@@ -1,0 +1,327 @@
+{% extends "layout.html" %}
+{% block title %}Veri Girişi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <h2 class="mb-4 text-center">📁 Dosya Yükle ve Yönet</h2>
+
+            <!-- Mizan Şablonu İndirme Butonu -->
+            <div class="text-center mb-4">
+                <p>Mizan verilerinizi yüklemeden önce lütfen örnek şablonu indirin:</p>
+                <a href="{{ url_for('static', filename='templates/mizan_sablonu.xlsx') }}" download="mizan_sablonu.xlsx"
+                   class="btn btn-info">
+                    <i class="bi bi-download me-2"></i>Mizan Şablonunu İndir
+                </a>
+            </div>
+
+            <!-- Dosya Yükleme Alanı -->
+            <form id="multiUploadForm" enctype="multipart/form-data">
+                <div id="drop-area" class="border border-primary border-2 rounded p-4 text-center mb-3"
+                     ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+                    <p class="mb-2">📎 PDF veya Mizan Excel dosyalarınızı (.pdf, .xlsx, .xls) buraya sürükleyin ya da seçin</p>
+                    <input type="file" id="fileElem" name="belgeler" accept=".pdf,.xlsx,.xls"
+                           class="form-control d-none" multiple required>
+                    <button type="button" class="btn btn-outline-primary"
+                            onclick="document.getElementById('fileElem').click()">Dosya Seç</button>
+                </div>
+
+                <!-- Yükleme İlerlemesi -->
+                <div id="uploadProgressContainer" class="mt-3" style="display:none;">
+                    <div class="progress">
+                        <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                             aria-valuemax="100">0%</div>
+                    </div>
+                    <p id="uploadFileName" class="text-muted mt-2"></p>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <!-- Önceden Yüklenen Veriler -->
+            <h4 class="text-center mb-3">🔍 Önceden Yüklenen Veriler</h4>
+            <form method="GET" action="{{ url_for('veri_giris') }}">
+                <div class="row mb-3">
+                    <div class="col">
+                        <select name="vkn" id="mukellefSelect" class="form-select" onchange="this.form.submit()" required>
+                            <option value="">-- Mükellef Seçin --</option>
+                            {% for m in mukellefler %}
+                                <option value="{{ m.vergi_kimlik_no }}" {% if secili_vkn==m.vergi_kimlik_no %}selected{% endif %}>
+                                    {{ m.vergi_kimlik_no }} - {{ m.unvan }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <select name="donem" id="donemSelect" class="form-select" onchange="this.form.submit()"
+                                {% if not secili_vkn %}disabled{% endif %}>
+                            <option value="">-- Dönem Seçin --</option>
+                            {% for d in donemler %}
+                                <option value="{{ d }}" {% if secili_donem==d %}selected{% endif %}>{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {% if secili_vkn and not secili_donem %}
+                <button type="button" class="btn btn-outline-danger w-100 mb-3"
+                        onclick="confirmDelete('mukellef', '{{ secili_vkn }}', null)">
+                    🗑 Mükellefi ve Tüm Dönemleri Sil
+                </button>
+                {% endif %}
+
+                {% if secili_vkn and secili_donem %}
+                <button type="button" class="btn btn-outline-danger w-100 mb-3"
+                        onclick="confirmDelete('donem', '{{ secili_vkn }}', '{{ secili_donem }}', 'all')">
+                    🗑 Seçili Döneme Ait Tüm Belgeleri Sil
+                </button>
+                {% endif %}
+            </form>
+
+            <!-- Bilanço, Gelir, KDV Göster Butonları -->
+            {% if secili_vkn and secili_donem %}
+            {% set is_aylik = '/' in secili_donem %}
+            {% set is_yillik = secili_donem | length == 4 and secili_donem.isdigit() %}
+            <div class="d-flex justify-content-center flex-wrap gap-3 mt-2 mb-3">
+
+                <!-- KDV -->
+                <div>
+                    {% if is_aylik %}
+                    <a href="{{ url_for('pdf_belgeler_tablo', tur='kdv', vkn=secili_vkn, donem=secili_donem) }}"
+                       class="btn btn-info">📄 KDV Beyannamesi Göster</a>
+                    {% else %}
+                    <button class="btn btn-info" disabled>📄 KDV Beyannamesi Göster</button>
+                    {% endif %}
+                </div>
+                
+                <!-- Bilanço -->
+                <div class="d-flex flex-column gap-2">
+                    {% if is_yillik and not has_mizan_for_selected_period %}
+                    <a href="{{ url_for('pdf_belgeler_tablo',
+                        tur='bilanco',
+                        vkn=secili_vkn,
+                        unvan=((yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first).unvan if (yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first) else ''),
+                        donem=secili_donem) }}"
+                    class="btn btn-success">📊 Bilanço Göster (PDF)</a>
+                    {% else %}
+                    <button class="btn btn-success" disabled>📊 Bilanço Göster (PDF)</button>
+                    {% endif %}
+
+                    {% if is_yillik and has_mizan_for_selected_period %}
+                    <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=secili_vkn, donem=secili_donem) }}"
+                    class="btn btn-outline-success">📊 Mizan Bilanço</a>
+                    {% else %}
+                    <button class="btn btn-outline-success" disabled>📊 Mizan Bilanço</button>
+                    {% endif %}
+                </div>
+
+                <!-- Gelir -->
+                <div class="d-flex flex-column gap-2">
+                    {% if is_yillik and not has_mizan_for_selected_period %}
+                    <a href="{{ url_for('pdf_belgeler_tablo',
+                        tur='gelir',
+                        vkn=secili_vkn,
+                        unvan=((yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first).unvan if (yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first) else ''),
+                        donem=secili_donem) }}"
+                    class="btn btn-warning">📈 Gelir Tablosu Göster (PDF)</a>
+                    {% else %}
+                    <button class="btn btn-warning" disabled>📈 Gelir Tablosu Göster (PDF)</button>
+                    {% endif %}
+
+                    {% if is_yillik and has_mizan_for_selected_period %}
+                    <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=secili_vkn, donem=secili_donem) }}"
+                    class="btn btn-outline-warning">📈 Mizan Gelir</a>
+                    {% else %}
+                    <button class="btn btn-outline-warning" disabled>📈 Mizan Gelir</button>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endif %}
+
+            <!-- Yüklenen Tüm Belgeler Tablosu -->
+            {% if yuklenen_tum_belgeler %}
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>VKN / TC Kimlik No</th>
+                            <th>Dönem</th>
+                            <th>Tür</th>
+                            <th>Yükleme Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for belge in yuklenen_tum_belgeler %}
+                        <tr>
+                            <td>{{ belge.vkn }}</td>
+                            <td>{{ belge.donem }}</td>
+                            <td><span class="badge bg-secondary">{{ belge.belge_turu | upper }}</span></td>
+                            <td>{{ belge.yuklenme_tarihi }}</td>
+                            <td>
+                                {% if belge.belge_turu in ['bilanco','gelir','kdv'] %}
+                                <a href="{{ url_for('pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
+                                   class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                {% elif belge.belge_turu == 'mizan' %}
+                                <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=belge.vkn, donem=belge.donem) }}"
+                                   class="btn btn-sm btn-outline-success"><i class="bi bi-bar-chart-fill"></i> B</a>
+                                <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=belge.vkn, donem=belge.donem) }}"
+                                   class="btn btn-sm btn-outline-warning"><i class="bi bi-graph-up-arrow"></i> G</a>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete('belge', '{{ belge.vkn }}', '{{ belge.donem }}', '{{ belge.belge_turu }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center">Seçilen kriterlere göre yüklenmiş belge bulunmamaktadır.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mizan Bilgileri Modal -->
+    <div class="modal fade" id="mizanInfoModal" tabindex="-1" aria-labelledby="mizanInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mizanInfoModalLabel">Mizan Bilgileri</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="mizanModalFilename" class="fw-bold"></p>
+                    <div class="mb-3">
+                        <label for="modalUnvanSelect" class="form-label">Mükellef Seçin</label>
+                        <select id="modalUnvanSelect" class="form-select" onchange="toggleNewUnvanInput()">
+                            <option value="">-- Mevcut Mükellef Seçin --</option>
+                            {% for m in mukellefler %}
+                                <option value="{{ m.vergi_kimlik_no }}">{{ m.vergi_kimlik_no }} - {{ m.unvan }}</option>
+                            {% endfor %}
+                            <option value="yeni">-- Yeni Mükellef Ekle --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="newUnvanInputGroup" style="display: none;">
+                        <input type="text" id="newUnvanInput" class="form-control"
+                               placeholder="Yeni mükellef unvanı girin">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="modalDonemInput" class="form-control" placeholder="Örn: 2023" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button class="btn btn-primary" onclick="saveMizanInfo()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const mukellefSilUrl = "{{ url_for('mukellef_sil') }}";
+const donemSilUrl = "{{ url_for('donem_sil') }}";
+const kaydetMizanMetaUrl = "{{ url_for('kaydet_mizan_meta') }}";
+let currentMizanFilename = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("fileElem").addEventListener("change", function () {
+        if (this.files.length > 0) uploadFiles(this.files);
+    });
+    const dropArea = document.getElementById('drop-area');
+    dropArea.addEventListener('drop', handleDrop);
+    dropArea.addEventListener('dragover', e => e.preventDefault());
+});
+
+function uploadFiles(files) {
+    const formData = new FormData();
+    [...files].forEach(f => formData.append("belgeler", f));
+    const xhr = new XMLHttpRequest();
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressContainer = document.getElementById('uploadProgressContainer');
+    const fileNameDisplay = document.getElementById('uploadFileName');
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%'; progressBar.textContent = '0%';
+    fileNameDisplay.textContent = 'Yükleniyor...';
+    xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressBar.style.width = percent.toFixed(0) + '%';
+            progressBar.textContent = percent.toFixed(0) + '%';
+        }
+    });
+    xhr.onload = () => {
+        progressContainer.style.display = 'none';
+        if (xhr.status === 200) handleUploadMessages(JSON.parse(xhr.responseText));
+        else Swal.fire("Sunucu Hatası", `HTTP Kodu: ${xhr.status}`, "error");
+    };
+    xhr.onerror = () => Swal.fire("Bağlantı Hatası", "Sunucuya ulaşılamadı.", "error");
+    xhr.open('POST', '/yukle-coklu');
+    xhr.send(formData);
+}
+function handleDrop(e) {
+    e.preventDefault();
+    if (e.dataTransfer.files.length > 0) uploadFiles(e.dataTransfer.files);
+}
+function handleUploadMessages(messages) {
+    let needsReload = false;
+    messages.forEach(msg => {
+        if (msg.type === "mizan_input_required") {
+            currentMizanFilename = msg.filename;
+            new bootstrap.Modal('#mizanInfoModal').show();
+            document.getElementById('mizanModalFilename').textContent = `Dosya: ${msg.filename}`;
+        } else {
+            showSwalMessage(msg.type, msg.title, msg.text);
+            if (msg.type === "success") needsReload = true;
+        }
+    });
+    if (needsReload) setTimeout(() => location.reload(), 1500);
+}
+function toggleNewUnvanInput() {
+    document.getElementById('newUnvanInputGroup').style.display =
+        document.getElementById('modalUnvanSelect').value === 'yeni' ? 'block' : 'none';
+}
+function saveMizanInfo() {
+    let finalUnvan = document.getElementById('modalUnvanSelect').value;
+    if (finalUnvan === 'yeni') finalUnvan = document.getElementById('newUnvanInput').value;
+    const donem = document.getElementById('modalDonemInput').value;
+    if (!finalUnvan || !donem) return Swal.fire('Hata', 'Unvan ve dönem boş olamaz.', 'error');
+    if (!/^\d{4}$/.test(donem)) return Swal.fire('Hata', 'Dönem 4 haneli yıl olmalı.', 'error');
+    const formData = new FormData();
+    formData.append('vkn', finalUnvan);
+    formData.append('donem', donem);
+    formData.append('filename', currentMizanFilename);
+    fetch(kaydetMizanMetaUrl, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            showSwalMessage(data.status, data.title, data.message);
+            if (data.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('mizanInfoModal')).hide();
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(err => Swal.fire('Hata!', err.message, 'error'));
+}
+function confirmDelete(type, vkn, donem, belgeTuru) {
+    let actionUrl, formData = new FormData();
+    if (type === 'mukellef') { actionUrl = mukellefSilUrl; formData.append('vkn', vkn); }
+    else { actionUrl = donemSilUrl; formData.append('vkn', vkn); formData.append('donem', donem); formData.append('belge_turu', belgeTuru); }
+    Swal.fire({title:'Emin misiniz?', text:'Silme işlemi geri alınamaz.', icon:'warning',
+        showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'Evet, Sil!'}).then(res=>{
+        if(res.isConfirmed) fetch(actionUrl,{method:'POST',body:formData})
+            .then(r=>r.json()).then(data=>{
+                showSwalMessage(data.status,data.title,data.message);
+                if(data.status==="success") setTimeout(()=>location.reload(),1500);
+            });
+    });
+}
+</script>
+{% endblock %}

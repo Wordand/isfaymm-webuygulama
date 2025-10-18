@@ -1,0 +1,645 @@
+{% extends "layout.html" %}
+{% block title %}Finansal Analiz{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Genel tasarım iyileştirmeleri --- */
+    h3.page-title {
+        font-weight: 600;
+        font-size: 1.6rem;
+        color: #0d6efd;
+        margin-bottom: 1.5rem;
+    }
+
+    .card.oran-card {
+        transition: all 0.25s ease;
+        border-radius: 14px;
+        border: 1px solid #dee2e6;
+    }
+
+    .card.oran-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .value-badge {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0d6efd;
+    }
+
+    .oran-action {
+        display: flex;
+        gap: 0.6rem;
+    }
+
+    .oran-action button {
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .oran-action button:hover {
+        transform: scale(1.15);
+    }
+
+    .btn-info-icon {
+        color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-chart-icon {
+        color: #198754;
+        border-color: #198754;
+    }
+
+    .btn-info-icon:hover {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .btn-chart-icon:hover {
+        background-color: #198754;
+        color: #fff;
+    }
+
+    .modal-content {
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        animation: fadeInScale 0.3s ease;
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <h3 class="page-title text-center">📊 Finansal Oran Analizi</h3>
+
+    <!-- Flash mesaj -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, msg in messages %}
+    <div class="alert alert-{{ 'success' if category == 'message' else category }} text-center">
+        {{ msg }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Seçim formu -->
+    <form id="finansalForm" method="get" action="{{ url_for('finansal_analiz') }}" class="row gx-3 gy-2 mb-4">
+        <div class="col-md-3">
+            <label for="vknSelect" class="form-label">Mükellef (VKN)</label>
+            <select id="vknSelect" name="vkn" class="form-select" onchange="this.form.submit()">
+                <option value="">Seçiniz...</option>
+                {% for m in unvanlar %}
+                <option value="{{ m.vkn }}" {% if secili_vkn==m.vkn %}selected{% endif %}>{{ m.vkn }} - {{ m.unvan }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="dataSourceSelect" class="form-label">Veri Kaynağı</label>
+            <select id="dataSourceSelect" name="data_source" class="form-select" onchange="this.form.submit()" {% if not
+                secili_vkn %}disabled{% endif %}>
+                <option value="pdf" {% if data_source=='pdf' %}selected{% endif %}>PDF (Bilanço/Gelir)</option>
+                <option value="mizan" {% if data_source=='mizan' %}selected{% endif %}>Mizan Excel</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="inflationMode" class="form-label">Bilanço Türü</label>
+            <select id="inflationMode" name="inflation_mode" class="form-select" onchange="this.form.submit()">
+                <option value="auto" {% if inflation_mode=='auto' %}selected{% endif %}>Otomatik</option>
+                <option value="enflasyonsuz" {% if inflation_mode=='enflasyonsuz' %}selected{% endif %}>Enflasyonsuz
+                </option>
+                <option value="enflasyonlu" {% if inflation_mode=='enflasyonlu' %}selected{% endif %}>Enflasyonlu
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="kategoriSelect" class="form-label">Kategori</label>
+            <select id="kategoriSelect" name="kategori" class="form-select" onchange="this.form.submit()">
+                {% set categories = [
+                ('likidite','Likidite Oranları'),
+                ('yapi','Finansal Yapı Oranları'),
+                ('varlik','Varlık Kullanım Oranları'),
+                ('karlilik','Kârlılık Oranları'),
+                ('borsa','Borsa Performans Oranları')
+                ] %}
+                {% for key, label in categories %}
+                <option value="{{ key }}" {% if kategori==key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="yearSelect" class="form-label">Analiz Edilecek Yıllar</label>
+            <select id="yearSelect" name="yillar" class="form-select" multiple onchange="this.form.submit()">
+                {% for yil in mevcut_yillar %}
+                <option value="{{ yil }}" {% if yil in secili_yillar %}selected{% endif %}>{{ yil }}</option>
+                {% endfor %}
+            </select>
+            <small class="text-muted">Ctrl / Cmd ile birden fazla yıl seçebilirsiniz</small>
+        </div>
+    </form>
+
+    {% if not secili_vkn or not secili_yillar or not kategori %}
+    <div class="alert alert-primary text-center mb-5">
+        Lütfen mükellef, yıl(lar) ve kategori seçin.
+    </div>
+    {% else %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for ad, yil_veri in trend_data.items() %}
+        <div class="col">
+            <div class="card oran-card h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-semibold">{{ ad }}</h6>
+                        <span class="value-badge">
+                            {% for yil, deger in yil_veri.items() %}
+                            <div>{{ yil }}: {{ "%.2f"|format(deger) if deger is not none else "-" }}</div>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="oran-action">
+                        <button type="button" class="btn btn-outline-primary btn-info-icon" data-ratio="{{ ad }}"
+                            data-value="{{ yil_veri.values()|list|last }}">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-chart-icon"
+                            onclick="openChart('{{ ad|escape }}')">
+                            <i class="bi bi-graph-up"></i>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Bilgi Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="infoModalLabel">Oran Bilgisi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 id="infoName" class="fw-bold mb-2"></h6>
+                <p id="infoDesc" class="mb-0"></p>
+                <div id="ratioDetails"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Chart Modal -->
+<div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="chartTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="trendChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+
+    const TREND_DATA = {{ trend_data | tojson | safe }};
+
+
+
+    const definitions = {
+        "Cari Oran": {
+            formula: "Dönen Varlıklar / Kısa Vadeli Yabancı Kaynaklar",
+            meaning: "Cari oran, işletmenin kısa vadeli borçlarını ödeme gücünü gösterir. Her sektörde farklı olmakla birlikte, bu oranın 2 olması genellikle yeterli kabul edilir.",
+            thresholds: { safe: 2.0, adequate: 1.5 },
+            advice: {
+                safe: "Cari oranınız güçlü. İşletmenizin kısa vadeli borçlarını ödeme gücü yüksektir. Ancak oranın çok yüksek olması, atıl fon bulunduğuna veya kaynakların etkin kullanılmadığına işaret edebilir.",
+                adequate: "Cari oranınız yeterli seviyede. Borç ödeme gücünüz makul düzeydedir. Daha güçlü bir likidite için 2'nin üzerine çıkmak güvenliği artırabilir.",
+                risky: "Cari oranınız zayıf. İşletmenizin dönen varlıkları kısa vadeli borçları karşılamaya yetmeyebilir ve net çalışma sermayesi noksanı ile karşı karşıya kalabilirsiniz. Dönen varlıklarınızı ve nakit rezervlerinizi artırmayı değerlendirin."
+            }
+        },
+        "Likidite (Asit Test) Oranı": {
+            formula: "(Dönen Varlıklar - Stoklar) / Kısa Vadeli Yabancı Kaynaklar",
+            meaning: "Likidite oranı işletmenin kısa vadeli borçlarını ödeme gücünü gösterir. Stokları dönen varlıklardan ayırdığı için daha keskin bir orandır. Stokların paraya çevrilmeme riskini ortadan kaldırır. Oranın 1 olması yeterli kabul edilir.",
+            thresholds: { safe: 1.0, adequate: 0.8 },
+            advice: {
+                safe: "Likidite (Asit Test) oranınız sağlıklı. İşletmenizin acil borç ödeme gücü güçlüdür, stokların paraya çevrilme riskine bağımlılık düşüktür.",
+                adequate: "Likidite (Asit Test) oranınız makul seviyede. Stok kalitesi ve nakit ile alacak yönetimini güçlendirmeyi değerlendirin.",
+                risky: "Likidite (Asit Test) oranınız zayıf. İşletmenizin kısa vadeli borçlarını ödeme gücü stoklara bağımlı olabilir. Stok ve alacak kalitesini gözden geçirin."
+            }
+        },
+        "Nakit Oranı": {
+            formula: "(Hazır Değerler + Menkul Kıymetler) / Kısa Vadeli Yabancı Kaynaklar",
+            meaning: "Nakit oranı, işletmenin elindeki mevcut hazır değerlerle kısa vadeli yabancı kaynakların ne ölçüde karşılandığını gösterir. Diğer likidite oranlarına göre daha hassas bir orandır. Genellikle 0,20 olması yeterli kabul edilir.",
+            thresholds: { safe: 0.20, adequate: 0.15 },
+            advice: {
+                safe: "Nakit oranınız güçlü. İşletmenizin acil durumlar için yeterli nakit rezervi bulunmaktadır.",
+                adequate: "Nakit oranınız yeterli düzeyde. Nakit akışınızı ve likiditeyi izlemeye devam edin.",
+                risky: "Nakit oranınız düşük. İşletmenizin para durumunda sıkışıklık doğabilir ve yeni kredi bulma ihtiyacı ortaya çıkabilir. Nakit akışını ve sermaye yönetimini gözden geçirin."
+            }
+        },
+        "Stok Bağımlılık Oranı": {
+            formula: "(Kısa Vadeli Yabancı Kaynaklar - (Hazır Değerler + Menkul Kıymetler + Süratle Paraya Çevrilebilir Varlıklar)) / Stoklar",
+            meaning: "Bu oran, asit test oranının 1'den küçük çıkması durumunda işletmenin kısa vadeli borçlarını geri ödemesinde stoklara olan bağımlılığını ölçmede kullanılır. Düşük olması istenir, negatif olması stoklara bağımlılık olmadığını gösterir.",
+            thresholds: { safe: 0, adequate: 0.5 }, // Düşük daha iyi
+            advice: {
+                safe: "Stoklara bağımlılık yok veya çok düşük. Likidite sorunları yaşandığında stokları satma baskısı azdır.",
+                adequate: "Stoklara bağımlılık makul düzeyde. Stok devir hızını artırarak likidite riskini azaltmayı değerlendirin.",
+                risky: "Stoklara aşırı bağımlılık var; likidite riski yüksek. Acil borç ödemeleri için stokların hızla paraya çevrilmesi gerekebilir."
+            }
+        },
+        "Yabancı Kaynak Oranı": {
+            formula: "Toplam Yabancı Kaynaklar / Pasif Toplamı",
+            meaning: "Bu oran, işletmenin varlıklarının ne kadarlık kısmının yabancı kaynaklarla finanse edildiğini gösterir. Kaldıraç oranı olarak da bilinir. Oranın %50 civarında olması normal karşılanabilir. Oranın yüksek olması işletmenin riskli bir şekilde finanse edildiğini gösterir.",
+            thresholds: { safe: 0.50, adequate: 0.60 },
+            advice: {
+                safe: "Yabancı kaynak oranınız düşük, finansal riskiniz azdır. Varlıklarınız büyük ölçüde özkaynaklarla finanse ediliyor.",
+                adequate: "Yabancı kaynak oranınız makul seviyede. Borç yönetiminizi sürdürün. Gelişmekte olan ülkelerde %60 üzeri görülebilir.",
+                risky: "Yabancı kaynak oranınız yüksek. İşletmeniz riskli bir şekilde finanse ediliyor olabilir. Borç azaltma stratejileri uygulayın. Kredi verenler için risk artırıcıdır."
+            }
+        },
+        "Özkaynak Oranı": {
+            formula: "Özkaynaklar / Pasif Toplamı",
+            meaning: "Bu oran, işletme varlıklarından yüzde kaçının ortaklar veya işletme sahibince finanse edildiğini gösterir. İşletmenin finansal dayanıklılığının göstergesidir. Oranın %50 civarında olması normal karşılanabilir.",
+            thresholds: { safe: 0.50, adequate: 0.30 }, // Yüksek daha iyi
+            advice: {
+                safe: "Özkaynak oranınız güçlü; mali yapınız sağlıklı ve finansal dayanıklılığınız yüksek.",
+                adequate: "Özkaynak oranınız makul seviyede. Uzun vadeli kredi analizlerinde işletmenin kredi değerini tespit amacıyla yaygın olarak kullanılır.",
+                risky: "Özkaynak oranınız zayıf; işletmenizin yükümlülüklerini karşılamada güçlükle karşılaşma riski ortaya çıkabilir. Sermaye yapınızı güçlendirmeyi değerlendirin."
+            }
+        },
+        "Borç / Özsermaye Oranı": {
+            formula: "Toplam Yabancı Kaynaklar / Özkaynaklar",
+            meaning: "Bu oran, işletmenin özkaynakları ile yabancı kaynakları arasındaki ilişkiyi gösterir. Oranın 1 olması özkaynak borç dengesi açısından yeterli görülür. Oran küçüldükçe işletmenin herhangi bir kriz karşısında güç durumda kalma riski azalır.",
+            thresholds: { safe: 1.0, adequate: 1.5 }, // Düşük daha iyi
+            advice: {
+                safe: "Borç/Özsermaye oranınız dengeli; finansal riskiniz düşüktür. Varlıklarınız büyük ölçüde özkaynakla finanse ediliyor.",
+                adequate: "Borç/Özsermaye oranınız makul düzeyde. Ancak, üçüncü kişilerden sağlanan kaynakların ortaklardan sağlanan kaynaklardan daha fazla olduğunu gösterebilir.",
+                risky: "Borç/Özsermaye oranınız yüksek. İşletmenizin borç yükü fazladır ve herhangi bir kriz durumunda güçlük çekme riski artabilir. Borç azaltma stratejileri uygulayın."
+            }
+        },
+        "Kısa Vadeli Yabancı Kaynak Oranı": {
+            formula: "Kısa Vadeli Yabancı Kaynaklar Toplamı / Pasif Toplamı",
+            meaning: "Aktiflerin ne kadarlık bölümünün kısa vadeli yabancı kaynaklarla finanse edildiğini gösterir. Pasif içinde kısa vadeli yabancı kaynakların ağırlığını gösteren bir orandır. Bu oranın 1/3 (%33) seviyesini aşması uygun olur.",
+            thresholds: { safe: 0.33, adequate: 0.50 }, // Düşük daha iyi
+            advice: {
+                safe: "Kısa vadeli borç yükünüz düşük; finansal yapınız sağlamdır.",
+                adequate: "Kısa vadeli borç yükünüz makul seviyededir. Ancak %50 dolaylarında olması gelişmekte olan ülkelerde sık görülse de riskleri olabilir.",
+                risky: "Kısa vadeli borç yükünüz yüksek; aktiflerin büyük bölümü kısa vadeli yabancı kaynaklarla finanse ediliyor. İşletmenizin ödeme darboğazına girme riski olabilir."
+            }
+        },
+        "Uzun Vadeli Yabancı Kaynak Oranı": {
+            formula: "Uzun Vadeli Yabancı Kaynaklar Toplamı / Pasif Toplamı",
+            meaning: "Bu oran, işletmenin sahip olduğu varlıkların ne kadarlık kısmının uzun vadeli yabancı kaynaklarla finanse edildiğini gösterir. Oranın normal şartlarda 1/6 (%16-17) olması gerekmektedir.",
+            thresholds: { safe: 0.17, adequate: 0.30 }, // Sektöre göre değişir.
+            advice: {
+                safe: "Uzun vadeli borç yapınız dengeli.",
+                adequate: "Uzun vadeli borç yapınız makul seviyede. Kısa vadeli yabancı kaynak oranını azaltmak kaydıyla normal kabul edilebilir.",
+                risky: "Uzun vadeli borç yükünüz yüksek. Dikkatli olunmalıdır."
+            }
+        },
+        "Yabancı Kaynaklar Vade Yapısı Oranı": {
+            formula: "Kısa Vadeli Yabancı Kaynaklar Toplamı / Toplam Yabancı Kaynaklar",
+            meaning: "Kısa vadeli yabancı kaynakların, toplam yabancı kaynaklar içindeki nispi önemini tespite yönelik olarak hesaplanır. Bu oranın genel standart olarak 2/3 (%66) dolayında olması kabul edilebilir.",
+            thresholds: { safe: 0.66, adequate: 0.80 }, // Düşük kısa vade payı daha iyi, yani bu eşiklerin altı daha iyi
+            advice: {
+                safe: "Borç vadesi yapınız dengeli; uzun vadeli kaynak payı yeterli.",
+                adequate: "Kısa vade payı makul; ancak iyileştirme potansiyeli olabilir.",
+                risky: "Kısa vade payı yüksek; likidite riski ve finansman baskısı artabilir."
+            }
+        },
+        "Alacak Devir Hızı": {
+            formula: "Net Satışlar / Ortalama Ticari Alacaklar",
+            meaning: "Alacakların yılda kaç defa tahsil edildiğini gösterir. Hız arttıkça alacakların likidite değeri artar. Genellikle 4-6 ve üzeri iyi kabul edilir.",
+            thresholds: { safe: 6, adequate: 4 },
+            advice: {
+                safe: "Alacak tahsilatınız hızlı; kredi riskiniz düşüktür ve fonlar daha verimli kullanılır.",
+                adequate: "Alacak tahsilatınız makul seviyede; alacak takibini güçlendirmeyi değerlendirin.",
+                risky: "Alacak tahsilatınız yavaş; kredi politikası gözden geçirmeli ve tahsilat süreçlerinizi hızlandırmalısınız."
+            }
+        },
+        "Stok Devir Hızı": {
+            formula: "Satışların Maliyeti / Ortalama Stoklar",
+            meaning: "Stokların yılda kaç defa satıldığını gösterir. Hız arttıkça verimlilik artar. Sektöre göre değişmekle birlikte yüksek olması olumludur.",
+            thresholds: { safe: 8, adequate: 5 },
+            advice: {
+                safe: "Stok yönetiminiz verimli; stoklar hızla satılmakta ve maliyetler düşük tutulmaktadır.",
+                adequate: "Stok devir hızınız makul seviyede; stok rotasyonunu hızlandırma fırsatları olabilir.",
+                risky: "Stoklarınız stoklanmış veya yavaş satılmakta; depolama maliyetleri ve demode olma riski yüksek olabilir. Satış stratejilerini gözden geçirin."
+            }
+        },
+        "Aktif Devir Hızı": {
+            formula: "Net Satışlar / Toplam Aktif",
+            meaning: "İşletmenin aktif varlıklarının kaç katı satış yaptığını gösterir. Aktif devir hızının yüksek olması olumludur. Genellikle 1 ve üzeri iyidir.",
+            thresholds: { safe: 1.0, adequate: 0.8 },
+            advice: {
+                safe: "Aktifleriniz verimli kullanılıyor; satış yaratma kapasiteniz güçlüdür.",
+                adequate: "Aktif devir hızınız makul seviyede; varlık kullanımını optimize etme fırsatları olabilir.",
+                risky: "Varlıklarınız verimsiz kullanılıyor; yatırımlarınızın satışa dönüşümü zayıf olabilir. Varlık yönetim kararlarınızı gözden geçirin."
+            }
+        },
+        "Brüt Kar Marjı": {
+            formula: "(Brüt Satış Kârı / Net Satışlar) * 100",
+            meaning: "Net satışların yüzde kaçı oranında brüt satış kârı elde edildiğini gösterir. Yüksek olması istenir ve sektör ortalamalarıyla karşılaştırılmalıdır.",
+            thresholds: { safe: 0.30, adequate: 0.20 }, // Yüksek daha iyi
+            advice: {
+                safe: "Brüt kar marjınız güçlü; ana iş faaliyetleriniz oldukça karlı.",
+                adequate: "Brüt kar marjınız makul seviyede; maliyet kontrolü veya fiyatlama stratejileri iyileştirilebilir.",
+                risky: "Brüt kar marjınız düşük; ürün fiyatlandırmanızı, satışların maliyetini veya üretim verimliliğinizi gözden geçirin."
+            }
+        },
+        "Faaliyet Kar Marjı": {
+            formula: "(Faaliyet Kârı / Net Satışlar) * 100",
+            meaning: "İşletmenin ana faaliyetlerinin ne ölçüde kârlı olduğunu gösterir. Yüksek olması olumludur.",
+            thresholds: { safe: 0.05, adequate: 0.02 }, // Yüksek daha iyi, sektörden sektöre değişir
+            advice: {
+                safe: "Faaliyet kar marjınız güçlü; ana operasyonlarınız oldukça karlı ve verimli.",
+                adequate: "Faaliyet kar marjınız makul seviyede; operasyonel verimlilik artırılabilir.",
+                risky: "Faaliyet kar marjınız düşük; ana faaliyetlerinizin karlılığını ve faaliyet giderlerinizi inceleyin."
+            }
+        },
+        "Olağan Kar Marjı": {
+            formula: "(Olağan Kâr / Net Satışlar) * 100",
+            meaning: "İşletmelerin süreklilik gösteren ana ve yan faaliyetlerinin sonucunu gösterir. Yüksek olması istenir.",
+            thresholds: { safe: 0.04, adequate: 0.02 }, // Yüksek daha iyi
+            advice: {
+                safe: "Olağan kar marjınız güçlü; işletmenizin düzenli faaliyetleri karlı.",
+                adequate: "Olağan kar marjınız makul seviyede. Yan faaliyetlerin veya finansman giderlerinin karlılığa etkisini inceleyin.",
+                risky: "Olağan kar marjınız düşük; işletmenizin düzenli faaliyetleri beklenenden az karlı olabilir."
+            }
+        },
+        "Dönem Kar Marjı": {
+            formula: "(Dönem Kârı / Net Satışlar) * 100",
+            meaning: "İşletmenin dönem kârı veya zararının net satışlar içindeki oranını gösterir. Yüksek olması olumludur.",
+            thresholds: { safe: 0.05, adequate: 0.03 }, // Yüksek daha iyi
+            advice: {
+                safe: "Dönem kar marjınız güçlü; işletmeniz genel olarak karlı bir dönemi geride bırakmış.",
+                adequate: "Dönem kar marjınız makul seviyede. Olağandışı gelir ve giderlerin etkisini inceleyin.",
+                risky: "Dönem kar marjınız düşük; işletmenizin genel karlılığı beklentilerin altında olabilir."
+            }
+        },
+        "Net Kar Marjı (Satışların Karlılığı)": {
+            formula: "(Dönem Net Kârı / Net Satışlar) * 100",
+            meaning: "Tüm faaliyetlerin sonucunda elde edilen net verimliliği gösterir. Yüksek olması istenir. Büyük sanayi işletmelerinde %4-6 arasında olması uygun görülür.",
+            thresholds: { safe: 0.04, adequate: 0.02 }, // Yüksek daha iyi
+            advice: {
+                safe: "Net kar marjınız sağlıklı; işletmeniz genel olarak yüksek bir net verimlilikle çalışıyor.",
+                adequate: "Net kar marjınız makul seviyede; tüm faaliyetler sonrası verimliliği izlemeye devam edin.",
+                risky: "Net kar marjınız düşük; genel karlılık sorunları veya gider yönetimi problemleri olabilir."
+            }
+        },
+        "Özsermaye Karlılığı": {
+            formula: "(Dönem Net Kârı / Özkaynaklar) * 100",
+            meaning: "İşletme ortaklarının yatırımlarının ne ölçüde verimli kullanıldığını gösterir. Yüksek olması olumludur. Genellikle %15 ve üzeri iyidir.",
+            thresholds: { safe: 0.15, adequate: 0.10 },
+            advice: {
+                safe: "Özkaynak getirisi yüksek; ortaklarınızın yatırımları verimli bir şekilde değer yaratıyor.",
+                adequate: "Özkaynak getirisi makul; sürdürülebilir büyüme ve karlılık için izlemeye devam edin.",
+                risky: "Özkaynak getirisi düşük; sermayenin verimliliğini artırmalı veya sermaye yapısını gözden geçirmelisiniz."
+            }
+        },
+        "Aktif Karlılığı": {
+            formula: "(Dönem Kârı / Aktif Toplamı) * 100",
+            meaning: "Aktiflerin işletmede ne ölçüde kârlı kullanıldığını tespit amacıyla hesaplanır. Yüksek değer tercih edilir.",
+            thresholds: { safe: 0.10, adequate: 0.07 },
+            advice: {
+                safe: "Varlık karlılığı yüksek; işletmenizin varlıkları karlı ve etkin bir şekilde kullanılıyor.",
+                adequate: "Varlık karlılığınız makul seviyede; varlık kullanımını optimize etme fırsatları olabilir.",
+                risky: "Varlık karlılığınız düşük; varlıklarınızdan yeterince kar elde edilemiyor. Varlık verimliliğini artırma stratejileri geliştirin."
+            }
+        },
+        "Hisse Başına Kâr (EPS)": {
+            formula: "Dönem Net Kârı / Toplam Hisse Sayısı",
+            meaning: "Hisse başına düşen net kar miktarını gösterir. Yatırımcılar için önemli bir göstergedir.",
+            thresholds: { safe: null, adequate: null }, // Bu oran için spesifik eşik değerleri piyasaya ve şirketin büyüme evresine göre değişir.
+            advice: {
+                safe: "EPS değeri olumlu ve yüksek. Şirket hisse başına iyi bir kazanç sağlamış.",
+                adequate: "EPS değeri makul seviyede. Şirketin kazanç istikrarını ve büyüme potansiyelini değerlendirin.",
+                risky: "EPS değeri düşük veya negatif. Şirketin karlılığı ve hisse başına kazancı zayıf olabilir; kar artırma stratejileri geliştirilmelidir."
+            }
+        },
+        "Fiyat Kazanç (F/K) Oranı": {
+            formula: "Hisse Fiyatı / Hisse Başına Kâr (EPS)",
+            meaning: "Hisse senedinin borsa değeri ile hisse başına kâr arasındaki bağlantıyı gösterir. Düşük F/K oranı genellikle hisse senedinin göreceli olarak 'ucuz' olduğunu işaret edebilir.",
+            thresholds: { safe: 15.0, adequate: 20.0 }, // Düşük P/E genellikle daha iyi değerleme gösterir
+            advice: {
+                safe: "Fiyat/Kazanç (F/K) oranınız makul seviyede; değerleme dengeli görünüyor.",
+                adequate: "F/K oranınız makul ancak piyasa koşullarına göre daha detaylı incelenmelidir.",
+                risky: "F/K oranınız yüksek; hisse senedi aşırı değerlenmiş olabilir veya piyasanın yüksek beklentilerini yansıtabilir."
+            }
+        },
+        "Piyasa Değeri / Defter Değeri Oranı": {
+            formula: "(Toplam Borsa Değeri) / Özkaynaklar",
+            meaning: "İşletmenin borsa değerinin özkaynaklarının kaç katı olduğunu gösterir. Genellikle 1 üzeri olması, piyasanın şirketi defter değerinden daha değerli gördüğünü gösterir.",
+            thresholds: { safe: 1.0, adequate: 0.8 }, // Genellikle 1 ve üzeri iyi
+            advice: {
+                safe: "Piyasa değeri / Defter değeri oranınız olumlu; piyasa şirketinizi defter değerinin üzerinde fiyatlıyor.",
+                adequate: "Piyasa değeri / Defter değeri oranınız makul seviyede.",
+                risky: "Piyasa değeri / Defter değeri oranınız düşük; piyasa şirketinizi defter değerinin altında fiyatlıyor olabilir, bu da potansiyel sorunlara veya düşük beklentilere işaret edebilir."
+            }
+        }
+    };
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- Bilgi butonları ---
+        document.querySelectorAll('.btn-info-icon').forEach(btn => {
+            btn.addEventListener('click', () => {
+
+                const ratioName = btn.dataset.ratio;
+                const ratioValue = parseFloat(btn.dataset.value);
+                const definition = definitions[ratioName];
+                const detailsContainer = document.getElementById('ratioDetails');
+
+                // Başlık ve açıklama
+                document.getElementById('infoName').innerText = ratioName;
+                
+                document.getElementById('infoDesc').innerText = definition
+                
+                    ? definition.meaning
+                    : 'Bu oran için açıklama bulunamadı.';
+
+                // Tanım yoksa uyarı göster
+                if (!definition) {
+                    detailsContainer.innerHTML = `
+                    <div class="alert alert-warning">Bu oran için detaylı bilgi bulunamadı.</div>
+                `;
+                    const modal = new bootstrap.Modal(document.getElementById('infoModal'));
+                    modal.show();
+                    return;
+                }
+
+                // Değerlendirme metni
+                let evaluationText = '';
+                if (!isNaN(ratioValue) && definition.thresholds) {
+
+                    const lowerIsBetterRatios = [
+                        "Stok Bağımlılık Oranı",
+                        "Borç / Özsermaye Oranı",
+                        "Kısa Vadeli Yabancı Kaynak Oranı",
+                        "Yabancı Kaynaklar Vade Yapısı Oranı",
+                        "Fiyat Kazanç (F/K) Oranı"
+                    ];
+
+                    if (lowerIsBetterRatios.includes(ratioName)) {
+                        if (ratioValue <= definition.thresholds.safe) {
+                            evaluationText = definition.advice.safe;
+                        } else if (ratioValue <= definition.thresholds.adequate) {
+                            evaluationText = definition.advice.adequate;
+                        } else {
+                            evaluationText = definition.advice.risky;
+                        }
+                    } else {
+                        if (ratioValue >= definition.thresholds.safe) {
+                            evaluationText = definition.advice.safe;
+                        } else if (ratioValue >= definition.thresholds.adequate) {
+                            evaluationText = definition.advice.adequate;
+                        } else {
+                            evaluationText = definition.advice.risky;
+                        }
+                    }
+
+                } else if (isNaN(ratioValue)) {
+                    evaluationText = "Bu oran için değer hesaplanamadı veya geçersiz.";
+                } else {
+                    evaluationText = definition.advice.safe;
+                }
+
+                // Modal içeriği oluştur
+                detailsContainer.innerHTML = `
+                <div class="card shadow-sm p-4 animate__animated animate__fadeIn">
+                    <h5 class="card-title mb-3">${ratioName} Detayları</h5>
+                    <h6>Formül:</h6>
+                    <p><code>${definition.formula}</code></p>
+                    <h6>Açıklama:</h6>
+                    <p>${definition.meaning}</p>
+                    ${evaluationText ? `<h6>Firma İçin Değerlendirme:</h6><p>${evaluationText}</p>` : ''}
+                    <button type="button" class="btn btn-sm btn-secondary mt-3"
+                        onclick="document.getElementById('ratioDetails').innerHTML = ''">Kapat</button>
+                </div>
+            `;
+
+                // Modal aç
+                const modal = new bootstrap.Modal(document.getElementById('infoModal'));
+                modal.show();
+            });
+        });
+
+        // --- Grafik butonları ---
+        let chartInstance = null;
+
+        window.openChart = function (ratioName) {
+            const chartModalEl = document.getElementById('chartModal');
+            const chartTitle = document.getElementById('chartTitle');
+            const ctx = document.getElementById('trendChart').getContext('2d');
+
+            // Başlık
+            chartTitle.innerText = `📈 ${ratioName} - Trend Grafiği`;
+
+            // Veri hazırla
+            const trendData = TREND_DATA[ratioName] || {};
+            const years = Object.keys(trendData).sort();
+            const values = years.map(y => trendData[y]);
+
+            // Önceki grafik varsa sil
+            if (chartInstance) chartInstance.destroy();
+
+            // Yeni grafik oluştur
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: ratioName,
+                        data: values,
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25,135,84,0.15)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.parsed.y?.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: { y: { beginAtZero: false } }
+                }
+            });
+
+            // Modal aç
+            const chartModal = new bootstrap.Modal(chartModalEl);
+            chartModal.show();
+        };
+
+        // --- Form submit debounce ---
+        let timeout;
+        document.querySelectorAll('#finansalForm select').forEach(sel => {
+            sel.addEventListener('change', () => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => document.getElementById('finansalForm').submit(), 500);
+            });
+        });
+
+        const uyarilar = {{ uyarilar|tojson|safe }};
+        if (uyarilar.length > 0) {
+        let htmlList = "<ul style='text-align:left'>";
+        uyarilar.forEach(u => htmlList += `<li>${u}</li>`);
+        htmlList += "</ul>";
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Veri Tutarsızlığı Uyarısı ⚠️',
+                html: htmlList,
+                confirmButtonText: 'Tamam',
+                confirmButtonColor: '#d33',
+                background: '#fffbe6'
+            });
+        }
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block title %}ISFAYMM - Blog Yazıları{% endblock %}
+
+{% block content %}
+<section id="blog" class="container mt-5">
+    <h1 class="section-title text-center mb-5">Vergi Haberleri ve Blog</h1>
+    <div class="row g-4">
+        {% for post in posts %}
+        <div class="col-md-6 col-lg-4">
+           <div class="card h-100 shadow-sm blog-card">
+                <div class="card-body text-center p-4"> {# p-4 ve text-center ekledik #}
+                    {# İKON EKLEDİK #}
+                    {% if 'Vergi' in post.title or 'KDV' in post.title %}
+                        <i class="bi bi-receipt-cutoff blog-card-icon text-primary mb-3"></i> {# Vergi/KDV ikon #}
+                    {% elif 'Fatura' in post.title or 'Arşiv' in post.title %}
+                        <i class="bi bi-file-earmark-text blog-card-icon text-info mb-3"></i> {# Fatura/Arşiv ikon #}
+                    {% else %}
+                        <i class="bi bi-newspaper blog-card-icon text-secondary mb-3"></i> {# Genel haber ikon #}
+                    {% endif %}
+                    {# Resim satırı kaldırıldı #}
+                    <h5 class="card-title fw-bold">{{ post.title }}</h5>
+                    <p class="card-text text-muted small">{{ post.publish_date.strftime('%d %B %Y') }}</p>
+                    <p class="card-text">{{ post.summary }}...</p>
+                    <a href="{{ url_for('blog.detail', slug=post.slug) }}" class="btn btn-sm btn-outline-primary mt-3">Devamını Oku</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if not posts %}
+        <p class="text-center text-muted">Henüz blog yazısı bulunmamaktadır.</p>
+    {% endif %}
+</section>
+{% endblock %}

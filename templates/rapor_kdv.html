@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}KDV Özeti{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4 text-center">🗂️ KDV Özeti - {{ secili_vkn }} / {{ secili_unvan }}</h3>
+
+  <style>
+    table.kdv-table tr.kdv-section-row > th,
+    table.kdv-table tr.kdv-section-row > td {
+      font-weight: 800 !important;
+      background-color: #e9ecef !important;
+    }
+  </style>
+
+  <div class="table-responsive">
+
+      <table class="table table-bordered table-sm table-striped align-middle kdv-table w-100">
+      <thead class="table-light text-center" style="position: sticky; top: 0; z-index: 10;">
+        <tr>
+          <th>Açıklama</th>
+          {% for m in kdv_months %}
+            <th>{{ m }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for alan, aylik in kdv_data.items() %}
+          {% if alan and alan[:2] == '§ ' %}
+            <!-- Bölüm başlığı -->
+            <tr class="kdv-section-row">
+              <td class="kdv-section-cell" colspan="{{ 1 + kdv_months|length }}">
+                {{ alan[2:] }}
+              </td>
+            </tr>
+          {% else %}
+            <!-- Normal satır -->
+            <tr>
+              <td>{{ alan }}</td>
+              {% for m in kdv_months %}
+                {% set v = aylik.get(m) %}
+                <td class="text-end">
+                  {{ '' if v is none or v=='' or (v|string)|lower in ['nan','none','-'] else v }}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-3">
+    <a id="excelBtn" class="btn btn-success"
+       href="{{ url_for('rapor_kdv_excel', vkn=secili_vkn, unvan=secili_unvan, donemler=','.join(secili_donemler)) }}"
+       onclick="excelIndirmeBaslat(event)">
+      <i class="bi bi-file-earmark-excel me-1"></i> Excel Çıktısı Al
+    </a>
+  </div>
+
+  <iframe id="downloadFrame" style="display:none;"></iframe>
+
+  <div class="text-center mt-4">
+    <a href="javascript:history.back()" class="btn btn-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Geri Dön
+    </a>
+  </div>
+</div>
+
+<script>
+  function excelIndirmeBaslat(event) {
+    const btn = document.getElementById("excelBtn");
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Oluşturuluyor...`;
+    btn.classList.add("disabled");
+
+    setTimeout(() => {
+      btn.innerHTML = `<i class="bi bi-file-earmark-excel me-1"></i> Excel Çıktısı Al`;
+      btn.classList.remove("disabled");
+    }, 2000);
+  }
+</script>
+{% endblock %}

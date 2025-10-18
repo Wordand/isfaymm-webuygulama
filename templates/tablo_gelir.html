@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block title %}Gelir Tablosu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <h2 class="text-center mb-4">📈 Gelir Tablosu</h2>
+
+        <div class="text-center mb-4">
+            <h5 class="mb-2">Mükellef: <strong>{{ unvan }}</strong></h5>
+            <form method="get" class="d-inline-block">
+                <input type="hidden" name="tur" value="gelir">
+                <input type="hidden" name="vkn" value="{{ vkn }}">
+                <input type="hidden" name="donem" value="{{ donem }}">
+                
+                <label for="donemSec" class="form-label fw-semibold me-2">Dönemi Göster:</label>
+
+                <select name="donem_turu" id="donemSec" class="form-select d-inline w-auto" onchange="this.form.submit()">                   
+                    {% if donem_mapping.onceki %}
+                        <option value="onceki" {% if secilen_donem == 'onceki' %}selected{% endif %}>
+                            Önceki {{ donem_mapping.onceki }}
+                        </option>
+                    {% endif %}
+                    {% if donem_mapping.cari %}
+                        <option value="cari" {% if secilen_donem == 'cari' %}selected{% endif %}>
+                            Cari {{ donem_mapping.cari }}
+                        </option>
+                    {% endif %}
+                </select>
+            </form>
+        </div>
+
+        <p class="text-center fw-semibold">
+            Şu An Gösterilen Dönem:
+            {% if secilen_donem == 'onceki' %}
+                {{ donem_mapping.onceki }}
+            {% else %}
+                {{ donem_mapping.cari }}
+            {% endif %}
+        </p>
+
+        <table class="table table-bordered table-sm align-middle">
+            <thead class="table-light text-center">
+                <tr>
+                    <th>Kod</th>
+                    <th>Açıklama</th>
+                    <th class="text-end">Tutar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in tablo %}
+                    {% set kod = row.kod %}
+                    {% set aciklama = row.aciklama %}
+                    {% set tutar = row.get(gorunen_kolon) %}
+
+
+                    <tr>
+                        <td class="text-center">{{ kod }}</td>
+                        {% if not kod %}
+                            <td class="fw-bold">{{ aciklama }}</td>
+                            <td class="text-end fw-bold">
+                                {% if tutar is not none %}
+                                    {{ tutar | tlformat }}
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
+                            </td>
+                        {% else %}
+                            <td>{{ aciklama }}</td>
+                            <td class="text-end">
+                                {% if tutar is not none %}
+                                    {{ tutar | tlformat }}
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('veri_giris', vkn=vkn, donem=donem) }}" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

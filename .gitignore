@@ -1,0 +1,14 @@
+# Python cache dosyaları
+__pycache__/
+*.pyc
+
+# Ortam dosyası (gizli anahtarlar burada)
+.env
+
+# SQLite veritabanı
+instance/
+*.db
+
+# IDE / editör ayarları
+.vscode/
+.idea/

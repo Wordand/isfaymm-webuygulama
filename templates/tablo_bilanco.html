@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block title %}Bilanço Tablosu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-12 col-lg-10">
+        <h2 class="text-center mb-4">📊 Bilanço Tablosu</h2>
+
+        <div class="text-center mb-4">
+            <h5 class="mb-2">
+                VKN: <strong>{{ vkn }}</strong> — Mükellef: <strong>{{ unvan or "" }}</strong>
+            </h5>
+            <form method="get" class="d-inline-block">
+                <input type="hidden" name="tur" value="bilanco">
+                <input type="hidden" name="vkn" value="{{ vkn }}">
+                <input type="hidden" name="donem" value="{{ donem }}">
+                
+                <label for="donemSec" class="form-label fw-semibold me-2">Dönemi Göster:</label>
+
+                <select name="donem_turu" id="donemSec" class="form-select d-inline w-auto" onchange="this.form.submit()">                   
+                    {% if donem_mapping.onceki %}
+                        <option value="onceki" {% if secilen_donem == 'onceki' %}selected{% endif %}>
+                            Önceki {{ donem_mapping.onceki }}
+                        </option>
+                    {% endif %}
+                    {% if donem_mapping.cari %}
+                        <option value="cari" {% if secilen_donem == 'cari' %}selected{% endif %}>
+                            Cari {{ donem_mapping.cari }}
+                        </option>
+                    {% endif %}
+                    {% if has_inflation and donem_mapping.cari_enflasyon %}
+                        <option value="cari_enflasyon" {% if secilen_donem == 'cari_enflasyon' %}selected{% endif %}>
+                            Cari {{ donem_mapping.cari_enflasyon }} (Enflasyonlu)
+                        </option>
+                    {% endif %}
+                </select>
+            </form>
+        </div>
+
+        <p class="text-center fw-semibold">
+            Şu An Gösterilen Dönem:
+            {% if secilen_donem == 'onceki' %}
+                {{ donem_mapping.onceki }}
+            {% elif secilen_donem == 'cari' %}
+                {{ donem_mapping.cari }}
+            {% elif secilen_donem == 'cari_enflasyon' %}
+                {{ donem_mapping.cari_enflasyon }} (Enflasyonlu)
+            {% else %}
+                Cari {{ donem_mapping.cari }}
+            {% endif %}
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle" style="border-collapse: collapse; width: 100%;">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th colspan="3" style="border-right: 3px solid #000;">AKTİF</th>
+                        <th colspan="3" style="border-left: 3px solid #000;">PASİF</th>
+                    </tr>
+                    <tr>
+                        <th>Kod</th>
+                        <th>Açıklama</th>
+                        <th class="text-end" style="border-right: 3px solid #000;">Tutar</th>
+                        <th style="border-left: 3px solid #000;">Kod</th>
+                        <th>Açıklama</th>
+                        <th class="text-end">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set aktif_len = aktif_list | length %}
+                    {% set pasif_len = pasif_list | length %}
+                    {% set max_len = [aktif_len, pasif_len] | max %}
+
+                    {% for i in range(max_len) %}
+                    <tr>
+                        <!-- AKTİF -->
+                        {% if i < aktif_len %}
+                            {% set row = aktif_list[i] %}
+                            {% set tutar = (
+                                row.get("Önceki Dönem") if secilen_donem == "onceki" else
+                                row.get("Cari Dönem") if secilen_donem == "cari" else
+                                row.get("Cari Dönem (Enflasyonlu)") if secilen_donem == "cari_enflasyon" else
+                                row.get("Cari Dönem")
+                            ) %}
+                            {% if not row["Kod"] %}
+                                <td></td>
+                                <td class="fw-bold">{{ row["Açıklama"] }}</td>
+                                <td class="text-end fw-bold" style="border-right: 3px solid #000;">{{ tutar | tlformat }}</td>
+                            {% else %}
+                                <td>{{ row["Kod"] }}</td>
+                                <td>{{ row["Açıklama"] }}</td>
+                                <td class="text-end" style="border-right: 3px solid #000;">{{ tutar | tlformat }}</td>
+                            {% endif %}
+                        {% else %}
+                            <td></td><td></td><td style="border-right: 3px solid #000;"></td>
+                        {% endif %}
+
+                        <!-- PASİF -->
+                        {% if i < pasif_len %}
+                            {% set row = pasif_list[i] %}
+                            {% set tutar = 
+                                (row["Önceki Dönem"] if secilen_donem == "onceki" else
+                                row["Cari Dönem"] if secilen_donem == "cari" else
+                                row["Cari Dönem (Enflasyonlu)"] if secilen_donem == "cari_enflasyon" else
+                                row["Cari Dönem"]) 
+                            %}
+                            {% if not row["Kod"] %}
+                                <td style="border-left: 3px solid #000;"></td>
+                                <td class="fw-bold">{{ row["Açıklama"] }}</td>
+                                <td class="text-end fw-bold">{{ tutar | tlformat }}</td>
+                            {% else %}
+                                <td style="border-left: 3px solid #000;">{{ row["Kod"] }}</td>
+                                <td>{{ row["Açıklama"] }}</td>
+                                <td class="text-end">{{ tutar | tlformat }}</td>
+                            {% endif %}
+                        {% else %}
+                            <td style="border-left: 3px solid #000;"></td><td></td><td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+
+                    <!-- TOPLAMLAR -->
+                    <tr class="fw-bold bg-warning-subtle">
+                        <td></td>
+                        <td>AKTİF TOPLAMI</td>
+                        <td class="text-end" style="border-right: 3px solid #000;">{{ toplamlar.AKTİF.get(secilen_donem, 0) | tlformat }}</td>
+                        <td style="border-left: 3px solid #000;"></td>
+                        <td>PASİF TOPLAMI</td>
+                        <td class="text-end">{{ toplamlar.PASİF.get(secilen_donem, 0) | tlformat }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('veri_giris', vkn=vkn, donem=donem) }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

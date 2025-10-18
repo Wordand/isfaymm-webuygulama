@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ unvan }} - Finansal Oran Raporu</title>
+  <style>
+    /* === GENEL === */
+    body {
+      font-family: "DejaVu Sans", Arial, sans-serif;
+      font-size: 12px;
+      color: #1a1a1a;
+      background: #fff;
+      margin: 25px;
+      line-height: 1.5;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      color: #0d47a1;
+    }
+
+    /* === ÜST BANNER === */
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #1565c0;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 22px; font-weight: bold; }
+    .header h2 { font-size: 15px; color: #1565c0; margin-top: 5px; }
+    .year { color: #555; margin-top: 5px; font-style: italic; }
+
+    /* === FİRMA BİLGİLERİ === */
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 20px;
+      background: #f7f9fc;
+      border: 1px solid #cfd8dc;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+    .meta strong { color: #0d47a1; }
+
+    /* === ORAN KARTI === */
+    .card {
+      border: 1px solid #cfd8dc;
+      border-left: 5px solid #1976d2;
+      background: #fafafa;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 15px;
+      page-break-inside: avoid;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #0d47a1;
+      margin-bottom: 8px;
+    }
+
+    .card-values {
+      margin-bottom: 6px;
+    }
+    .card-values span {
+      display: inline-block;
+      margin-right: 8px;
+      background: #e3f2fd;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .card-section {
+      margin-top: 8px;
+      font-size: 11.5px;
+    }
+    .card-section strong {
+      color: #ff6f00;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .card-section ul {
+      margin: 0;
+      padding-left: 15px;
+    }
+
+    /* === GENEL ANALİZ === */
+    .analysis {
+      margin-top: 25px;
+      background: #f1f8e9;
+      border-left: 5px solid #43a047;
+      padding: 14px 16px;
+      border-radius: 6px;
+    }
+
+    .analysis h3 {
+      color: #2e7d32;
+      border-bottom: 2px solid #81c784;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    /* === ÖNERİLER === */
+    .analysis ol {
+      margin-top: 8px;
+      padding-left: 18px;
+    }
+
+    /* === RENK KODLU DEĞERLER === */
+    .good { color: #2e7d32; font-weight: bold; }
+    .warn { color: #f57f17; font-weight: bold; }
+    .bad  { color: #c62828; font-weight: bold; }
+
+    /* === FOOTER === */
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      color: #777;
+      border-top: 1px solid #ccc;
+      margin-top: 30px;
+      padding-top: 6px;
+    }
+
+    /* === SAYFA KIRILMALARI === */
+    @page {
+      size: A4;
+      margin: 15mm 12mm;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>{{ unvan }}</h1>
+    <h2>Finansal Oran Raporu</h2>
+    <div class="year">{{ donemler|join(" • ") }}</div>
+  </div>
+
+  <div class="meta">
+    <div><strong>Vergi Kimlik No:</strong> {{ vkn }}</div>
+    <div><strong>Tarih:</strong> {{ now().strftime("%d.%m.%Y") }}</div>
+    <div><strong>Adres:</strong> {{ adres or "-" }}</div>
+    <div><strong>Telefon:</strong> {{ telefon or "-" }}</div>
+    <div><strong>E-posta:</strong> {{ email or "-" }}</div>
+  </div>
+
+  {% for oran_adi in reports[donemler[0]].keys() %}
+  {% set info = reports[donemler[0]][oran_adi] %}
+  {% set trend = analiz.oran_analizleri.get(oran_adi) %}
+  <div class="card">
+    <div class="card-title">{{ oran_adi }}</div>
+    <div class="card-values">
+      {% for d in donemler %}
+        {% set v = reports[d][oran_adi].deger %}
+        <span>
+          <strong>{{ d }}:</strong>
+          {% if v is not none %}
+            {% set cls = "good" if v >= 1.5 else ("warn" if v >= 1 else "bad") %}
+            <span class="{{ cls }}">{{ "%.2f"|format(v) }}</span>
+          {% else %}
+            –
+          {% endif %}
+        </span>
+      {% endfor %}
+    </div>
+
+    <div class="card-section">
+      <strong>Açıklama</strong>
+      <div>{{ info.meaning or "–" }}</div>
+    </div>
+
+    <div class="card-section">
+      <strong>Öneri</strong>
+      <div>
+        {% if info.advice is iterable and info.advice is not string %}
+          <ul>
+            {% for o in info.advice %}<li>{{ o }}</li>{% endfor %}
+          </ul>
+        {% else %}
+          {{ info.advice or "–" }}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if donemler|length > 1 and trend %}
+      <div class="card-section">
+        <strong>Trend Yorumu</strong>
+        <div>{{ trend.sonucu }}</div>
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="analysis">
+    <h3>Genel Sonuç</h3>
+    <p>{{ analiz.genel_sonuc }}</p>
+
+    <h3>Genel Öneriler</h3>
+    <ol>
+      {% for o in analiz.genel_oneriler %}<li>{{ o }}</li>{% endfor %}
+    </ol>
+  </div>
+
+  <div class="footer">
+    Rapor oluşturulma tarihi: {{ now().strftime("%d/%m/%Y %H:%M") }}
+  </div>
+
+</body>
+</html>

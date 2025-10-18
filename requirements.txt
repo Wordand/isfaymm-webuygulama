@@ -1,0 +1,16 @@
+Flask
+gunicorn
+cryptography
+fpdf
+pandas
+pdfplumber
+python-dateutil
+xlsxwriter
+PyPDF2
+werkzeug
+jinja2
+itsdangerous
+click
+MarkupSafe
+requests
+unicodedata2

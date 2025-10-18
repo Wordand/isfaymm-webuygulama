@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}Matrah Hesaplama{% endblock %}
+
+{% block content %}
+<h3>Matrah Hesaplama</h3>
+
+<form method="POST" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Toplam Gelir (₺)</label>
+        <input type="number" class="form-control" name="gelir" required>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Toplam Gider (₺)</label>
+        <input type="number" class="form-control" name="gider" required>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Hesapla</button>
+    </div>
+</form>
+
+{% if matrah is not none %}
+    <hr>
+    <h5>Hesaplanan Matrah: ₺{{ matrah }}</h5>
+{% endif %}
+
+{% if kayitlar %}
+    <hr>
+    <h5>Geçmiş Hesaplamalar</h5>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Tarih</th>
+                <th>Gelir</th>
+                <th>Gider</th>
+                <th>Matrah</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for k in kayitlar %}
+            <tr>
+                <td>{{ k[3] }}</td>
+                <td>{{ k[0] }}</td>
+                <td>{{ k[1] }}</td>
+                <td>{{ k[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

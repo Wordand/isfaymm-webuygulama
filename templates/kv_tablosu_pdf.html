@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: DejaVu Sans, sans-serif; font-size: 12pt; }
+    table { width: 100%; border-collapse: collapse; margin: 0 auto; }
+    th, td { padding: 4px 6px; vertical-align: top; }
+    .header { text-align: center; font-weight: bold; margin-bottom: 12px; }
+    .label { width: 50%; }
+    .value { width: 50%; text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="header">İNDİRİMLİ KURUMLAR VERGİSİ TABLOSU</div>
+  <table>
+    {% macro row(label, value) -%}
+      <tr>
+        <td class="label">{{ label }}</td>
+        <td class="value">{{ value }}</td>
+      </tr>
+    {%- endmacro %}
+
+    {{ row("Teşvik Belgesi Numarası", data.belge_no) }}
+    {{ row("Teşvik Belgesinin Hangi Karara Göre Düzenlendiği", data.karar) }}
+    {{ row("Yatırıma Başlama Tarihi", data.belge_tarihi) }}
+    {{ row("Yatırımın Türü 1", data.yatirim_turu1) }}
+    {{ row("Yatırımın Türü 2", data.yatirim_turu2) }}
+
+    {{ row("Toplam Yatırım Tutarı (İndirimli KV Kapsamında Olmayan Harcamalar Hariç)", data.toplam_tutar | currency) }}
+    {{ row("Yatırıma Katkı Oranı", data.katki_orani ~ "%") }}
+    {{ row("Vergi İndirim Oranı", data.vergi_orani ~ "%") }}
+    {{ row("Yatırımın Yapıldığı Bölge", data.bolge) }}
+    {{ row("İndirimli KV Oranı", data.diger_oran ~ "%") }}
+
+    {{ row("Toplam Yatırıma Katkı Tutarı", data.katki_tutari | currency) }}
+    {{ row("Cari Yılda Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı", data.cari_harcama_tutari | currency) }}
+    {{ row("Fiilen Gerçekleştirilen Yatırım Harcaması (Başlangıçtan İtibaren)", data.toplam_harcama_tutari | currency) }}
+    {{ row("Fiili Yatırım Harcaması Nedeniyle Hak Kazanılan Katkı Tutarı", data.fiili_katki_tutari | currency) }}
+    {{ row("Endekslenmiş Tutarlar Nedeniyle Hak Kazanılan Katkı Tutarı", data.endeks_katki_tutari | currency) }}
+
+    {{ row("Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)", data.onceki_yatirim_katki_tutari | currency) }}
+    {{ row("Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)", data.onceki_diger_katki_tutari | currency) }}
+    {{ row("Önceki Dönemlerde Yararlanılan Toplam Katkı Tutarı", data.onceki_katki_tutari | currency) }}
+    {{ row("Cari Dönemde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)", data.cari_yatirim_katki | currency) }}
+    {{ row("Cari Dönemde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)", data.cari_diger_katki | currency) }}
+    {{ row("Cari Dönemde Yararlanılan Toplam Yatırıma Katkı Tutarı", data.cari_toplam_katki | currency) }}
+    {{ row("Cari Dönem Dahil Olmak Üzere Yararlanılan Toplam Katkı Tutarı", data.genel_toplam_katki | currency) }}
+  </table>
+</body>
+</html>

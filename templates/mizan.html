@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+{% block title %}Mizan Yükleme{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h2 class="mb-4 text-center">📊 Mizan Yükle ve Yönet</h2>
+
+        <div class="text-center mb-4">
+            <p>Kendi mizan verilerinizi yüklemek için lütfen örnek şablonu indirin:</p>
+            <a href="{{ url_for('static', filename='templates/mizan_sablonu.xlsx') }}" download="mizan_sablonu.xlsx" class="btn btn-info">
+                <i class="bi bi-download me-2"></i>Mizan Şablonunu İndir
+            </a>
+        </div>
+
+        <form id="mizanUploadForm" enctype="multipart/form-data">
+            <div id="drop-area" class="border border-primary border-2 rounded p-4 text-center mb-3"
+                 ondrop="handleDropMizan(event)" ondragover="event.preventDefault()">
+                <p class="mb-2">📎 Mizan Excel dosyalarınızı (.xlsx veya .xls) buraya sürükleyin ya da <strong>seçin</strong></p>
+                <input type="file" id="fileElemMizan" name="belgeler" accept=".xlsx,.xls" class="form-control d-none" multiple required>
+                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('fileElemMizan').click()">Dosya Seç</button>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <h4 class="text-center mb-3">📂 Yüklenen Mizan Dosyaları</h4>
+
+        {% if yuklenen_mizanlar %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Dosya Adı</th>
+                            <th>Dönem</th>
+                            <th>VKN</th>
+                            <th>Yükleme Tarihi</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mizan in yuklenen_mizanlar %}
+                        <tr>
+                            <td>{{ mizan.ad }}</td>
+                            <td>{{ mizan.donem }}</td>
+                            <td>{{ mizan.vkn }}</td>
+                            <td>{{ mizan.tarih }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete-mizan"
+                                        data-vkn="{{ mizan.vkn }}"
+                                        data-donem="{{ mizan.donem }}"
+                                        data-belge-turu="mizan"
+                                        data-file-name="{{ mizan.ad }}">
+                                    <i class="bi bi-trash"></i> Sil
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">Henüz yüklenmiş mizan dosyası bulunmamaktadır.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// Mizan Excel Yükleme
+function handleDropMizan(e) {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        uploadMizanFiles(files);
+    }
+}
+
+document.getElementById("fileElemMizan").addEventListener("change", function () {
+    if (this.files.length > 0) {
+        uploadMizanFiles(this.files);
+    }
+});
+
+function uploadMizanFiles(files) {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append("belgeler", files[i]);
+    }
+
+    fetch("/yukle-mizan-excel", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(messages => {
+        if (Array.isArray(messages)) {
+            let needsReload = false;
+            messages.forEach(msg => {
+                if (msg.type === "warning") {
+                    Swal.fire({
+                        icon: msg.type,
+                        title: msg.title,
+                        html: `<b>${msg.text}</b><br><small>Bu belge zaten yüklü. Üzerine yazmak ister misiniz?</small>`,
+                        showCancelButton: true,
+                        confirmButtonText: "↻ Evet, Üzerine Yaz",
+                        cancelButtonText: "İptal",
+                        reverseButtons: true
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            uploadOverwrite({
+                                vkn: msg.vkn,
+                                donem: msg.donem,
+                                belge_turu: 'mizan',
+                                dosya: msg.dosya
+                            });
+                        }
+                    });
+                } else {
+                    showSwalMessage(msg.type, msg.title, msg.text);
+                    if (msg.type === "success") needsReload = true;
+                }
+            });
+            if (needsReload) setTimeout(() => location.reload(), 1500);
+        }
+    })
+    .catch(err => {
+        Swal.fire({ icon: "error", title: "Sunucu Bağlantı Hatası", text: "Dosya yüklenirken sunucuya ulaşılamadı veya bir hata oluştu." });
+        console.error("Yükleme hatası:", err);
+    });
+}
+
+// Mizan Silme
+document.querySelectorAll('.btn-delete-mizan').forEach(button => {
+    button.addEventListener('click', function() {
+        const vkn = this.dataset.vkn;
+        const donem = this.dataset.donem;
+        const belgeTuru = this.dataset.belgeTuru;
+        const fileName = this.dataset.fileName;
+
+        Swal.fire({
+            title: 'Emin misiniz?',
+            text: `VKN '${vkn}' - '${donem}' dönemine ait '${fileName}' mizan dosyası silinecek.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Evet, Sil!',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('vkn', vkn);
+                formData.append('donem', donem);
+                formData.append('belge_turu', belgeTuru);
+
+                fetch('/donem-sil', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showSwalMessage(data.status, data.title, data.message);
+                    if (data.status === 'success') setTimeout(() => location.reload(), 1500);
+                })
+                .catch(error => {
+                    Swal.fire('Hata!', 'Dosya silinirken bir hata oluştu.', 'error');
+                    console.error('Silme hatası:', error);
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

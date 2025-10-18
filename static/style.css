@@ -1,0 +1,1148 @@
+.no-sidebar-layout #sidebar,
+.no-sidebar-layout .toggle-btn,
+.no-sidebar-layout #mobile-overlay,
+.no-sidebar-layout .hidden-initial {
+  display: none !important;
+}
+.no-sidebar-layout .main-content {
+  margin: 0 !important;  /* margin-left, paddingları tek satıra indirebilirsiniz */
+  padding: 0 !important;
+}
+
+
+
+
+/* Bölüm başlığı satırı: kalın + gri arka plan.
+   td kullanıyoruz ki bootstrap değişkenleri karışmasın. */
+table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
+  font-weight: 800 !important;
+  background-color: #e9ecef !important;
+  /* Görsel ayrım daha net olsun istersek: */
+  letter-spacing: .3px;
+}
+
+/* table-striped’in sırayla verdiği zemin bu satırları etkilemesin */
+table.kdv-table.table-striped > tbody > tr.kdv-section-row:nth-of-type(odd) > td {
+  --bs-table-bg-type: transparent;
+  background-color: #e9ecef !important;
+}
+
+/* İstersen sol kalın ayırıcı bu satırda da görünsün */
+table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
+  border-right: 3px solid #6c757d;
+}
+
+
+
+/* --- Genel Değişkenler ve Temel Ayarlar --- */
+:root {
+    /* Renk Paleti */
+    --primary-blue: #0d6efd; /* Ana vurgu rengi (Bootstrap primary) */
+    --dark-sidebar: #1e1e2f; /* Sidebar arka plan rengi */
+    --light-bg: #f1f3f5; /* Genel sayfa arka plan rengi */
+    --dark-text: #343a40; /* Koyu metin rengi */
+    --muted-text: #6c757d; /* Soluk metin rengi */
+    --white: #ffffff; /* Beyaz renk */
+    --light-gray: #ccc; /* Sidebar bağlantıları için açık gri */
+    --hover-dark: #343a40; /* Sidebar hover arka planı */
+    --warning-subtle: #fff3cd; /* Uyarı durumu için açık sarı (Bootstrap warning-subtle) */
+    --isfa-red: #dc3545; /* İSFA metni için kırmızı renk */
+
+
+    /* Başarılı ve Bilgi Durumları İçin Renkler */
+    --success-green: #4CAF50; /* Genel başarılı ikon/border rengi */
+    --light-success-green: #e8f5e9; /* SweetAlert başlık arka planı için açık yeşil */
+    --dark-success-green: #2e7d32; /* SweetAlert başlık metni için koyu yeşil */
+    --info-blue: #007bff; /* Bilgi ikonu/border rengi */
+    --light-info-blue: #e0f2f7; /* Bilgi ikonu arka planı için açık mavi */
+    --dark-info-blue: #0056b3; /* Bilgi ikonu hover durumu için koyu mavi */
+
+    /* Buton Gradyan Renkleri */
+    --btn-gradient-start: #4e54c8; /* Gradyan başlangıç rengi */
+    --btn-gradient-end: #8f94fb; /* Gradyan bitiş rengi */
+    --btn-gradient-hover-start: #3b40a4; /* Hover durumunda gradyan başlangıç rengi */
+    --btn-gradient-hover-end: #6b6ef4; /* Hover durumunda gradyan bitiş rengi */
+
+    /* Kenarlık Radiusları (Köşe Yuvarlaklığı) */
+    --border-radius-sm: .25rem; /* ~4px - Küçük yuvarlaklık */
+    --border-radius-md: .5rem; /* ~8px - Orta yuvarlaklık */
+    --border-radius-lg: 1rem; /* ~16px - Büyük yuvarlaklık (Kartlar için ideal) */
+
+    /* Geçiş Süreleri */
+    --transition-speed-normal: 0.3s; /* Normal geçiş hızı */
+    --transition-speed-fast: 0.2s; /* Hızlı geçiş hızı */
+    --transition-speed-slow: 0.5s; /* Navbar geçişi için yavaş hız */
+}
+
+/* Genel Body Ayarları */
+body {
+    margin: 0;
+    display: flex; /* Flexbox ile ana layoutu yönetir */
+    min-height: 100vh; /* Minimum tam ekran yüksekliği */
+    font-family: "Segoe UI", sans-serif; /* Okunabilir font */
+    color: var(--dark-text); /* Varsayılan metin rengi */
+    background: var(--light-bg); /* Varsayılan sayfa arka planı */
+}
+
+
+/* --- Scrollbar Stilleri --- */
+/* Webkit tabanlı tarayıcılar (Chrome, Safari) için scrollbar özelleştirmeleri */
+::-webkit-scrollbar {
+    width: 8px; /* Scrollbar genişliği */
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Scrollbar yolu rengi */
+}
+::-webkit-scrollbar-thumb {
+    background: #888; /* Scrollbar çubuğu rengi */
+    border-radius: 10px; /* Yuvarlak köşeler */
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Mouse üzerine gelince daha koyu */
+}
+
+
+/* --- Sidebar (Yan Menü) Stilleri --- */
+.sidebar {
+    width: 240px; /* Varsayılan genişlik */
+    background: var(--dark-sidebar); /* Koyu arka plan */
+    color: var(--white);
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* İçeriği dikey sırala */
+    transition: all var(--transition-speed-normal) ease-in-out; /* Animasyonlu geçişler */
+    overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu */
+    min-height: 100vh; /* Bu, sidebar'ın içeriği az olsa bile ekran yüksekliği kadar olmasını sağlar */
+    height: auto; /* İçerik 100vh'yi aşarsa uzamasını sağlar */
+    position: relative; /* Z-index yönetimi için */
+    z-index: 1000;
+    flex-shrink: 0; /* İçeriğin sidebar'ı sıkıştırmasını engeller */
+}
+
+/* Sidebar Başlık Alanı (Logo/Marka Adı) */
+.sidebar-header {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Alt çizgi */
+    text-align: center; /* İçeriği ortala */
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center; /* Dikeyde hizala */
+    justify-content: center; /* Yatayda ortala */
+    color: var(--white) !important; /* Metin rengi */
+    text-decoration: none; /* Alt çizgi olmasın */
+    font-size: 1.5rem; /* Başlık font boyutu */
+    font-weight: bold;
+    transition: all var(--transition-speed-fast);
+}
+
+.sidebar-brand:hover {
+    color: var(--primary-blue) !important; /* Hover efekti */
+}
+
+.sidebar-brand .sidebar-icon {
+    margin-right: 10px; /* İkon ile metin arası boşluk */
+    font-size: 1.8rem; /* İkon boyutu */
+}
+
+/* Sidebar Navigasyon Bölümü */
+.sidebar-nav {
+    flex-grow: 1; /* Kalan alanı kapla */
+}
+
+/* Sidebar bağlantıları (menü öğeleri) */
+.sidebar-nav .sidebar-link {
+    color: var(--light-gray);
+    text-decoration: none;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    transition: all var(--transition-speed-fast);
+    padding: 10px 12px; /* Tıklama alanı */
+    border-radius: var(--border-radius-sm);
+    font-size: 1.05rem;
+}
+
+.sidebar-nav .sidebar-link i.sidebar-icon {
+    margin-right: 12px;
+    font-size: 1.2rem;
+}
+
+.sidebar-nav .sidebar-link:hover {
+    color: var(--white);
+    background-color: var(--hover-dark);
+    padding-left: 15px; /* Hover'da hafif kaydırma efekti */
+    border-radius: var(--border-radius-sm);
+}
+
+/* Aktif menü öğesi */
+.sidebar-nav .sidebar-link.active {
+    background-color: var(--primary-blue);
+    color: var(--white) !important;
+    font-weight: bold;
+    padding-left: 15px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3); /* Aktif butona gölge */
+}
+
+/* Daraltılmış sidebar görünümü (Masaüstü) */
+.collapsed {
+    width: 60px !important; /* Daraltılmış genişlik */
+}
+.collapsed .sidebar-text {
+    display: none !important; /* Metinleri gizle */
+}
+/* Daraltılmışken ikonları ortala */
+.collapsed .sidebar-header .sidebar-brand .sidebar-text,
+.collapsed .sidebar-nav .sidebar-link .sidebar-text {
+    display: none !important; /* Daraltıldığında tüm metinleri gizle */
+}
+.collapsed .sidebar-header .sidebar-brand .sidebar-icon,
+.collapsed .sidebar-nav .sidebar-link i.sidebar-icon {
+    margin: 0 auto !important; /* İkonları ortala */
+    width: 100%;
+    text-align: center;
+}
+
+
+/* --- Ana İçerik Alanı --- */
+.main-content {
+    flex: 1; /* Kalan tüm alanı kapla */
+    /* Navbar yüksekliği kadar üst boşluk ekle, navbar-scrolled yüksekliği ortalama 70-80px */
+    padding: calc(75px + 40px) 40px 40px; /* Navbar ve kendi padding'i toplamı */
+    background: var(--light-bg);
+    overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu */
+    transition: margin-left var(--transition-speed-normal) ease;
+    margin-left: 0; /* Başlangıçta sol kenar boşluğu yok */
+    /* main-content'in minimum yüksekliği, ekran yüksekliğinden üst/alt padding çıkarılarak hesaplanır */
+    min-height: calc(100vh - (75px + 40px) - 40px);
+}
+
+
+/* --- Sidebar Toggle Butonu --- */
+.toggle-btn {
+    position: fixed; /* Ekranda sabit durur */
+    top: 20px;
+    left: 260px; /* Sidebar genişliği (240px) + 20px boşluk */
+    z-index: 1100; /* Sidebar'dan daha üstte */
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    padding: 8px 15px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-speed-normal) ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    font-size: 1.2rem; /* İkon için boyut */
+    display: flex; /* İkonu ortalamak için */
+    align-items: center;
+    justify-content: center;
+}
+.toggle-btn:hover {
+    background-color: var(--dark-info-blue); /* Hover rengi */
+    transform: translateY(-1px); /* Hafif yukarı kalkma efekti */
+}
+/* Sidebar daraldığında butonun konumu */
+.collapsed ~ .toggle-btn {
+    left: 80px; /* Daraltılmış sidebar genişliği (60px) + 20px boşluk */
+}
+
+
+/* --- Mobil Menü Overlay'i --- */
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Yarı şeffaf siyah */
+    z-index: 1040; /* Sidebar'dan düşük, main-content'ten yüksek */
+    display: none; /* Başlangıçta gizli */
+    transition: opacity var(--transition-speed-normal) ease;
+    opacity: 0; /* Geçiş için başlangıç opaklığı */
+}
+
+/* Mobil menü açıkken overlay'i göster */
+body.mobile-menu-open .mobile-overlay {
+    display: block;
+    opacity: 1;
+}
+
+
+/* --- Gradyan Efektli Butonlar (`btn-gradient-hover`) --- */
+.btn-gradient-hover {
+    background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+    transition: transform var(--transition-speed-fast) ease, box-shadow var(--transition-speed-fast) ease, background var(--transition-speed-normal) ease;
+    text-align: center;
+    color: var(--white); /* Metin rengi beyaz olsun */
+    border: none;
+    padding: .75rem 1.5rem; /* Dolgun butonlar */
+    border-radius: var(--border-radius-sm);
+}
+
+.btn-gradient-hover:hover {
+    transform: translateY(-3px); /* Hafif yukarı kalkma */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Gölge efekti */
+    background: linear-gradient(135deg, var(--btn-gradient-hover-start), var(--btn-gradient-hover-end)); /* Hover gradyanı */
+}
+
+/* Küçük butonlar için gradient (Navbar'daki "Giriş Yap" gibi) */
+.btn-gradient-hover-small {
+    background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+    transition: transform var(--transition-speed-fast) ease, box-shadow var(--transition-speed-fast) ease, background var(--transition-speed-normal) ease;
+    color: var(--white);
+    border: none;
+    padding: .5rem 1rem; /* Daha küçük padding */
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem; /* Daha küçük font */
+}
+
+.btn-gradient-hover-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, var(--btn-gradient-hover-start), var(--btn-gradient-hover-end));
+}
+
+
+/* --- Yeni Navbar Stilleri --- */
+#mainNavbar {
+    background-color: var(--white); /* Varsayılan arka plan */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Hafif gölge */
+    transition: background-color var(--transition-speed-slow) ease, padding var(--transition-speed-slow) ease;
+    z-index: 1030; /* Sidebar ve toggle button'dan daha düşük, ancak diğer içerikten yüksek */
+}
+
+#mainNavbar .navbar-brand {
+    color: var(--dark-text); /* Marka rengi */
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+#mainNavbar .navbar-brand:hover {
+    color: var(--primary-blue);
+}
+
+#mainNavbar .nav-link {
+    color: var(--dark-text);
+    font-weight: 500;
+    margin-right: 1.5rem;
+    transition: color var(--transition-speed-fast) ease;
+}
+#mainNavbar .nav-link:hover {
+    color: var(--primary-blue);
+}
+
+/* Navbar şeffaf iken (genellikle hero bölümünün üstünde) */
+.navbar-transparent {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.navbar-transparent .navbar-brand,
+.navbar-transparent .nav-link {
+    color: var(--white); /* Şeffafken metin rengini beyaz yap */
+}
+.navbar-transparent .navbar-toggler-icon {
+    filter: invert(1); /* Hamburger ikonunu beyaz yap */
+}
+.navbar-transparent .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5); /* Beyaz kenarlık */
+}
+
+/* Navbar aşağı kaydırıldığında */
+.navbar-scrolled {
+    background-color: var(--white) !important; /* Beyaz renkli arka plan */
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    padding-top: 1rem !important; /* Daha küçük padding */
+    padding-bottom: 1rem !important;
+}
+
+.navbar-scrolled .navbar-brand,
+.navbar-scrolled .nav-link {
+    color: var(--dark-text); /* Kaydırıldığında metin rengini koyu yap */
+}
+
+
+/* Sadece İç Panellerdeki Navbar */
+.page-tabs-nav {
+    position: relative; /* Sabit değil */
+    top: auto;
+    left: auto;
+    width: auto;
+    margin-top: 0;
+    box-shadow: none;
+    background-color: var(--white) !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+.page-tabs-nav .nav-link {
+    color: var(--dark-text);
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-speed-fast) ease;
+}
+.page-tabs-nav .nav-link.active {
+    color: var(--primary-blue);
+    border-bottom: 2px solid var(--primary-blue);
+    font-weight: bold;
+    background-color: transparent !important;
+}
+.page-tabs-nav .nav-link:hover {
+    color: var(--primary-blue);
+}
+
+
+/* --- Responsive Ayarlamalar (Mobil Uyum) --- */
+@media (max-width: 991.98px) { /* Medium ve altı ekranlar için navbar düzeni */
+    #mainNavbar .navbar-collapse {
+        background-color: var(--white); /* Mobil menü açıldığında arka plan rengi */
+        border-radius: var(--border-radius-sm);
+        padding: 1rem;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    #mainNavbar .navbar-nav .nav-link {
+        color: var(--dark-text); /* Mobil menüde metin rengi */
+        text-align: center;
+        margin-right: 0;
+        padding: 0.75rem 0;
+    }
+    #mainNavbar .navbar-nav .nav-link:hover {
+        background-color: #f8f9fa;
+        border-radius: var(--border-radius-sm);
+    }
+    #mainNavbar .navbar-toggler {
+        color: var(--dark-text); /* Hamburger ikon rengi */
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+    .navbar-transparent.navbar-collapse .navbar-nav .nav-link {
+        color: var(--dark-text); /* Mobil açık menüde transparan olsa bile metin koyu */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobil görünümde sidebar */
+    .sidebar {
+        position: fixed; /* Ekranı kaydırmaz */
+        left: -240px; /* Başlangıçta gizli */
+        top: 0;
+        height: 100%; /* Tam ekran yüksekliği */
+        z-index: 1050; /* Toggle butondan daha yüksek */
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3); /* Açıldığında gölge */
+    }
+
+    /* Mobil menü açıkken sidebar'ı göster */
+    body.mobile-menu-open .sidebar {
+        left: 0 !important;
+    }
+
+    /* Mobil menü açıkken ana içeriği karart ve tıklamayı engelle */
+    body.mobile-menu-open .main-content {
+        overflow: hidden; /* Ana içeriğin kaydırmasını engelle */
+        filter: brightness(0.7); /* Ana içeriği hafif karart */
+        pointer-events: none; /* Ana içeriğe tıklamayı engelle */
+    }
+
+    /* Mobil görünümde toggle butonu */
+    .toggle-btn {
+        left: 20px !important; /* Her zaman sol üstte sabit kalsın */
+        top: 20px;
+        z-index: 1100; /* Navbar'dan daha üstte */
+        /* Navbar ile çakışmaması için burada dikkat edin */
+        /* Eğer navbar üstte sabitse ve toggle-btn de sabitse */
+        /* toggle-btn'i navbar'ın altına alabilir veya sağ üste taşıyabiliriz. */
+        /* Şu anki durumda navbar'dan yüksek z-index'e sahip, sorun çıkarmayabilir. */
+    }
+
+    /* Mobil görünümde ana içerik paddingleri */
+    .main-content {
+        /* Navbar ve kendi padding'i toplamı, mobil için Navbar yüksekliği değişebilir */
+        padding-top: calc(75px + 20px); /* Ortalama Navbar yüksekliği + ek boşluk */
+        padding-left: 20px; /* Yanlardan boşluk */
+        padding-right: 20px;
+        min-height: calc(100vh - (75px + 20px) - 20px); /* Mobil için de min-height ayarı */
+    }
+    
+    /* Mobil'de sidebar daraltma (collapsed) durumu artık sadece masaüstü için geçerli olduğundan,
+       mobil menü her zaman tam genişlikte açılır ve metinler görünür olur. */
+    .collapsed {
+        width: 240px !important; /* Mobil'de hep tam genişlik */
+    }
+    .collapsed .sidebar-text {
+        display: inline !important; /* Mobil'de hep göster */
+    }
+
+    /* Mobil buton metinleri (eğer buton içinde metin varsa) */
+    .btn-gradient-hover {
+        white-space: normal; /* Metin taşarsa alt satıra geç */
+        line-height: 1.2;
+    }
+}
+
+
+/* --- Dashboard ve Genel Bileşen Stilleri --- */
+.dashboard-welcome,
+.dashboard-instruction {
+    text-align: center;
+    font-weight: 500;
+    margin-top: 1.5rem; /* Daha fazla boşluk */
+    color: var(--dark-text);
+}
+
+.card {
+    border-radius: var(--border-radius-lg); /* Yuvarlak köşeler (16px) */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Hafif gölge */
+    border: none; /* Bootstrap'in varsayılan kenarlığını kaldırın */
+}
+
+
+/* --- Tablo Stilleri --- */
+table {
+    border-collapse: collapse; /* Kenarlıklar birleşir */
+    width: 100%;
+    margin-top: 1.5rem;
+    background-color: var(--white);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden; /* Köşeleri yuvarlamak için içeriği kırp */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Hafif gölge */
+}
+
+th, td {
+    border: 1px solid #dee2e6; /* Açık gri kenarlık */
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    vertical-align: middle; /* Hücre içeriğini dikeyde ortala */
+}
+
+/* Zebra satır (her iki satırda bir farklı renk) */
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Ortadaki kalın dikey çizgi (sütunları ayırmak için) */
+th:nth-child(1),
+td:nth-child(1) {
+    border-right: 3px solid #6c757d;
+}
+
+
+thead th {
+    background-color: #e9ecef; /* Başlık arka plan rengi */
+    text-align: center;
+    font-weight: bold;
+    color: var(--dark-text);
+}
+
+/* Metin Hizalama ve Renk Yardımcı Sınıfları */
+.fw-bold {
+    font-weight: bold;
+}
+.text-muted {
+    color: var(--muted-text) !important;
+}
+.text-end {
+    text-align: right;
+}
+.bg-warning-subtle {
+    background-color: var(--warning-subtle) !important;
+}
+
+
+/* --- Input Group ve Bilgi İkon Stilleri --- */
+/* Input group konteynerinin dış kenarlığı ve yuvarlaklığı */
+.input-group {
+    display: flex; /* Flexbox ile iç elementleri sırala */
+    width: 100%;
+    border: 1px solid #ced4da; /* Dış kenarlık */
+    border-radius: var(--border-radius-sm);
+    overflow: hidden; /* İç elementlerin köşelerin dışına taşmasını engeller */
+    transition: all var(--transition-speed-fast) ease-in-out;
+}
+
+/* Input group odaklandığında dış kenarlık ve gölge */
+.input-group:focus-within {
+    border-color: #86b7fe; /* Bootstrap focus rengi */
+    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+}
+
+/* Bilgi İkonu Stili (input-group-text içinde kullanılırsa) */
+.info-icon-styled {
+    background-color: var(--light-info-blue);
+    color: var(--info-blue);
+    cursor: pointer;
+    padding: .375rem .75rem; /* Bootstrap varsayılan padding'i */
+    border: none; /* Dış input-group'ta zaten border var */
+    
+    display: flex;
+    align-items: center; /* Dikeyde ortala */
+    justify-content: center; /* Yatayda ortala */
+    font-size: 1.1em;
+    flex-shrink: 0; /* İçeriğin sıkışmasını engeller */
+    
+    border-right: 1px solid var(--info-blue); /* İkonun sağ tarafına iç kenarlık */
+
+    transition: all var(--transition-speed-fast) ease-in-out;
+}
+
+.info-icon-styled:hover,
+.info-icon-styled:focus {
+    background-color: #cce5ff;
+    color: var(--dark-info-blue);
+    border-color: var(--dark-info-blue);
+}
+
+/* Input group içindeki form kontrol elemanları (input, select) */
+.input-group .form-control,
+.input-group .form-select {
+    border: none; /* Dış input-group'ta zaten border var */
+    flex: 1; /* Kalan alanı kapla */
+    padding: .375rem .75rem;
+    background-color: var(--white);
+    
+    /* Sağ tarafta yuvarlak köşeler */
+    border-top-right-radius: var(--border-radius-sm);
+    border-bottom-right-radius: var(--border-radius-sm);
+    border-top-left-radius: 0; /* Sol tarafta köşe olmasın */
+    border-bottom-left-radius: 0; /* Sol tarafta köşe olmasın */
+}
+
+/* Eğer input group'un ilk elemanı input/select ise, sol köşelerini yuvarla */
+.input-group .form-control:first-child,
+.input-group .form-select:first-child {
+    border-top-left-radius: var(--border-radius-sm);
+    border-bottom-left-radius: var(--border-radius-sm);
+}
+/* Eğer input group'un ilk elemanı ikon değilse (örneğin input'un kendisi ilkse), sol tarafında border-radius olmasın */
+.input-group .form-control:not(:first-child),
+.input-group .form-select:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+
+/* --- SweetAlert (Swal2) Tema Stilleri --- */
+
+/* Genel SweetAlert popup (kutusu) stili */
+.swal2-green-theme-popup {
+    background-color: var(--white) !important;
+    border: 1px solid var(--success-green) !important;
+    border-radius: var(--border-radius-lg) !important; /* Daha yuvarlak köşeler */
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2) !important;
+    max-width: 500px !important;
+}
+
+/* Başlık alanı stili */
+.swal2-green-theme-header {
+    background-color: var(--light-success-green) !important;
+    border-bottom: 1px solid var(--success-green) !important;
+    padding-bottom: 10px !important;
+    border-top-left-radius: var(--border-radius-lg) !important;
+    border-top-right-radius: var(--border-radius-lg) !important;
+}
+
+/* Başlık metni stili */
+.swal2-green-theme-title {
+    color: var(--dark-success-green) !important;
+    font-size: 1.5em !important;
+    font-weight: bold !important;
+    padding-top: 15px !important;
+    text-align: center !important; /* Başlık metnini ortala */
+}
+
+/* İkon stili */
+.swal2-green-theme-icon {
+    border-color: var(--success-green) !important;
+    color: var(--success-green) !important;
+}
+.swal2-icon.swal2-info::before {
+    font-size: 2.5em !important; /* İkonun içindeki sembolün boyutu */
+}
+
+/* Kapatma butonu stili */
+.swal2-green-theme-close-button {
+    color: var(--dark-success-green) !important;
+    font-size: 1.5em !important;
+    transition: color var(--transition-speed-fast) ease-in-out !important;
+}
+
+.swal2-green-theme-close-button:hover {
+    color: #1b5e20 !important; /* Üzerine gelince daha koyu */
+}
+
+/* İçerik konteyneri metin hizalaması */
+.swal2-green-theme-html-container {
+    text-align: justify !important; /* Yazıyı iki yana yasla */
+    word-break: break-word; /* Uzun kelimeleri kırmayı sağlar */
+    padding: 20px 30px !important; /* Sağdan soldan biraz boşluk */
+}
+
+
+/* --- Hero Section (Ana Sayfa Başlık) Stilleri --- */
+.hero {
+    min-height: 600px; /* Hero bölümünü biraz daha uzun yap */
+    background-color: #000; /* Video yüklenmeden veya desteklenmezse fallback arka plan */
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden; /* Taşmayı engeller */
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* İçeriğin altında kalmasını sağlar */
+    display: flex; /* Videoyu ortalamak için */
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Videonun taşmasını engelle */
+    /* background: url('../images/hero-bg.jpg') no-repeat center center / cover;  Artık videoyu kullanacağımız için bu satırı kaldırabilir veya bir fallback görseli olarak kullanabiliriz */
+}
+
+/* --- Hero Section'daki Video Stili --- */
+.hero-video {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    opacity: 0.7; /* Metin okunurluğunu artırmak için mevcut opaklık */
+    
+    /* VİDEO BLUR EFEKTİ BURAYA EKLENECEK */
+    filter: blur(3px); /* Örneğin 3 piksel bulanıklık */
+    /* Daha az veya daha çok isterseniz buradaki piksel değerini değiştirebilirsiniz. */
+}
+
+/* Hero Section'daki Fallback Görsel Stili (video yüklenmezse) */
+.hero-fallback-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8; /* Görseli hafif karart */
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1; /* Metin ve butonların videonun üzerinde kalmasını sağlar */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Metin okunurluğunu artırmak için gölge */
+}
+
+/* Hero Section Başlık Özelleştirmeleri */
+.hero-content h1 {
+    line-height: 1.2; /* Satır yüksekliğini ayarla, metinler birbirine çok yapışmasın */
+    margin-bottom: 20px; /* Başlık ile altındaki paragraf arası boşluk */
+}
+
+.hero-content h1 .text-isfa {
+    color: var(--isfa-red); /* İSFA kısmını kırmızı yapar */
+    /* isteğe bağlı: hafif bir gölge veya daha kalın font */
+    /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); */
+    /* font-weight: 900; */
+}
+
+/* Hero bölümündeki dış hatlı beyaz buton */
+.hero .btn-outline-light {
+    border-color: var(--white);
+    color: var(--white);
+}
+.hero .btn-outline-light:hover {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: var(--white);
+}
+
+
+/* --- Floating Shapes (Hero Section Animasyonları) --- */
+/* Bu bölümde tanımlanan şekiller artık Hero Section'daki videonun altında kalacaktır.
+   Eğer videonun üzerinde görünmelerini istiyorsanız z-index ayarlarını gözden geçirmelisiniz.
+   Genellikle video arka planlarında soyut şekillerin görünürlüğü azalır veya kaldırılır. */
+.floating-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Şekillerin tıklama almasını engeller */
+    overflow: hidden;
+    z-index: 0; /* Hero içeriğinin altında kalacak şekilde ayarla */
+}
+
+.floating-shapes .shape {
+    position: absolute;
+    font-size: 2.5rem;
+    opacity: 0.4;
+    color: rgba(0, 123, 255, 0.1); /* Hafif mavi tonunda şekiller */
+    animation: float 10s ease-in-out infinite; /* Animasyon süresini uzat */
+    will-change: transform, opacity; /* Performans ipucu */
+}
+
+/* Animasyon keyframes (Şekillerin yukarı-aşağı, hafif dönme hareketi) */
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.4; }
+    25% { transform: translate(10px, -20px) rotate(5deg); opacity: 0.5; }
+    50% { transform: translate(-10px, 10px) rotate(-5deg); opacity: 0.4; }
+    75% { transform: translate(15px, -15px) rotate(3deg); opacity: 0.5; }
+    100% { transform: translate(0, 0) rotate(0deg); opacity: 0.4; }
+}
+
+/* Her bir şekil için özel konumlandırma ve animasyon gecikmesi */
+.floating-shapes .shape:nth-child(1) {
+    top: 10%;
+    left: 15%;
+    font-size: 3rem;
+    animation-delay: 0s;
+}
+.floating-shapes .shape:nth-child(2) {
+    top: 30%;
+    left: 80%;
+    font-size: 2rem;
+    animation-delay: 3s;
+}
+.floating-shapes .shape:nth-child(3) {
+    top: 60%;
+    left: 5%;
+    font-size: 3.5rem;
+    animation-delay: 6s;
+}
+.floating-shapes .shape:nth-child(4) {
+    top: 85%;
+    left: 40%;
+    font-size: 2.2rem;
+    animation-delay: 9s;
+}
+.floating-shapes .shape:nth-child(5) {
+    top: 5%;
+    left: 50%;
+    font-size: 2.8rem;
+    animation-delay: 12s;
+}
+
+
+/* --- Bölüm Başlıkları (H2 için) --- */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block; /* Çizgiyi başlığın altına almak için */
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -10px; /* Başlığın altında boşluk bırak */
+    transform: translateX(-50%); /* Ortala */
+    width: 60px;
+    height: 4px;
+    background-color: var(--primary-blue);
+    border-radius: 2px;
+}
+
+
+/* --- Sayaç Bölümü Stilleri --- */
+#stats-top .counter {
+    color: var(--primary-blue);
+    font-size: 3rem;
+}
+
+#stats-top p {
+    color: var(--muted-text);
+    font-size: 1.1rem;
+}
+
+
+/* --- Hizmet Kartları Stilleri --- */
+.service-card {
+    transition: all var(--transition-speed-normal) ease;
+    border-radius: var(--border-radius-lg); /* Yuvarlak köşeler */
+    overflow: hidden;
+}
+
+.service-card:hover {
+    transform: translateY(-5px); /* Hafif yukarı kalkma */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Belirgin gölge */
+}
+
+.service-icon {
+    font-size: 3rem; /* Büyük ikonlar */
+    display: block;
+    margin: 0 auto 15px; /* Ortala ve alt boşluk bırak */
+}
+
+
+/* --- Hakkımızda Bölümü Stilleri --- */
+.text-justify {
+    text-align: justify; /* Yazıyı iki yana yasla */
+}
+
+
+/* --- Ekip Kartları Stilleri --- */
+.team-card {
+    transition: all var(--transition-speed-normal) ease;
+    border-radius: var(--border-radius-lg); /* Kartları yuvarla */
+}
+
+.team-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.team-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover; /* Resmi kutuya sığdır */
+    border: 3px solid var(--primary-blue); /* Yuvarlak çerçeve */
+}
+
+.social-links a {
+    font-size: 1.3rem;
+    color: var(--muted-text);
+    transition: color var(--transition-speed-fast) ease;
+}
+.social-links a:hover {
+    color: var(--primary-blue);
+}
+
+
+/* --- Müşteri Yorumları (Testimonials) Bölümü Stilleri --- */
+#testimonials {
+    background: linear-gradient(135deg, var(--primary-blue), var(--btn-gradient-end)); /* Arka plan gradyanı */
+    color: var(--white); /* Metin rengi */
+}
+
+#testimonials .section-title {
+    color: var(--white); /* Başlık rengini beyaz yap */
+}
+#testimonials .section-title::after {
+    background-color: var(--white); /* Alt çizgiyi beyaz yap */
+}
+
+.testimonial-card {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.testimonial-card .bi-quote {
+    color: var(--primary-blue);
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.testimonial-card .lead {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--dark-text);
+}
+
+.testimonial-card h6 {
+    color: var(--primary-blue);
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(255, 255, 255, 0.3); /* Beyaz kontrol ikonları */
+    border-radius: 50%;
+}
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%; /* Küçük kontrol alanı */
+}
+
+
+/* --- İletişim Formu Stilleri --- */
+#contact .form-control {
+    border-radius: var(--border-radius-md); /* Hafif yuvarlak köşeler */
+    padding: 0.8rem 1rem;
+}
+
+
+/* --- Bölüm Paddingleri --- */
+/* Tüm ana bölümler için tutarlı üst ve alt boşluk */
+#services, #about, #team, #contact, #testimonials {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+
+
+.service-card .service-icon {
+    font-size: 3rem;
+    display: block;
+    margin: 0 auto 15px;
+    color: var(--primary-blue); /* İkonun varsayılan rengi */
+    transition: transform 0.3s ease-out, color 0.3s ease-out; /* Animasyon için geçiş ekle */
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1) rotate(5deg); /* Hafif büyüt ve döndür */
+    color: var(--dark-info-blue); /* Hover'da renk değiştir */
+}
+
+.about-intro {
+    font-size: 1.3rem; /* Giriş paragrafını daha büyük yap */
+    font-weight: 500;
+    color: var(--dark-text) !important;
+    line-height: 1.6;
+    margin-bottom: 3rem; /* Alttaki grid ile boşluk */
+}
+
+.feature-grid {
+    margin-top: 2rem; /* Gridin üstündeki boşluk */
+}
+
+.feature-card {
+    background-color: var(--white);
+    border: 1px solid #e9ecef; /* Hafif kenarlık */
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Hafif gölge */
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: var(--primary-blue); /* Hover'da kenarlık rengi değişsin */
+}
+
+.feature-icon {
+    font-size: 2.5rem; /* İkon boyutu */
+    margin-bottom: 1rem;
+    display: inline-block; /* Ortalamak için */
+}
+
+.feature-card h5 {
+    color: var(--primary-blue); /* Başlık rengi */
+    margin-bottom: 0.75rem;
+}
+
+.feature-card p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.about-closing {
+    font-size: 1.2rem; /* Kapanış paragrafını daha büyük yap */
+    font-style: italic; /* İtalik yap */
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--muted-text) !important;
+    border-left: 5px solid var(--primary-blue); /* Sol kenarlık vurgusu */
+    padding-left: 20px;
+    margin-top: 3rem; /* Üst boşluk */
+}
+
+/* style.css - Blog Kart İkonları */
+.blog-card-icon {
+    font-size: 3.5rem; /* Büyük ikonlar */
+    display: block;
+    margin: 0 auto 15px; /* Ortala ve alt boşluk bırak */
+    color: var(--primary-blue); /* Varsayılan renk */
+}
+
+/* style.css - Blog Detay Sayfası İkonları */
+.blog-detail-icon {
+    font-size: 5rem; /* Daha da büyük ikon */
+    display: block;
+    margin: 0 auto 20px;
+    color: var(--primary-blue); /* Varsayılan renk */
+}
+
+.contact-card {
+    transition: all 0.3s ease-in-out;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: var(--primary-blue);
+}
+
+.contact-icon {
+    font-size: 3rem; /* Büyük ikon boyutu */
+    margin-bottom: 1rem;
+    display: block; /* Kart içindeki metni ortalamak için */
+    margin-left: auto; /* Yatayda ortala */
+    margin-right: auto; /* Yatayda ortala */
+}
+
+.contact-card p a {
+    color: var(--muted-text); /* Linklerin rengini metinle aynı yap */
+    transition: color 0.2s ease-in-out;
+}
+
+.contact-card p a:hover {
+    color: var(--primary-blue); /* Hover'da renk değiştir */
+}
+
+html {
+  scroll-behavior: smooth;           /* Tarayıcıdan gelen pürüzsüz kaydırma */
+  scroll-padding-top: 80px;          /* Sabit navbar yüksekliği kadar boşluk */
+}
+
+[id] {
+  scroll-margin-top: 80px;
+}
+
+/* style.css sonuna ekle */
+.no-sidebar-layout .main-content {
+  /* Navbar yüksekliğin ne ise onu gir: örnekte 80px */
+  padding-top: 80px !important;
+}
+
+/* DROPZONE KUTULARI */
+.dropzone {
+  min-height: 200px;
+  background: #fff;
+  border: 2px dashed #ccc;
+  padding: 0;
+  position: relative;
+}
+
+/* LIST-GROUP içindeki normal <li>’lar */
+.dropzone .list-group-item {
+  background: transparent;  /* kutu arka planını görünür bırak */
+  border: none;             /* öğe kenarlığını kaldır */
+}
+
+/* placeholder <li> özel stili */
+.dropzone .placeholder {
+  background: transparent !important;
+  border: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  text-align: center;
+  color: #6c757d;
+  line-height: 200px;   /* dropzone yüksekliğiyle eşitle */
+  pointer-events: none; /* tıklamayı engelle */
+}
+
+/* 💡 Bilgi ikonuna dikkat çeken animasyon */
+@keyframes infoBlink {
+  0%, 100% { color: #0d6efd; opacity: 1; }
+  50% { color: #66b2ff; opacity: 0.3; }
+}
+
+/* Bu sınıf animasyonu 3 kere çalıştırır */
+.info-icon-styled.blink {
+  animation: infoBlink 0.8s ease-in-out 7;
+}
+
+.info-icon-styled:hover {
+  animation: infoBlink 1s ease-in-out 1;
+}

@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block title %}ISFAYMM - {{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {# İKON EKLEDİK #}
+            <div class="text-center mb-4">
+                {% if 'Vergi' in post.title or 'KDV' in post.title %}
+                    <i class="bi bi-receipt-cutoff blog-detail-icon text-primary"></i>
+                {% elif 'Fatura' in post.title or 'Arşiv' in post.title %}
+                    <i class="bi bi-file-earmark-text blog-detail-icon text-info"></i>
+                {% else %}
+                    <i class="bi bi-newspaper blog-detail-icon text-secondary"></i>
+                {% endif %}
+            </div>
+            {# Resim bloğu kaldırıldı #}
+            <h1 class="mb-4 text-center">{{ post.title }}</h1> {# Başlığı da ortalayabiliriz #}
+            <p class="text-muted small mb-4 text-center">Yayın Tarihi: {{ post.publish_date.strftime('%d %B %Y') }}</p>
+            <div class="blog-content">
+                {{ post.content | safe }}
+            </div>
+            <a href="{{ url_for('blog.index') }}" class="btn btn-outline-primary mt-5">← Tüm Yazılara Dön</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

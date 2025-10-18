@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% block title %}Dosya Yükle{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">📤 Dosya Yükleme</h3>
+
+  <div id="drop-area" class="border border-2 border-primary rounded p-5 text-center"
+       ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+    <p class="mb-2">📎 PDF dosyalarınızı buraya sürükleyin veya</p>    
+    <input type="file" id="fileElem" name="belgeler" class="form-control d-inline w-auto" multiple accept=".pdf">
+    <button class="btn btn-primary mt-3" onclick="document.getElementById('fileElem').click()">Dosya Seç</button>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function handleDrop(e) {
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    uploadFiles(files);
+  }
+}
+
+document.getElementById("fileElem").addEventListener("change", function () {
+  if (this.files.length > 0) {
+    uploadFiles(this.files);
+  }
+});
+
+function uploadFiles(files) {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append("belgeler", files[i]);
+  }
+
+  fetch("/yukle-coklu", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(messages => {
+    if (Array.isArray(messages)) {
+      messages.forEach(msg => {
+        const titleMap = {
+          success: "✅ Başarılı",
+          warning: "⚠️ Uyarı",
+          error: "❌ Hata"
+        };
+
+        const iconMap = {
+          success: "success",
+          warning: "warning",
+          error: "error"
+        };
+
+        if (msg.type === "warning") {
+          Swal.fire({
+            icon: iconMap[msg.type],
+            title: `${msg.icon} ${titleMap[msg.type]}`,
+            html: `<b>${msg.text}</b><br><small>İsterseniz yeniden yükleyebilirsiniz.</small>`,
+            showCancelButton: true,
+            confirmButtonText: "↻ Yeniden Yükle",
+            cancelButtonText: "İptal",
+            reverseButtons: true
+          }).then(result => {
+            if (result.isConfirmed) {
+              uploadOverwrite(msg);
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: iconMap[msg.type],
+            title: `${msg.icon} ${titleMap[msg.type]}`,
+            text: msg.text,
+            timer: 3000,
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false
+          });
+        }
+      });
+    }
+  })
+  .catch(err => {
+    Swal.fire({
+      icon: "error",
+      title: "Sunucu Hatası",
+      text: err.toString()
+    });
+  });
+}
+
+function uploadOverwrite(msg) {
+  const overwriteForm = new FormData();
+  overwriteForm.append("unvan", msg.unvan);
+  overwriteForm.append("donem", msg.donem);
+  overwriteForm.append("tur", msg.tur);
+  overwriteForm.append("dosya", msg.dosya);
+
+  fetch("/yeniden-yukle", {
+    method: "POST",
+    body: overwriteForm
+  })
+  .then(res => res.json())
+  .then(data => {
+    Swal.fire({
+      icon: data.status === "success" ? "success" : "error",
+      title: data.status === "success" ? "✔️ Güncellendi" : "❌ Hata",
+      text: data.message
+    });
+  });
+}
+</script>
+{% endblock %}

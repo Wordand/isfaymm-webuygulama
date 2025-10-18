@@ -1,0 +1,417 @@
+{% extends "layout.html" %}
+{% block title %}Raporlama{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4 text-center">📊 Raporlama</h3>
+
+  <form id="raporlamaForm" method="get" action="{{ url_for('raporlama') }}">
+    <div class="row gy-3 justify-content-center">
+      <!-- Mükellef seçimi -->
+      <div class="col-md-4">
+        <label for="selVkn" class="form-label">Mükellef</label>
+        <select id="selVkn" name="vkn" class="form-select" onchange="this.form.submit()" required>
+          <option value="">-- Seçin --</option>
+          {% for m in mukellefler %}
+          <option value="{{ m.vkn }}" {% if m.vkn==secili_vkn %}selected{% endif %}>
+            {{ m.vkn }} - {{ m.unvan }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Drag&Drop alanları -->
+      <div class="col-12">
+
+        <!-- Filtre ve toplu ekleme -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <label for="periodFilter" class="form-label mb-0 me-2">Filtre:</label>
+            <select id="periodFilter" class="form-select form-select-sm d-inline-block w-auto"
+              onchange="filterPeriods()">
+              <option value="all">Tümü</option>
+              <option value="last6">Son 6 Ay</option>
+              <option value="year2025">Sadece 2025</option>
+              <option value="year2024">Sadece 2024</option>
+              <option value="year2023">Sadece 2023</option>
+              <option value="year2022">Sadece 2022</option>
+            </select>
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addAllToFA()">📥 Finansal Analize
+              Ekle</button>
+            <button type="button" class="btn btn-sm btn-outline-warning" onclick="addAllToKDV()">📥 KDV Özeti'ne
+              Ekle</button>
+          </div>
+        </div>
+        <p class="fw-semibold">Dönem(ler) (sürükle-bırak)</p>
+        <div class="row gx-3">
+
+          <!-- 1) Kaynak: Tüm Dönemler -->
+          <div class="col-md-4">
+            <label class="form-label">Tüm Dönemler</label>
+            <ul id="availablePeriods" class="list-group" style="height:200px; overflow:auto; background:#f8f9fa;">
+              {% for d in donemler %}
+              <li class="list-group-item draggable" draggable="true">{{ d }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- 2) Finansal Analiz Yılları -->
+          <div class="col-md-4">
+            <label class="form-label">Finansal Analiz Yılları</label>
+            <ul id="faYears" class="list-group dropzone">
+              <li class="placeholder">Buraya sürükleyebilirsiniz</li>
+            </ul>
+            <div id="faInputs"></div>
+          </div>
+
+          <!-- 3) KDV Özeti Dönemleri -->
+          <div class="col-md-4">
+            <label class="form-label">KDV Özeti Dönemleri</label>
+            <ul id="kdvPeriods" class="list-group dropzone">
+              <li class="placeholder">Buraya sürükleyebilirsiniz</li>
+            </ul>
+            <input type="hidden" name="kdv_periods" id="kdvPeriodsInput">
+            <input type="hidden" name="donemler" id="faYearsInput">
+            <input type="hidden" id="selUnvan" name="unvan" value="{{ secili_unvan or '' }}">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Butonlar -->
+      <div class="col-12 text-center mt-4">
+        <button type="submit" formaction="{{ url_for('raporlama_grafik') }}" formmethod="get"
+          class="btn btn-lg btn-primary" name="grafik" value="1" id="btnGrafik" disabled>
+          📊 Grafik Göster
+        </button>
+
+        <button type="submit" formaction="{{ url_for('finansal_oran_raporu') }}" formmethod="get"
+          class="btn btn-lg btn-success me-2" id="btnFA" disabled>
+          📄 Finansal Oran Raporu (PDF İndir)
+        </button>
+        <button type="submit" id="btnKDV" class="btn btn-lg btn-warning" disabled>
+          📄 KDV Özeti (Excel İndir)
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% if secili_vkn and yuklenen_dosyalar %}
+  <div class="card mt-4 mb-4">
+    <div class="card-header">
+      Geçmiş Yüklemeler ({{ secili_vkn }} - {{ secili_unvan }})
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th>Belge Türü</th>
+              <th>Yükleme Tarihi</th>
+              <th>Dönem</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dosya in yuklenen_dosyalar %}
+            <tr>
+              <td><span class="badge bg-secondary">{{ dosya.tur|upper }}</span></td>
+              <td>{{ dosya.tarih }}</td> {# Yükleme Tarihi #}
+              <td>{{ dosya.donem }}</td> {# Dönem #}
+              <td class="text-center align-middle">
+                <div class="btn-group" role="group">
+                  {% if dosya.tur=='bilanco' %}
+                  <a href="{{ url_for('pdf_belgeler_tablo', tur='bilanco', vkn=secili_vkn, donem=dosya.donem) }}"
+                    class="btn btn-sm btn-outline-primary" title="Bilanço">
+                    <i class="bi bi-table"></i>
+                  </a>
+                  {% elif dosya.tur=='gelir' %}
+                  <a href="{{ url_for('pdf_belgeler_tablo', tur='gelir', vkn=secili_vkn, donem=dosya.donem) }}"
+                    class="btn btn-sm btn-outline-warning" title="Gelir">
+                    <i class="bi bi-graph-up"></i>
+                  </a>
+                  {% elif dosya.tur=='kdv' %}
+                  <a href="{{ url_for('pdf_belgeler_tablo', tur='kdv', vkn=secili_vkn, donem=dosya.donem) }}"
+                    class="btn btn-sm btn-outline-info" title="KDV">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </a>
+                  {% elif dosya.tur=='mizan' %}
+                  <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=secili_vkn, donem=dosya.donem) }}"
+                    class="btn btn-sm btn-outline-success" title="Mizan Bilanço">
+                    <i class="bi bi-file-spreadsheet"></i>
+                  </a>
+                  <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=secili_vkn, donem=dosya.donem) }}"
+                    class="btn btn-sm btn-outline-success" title="Mizan Gelir">
+                    <i class="bi bi-file-spreadsheet"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Ekranda özet tablo gösterimi #}
+  {% if analiz_turu=='kdv' and kdv_months %}
+  <h5 class="mt-4">KDV Özeti</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm text-center">
+      <thead class="table-light">
+        <tr>
+          <th>Kalan Kalem</th>
+          {% for col in kdv_months %}
+          <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for alan, satir in kdv_data.items() %}
+        <tr>
+          <td class="fw-semibold">{{ alan }}</td>
+          {% for col in kdv_months %}
+          <td>{{ satir[col] if satir[col] is defined else '-' }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif analiz_turu!='kdv' and oranlar %}
+  <h5 class="mt-4">Finansal Oranlar</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm text-center">
+      <thead class="table-light">
+        <tr>
+          <th>Oran</th>
+          {% for d in secili_donemler %}<th>{{ d }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for oran, detay in oranlar.items() %}
+        <tr>
+          <td>{{ oran }}</td>
+          {% for d in secili_donemler %}
+          <td>{{ detay[d] if detay[d] is defined else '-' }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+
+
+<script>
+  const allPeriodsOriginal = Array.from(document.querySelectorAll("#availablePeriods .list-group-item"))
+    .map(el => el.textContent.trim());
+
+  function getFilteredPeriods() {
+    const filter = document.getElementById("periodFilter").value;
+    const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    const now = new Date();
+    const last6 = [];
+
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      last6.push(`${months[date.getMonth()]} / ${date.getFullYear()}`);
+    }
+
+    if (filter === "last6") {
+      return allPeriodsOriginal.filter(p => last6.includes(p));
+    }
+
+    if (filter.startsWith("year")) {
+      const year = filter.replace("year", "");
+      return allPeriodsOriginal.filter(p => p.includes(`/ ${year}`) || p.trim() === year);
+    }
+
+    if (filter === "ocaklar") {
+      return allPeriodsOriginal.filter(p => p.startsWith("Ocak"));
+    }
+
+    return [...allPeriodsOriginal]; // tümü
+  }
+
+  function getSortedPeriods(periods) {
+    const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    return periods.sort((a, b) => {
+      const [ma, ya] = a.split("/").map(s => s.trim());
+      const [mb, yb] = b.split("/").map(s => s.trim());
+      const da = parseInt(ya) * 12 + months.indexOf(ma);
+      const db = parseInt(yb) * 12 + months.indexOf(mb);
+      return da - db;
+    });
+  }
+
+
+
+
+  function addAllToFA() {
+    const filtered = getFilteredPeriods();
+    const sorted = getSortedPeriods(filtered);
+    moveToList(sorted, "faYears");
+    updateHiddenInputs();
+  }
+
+  function addAllToKDV() {
+    const filtered = getFilteredPeriods();
+    const sorted = getSortedPeriods(filtered);
+    moveToList(sorted, "kdvPeriods");
+    updateHiddenInputs();
+  }
+
+  function filterPeriods() {
+    const filtered = getFilteredPeriods();
+    const container = document.getElementById("availablePeriods");
+    container.innerHTML = "";
+
+    getSortedPeriods(filtered).forEach(p => {
+      const li = document.createElement("li");
+      li.className = "list-group-item draggable";
+      li.textContent = p;
+      li.setAttribute("draggable", "true");
+      container.appendChild(li);
+    });
+
+    addDragEvents(); // 🔁 filtre sonrası sürükleme aktif kalsın
+  }
+
+
+  function updateHiddenInputs() {
+    const kdvPeriods = Array.from(document.querySelectorAll("#kdvPeriods li:not(.placeholder)"))
+      .map(li => li.textContent.trim());
+
+    const faYears = Array.from(document.querySelectorAll("#faYears li:not(.placeholder)"))
+      .map(li => li.textContent.trim());
+
+    // hidden input’ları güncelle
+    document.getElementById("kdvPeriodsInput").value = kdvPeriods.join(",");
+    document.getElementById("faYearsInput").value = faYears.join(",");
+
+    const btnKDV = document.getElementById("btnKDV");
+
+    if (kdvPeriods.length >= 1) {
+      btnKDV.setAttribute("formaction", "{{ url_for('rapor_kdv') }}");
+      btnKDV.disabled = false;
+      btnKDV.textContent = kdvPeriods.length === 1
+        ? "📄 KDV Özeti Göster (Tek)"
+        : "📄 KDV Özeti (Çoklu)";
+    } else {
+      btnKDV.disabled = true;
+      btnKDV.textContent = "📄 KDV Özeti";
+    }
+  }
+
+
+
+
+
+
+
+  function enableButtonsIfNeeded() {
+    const faCount = document.querySelectorAll("#faYears li:not(.placeholder)").length;
+    const kdvCount = document.querySelectorAll("#kdvPeriods li:not(.placeholder)").length;
+
+    const btnFA = document.getElementById("btnFA");
+    const btnKDV = document.getElementById("btnKDV");
+    const btnGrafik = document.getElementById("btnGrafik");
+
+    btnFA.disabled = faCount === 0;
+    btnGrafik.disabled = faCount === 0;
+    btnKDV.disabled = kdvCount === 0;
+  }
+
+  function refreshUIState() {
+    updateHiddenInputs();
+    enableButtonsIfNeeded();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    refreshUIState();
+    addDragEvents();
+  });
+
+  document.addEventListener("dragend", () => {
+    refreshUIState();
+  });
+
+  document.getElementById("raporlamaForm").addEventListener("submit", () => {
+    refreshUIState();
+  });
+
+  function moveToList(periods, targetId) {
+    const target = document.getElementById(targetId);
+    const existingItems = Array.from(target.querySelectorAll("li")).map(li => li.textContent.trim());
+    for (const period of periods) {
+      if (!existingItems.includes(period)) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = period;
+
+        // ✅ Tıklayınca sil özelliği
+        li.addEventListener("click", () => {
+          li.remove();
+
+          // Eğer boşaldıysa placeholder'ı geri getir
+          if (target.querySelectorAll("li:not(.placeholder)").length === 0) {
+            const placeholder = document.createElement("li");
+            placeholder.className = "placeholder";
+            placeholder.textContent = "Buraya sürükleyebilirsiniz";
+            target.appendChild(placeholder);
+          }
+          refreshUIState();
+        });
+
+        target.appendChild(li);
+      }
+    }
+
+    const placeholder = target.querySelector(".placeholder");
+    if (placeholder) placeholder.remove();
+
+    refreshUIState();
+  }
+
+  const observer = new MutationObserver(() => {
+    refreshUIState();
+  });
+
+  const faList = document.getElementById("faYears");
+  const kdvList = document.getElementById("kdvPeriods");
+
+  observer.observe(faList, { childList: true });
+  observer.observe(kdvList, { childList: true });
+
+
+  function addDragEvents() {
+    const draggables = document.querySelectorAll(".draggable");
+    draggables.forEach(el => {
+      el.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", el.textContent.trim());
+      });
+    });
+
+    const dropzones = document.querySelectorAll(".dropzone");
+    dropzones.forEach(zone => {
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const period = e.dataTransfer.getData("text/plain");
+        moveToList([period], zone.id);
+      });
+    });
+  }
+</script>
+{% endblock %}

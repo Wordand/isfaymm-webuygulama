@@ -1,0 +1,431 @@
+{% extends 'layout.html' %}
+
+{% block title %}ISFAYMM - Ana Sayfa{% endblock %}
+
+{% block content %}
+
+<section class="hero text-center position-relative overflow-hidden">
+  <div class="hero-background">
+    <video autoplay muted playsinline class="hero-video">
+      <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
+      <source src="{{ url_for('static', filename='videos/hero-video.webm') }}" type="video/webm">
+      <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Finansal Danışmanlık Arka Planı"
+        class="img-fluid hero-fallback-img">
+    </video>
+  </div>
+  <div class="container hero-content" data-aos="fade-up">
+    <h1 class="display-3 fw-bold mb-3 text-white" data-aos="fade-up" data-aos-delay="200">
+      <span class="text-isfa">İSFA</span><br>
+      YEMİNLİ MALİ MÜŞAVİRLİK
+    </h1>
+    <p class="lead mb-4 text-white-75">
+      İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi, vergi danışmanlığı ve inceleme
+      danışmanlığında uzman ekibimizle yanınızdayız.
+    </p>
+    <a href="#services" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hizmetlerimiz</a>
+    <a href="#about" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hakkımızda</a>
+
+  </div>
+</section>
+
+<section class="py-4 text-center bg-light" id="stats-top">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-6 col-md-4 mb-3">
+        <h2 class="display-6 fw-bold counter" data-target="3000">0</h2>
+        <p class="text-muted mb-0">Doküman Yüklemesi</p>
+      </div>
+      <div class="col-6 col-md-4 mb-3">
+        <h2 class="display-6 fw-bold counter" data-target="85">0</h2>
+        <p class="text-muted mb-0">Finansal Oran</p>
+      </div>
+      <div class="col-6 col-md-4 mb-3">
+        <h2 class="display-6 fw-bold counter" data-target="473">0</h2>
+        <p class="text-muted mb-0">Kayıtlı Kullanıcı</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="services" class="py-5 bg-white">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">Hizmetlerimiz</h2>
+      <p class="text-muted mb-4">İşletmenizin tüm vergi ve mali süreçlerinde yanınızdayız:</p>
+    </div>
+    <div class="row gy-4">
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-check-circle-fill service-icon text-success mb-3"></i>
+            <h5 class="card-title fw-bold">Tam Tasdik Hizmeti</h5>
+            <p class="card-text text-muted">Finansal tablolarınızın tam tasdikini, mevzuata uygun ve hızlı şekilde
+              gerçekleştiriyoruz.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-arrow-counterclockwise service-icon text-warning mb-3"></i>
+            <h5 class="card-title fw-bold">KDV İadesi</h5>
+            <p class="card-text text-muted">KDV iadelerinizi hukuka uygun, maksimum hız ve minimum riskle yönetiyoruz.
+            </p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-people-fill service-icon text-primary mb-3"></i>
+            <h5 class="card-title fw-bold">Vergi Danışmanlığı</h5>
+            <p class="card-text text-muted">Bireysel ve kurumsal vergi stratejileriniz için kapsamlı danışmanlık
+              sağlıyoruz.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-search service-icon text-danger mb-3"></i>
+            <h5 class="card-title fw-bold">Vergi İnceleme Danışmanlığı</h5>
+            <p class="card-text text-muted">Vergi incelemelerinde sizin adınıza savunma, düzeltme ve mali risk yönetimi
+              desteği.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-gift-fill service-icon text-info mb-3"></i>
+            <h5 class="card-title fw-bold">Teşvik, İndirim, İstisna ve Muafiyet</h5>
+            <p class="card-text text-muted">Ar-Ge, Teknoloji Geliştirme Bölgeleri ve Serbest Bölge projelerinizde
+              maksimum avantaj sağlıyoruz.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-percent service-icon text-success mb-3"></i>
+            <h5 class="card-title fw-bold">İndirimli Kurumlar Vergisi</h5>
+            <p class="card-text text-muted">İndirimli kurumlar vergisi uygulamaları ile şirketlerin vergi yükünü
+              optimize ediyoruz.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="700">
+        <div class="service-card card h-100 shadow-sm border-0">
+          <div class="card-body text-center p-4">
+            <i class="bi bi-arrows-move service-icon text-secondary mb-3"></i>
+            <h5 class="card-title fw-bold">Transfer Fiyatlandırması</h5>
+            <p class="card-text text-muted">Uluslararası ticaretinizde mevzuata uygun fiyatlandırma stratejileri
+              sunuyoruz.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Detayları İncele</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="about" class="py-5 bg-white">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">Hakkımızda</h2>
+    </div>
+
+    <div class="row justify-content-center about-intro">
+      <div class="col-lg-10 col-md-12 text-center lead text-muted mb-4">
+        İSFA YMM olarak, finansal geleceğinizi şekillendiriyoruz. Türkiye'nin dört bir yanında, son teknoloji altyapımız
+        ve alanında uzman mali müşavir kadromuzla güvenilir bir iş ortağıyız.
+      </div>
+    </div>
+
+    <div class="row feature-grid g-4">
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+          <i class="bi bi-speedometer2 feature-icon text-primary mb-3"></i>
+          <h5 class="fw-bold">Hız ve Güvenilirlik</h5>
+          <p class="text-muted">Tam tasdik süreçlerinde yasal uyumluluğu hızla birleştirerek, işletmenize maksimum
+            avantaj sağlıyoruz.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+          <i class="bi bi-shield-check feature-icon text-success mb-3"></i>
+          <h5 class="fw-bold">Mali Risk Yönetimi</h5>
+          <p class="text-muted">Vergi danışmanlığı ve detaylı inceleme hizmetlerimizle, mali risklerinizi en aza
+            indirirken, geleceğe güvenle bakmanızı temin ediyoruz.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+          <i class="bi bi-cash-coin feature-icon text-warning mb-3"></i>
+          <h5 class="fw-bold">Teşvik ve Muafiyet Uzmanlığı</h5>
+          <p class="text-muted">Ar-Ge, Teknoloji Geliştirme Bölgeleri ve Serbest Bölge projelerinizde, hak ettiğiniz
+            teşvik ve muafiyetlere ulaşmanız için sağlam bir rehberlik sunuyoruz.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+      <div class="col-lg-10 col-md-12 text-center about-closing lead text-muted">
+        Şeffaflık, doğruluk ve sürekli iyileştirme prensiplerimizle, her müşterimizin finansal başarısını güvence altına
+        almak en büyük hedefimizdir. Bizimle, finansal potansiyelinizi tam anlamıyla keşfedin!
+      </div>
+    </div>
+
+
+
+  </div>
+</section>
+
+
+<section id="team" class="py-5 bg-white">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">Ekibimiz</h2>
+      <p class="text-muted mb-4">Alanında uzman mali müşavir ve danışmanlarımızla tanışın.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card text-center border-0 shadow-sm team-card h-100">
+          <img src="{{ url_for('static', filename='images/team1.jpg') }}"
+            class="card-img-top rounded-circle mx-auto mt-3 team-img" alt="Dr. Ayşe Yılmaz, Vergi ve mevzuat uzmanı">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">Dr. Ayşe Yılmaz</h5>
+            <p class="card-text text-muted mb-2">Vergi ve Mevzuat Uzmanı</p>
+            <div class="social-links">
+              <a href="#" class="text-secondary mx-1"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card text-center border-0 shadow-sm team-card h-100">
+          <img src="{{ url_for('static', filename='images/team2.jpg') }}"
+            class="card-img-top rounded-circle mx-auto mt-3 team-img"
+            alt="Mehmet Demir, Finansal analiz ve risk yönetimi uzmanı">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">Mehmet Demir</h5>
+            <p class="card-text text-muted mb-2">Finansal Analiz ve Risk Yönetimi</p>
+            <div class="social-links">
+              <a href="#" class="text-secondary mx-1"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card text-center border-0 shadow-sm team-card h-100">
+          <img src="{{ url_for('static', filename='images/team3.jpg') }}"
+            class="card-img-top rounded-circle mx-auto mt-3 team-img"
+            alt="Talha ÖNER, KDV İade Müdürü">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">Talha ÖNER</h5>
+            <p class="card-text text-muted mb-2">KDV İade Müdürü</p>
+            <div class="social-links">
+              <a href="#" class="text-secondary mx-1"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="blog" class="py-5 bg-white">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">Son Yazılarımız</h2>
+      <p class="text-muted mb-4">Vergi ve finans dünyasındaki güncel gelişmeler ve ipuçları.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {# Flask'tan gelen son 3 blog yazısını döngü ile listele #}
+      {# NOT: Bu kısım Python Flask uygulamanızdan 'latest_posts' verisi gelmesini bekler #}
+      {% if latest_posts %}
+      {% for post in latest_posts %}
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div class="card h-100 shadow-sm border-0 blog-card">
+          {% if post.image_url %}
+          <img src="{{ url_for('static', filename=post.image_url) }}" class="card-img-top" alt="{{ post.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title fw-bold">{{ post.title }}</h5>
+            <p class="card-text text-muted small">{{ post.publish_date.strftime('%d %B %Y') }}</p>
+            <p class="card-text">{{ post.summary }}...</p>
+            <a href="{{ url_for('blog.detail', slug=post.slug) }}" class="btn btn-sm btn-outline-primary mt-2">Devamını
+              Oku</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="text-center text-muted">Henüz blog yazısı bulunmamaktadır.</p>
+      {% endif %}
+    </div>
+    <div class="text-center mt-5">
+      <a href="{{ url_for('blog.index') }}" class="btn btn-primary btn-lg btn-gradient-hover">Tüm Yazıları Gör</a>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials" class="py-5 bg-gradient-light">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title text-white">Müşterilerimiz Ne Diyor?</h2>
+      <p class="lead text-white-75 mb-4">Başarımızın en büyük kanıtı, memnun müşterilerimizdir.</p>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="testimonial-card text-center bg-white p-4 shadow-sm rounded-3">
+                <i class="bi bi-quote fs-1 text-primary mb-3"></i>
+                <p class="lead mb-3">"ISFAYMM ile çalışmak iş süreçlerimizi inanılmaz kolaylaştırdı. Vergi iadelerimiz
+                  hiç bu kadar hızlı ve sorunsuz olmamıştı. Profesyonellikleri takdire şayan!"</p>
+                <h6 class="fw-bold mb-0">Ayşe Can</h6>
+                <p class="text-muted">XYZ Holding - Finans Direktörü</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <div class="testimonial-card text-center bg-white p-4 shadow-sm rounded-3">
+                <i class="bi bi-quote fs-1 text-primary mb-3"></i>
+                <p class="lead mb-3">"Vergi danışmanlığı hizmetleri sayesinde önemli ölçüde tasarruf ettik. Ekibin bilgi
+                  birikimi ve proaktif yaklaşımları gerçekten fark yaratıyor."</p>
+                <h6 class="fw-bold mb-0">Murat Güneş</h6>
+                <p class="text-muted">ABC Teknoloji - Kurucu Ortak</p>
+              </div>
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Önceki</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Sonraki</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="contact" class="py-5 bg-white"> {# background color changed to white for consistency #}
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">İletişim</h2>
+      <p class="lead text-muted mb-4">Aklınızdaki tüm sorular için bize kolayca ulaşın.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
+          <i class="bi bi-geo-alt-fill contact-icon text-primary mb-3"></i>
+          <h5 class="fw-bold">Adresimiz</h5>
+          <p class="text-muted mb-0">Örnek Mah. Örnek Cad. No: 123</p>
+          <p class="text-muted mb-0">Örnek Plaza Kat: 5, Konya, Türkiye</p>
+          {# Harita linki ekledik, contact.html'ye yönlendirir #}
+          <p class="text-muted mb-0 mt-2"><a href="{{ url_for('contact') }}"
+              class="text-decoration-none text-primary fw-bold">Haritada Gör</a></p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
+          <i class="bi bi-telephone-fill contact-icon text-primary mb-3"></i>
+          <h5 class="fw-bold">Bizi Arayın</h5>
+          <p class="text-muted mb-0"><a href="tel:+905551234567" class="text-decoration-none text-muted">+90 (555) 123
+              45 67</a></p>
+          <p class="text-muted mb-0"><a href="tel:+903329876543" class="text-decoration-none text-muted">+90 (332) 987
+              65 43</a></p>
+          {# Tüm numaralar için link #}
+          <p class="text-muted mb-0 mt-2"><a href="{{ url_for('contact') }}"
+              class="text-decoration-none text-primary fw-bold">Tüm İletişim Numaraları</a></p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
+          <i class="bi bi-envelope-fill contact-icon text-primary mb-3"></i>
+          <h5 class="fw-bold">E-posta Gönderin</h5>
+          <p class="text-muted mb-0"><a href="mailto:info@isfaymm.com.tr"
+              class="text-decoration-none text-muted">info@isfaymm.com.tr</a></p>
+          <p class="text-muted mb-0"><a href="mailto:destek@isfaymm.com.tr"
+              class="text-decoration-none text-muted">destek@isfaymm.com.tr</a></p>
+          {# Tüm e-postalar için link #}
+          <p class="text-muted mb-0 mt-2"><a href="{{ url_for('contact') }}"
+              class="text-decoration-none text-primary fw-bold">E-posta Adreslerimiz</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="700">
+      <h3 class="fw-bold mb-3">İşletmenizin Vergi Yükünü Optimize Etmeye Hazır Mısınız?</h3>
+      <p class="lead text-muted mb-4">Uzmanlarımızla görüşerek size özel çözümleri keşfedin.</p>
+      <a href="{{ url_for('contact') }}" class="btn btn-primary btn-lg btn-gradient-hover">Danışmanlık için aramanız
+        yeterli</a>
+    </div>
+
+  </div>
+
+
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+  AOS.init({ duration: 800, once: true });
+
+  // Sayı Sayaçları Animasyonu (Intersection Observer ile performans iyileştirmesi)
+  const counters = document.querySelectorAll('.counter');
+  const animateCounter = (entry) => {
+    if (entry.isIntersecting) {
+      const counter = entry.target;
+      counter.innerText = '0'; // Animasyondan önce sıfırla
+      const target = +counter.getAttribute('data-target');
+      const speed = 200; // Animasyon süresi (çerçeve veya iterasyon cinsinden)
+      const increment = target / speed;
+
+      let count = 0;
+      const updateCount = () => {
+        count += increment;
+        if (count < target) {
+          counter.innerText = Math.ceil(count);
+          requestAnimationFrame(updateCount); // Tarayıcının render döngüsüyle senkronize
+        } else {
+          counter.innerText = target;
+        }
+      };
+      requestAnimationFrame(updateCount);
+      observer.unobserve(counter); // Animasyon bittikten sonra gözlemlemeyi durdur
+    }
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(animateCounter);
+  }, {
+    threshold: 0.5 // Elementin %50'si görünür olduğunda tetikle
+  });
+
+  counters.forEach(counter => {
+    observer.observe(counter);
+  });
+</script>
+{% endblock %}
