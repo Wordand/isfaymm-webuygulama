@@ -62,6 +62,12 @@ from config import tarifeler, asgari_ucretler
 
 app = Flask(__name__, instance_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance'))
 
+# --- Render ortamında veritabanı yoksa init_db.py çalıştır ---
+from init_db import base_dir, database_path
+if not os.path.exists(database_path):
+    print("📦 Render ortamında veritabanı bulunamadı, init_db.py çalıştırılıyor...")
+    import init_db  # Bu dosya CREATE TABLE komutlarını çalıştırır
+
 app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
 
