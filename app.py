@@ -44,16 +44,16 @@ from zoneinfo import ZoneInfo
 from io import BytesIO
 from difflib import get_close_matches
 
-from webuygulama import config
-from webuygulama.hesaplar import BILANCO_HESAPLARI
-from webuygulama.gelir import GELIR_TABLOSU_HESAPLARI
-from webuygulama.finansal_oranlar import hesapla_finansal_oranlar
-from webuygulama.finansal_oranlar import analiz_olustur
-from webuygulama.auth import login_required
-from webuygulama.services.db import get_conn, migrate_tesvik_columns
-from webuygulama.routes.indirimlikurumlar import bp as indirim_bp
-from webuygulama.routes.blog import blog_bp, blog_posts
-from webuygulama.config import tarifeler, asgari_ucretler
+import config
+from hesaplar import BILANCO_HESAPLARI
+from gelir import GELIR_TABLOSU_HESAPLARI
+from finansal_oranlar import hesapla_finansal_oranlar, analiz_olustur
+from auth import login_required
+from services.db import get_conn, migrate_tesvik_columns
+from routes.indirimlikurumlar import bp as indirim_bp
+from routes.blog import blog_bp, blog_posts
+from config import tarifeler, asgari_ucretler
+
 
 
 
