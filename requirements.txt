@@ -14,3 +14,4 @@ click
 MarkupSafe
 requests
 unicodedata2
+pdfkit
