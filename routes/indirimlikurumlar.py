@@ -9,9 +9,9 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from werkzeug.utils import secure_filename
 import json # JSON modülünü import ediyoruz
 
-from webuygulama.services.db import get_conn
-from webuygulama.config import ILLER, BOLGE_MAP, BOLGE_MAP_9903, TESVIK_KATKILAR, TESVIK_VERGILER, TESVIK_KATKILAR_9903
-from webuygulama.auth import login_required
+from services.db import get_conn
+from config import ILLER, BOLGE_MAP, BOLGE_MAP_9903, TESVIK_KATKILAR, TESVIK_VERGILER, TESVIK_KATKILAR_9903
+from auth import login_required
 
 bp = Blueprint("indirimlikurumlar", __name__, url_prefix="/indirimlikurumlar")
 
