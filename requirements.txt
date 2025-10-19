@@ -15,3 +15,4 @@ MarkupSafe
 requests
 unicodedata2
 pdfkit
+python-dotenv
