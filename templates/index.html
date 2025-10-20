@@ -13,19 +13,22 @@
         class="img-fluid hero-fallback-img">
     </video>
   </div>
-  <div class="container hero-content text-center" data-aos="fade-up">
+  <div class="container hero-content" data-aos="fade-up">
+    <h1 class="display-3 fw-bold mb-3 text-white" data-aos="fade-up" data-aos-delay="200">
+      <span class="text-isfa">İSFA</span><br>
+      YEMİNLİ MALİ MÜŞAVİRLİK
+    </h1>
     <h1 class="display-3 fw-bold mb-3 text-white hero-title">
       <span class="text-isfa">İSFA</span><br>
-      YEMİNLİ MALİ MÜŞAVİRLİK<br>
       <span id="hero-dynamic-text"></span>
     </h1>
-
     <p class="lead mb-4 text-white-75">
       İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi, vergi danışmanlığı ve inceleme
       danışmanlığında uzman ekibimizle yanınızdayız.
     </p>
     <a href="#services" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hizmetlerimiz</a>
     <a href="#about" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hakkımızda</a>
+
   </div>
 </section>
 
@@ -733,67 +736,48 @@
   </div>
 </section>
 
-
-
-{% endblock %}  {# ← bu, content bloğunun kapanışı #}
+{% endblock %}
 
 {% block extra_scripts %}
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-{% raw %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
   AOS.init({ duration: 800, once: true });
 
-  // 🧮 Sayaç animasyonu
+  // Sayı Sayaçları Animasyonu (Intersection Observer ile performans iyileştirmesi)
   const counters = document.querySelectorAll('.counter');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const c = entry.target;
-        let count = 0;
-        const target = +c.getAttribute('data-target');
-        const step = target / 200;
-        const animate = () => {
-          count += step;
-          c.innerText = Math.min(Math.ceil(count), target);
-          if (count < target) requestAnimationFrame(animate);
-        };
-        animate();
-        observer.unobserve(c);
-      }
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(c => observer.observe(c));
+  const animateCounter = (entry) => {
+    if (entry.isIntersecting) {
+      const counter = entry.target;
+      counter.innerText = '0'; // Animasyondan önce sıfırla
+      const target = +counter.getAttribute('data-target');
+      const speed = 200; // Animasyon süresi (çerçeve veya iterasyon cinsinden)
+      const increment = target / speed;
 
-  // 🎞️ Paralaks efekti
-  const title = document.querySelector('.hero-title');
-  window.addEventListener('scroll', () => {
-    if (!title) return;
-    if (window.innerWidth < 768) {
-      title.style.transform = 'translateY(0px)';
-    } else {
-      title.style.transform = `translateY(${window.scrollY * 0.4}px)`;
+      let count = 0;
+      const updateCount = () => {
+        count += increment;
+        if (count < target) {
+          counter.innerText = Math.ceil(count);
+          requestAnimationFrame(updateCount); // Tarayıcının render döngüsüyle senkronize
+        } else {
+          counter.innerText = target;
+        }
+      };
+      requestAnimationFrame(updateCount);
+      observer.unobserve(counter); // Animasyon bittikten sonra gözlemlemeyi durdur
     }
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(animateCounter);
+  }, {
+    threshold: 0.5 // Elementin %50'si görünür olduğunda tetikle
   });
 
-  // 🔁 Dinamik metin döngüsü
-  const texts = ["GÜVEN", "HIZ", "TEKNOLOJİ"];
-  let i = 0;
-  const el = document.getElementById("hero-dynamic-text");
-  function cycle() {
-    if (!el) return;
-    el.classList.remove('fade-in');
-    void el.offsetWidth;
-    el.innerText = texts[i];
-    el.classList.add('fade-in');
-    i = (i + 1) % texts.length;
-  }
-  cycle();
-  setInterval(cycle, 2500);
-});
+  counters.forEach(counter => {
+    observer.observe(counter);
+  });
 </script>
-{% endraw %}
-
 {% endblock %}

@@ -479,149 +479,6 @@ body.mobile-menu-open .mobile-overlay {
 }
 
 
-@media (max-width: 768px) {
-  .hero {
-    text-align: center;
-    padding: 4rem 1rem;
-  }
-
-  .hero-video {
-    height: 60vh;
-    object-fit: cover;
-  }
-
-  .hero-content h1 {
-    font-size: 2rem !important;
-    line-height: 1.2;
-  }
-
-  .hero-content p {
-    font-size: 1rem !important;
-    margin-bottom: 1rem;
-  }
-
-  .hero-content .btn {
-    font-size: 0.9rem;
-    padding: 0.6rem 1.2rem;
-    margin-bottom: 0.5rem;
-  }
-}
-
-/* İstatistikler */
-@media (max-width: 576px) {
-  #stats-top h2 {
-    font-size: 1.5rem;
-  }
-  #stats-top p {
-    font-size: 0.9rem;
-    line-height: 1.2rem;
-  }
-}
-
-/* Hizmet Kartları */
-@media (max-width: 576px) {
-  .service-card .card-body {
-    padding: 1.25rem;
-  }
-  .service-card .card-title {
-    font-size: 1rem;
-  }
-  .service-card .btn {
-    font-size: 0.85rem;
-    padding: 0.4rem 1rem;
-  }
-}
-
-/* Modallar */
-@media (max-width: 768px) {
-  .modal-dialog {
-    margin: 1rem;
-  }
-  .modal-body {
-    padding: 1.5rem !important;
-  }
-  .modal-body p.small {
-    font-size: 0.9rem;
-  }
-}
-
-/* Hakkımızda – Özellik kartları */
-@media (max-width: 768px) {
-  .feature-card {
-    padding: 1.5rem;
-  }
-  .feature-card h5 {
-    font-size: 1rem;
-  }
-  .feature-card p {
-    font-size: 0.9rem;
-  }
-}
-
-/* Ekibimiz */
-@media (max-width: 576px) {
-  .team-photo,
-  .team-img {
-    width: 90px;
-    height: 90px;
-  }
-  .team-card h5,
-  .team-card h6 {
-    font-size: 1rem;
-  }
-  .team-details {
-    font-size: 0.85rem;
-  }
-}
-
-/* Blog Kartları */
-@media (max-width: 768px) {
-  .blog-card .card-body {
-    padding: 1rem;
-  }
-  .blog-card h5 {
-    font-size: 1rem;
-  }
-}
-
-/* İletişim Bölümü */
-@media (max-width: 768px) {
-  .contact-card {
-    padding: 1.5rem;
-  }
-  .contact-card p {
-    word-break: break-word;
-  }
-  .contact-card .btn {
-    font-size: 0.9rem;
-  }
-}
-
-/* CTA başlığı */
-@media (max-width: 576px) {
-  #contact h3 {
-    font-size: 1.2rem;
-  }
-  #contact p.lead {
-    font-size: 1rem;
-  }
-}
-
-
-@media (max-width: 768px) {
-  #mainNavbar {
-    background-color: #fff !important;
-  }
-  #mainNavbar .nav-link {
-    font-size: 1rem;
-    padding: 0.6rem;
-  }
-  #mainNavbar .btn {
-    margin-top: 0.5rem;
-  }
-}
-
-
 /* --- Dashboard ve Genel Bileşen Stilleri --- */
 .dashboard-welcome,
 .dashboard-instruction {
@@ -819,9 +676,6 @@ thead th {
 }
 
 
-
-
-
 /* --- Hero Section (Ana Sayfa Başlık) Stilleri --- */
 .hero {
     min-height: 600px; /* Hero bölümünü biraz daha uzun yap */
@@ -907,40 +761,6 @@ thead th {
     color: var(--white);
 }
 
-/* 🎞️ Hero Dinamik Metin ve Paralaks Uyum Ayarları */
-.hero-title {
-  transition: transform 0.25s ease-out;
-  will-change: transform;
-}
-
-/* 🔁 Dinamik metin efekti (fade geçişi için gerekli) */
-#hero-dynamic-text {
-  display: inline-block;
-  font-weight: 700;
-  color: #00e5ff !important; /* görünürlüğü garanti et */
-  font-size: 1.2em;
-  transition: opacity 0.6s ease-in-out;
-  opacity: 0;
-}
-
-/* Fade-in class'ı metni görünür hale getirir */
-.fade-in {
-  opacity: 1;
-}
-
-/* 📱 Mobil uyum */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2rem !important;
-    line-height: 1.3;
-  }
-  #hero-dynamic-text {
-    font-size: 1rem;
-  }
-}
-
-
-
 
 /* --- Floating Shapes (Hero Section Animasyonları) --- */
 /* Bu bölümde tanımlanan şekiller artık Hero Section'daki videonun altında kalacaktır.
@@ -965,10 +785,6 @@ thead th {
     animation: float 10s ease-in-out infinite; /* Animasyon süresini uzat */
     will-change: transform, opacity; /* Performans ipucu */
 }
-
-
-
-
 
 /* Animasyon keyframes (Şekillerin yukarı-aşağı, hafif dönme hareketi) */
 @keyframes float {
