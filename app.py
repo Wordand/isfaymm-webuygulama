@@ -19,6 +19,7 @@ from cryptography.fernet import Fernet
 
 
 
+
 # Veri İşleme ve Analiz
 import sqlite3
 import pandas as pd
@@ -107,12 +108,46 @@ def inject_login_status():
     return dict(is_logged_in=session.get('logged_in', False))
 
 
+def bootstrap_admin():
+    """
+    Render ortamında ADMIN_BOOTSTRAP_PASSWORD env değişkeni varsa
+    admin kullanıcısını otomatik oluşturur (sadece bir defa).
+    """
+    temp_pwd = os.getenv("ADMIN_BOOTSTRAP_PASSWORD")
+    if not temp_pwd:
+        print("ℹ️ ADMIN_BOOTSTRAP_PASSWORD bulunamadı, bootstrap atlandı.")
+        return
 
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE,
+                password TEXT,
+                is_approved INTEGER DEFAULT 1
+            )
+        """)
+        c.execute("SELECT id FROM users WHERE username = ?", ("admin",))
+        row = c.fetchone()
+        if row:
+            print("ℹ️ Admin zaten mevcut, bootstrap atlandı.")
+            return
+
+        hashed = generate_password_hash(temp_pwd)
+        c.execute(
+            "INSERT INTO users (username, password, is_approved) VALUES (?, ?, 1)",
+            ("admin", hashed)
+        )
+        conn.commit()
+
+    print("✅ Admin bootstrap ile oluşturuldu.")
 
 with app.app_context():
     migrate_tesvik_columns()
     from services.db import migrate_users_table
     migrate_users_table()
+    bootstrap_admin()
 
 app.register_blueprint(indirim_bp)
 app.register_blueprint(blog_bp, url_prefix='/blog')
