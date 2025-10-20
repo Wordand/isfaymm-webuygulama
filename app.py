@@ -74,9 +74,6 @@ from werkzeug.security import generate_password_hash
 from services.db import get_conn
 
 def bootstrap_admin_from_env():
-    """
-    Ortam değişkenlerinden admin kullanıcıyı güvenli şekilde oluşturur.
-    """
     username = os.getenv("ADMIN_USERNAME")
     password = os.getenv("ADMIN_PASSWORD")
 
@@ -88,12 +85,15 @@ def bootstrap_admin_from_env():
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE username = ?", (username,))
         if not c.fetchone():
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", 
-                      (username, generate_password_hash(password)))
+            c.execute("""
+                INSERT INTO users (username, password, is_approved)
+                VALUES (?, ?, 1)
+            """, (username, generate_password_hash(password)))
             conn.commit()
-            print(f"✅ Admin kullanıcısı oluşturuldu: {username}")
+            print(f"✅ Admin kullanıcısı oluşturuldu ve onaylandı: {username}")
         else:
             print("ℹ️ Admin zaten mevcut.")
+
 
 
 
