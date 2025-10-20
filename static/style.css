@@ -479,6 +479,149 @@ body.mobile-menu-open .mobile-overlay {
 }
 
 
+@media (max-width: 768px) {
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .hero-video {
+    height: 60vh;
+    object-fit: cover;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem !important;
+    line-height: 1.2;
+  }
+
+  .hero-content p {
+    font-size: 1rem !important;
+    margin-bottom: 1rem;
+  }
+
+  .hero-content .btn {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* İstatistikler */
+@media (max-width: 576px) {
+  #stats-top h2 {
+    font-size: 1.5rem;
+  }
+  #stats-top p {
+    font-size: 0.9rem;
+    line-height: 1.2rem;
+  }
+}
+
+/* Hizmet Kartları */
+@media (max-width: 576px) {
+  .service-card .card-body {
+    padding: 1.25rem;
+  }
+  .service-card .card-title {
+    font-size: 1rem;
+  }
+  .service-card .btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+  }
+}
+
+/* Modallar */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+  .modal-body {
+    padding: 1.5rem !important;
+  }
+  .modal-body p.small {
+    font-size: 0.9rem;
+  }
+}
+
+/* Hakkımızda – Özellik kartları */
+@media (max-width: 768px) {
+  .feature-card {
+    padding: 1.5rem;
+  }
+  .feature-card h5 {
+    font-size: 1rem;
+  }
+  .feature-card p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Ekibimiz */
+@media (max-width: 576px) {
+  .team-photo,
+  .team-img {
+    width: 90px;
+    height: 90px;
+  }
+  .team-card h5,
+  .team-card h6 {
+    font-size: 1rem;
+  }
+  .team-details {
+    font-size: 0.85rem;
+  }
+}
+
+/* Blog Kartları */
+@media (max-width: 768px) {
+  .blog-card .card-body {
+    padding: 1rem;
+  }
+  .blog-card h5 {
+    font-size: 1rem;
+  }
+}
+
+/* İletişim Bölümü */
+@media (max-width: 768px) {
+  .contact-card {
+    padding: 1.5rem;
+  }
+  .contact-card p {
+    word-break: break-word;
+  }
+  .contact-card .btn {
+    font-size: 0.9rem;
+  }
+}
+
+/* CTA başlığı */
+@media (max-width: 576px) {
+  #contact h3 {
+    font-size: 1.2rem;
+  }
+  #contact p.lead {
+    font-size: 1rem;
+  }
+}
+
+
+@media (max-width: 768px) {
+  #mainNavbar {
+    background-color: #fff !important;
+  }
+  #mainNavbar .nav-link {
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
+  #mainNavbar .btn {
+    margin-top: 0.5rem;
+  }
+}
+
+
 /* --- Dashboard ve Genel Bileşen Stilleri --- */
 .dashboard-welcome,
 .dashboard-instruction {
@@ -676,6 +819,9 @@ thead th {
 }
 
 
+
+
+
 /* --- Hero Section (Ana Sayfa Başlık) Stilleri --- */
 .hero {
     min-height: 600px; /* Hero bölümünü biraz daha uzun yap */
@@ -761,6 +907,40 @@ thead th {
     color: var(--white);
 }
 
+/* 🎞️ Hero Dinamik Metin ve Paralaks Uyum Ayarları */
+.hero-title {
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+
+/* 🔁 Dinamik metin efekti (fade geçişi için gerekli) */
+#hero-dynamic-text {
+  display: inline-block;
+  font-weight: 700;
+  color: #00e5ff !important; /* görünürlüğü garanti et */
+  font-size: 1.2em;
+  transition: opacity 0.6s ease-in-out;
+  opacity: 0;
+}
+
+/* Fade-in class'ı metni görünür hale getirir */
+.fade-in {
+  opacity: 1;
+}
+
+/* 📱 Mobil uyum */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem !important;
+    line-height: 1.3;
+  }
+  #hero-dynamic-text {
+    font-size: 1rem;
+  }
+}
+
+
+
 
 /* --- Floating Shapes (Hero Section Animasyonları) --- */
 /* Bu bölümde tanımlanan şekiller artık Hero Section'daki videonun altında kalacaktır.
@@ -785,6 +965,10 @@ thead th {
     animation: float 10s ease-in-out infinite; /* Animasyon süresini uzat */
     will-change: transform, opacity; /* Performans ipucu */
 }
+
+
+
+
 
 /* Animasyon keyframes (Şekillerin yukarı-aşağı, hafif dönme hareketi) */
 @keyframes float {
@@ -1145,4 +1329,274 @@ html {
 
 .info-icon-styled:hover {
   animation: infoBlink 1s ease-in-out 1;
+}
+
+
+
+
+
+.team-lead-card {
+  transition: all 0.3s ease;
+  background: #f8f9fb;
+  border: none;
+}
+.team-lead-card:hover {
+  box-shadow: 0 0.8rem 1.5rem rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+}
+.team-lead-name {
+  transition: all 0.3s ease;
+}
+.team-lead-card:hover .team-lead-name {
+  text-decoration: underline;
+  text-decoration-color: #004aad;
+}
+.team-lead-card img {
+  transition: all 0.3s ease;
+}
+.team-lead-card:hover img {
+  transform: scale(1.05);
+  box-shadow: 0 0.8rem 1.5rem rgba(0,0,0,0.1);
+}
+
+
+
+
+.team-card {
+  transition: all 0.5s ease;
+  cursor: pointer;
+  overflow: hidden;
+  height: auto;
+  min-height: 220px;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.12);
+}
+
+/* iç kısmın hover rengi */
+.team-inner {
+  transition: background-color 0.3s ease;
+}
+
+.team-card:hover .team-inner {
+  background-color: #eef1f4;
+}
+
+/* fotoğraf büyüsün */
+.team-photo {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  transition: all 0.4s ease;
+}
+
+.team-card:hover .team-photo {
+  transform: scale(1.08);
+}
+
+/* yazı kısmı */
+.team-details {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.6s ease, opacity 0.5s ease;
+}
+
+/* hover olunca görünür hale gelir ve kartın yüksekliği artar */
+.team-card:hover .team-details {
+  max-height: 500px; /* isteğe göre artırabilirsin */
+  opacity: 1;
+}
+
+/* isteğe bağlı: alt boşluk bırak */
+.team-details p {
+  margin-bottom: 0.5rem;
+}
+
+
+
+
+
+
+.blog-card {
+  transition: all 0.4s ease;
+  background: #fff;
+}
+
+.blog-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 1rem 2rem rgba(0,0,0,0.12);
+}
+
+.blog-image {
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.blog-card:hover .blog-image {
+  transform: scale(1.05);
+}
+
+.text-primary-hover:hover {
+  color: #004aad !important;
+}
+
+
+
+
+
+.blog-card {
+  transition: all 0.4s ease;
+  background-color: #fff;
+}
+.blog-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.12);
+}
+.blog-img {
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.blog-card:hover .blog-img {
+  transform: scale(1.05);
+}
+.text-primary-hover:hover {
+  color: #004aad !important;
+}
+
+
+
+.blog-content {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #444;
+}
+
+.blog-content h2, .blog-content h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #004aad;
+  font-weight: 600;
+}
+
+.blog-content p {
+  margin-bottom: 1.2rem;
+}
+
+.blog-cover img {
+  border-radius: 1rem;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.social-share .btn {
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-share .btn:hover {
+  background-color: #004aad;
+  color: #fff;
+}
+
+
+
+
+.contact-card {
+  transition: all 0.3s ease;
+}
+.contact-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 1rem 2rem rgba(0,0,0,0.08);
+}
+.map-container iframe {
+  border-radius: 12px;
+}
+
+
+
+.breadcrumb {
+  background-color: transparent;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #6c757d;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+
+
+.blog-card {
+  transition: all 0.3s ease;
+}
+.blog-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+.blog-card .badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+  z-index: 5;
+}
+.blog-card .card-title {
+  min-height: 48px;
+}
+
+
+
+.badge {
+  color: #fff !important;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+.badge[data-category="Yatırım Teşvik"] { background-color: #004aad; }
+.badge[data-category="Vergi"] { background-color: #f39c12; }
+.badge[data-category="E-Belge"] { background-color: #16a085; }
+.badge[data-category="KDV"] { background-color: #9b59b6; }
+
+
+
+.tag-badge {
+  background-color: #4307ea; /* açık gri mavi tonlu arka plan */
+  color: #004aad; /* İSFA kurumsal mavisi */
+  font-weight: 500;
+  font-size: 0.8rem;
+  border: 1px solid #d3d9e3;
+  border-radius: 50px;
+  padding: 0.35rem 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.tag-badge:hover {
+  background-color: #004aad;
+  color: #fff;
+  border-color: #004aad;
+  cursor: pointer;
+  transform: translateY(-2px);
+}
+
+
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px; /* sabit navbar yüksekliği kadar boşluk */
+}
+
+#blog {
+  scroll-margin-top: 100px;
 }

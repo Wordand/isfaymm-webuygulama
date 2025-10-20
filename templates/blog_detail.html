@@ -1,29 +1,77 @@
 {% extends 'layout.html' %}
-
 {% block title %}ISFAYMM - {{ post.title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            {# İKON EKLEDİK #}
-            <div class="text-center mb-4">
-                {% if 'Vergi' in post.title or 'KDV' in post.title %}
-                    <i class="bi bi-receipt-cutoff blog-detail-icon text-primary"></i>
-                {% elif 'Fatura' in post.title or 'Arşiv' in post.title %}
-                    <i class="bi bi-file-earmark-text blog-detail-icon text-info"></i>
-                {% else %}
-                    <i class="bi bi-newspaper blog-detail-icon text-secondary"></i>
+
+<!-- 🟦 Hero Başlık Alanı -->
+<section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad 0%, #007bff 100%);">
+    <div class="container">
+        <h1 class="display-6 fw-bold mb-3">{{ post.title }}</h1>
+        <p class="text-white-50 small mb-0">
+            <i class="bi bi-calendar3 me-1"></i>{{ post.publish_date.strftime('%d %B %Y') }}
+            {% if post.author %} | <i class="bi bi-person-circle me-1"></i>{{ post.author }}{% endif %}
+        </p>
+    </div>
+</section>
+
+<!-- 📰 Blog İçeriği -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- 🧭 Breadcrumb (Yol Gösterici) -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb justify-content-center">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('home') }}" class="text-decoration-none text-primary">Ana Sayfa</a>
+
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('blog.index') }}" class="text-decoration-none text-primary">Blog</a>
+                        </li>
+                        {% if post.category %}
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('blog.index') }}#{{ post.category | replace(' ', '-') | lower }}"
+                                class="text-decoration-none text-primary">{{ post.category }}</a>
+                        </li>
+                        {% endif %}
+                        <li class="breadcrumb-item active text-secondary" aria-current="page">{{ post.title }}</li>
+                    </ol>
+                </nav>
+
+
+                <!-- Geri Butonu -->
+                <a href="{{ url_for('blog.index') }}" class="btn btn-outline-primary mb-4">
+                    <i class="bi bi-arrow-left"></i> Tüm Yazılara Dön
+                </a>
+
+                <!-- Görsel (isteğe bağlı) -->
+                {% if post.image_url %}
+                <div class="blog-cover mb-4 text-center">
+                </div>
                 {% endif %}
+
+                <!-- İçerik -->
+                <article class="blog-content">
+                    {{ post.content | safe }}
+                </article>
+
+                <!-- Etiketler (isteğe bağlı) -->
+                {% if post.tags %}
+                <div class="mt-4">
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-tags me-1"></i>Etiketler:</h6>
+                    {% for tag in post.tags %}
+                    <span class="badge tag-badge me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+
+
             </div>
-            {# Resim bloğu kaldırıldı #}
-            <h1 class="mb-4 text-center">{{ post.title }}</h1> {# Başlığı da ortalayabiliriz #}
-            <p class="text-muted small mb-4 text-center">Yayın Tarihi: {{ post.publish_date.strftime('%d %B %Y') }}</p>
-            <div class="blog-content">
-                {{ post.content | safe }}
-            </div>
-            <a href="{{ url_for('blog.index') }}" class="btn btn-outline-primary mt-5">← Tüm Yazılara Dön</a>
         </div>
     </div>
-</div>
+</section>
+
 {% endblock %}

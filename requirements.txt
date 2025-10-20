@@ -16,3 +16,4 @@ requests
 unicodedata2
 pdfkit
 python-dotenv
+Flask-Limiter>=3.5.0

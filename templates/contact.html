@@ -1,72 +1,135 @@
 {% extends 'layout.html' %}
-
 {% block title %}ISFAYMM - İletişim Bilgileri{% endblock %}
 
 {% block content %}
-<section id="contact" class="py-5 bg-white">
-    <div class="container" data-aos="fade-up">
-        <div class="text-center mb-5">
-            <h2 class="section-title">Bizimle İletişime Geçin</h2>
-            <p class="lead text-muted mb-4">Sorularınız, danışmanlık talepleriniz veya daha fazla bilgi için bize aşağıdaki kanallardan ulaşabilirsiniz.</p>
-        </div>
 
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
-                    <i class="bi bi-geo-alt-fill contact-icon text-primary mb-3"></i>
-                    <h5 class="fw-bold">Adresimiz</h5>
-                    <p class="text-muted mb-0">Örnek Mah. Örnek Cad. No: 123</p>
-                    <p class="text-muted mb-0">Örnek Plaza Kat: 5</p>
-                    <p class="text-muted mb-0">42000, Konya, Türkiye</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
-                    <i class="bi bi-telephone-fill contact-icon text-primary mb-3"></i>
-                    <h5 class="fw-bold">Bizi Arayın</h5>
-                    <p class="text-muted mb-0"><a href="tel:+905551234567" class="text-decoration-none text-muted">+90 (555) 123 45 67</a></p>
-                    <p class="text-muted mb-0"><a href="tel:+903329876543" class="text-decoration-none text-muted">+90 (332) 987 65 43</a></p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
-                    <i class="bi bi-envelope-fill contact-icon text-primary mb-3"></i>
-                    <h5 class="fw-bold">E-posta Gönderin</h5>
-                    <p class="text-muted mb-0"><a href="mailto:info@isfaymm.com.tr" class="text-decoration-none text-muted">info@isfaymm.com.tr</a></p>
-                    <p class="text-muted mb-0"><a href="mailto:destek@isfaymm.com.tr" class="text-decoration-none text-muted">destek@isfaymm.com.tr</a></p>
-                </div>
-            </div>
-            {# Opsiyonel: Çalışma Saatleri #}
-            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
-                <div class="contact-card card h-100 shadow-sm border-0 text-center p-4">
-                    <i class="bi bi-clock-fill contact-icon text-primary mb-3"></i>
-                    <h5 class="fw-bold">Çalışma Saatleri</h5>
-                    <p class="text-muted mb-0">Pazartesi - Cuma:</p>
-                    <p class="text-muted mb-0">09:00 - 18:00</p>
-                </div>
-            </div>
-        </div>
-
-        {# Opsiyonel: Google Haritası #}
-        <div class="row mt-5" data-aos="fade-up" data-aos-delay="500">
-            <div class="col-12">
-                <h3 class="text-center section-title mb-4">Konumumuz</h3>
-                <div class="map-container rounded-3 shadow-sm overflow-hidden">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3106.012574936081!2d32.4839801!3d37.8746777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d081f21d3f9b87%3A0x6b00c3b0d7d3d1f1!2sKonya%20B%C3%BCy%C3%BCk%C5%9Fehir%20Belediyesi!5e0!3m2!1str!2str!4v1719875432109!5m2!1str!2str" 
-                            width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-        </div>
-        
-        {# Eğer bir form da istiyorsanız ve onu ayrı bir sayfada tutmak isterseniz: #}
-        {# Bu kısmı eklemeniz için app.py'de 'contact_form' adında yeni bir route oluşturmanız ve ona ayrı bir HTML şablonu (örn. contact_form.html) render etmeniz gerekir. #}
-        {#
-        <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="600">
-            <p class="lead text-muted">Daha detaylı sorularınız için aşağıdaki formu kullanabilirsiniz:</p>
-            <a href="{{ url_for('contact_form') }}" class="btn btn-primary btn-lg btn-gradient-hover">İletişim Formunu Doldurun</a>
-        </div>
-        #}
-
-    </div>
+<!-- 🟦 Başlık Alanı -->
+<section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad 0%, #007bff 100%);">
+  <div class="container">
+    <h1 class="fw-bold mb-3">Bizimle İletişime Geçin</h1>
+    <p class="text-white-50 mb-0">
+      Vergi, teşvik ve mali danışmanlık hizmetlerinde size özel çözümler sunuyoruz.
+    </p>
+  </div>
 </section>
+
+<!-- 🗂️ İletişim Bilgileri -->
+<section id="contact" class="py-5" style="background-color: #f8f9fb;">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <h2 class="section-title">İletişim Kanallarımız</h2>
+      <p class="lead text-muted mb-4">
+        Sorularınız, danışmanlık talepleriniz veya bilgi ihtiyaçlarınız için bize ulaşın.
+      </p>
+    </div>
+
+    <!-- 🏢 ÜST SATIR: Adres Kartları -->
+    <div class="row g-4 justify-content-center mb-4">
+      <!-- İstanbul Ofis -->
+      <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="100">
+        <div class="bg-white border-start border-4 border-primary rounded-4 p-4 h-100 text-center shadow-sm">
+          <div class="mb-3">
+            <i class="bi bi-geo-alt-fill fs-3 text-primary"></i>
+          </div>
+          <h5 class="fw-bold mb-2">İstanbul Ofis</h5>
+          <p class="text-muted small mb-0">Ziya Gökalp Mah. Süleyman Demirel Bulvarı Mall of İstanbul Ofis  No:7E/131 Başakşehir / İstanbul</p>
+          <p class="text-muted small mb-0">İSFA Yeminli Danışmanlık Ofisi</p>
+          <p class="text-muted small mt-2">
+            <a href="https://maps.google.com?q=Büyükdere Cad. No:123, Şişli, İstanbul" target="_blank"
+              class="text-decoration-none text-primary fw-bold">Haritada Gör</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Konya Ofis -->
+      <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="150">
+        <div class="bg-white border-start border-4 border-success rounded-4 p-4 h-100 text-center shadow-sm">
+          <div class="mb-3">
+            <i class="bi bi-geo-alt-fill fs-3 text-success"></i>
+          </div>
+          <h5 class="fw-bold mb-2">Konya Ofis</h5>
+          <p class="text-muted small mb-0">Ferhuniye Mah. Sultanşah Cd. 46/1 Selçuklu / Konya</p>
+          <p class="text-muted small mb-0">İSFA Yeminli Mali Müşavirlik Ofisi</p>
+          <p class="text-muted small mt-2">
+            <a href="https://maps.google.com?q=Mevlana Cad. No:45, Selçuklu, Konya" target="_blank"
+              class="text-decoration-none text-success fw-bold">Haritada Gör</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📞 ALT SATIR: Telefon ve E-posta -->
+    <div class="row g-4 justify-content-center">
+      <!-- Telefon -->
+      <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="200">
+        <div class="bg-white border-start border-4 border-primary rounded-4 p-4 h-100 text-center shadow-sm">
+          <div class="mb-3">
+            <i class="bi bi-telephone-fill fs-3 text-primary"></i>
+          </div>
+          <h5 class="fw-bold mb-2">Bizi Arayın</h5>
+          <p class="text-muted mb-0">
+            <a href="tel:+905079198118" class="text-decoration-none text-muted">+90 (507) 919 81 18</a>
+          </p>
+          <p class="text-muted mb-0">
+            <a href="tel:+905053649717" class="text-decoration-none text-muted">+90 (505) 364 97 17</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- E-posta -->
+      <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="300">
+        <div class="bg-white border-start border-4 border-primary rounded-4 p-4 h-100 text-center shadow-sm">
+          <div class="mb-3">
+            <i class="bi bi-envelope-fill fs-3 text-primary"></i>
+          </div>
+          <h5 class="fw-bold mb-2">E-posta Gönderin</h5>
+          <p class="text-muted mb-0">
+            <a href="mailto:bilgi@isfaymm.com" class="text-decoration-none text-muted">bilgi@isfaymm.com</a>
+          </p>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 🕓 Çalışma Saatleri -->
+    <div class="row g-4 justify-content-center mt-4">
+      <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-delay="400">
+        <div class="bg-white border-start border-4 border-primary rounded-4 p-4 h-100 text-center shadow-sm">
+          <div class="mb-3">
+            <i class="bi bi-clock-fill fs-3 text-primary"></i>
+          </div>
+          <h5 class="fw-bold mb-2">Çalışma Saatleri</h5>
+          <p class="text-muted mb-0">Pazartesi - Cuma</p>
+          <p class="text-muted mb-0">09:00 - 18:00</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🌍 Harita -->
+    <div class="row mt-5" data-aos="fade-up" data-aos-delay="500">
+      <div class="col-12">
+        <div class="map-container rounded-4 shadow-sm overflow-hidden">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3106.012574936081!2d32.4839801!3d37.8746777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d081f21d3f9b87%3A0x6b00c3b0d7d3d1f1!2sKonya%20B%C3%BCy%C3%BCk%C5%9Fehir%20Belediyesi!5e0!3m2!1str!2str!4v1719875432109!5m2!1str!2str"
+            width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy">
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- 💬 CTA Alanı -->
+    <div class="text-center mt-5 py-5 px-3 rounded-4"
+      style="background: linear-gradient(135deg, #004aad 0%, #007bff 100%); color: white;">
+      <h3 class="fw-bold mb-3">İşletmenizin Vergi Yükünü Azaltmak İçin İlk Adımı Atın</h3>
+      <p class="lead text-white-50 mb-4">
+        Uzman YMM ekibimizle görüşün, size özel teşvik ve vergi planlaması çözümlerini keşfedin.
+      </p>
+      <a href="tel:+905053649717" class="btn btn-light btn-lg rounded-pill px-4 fw-bold">
+        <i class="bi bi-telephone-forward me-2"></i>Hemen Arayın
+      </a>
+    </div>
+
+  </div>
+</section>
+
 {% endblock %}

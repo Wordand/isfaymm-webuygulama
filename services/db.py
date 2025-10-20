@@ -11,6 +11,7 @@ def get_conn():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 def migrate_tesvik_columns():
     """
     tesvik_belgeleri tablosuna eksik sütunları ekler.
@@ -52,8 +53,6 @@ def migrate_tesvik_columns():
             if col not in existing:
                 c.execute(f"ALTER TABLE tesvik_belgeleri ADD COLUMN {col} {col_type}")
 
-
-
         c.execute('''
         CREATE TABLE IF NOT EXISTS belgeler (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,5 +65,24 @@ def migrate_tesvik_columns():
         )
         ''')
         
-        
         conn.commit()
+
+
+# 🆕 Yeni eklenecek fonksiyon:
+def migrate_users_table():
+    """
+    users tablosunda 'is_approved' sütunu yoksa ekler.
+    Bu sütun, admin onayı sisteminde kullanılır.
+    """
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("PRAGMA table_info(users)")
+        existing = {row[1] for row in c.fetchall()}
+
+        if "is_approved" not in existing:
+            print("🛠️ 'is_approved' sütunu users tablosuna ekleniyor...")
+            c.execute("ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0")
+            conn.commit()
+            print("✅ 'is_approved' sütunu başarıyla eklendi.")
+        else:
+            print("✅ 'is_approved' sütunu zaten mevcut.")

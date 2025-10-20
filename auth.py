@@ -1,13 +1,11 @@
 from functools import wraps
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, flash
 
 def login_required(f):
-    """
-    Oturumda 'user' yoksa login sayfasına yönlendirir.
-    """
     @wraps(f)
-    def decorated(*args, **kwargs):
-        if "user" not in session:
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in") or "user" not in session:
+            flash("Bu sayfaya erişmek için giriş yapmalısınız.", "warning")
             return redirect(url_for("login"))
         return f(*args, **kwargs)
-    return decorated
+    return decorated_function

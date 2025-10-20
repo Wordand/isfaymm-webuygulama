@@ -4,6 +4,10 @@ from flask import (
     send_from_directory, flash, send_file, current_app
 )
 
+
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -67,6 +71,15 @@ from init_db import base_dir, database_path
 if not os.path.exists(database_path):
     print("📦 Render ortamında veritabanı bulunamadı, init_db.py çalıştırılıyor...")
     import init_db  # Bu dosya CREATE TABLE komutlarını çalıştırır
+    
+    
+    
+# --- Flask-Limiter: Giriş denemelerini kısıtla ---
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[]
+)
 
 app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
@@ -85,7 +98,7 @@ fernet = Fernet(app.config["FERNET_KEY"])
 app.debug = True
 
 
-
+limiter.enabled = False
 
 
 @app.context_processor
@@ -98,6 +111,8 @@ def inject_login_status():
 
 with app.app_context():
     migrate_tesvik_columns()
+    from services.db import migrate_users_table
+    migrate_users_table()
 
 app.register_blueprint(indirim_bp)
 app.register_blueprint(blog_bp, url_prefix='/blog')
@@ -166,8 +181,8 @@ def register():
 
 
 
-
-@app.route("/login", methods=["GET", "POST"]) # BURAYI DEĞİŞTİRİN
+@app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per 10 minutes")  # 10 dakikada en fazla 5 deneme
 def login():
     # Eğer kullanıcı zaten giriş yapmışsa, ana sayfaya yönlendir
     if session.get("user_id"):
@@ -179,22 +194,34 @@ def login():
 
         with get_conn() as conn:
             c = conn.cursor()
-            c.execute("SELECT id, password FROM users WHERE username = ?", (username,))
+            c.execute("SELECT id, password, is_approved FROM users WHERE username = ?", (username,))
             result = c.fetchone()
         
-        if result and check_password_hash(result[1], password):
-            session["user_id"] = result[0]
+        if result and check_password_hash(result["password"], password):
+            # 🧩 Onay kontrolü ekledik
+            if result["is_approved"] == 0:
+                flash("Hesabınız henüz admin tarafından onaylanmadı.", "warning")
+                return render_template("login.html")
+
+            # 🔐 Giriş başarılı
+            session["user_id"] = result["id"]
             session["user"] = username
             session['logged_in'] = True 
-            session.permanent = True # 30 dk session süresi aktif
+            session.permanent = True  # 30 dk session süresi aktif
             
             flash(f"Hoş geldiniz, {username}!", "success") 
-            return redirect(url_for("home")) 
+
+            # 👑 Admin ise doğrudan admin paneline yönlendir
+            if username.lower() == "admin":
+                return redirect(url_for("admin_users"))
+            else:
+                return redirect(url_for("home")) 
         else:
             flash("Hatalı kullanıcı adı veya şifre.", "danger") 
             return render_template("login.html")
     
     return render_template("login.html")
+
 
 
 @app.route("/logout")
@@ -205,15 +232,188 @@ def logout():
 
 
 
-@app.route("/") 
-def home():    
+@app.route("/")
+def home():
+    latest_posts = sorted(blog_posts, key=lambda x: x['publish_date'], reverse=True)[:3]
+    is_logged_in = session.get('logged_in', False)
 
-    latest_posts = sorted(blog_posts, key=lambda x: x['publish_date'], reverse=True)[:3] # blog_bp. kaldırıldı
+    stats = {
+        "experience_years": 15,        # 15+ yıl tecrübe
+        "financial_ratios": 23,        # sistemde tanımlı oran sayısı
+        "ymm_cities": 2,               # iki farklı ilde iki ofis
+    }
 
-    # Kullanıcının giriş yapıp yapmadığını kontrol et ve şablona gönder
-    is_logged_in = session.get('logged_in', False) # <-- BURAYI EKLEYİN
-    
-    return render_template("index.html", latest_posts=latest_posts, is_logged_in=is_logged_in) # <-- BURAYI GÜNCELLEYİN
+    return render_template(
+        "index.html",
+        latest_posts=latest_posts,
+        is_logged_in=is_logged_in,
+        stats=stats
+    )
+
+
+
+# --- Kullanıcı Yönetimi: Admin paneli ---
+@app.route("/admin/users")
+@login_required
+def admin_users():
+    # Sadece admin kullanıcı görebilsin
+    if session.get("user") != "admin":
+        flash("Bu sayfaya erişim izniniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, username, is_approved FROM users")
+        users = c.fetchall()
+    return render_template("admin_users.html", users=users)
+
+
+@app.route("/admin/approve/<int:user_id>")
+@login_required
+def approve_user(user_id):
+    if session.get("user") != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE users SET is_approved = 1 WHERE id = ?", (user_id,))
+        conn.commit()
+    flash("Kullanıcı başarıyla onaylandı ✅", "success")
+    return redirect(url_for("admin_users"))
+
+
+@app.route("/admin/reject/<int:user_id>")
+@login_required
+def reject_user(user_id):
+    if session.get("user") != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+
+        # Kullanıcı adı admin olan hesap silinemez
+        c.execute("SELECT username FROM users WHERE id = ?", (user_id,))
+        row = c.fetchone()
+        if row and row["username"].lower() == "admin":
+            flash("Admin hesabı silinemez ❌", "warning")
+            return redirect(url_for("admin_users"))
+
+        # Diğer kullanıcıyı sil
+        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+
+    flash("Kullanıcı kaydı silindi ❌", "info")
+    return redirect(url_for("admin_users"))
+
+
+
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
+
+# --- Kullanıcı kendi şifresini değiştirme ---
+@limiter.limit("5 per 5 minutes")
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    # Kullanıcının oturumda olduğundan emin ol (login_required ile garanti)
+    username = session.get("user")
+    if not username:
+        flash("Önce giriş yapmalısınız.", "warning")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        current = request.form.get("current_password", "")
+        new1 = request.form.get("new_password", "")
+        new2 = request.form.get("new_password_confirm", "")
+
+        # Basit doğrulamalar
+        if not current or not new1 or not new2:
+            flash("Tüm alanları doldurun.", "warning")
+            return render_template("change_password.html")
+
+        if new1 != new2:
+            flash("Yeni şifreler eşleşmiyor.", "warning")
+            return render_template("change_password.html")
+
+        # Parola güçlülüğü (örnek): en az 8 karakter ve rakam içermeli
+        if len(new1) < 8 or not re.search(r"\d", new1) or not re.search(r"[A-Za-z]", new1):
+            flash("Yeni şifre en az 8 karakter olmalı ve hem harf hem rakam içermelidir.", "warning")
+            return render_template("change_password.html")
+
+        # Mevcut parola kontrolü
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute("SELECT id, password FROM users WHERE username = ?", (username,))
+            row = c.fetchone()
+
+            if not row or not check_password_hash(row["password"], current):
+                flash("Mevcut şifre hatalı.", "danger")
+                return render_template("change_password.html")
+
+            # Güncelle
+            new_hash = generate_password_hash(new1)
+            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, row["id"]))
+            conn.commit()
+
+        flash("Şifreniz başarıyla değiştirildi.", "success")
+        return redirect(url_for("home"))
+
+    return render_template("change_password.html")
+
+
+
+# --- Admin: herhangi bir kullanıcının şifresini sıfırlama ---
+@app.route("/admin/reset_password/<int:user_id>", methods=["GET", "POST"])
+@login_required
+def admin_reset_password(user_id):
+    if session.get("user") != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, username FROM users WHERE id = ?", (user_id,))
+        user = c.fetchone()
+        if not user:
+            flash("Kullanıcı bulunamadı.", "warning")
+            return redirect(url_for("admin_users"))
+
+    if request.method == "POST":
+        new1 = request.form.get("new_password", "")
+        new2 = request.form.get("new_password_confirm", "")
+
+        if not new1 or not new2:
+            flash("Lütfen yeni şifre alanlarını doldurun.", "warning")
+            return render_template("admin_reset_password.html", user=user)
+
+        if new1 != new2:
+            flash("Yeni şifreler eşleşmiyor.", "warning")
+            return render_template("admin_reset_password.html", user=user)
+
+        # Parola güçlülüğü kontrolü
+        if len(new1) < 8 or not re.search(r"\d", new1) or not re.search(r"[A-Za-z]", new1):
+            flash("Yeni şifre en az 8 karakter olmalı ve hem harf hem rakam içermelidir.", "warning")
+            return render_template("admin_reset_password.html", user=user)
+
+        # Admin kendi hesabını sıfırlıyorsa ekstra onay (opsiyonel)
+        if user["username"].lower() == "admin" and session.get("user") != "admin":
+            flash("Admin hesabını sadece admin değiştirebilir.", "danger")
+            return redirect(url_for("admin_users"))
+
+        new_hash = generate_password_hash(new1)
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, user_id))
+            conn.commit()
+
+        flash(f"{user['username']} kullanıcısının şifresi sıfırlandı.", "success")
+        return redirect(url_for("admin_users"))
+
+    return render_template("admin_reset_password.html", user=user)
+
+
 
 
 @app.template_filter('tlformat')
@@ -231,6 +431,50 @@ def currency_filter(amount):
         return f"{amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     except:
         return amount or "-"
+
+
+
+
+@app.route('/sitemap.xml')
+def sitemap():
+    pages = []
+    now = datetime.now().date().isoformat()
+
+    static_urls = [
+        # Ana sayfa ve bölümler
+        ('home', {}),  # https://www.isfaymm.com/
+        # Alt bölümler (tek sayfa içinde anchor linkler)
+        ('home', {'_anchor': 'services'}),   # https://www.isfaymm.com/#services
+        ('home', {'_anchor': 'about'}),      # https://www.isfaymm.com/#about
+        ('home', {'_anchor': 'team'}),       # https://www.isfaymm.com/#team
+        ('home', {'_anchor': 'blog'}),       # https://www.isfaymm.com/#blog
+        ('home', {'_anchor': 'contact'}),    # https://www.isfaymm.com/#contact
+
+        # Bağımsız sayfalar
+        ('contact', {}),                     # https://www.isfaymm.com/contact
+        ('indirimlikurumlar.index', {}),     # https://www.isfaymm.com/indirimlikurumlar
+        ('asgari', {}),                      # https://www.isfaymm.com/asgari
+        ('sermaye', {}),                     # https://www.isfaymm.com/sermaye
+        ('finansman', {}),                   # https://www.isfaymm.com/finansman
+
+        # Blog (liste sayfası)
+        ('blog.index', {}),                  # https://www.isfaymm.com/blog
+    ]
+
+    # URL’leri oluştur
+    for endpoint, params in static_urls:
+        try:
+            url = f"https://www.isfaymm.com{url_for(endpoint, **params)}"
+            pages.append(url)
+        except Exception as e:
+            print(f"Sitemap URL hatası ({endpoint}):", e)
+
+    # XML çıktı oluştur
+    xml = render_template('sitemap_template.xml', pages=pages, lastmod=now)
+    response = make_response(xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
+
 
 
 
