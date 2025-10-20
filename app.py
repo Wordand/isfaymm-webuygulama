@@ -78,22 +78,33 @@ def bootstrap_admin_from_env():
     password = os.getenv("ADMIN_PASSWORD")
 
     if not username or not password:
-        print("⚠️ Ortam değişkenleri tanımlı değil, admin oluşturulmadı.")
+        print("⚠️ Ortam değişkenleri eksik, admin oluşturulmadı.")
         return
 
     with get_conn() as conn:
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE username = ?", (username,))
-        if not c.fetchone():
+        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        row = c.fetchone()
+
+        hashed_pw = generate_password_hash(password)
+
+        if not row:
             c.execute("""
                 INSERT INTO users (username, password, is_approved)
                 VALUES (?, ?, 1)
-            """, (username, generate_password_hash(password)))
+            """, (username, hashed_pw))
             conn.commit()
-            print(f"✅ Admin kullanıcısı oluşturuldu ve onaylandı: {username}")
+            print(f"✅ Admin oluşturuldu ve onaylandı: {username}")
         else:
-            print("ℹ️ Admin zaten mevcut.")
-
+            # Şifre değişmişse güncelle
+            from werkzeug.security import check_password_hash
+            existing_hash = row["password"] if isinstance(row, sqlite3.Row) else row[0]
+            if not check_password_hash(existing_hash, password):
+                c.execute("UPDATE users SET password=? WHERE username=?", (hashed_pw, username))
+                conn.commit()
+                print(f"🔄 Admin şifresi .env dosyasına göre güncellendi: {username}")
+            else:
+                print(f"ℹ️ Admin zaten mevcut ve şifre güncel: {username}")
 
 
 
@@ -101,11 +112,10 @@ def bootstrap_admin_from_env():
 from init_db import base_dir, database_path
 
 if os.path.exists(database_path):
-    print(f"✅ Mevcut veritabanı bulundu: {database_path}")
+    print("✅ Mevcut veritabanı bulundu.")
 else:
     print("🆕 Veritabanı yok, ilk kez oluşturuluyor...")
     import init_db  # tablo yapısını kurar
-
     
     
     
@@ -130,10 +140,10 @@ app.secret_key = app.config["SECRET_KEY"]
 
 fernet = Fernet(app.config["FERNET_KEY"])
 
-app.debug = True
+app.debug = os.getenv("FLASK_DEBUG", "0") == "1"
 
 
-limiter.enabled = False
+
 
 
 @app.context_processor
@@ -517,8 +527,9 @@ def sitemap():
         try:
             url = f"https://www.isfaymm.com{url_for(endpoint, **params)}"
             pages.append(url)
-        except Exception as e:
-            print(f"Sitemap URL hatası ({endpoint}):", e)
+        except Exception:
+            continue
+
 
     # XML çıktı oluştur
     xml = render_template('sitemap_template.xml', pages=pages, lastmod=now)
@@ -561,11 +572,9 @@ def to_float_turkish(s):
     try:
         float_val = float(s)
         if is_negative_parentheses or is_negative_trailing_dash:
-            float_val = -float_val # Negatif işareti uygula
-        # print(f"DEBUG(to_float_turkish): Orijinal: '{original_s}', İşlenmiş: '{s}', Sonuç: {float_val}") # Debug için
+            float_val = -float_val  # Negatif işareti uygula
         return float_val
-    except ValueError as e:
-        # print(f"ERROR(to_float_turkish): '{original_s}' float'a dönüştürülemedi. Hata: {e}") # Debug için
+    except ValueError:
         return None
 
 
@@ -620,7 +629,7 @@ def extract_mukellef_bilgileri(text: str):
             if m4:
                 donem = m4.group(1)
 
-    print(f"[DEBUG] Unvan={unvan}, Donem={donem}, VKN={vkn}, Tür={tur}")
+
     return {
         "unvan": unvan,
         "donem": donem,
@@ -694,7 +703,7 @@ def veri_giris():
                         istanbul_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
                         tarih = istanbul_dt.strftime("%Y-%m-%d %H:%M:%S")
                     except Exception as e:
-                        print(f"Hata: Belge yükleme tarihi dönüşümünde problem: {e}")
+
                         tarih = "Tarih Hatası"
                 else:
                     tarih = "Tarih Yok"
@@ -805,15 +814,14 @@ def yukle_coklu():
                     "text": f"'{filename}' mizan dosyası için mükellef ve dönem bilgilerini giriniz."
                 })
 
-        except Exception as e:
-            import traceback
-            print("=== YÜKLE HATASI ===")
-            print(traceback.format_exc())   # ✅ Burada detaylı log göreceksin
+        except Exception:
+            # Gizlilik odaklı hata yönetimi (hiçbir dosya veya hata detayı loglanmaz)
             mesajlar.append({
                 "type": "error",
                 "title": "Yükleme Hatası",
-                "text": f"'{filename}' yüklenemedi: {e}"
+                "text": "Dosya yüklenirken bir hata oluştu. Lütfen tekrar deneyin."
             })
+
 
     return jsonify(mesajlar)
 
@@ -985,10 +993,9 @@ def kaydet_beyanname(sonuc, belge_turu):
                         })
 
                     conn.commit()
-                    current_app.logger.info(f"[AUTO-SAVE] {file_donem} PDF'inden {onceki_yil} bilanço üretildi.")
 
-            except Exception as e:
-                current_app.logger.warning(f"[AUTO-SAVE] Önceki dönem kaydedilemedi: {e}")
+            except Exception:
+                pass
         
         # 🔄 Ek olarak, eğer gelir tablosu dosyasında "önceki dönem" verisi varsa, onu da DB'ye yaz
         elif belge_turu == "gelir":
@@ -1049,10 +1056,10 @@ def kaydet_beyanname(sonuc, belge_turu):
                         })
 
                     conn.commit()
-                    current_app.logger.info(f"[AUTO-SAVE][GELİR] {file_donem} PDF'inden {onceki_yil} gelir tablosu üretildi.")
 
-            except Exception as e:
-                current_app.logger.warning(f"[AUTO-SAVE][GELİR] Önceki dönem kaydedilemedi: {e}")
+
+            except Exception:
+                pass
 
     return mesajlar
 
@@ -1168,26 +1175,15 @@ def pdf_belgeler_tablo(tur):
                 tablo = veriler.get("tablo") or veriler.get("veriler") or []
             else:
                 tablo = []
-        except Exception as e:
-            current_app.logger.error(f"[GELİR] Veri çözme hatası: {e}")
+        except Exception:
             tablo = []
 
         # --- Listeyi dict'e çevir ---
         tablo = [dict(r) for r in tablo if isinstance(r, (dict, sqlite3.Row))]
 
-        current_app.logger.info(
-            f"[GELİR] tablo satır sayısı: {len(tablo)} | veri_tipi={type(veriler)} | secilen_donem={secilen_donem_turu}"
-        )
 
-        # --- İlk birkaç satırı logla ---
-        for i, r in enumerate(tablo[:10]):
-            kod = r.get("kod")
-            aciklama = r.get("aciklama")
-            onceki = r.get("onceki_donem")
-            cari = r.get("cari_donem")
-            current_app.logger.info(
-                f"[DEBUG][GELİR] Satır {i} -> kod={kod} | açıklama={aciklama} | önceki={onceki} | cari={cari}"
-            )
+
+
 
         # --- Eğer veri yoksa uyar ve geri dön ---
         if not tablo:
@@ -1206,9 +1202,6 @@ def pdf_belgeler_tablo(tur):
         else:
             gorunen_kolon = "cari_donem"
 
-        current_app.logger.info(
-            f"[GELİR][RENDER] unvan={unvan} | donem={donem} | secilen_donem_turu={secilen_donem_turu} | gorunen_kolon={gorunen_kolon}"
-        )
 
         try:
             return render_template(
@@ -1221,9 +1214,7 @@ def pdf_belgeler_tablo(tur):
                 secilen_donem=secilen_donem_turu,
                 gorunen_kolon=gorunen_kolon  # 👈 bu kritik!
             )
-        except Exception as e:
-            # 🔥 render sırasında hata olursa logla
-            current_app.logger.error(f"[GELİR][RENDER ERROR]: {e}", exc_info=True)
+        except Exception:
             flash("❗ Gelir tablosu görüntülenirken hata oluştu.")
             return redirect(url_for("veri_giris", vkn=vkn, donem=donem))
 
@@ -1248,10 +1239,8 @@ def find_account_code(block_name, description, parent_group=None):
     kod_match = re.match(r"^\s*(\d{1,3})\s*[.\-]?\s*(.*)", original_description)
 
     if kod_match:
-        kod = kod_match.group(1)
-        if parent_group:
-            print(f"[DEBUG] {block_name} -> {original_description} | kod={kod} (direct)")
-        return kod
+        return kod_match.group(1)
+
 
     # Sadece başlık satırıysa (örneğin "A. Hazır Değerler"), kod boş
     if re.match(r"^\s*([A-ZÇĞİÖŞÜ]|[IVXLCDM]+)\.\s*[\w\s\-()]+$", original_description):
@@ -1326,11 +1315,7 @@ def parse_numeric_columns(line_stripped):
 
 
 def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True):
-    """
-    PDF metninden belirtilen bilanço bloğunu (AKTİF veya PASİF) tablo olarak çıkarır.
-    Debug True olduğunda satır satır log basar.
-    """
-    # Tablo başlangıcı
+
     header_pattern = (
         rf"{block_name}[\s\S]*?Açıklama.*?(?:\n.*?Cari Dönem)?[\s\S]*?\(\d{{4}}\).*?\(\d{{4}}\)"
     )
@@ -1338,10 +1323,8 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
 
     block_start_match = re.search(header_pattern, text, re.DOTALL | re.IGNORECASE)
     if not block_start_match:
-        if debug:
-            sample = "\n".join(text.splitlines()[:40])
-            print(f"[DEBUG] {block_name}: header bulunamadı.\n--- İlk 40 satır ---\n{sample}")
         return pd.DataFrame(columns=["Kod", "Açıklama", "Önceki Dönem", "Cari Dönem"]), False
+
 
     header_line_text_full_match = block_start_match.group(0)
     has_inflation_column_from_header = bool(
@@ -1373,31 +1356,19 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
     for idx, line in enumerate(lines):
         line_stripped = line.strip()
         if not line_stripped:
-            if debug:
-                print(f"[{block_name}] {idx}: boş satır atlandı")
             continue
 
         if any(re.search(pat, line_stripped) for pat in filter_patterns):
-            if debug:
-                print(f"[{block_name}] {idx}: header/önemsiz satır atlandı -> {line_stripped}")
             continue
 
         all_numeric_strings = re.findall(r"\d[\d\.\,]*", line_stripped)
         if not all_numeric_strings:
-            if debug:
-                print(f"[{block_name}] {idx}: sayı bulunamadı -> {line_stripped}")
             continue
 
         numeric_values_float = [to_float_turkish(s) for s in all_numeric_strings]
         if not any(val is not None for val in numeric_values_float):
-            if debug:
-                print(f"[{block_name}] {idx}: sayılar float çevrilemedi -> {line_stripped}")
-            continue
-        
+            continue             
 
-        
-        # Normal işleme devam
-        # --- Sütun sayısını dinamik belirle ---
         if len(numeric_values_float) >= 3:
             # Muhtemelen enflasyonlu 3 sütun
             onceki_val, cari_val, inflation_val = numeric_values_float[-3:]
@@ -1407,14 +1378,11 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
             inflation_val = None
         else:
             cari_val = numeric_values_float[-1] if numeric_values_float else None
-            onceki_val = inflation_val = None
-
+            onceki_val = inflation_val = None             
         
-        
-        
-        description, onceki_val, cari_val, inflation_val = parse_numeric_columns(line_stripped)
-        
+        description, onceki_val, cari_val, inflation_val = parse_numeric_columns(line_stripped)        
         kod = find_account_code(block_name, description)
+        
         data.append([
             kod,
             description,
@@ -1422,9 +1390,6 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
             cari_val,
             inflation_val if has_inflation_column_from_header else None
         ])
-
-        if debug:
-            print(f"[{block_name}] {idx}: eklendi -> {description} | {onceki_val}, {cari_val}, {inflation_val}")
 
     columns = ["Kod", "Açıklama", "Önceki Dönem", "Cari Dönem"]
     if has_inflation_column_from_header:
@@ -1436,9 +1401,7 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
 
 
 def get_bilanco_total_from_text(full_text, block_name="AKTİF"):
-    """
-    PDF metninden belirli bir bilanço bloğunun (AKTİF veya PASİF) TOPLAM değerlerini doğrudan ayıklar.
-    """
+
     total_line_pattern = (
         rf"(?i){block_name}\s*TOPLAMI\s*"
         rf"({num_val_pattern_str}(?:\s+{num_val_pattern_str})?(?:\s+{num_val_pattern_str})?)"
@@ -1486,7 +1449,7 @@ def parse_bilanco_from_pdf(pdf_path: str) -> dict:
         if "PASİF" not in pasif_text.upper() and "III." in pasif_text:
             pasif_text = "PASİF\n" + pasif_text
 
-        current_app.logger.info("PASİF metin örneği:\n%s", "\n".join(pasif_text.splitlines()[:30]))
+
 
     # Mükellef bilgileri
     muk = extract_mukellef_bilgileri(full_text)
@@ -1511,9 +1474,7 @@ def parse_bilanco_from_pdf(pdf_path: str) -> dict:
     if aktif_toplamlar.get("cari_enflasyon", 0) or pasif_toplamlar.get("cari_enflasyon", 0):
         has_inflation = True
 
-    current_app.logger.info("AKTİF DF:\n%s", df_aktif.head(10).to_string())
-    current_app.logger.info("PASİF DF:\n%s", df_pasif.head(10).to_string())
-    current_app.logger.info("TOPLAM: %s %s", aktif_toplamlar, pasif_toplamlar)
+
 
     aktif_list = df_aktif.to_dict(orient="records") if df_aktif is not None else []
     pasif_list = df_pasif.to_dict(orient="records") if df_pasif is not None else []
@@ -1669,8 +1630,7 @@ def parse_gelir_from_pdf(pdf_path: str) -> dict:
         if end_found:
             break
 
-    if not tablo:
-        current_app.logger.warning(f"[GELİR TABLOSU] {pdf_path}: hiçbir satır bulunamadı.")
+
 
     return {
         "tur": "gelir",
@@ -1974,10 +1934,9 @@ def parse_kdv_from_pdf(pdf_path):
         return None
 
     try:
-        with pdfplumber.open(pdf_path) as pdf:
-            print("DEBUG: Açılıyor:", pdf_path)
+        with pdfplumber.open(pdf_path) as pdf:            
             full_text = "\n".join((p.extract_text() or "") for p in pdf.pages)
-            print("DEBUG: İlk 500 karakter:\n", full_text[:500])
+            
             
             if "KURUMLAR VERGİSİ BEYANNAMESİ" in full_text.upper():
                 return {
@@ -1989,10 +1948,7 @@ def parse_kdv_from_pdf(pdf_path):
                     "hata": "Bu dosya Kurumlar Vergisi beyannamesi, KDV değil."
                 }
             
-            # DEBUG ekledik
-            print("=== DEBUG PDF TEXT START ===")
-            print(full_text)
-            print("=== DEBUG PDF TEXT END ===")
+
             
             muk = extract_mukellef_bilgileri(full_text)
             unvan = muk["unvan"]
@@ -2295,24 +2251,23 @@ def parse_kdv_from_pdf(pdf_path):
                 r["deger"] = "0,00"
                 
         
-        print(f"[DEBUG] {pdf_path} içinden {len(data)} satır parse edildi")
+        
 
 
         return {"tur": muk["tur"], "donem": donem_adi, "unvan": unvan, "vergi_kimlik_no": vkn, "veriler": data}
 
-    except Exception as e:
-        import traceback
-        print("PDF PARSE ERROR:", e)
-        traceback.print_exc()
+    except Exception:
+
         return {
-            "tur": "KDV",   
+            "tur": "KDV",
             "donem": "Hata",
             "unvan": "Bilinmiyor",
             "vergi_kimlik_no": "Bilinmiyor",
             "veriler": [],
-            "hata": str(e)
+            "hata": "PDF işlenirken bir hata oluştu."
         }
-        
+
+            
         
         
         
@@ -2552,12 +2507,6 @@ def raporlama():
     kdv_periods = [d for d in request.args.get("kdv_periods", "").split(",") if d]
     analiz_turu = request.args.get("analiz_turu")
     
-    print("👉 /raporlama çağrıldı")
-    print("  vkn:", vkn)
-    print("  fa_years:", fa_years)
-    print("  kdv_periods:", kdv_periods)
-    print("  analiz_turu:", analiz_turu)
-
     secili_vkn         = vkn
     secili_unvan       = None
     secili_fa_years    = fa_years
@@ -2601,7 +2550,7 @@ def raporlama():
 
 
             donemler = sorted(set(rows), reverse=True)
-            print("[DEBUG] Donemler (raporlama):", donemler)
+            
 
             # Geçmiş yüklenen dosyalar
             c.execute("""
@@ -2892,9 +2841,7 @@ def calculate_group_total_and_add(target_df, group_definition_map):
 def parse_mizan_excel(excel_path):
     try:
         df_mizan_raw = pd.read_excel(excel_path, header=None)
-        print(f"\n--- parse_mizan_excel DEBUG BAŞLANGICI ---")
-        print(f"### DEBUG: 1. df_mizan_raw (okuma sonrası) satır sayısı: {df_mizan_raw.shape[0]}, sütunlar: {df_mizan_raw.columns.tolist()}")
-        print(f"### DEBUG: 1. df_mizan_raw (okuma sonrası) ilk 5 satır:\n{df_mizan_raw.head().to_string()}")
+        
 
         expected_columns_count = 6 
         if df_mizan_raw.shape[1] < expected_columns_count:
@@ -2918,9 +2865,7 @@ def parse_mizan_excel(excel_path):
                 f"Lütfen Excel dosyanızın en az {expected_columns_count} sütuna sahip olduğundan emin olun. Hata: {e}"
             )
             
-        print(f"### DEBUG: 2. df_mizan (manuel isimlendirme sonrası) satır sayısı: {df_mizan.shape[0]}, sütunlar: {df_mizan.columns.tolist()}")
-        print(f"### DEBUG: 2. df_mizan (manuel isimlendirme sonrası) ilk 5 satır:\n{df_mizan.head().to_string()}")
-
+       
 
         first_row_values = None
         if not df_mizan.empty:
@@ -2937,40 +2882,29 @@ def parse_mizan_excel(excel_path):
              if any(keyword in first_row_str for keyword in possible_headers_keywords):
                  first_row_is_header = True
              
-        print(f"### DEBUG: 3. first_row_is_header: {first_row_is_header}")
 
         if first_row_is_header:
             df_mizan = df_mizan.iloc[1:].copy()
         
-        print(f"### DEBUG: 4. df_mizan (başlık atlama sonrası) satır sayısı: {df_mizan.shape[0]}, ilk 5 satır:\n{df_mizan.head().to_string()}")
 
         # NaN kodları düşür (boş satırları veya geçersiz kodları temizle)
         initial_rows_before_dropna = df_mizan.shape[0]
         df_mizan.dropna(subset=['Kod'], inplace=True)
-        print(f"### DEBUG: 5. df_mizan (NaN Kod düşme sonrası) satır sayısı: {df_mizan.shape[0]} (başlangıç {initial_rows_before_dropna})")
 
         initial_rows_before_digit_filter = df_mizan.shape[0]
         df_mizan = df_mizan[df_mizan['Kod'].str.match(r'^\d+$')]
-        print(f"### DEBUG: 6. df_mizan (sadece rakamlı Kod filtreleme sonrası) satır sayısı: {df_mizan.shape[0]} (başlangıç {initial_rows_before_digit_filter})")
-        print(f"### DEBUG: 6. df_mizan (sadece rakamlı Kod filtreleme sonrası) ilk 5 satır:\n{df_mizan.head().to_string()}")
-
+        
 
         df_mizan['BORC_BAKIYE'] = df_mizan['BORC_BAKIYE'].apply(to_float_turkish)
         df_mizan['ALACAK_BAKIYE'] = df_mizan['ALACAK_BAKIYE'].apply(to_float_turkish)
         
-        print(f"### DEBUG: 7. BORC_BAKIYE Dtypes: {df_mizan['BORC_BAKIYE'].dtype}")
-        print(f"### DEBUG: 7. ALACAK_BAKIYE Dtypes: {df_mizan['ALACAK_BAKIYE'].dtype}")
-        print(f"### DEBUG: 7. df_mizan (float dönüşüm sonrası) ilk 5 satır:\n{df_mizan.head().to_string()}")
-
+      
 
         # SADECE 3 HANELİ HESAP KODLARINI FİLTRELE ve Tekilleştir
         initial_rows_before_3digit_filter = df_mizan.shape[0]
         df_filtered_3_digit_codes = df_mizan[df_mizan['Kod'].str.match(r'^\d{3}$')]
-        print(f"### DEBUG: 8. df_filtered_3_digit_codes (3 haneli kod filtreleme sonrası) satır sayısı: {df_filtered_3_digit_codes.shape[0]} (başlangıç {initial_rows_before_3digit_filter})")
-        print(f"### DEBUG: 8. df_filtered_3_digit_codes ilk 5 satır:\n{df_filtered_3_digit_codes.head().to_string()}")
-
+       
         if df_filtered_3_digit_codes.empty:
-            print("### DEBUG: 9. HİÇ 3 HANELİ HESAP KODU BULUNAMADI! Fonksiyon boş veri döndürecek.")
             return {
                 "aktif": pd.DataFrame(columns=['Kod', 'Açıklama', 'Cari Dönem']),
                 "pasif": pd.DataFrame(columns=['Kod', 'Açıklama', 'Cari Dönem']),
@@ -2989,28 +2923,20 @@ def parse_mizan_excel(excel_path):
             'BORC_BAKIYE': 'sum',
             'ALACAK_BAKIYE': 'sum'
         }).reset_index()
-        print(f"### DEBUG: 10. df_unique_3_digit_accounts (tekilleştirme sonrası) satır sayısı: {df_unique_3_digit_accounts.shape[0]} (başlangıç {initial_rows_before_unique})")
-        print(f"### DEBUG: 10. df_unique_3_digit_accounts ilk 5 satır:\n{df_unique_3_digit_accounts.head().to_string()}")
-
+      
         df_unique_3_digit_accounts = df_unique_3_digit_accounts.sort_values(by='Kod')
 
         aktif_hesaplar = df_unique_3_digit_accounts[df_unique_3_digit_accounts['Kod'].str.startswith(('1', '2'))].copy()
         pasif_hesaplar = df_unique_3_digit_accounts[df_unique_3_digit_accounts['Kod'].str.startswith(('3', '4', '5'))].copy()
         gelir_hesaplar = df_unique_3_digit_accounts[df_unique_3_digit_accounts['Kod'].str.startswith(('6', '7'))].copy()
 
-        print(f"### DEBUG: 11. aktif_hesaplar satır sayısı: {aktif_hesaplar.shape[0]}, ilk 5:\n{aktif_hesaplar.head().to_string()}")
-        print(f"### DEBUG: 11. pasif_hesaplar satır sayısı: {pasif_hesaplar.shape[0]}, ilk 5:\n{pasif_hesaplar.head().to_string()}")
-        print(f"### DEBUG: 11. gelir_hesaplar satır sayısı: {gelir_hesaplar.shape[0]}, ilk 5:\n{gelir_hesaplar.head().to_string()}")
-
+      
 
         aktif_hesaplar['Cari Dönem'] = aktif_hesaplar.apply(lambda row: apply_balance_sign_bilanco(row, True), axis=1)
         pasif_hesaplar['Cari Dönem'] = pasif_hesaplar.apply(lambda row: apply_balance_sign_bilanco(row, False), axis=1)
         gelir_hesaplar['Cari Dönem'] = gelir_hesaplar.apply(get_gelir_sign_value, axis=1)
 
-        print(f"### DEBUG: 12. aktif_hesaplar (Cari Dönem sonrası) ilk 5:\n{aktif_hesaplar.head().to_string()}")
-        print(f"### DEBUG: 12. pasif_hesaplar (Cari Dönem sonrası) ilk 5:\n{pasif_hesaplar.head().to_string()}")
-        print(f"### DEBUG: 12. gelir_hesaplar (Cari Dönem sonrası) ilk 5:\n{gelir_hesaplar.head().to_string()}")
-
+       
         # Finansal Tabloları Oluşturma (Sadece Mizanda Olanları Dahil Etme)
         df_bilanco_aktif_final = pd.DataFrame(columns=['Kod', 'Açıklama', 'Cari Dönem'])
         for grup_adi, alt_gruplar in BILANCO_HESAPLARI["AKTİF"].items():
@@ -3022,7 +2948,6 @@ def parse_mizan_excel(excel_path):
                     if not hesap_satiri.empty:
                         df_bilanco_aktif_final = pd.concat([df_bilanco_aktif_final, hesap_satiri[['Kod', 'Açıklama', 'Cari Dönem']]], ignore_index=True)
 
-        print(f"### DEBUG: 13. df_bilanco_aktif_final satır sayısı: {df_bilanco_aktif_final.shape[0]}, ilk 5:\n{df_bilanco_aktif_final.head().to_string()}")
 
         df_bilanco_pasif_final = pd.DataFrame(columns=['Kod', 'Açıklama', 'Cari Dönem'])
         for grup_adi, alt_gruplar in BILANCO_HESAPLARI["PASİF"].items():
@@ -3034,7 +2959,6 @@ def parse_mizan_excel(excel_path):
                     if not hesap_satiri.empty:
                         df_bilanco_pasif_final = pd.concat([df_bilanco_pasif_final, hesap_satiri[['Kod', 'Açıklama', 'Cari Dönem']]], ignore_index=True)
 
-        print(f"### DEBUG: 14. df_bilanco_pasif_final satır sayısı: {df_bilanco_pasif_final.shape[0]}, ilk 5:\n{df_bilanco_pasif_final.head().to_string()}")
 
         df_gelir_final = pd.DataFrame(columns=['Kod', 'Açıklama', 'Cari Dönem'])
         gelir_hesaplar_dict = gelir_hesaplar.set_index('Kod')['Cari Dönem'].to_dict()
@@ -3131,14 +3055,19 @@ def parse_mizan_excel(excel_path):
             "donem": donem_from_mizan
         }
 
-    except ValueError as ve:
-        print(f"VERİ AYRIŞTIRMA HATASI: {ve}")
-        return {"status": "error", "message": str(ve)}
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        print(f"MİZAN EXCEL PARSE GENEL HATASI: {e}")
-        return {"status": "error", "message": f"Mizan Excel dosyası işlenirken beklenmeyen bir hata oluştu: {str(e)}"}
+    except ValueError:
+        # Veri yapısı beklenenden farklıysa
+        return {
+            "status": "error",
+            "message": "Veri ayrıştırma hatası: Mizan dosyası beklenen formatta değil."
+        }
+    except Exception:
+        # Genel, güvenli hata mesajı
+        return {
+            "status": "error",
+            "message": "Mizan Excel dosyası işlenirken beklenmeyen bir hata oluştu. Lütfen dosyayı kontrol edin."
+        }
+
     
     
     # Yükleme sonrası mizan meta verisi kaydetme/güncelleme
@@ -3218,13 +3147,12 @@ def kaydet_mizan_meta():
             })
 
     except Exception as e:
-        print(f"Mizan meta verisi kaydetme hatası: {e}")
+        # Gizlilik nedeniyle hata detayı loglanmıyor
         return jsonify({
             "status": "error",
             "title": "❌ Kayıt Hatası",
-            "message": f"Mizan meta verisi kaydedilirken bir hata oluştu: {str(e)}"
+            "message": "Mizan meta verisi kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin."
         }), 500
-
 
 
 
@@ -3235,7 +3163,6 @@ def prepare_df(df_raw, column_name):
     from flask import current_app
 
     if df_raw is None or df_raw.empty:
-        current_app.logger.warning(f"[prepare_df] Boş DataFrame alındı -> column_name={column_name}")
         raise ValueError("Boş tablo alındı")
 
     col_map = {col.lower(): col for col in df_raw.columns}
@@ -3264,7 +3191,6 @@ def prepare_df(df_raw, column_name):
     # 🔒 Güvenli kolon kontrolü
     kolonlar = [k for k in [kod_kolon, aciklama_kolon, ana_kolon] if k]
     if not kolonlar:
-        current_app.logger.error(f"[prepare_df] Gerekli kolonlar bulunamadı. Var olan sütunlar: {list(df_raw.columns)}")
         raise ValueError("Kolon eşleşmesi yapılamadı")
 
     df = df_raw[kolonlar].copy()
@@ -3297,9 +3223,7 @@ def prepare_df(df_raw, column_name):
             # varsa enflasyon sütunlarını da sona ekle
             extras = [c for c in df.columns if "enflasyon" in c.lower() and c not in ordered]
             df = df[[c for c in ordered if c in df.columns] + extras]
-            current_app.logger.warning("[prepare_df] Kolon sırası ters geldi, düzeltildi.")
 
-    current_app.logger.info(f"[prepare_df] Kolonlar: {list(df.columns)} | Satır sayısı: {len(df)}")
 
     return df
 
@@ -3382,8 +3306,7 @@ def finansal_analiz():
                     """, (uid, secili_vkn, yil))
                     gelir_row = c.fetchone()
 
-                    if not bilanco_row or not gelir_row:
-                        current_app.logger.warning(f"[ANALIZ] {yil} yılı verisi eksik (bilanço veya gelir yok)")
+                    if not bilanco_row or not gelir_row:                        
                         continue
 
                     # 🧩 Decrypt et
@@ -3401,8 +3324,7 @@ def finansal_analiz():
                     pasif_df = pd.DataFrame(parsed_b.get("pasif", []))
                     gelir_df = pd.DataFrame(parsed_g.get("tablo", []))
 
-                    if aktif_df.empty or pasif_df.empty or gelir_df.empty:
-                        current_app.logger.warning(f"[ANALIZ] {yil} yılı veri boş geçti.")
+                    if aktif_df.empty or pasif_df.empty or gelir_df.empty:                        
                         continue
 
                     has_inflation = "Cari Dönem (Enflasyonlu)" in aktif_df.columns
@@ -3479,10 +3401,8 @@ def finansal_analiz():
                         if prev_year not in secili_yillar:
                             secili_yillar.append(prev_year)
 
-                    current_app.logger.info(f"[TREND] {yil} ve {prev_year} yılları analize dahil edildi.")
-
-                except Exception as e:
-                    current_app.logger.warning(f"[TREND] {yil} verisi alınamadı: {e}", exc_info=True)
+                except Exception:
+                    continue
 
     return render_template(
         "finansal_analiz.html",
@@ -3621,7 +3541,6 @@ def raporlama_grafik():
                     raporlar[yil][key] = {"deger": value, "kategori": kategori, "aciklama": aciklama, "kod": kod}
 
         except Exception as e:
-            current_app.logger.warning(f"[{yil}] veri işleme hatası: {e}")
             eksik_yillar.append(yil)
             continue
 
@@ -3815,11 +3734,7 @@ def finansal_oran_raporu():
 
     try:
         
-        # 💾 HTML debug çıktısı — PDF oluşmadan önce HTML'yi kaydeder
-        debug_path = os.path.join(current_app.root_path, "rendered_debug.html")
-        with open(debug_path, "w", encoding="utf-8") as f:
-            f.write(rendered)
-        print(f"✅ HTML debug dosyası kaydedildi: {debug_path}")
+
         
         wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
         if not wkhtml_path or not os.path.exists(wkhtml_path):
@@ -3854,7 +3769,7 @@ def finansal_oran_raporu():
             )
             tmpfile.flush()
 
-        print("✅ PDF başarıyla oluşturuldu:", tmpfile.name)
+
         return send_file(
             tmpfile.name,
             mimetype="application/pdf",
@@ -3862,11 +3777,11 @@ def finansal_oran_raporu():
             download_name=f"{vkn}_{unvan}_Oran_Raporu.pdf"
         )
 
-    except Exception as e:
-        print("🧨 PDF oluşturma hatası:", e)
-        traceback.print_exc()
-        flash(f"PDF oluşturulamadı: {e}", "danger")
+    except Exception:
+        # Kullanıcıya sade bir mesaj göster, loglama yapma
+        flash("PDF oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.", "danger")
         return redirect(url_for("raporlama", vkn=vkn))
+
 
     finally:
         try:
@@ -4019,7 +3934,6 @@ def yeniden_yukle():
             if row and row["yuklenme_tarihi"]:
                 utc_dt = datetime.strptime(row["yuklenme_tarihi"], "%Y-%m-%d %H:%M:%S")
                 istanbul_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
-                print(f"DEBUG | {unvan} ({vkn}) - {donem} {belge_turu.upper()} yeniden yüklendi: {istanbul_dt.strftime('%Y-%m-%d %H:%M:%S')}")
 
         return jsonify({
             "status": "success",
