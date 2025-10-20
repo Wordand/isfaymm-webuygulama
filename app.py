@@ -69,6 +69,34 @@ app = Flask(__name__, instance_path=os.path.join(os.path.dirname(os.path.abspath
 
 
 
+import os
+from werkzeug.security import generate_password_hash
+from services.db import get_conn
+
+def bootstrap_admin_from_env():
+    """
+    Ortam değişkenlerinden admin kullanıcıyı güvenli şekilde oluşturur.
+    """
+    username = os.getenv("ADMIN_USERNAME")
+    password = os.getenv("ADMIN_PASSWORD")
+
+    if not username or not password:
+        print("⚠️ Ortam değişkenleri tanımlı değil, admin oluşturulmadı.")
+        return
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE username = ?", (username,))
+        if not c.fetchone():
+            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", 
+                      (username, generate_password_hash(password)))
+            conn.commit()
+            print(f"✅ Admin kullanıcısı oluşturuldu: {username}")
+        else:
+            print("ℹ️ Admin zaten mevcut.")
+
+
+
 # --- Veritabanı kontrolü ve güvenli başlatma ---
 from init_db import base_dir, database_path
 
@@ -120,6 +148,8 @@ with app.app_context():
     migrate_tesvik_columns()
     from services.db import migrate_users_table
     migrate_users_table()
+
+bootstrap_admin_from_env() 
 
 
 app.register_blueprint(indirim_bp)
