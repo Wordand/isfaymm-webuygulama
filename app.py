@@ -146,10 +146,15 @@ def inject_login_status():
 
 with app.app_context():
     migrate_tesvik_columns()
+
     from services.db import migrate_users_table
     migrate_users_table()
 
-bootstrap_admin_from_env() 
+    # Admin bootstrap da context içinde çalışmalı
+    try:
+        bootstrap_admin_from_env()
+    except Exception as e:
+        print(f"⚠️ Admin oluşturulurken hata: {e}")
 
 
 app.register_blueprint(indirim_bp)
