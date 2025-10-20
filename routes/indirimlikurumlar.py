@@ -702,6 +702,9 @@ def download_tesvik_pdf(doc_id):
         return jsonify({"status": "error", "title": "PDF Hatası!", "message": f"PDF oluşturulurken bir hata oluştu: {str(e)}"})
     
     
+from io import BytesIO
+import pdfplumber
+
 @bp.route('/upload-kv-beyan', methods=['POST'])
 @login_required
 def upload_kv_beyan():
@@ -709,13 +712,17 @@ def upload_kv_beyan():
     if not f or not f.filename.lower().endswith('.pdf'):
         return jsonify(status='error', title='Geçersiz Dosya', message='Lütfen bir PDF dosyası yükleyin.'), 400
 
-    temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
-    f.save(temp_path)
-
     try:
-        veri = parse_ikv_from_pdf(temp_path)
-        tablolar = veri.get("tablolar", [])
+        # PDF verisini belleğe al
+        pdf_data = BytesIO(f.read())
 
+        # parse_ikv_from_pdf fonksiyonun path yerine bytes kabul ediyorsa:
+        veri = parse_ikv_from_pdf(pdf_data)
+
+        # Eğer parse_ikv_from_pdf sadece path kabul ediyorsa, onu da şöyle güncelleyeceğiz:
+        # with pdfplumber.open(BytesIO(pdf_data)) as pdf: ...
+
+        tablolar = veri.get("tablolar", [])
         if not tablolar:
             return jsonify(status='error', title='Veri Hatası', message='Hiç tablo bulunamadı.'), 400
 
@@ -731,34 +738,28 @@ def upload_kv_beyan():
                 'belge_tarihi':find_deger('Yatırıma Başlama Tarihi'),
                 'yatirim_turu1': find_deger('Yatırımın Türü 1'),
                 'yatirim_turu2': find_deger('Yatırımın Türü 2'),
-
                 'toplam_tutar': find_deger('Toplam Yatırım Tutarı (İndirimli KV Kapsamında Olmayan Harcamalar Hariç)'),
                 'katki_orani':  find_deger('Yatırıma Katkı Oranı'),
                 'vergi_orani':  find_deger('Vergi İndirim Oranı'),
                 'bolge':        find_deger('Yatırımın Yapıldığı Bölge'),
                 'diger_oran':   find_deger('İndirimli KV Oranı'),
-
                 'katki_tutari':          find_deger('Toplam Yatırıma Katkı Tutarı'),
                 'cari_harcama_tutari':   find_deger('Cari Yılda Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı'),
                 'toplam_harcama_tutari': find_deger('Fiilen Gerçekleştirilen Yatırım Harcaması (Yatırımın Başlangıcından İtibaren)'),
                 'fiili_katki_tutari':    find_deger('Fiili Yatırım Harcaması Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı'),
                 'endeks_katki_tutari':   find_deger('Endekslenmiş Tutarlar Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı'),
-
                 'onceki_yatirim_katki_tutari': find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)'),
                 'onceki_diger_katki_tutari':   find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)'),
                 'onceki_katki_tutari':         find_deger('Önceki Dönemlerde Yararlanılan Toplam Yatırıma Katkı Tutarı'),
-
                 'cari_yatirim_katki':    find_deger('Cari Dönemde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)'),
                 'cari_diger_katki':      find_deger('Cari Dönemde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)'),
                 'cari_toplam_katki':     find_deger('Cari Dönemde Yararlanılan Toplam Yatırıma Katkı Tutarı'),
                 'genel_toplam_katki':    find_deger('Cari Dönem Dahil Olmak Üzere Yararlanılan Toplam Yatırıma Katkı Tutarı'),
             }
 
-        # Eğer birden fazla tablo varsa
         if len(tablolar) > 1:
             parsed_list = []
             secenekler = []
-
             for i, tablo in enumerate(tablolar):
                 parsed = parse_veri_listesi(tablo.get("veriler", []))
                 current_app.logger.info(f"[DEBUG] Tablo {i} - Belge No: {parsed.get('belge_no')}")
@@ -767,21 +768,14 @@ def upload_kv_beyan():
                     "index": i,
                     "belge_no": parsed["belge_no"] or f"Belge {i+1}"
                 })
-
             return jsonify(status='multiple', tablolar=secenekler, raw_data=parsed_list)
 
-        # Tek tablo varsa
         parsed = parse_veri_listesi(tablolar[0].get("veriler", []))
         return jsonify(status='ok', parsed=parsed)
 
     except Exception as e:
         current_app.logger.exception("PDF parse hatası")
         return jsonify(status='error', title='Parse Hatası', message=str(e)), 500
-    finally:
-        try: os.remove(temp_path)
-        except: pass
-
-
 
 
 
