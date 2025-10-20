@@ -414,9 +414,12 @@ def admin_reset_password(user_id):
     return render_template("admin_reset_password.html", user=user)
 
 
+
+
+
 @app.route('/robots.txt')
 def robots():
-    return send_from_directory('static', 'robots.txt')
+    return send_from_directory('static', 'robots.txt', mimetype='text/plain')
 
 
 
