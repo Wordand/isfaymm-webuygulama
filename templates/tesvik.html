@@ -19,12 +19,13 @@
       <td>{{ d.belge_no }}</td>
       <td>{{ d.belge_tarihi }}</td>
       <td>{{ d.vize_durumu }}</td>
-      <td>{{ '%.2f'|format(d.cari_toplam_katki) }}</td>
-      <td>{{ '%.2f'|format(d.genel_toplam_katki) }}</td>
+      <td>{{ d.cari_toplam_katki | tlformat }}</td>
+      <td>{{ d.genel_toplam_katki | tlformat }}</td>
       <td>
-        
+
         <a href="?sekme=tesvik&view={{ d.id }}" class="btn btn-sm btn-info">Detay</a>
-        <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id) }}" class="btn btn-sm btn-warning me-1">Güncelle</a>
+        <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id) }}"
+          class="btn btn-sm btn-warning me-1">Güncelle</a>
         <form class="delete-tesvik-form d-inline" action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id) }}"
           method="post">
           <button type="submit" class="btn btn-sm btn-danger">Sil</button>

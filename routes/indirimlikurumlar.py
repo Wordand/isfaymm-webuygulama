@@ -163,13 +163,17 @@ def get_user_profit_df(user_id: int) -> pd.DataFrame:
         c = conn.cursor()
         c.execute(
             "SELECT aciklama_index, column_b, column_c, column_d, column_e "
-            "FROM profit_data WHERE user_id = ?",
+            "FROM profit_data WHERE user_id = %s",
             (user_id,)
         )
         db_data = c.fetchall()
 
         if db_data:
             for row_idx, val_b, val_c, val_d, val_e in db_data:
+                try:
+                    row_idx = int(row_idx)
+                except (ValueError, TypeError):
+                    continue  # Geçersiz indeksleri atla
                 if 0 <= row_idx < len(explanations): 
                     df.at[row_idx, 'B'] = val_b
                     df.at[row_idx, 'C'] = val_c
@@ -179,7 +183,7 @@ def get_user_profit_df(user_id: int) -> pd.DataFrame:
             for i, _ in enumerate(explanations):
                 c.execute(
                     "INSERT INTO profit_data (user_id, aciklama_index, column_b, column_c, column_d, column_e) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
                     (user_id, i, 0.0, 0.0, 0.0, 0.0)
                 )
             conn.commit()
@@ -193,11 +197,16 @@ def save_user_profit_df(user_id: int, dataframe: pd.DataFrame):
     with get_conn() as conn:
         c = conn.cursor()
         for i, row in dataframe.iterrows():
-            c.execute(
-                "INSERT OR REPLACE INTO profit_data (user_id, aciklama_index, column_b, column_c, column_d, column_e) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (user_id, i, row['B'], row['C'], row['D'], row['E'])
-            )
+            c.execute("""
+                INSERT INTO profit_data (user_id, aciklama_index, column_b, column_c, column_d, column_e)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (user_id, aciklama_index)
+                DO UPDATE SET
+                    column_b = EXCLUDED.column_b,
+                    column_c = EXCLUDED.column_c,
+                    column_d = EXCLUDED.column_d,
+                    column_e = EXCLUDED.column_e
+            """, (user_id, i, row['B'], row['C'], row['D'], row['E']))
         conn.commit()
 
 def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
@@ -233,7 +242,7 @@ def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
 @bp.route('/ayrintili-kazanc', methods=['GET','POST'])
 @login_required 
 def ayrintili_kazanc():
-    user_id = session["user"]
+    user_id = session["user_id"]
 
     # --- BU DAHA KAPSAMLI TRY-EXCEPT BLOĞUNU EKLEYİN ---
     try:
@@ -321,7 +330,7 @@ def ayrintili_kazanc():
 @login_required
 def index():
     sekme = request.args.get("sekme", "form")
-    user_id = session["user"]
+    user_id = session["user_id"]
     
     # URL'den gelen 'view' parametresini her zaman kontrol edelim.
     # Bu, hem 'tesvik' sekmesinde detay görmek hem de 'form' sekmesinde belge düzenlemek için kullanılır.
@@ -409,7 +418,7 @@ def index():
 def form_kaydet():
     print(">>> form_kaydet GİRİLDİ")
     print("POST verileri:", dict(request.form))
-    user_id = session["user"]
+    user_id = session["user_id"]
     print(">>> form_kaydet called. form data:", dict(request.form))
 
     # TEŞVİK ID BELİRLEME MANTIĞI:
@@ -513,7 +522,7 @@ def form_kaydet():
                                                     onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                                                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                                                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios)
-                               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                     (user_id, belge_no, belge_no, belge_tarihi, # dosya_adi olarak belge_no kullanıldı
                      karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
                      katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
@@ -522,7 +531,8 @@ def form_kaydet():
                      cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                      brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios)
                 )
-                tesvik_id = c.lastrowid # Yeni oluşturulan belgenin ID'sini al
+                c.execute("SELECT currval(pg_get_serial_sequence('tesvik_belgeleri', 'id'))")
+                tesvik_id = c.fetchone()[0]
                 conn.commit()
                 # Yeni oluşturulan ID'yi session'a kaydet, böylece sonraki kaydetmeler update olur
                 session["current_tesvik_id"] = tesvik_id 
@@ -535,15 +545,15 @@ def form_kaydet():
                     """
                     UPDATE tesvik_belgeleri
                     SET
-                        belge_no = ?, belge_tarihi = ?, karar = ?, yatirim_turu1 = ?, yatirim_turu2 = ?,
-                        vize_durumu = ?, donem = ?, il = ?, osb = ?, bolge = ?,
-                        katki_orani = ?, vergi_orani = ?, diger_oran = ?,
-                        toplam_tutar = ?, katki_tutari = ?, diger_katki_tutari = ?,
-                        cari_harcama_tutari = ?, toplam_harcama_tutari = ?, fiili_katki_tutari = ?, endeks_katki_tutari = ?,
-                        onceki_yatirim_katki_tutari = ?, onceki_diger_katki_tutari = ?, onceki_katki_tutari = ?,
-                        cari_yatirim_katki = ?, cari_diger_katki = ?, cari_toplam_katki = ?, genel_toplam_katki = ?,
-                        brut_satis = ?, ihracat = ?, imalat = ?, diger_faaliyet = ?, use_detailed_profit_ratios = ?
-                    WHERE id = ? AND user_id = ?
+                        belge_no = %s, belge_tarihi = %s, karar = %s, yatirim_turu1 = %s, yatirim_turu2 = %s,
+                        vize_durumu = %s, donem = %s, il = %s, osb = %s, bolge = %s,
+                        katki_orani = %s, vergi_orani = %s, diger_oran = %s,
+                        toplam_tutar = %s, katki_tutari = %s, diger_katki_tutari = %s,
+                        cari_harcama_tutari = %s, toplam_harcama_tutari = %s, fiili_katki_tutari = %s, endeks_katki_tutari = %s,
+                        onceki_yatirim_katki_tutari = %s, onceki_diger_katki_tutari = %s, onceki_katki_tutari = %s,
+                        cari_yatirim_katki = %s, cari_diger_katki = %s, cari_toplam_katki = %s, genel_toplam_katki = %s,
+                        brut_satis = %s, ihracat = %s, imalat = %s, diger_faaliyet = %s, use_detailed_profit_ratios = %s
+                    WHERE id = %s AND user_id = %s
                     """,
                     (
                         belge_no, belge_tarihi, karar, yatirim_turu1, yatirim_turu2,
@@ -572,7 +582,7 @@ def veri_giris():
     if request.method == "POST":
         faaliyet_kodu = request.form.get("faaliyet_kodu")
         faaliyet_adi  = request.form.get("faaliyet_adi")
-        user_id = session["user"] 
+        user_id = session["user_id"]
         # TODO: Veritabanına kaydetme işlemi - user_id'yi de eklemeyi unutmayın
         flash(f"Kaydedildi: {faaliyet_kodu} - {faaliyet_adi}")
         return redirect(url_for("indirimlikurumlar.index"))
@@ -595,7 +605,7 @@ def get_all_tesvik_docs(user_id: int):
                 cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                 brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
             FROM tesvik_belgeleri
-            WHERE user_id = ?
+            WHERE user_id = %s
             ORDER BY id DESC
             """,
             (user_id,)
@@ -631,7 +641,7 @@ def delete_tesvik(doc_id):
     with get_conn() as conn:
         c = conn.cursor()
         try:
-            c.execute("DELETE FROM tesvik_belgeleri WHERE id=? AND user_id=?", (doc_id, user_id))
+            c.execute("DELETE FROM tesvik_belgeleri WHERE id=%s AND user_id=%s", (doc_id, user_id))
             conn.commit()
             # flash('Belge silindi.', 'warning')
             return jsonify({"status": "success", "title": "Silindi!", "message": "Belge başarıyla silindi."})
@@ -654,14 +664,14 @@ def download_tesvik_pdf(doc_id):
         c.execute(
             """
             SELECT
-                id, user, dosya_adi, yukleme_tarihi, belge_no, belge_tarihi,
+                id, user_id, dosya_adi, yukleme_tarihi, belge_no, belge_tarihi,
                 karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
                 katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
                 cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
                 onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                 cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                 brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
-            FROM tesvik_belgeleri WHERE id = ? AND user_id = ?
+            FROM tesvik_belgeleri WHERE id = %s AND user_id = %s
             """,
             (doc_id, user_id)
         )
@@ -675,9 +685,7 @@ def download_tesvik_pdf(doc_id):
     data = dict(zip(cols, row))
 
     # pdfkit’e wkhtmltopdf’in tam yolunu göster
-    config = pdfkit.configuration(
-        wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-    )
+    config = pdfkit.configuration(wkhtmltopdf=shutil.which("wkhtmltopdf"))
 
     # 2) Şablonu render edip HTML elde edelim
     html = render_template('kv_tablosu_pdf.html', data=data)

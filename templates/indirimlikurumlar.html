@@ -69,6 +69,9 @@
           onclick="document.getElementById('kvUploadInput').click()">
           📂 PDF’den İçe Aktar
         </button>
+        <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
+          🗑️ Verileri Temizle
+        </button>
       </div>
 
       <div class="mb-3">
@@ -164,7 +167,7 @@
       <div class="mb-3">
         <label>Dönem Seçiniz</label>
         <select name="donem" id="donem" class="form-select" required onchange="setOranlar()">
-          {% for yil in range(2030, 2014, -1) %}
+          {% for yil in range(2025, 2014, -1) %}
           <optgroup label="{{ yil }}">
             <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
             <option value="{{ yil }} - 2. GEÇİCİ">{{ yil }} - 2. GEÇİCİ</option>
@@ -1008,6 +1011,8 @@
 
     updateProgress(stepNum);
 
+    sessionStorage.setItem('last_step', stepNum);
+
     if (stepNum === 2) {
       setBolge();
       setOranlar();
@@ -1242,20 +1247,30 @@
       const el = document.querySelector(`[name="${destName}"]`);
       if (!el) return;
       const val = data[src];
-      el.value = (el.type === 'date')
+      const v = (el.type === 'date')
         ? convertToInputDateFormat(val || '')
         : (val ?? '');
+      el.value = v;
+
+      // ➕ PDF’den geleni kalıcılaştır
+      sessionStorage.setItem(`form_${destName}`, v);
     });
 
-    // Bölge değişince gizli alanı da güncelle (formunla uyumluysa)
+    // Bölge gizli alanı
     const b = document.getElementById('bolge');
     if (b) {
       b.dispatchEvent(new Event('change'));
       const bh = document.getElementById('bolge_hidden');
-      if (bh) bh.value = b.value;
+      if (bh) {
+        bh.value = b.value;
+        sessionStorage.setItem('form_bolge', b.value);
+        sessionStorage.setItem('form_bolge_hidden', b.value);
+      }
     }
 
-    // İstersen otomatik Aşama 2’ye geç
+    // Kaldığın adımı da kaydet (ör: otomatik Step 2’ye geçeceksen)
+    sessionStorage.setItem('last_step', '2');
+
     if (typeof goToStep2 === 'function') goToStep2();
   }
 
@@ -2344,32 +2359,41 @@
       tevsiMask.unmaskedValue = String(calculatedKazanc);
       tevsiMask.updateValue();
     } else {
-      tevsiKazancTargetElement.value = calculatedKazanc.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+      tevsiKazancTargetElement.value = calculatedKazanc.toLocaleString('tr-TR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     }
   }
 
 
   async function askWhichIncomeToApplyDiscount() {
+    const karar = (document.getElementById('karar')?.value || "").trim();
+    const vizeRaw = (document.getElementById('vize_durumu')?.value || '').trim().toLowerCase();
+    const isIsletme = vizeRaw.includes('evet') || vizeRaw.includes('işletme');
+
+    let html = `
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <button id="btn-yatirim" class="swal-choice-btn">
+        💼 <b>Sadece Yatırımdan Elde Edilen Kazançlar için</b><br>
+        <small>(Teşvik belgesi kapsamındaki yatırım kazançlarına uygulanır)</small>
+      </button>
+
+      <button id="btn-diger" class="swal-choice-btn ${isIsletme && karar !== '2025/9903' ? 'disabled-btn' : ''}">
+        🏢 <b>Sadece Diğer Faaliyetlerden Elde Edilen Kazançlar için</b><br>
+        <small>(Mevzuatta belirtilen süre ve oran sınırlamalarıyla)</small>
+      </button>
+
+      <button id="btn-herikisi" class="swal-choice-btn ${isIsletme && karar !== '2025/9903' ? 'disabled-btn' : ''}">
+        ⚖️ <b>Her İkisi İçin de Uygulamak İstiyorum</b><br>
+        <small>(Hem yatırım hem de diğer kazançlara indirim uygulanacak)</small>
+      </button>
+    </div>
+  `;
+
     Swal.fire({
       title: 'İndirimli kurumlar vergisini hangi kazanç için hesaplamak istediğinizi seçiniz.',
-      html: `
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button id="btn-yatirim" class="swal-choice-btn">
-          💼 <b>Sadece Yatırımdan Elde Edilen Kazançlar için</b><br>
-          <small>(Teşvik belgesi kapsamındaki yatırım kazançlarına uygulanır)</small>
-        </button>
-
-        <button id="btn-diger" class="swal-choice-btn">
-          🏢 <b>Sadece Diğer Faaliyetlerden Elde Edilen Kazançlar için</b><br>
-          <small>(Mevzuatta belirtilen süre ve oran sınırlamalarıyla)</small>
-        </button>
-
-        <button id="btn-herikisi" class="swal-choice-btn">
-          ⚖️ <b>Her İkisi İçin de Uygulamak İstiyorum</b><br>
-          <small>(Hem yatırım hem de diğer kazançlara indirim uygulanacak)</small>
-        </button>
-      </div>
-    `,
+      html,
       showConfirmButton: false,
       showCancelButton: true,
       cancelButtonText: 'İptal',
@@ -2384,61 +2408,65 @@
       didOpen: () => {
         const style = document.createElement('style');
         style.innerHTML = `
-    .swal-choice-btn {
-      background-color: #f8f9fa;
-      border: 1px solid #d1d1d1;
-      border-radius: 8px;
-      padding: 12px 14px;
-      text-align: left;
-      font-size: 14px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    .swal-choice-btn:hover {
-      background-color: #e9f7ef;
-      border-color: #28a745;
-      transform: scale(1.02);
-    }
-    .swal-choice-btn small { color: #555; }
-  `;
+        .swal-choice-btn {
+          background-color: #f8f9fa;
+          border: 1px solid #d1d1d1;
+          border-radius: 8px;
+          padding: 12px 14px;
+          text-align: left;
+          font-size: 14px;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .swal-choice-btn:hover {
+          background-color: #e9f7ef;
+          border-color: #28a745;
+          transform: scale(1.02);
+        }
+        .swal-choice-btn small { color: #555; }
+
+        /* 🔒 Pasif buton stili */
+        .disabled-btn {
+          background-color: #f0f0f0 !important;
+          color: #999 !important;
+          border-color: #ccc !important;
+          cursor: not-allowed !important;
+          pointer-events: none !important;
+          opacity: 0.7 !important;
+        }
+      `;
         document.head.appendChild(style);
 
-        // ⏳ DOM hazır olana kadar bekleyen versiyon
         const waitForButtons = () => new Promise(resolve => {
           const check = () => {
             const btnY = document.getElementById('btn-yatirim');
             const btnD = document.getElementById('btn-diger');
             const btnH = document.getElementById('btn-herikisi');
-            if (btnY && btnD && btnH) {
-              resolve({ btnY, btnD, btnH });
-            } else {
-              setTimeout(check, 50); // tekrar dene (50ms aralıkla)
-            }
+            if (btnY && btnD && btnH) resolve({ btnY, btnD, btnH });
+            else setTimeout(check, 50);
           };
           check();
         });
 
         (async () => {
           const { btnY, btnD, btnH } = await waitForButtons();
-          btnY.addEventListener('click', async () => await handleIncomeSelection('yatirim'));
-          btnD.addEventListener('click', async () => await handleIncomeSelection('diger'));
-          btnH.addEventListener('click', async () => await handleIncomeSelection('herikisi'));
+          if (btnY) btnY.addEventListener('click', async () => await handleIncomeSelection('yatirim'));
+          if (btnD && !btnD.classList.contains('disabled-btn')) btnD.addEventListener('click', async () => await handleIncomeSelection('diger'));
+          if (btnH && !btnH.classList.contains('disabled-btn')) btnH.addEventListener('click', async () => await handleIncomeSelection('herikisi'));
         })();
-
       }
     });
 
     // 🔹 Seçim sonrası yönlendirme
     async function handleIncomeSelection(choice) {
-      const karar = (document.getElementById('karar')?.value || "").trim();
       Swal.close();
-      await new Promise(r => setTimeout(r, 100)); // 👈 burada 100ms bekliyoruz
+      await new Promise(r => setTimeout(r, 100));
 
       if (choice === 'yatirim') {
         if (karar === "2025/9903") {
-          await askYatirimKazancQuestion9903(); // ✅ artık bekleyecek
+          await askYatirimKazancQuestion9903();
         } else {
-          await askTevsiKazancQuestion();
+          await askYatirimKazanciGirisi();
         }
         return;
       }
@@ -2454,11 +2482,13 @@
         } else {
           await askTevsiKazancQuestion();
         }
-        await startOtherActivitiesFlow9903(); // ✅ sırayla çağrılır
+        await startOtherActivitiesFlow9903();
         return;
       }
     }
   }
+
+
 
 
 
@@ -2477,18 +2507,67 @@
     Swal.fire({
       title: 'Diğer Faaliyetler İçin Üst Sınır',
       html: `Bu dönemde diğer faaliyet kazançlarına uygulanabilecek azami katkı tutarı:<br><br>
-         <b>${kucukOlan.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</b>`,
+       <b>${kucukOlan.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</b>`,
       icon: 'info',
       confirmButtonText: 'Tamam'
     }).then(() => {
-      // 🔹 Ticari bilanço + KKEG popup’ını göster, ardından Step 6’ya geç
+      // 🔹 Ticari bilanço + KKEG popup’ını göster, ardından Step 5’e geç
       if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
+        // popup’ı yine aç, ama yönlendirme 5’e
         promptTicariKariVeKKEGThenGoTo6();
-      } else {
-        _updateStepDisplay(6);
       }
+      _updateStepDisplay(5);
     });
   }
+
+
+
+
+  async function askYatirimKazanciGirisi() {
+    const inputResult = await Swal.fire({
+      title: 'Yatırımdan Elde Edilen Kazanç Tutarını Giriniz (TL)',
+      input: 'text',
+      inputPlaceholder: '0,00 TL',
+      showCancelButton: true,
+      confirmButtonText: 'Tamam',
+      cancelButtonText: 'Vazgeç',
+      reverseButtons: true,
+      customClass: {
+        popup: 'swal2-green-theme-popup',
+        header: 'swal2-green-theme-header',
+        title: 'swal2-green-theme-title',
+        icon: 'swal2-green-theme-icon',
+        confirmButton: 'swal2-green-theme-confirm-button',
+        cancelButton: 'swal2-green-theme-cancel-button',
+        htmlContainer: 'swal2-green-theme-html-container'
+      },
+      inputValidator: (value) => {
+        if (!value) return 'Bir tutar girmelisiniz!';
+        if (isNaN(parseFormattedNumber(value))) return 'Geçerli bir sayı girmelisiniz!';
+        return null;
+      }
+    });
+
+    if (inputResult.isConfirmed && inputResult.value) {
+      const enteredAmount = parseFormattedNumber(inputResult.value);
+      document.getElementById('tevsi_yatirim_kazanci').value =
+        enteredAmount.toLocaleString('tr-TR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    } else {
+      document.getElementById('tevsi_yatirim_kazanci').value = '';
+    }
+
+    // 📊 Son olarak ticari bilanço + KKEG popup’ını göster
+    if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
+      promptTicariKariVeKKEGThenGoTo6();
+    }
+
+    // 🚀 ama yönlendirme step 5'e olacak (önce ayrıntılı kazanç hesaplama)
+    _updateStepDisplay(5);
+  }
+
 
 
   async function askYatirimKazancQuestion9903() {
@@ -2539,7 +2618,10 @@
       if (inputResult.isConfirmed && inputResult.value) {
         const enteredAmount = parseFormattedNumber(inputResult.value);
         document.getElementById('tevsi_yatirim_kazanci').value =
-          enteredAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+          enteredAmount.toLocaleString('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
       }
     } else {
       await Swal.fire({
@@ -2561,12 +2643,9 @@
     // 📊 Son olarak ticari bilanço sorusuna geç
     if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
       promptTicariKariVeKKEGThenGoTo6();
-    } else {
-      _updateStepDisplay(6);
     }
+    _updateStepDisplay(5);
   }
-
-
 
 
   function askTevsiKazancQuestion() {
@@ -2587,10 +2666,10 @@
         cancelButton: 'swal2-green-theme-cancel-button',
         htmlContainer: 'swal2-green-theme-html-container'
       }
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
         // ✅ Kullanıcı "Evet" dedi — yatırım kazancını manuel girecek
-        Swal.fire({
+        const inputResult = await Swal.fire({
           title: 'Tevsi Yatırımlardan Elde Edilen Kazanç Tutarını Giriniz (TL)',
           input: 'text',
           inputPlaceholder: '0,00 TL',
@@ -2611,27 +2690,37 @@
             if (!value) return 'Bir tutar girmelisiniz!';
             if (isNaN(parseFormattedNumber(value))) return 'Geçerli bir sayı girmelisiniz!';
             return null;
-          }
-        }).then((inputResult) => {
-          if (inputResult.isConfirmed && inputResult.value) {
-            const enteredAmount = parseFormattedNumber(inputResult.value);
-            document.getElementById('tevsi_yatirim_kazanci').value = enteredAmount.toLocaleString('tr-TR', {
-              minimumFractionDigits: 2
+          },
+          didOpen: () => {
+            // 🔹 Yazarken otomatik TL biçimleme
+            const inputEl = Swal.getInput();
+            inputEl.addEventListener('input', () => {
+              let val = inputEl.value.replace(/\./g, '').replace(',', '.');
+              const num = parseFloat(val);
+              if (!isNaN(num)) {
+                inputEl.value = num.toLocaleString('tr-TR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              }
             });
-            document.getElementById('gerceklesen_tevsi_yatirim_tutari').value = '';
-            document.getElementById('toplam_sabit_kiymet_tutari').value = '';
-            document.getElementById('ticari_bilanco_kari').value = '';
-          } else {
-            document.getElementById('tevsi_yatirim_kazanci').value = '';
           }
-
-          // 🟡 Yatırım kazancı tamamlandı, şimdi diğer faaliyet sorusuna geçelim
-          askOtherActivitiesDiscountQuestion();
         });
 
+        if (inputResult.isConfirmed && inputResult.value) {
+          const enteredAmount = parseFormattedNumber(inputResult.value);
+          document.getElementById('tevsi_yatirim_kazanci').value =
+            enteredAmount.toLocaleString('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            });
+        } else {
+          document.getElementById('tevsi_yatirim_kazanci').value = '';
+        }
+
       } else {
-        // ❌ Kullanıcı "Hayır" dedi — yatırım kazancı otomatik hesaplanacak
-        Swal.fire({
+        // ❌ Kullanıcı "Hayır" dedi — otomatik hesaplanacak
+        await Swal.fire({
           title: 'Bilgilendirme',
           html: '<div style="text-align: justify;">Gerçekleşen Tevsi Yatırım Tutarını, Toplam Sabit Kıymet Tutarını ve Ticari Bilanço Karını girmeyi unutmayınız.</div>',
           icon: 'info',
@@ -2644,50 +2733,22 @@
             confirmButton: 'swal2-green-theme-confirm-button',
             htmlContainer: 'swal2-green-theme-html-container'
           }
-        }).then(() => {
-          document.getElementById('tevsi_yatirim_kazanci').value = '';
-          // 🟡 Yine yatırım kısmı tamamlandı, şimdi diğer faaliyet sorusuna geçelim
-          askOtherActivitiesDiscountQuestion();
         });
-      }
-    });
-  }
 
-
-  // 🔷 Diğer Faaliyet Kazancı Sorusu
-  function askOtherActivitiesDiscountQuestion() {
-    Swal.fire({
-      title: 'Diğer Faaliyetler',
-      html: '<div style="text-align: justify;">Diğer faaliyetlerden elde ettiğiniz kazançlarınıza indirimli kurumlar vergisi uygulamak istiyor musunuz?</div>',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Evet, istiyorum.',
-      cancelButtonText: 'Hayır, istemiyorum.',
-      reverseButtons: true,
-      customClass: {
-        popup: 'swal2-green-theme-popup',
-        header: 'swal2-green-theme-header',
-        title: 'swal2-green-theme-title',
-        icon: 'swal2-green-theme-icon',
-        confirmButton: 'swal2-green-theme-confirm-button',
-        cancelButton: 'swal2-green-theme-cancel-button',
-        htmlContainer: 'swal2-green-theme-html-container'
+        document.getElementById('tevsi_yatirim_kazanci').value = '';
       }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // ✅ Kullanıcı "Evet" dedi — diğer faaliyet kazancı da uygulanacak
-        sessionStorage.setItem('diger_kazanc_uygulama', 'evet');
-        askSmallestAmountQuestionForOtherActivities();
+
+      // 🔹 Kazanç bilgisi girildikten sonra ticari kâr + KKEG popup’ına geçelim
+      if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
+        promptTicariKariVeKKEGThenGoTo6();
       } else {
-        // ❌ Kullanıcı "Hayır" dedi
-        sessionStorage.setItem('diger_kazanc_uygulama', 'hayir');
-        sessionStorage.removeItem('kucuk_olan_diger_faaliyet');
-
-        // ⚙️ Eğer sadece yatırım kazancı varsa → Step 5'e geç
         _updateStepDisplay(5);
       }
-    });
+    }); // ✅ Fazladan parantez kaldırıldı
   }
+
+
+
 
 
   function askSmallestAmountQuestionForOtherActivities() {
@@ -2741,54 +2802,68 @@
       // 6’ya geçmeden önce Ticari Kâr + KKEG’yi iste
       if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
         promptTicariKariVeKKEGThenGoTo6();
-      } else {
-        _updateStepDisplay(6); // güvenlik için
       }
+      _updateStepDisplay(5); // güvenlik için
+
     });
   }
 
-  async function promptTicariKariVeKKEGThenGoTo6() {
-    const formatTL = (n) => (n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
 
-    const { value: vals, isConfirmed } = await Swal.fire({
+
+  async function promptTicariKariVeKKEGThenGoTo6() {
+    // 🔹 Türk formatında TL yazdıran fonksiyon (Python'daki tlformat eşdeğeri)
+    const formatTL = (num) => {
+      if (isNaN(num) || num === null) return "0,00";
+      return num
+        .toFixed(2)
+        .replace(".", ",")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    // 🔹 Virgül/nokta içeren string'i parse eden fonksiyon
+    const parseFormattedNumber = (val) => {
+      if (!val) return 0;
+      return parseFloat(val.replace(/\./g, "").replace(",", "."));
+    };
+
+    const { value: vals, isConfirmed, isDismissed } = await Swal.fire({
       title: 'Cari Dönem Verileri',
       html: `
       <div style="text-align:left">
-        <!-- Alan 1: Ticari Bilanço Kârı -->
-        <div style="display:flex; flex-direction:column; gap:6px; margin:0 0 14px 0;">
-          <label style="font-size:13px; color:#555; display:block;">Ticari Bilanço Kârı (TL)</label>
-          <input id="swal_ticari" class="swal2-input" placeholder="0,00 TL" inputmode="decimal" style="margin:0; width:100%;">
+        <!-- Ticari Bilanço Kârı -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:13px; color:#555;">Ticari Bilanço Kârı (TL)</label>
+          <input id="swal_ticari" class="swal2-input" placeholder="0,00" inputmode="decimal" style="margin:0; width:100%;">
         </div>
 
-        <!-- Alan 2: KKEG -->
-        <div style="display:flex; flex-direction:column; gap:6px; margin:0 0 14px 0;">
-          <label style="font-size:13px; color:#555; display:block;">KKEG (TL)</label>
-          <input id="swal_kkeg" class="swal2-input" placeholder="0,00 TL" inputmode="decimal" style="margin:0; width:100%;">
+        <!-- KKEG -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:13px; color:#555;">KKEG (TL)</label>
+          <input id="swal_kkeg" class="swal2-input" placeholder="0,00" inputmode="decimal" style="margin:0; width:100%;">
         </div>
-      </div>
 
-      <!-- Matrah kutusu -->
-      <div style="margin-top:6px; padding:14px; background:#f6faf6; border:1px solid #d5ead5; border-radius:10px;">
-        <div style="font-weight:700; font-size:14px; margin-bottom:6px;">Kurumlar Vergisi Matrahı</div>
-        <div style="font-size:13px; color:#444; margin-bottom:8px;">
-          Matrah = <b>Ticari Bilanço Kârı</b> + <b>KKEG</b>
+        <!-- Matrah kutusu -->
+        <div style="margin-top:6px; padding:14px; background:#f6faf6; border:1px solid #d5ead5; border-radius:10px;">
+          <div style="font-weight:700; font-size:14px; margin-bottom:6px;">Kurumlar Vergisi Matrahı</div>
+          <div style="font-size:13px; color:#444; margin-bottom:8px;">
+            Matrah = <b>Ticari Bilanço Kârı</b> + <b>KKEG</b>
+          </div>
+          <input id="swal_matrah" class="swal2-input" placeholder="0,00" readonly
+                 style="margin:0; background:#f0f0f0; width:100%;">
         </div>
-        <input id="swal_matrah" class="swal2-input" placeholder="0,00 TL" readonly
-               style="margin:0; background:#f0f0f0; width:100%;">
       </div>
     `,
       focusConfirm: false,
-      showCancelButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
+      showCancelButton: true, // 🔹 İPTAL butonu eklendi
+      cancelButtonText: 'İptal',
       confirmButtonText: 'Kaydet ve devam et',
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      reverseButtons: true, // 🔹 buton sırasını ters çevir: İptal solda, Kaydet sağda
       customClass: {
         popup: 'swal2-green-theme-popup',
-        header: 'swal2-green-theme-header',
-        title: 'swal2-green-theme-title',
-        icon: 'swal2-green-theme-icon',
         confirmButton: 'swal2-green-theme-confirm-button',
-        htmlContainer: 'swal2-green-theme-html-container'
+        cancelButton: 'swal2-green-theme-cancel-button'
       },
       didOpen: () => {
         const tEl = document.getElementById('swal_ticari');
@@ -2802,8 +2877,17 @@
           mEl.value = formatTL(sum);
         };
 
-        tEl.addEventListener('input', update);
-        kEl.addEventListener('input', update);
+        // 🔹 Anlık formatlama
+        [tEl, kEl].forEach(el => {
+          el.addEventListener("input", (e) => {
+            const caretPos = el.selectionStart;
+            const val = parseFormattedNumber(e.target.value);
+            e.target.value = formatTL(val);
+            el.setSelectionRange(caretPos, caretPos);
+            update();
+          });
+        });
+
         update();
       },
       preConfirm: () => {
@@ -2817,6 +2901,12 @@
       }
     });
 
+    // 🔹 İptal durumunda hiçbir şey yapılmaz
+    if (isDismissed) {
+      console.log("❌ Kullanıcı cari dönem girişini iptal etti.");
+      return;
+    }
+
     if (isConfirmed && vals) {
       const tOut = document.getElementById('ticari_bilanco_kari');
       const kOut = document.getElementById('kkeg');
@@ -2827,9 +2917,9 @@
       if (mOut) mOut.value = formatTL(vals.m);
 
       if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
-    }
 
-    _updateStepDisplay(6);
+      _updateStepDisplay(6);
+    }
   }
 
 
@@ -2882,38 +2972,36 @@
 
   function goToStep4() { _updateStepDisplay(4); }
 
-  function goToStep5(source) {
+  async function goToStep5(source) {
     if (source === 'from6') {
       _updateStepDisplay(5);
       return;
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const karar = (document.getElementById('karar')?.value || "").trim();
       const vizeDurumu = (document.getElementById('vize_durumu')?.value || "").trim().toLowerCase();
 
       // 🟩 2025/9903 özel kuralı:
       if (karar === "2025/9903") {
         console.log("✅ 2025/9903 kararı: yeni kazanç seçimi sorusu gösteriliyor.");
-        askWhichIncomeToApplyDiscount(); // 🆕 yeni ana soru (yatırım / diğer / her ikisi)
+        await askWhichIncomeToApplyDiscount(); // 🆕 yatırım / diğer / her ikisi sorusu
         return;
       }
 
-      // 🟨 Diğer kararlar için klasik mantık:
+      // 🟨 Diğer kararlar için klasik 32/A mantığı:
       sessionStorage.removeItem('kucuk_olan_diger_faaliyet');
 
-      if (vizeDurumu.includes("evet")) {
-        // Tevsi yatırımı olan mükellefler için
-        askTevsiKazancQuestion();
-      } else if (vizeDurumu.includes("hayır") || vizeDurumu.includes("hayir")) {
-        // Tevsi yatırımı olmayanlar (sadece diğer faaliyetler)
-        askOtherActivitiesDiscountQuestion();
+      if (vizeDurumu.includes("evet") || vizeDurumu.includes("hayır") || vizeDurumu.includes("hayir")) {
+        console.log("📘 2025/9903 dışı karar: yeni kazanç seçimi sorusu gösteriliyor.");
+        await askWhichIncomeToApplyDiscount(); // ✅ yeni sistem burada da çalışacak
       } else {
         // Eğer vize durumu boş veya tanımsızsa doğrudan step 5’e geç
         _updateStepDisplay(5);
       }
     }, 100);
   }
+
 
 
   function goToStep6() { _updateStepDisplay(6); }
@@ -2924,6 +3012,45 @@
 
   const currentBelgeJSData = {{ current_belge | tojson | safe
   }};
+
+
+  function clearAllFormData() {
+    Swal.fire({
+      title: "Tüm veriler temizlensin mi?",
+      text: "Bu işlem geri alınamaz. Formdaki tüm bilgiler silinecek.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Evet, temizle",
+      cancelButtonText: "Vazgeç",
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      // Tüm input, select ve textarea alanlarını temizle
+      document.querySelectorAll("input, select, textarea").forEach(el => {
+        if (el.type === "file") return;
+        if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+        else el.value = "";
+      });
+
+      // Step kontrol, hesaplama veya oturum verilerini de sıfırla
+      sessionStorage.clear();
+
+      Swal.fire({
+        icon: "success",
+        title: "Form temizlendi",
+        showConfirmButton: false,
+        timer: 1200,
+        toast: true,
+        position: "top-end"
+      });
+
+      // İlk adıma dön (isteğe bağlı)
+      if (typeof _updateStepDisplay === "function") {
+        _updateStepDisplay(1);
+      }
+    });
+  }
+
 
   document.addEventListener("DOMContentLoaded", function () {
 
@@ -3003,6 +3130,24 @@
       });
     }
 
+    // 🔹 1. Daha önce kaydedilmiş form verilerini geri yükle
+    document.querySelectorAll("input, select, textarea").forEach(el => {
+      if (el.type === "file") return;
+      const name = el.name || el.id;
+      const saved = sessionStorage.getItem(`form_${name}`);
+      if (saved !== null) el.value = saved;
+    });
+
+    // 🔹 2. Tüm input, select ve textarea alanlarını dinle
+    document.querySelectorAll("input, select, textarea").forEach(el => {
+      if (el.type === "file") return;
+      el.addEventListener("input", () => {
+        const name = el.name || el.id;
+        if (name) {
+          sessionStorage.setItem(`form_${name}`, el.value);
+        }
+      });
+    });
 
     function blinkAllInfoIcons(attempt = 0) {
       const icons = document.querySelectorAll('.info-icon-styled');
@@ -3035,28 +3180,57 @@
       });
     }
 
+
+
+    function restoreFormFromSession() {
+      document.querySelectorAll("input, select, textarea").forEach(el => {
+        if (el.type === "file") return;
+        const name = el.name || el.id;
+        if (!name) return;
+        const saved = sessionStorage.getItem(`form_${name}`);
+        if (saved !== null) {
+          el.value = saved;
+        }
+      });
+
+      // Türetilen alanlar doğru hesaplansın
+      try {
+        setBolge();
+        setOranlar();
+        calculateRatios();
+        calculateKVMatrah();
+        calculateTevsiKazancAutomatically();
+      } catch (e) {
+        console.warn('restore recalcs skipped:', e);
+      }
+    }
+
     // 2) Tüm adımları gizle
     ALL_STEPS_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.add("hidden-step");
     });
 
+    restoreFormFromSession();
+
     // 3) URL hash varsa ilgili adıma geç
     const hash = window.location.hash;
+    const lastStep = parseInt(sessionStorage.getItem('last_step') || '1');
+
     if (hash.startsWith("#step")) {
       const stepNum = hash.replace("#step", "");
       const fn = window["goToStep" + stepNum];
       if (typeof fn === "function") {
         fn();
-        document.getElementById("step" + stepNum)?.scrollIntoView({
-          behavior: "smooth"
-        });
+        document.getElementById("step" + stepNum)?.scrollIntoView({ behavior: "smooth" });
       } else {
-        _updateStepDisplay(1); // URL hash'i yoksa veya geçersizse Aşama 1'i göster
+        _updateStepDisplay(lastStep); // 🔹 sessionStorage'daki adıma dön
       }
     } else {
-      goToStep1();
+      _updateStepDisplay(lastStep); // 🔹 varsayılan olarak son aşamaya dön
     }
+
+
 
     // 4) Diğer init işlemleri
     const clearButton = document.getElementById('clearProfitData');
@@ -3324,33 +3498,21 @@
     handleKarar9903();
   });
 
-
+  // ⏪ Kullanıcı geri tuşuyla dönmüşse son aşamaya otomatik dön
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      restoreFormFromSession();
+      const lastStep = parseInt(sessionStorage.getItem('last_step') || '1');
+      _updateStepDisplay(lastStep);
+    }
+  });
 
 
   // Mevcut belge verisini forma bas (isteğe bağlı kısa yardımcılar)
   const setVal = (sel, v) => { const el = document.querySelector(sel); if (el) el.value = v ?? ''; };
   const fmt = n => (n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
 
-  // Form sekmesi linki: PDF'den içe aktarmayı sor
-  const indirimLink = document.querySelector('a.nav-link[href*="sekme=form"]');
-  if (indirimLink) {
-    indirimLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      Swal.fire({
-        title: 'PDF’den içe aktarılsın mı?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Evet',
-        cancelButtonText: 'Hayır'
-      }).then(res => {
-        if (res.isConfirmed) {
-          document.getElementById('kvUploadInput')?.click();
-        } else {
-          window.location.href = '{{ url_for("indirimlikurumlar.index") }}?sekme=form#step1';
-        }
-      });
-    });
-  }
+
 
   // Gizli file input → PDF parser
   const kvInput = document.getElementById('kvUploadInput');

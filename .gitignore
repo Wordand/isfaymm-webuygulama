@@ -1,14 +1,56 @@
-# Python cache dosyaları
+# Python cache ve derleme dosyaları
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.pdb
 
-# Ortam dosyası (gizli anahtarlar burada)
+# Sanal ortamlar
+env/
+venv/
+.venv/
+
+# Ortam değişkenleri ve gizli anahtarlar
 .env
+.env.*
 
-# SQLite veritabanı
+# SQLite veya geçici veritabanı dosyaları
 instance/
 *.db
+*.sqlite3
+
+# Logs ve geçici çıktı dosyaları
+*.log
+logs/
+tmp/
+*.bak
+*.swp
+.DS_Store
 
 # IDE / editör ayarları
 .vscode/
 .idea/
+*.code-workspace
+
+# PyInstaller, build veya dist klasörleri
+build/
+dist/
+*.spec
+
+# Jupyter veya geçici çalışma dosyaları
+.ipynb_checkpoints/
+__MACOSX/
+
+# PDF / Excel / geçici çıktı dosyaları
+*.xlsx
+*.xls
+*.pdf
+
+# HTML export, rapor çıktıları (eğer otomatik üretiliyorsa)
+reports/
+exports/
+outputs/
+
+# Render özel
+# Render zaten kendi ortam değişkenlerini sağlar
+# Bu yüzden veritabanı erişim bilgilerini .env içine yaz, commit etme

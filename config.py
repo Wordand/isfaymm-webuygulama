@@ -8,6 +8,7 @@ load_dotenv(find_dotenv())
 # Ortam değişkenlerinden oku
 SECRET_KEY = os.getenv("SECRET_KEY")
 FERNET_KEY = os.getenv("FERNET_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # İzin verilen dosya uzantıları
 ALLOWED_EXTENSIONS = {"pdf", "docx", "xlsx", "xls"}

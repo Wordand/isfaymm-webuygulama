@@ -16,12 +16,8 @@ from fpdf import FPDF
 from cryptography.fernet import Fernet
 
 
-
-
-
-
 # Veri İşleme ve Analiz
-import sqlite3
+
 import pandas as pd
 import pdfplumber
 import re
@@ -38,6 +34,8 @@ import calendar
 import xlsxwriter
 import math
 import traceback
+import psycopg2 
+import psycopg2.extras
 
 
 from collections import defaultdict
@@ -54,24 +52,29 @@ from hesaplar import BILANCO_HESAPLARI
 from gelir import GELIR_TABLOSU_HESAPLARI
 from finansal_oranlar import hesapla_finansal_oranlar, analiz_olustur
 from auth import login_required
-from services.db import get_conn, migrate_tesvik_columns
+from services.db import migrate_tesvik_columns
 from routes.indirimlikurumlar import bp as indirim_bp
 from routes.blog import blog_bp, blog_posts
 from config import tarifeler, asgari_ucretler
 
 
+app = Flask(__name__)
+
+# ✅ Supabase bağlantısı (Render Environment'dan)
+app.config["DATABASE_URL"] = os.getenv("DATABASE_URL")
+
+if not app.config["DATABASE_URL"]:
+    raise ValueError("DATABASE_URL bulunamadı. Render environment ayarlarını kontrol et.")
+
+# ✅ Yeni bağlantı fonksiyonu
+def get_conn():
+    conn = psycopg2.connect(app.config["DATABASE_URL"])
+    return conn
 
 
 
-
-
-app = Flask(__name__, instance_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance'))
-
-
-
-import os
 from werkzeug.security import generate_password_hash
-from services.db import get_conn
+
 
 def bootstrap_admin_from_env():
     username = os.getenv("ADMIN_USERNAME")
@@ -83,7 +86,7 @@ def bootstrap_admin_from_env():
 
     with get_conn() as conn:
         c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username = ?", (username,))
+        c.execute("SELECT password FROM users WHERE username = %s", (username,))
         row = c.fetchone()
 
         hashed_pw = generate_password_hash(password)
@@ -91,33 +94,15 @@ def bootstrap_admin_from_env():
         if not row:
             c.execute("""
                 INSERT INTO users (username, password, is_approved)
-                VALUES (?, ?, 1)
+                VALUES (%s, %s, 1)
             """, (username, hashed_pw))
             conn.commit()
             print(f"✅ Admin oluşturuldu ve onaylandı: {username}")
         else:
-            # Şifre değişmişse güncelle
-            from werkzeug.security import check_password_hash
-            existing_hash = row["password"] if isinstance(row, sqlite3.Row) else row[0]
-            if not check_password_hash(existing_hash, password):
-                c.execute("UPDATE users SET password=? WHERE username=?", (hashed_pw, username))
-                conn.commit()
-                print(f"🔄 Admin şifresi .env dosyasına göre güncellendi: {username}")
-            else:
-                print(f"ℹ️ Admin zaten mevcut ve şifre güncel: {username}")
+            print(f"ℹ️ Admin zaten mevcut: {username}")
 
 
 
-# --- Veritabanı kontrolü ve güvenli başlatma ---
-from init_db import base_dir, database_path
-
-if os.path.exists(database_path):
-    print("✅ Mevcut veritabanı bulundu.")
-else:
-    print("🆕 Veritabanı yok, ilk kez oluşturuluyor...")
-    import init_db  # tablo yapısını kurar
-    
-    
     
 # --- Flask-Limiter: Giriş denemelerini kısıtla ---
 limiter = Limiter(
@@ -126,45 +111,55 @@ limiter = Limiter(
     default_limits=[]
 )
 
+
 app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
-
-
-app.config.from_object(config)
-
-app.config['DATABASE'] = os.path.join(app.instance_path, 'database.db')
-
-os.makedirs(app.instance_path, exist_ok=True)
-
-app.secret_key = app.config["SECRET_KEY"]
-
-fernet = Fernet(app.config["FERNET_KEY"])
+app.secret_key = config.SECRET_KEY
+fernet = Fernet(config.FERNET_KEY)
 
 app.debug = os.getenv("FLASK_DEBUG", "0") == "1"
 
 
+app.config['ENV'] = 'production'
+
+if not app.debug:
+    from flask_talisman import Talisman
+    Talisman(app, content_security_policy=None)
+
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,   # HTTPS çerez koruması
+        SESSION_COOKIE_HTTPONLY=True, # JS erişemez
+        SESSION_COOKIE_SAMESITE='Lax'
+    )
+
+ALLOWED_EXTENSIONS = config.ALLOWED_EXTENSIONS
 
 
-
+# --- Context Processor ---
 @app.context_processor
 def inject_login_status():
-    # session['logged_in'] True/False tuttuğumuz için
-    return dict(is_logged_in=session.get('logged_in', False))
+    return dict(is_logged_in=session.get("logged_in", False))
 
 
+# --- Supabase Bağlantı Kontrolü ---
+try:
+    print("🔍 Supabase bağlantısı test ediliyor...")
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT 1 FROM users LIMIT 1;")
+    conn.close()
+    print("✅ Supabase bağlantısı aktif ve tablo erişimi başarılı.")
+except Exception as e:
+    print(f"⚠️ Supabase bağlantı testi başarısız: {e}")
 
 
+# --- Admin Hesabı Otomatik Kurulum ---
 with app.app_context():
-    migrate_tesvik_columns()
-
-    from services.db import migrate_users_table
-    migrate_users_table()
-
-    # Admin bootstrap da context içinde çalışmalı
     try:
         bootstrap_admin_from_env()
     except Exception as e:
         print(f"⚠️ Admin oluşturulurken hata: {e}")
+
 
 
 app.register_blueprint(indirim_bp)
@@ -172,35 +167,13 @@ app.register_blueprint(blog_bp, url_prefix='/blog')
 
 
 
-ALLOWED_EXTENSIONS = app.config["ALLOWED_EXTENSIONS"]
+
 
 def allowed_file(filename):
     return (
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
-
-
-
-FAVORI_DOSYA = "favoriler.json"
-NOT_DOSYA = "notlar.json"
-
-
-NEGATIVE_BILANCO_CODES = set([
-    '103', '119', '122', '124', '129', '137', '139', '158',
-    '199', '222', '224', '229', '237', '239', '241', '243',
-    '244', '246', '247', '249', '257', '268', '278', '298',
-    '299', '302', '308', '322', '337', '371', '402', '408',
-    '422', '437', '501', '503', '580', '591'
-])
-
-NEGATIVE_GELIR_CODES = set([
-    '610', '611', '612', '620', '621', '622', '623', '630',
-    '631', '632', '653', '654', '655', '656', '657', '658',
-    '659', '660', '661', '680', '681', '689', '690'
-])
-
-
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -222,12 +195,13 @@ def register():
         try:
             with get_conn() as conn:
                 c = conn.cursor()
-                c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+                c.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
                 conn.commit()
-            flash("Kayıt başarılı! Giriş yapabilirsiniz.", "success") # Kategori eklendi
+            flash("Kayıt başarılı! Giriş yapabilirsiniz.", "success")
             return redirect(url_for("login"))
-        except sqlite3.IntegrityError:
-            flash("Bu kullanıcı adı zaten var. Lütfen farklı bir kullanıcı adı seçin.", "danger") # Kategori eklendi
+        except psycopg2.IntegrityError:            
+            conn.rollback()
+            flash("Bu kullanıcı adı zaten var. Lütfen farklı bir kullanıcı adı seçin.", "danger")
             return render_template("register.html")
         
     return render_template("register.html")
@@ -235,45 +209,54 @@ def register():
 
 
 @app.route("/login", methods=["GET", "POST"])
-@limiter.limit("5 per 10 minutes")  # 10 dakikada en fazla 5 deneme
+@limiter.limit("50 per 10 minutes")  # 10 dakikada en fazla 5 deneme
 def login():
     # Eğer kullanıcı zaten giriş yapmışsa, ana sayfaya yönlendir
     if session.get("user_id"):
         return redirect(url_for('home'))
 
     if request.method == "POST":
-        username = request.form["username"]
+        username = request.form["username"].strip()
         password = request.form["password"]
 
         with get_conn() as conn:
             c = conn.cursor()
-            c.execute("SELECT id, password, is_approved FROM users WHERE username = ?", (username,))
+            c.execute(
+                "SELECT id, password, is_approved FROM users WHERE username = %s",
+                (username,)
+            )
             result = c.fetchone()
-        
-        if result and check_password_hash(result["password"], password):
-            # 🧩 Onay kontrolü ekledik
-            if result["is_approved"] == 0:
+
+        # Kullanıcı bulunduysa ve şifre doğruysa
+        if result and check_password_hash(result[1], password):
+            user_id, hashed_pw, is_approved = result
+
+            # Onay kontrolü
+            if is_approved == 0:
                 flash("Hesabınız henüz admin tarafından onaylanmadı.", "warning")
                 return render_template("login.html")
 
             # 🔐 Giriş başarılı
-            session["user_id"] = result["id"]
-            session["user"] = username
-            session['logged_in'] = True 
+            session.clear()  # önceki session'ı temizle
+            session["user_id"] = user_id       # ✅ integer ID
+            session["username"] = username      # ✅ gösterim için
+            session["logged_in"] = True
             session.permanent = True  # 30 dk session süresi aktif
-            
-            flash(f"Hoş geldiniz, {username}!", "success") 
+
+            flash(f"Hoş geldiniz, {username}!", "success")
 
             # 👑 Admin ise doğrudan admin paneline yönlendir
             if username.lower() == "admin":
                 return redirect(url_for("admin_users"))
             else:
-                return redirect(url_for("home")) 
+                return redirect(url_for("home"))
+
         else:
-            flash("Hatalı kullanıcı adı veya şifre.", "danger") 
+            flash("Hatalı kullanıcı adı veya şifre.", "danger")
             return render_template("login.html")
-    
+
     return render_template("login.html")
+
 
 
 
@@ -310,7 +293,7 @@ def home():
 @login_required
 def admin_users():
     # Sadece admin kullanıcı görebilsin
-    if session.get("user") != "admin":
+    if session.get("username", "").lower() != "admin":
         flash("Bu sayfaya erişim izniniz yok.", "danger")
         return redirect(url_for("home"))
 
@@ -324,13 +307,13 @@ def admin_users():
 @app.route("/admin/approve/<int:user_id>")
 @login_required
 def approve_user(user_id):
-    if session.get("user") != "admin":
+    if session.get("username", "").lower() != "admin":
         flash("Bu işlemi yapma yetkiniz yok.", "danger")
         return redirect(url_for("home"))
 
     with get_conn() as conn:
         c = conn.cursor()
-        c.execute("UPDATE users SET is_approved = 1 WHERE id = ?", (user_id,))
+        c.execute("UPDATE users SET is_approved = 1 WHERE id = %s", (user_id,))
         conn.commit()
     flash("Kullanıcı başarıyla onaylandı ✅", "success")
     return redirect(url_for("admin_users"))
@@ -339,7 +322,7 @@ def approve_user(user_id):
 @app.route("/admin/reject/<int:user_id>")
 @login_required
 def reject_user(user_id):
-    if session.get("user") != "admin":
+    if session.get("username", "").lower() != "admin":
         flash("Bu işlemi yapma yetkiniz yok.", "danger")
         return redirect(url_for("home"))
 
@@ -347,14 +330,14 @@ def reject_user(user_id):
         c = conn.cursor()
 
         # Kullanıcı adı admin olan hesap silinemez
-        c.execute("SELECT username FROM users WHERE id = ?", (user_id,))
+        c.execute("SELECT username FROM users WHERE id = %s", (user_id,))
         row = c.fetchone()
-        if row and row["username"].lower() == "admin":
+        if row and row[0].lower() == "admin":
             flash("Admin hesabı silinemez ❌", "warning")
             return redirect(url_for("admin_users"))
 
         # Diğer kullanıcıyı sil
-        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        c.execute("DELETE FROM users WHERE id = %s", (user_id,))
         conn.commit()
 
     flash("Kullanıcı kaydı silindi ❌", "info")
@@ -362,8 +345,7 @@ def reject_user(user_id):
 
 
 
-from werkzeug.security import generate_password_hash, check_password_hash
-import re
+
 
 # --- Kullanıcı kendi şifresini değiştirme ---
 @limiter.limit("5 per 5 minutes")
@@ -398,16 +380,16 @@ def change_password():
         # Mevcut parola kontrolü
         with get_conn() as conn:
             c = conn.cursor()
-            c.execute("SELECT id, password FROM users WHERE username = ?", (username,))
+            c.execute("SELECT id, password FROM users WHERE username = %s", (username,))
             row = c.fetchone()
 
-            if not row or not check_password_hash(row["password"], current):
+            if not row or not check_password_hash(row[1], current):
                 flash("Mevcut şifre hatalı.", "danger")
                 return render_template("change_password.html")
 
             # Güncelle
             new_hash = generate_password_hash(new1)
-            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, row["id"]))
+            c.execute("UPDATE users SET password = %s WHERE id = %s", (new_hash, row[0]))
             conn.commit()
 
         flash("Şifreniz başarıyla değiştirildi.", "success")
@@ -421,13 +403,13 @@ def change_password():
 @app.route("/admin/reset_password/<int:user_id>", methods=["GET", "POST"])
 @login_required
 def admin_reset_password(user_id):
-    if session.get("user") != "admin":
+    if session.get("username", "").lower() != "admin":
         flash("Bu işlemi yapma yetkiniz yok.", "danger")
         return redirect(url_for("home"))
 
     with get_conn() as conn:
         c = conn.cursor()
-        c.execute("SELECT id, username FROM users WHERE id = ?", (user_id,))
+        c.execute("SELECT id, username FROM users WHERE id = %s", (user_id,))
         user = c.fetchone()
         if not user:
             flash("Kullanıcı bulunamadı.", "warning")
@@ -451,17 +433,17 @@ def admin_reset_password(user_id):
             return render_template("admin_reset_password.html", user=user)
 
         # Admin kendi hesabını sıfırlıyorsa ekstra onay (opsiyonel)
-        if user["username"].lower() == "admin" and session.get("user") != "admin":
+        if user[1].lower() == "admin":
             flash("Admin hesabını sadece admin değiştirebilir.", "danger")
             return redirect(url_for("admin_users"))
 
         new_hash = generate_password_hash(new1)
         with get_conn() as conn:
             c = conn.cursor()
-            c.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, user_id))
+            c.execute("UPDATE users SET password = %s WHERE id = %s", (new_hash, user_id))
             conn.commit()
 
-        flash(f"{user['username']} kullanıcısının şifresi sıfırlandı.", "success")
+        flash(f"{user[1]} kullanıcısının şifresi sıfırlandı.", "success")
         return redirect(url_for("admin_users"))
 
     return render_template("admin_reset_password.html", user=user)
@@ -536,6 +518,29 @@ def sitemap():
     response = make_response(xml)
     response.headers["Content-Type"] = "application/xml"
     return response
+
+
+
+
+
+
+FAVORI_DOSYA = "favoriler.json"
+NOT_DOSYA = "notlar.json"
+
+
+NEGATIVE_BILANCO_CODES = set([
+    '103', '119', '122', '124', '129', '137', '139', '158',
+    '199', '222', '224', '229', '237', '239', '241', '243',
+    '244', '246', '247', '249', '257', '268', '278', '298',
+    '299', '302', '308', '322', '337', '371', '402', '408',
+    '422', '437', '501', '503', '580', '591'
+])
+
+NEGATIVE_GELIR_CODES = set([
+    '610', '611', '612', '620', '621', '622', '623', '630',
+    '631', '632', '653', '654', '655', '656', '657', '658',
+    '659', '660', '661', '680', '681', '689', '690'
+])
 
 
 
@@ -650,13 +655,13 @@ def veri_giris():
     yuklenen_tum_belgeler = []
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
         uid = session.get("user_id")
         c.execute(
-            "SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=? ORDER BY unvan",
+            "SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan",
             (uid,)
         )
         mukellefler = [{"vergi_kimlik_no": row["vergi_kimlik_no"], "unvan": row["unvan"]} for row in c.fetchall()]
@@ -667,7 +672,7 @@ def veri_giris():
                 SELECT DISTINCT b.donem 
                 FROM beyanname b
                 JOIN mukellef m ON b.mukellef_id = m.id
-                WHERE m.vergi_kimlik_no = ? AND m.user_id = ?
+                WHERE m.vergi_kimlik_no = %s AND m.user_id = %s
                 ORDER BY b.donem DESC
             """, (secili_vkn, uid))
             donemler = [row["donem"] for row in c.fetchall()]
@@ -679,7 +684,7 @@ def veri_giris():
                         b.veriler, b.yuklenme_tarihi
                     FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id = m.id
-                    WHERE m.vergi_kimlik_no = ? AND m.user_id = ? AND b.donem = ?
+                    WHERE m.vergi_kimlik_no = %s AND m.user_id = %s AND b.donem = %s
                     ORDER BY b.yuklenme_tarihi DESC
                 """, (secili_vkn, uid, secili_donem))
             else:
@@ -688,27 +693,34 @@ def veri_giris():
                         b.veriler, b.yuklenme_tarihi
                     FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id = m.id
-                    WHERE m.vergi_kimlik_no = ? AND m.user_id = ?
+                    WHERE m.vergi_kimlik_no = %s AND m.user_id = %s
                     ORDER BY b.donem DESC, b.yuklenme_tarihi DESC
                 """, (secili_vkn, uid))
 
 
             rows = c.fetchall()
             for r in rows:
-                # ✅ Tarihi dönüştür
                 tarih = r["yuklenme_tarihi"]
+
                 if tarih:
                     try:
-                        utc_dt = datetime.strptime(tarih, "%Y-%m-%d %H:%M:%S")
-                        istanbul_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
-                        tarih = istanbul_dt.strftime("%Y-%m-%d %H:%M:%S")
-                    except Exception as e:
+                        # PostgreSQL zaten datetime nesnesi döndürür
+                        if isinstance(tarih, str):
+                            # Eğer string geldiyse ISO formatta parse et
+                            tarih_obj = datetime.fromisoformat(tarih)
+                        else:
+                            tarih_obj = tarih  # datetime zaten
 
+                        # UTC kabul edip İstanbul saatine çevir
+                        istanbul_dt = tarih_obj.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
+                        tarih = istanbul_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+                    except Exception:
                         tarih = "Tarih Hatası"
                 else:
                     tarih = "Tarih Yok"
-
-
+                    
+                    
                 yuklenen_tum_belgeler.append({
                     "id": r["id"],
                     "unvan": r["unvan"],
@@ -887,17 +899,17 @@ def kaydet_beyanname(sonuc, belge_turu):
         c = conn.cursor()
 
         # --- mükellef kontrol ---
-        c.execute("SELECT id FROM mukellef WHERE user_id=? AND vergi_kimlik_no=?", (uid, file_vkn))
+        c.execute("SELECT id FROM mukellef WHERE user_id=%s AND vergi_kimlik_no=%s", (uid, file_vkn))
         row = c.fetchone()
         if row:
             mukellef_id = row[0]
-            c.execute("UPDATE mukellef SET unvan=? WHERE id=? AND user_id=?", (file_unvan, mukellef_id, uid))
+            c.execute("UPDATE mukellef SET unvan=%s WHERE id=%s AND user_id=%s", (file_unvan, mukellef_id, uid))
         else:
             c.execute(
-                "INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (?, ?, ?)",
+                "INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (%s, %s, %s)",
                 (uid, file_vkn, file_unvan)
             )
-            mukellef_id = c.lastrowid
+            mukellef_id = c.fetchone()[0]
 
         # --- veriyi şifrele ---
         encrypted_data = fernet.encrypt(
@@ -907,7 +919,7 @@ def kaydet_beyanname(sonuc, belge_turu):
         # --- beyanname kontrol ---
         c.execute("""
             SELECT id FROM beyanname 
-            WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?
+            WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s
         """, (uid, mukellef_id, file_donem, belge_turu))
         existing = c.fetchone()
 
@@ -915,8 +927,8 @@ def kaydet_beyanname(sonuc, belge_turu):
             # ✅ Güncelleme
             c.execute("""
                 UPDATE beyanname 
-                SET veriler=?, yuklenme_tarihi=CURRENT_TIMESTAMP 
-                WHERE id=?
+                SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP 
+                WHERE id=%s
             """, (encrypted_data, existing[0]))
             mesajlar.append({
                 "type": "info",
@@ -927,7 +939,7 @@ def kaydet_beyanname(sonuc, belge_turu):
             # ✅ Yeni kayıt
             c.execute("""
                 INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler) 
-                VALUES (?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s)
             """, (uid, mukellef_id, file_donem, belge_turu, encrypted_data))
             mesajlar.append({
                 "type": "success",
@@ -966,15 +978,15 @@ def kaydet_beyanname(sonuc, belge_turu):
 
                     c.execute("""
                         SELECT id FROM beyanname
-                        WHERE user_id=? AND mukellef_id=? AND donem=? AND tur='bilanco'
+                        WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur='bilanco'
                     """, (uid, mukellef_id, onceki_yil))
                     exists_prev = c.fetchone()
 
                     if exists_prev:
                         c.execute("""
                             UPDATE beyanname
-                            SET veriler=?, yuklenme_tarihi=CURRENT_TIMESTAMP
-                            WHERE id=?
+                            SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
+                            WHERE id=%s
                         """, (encrypted_prev, exists_prev[0]))
                         mesajlar.append({
                             "type": "info",
@@ -984,7 +996,7 @@ def kaydet_beyanname(sonuc, belge_turu):
                     else:
                         c.execute("""
                             INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler)
-                            VALUES (?, ?, ?, 'bilanco', ?)
+                            VALUES (%s, %s, %s, 'bilanco', %s)
                         """, (uid, mukellef_id, onceki_yil, encrypted_prev))
                         mesajlar.append({
                             "type": "success",
@@ -1029,15 +1041,15 @@ def kaydet_beyanname(sonuc, belge_turu):
 
                     c.execute("""
                         SELECT id FROM beyanname
-                        WHERE user_id=? AND mukellef_id=? AND donem=? AND tur='gelir'
+                        WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur='gelir'
                     """, (uid, mukellef_id, onceki_yil))
                     exists_prev = c.fetchone()
 
                     if exists_prev:
                         c.execute("""
                             UPDATE beyanname
-                            SET veriler=?, yuklenme_tarihi=CURRENT_TIMESTAMP
-                            WHERE id=?
+                            SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
+                            WHERE id=%s
                         """, (encrypted_prev, exists_prev[0]))
                         mesajlar.append({
                             "type": "info",
@@ -1047,7 +1059,7 @@ def kaydet_beyanname(sonuc, belge_turu):
                     else:
                         c.execute("""
                             INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler)
-                            VALUES (?, ?, ?, 'gelir', ?)
+                            VALUES (%s, %s, %s, 'gelir', %s)
                         """, (uid, mukellef_id, onceki_yil, encrypted_prev))
                         mesajlar.append({
                             "type": "success",
@@ -1082,9 +1094,9 @@ def pdf_belgeler_tablo(tur):
     uid = session["user_id"]
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute("SELECT id, unvan FROM mukellef WHERE user_id=? AND vergi_kimlik_no=?", (uid, vkn))
+        
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c.execute("SELECT id, unvan FROM mukellef WHERE user_id=%s AND vergi_kimlik_no=%s", (uid, vkn))
         row = c.fetchone()
         if not row:
             flash("❗ Mükellef bulunamadı.")
@@ -1095,7 +1107,7 @@ def pdf_belgeler_tablo(tur):
         mid = row["id"]
         unvan = row["unvan"]
 
-        c.execute("SELECT veriler FROM beyanname WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?",
+        c.execute("SELECT veriler FROM beyanname WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s",
                   (uid, mid, donem, tur.lower()))
         row = c.fetchone()
 
@@ -1179,7 +1191,7 @@ def pdf_belgeler_tablo(tur):
             tablo = []
 
         # --- Listeyi dict'e çevir ---
-        tablo = [dict(r) for r in tablo if isinstance(r, (dict, sqlite3.Row))]
+        tablo = [dict(r) for r in tablo if isinstance(r, dict)]
 
 
 
@@ -2293,14 +2305,14 @@ def rapor_kdv_excel():
 
     # --- PDF verilerini topla ---
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         for donem in secili_donemler:
             c.execute("""
                 SELECT b.veriler, b.donem
                 FROM beyanname b
                 JOIN mukellef m ON m.id = b.mukellef_id
-                WHERE m.vergi_kimlik_no=? AND m.unvan=? AND b.donem=? AND b.tur='kdv'
+                WHERE m.vergi_kimlik_no=%s AND m.unvan=%s AND b.donem=%s AND b.tur='kdv'
             """, (vkn, unvan, donem))
             rows = c.fetchall()
 
@@ -2432,15 +2444,15 @@ def rapor_kdv():
 
     # --- Verileri DB'den topla ---
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         for donem in secili_donemler:
             c.execute("""
                 SELECT b.veriler, b.donem
                 FROM beyanname b
                 JOIN mukellef m ON m.id = b.mukellef_id
-                WHERE m.vergi_kimlik_no=? AND m.unvan=? 
-                  AND b.donem=? AND b.tur='kdv'
+                WHERE m.vergi_kimlik_no=%s AND m.unvan=%s 
+                  AND b.donem=%s AND b.tur='kdv'
             """, (vkn, unvan, donem))
             rows = c.fetchall()
 
@@ -2518,18 +2530,17 @@ def raporlama():
     yuklenen_dosyalar = []
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         uid = session.get("user_id")
         c.execute(
-            "SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=? ORDER BY unvan",
+            "SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan",
             (uid,)
         )
         unvanlar = [{"vkn": row["vergi_kimlik_no"], "unvan": row["unvan"]} for row in c.fetchall()]
 
         if secili_vkn:
             c.execute(
-                "SELECT unvan FROM mukellef WHERE vergi_kimlik_no=? AND user_id=?",
+                "SELECT unvan FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s",
                 (secili_vkn, uid)
             )
             row = c.fetchone()
@@ -2542,7 +2553,7 @@ def raporlama():
                 SELECT DISTINCT b.donem
                 FROM beyanname b
                 JOIN mukellef m ON b.mukellef_id=m.id
-                WHERE m.vergi_kimlik_no=? AND m.user_id=?
+                WHERE m.vergi_kimlik_no=%s AND m.user_id=%s
                 ORDER BY b.donem DESC
             """, (secili_vkn, uid))
             rows = [row["donem"] for row in c.fetchall()]
@@ -2552,27 +2563,43 @@ def raporlama():
             donemler = sorted(set(rows), reverse=True)
             
 
+
             # Geçmiş yüklenen dosyalar
             c.execute("""
                 SELECT b.tur, b.veriler, b.yuklenme_tarihi, b.donem
                 FROM beyanname b
                 JOIN mukellef m ON b.mukellef_id=m.id
-                WHERE m.vergi_kimlik_no=? AND m.user_id=?
+                WHERE m.vergi_kimlik_no=%s AND m.user_id=%s
                 ORDER BY b.yuklenme_tarihi DESC
             """, (secili_vkn, uid))
+
             for r in c.fetchall():
                 tarih = r["yuklenme_tarihi"]
-                try:
-                    utc_dt = datetime.strptime(tarih, "%Y-%m-%d %H:%M:%S")
-                    ist_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
-                    tarih = ist_dt.strftime("%Y-%m-%d %H:%M:%S")
-                except Exception:
-                    pass
+
+                if tarih:
+                    try:
+                        # Eğer zaten datetime nesnesiyse direkt kullan
+                        if isinstance(tarih, datetime):
+                            utc_dt = tarih
+                        else:
+                            # string geldiyse ISO formatında çöz
+                            utc_dt = datetime.fromisoformat(str(tarih))
+
+                        # UTC → İstanbul saatine dönüştür
+                        ist_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
+                        tarih = ist_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+                    except Exception:
+                        tarih = "Tarih Hatası"
+                else:
+                    tarih = "Tarih Yok"
+
                 yuklenen_dosyalar.append({
                     "tur":   r["tur"],
                     "tarih": tarih,
                     "donem": r["donem"],
                 })
+
 
             # Finansal analiz grafikleri (bilançodan)
             for donem in secili_fa_years:
@@ -2580,8 +2607,8 @@ def raporlama():
                     SELECT b.veriler
                     FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id=m.id
-                    WHERE m.vergi_kimlik_no=? AND m.user_id=? 
-                    AND b.donem=? AND b.tur='bilanco'
+                    WHERE m.vergi_kimlik_no=%s AND m.user_id=%s 
+                    AND b.donem=%s AND b.tur='bilanco'
                     LIMIT 1
                 """, (secili_vkn, uid, donem))
                 row_b = c.fetchone()
@@ -2606,15 +2633,14 @@ def raporlama():
         kdv_data: dict[str, dict[str, str]] = {}
 
         with get_conn() as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             for donem in secili_kdv_periods:
                 c.execute("""
                     SELECT b.veriler, b.donem
                     FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id=m.id
-                    WHERE m.vergi_kimlik_no=? AND m.user_id=? 
-                    AND b.donem=? AND b.tur='kdv'
+                    WHERE m.vergi_kimlik_no=%s AND m.user_id=%s 
+                    AND b.donem=%s AND b.tur='kdv'
                 """, (secili_vkn, uid, donem))
                 rows = c.fetchall()
                 if not rows:
@@ -2687,11 +2713,9 @@ def tablo_mizan(tur):
         return redirect(url_for("veri_giris"))
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         # mukellef_id + unvan
-        c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=?", (vkn,))
+        c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=%s", (vkn,))
         row = c.fetchone()
         if not row:
             flash("❗ Mükellef bulunamadı.")
@@ -2703,7 +2727,7 @@ def tablo_mizan(tur):
         c.execute("""
             SELECT veriler
             FROM beyanname
-            WHERE user_id=? AND mukellef_id=? AND donem=? AND tur='mizan'
+            WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur='mizan'
             LIMIT 1
         """, (session["user_id"], mid, donem))
         row = c.fetchone()
@@ -3069,8 +3093,6 @@ def parse_mizan_excel(excel_path):
         }
 
     
-    
-    # Yükleme sonrası mizan meta verisi kaydetme/güncelleme
 @app.route("/kaydet-mizan-meta", methods=["POST"])
 @login_required
 def kaydet_mizan_meta():
@@ -3089,7 +3111,6 @@ def kaydet_mizan_meta():
     belge_turu = "mizan"
 
     try:
-        # --- BytesIO üzerinden parse et ---
         import io
         file_bytes = io.BytesIO(file.read())
         mizan_data = parse_mizan_excel(file_bytes)
@@ -3098,15 +3119,15 @@ def kaydet_mizan_meta():
             return jsonify({
                 "status": "error",
                 "title": "❌ Hata",
-                "message": f"Mizan dosyası işlenemedi: {mizan_data.get('message', 'Bilinmeyen hata')}"
+                "message": f"Mizan dosyası işlenemedi: {mizan_data.get('message', 'Bilinmeyen hata')}."
             }), 400
 
         # --- DB kaydı ---
         with get_conn() as conn:
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             # Mükellefi bul
-            c.execute("SELECT id FROM mukellef WHERE vergi_kimlik_no=? AND unvan=?", (vkn, unvan))
+            c.execute("SELECT id FROM mukellef WHERE vergi_kimlik_no=%s AND unvan=%s", (vkn, unvan))
             row = c.fetchone()
             if not row:
                 return jsonify({
@@ -3116,29 +3137,32 @@ def kaydet_mizan_meta():
                 }), 404
             mid = row["id"]
 
-            # JSON'a dönüştür
+            # 🔐 JSON verisini şifrele (BYTEA kaydı için gerekli)
             veriler_json = json.dumps(mizan_data, ensure_ascii=False)
+            encrypted_data = fernet.encrypt(veriler_json.encode("utf-8"))
 
-            # Eğer daha önce aynı dönem için mizan varsa güncelle
+            # --- Mevcut kayıt var mı kontrolü ---
             c.execute("""
                 SELECT COUNT(*) FROM beyanname 
-                WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?
+                WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s
             """, (session["user_id"], mid, donem, belge_turu))
-            if c.fetchone()[0] > 0:
+            exists = c.fetchone()[0] > 0
+
+            if exists:
                 c.execute("""
                     UPDATE beyanname
-                    SET veriler=?, yuklenme_tarihi=CURRENT_TIMESTAMP
-                    WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?
-                """, (veriler_json, session["user_id"], mid, donem, belge_turu))
-                conn.commit()
+                    SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
+                    WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s
+                """, (encrypted_data, session["user_id"], mid, donem, belge_turu))
                 message = f"{unvan} ({vkn}) - {donem} {belge_turu.upper()} başarıyla güncellendi."
             else:
                 c.execute("""
                     INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (session["user_id"], mid, donem, belge_turu, veriler_json))
-                conn.commit()
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (session["user_id"], mid, donem, belge_turu, encrypted_data))
                 message = f"{unvan} ({vkn}) - {donem} {belge_turu.upper()} başarıyla yüklendi."
+
+            conn.commit()
 
             return jsonify({
                 "status": "success",
@@ -3147,7 +3171,7 @@ def kaydet_mizan_meta():
             })
 
     except Exception as e:
-        # Gizlilik nedeniyle hata detayı loglanmıyor
+        print("❌ Kayıt hatası:", e)
         return jsonify({
             "status": "error",
             "title": "❌ Kayıt Hatası",
@@ -3155,23 +3179,21 @@ def kaydet_mizan_meta():
         }), 500
 
 
-
-
-
 def prepare_df(df_raw, column_name):
     import pandas as pd
-    from flask import current_app
 
     if df_raw is None or df_raw.empty:
         raise ValueError("Boş tablo alındı")
 
-    col_map = {col.lower(): col for col in df_raw.columns}
+    # --- Kolon adlarını normalize et ---
+    col_map = {col.strip().lower().replace("ı", "i").replace("ş", "s").replace("ğ", "g").replace("ü", "u").replace("ö", "o").replace("ç", "c"): col for col in df_raw.columns}
+
     alternatifler = {
-        "cari dönem": ["cari_donem", "cari donem"],
-        "önceki dönem": ["onceki_donem", "onceki donem"],
+        "cari donem": ["cari_donem", "cari donem", "donem", "cari"],
+        "onceki donem": ["onceki_donem", "onceki donem", "gecen donem", "onceki"],
     }
 
-    anahtar = column_name.lower()
+    anahtar = column_name.lower().replace("ı", "i").replace("ş", "s").replace("ğ", "g").replace("ü", "u").replace("ö", "o").replace("ç", "c")
     ana_kolon = col_map.get(anahtar)
     if not ana_kolon and anahtar in alternatifler:
         for alt in alternatifler[anahtar]:
@@ -3180,57 +3202,43 @@ def prepare_df(df_raw, column_name):
                 break
 
     onceki_kolon = None
-    for alt in alternatifler["önceki dönem"]:
+    for alt in alternatifler["onceki donem"]:
         if alt in col_map:
             onceki_kolon = col_map[alt]
             break
 
     kod_kolon = col_map.get("kod")
-    aciklama_kolon = col_map.get("açıklama") or col_map.get("aciklama")
+    aciklama_kolon = col_map.get("aciklama") or col_map.get("aciklama adi") or col_map.get("hesap adi")
 
-    # 🔒 Güvenli kolon kontrolü
+    # --- Güvenli kolon kontrolü ---
     kolonlar = [k for k in [kod_kolon, aciklama_kolon, ana_kolon] if k]
     if not kolonlar:
-        raise ValueError("Kolon eşleşmesi yapılamadı")
+        raise ValueError("Kolon eşleşmesi yapılamadı: Kod, Açıklama veya Dönem sütunu bulunamadı.")
 
     df = df_raw[kolonlar].copy()
 
-    # 🧩 --- KOLON ADLARINI STANDARTLAŞTIR ---
+    # --- Kolon adlarını standartlaştır ---
     rename_map = {}
     if kod_kolon: rename_map[kod_kolon] = "Kod"
     if aciklama_kolon: rename_map[aciklama_kolon] = "Açıklama"
     if ana_kolon: rename_map[ana_kolon] = "Cari Dönem"
     df.rename(columns=rename_map, inplace=True)
 
-    # 🧩 --- ÖNCEKİ DÖNEM KOLONUNU EKLE ---
+    # --- Önceki dönem ekle ---
     if onceki_kolon:
-        df["Önceki Dönem"] = pd.to_numeric(df_raw[onceki_kolon], errors="coerce").fillna(0)
+        df.loc[:, "Önceki Dönem"] = pd.to_numeric(df_raw[onceki_kolon], errors="coerce").fillna(0)
     else:
-        df["Önceki Dönem"] = 0
+        df.loc[:, "Önceki Dönem"] = 0
 
-    # 🔢 Sayısal dönüşüm
+    # --- Sayısal dönüşüm ---
     if "Cari Dönem" in df.columns:
-        df["Cari Dönem"] = pd.to_numeric(df["Cari Dönem"], errors="coerce").fillna(0)
+        df.loc[:, "Cari Dönem"] = pd.to_numeric(df["Cari Dönem"], errors="coerce").fillna(0)
 
-    # 🧭 --- KOLON SIRASI DÜZELTME ---
-    if "Önceki Dönem" in df.columns and "Cari Dönem" in df.columns:
-        cols = list(df.columns)
-        onceki_idx = cols.index("Önceki Dönem")
-        cari_idx = cols.index("Cari Dönem")
-        # Eğer Cari, Öncekiden önce geldiyse sıralamayı düzelt
-        if cari_idx < onceki_idx:
-            ordered = ["Kod", "Açıklama", "Önceki Dönem", "Cari Dönem"]
-            # varsa enflasyon sütunlarını da sona ekle
-            extras = [c for c in df.columns if "enflasyon" in c.lower() and c not in ordered]
-            df = df[[c for c in ordered if c in df.columns] + extras]
-
+    # --- Kolon sırasını düzenle ---
+    hedef_sira = ["Kod", "Açıklama", "Önceki Dönem", "Cari Dönem"]
+    df = df[[c for c in hedef_sira if c in df.columns] + [c for c in df.columns if c not in hedef_sira]]
 
     return df
-
-
-
-ALLOWED_CATEGORIES = {'likidite', 'karlilik', 'borç', 'borsa'}
-ALLOWED_INFLATION = {'cari', 'cari_enflasyon'}
 
 @app.route("/finansal-analiz", methods=["GET"])
 @login_required
@@ -3254,14 +3262,13 @@ def finansal_analiz():
     uid = session.get("user_id")
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         # --- Mükellef listesi ---
         c.execute("""
             SELECT vergi_kimlik_no, unvan 
             FROM mukellef 
-            WHERE user_id=? 
+            WHERE user_id=%s 
             ORDER BY unvan
         """, (uid,))
         unvanlar = [{"vkn": row["vergi_kimlik_no"], "unvan": row["unvan"]} for row in c.fetchall()]
@@ -3272,7 +3279,7 @@ def finansal_analiz():
                 SELECT DISTINCT b.donem
                 FROM beyanname b
                 JOIN mukellef m ON b.mukellef_id=m.id
-                WHERE m.user_id=? AND m.vergi_kimlik_no=? 
+                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
                 AND b.tur='bilanco'
                 ORDER BY b.donem DESC
             """, (uid, secili_vkn))
@@ -3289,8 +3296,8 @@ def finansal_analiz():
                         SELECT b.veriler 
                         FROM beyanname b
                         JOIN mukellef m ON b.mukellef_id=m.id
-                        WHERE m.user_id=? AND m.vergi_kimlik_no=? 
-                        AND b.donem=? AND b.tur='bilanco'
+                        WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
+                        AND b.donem=%s AND b.tur='bilanco'
                         ORDER BY b.yuklenme_tarihi DESC LIMIT 1
                     """, (uid, secili_vkn, yil))
                     bilanco_row = c.fetchone()
@@ -3300,18 +3307,30 @@ def finansal_analiz():
                         SELECT b.veriler 
                         FROM beyanname b
                         JOIN mukellef m ON b.mukellef_id=m.id
-                        WHERE m.user_id=? AND m.vergi_kimlik_no=? 
-                        AND b.donem=? AND b.tur='gelir'
+                        WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
+                        AND b.donem=%s AND b.tur='gelir'
                         ORDER BY b.yuklenme_tarihi DESC LIMIT 1
                     """, (uid, secili_vkn, yil))
                     gelir_row = c.fetchone()
 
-                    if not bilanco_row or not gelir_row:                        
+                    if not bilanco_row or not gelir_row:
                         continue
 
-                    # 🧩 Decrypt et
-                    raw_b = fernet.decrypt(bilanco_row["veriler"]).decode("utf-8")
-                    raw_g = fernet.decrypt(gelir_row["veriler"]).decode("utf-8")
+                    # 🧩 Decrypt et (BYTEA → str)
+                    def decrypt_bytes(data):
+                        if not data:
+                            return None
+                        if isinstance(data, memoryview):
+                            data = data.tobytes()
+                        elif isinstance(data, str):
+                            data = data.encode("utf-8")
+                        return fernet.decrypt(data).decode("utf-8")
+
+                    raw_b = decrypt_bytes(bilanco_row["veriler"])
+                    raw_g = decrypt_bytes(gelir_row["veriler"])
+                    if not raw_b or not raw_g:
+                        continue
+
                     parsed_b = json.loads(raw_b)
                     parsed_g = json.loads(raw_g)
 
@@ -3324,7 +3343,7 @@ def finansal_analiz():
                     pasif_df = pd.DataFrame(parsed_b.get("pasif", []))
                     gelir_df = pd.DataFrame(parsed_g.get("tablo", []))
 
-                    if aktif_df.empty or pasif_df.empty or gelir_df.empty:                        
+                    if aktif_df.empty or pasif_df.empty or gelir_df.empty:
                         continue
 
                     has_inflation = "Cari Dönem (Enflasyonlu)" in aktif_df.columns
@@ -3341,67 +3360,55 @@ def finansal_analiz():
                     pasif_df_final = prepare_df(pasif_df, bilanco_col)
                     gelir_df_final = prepare_df(gelir_df, "Cari Dönem")
 
-                    # --- 📉 Önceki yıl kayıtlarını artık DB'den çekiyoruz ---
+                    # --- 📉 Önceki yıl kayıtları ---
                     prev_year = str(int(yil) - 1)
 
-                    # Bilanço - önceki yıl
-                    c.execute("""
-                        SELECT veriler FROM beyanname b
-                        JOIN mukellef m ON b.mukellef_id=m.id
-                        WHERE m.user_id=? AND m.vergi_kimlik_no=? 
-                        AND b.donem=? AND b.tur='bilanco'
-                        ORDER BY b.yuklenme_tarihi DESC LIMIT 1
-                    """, (uid, secili_vkn, prev_year))
-                    prev_bilanco = c.fetchone()
+                    def get_prev_table(tur, year):
+                        c.execute("""
+                            SELECT veriler FROM beyanname b
+                            JOIN mukellef m ON b.mukellef_id=m.id
+                            WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
+                            AND b.donem=%s AND b.tur=%s
+                            ORDER BY b.yuklenme_tarihi DESC LIMIT 1
+                        """, (uid, secili_vkn, year, tur))
+                        row = c.fetchone()
+                        if not row:
+                            return pd.DataFrame()
+                        raw = decrypt_bytes(row["veriler"])
+                        if not raw:
+                            return pd.DataFrame()
+                        parsed = json.loads(raw)
+                        if isinstance(parsed, list):
+                            parsed = {"tablo": parsed}
+                        df = pd.DataFrame(parsed.get("tablo" if tur == "gelir" else "aktif", []))
+                        if df.empty:
+                            return pd.DataFrame()
+                        return prepare_df(df, "Cari Dönem")
 
-                    if prev_bilanco:
-                        raw_prev_b = fernet.decrypt(prev_bilanco["veriler"]).decode("utf-8")
-                        parsed_prev_b = json.loads(raw_prev_b)
-                        aktif_df_prev = prepare_df(pd.DataFrame(parsed_prev_b.get("aktif", [])), "Cari Dönem")
-                        pasif_df_prev = prepare_df(pd.DataFrame(parsed_prev_b.get("pasif", [])), "Cari Dönem")
-                    else:
-                        aktif_df_prev = pd.DataFrame()
-                        pasif_df_prev = pd.DataFrame()
-
-                    # Gelir - önceki yıl
-                    c.execute("""
-                        SELECT veriler FROM beyanname b
-                        JOIN mukellef m ON b.mukellef_id=m.id
-                        WHERE m.user_id=? AND m.vergi_kimlik_no=? 
-                        AND b.donem=? AND b.tur='gelir'
-                        ORDER BY b.yuklenme_tarihi DESC LIMIT 1
-                    """, (uid, secili_vkn, prev_year))
-                    prev_gelir = c.fetchone()
-
-                    if prev_gelir:
-                        raw_prev_g = fernet.decrypt(prev_gelir["veriler"]).decode("utf-8")
-                        parsed_prev_g = json.loads(raw_prev_g)
-                        gelir_df_prev = prepare_df(
-                            pd.DataFrame(parsed_prev_g if isinstance(parsed_prev_g, list) else parsed_prev_g.get("tablo", [])),
-                            "Cari Dönem"
-                        )
-                    else:
-                        gelir_df_prev = pd.DataFrame()
+                    aktif_df_prev = get_prev_table("bilanco", prev_year)
+                    pasif_df_prev = get_prev_table("bilanco", prev_year)
+                    gelir_df_prev = get_prev_table("gelir", prev_year)
 
                     # --- 💹 Cari yıl oranları ---
                     oranlar_yil = hesapla_finansal_oranlar(aktif_df_final, pasif_df_final, gelir_df_final, kategori)
                     for oran, val in oranlar_yil.items():
                         deger = val["deger"] if isinstance(val, dict) and "deger" in val else val
-                        trend_data.setdefault(oran, {})[yil] = deger or 0.0
+                        trend_data.setdefault(oran, {})[yil] = float(deger or 0.0)
 
                     # --- 💹 Önceki yıl oranları ---
                     if not aktif_df_prev.empty and not pasif_df_prev.empty and not gelir_df_prev.empty:
                         oranlar_prev = hesapla_finansal_oranlar(aktif_df_prev, pasif_df_prev, gelir_df_prev, kategori)
                         for oran, val in oranlar_prev.items():
                             deger = val["deger"] if isinstance(val, dict) and "deger" in val else val
-                            trend_data.setdefault(oran, {})[prev_year] = deger or 0.0
+                            trend_data.setdefault(oran, {})[prev_year] = float(deger or 0.0)
 
                         if prev_year not in mevcut_yillar:
                             mevcut_yillar.append(prev_year)
                         if prev_year not in secili_yillar:
                             secili_yillar.append(prev_year)
 
-                except Exception:
+                except Exception as e:
+                    print(f"⚠️ {yil} yılı analiz hatası:", e)
                     continue
 
     return render_template(
@@ -3420,24 +3427,28 @@ def finansal_analiz():
 
 
 
-
-
-
 @app.route("/raporlama_grafik")
 @login_required
 def raporlama_grafik():
-    import pandas as pd
-    import json
-    from flask import request, render_template, current_app
+    import pandas as pd, json
+    from flask import request, render_template
+    import psycopg2.extras
+
+    def decrypt_json(data):
+        """BYTEA veya TEXT veriyi güvenli şekilde çöz."""
+        if not data:
+            return None
+        if isinstance(data, memoryview):
+            data = data.tobytes()
+        elif isinstance(data, str):
+            data = data.encode("utf-8")
+        return json.loads(fernet.decrypt(data).decode("utf-8"))
 
     vkn = request.args.get("vkn")
     unvan = request.args.get("unvan")
     fa_years_raw = request.args.get("fa_years", "")
     secili_yillar = [d.strip() for d in fa_years_raw.split(",") if d.strip()]
 
-    # -------------------------------------------------------------
-    # 📌 1. Giriş kontrolü
-    # -------------------------------------------------------------
     if not (vkn and unvan):
         return render_template(
             "raporlama_grafik.html",
@@ -3446,176 +3457,147 @@ def raporlama_grafik():
             default_suggestions=[], seriler={}, eksik_yillar=[]
         )
 
-    # -------------------------------------------------------------
-    # 📌 2. Mevcut dönemleri DB’den çek
-    # -------------------------------------------------------------
+    # 1️⃣ Dönemleri çek
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         c.execute("""
             SELECT DISTINCT b.donem
             FROM beyanname b
             JOIN mukellef m ON b.mukellef_id=m.id
-            WHERE m.vergi_kimlik_no=? AND m.unvan=? 
+            WHERE m.vergi_kimlik_no=%s AND m.unvan=%s 
               AND (b.tur='bilanco' OR b.tur='gelir')
             ORDER BY b.donem ASC
         """, (vkn, unvan))
-        all_years = [r[0] for r in c.fetchall()]
+        all_years = [r["donem"] for r in c.fetchall()]
 
     donemler = secili_yillar if secili_yillar else all_years
     donemler = [str(d) for d in donemler]
+    raporlar, eksik_yillar = {}, []
 
-    raporlar = {}
-    eksik_yillar = []
-
-    # -------------------------------------------------------------
-    # 📊 3. Her yıl için finansal tabloları işle
-    # -------------------------------------------------------------
+    # 2️⃣ Her yılın bilanço & gelir tablolarını çöz
     for yil in donemler:
         try:
             with get_conn() as conn:
-                c = conn.cursor()
-
-                # --- Bilanço verileri
+                c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 c.execute("""
                     SELECT b.veriler FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id=m.id
-                    WHERE m.vergi_kimlik_no=? AND m.unvan=? 
-                    AND b.donem=? AND b.tur='bilanco'
+                    WHERE m.vergi_kimlik_no=%s AND m.unvan=%s 
+                    AND b.donem=%s AND b.tur='bilanco'
                     ORDER BY b.yuklenme_tarihi DESC LIMIT 1
                 """, (vkn, unvan, yil))
                 rb = c.fetchone()
 
-                # --- Gelir tablosu verileri
                 c.execute("""
                     SELECT b.veriler FROM beyanname b
                     JOIN mukellef m ON b.mukellef_id=m.id
-                    WHERE m.vergi_kimlik_no=? AND m.unvan=? 
-                    AND b.donem=? AND b.tur='gelir'
+                    WHERE m.vergi_kimlik_no=%s AND m.unvan=%s 
+                    AND b.donem=%s AND b.tur='gelir'
                     ORDER BY b.yuklenme_tarihi DESC LIMIT 1
                 """, (vkn, unvan, yil))
                 rg = c.fetchone()
 
-            # Eğer biri yoksa eksik say
             if not rb or not rg:
                 eksik_yillar.append(yil)
                 continue
 
-            # --- Bilanço PDF verisini çöz
-            parsed_b = json.loads(fernet.decrypt(rb[0]).decode("utf-8"))
+            parsed_b = decrypt_json(rb["veriler"])
+            parsed_g = decrypt_json(rg["veriler"])
+            if not parsed_b or not parsed_g:
+                eksik_yillar.append(yil)
+                continue
+
             aktif_raw = pd.DataFrame(parsed_b.get("aktif", []))
             pasif_raw = pd.DataFrame(parsed_b.get("pasif", []))
+            if aktif_raw.empty or pasif_raw.empty:
+                eksik_yillar.append(yil)
+                continue
 
             has_inflation = "Cari Dönem (Enflasyonlu)" in aktif_raw.columns
             bilanco_col = "Cari Dönem (Enflasyonlu)" if has_inflation else "Cari Dönem"
-
             aktif_df = prepare_df(aktif_raw, bilanco_col)
             pasif_df = prepare_df(pasif_raw, bilanco_col)
 
-            # --- Gelir tablosu PDF verisini çöz
-            parsed_g = json.loads(fernet.decrypt(rg[0]).decode("utf-8"))
             if isinstance(parsed_g, list):
                 gelir_raw = pd.DataFrame(parsed_g)
             elif isinstance(parsed_g, dict):
                 gelir_raw = pd.DataFrame(parsed_g.get("tablo", []))
             else:
                 gelir_raw = pd.DataFrame([])
-
+            if gelir_raw.empty:
+                eksik_yillar.append(yil)
+                continue
             gelir_df = prepare_df(gelir_raw, "Cari Dönem")
 
-
-            # --- Finansal oranları hesapla (tek merkez)
+            # 3️⃣ Finansal oranlar
             raporlar[yil] = hesapla_finansal_oranlar(
                 aktif_df, pasif_df, gelir_df, kategori="tümü"
             )
 
-            # --- Kalemleri ekle (aktif, pasif, gelir)
+            # 4️⃣ Kalem detayları
             for kategori, df in [("aktif", aktif_df), ("pasif", pasif_df), ("gelir", gelir_df)]:
                 for _, row in df.iterrows():
                     kod = str(row.get("Kod") or "")
                     aciklama = str(row.get("Açıklama") or "").strip()
                     key = f"{kategori}_{kod or aciklama}"
-                    value = float(row.get("Cari Dönem", 0) or 0)
-                    if not value:
+                    val = float(row.get("Cari Dönem", 0) or 0)
+                    if not val:
                         continue
-                    # hem raporlar hem index için ekle
-                    raporlar[yil][key] = {"deger": value, "kategori": kategori, "aciklama": aciklama, "kod": kod}
+                    raporlar[yil][key] = {
+                        "deger": val,
+                        "kategori": kategori,
+                        "aciklama": aciklama,
+                        "kod": kod
+                    }
 
         except Exception as e:
+            print(f"⚠️ {yil} yılı hata: {e}")
             eksik_yillar.append(yil)
             continue
 
-    # -------------------------------------------------------------
-    # ⚠️ 4. Eğer hiç veri yoksa uyarı göster
-    # -------------------------------------------------------------
     if not raporlar:
         return render_template(
             "raporlama_grafik.html",
             vkn=vkn, unvan=unvan, donemler=[],
             raporlar={}, analiz={"oran_analizleri": {}},
             default_suggestions=[], seriler={}, eksik_yillar=eksik_yillar,
-            swal_warning="Oran tablosu oluşturmak için ilgili yılların bilanço ve gelir PDF’leri gerekli."
+            swal_warning="Oran tablosu oluşturmak için bilanço ve gelir PDF’leri gerekli."
         )
 
-    # -------------------------------------------------------------
-    # 📈 5. Analiz oluştur (trend + yorum)
-    # -------------------------------------------------------------
     analiz = analiz_olustur({int(y): raporlar[y] for y in raporlar})
 
-    # -------------------------------------------------------------
-    # 💡 6. Grafik varsayılan seriler (örnek)
-    # -------------------------------------------------------------
-    default_suggestions = []
+    defaults = []
     for w in ["Cari Oran", "Brüt Kar Marjı", "Özsermaye Karlılığı", "Aktif Karlılığı"]:
         for oran in raporlar[list(raporlar.keys())[0]].keys():
             if w.lower() in oran.lower():
-                default_suggestions.append(oran)
+                defaults.append(oran)
                 break
+    defaults = list(dict.fromkeys(defaults))
 
-    default_suggestions = list(dict.fromkeys(default_suggestions))
-
-
-    # 📊 7. Kalem indeksleri ve seriler (grafik araması için)
-    # -------------------------------------------------------------
-    kalem_index = []
-    kalem_series = {}
-
+    kalem_index, kalem_series = [], {}
     for yil, oranlar in raporlar.items():
         for oran_adi, oran_detay in oranlar.items():
-            if isinstance(oran_detay, dict):
-                val = oran_detay.get("deger", None)
-                src = oran_detay.get("kategori", "oran")
-                label = oran_adi
-                kod = oran_detay.get("kod", "")
-                aciklama = oran_detay.get("aciklama", oran_adi)
-            else:
-                val = oran_detay
-                src = "oran"
-                label = oran_adi
-                kod = ""
-                aciklama = oran_adi
-
-            key = oran_adi
+            val = oran_detay.get("deger") if isinstance(oran_detay, dict) else oran_detay
+            src = oran_detay.get("kategori", "oran") if isinstance(oran_detay, dict) else "oran"
+            kod = oran_detay.get("kod", "") if isinstance(oran_detay, dict) else ""
+            aciklama = oran_detay.get("aciklama", oran_adi) if isinstance(oran_detay, dict) else oran_adi
             kalem_index.append({
-                "key": key,
-                "label": label,
+                "key": oran_adi,
+                "label": oran_adi,
                 "code": kod,
                 "name": aciklama,
                 "source": src
             })
-            kalem_series.setdefault(key, {})[yil] = val
+            kalem_series.setdefault(oran_adi, {})[yil] = val
 
-    # -------------------------------------------------------------
-    # 🧩 8. Sayfa render
-    # -------------------------------------------------------------
     return render_template(
         "raporlama_grafik.html",
-        vkn=vkn, 
-        unvan=unvan,
-        fa_years=fa_years_raw, 
+        vkn=vkn, unvan=unvan,
+        fa_years=fa_years_raw,
         donemler=sorted(set(donemler)),
         raporlar=raporlar,
         analiz=analiz,
-        default_suggestions=default_suggestions,
+        default_suggestions=defaults,
         seriler=raporlar,
         eksik_yillar=eksik_yillar,
         kalem_index=kalem_index,
@@ -3628,6 +3610,16 @@ def finansal_oran_raporu():
     import os, io, json, tempfile, shutil, pdfkit, traceback, pandas as pd
     from datetime import datetime
     from flask import current_app, render_template, request, flash, redirect, url_for, send_file, session
+    import psycopg2.extras
+
+    def decrypt_json(data):
+        if not data:
+            return None
+        if isinstance(data, memoryview):
+            data = data.tobytes()
+        elif isinstance(data, str):
+            data = data.encode("utf-8")
+        return json.loads(fernet.decrypt(data).decode("utf-8"))
 
     vkn = request.args.get("vkn")
     donemler_raw = request.args.getlist("donemler")
@@ -3646,11 +3638,10 @@ def finansal_oran_raporu():
     reports = {}
 
     with get_conn() as conn:
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         # 🔍 Mükellef bul
-        c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=? AND user_id=?", (vkn, uid))
+        c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s", (vkn, uid))
         row = c.fetchone()
         if not row:
             flash(f"❗ {vkn} numaralı mükellef bulunamadı.", "danger")
@@ -3663,14 +3654,14 @@ def finansal_oran_raporu():
         for donem in donemler:
             c.execute("""
                 SELECT veriler FROM beyanname
-                WHERE mukellef_id=? AND donem=? AND tur='bilanco'
+                WHERE mukellef_id=%s AND donem=%s AND tur='bilanco'
                 ORDER BY yuklenme_tarihi DESC LIMIT 1
             """, (mukellef_id, donem))
             bilanco_row = c.fetchone()
 
             c.execute("""
                 SELECT veriler FROM beyanname
-                WHERE mukellef_id=? AND donem=? AND tur='gelir'
+                WHERE mukellef_id=%s AND donem=%s AND tur='gelir'
                 ORDER BY yuklenme_tarihi DESC LIMIT 1
             """, (mukellef_id, donem))
             gelir_row = c.fetchone()
@@ -3679,11 +3670,13 @@ def finansal_oran_raporu():
                 flash(f"❗ {donem} dönemi için '{unvan}' belgeleri eksik.", "danger")
                 return redirect(url_for("raporlama", vkn=vkn))
 
-            # 🧩 Decode + parse
-            decrypted_b = fernet.decrypt(bilanco_row["veriler"]).decode("utf-8")
-            decrypted_g = fernet.decrypt(gelir_row["veriler"]).decode("utf-8")
-            b_data = json.loads(decrypted_b)
-            g_data = json.loads(decrypted_g)
+            # 🧩 BYTEA → decrypt → JSON parse
+            b_data = decrypt_json(bilanco_row["veriler"])
+            g_data = decrypt_json(gelir_row["veriler"])
+
+            if not b_data or not g_data:
+                flash(f"❗ {donem} dönemi için şifreli veri çözülemedi.", "danger")
+                continue
 
             if isinstance(b_data, list): b_data = {"aktif": b_data, "pasif": []}
             if isinstance(g_data, list): g_data = {"tablo": g_data}
@@ -3733,9 +3726,6 @@ def finansal_oran_raporu():
     )
 
     try:
-        
-
-        
         wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
         if not wkhtml_path or not os.path.exists(wkhtml_path):
             flash("❗ wkhtmltopdf bulunamadı.", "danger")
@@ -3743,7 +3733,7 @@ def finansal_oran_raporu():
 
         config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
 
-        # 🧩 HTML'yi geçici dosyaya kaydet (CSS bu şekilde %100 uygulanır)
+        # 🧩 HTML’yi geçici dosyaya kaydet
         with tempfile.NamedTemporaryFile(delete=False, suffix=".html", mode="w", encoding="utf-8") as html_file:
             html_file.write(rendered)
             html_path = html_file.name
@@ -3769,7 +3759,6 @@ def finansal_oran_raporu():
             )
             tmpfile.flush()
 
-
         return send_file(
             tmpfile.name,
             mimetype="application/pdf",
@@ -3777,11 +3766,10 @@ def finansal_oran_raporu():
             download_name=f"{vkn}_{unvan}_Oran_Raporu.pdf"
         )
 
-    except Exception:
-        # Kullanıcıya sade bir mesaj göster, loglama yapma
+    except Exception as e:
+        print(f"⚠️ PDF oluşturma hatası: {e}")
         flash("PDF oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.", "danger")
         return redirect(url_for("raporlama", vkn=vkn))
-
 
     finally:
         try:
@@ -3793,49 +3781,66 @@ def finansal_oran_raporu():
             pass
 
 
-
 @app.route("/mukellef-sil", methods=["POST"])
 @login_required
 def mukellef_sil():
+    import psycopg2.extras
+    from flask import request, jsonify, session
+
     vkn = request.form.get("vkn", "").strip()
 
     if not vkn:
         return jsonify({
             "status": "error",
             "title": "❗ Hata",
-            "message": "Silinecek mükellef için vergi kimlik no gerekli."
+            "message": "Silinecek mükellef için vergi kimlik numarası gerekli."
         }), 400
 
     try:
         with get_conn() as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
-            # mukellef id ve unvan bul
-            c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=?", (vkn,))
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            # 🔍 Mükellef kimlik kontrolü (yalnızca giriş yapan kullanıcıya ait olan)
+            c.execute("""
+                SELECT id, unvan FROM mukellef 
+                WHERE vergi_kimlik_no=%s AND user_id=%s
+            """, (vkn, session["user_id"]))
             row = c.fetchone()
+
             if not row:
                 return jsonify({
                     "status": "error",
                     "title": "❌ Bulunamadı",
-                    "message": f"VKN {vkn} için kayıtlı mükellef bulunamadı."
+                    "message": f"VKN {vkn} için kayıtlı mükellef bulunamadı veya yetkiniz yok."
                 }), 404
+
             mid, unvan = row["id"], row["unvan"]
 
-            c.execute("DELETE FROM beyanname WHERE user_id=? AND mukellef_id=?", (session["user_id"], mid))
-            c.execute("DELETE FROM mukellef WHERE user_id=? AND id=?", (session["user_id"], mid))
+            # 🔒 Veritabanı bütünlüğü için önce beyanname kayıtlarını sil
+            c.execute("DELETE FROM beyanname WHERE user_id=%s AND mukellef_id=%s", (session["user_id"], mid))
+            c.execute("DELETE FROM mukellef WHERE user_id=%s AND id=%s", (session["user_id"], mid))
             conn.commit()
 
         return jsonify({
             "status": "success",
             "title": "✅ Başarıyla Silindi",
-            "message": f"Mükellef {unvan} ({vkn}) ve tüm beyannameleri silindi."
+            "message": f"{unvan} ({vkn}) mükellefi ve tüm beyannameleri kalıcı olarak silindi."
         })
 
+    except psycopg2.Error as db_err:
+        # Özelleştirilmiş hata mesajı (örneğin foreign key ihlali)
+        return jsonify({
+            "status": "error",
+            "title": "❌ Veritabanı Hatası",
+            "message": f"Silme işlemi sırasında bir veritabanı hatası oluştu: {db_err.pgerror or str(db_err)}"
+        }), 500
+
     except Exception as e:
+        # Genel hata yakalama
         return jsonify({
             "status": "error",
             "title": "❌ Silme Hatası",
-            "message": str(e)
+            "message": f"Beklenmeyen hata: {str(e)}"
         }), 500
 
 
@@ -3855,10 +3860,9 @@ def donem_sil():
 
     try:
         with get_conn() as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-            c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=?", (vkn,))
+            c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=%s", (vkn,))
             row = c.fetchone()
             if not row:
                 return jsonify({
@@ -3869,10 +3873,10 @@ def donem_sil():
             mid, unvan = row["id"], row["unvan"]
 
             if belge_turu == "all":
-                c.execute("DELETE FROM beyanname WHERE user_id=? AND mukellef_id=? AND donem=?", (session["user_id"], mid, donem))
+                c.execute("DELETE FROM beyanname WHERE user_id=%s AND mukellef_id=%s AND donem=%s", (session["user_id"], mid, donem))
                 message = f"{unvan} ({vkn}) {donem} tüm beyannameleri silindi."
             else:
-                c.execute("DELETE FROM beyanname WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?", (session["user_id"], mid, donem, belge_turu))
+                c.execute("DELETE FROM beyanname WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s", (session["user_id"], mid, donem, belge_turu))
                 message = f"{unvan} ({vkn}) {donem} {belge_turu.upper()} belgesi silindi."
 
             conn.commit()
@@ -3882,14 +3886,18 @@ def donem_sil():
     except Exception as e:
         return jsonify({"status": "error", "title": "❌ Hata", "message": str(e)}), 500
 
-
 @app.route("/yeniden-yukle", methods=["POST"])
 @login_required
 def yeniden_yukle():
+    import psycopg2.extras
+    from flask import request, jsonify, session
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
     vkn        = request.form.get("vkn")
     donem      = request.form.get("donem")
     belge_turu = request.form.get("belge_turu")
-    veriler    = request.form.get("veriler")  # JSON string ya da base64/BytesIO olabilir
+    veriler    = request.form.get("veriler")
 
     if not all([vkn, donem, belge_turu, veriler]):
         return jsonify({
@@ -3899,54 +3907,75 @@ def yeniden_yukle():
         }), 400
 
     try:
-        with get_conn() as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
+        # --- JSON string → bytes olarak şifrele
+        if isinstance(veriler, str):
+            veriler = fernet.encrypt(veriler.encode("utf-8"))
+        elif isinstance(veriler, bytes):
+            veriler = fernet.encrypt(veriler)
+        else:
+            return jsonify({
+                "status": "error",
+                "title": "❌ Veri Formatı Hatalı",
+                "message": "Veriler geçerli bir JSON string veya bytes olmalıdır."
+            }), 400
 
-            # mukellef id ve unvan bul
-            c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=?", (vkn,))
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            # 🔍 Mükellef kimlik kontrolü (sadece bu kullanıcıya ait olan)
+            c.execute("""
+                SELECT id, unvan 
+                FROM mukellef 
+                WHERE vergi_kimlik_no=%s AND user_id=%s
+            """, (vkn, session["user_id"]))
             row = c.fetchone()
             if not row:
                 return jsonify({
                     "status": "error",
                     "title": "❌ Bulunamadı",
-                    "message": f"VKN {vkn} için mükellef bulunamadı."
+                    "message": f"VKN {vkn} için mükellef bulunamadı veya bu kullanıcıya ait değil."
                 }), 404
+
             mid, unvan = row["id"], row["unvan"]
 
-            # eski kaydı sil
+            # 🔄 Eski kaydı sil
             c.execute("""
                 DELETE FROM beyanname
-                WHERE user_id=? AND mukellef_id=? AND donem=? AND tur=?
+                WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s
             """, (session["user_id"], mid, donem, belge_turu))
 
-            # yeni kaydı ekle
+            # 🧾 Yeni kaydı ekle ve id'sini al
             c.execute("""
                 INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler, yuklenme_tarihi)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                RETURNING yuklenme_tarihi;
             """, (session["user_id"], mid, donem, belge_turu, veriler))
-
+            
+            row = c.fetchone()
             conn.commit()
 
-            # yüklenme tarihini oku
-            c.execute("SELECT yuklenme_tarihi FROM beyanname WHERE rowid = last_insert_rowid()")
-            row = c.fetchone()
             if row and row["yuklenme_tarihi"]:
-                utc_dt = datetime.strptime(row["yuklenme_tarihi"], "%Y-%m-%d %H:%M:%S")
+                utc_dt = row["yuklenme_tarihi"]
+                if isinstance(utc_dt, str):
+                    utc_dt = datetime.strptime(utc_dt, "%Y-%m-%d %H:%M:%S")
                 istanbul_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(ZoneInfo("Europe/Istanbul"))
+                tarih_str = istanbul_dt.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                tarih_str = "Tarih okunamadı"
 
         return jsonify({
             "status": "success",
             "title": "✔️ Başarıyla Güncellendi",
-            "message": f"{unvan} - {donem} ({belge_turu.upper()}) başarıyla yeniden yüklendi."
+            "message": f"{unvan} - {donem} ({belge_turu.upper()}) başarıyla yeniden yüklendi. ({tarih_str})"
         })
 
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         return jsonify({
             "status": "error",
             "title": "❌ Veritabanı Hatası",
-            "message": str(e)
+            "message": f"{e.pgerror or str(e)}"
         }), 500
+
     except Exception as e:
         return jsonify({
             "status": "error",
@@ -3954,35 +3983,63 @@ def yeniden_yukle():
             "message": str(e)
         }), 500
 
-
 @app.route("/matrah", methods=["GET", "POST"])
 @login_required
 def matrah():
-    matrah = None
-    if request.method == "POST":
-        gelir = float(request.form.get("gelir", 0))
-        gider = float(request.form.get("gider", 0))
-        matrah = gelir - gider
+    import psycopg2.extras
+    from flask import request, render_template, session, jsonify
+    from datetime import datetime
 
-        # Veritabanına kaydet
+    hesaplanan_matrah = None
+
+    try:
+        if request.method == "POST":
+            gelir = float(request.form.get("gelir", 0) or 0)
+            gider = float(request.form.get("gider", 0) or 0)
+            hesaplanan_matrah = gelir - gider
+
+            # 💾 Veritabanına kaydet
+            with get_conn() as conn:
+                c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                c.execute("""
+                    INSERT INTO matrahlar (user_id, gelir, gider, matrah, tarih)
+                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+                """, (session["user_id"], gelir, gider, hesaplanan_matrah))
+                conn.commit()
+
+        # 📄 Kayıtlı verileri getir
         with get_conn() as conn:
-            c = conn.cursor()
-            c.execute(
-                "INSERT INTO matrahlar (user, gelir, gider, matrah) VALUES (?, ?, ?, ?)",
-                (session["user"], gelir, gider, matrah)
-            )
-            conn.commit()
+            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            c.execute("""
+                SELECT gelir, gider, matrah, tarih
+                FROM matrahlar
+                WHERE user_id = %s
+                ORDER BY tarih DESC
+            """, (session["user_id"],))
+            kayitlar = c.fetchall()
 
-    # Kayıtlı verileri getir
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            "SELECT gelir, gider, matrah, tarih FROM matrahlar WHERE user = ? ORDER BY tarih DESC",
-            (session["user"],)
+        return render_template(
+            "matrah.html",
+            matrah=hesaplanan_matrah,
+            kayitlar=kayitlar
         )
-        kayitlar = c.fetchall()
 
-    return render_template("matrah.html", matrah=matrah, kayitlar=kayitlar)
+    except psycopg2.Error as e:
+        return jsonify({
+            "status": "error",
+            "title": "❌ Veritabanı Hatası",
+            "message": e.pgerror or str(e)
+        }), 500
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "title": "❌ Uygulama Hatası",
+            "message": str(e)
+        }), 500
+
+
+# --- Kurumsal Sayfalar ---
 
 @app.route("/about")
 @login_required
@@ -3996,55 +4053,62 @@ def team():
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
+    from flask import flash, redirect, url_for, request, render_template
+
     if request.method == "POST":
         name    = request.form.get("name")
         email   = request.form.get("email")
         message = request.form.get("message")
-        # Burada dilerseniz veritabanına veya e-postaya kaydedebilirsiniz
-        flash("Mesajınız bize ulaştı, Teşekkürler!", "success")
+
+        # TODO: İstersen burayı e-posta gönderimi veya DB kaydıyla genişletebiliriz
+        flash("📨 Mesajınız bize ulaştı, teşekkür ederiz!", "success")
         return redirect(url_for("contact"))
+
     return render_template("contact.html")
 
 
-@app.route('/asgari') # Bu kısım Flask'a '/asgari' URL'sine gelen istekleri 'asgari' fonksiyonuna yönlendirmesini söyler.
-def asgari(): # Bu fonksiyonun adı 'asgari', url_for('asgari') ile eşleşen endpoint adıdır.
-    # Burada asgari vergi hesaplama veya gösterme ile ilgili mantığınız olacak
-    return render_template('asgari.html') # asgari.html adında bir şablonunuzun olması beklenir
+# --- Vergi / Finansal Araç Sayfaları ---
 
-@app.route('/sermaye')
+@app.route("/asgari")
+@login_required
+def asgari():
+    # Asgari vergi hesaplama mantığı buraya gelecek
+    return render_template("asgari.html")
+
+@app.route("/sermaye")
+@login_required
 def sermaye():
-    # Sermaye artırımı ile ilgili mantık
-    return render_template('sermaye.html')
+    # Sermaye artırımı analiz sayfası
+    return render_template("sermaye.html")
 
-@app.route('/finansman')
+@app.route("/finansman")
+@login_required
 def finansman():
-    # Finansman gideri ile ilgili mantık
-    return render_template('finansman.html')
+    # Finansman gideri kısıtlaması sayfası
+    return render_template("finansman.html")
 
-@app.route('/vergi_hesaplamalari')
+@app.route("/vergi_hesaplamalari")
+@login_required
 def vergi_hesaplamalari():    
-    return render_template('vergi_hesaplamalari.html')
-
-
-
+    return render_template("vergi_hesaplamalari.html")
+# --- GELİR VERGİSİ HESAPLAMA FONKSİYONU ---
 def gelir_vergisi_hesapla(yil: int, gelir: float, tarifeler: dict, ucret: bool = False) -> float:
+    """
+    Belirli bir yıl için gelir vergisini hesaplar.
+    """
     tarife_yili = tarifeler.get(yil)
     if not tarife_yili:
-        raise ValueError(f"{yil} yılı için tarife tanımlı değil")
+        raise ValueError(f"{yil} yılı için vergi tarifesi tanımlı değil.")
 
     tarife_tipi = "ucret" if ucret else "normal"
     dilimler = tarife_yili.get(tarife_tipi)
     if not dilimler:
-        raise ValueError(f"{yil} yılı için '{tarife_tipi}' tarifesi yok")
+        raise ValueError(f"{yil} yılı için '{tarife_tipi}' tarifesi bulunamadı.")
 
     vergi = 0.0
 
-    for i in range(len(dilimler)):
-        alt_limit, _, oran = dilimler[i]
-        if i + 1 < len(dilimler):
-            ust_limit = dilimler[i + 1][0]
-        else:
-            ust_limit = float("inf")
+    for i, (alt_limit, _, oran) in enumerate(dilimler):
+        ust_limit = dilimler[i + 1][0] if i + 1 < len(dilimler) else float("inf")
 
         if gelir > alt_limit:
             vergilenecek = min(gelir, ust_limit) - alt_limit
@@ -4055,71 +4119,11 @@ def gelir_vergisi_hesapla(yil: int, gelir: float, tarifeler: dict, ucret: bool =
     return round(vergi, 2)
 
 
-@app.route("/vergi-hesapla", methods=["POST"])
-def vergi_hesapla_api():
-    try:
-        data = request.get_json()
-
-        yil = int(data.get("yil"))
-        brut = float(data.get("brut"))
-        ay = int(data.get("ay"))
-        gelir_turu = data.get("gelir_turu", "ucret")
-        ucret_mi = gelir_turu == "ucret"
-        istisna_var = bool(data.get("istisna", False))
-        onceki_dict = data.get("onceki_matrahlar", {})
-
-        onceki_toplam = sum(float(v) for v in onceki_dict.values() if isinstance(v, (int, float, str)) and str(v).replace(".", "", 1).isdigit())
-
-        if ucret_mi:
-            if istisna_var:
-                if ay == 0:
-                    matrah_yillik = brut
-                    istisna_ay = 12
-                else:
-                    matrah_yillik = onceki_toplam + brut
-                    istisna_ay = ay
-            else:
-                # 🔧 İstisna yoksa yıllık gibi değerlendir
-                matrah_yillik = onceki_toplam + brut if ay > 0 else brut
-                istisna_ay = 0  # ❌ istisna olmayacak
-        else:
-            matrah_yillik = brut
-            istisna_ay = 0
-
-        vergi = gelir_vergisi_hesapla(yil, matrah_yillik, tarifeler, ucret=ucret_mi)
-
-        istisna = 0.0
-        tek_ay_istisna = 0.0
-        if istisna_var and ucret_mi and istisna_ay > 0:
-            istisna, tek_ay_istisna = asgari_ucret_istisnasi_hesapla(yil, istisna_ay, ucret=True)
-            vergi -= istisna
-            vergi = max(vergi, 0)
-
-        if ay > 0 and ay < 12 and onceki_toplam > 0:
-            onceki_vergi = gelir_vergisi_hesapla(yil, onceki_toplam, tarifeler, ucret=ucret_mi)
-            vergi -= onceki_vergi
-            vergi = max(vergi, 0)
-
-        tam_yillik_istisna = 0.0
-        if ucret_mi and istisna_var:
-            tam_yillik_istisna, _ = asgari_ucret_istisnasi_hesapla(yil, 12, ucret=True)
-
-        return jsonify({
-            "vergi": round(vergi, 2),
-            "istisna": round(istisna, 2),
-            "istisna_ay": istisna_ay,
-            "tam_istisna": round(tam_yillik_istisna, 2),
-            "tek_ay_istisna": round(tek_ay_istisna, 2),
-        })
-
-    except Exception as e:
-        return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
-    
-    
-    
-    
-
-def asgari_ucret_istisnasi_hesapla(yil, ay_sayisi, ucret=True):
+# --- ASGARİ ÜCRET İSTİSNASI HESABI ---
+def asgari_ucret_istisnasi_hesapla(yil: int, ay_sayisi: int, ucret: bool = True):
+    """
+    Belirli yıl ve ay sayısı için toplam ve son ay istisnasını döndürür.
+    """
     veriler = asgari_ucretler.get(yil)
     if not veriler or "istisnalar" not in veriler:
         return 0.0, 0.0
@@ -4135,22 +4139,88 @@ def asgari_ucret_istisnasi_hesapla(yil, ay_sayisi, ucret=True):
     return round(toplam, 2), round(son_ay_istisnasi, 2)
 
 
-@app.route("/asgari-istisna", methods=["POST"])
-def asgari_istisna_api():
+# --- GELİR VERGİSİ API ---
+@app.route("/vergi-hesapla", methods=["POST"])
+def vergi_hesapla_api():
     try:
-        data = request.get_json()
-        yil = int(data.get("yil"))
-        ay = int(data.get("ay_sayisi"))  # 1-12
-        ucret = bool(data.get("ucret", True))
+        data = request.get_json(force=True)
 
-        istisna = asgari_ucret_istisnasi_hesapla(yil, ay, ucret)
+        yil = int(data.get("yil", 0))
+        brut = float(data.get("brut", 0))
+        ay = int(data.get("ay", 0))
+        gelir_turu = data.get("gelir_turu", "ucret")
+        ucret_mi = gelir_turu == "ucret"
+        istisna_var = bool(data.get("istisna", False))
+        onceki_dict = data.get("onceki_matrahlar", {})
+
+        # 🔹 Önceki matrah toplamı
+        onceki_toplam = 0.0
+        for v in onceki_dict.values():
+            try:
+                onceki_toplam += float(v)
+            except (ValueError, TypeError):
+                continue
+
+        # 🔹 Matrah belirleme
+        if ucret_mi:
+            if istisna_var:
+                matrah_yillik = (onceki_toplam + brut) if ay > 0 else brut
+                istisna_ay = ay if ay > 0 else 12
+            else:
+                matrah_yillik = (onceki_toplam + brut) if ay > 0 else brut
+                istisna_ay = 0
+        else:
+            matrah_yillik = brut
+            istisna_ay = 0
+
+        # 🔹 Vergi hesaplama
+        vergi = gelir_vergisi_hesapla(yil, matrah_yillik, tarifeler, ucret=ucret_mi)
+
+        # 🔹 İstisna hesapla
+        istisna = tek_ay_istisna = 0.0
+        if istisna_var and ucret_mi and istisna_ay > 0:
+            istisna, tek_ay_istisna = asgari_ucret_istisnasi_hesapla(yil, istisna_ay, True)
+            vergi = max(vergi - istisna, 0)
+
+        # 🔹 Önceki ay fark vergisi
+        if ay > 0 and ay < 12 and onceki_toplam > 0:
+            onceki_vergi = gelir_vergisi_hesapla(yil, onceki_toplam, tarifeler, ucret=ucret_mi)
+            vergi = max(vergi - onceki_vergi, 0)
+
+        # 🔹 Yıllık tam istisna
+        tam_yillik_istisna = 0.0
+        if ucret_mi and istisna_var:
+            tam_yillik_istisna, _ = asgari_ucret_istisnasi_hesapla(yil, 12, True)
+
         return jsonify({
-            "istisna": round(istisna, 2)
+            "vergi": round(vergi, 2),
+            "istisna": round(istisna, 2),
+            "istisna_ay": istisna_ay,
+            "tam_istisna": round(tam_yillik_istisna, 2),
+            "tek_ay_istisna": round(tek_ay_istisna, 2)
         })
 
     except Exception as e:
         return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
 
+
+# --- ASGARİ ÜCRET İSTİSNA API ---
+@app.route("/asgari-istisna", methods=["POST"])
+def asgari_istisna_api():
+    try:
+        data = request.get_json(force=True)
+        yil = int(data.get("yil", 0))
+        ay = int(data.get("ay_sayisi", 1))
+        ucret = bool(data.get("ucret", True))
+
+        toplam, tek_ay = asgari_ucret_istisnasi_hesapla(yil, ay, ucret)
+        return jsonify({
+            "toplam_istisna": round(toplam, 2),
+            "tek_ay_istisna": round(tek_ay, 2)
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
 
     
 

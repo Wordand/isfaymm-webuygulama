@@ -1,87 +1,123 @@
-import sqlite3
-from flask import current_app
+import os
+from psycopg2 import pool, extras
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# --- PostgreSQL bağlantı havuzu ---
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL bulunamadı. Render Environment ayarını kontrol et.")
+
+# Bağlantı havuzu (1–10 arası aktif bağlantı tutar)
+db_pool = pool.SimpleConnectionPool(
+    1, 10, DATABASE_URL, cursor_factory=extras.RealDictCursor
+)
 
 def get_conn():
     """
-    Uygulamanın config'indeki DATABASE yoluna bağlanır,
-    sqlite3.Row kullanarak kolon isimleriyle erişimi sağlar.
+    Havuzdan bir bağlantı alır.
+    Her sorguda yeniden bağlantı açmak yerine bu havuzu kullanır.
     """
-    db_path = current_app.config.get("DATABASE", "database.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+    global db_pool  # ✅ global tanımı fonksiyonun başında olmalı
+
+    try:
+        return db_pool.getconn()
+    except Exception:
+        # Hatalı bağlantı olursa havuzu yeniden kur
+        db_pool = pool.SimpleConnectionPool(1, 10, DATABASE_URL, cursor_factory=extras.RealDictCursor)
+        return db_pool.getconn()
+
+def put_conn(conn):
+    """
+    Kullanım bittiğinde bağlantıyı havuza geri verir.
+    (Normalde 'with' kullanılmazsa manuel çağrılabilir.)
+    """
+    if conn:
+        db_pool.putconn(conn)
+
+
 
 
 def migrate_tesvik_columns():
     """
-    tesvik_belgeleri tablosuna eksik sütunları ekler.
-    CREATE TABLE IF NOT EXISTS çalıştıktan sonra çağrılmalı.
+    tesvik_belgeleri tablosunda eksik sütunları kontrol eder ve ekler.
+    PostgreSQL için uygun hale getirilmiştir.
     """
     with get_conn() as conn:
-        c = conn.cursor()
-        # Mevcut sütun adlarını al
-        c.execute("PRAGMA table_info(tesvik_belgeleri)")
-        existing = {row[1] for row in c.fetchall()}
+        cur = conn.cursor()
 
-        # Şablonda kullandığın tüm alanlar:
+        # Mevcut sütun adlarını al
+        cur.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'tesvik_belgeleri';
+        """)
+        existing = {row['column_name'] for row in cur.fetchall()}
+
         to_add = {
             "belge_no":                   "TEXT",
             "belge_tarihi":               "TEXT",
             "karar":                      "TEXT",
             "yatirim_turu1":              "TEXT",
             "yatirim_turu2":              "TEXT",
-            "toplam_tutar":               "REAL",
-            "katki_orani":                "REAL",
-            "vergi_orani":                "REAL",
+            "toplam_tutar":               "DOUBLE PRECISION",
+            "katki_orani":                "DOUBLE PRECISION",
+            "vergi_orani":                "DOUBLE PRECISION",
             "bolge":                      "TEXT",
-            "diger_oran":                 "REAL",
-            "katki_tutari":               "REAL",
-            "cari_harcama_tutari":        "REAL",
-            "toplam_harcama_tutari":      "REAL",
-            "fiili_katki_tutari":         "REAL",
-            "endeks_katki_tutari":        "REAL",
-            "onceki_yatirim_katki_tutari":"REAL",
-            "onceki_diger_katki_tutari":  "REAL",
-            "onceki_katki_tutari":        "REAL",
-            "cari_yatirim_katki":         "REAL",
-            "cari_diger_katki":           "REAL",
-            "cari_toplam_katki":          "REAL",
-            "genel_toplam_katki":         "REAL"
+            "diger_oran":                 "DOUBLE PRECISION",
+            "katki_tutari":               "DOUBLE PRECISION",
+            "cari_harcama_tutari":        "DOUBLE PRECISION",
+            "toplam_harcama_tutari":      "DOUBLE PRECISION",
+            "fiili_katki_tutari":         "DOUBLE PRECISION",
+            "endeks_katki_tutari":        "DOUBLE PRECISION",
+            "onceki_yatirim_katki_tutari":"DOUBLE PRECISION",
+            "onceki_diger_katki_tutari":  "DOUBLE PRECISION",
+            "onceki_katki_tutari":        "DOUBLE PRECISION",
+            "cari_yatirim_katki":         "DOUBLE PRECISION",
+            "cari_diger_katki":           "DOUBLE PRECISION",
+            "cari_toplam_katki":          "DOUBLE PRECISION",
+            "genel_toplam_katki":         "DOUBLE PRECISION"
         }
 
         for col, col_type in to_add.items():
             if col not in existing:
-                c.execute(f"ALTER TABLE tesvik_belgeleri ADD COLUMN {col} {col_type}")
+                print(f"🆕 '{col}' sütunu ekleniyor...")
+                cur.execute(f'ALTER TABLE tesvik_belgeleri ADD COLUMN "{col}" {col_type};')
 
-        c.execute('''
+        # Belgeler tablosu oluşturulmamışsa oluştur
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS belgeler (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            unvan           TEXT    NOT NULL,
-            donem           TEXT    NOT NULL,
-            belge_adi       TEXT    NOT NULL,
-            belge_turu      TEXT    NOT NULL,
-            dosya_yolu      TEXT    NOT NULL,
+            id SERIAL PRIMARY KEY,
+            unvan TEXT NOT NULL,
+            donem TEXT NOT NULL,
+            belge_adi TEXT NOT NULL,
+            belge_turu TEXT NOT NULL,
+            dosya_yolu TEXT NOT NULL,
             yuklenme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
-        
+        );
+        """)
+
         conn.commit()
+        print("✅ migrate_tesvik_columns tamamlandı.")
 
 
-# 🆕 Yeni eklenecek fonksiyon:
 def migrate_users_table():
     """
     users tablosunda 'is_approved' sütunu yoksa ekler.
-    Bu sütun, admin onayı sisteminde kullanılır.
     """
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("PRAGMA table_info(users)")
-        existing = {row[1] for row in c.fetchall()}
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'users';
+        """)
+        existing = {row['column_name'] for row in cur.fetchall()}
 
         if "is_approved" not in existing:
             print("🛠️ 'is_approved' sütunu users tablosuna ekleniyor...")
-            c.execute("ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0")
+            cur.execute('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0;')
             conn.commit()
             print("✅ 'is_approved' sütunu başarıyla eklendi.")
         else:

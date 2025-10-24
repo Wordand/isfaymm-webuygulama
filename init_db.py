@@ -1,79 +1,75 @@
-import sqlite3
 import os
+import psycopg2
+from psycopg2 import sql
+from dotenv import load_dotenv
 
-# init_db.py dosyasının bulunduğu dizin
-base_dir = os.path.dirname(os.path.abspath(__file__))
-# instance klasörünün yolu
-instance_path = os.path.join(base_dir, 'instance')
-# database.db dosyasının tam yolu
-database_path = os.path.join(instance_path, 'database.db')
+load_dotenv()
 
-# instance klasörünün var olduğundan emin ol
-os.makedirs(instance_path, exist_ok=True)
+# Ortam değişkeninden DATABASE_URL al
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL bulunamadı. Lütfen .env veya Render environment değişkenlerini kontrol et.")
 
-conn = sqlite3.connect(database_path)
-c = conn.cursor()
+# PostgreSQL bağlantısı
+conn = psycopg2.connect(DATABASE_URL)
+cur = conn.cursor()
 
-# Kullanıcılar tablosu (şifreler HASH olarak saklanmalı)
-c.execute('''
+# --- USERS TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL   -- ⚠️ HASH olarak saklanmalı, plain-text değil!
-)
-''')
+    password TEXT NOT NULL,
+    is_approved INTEGER DEFAULT 0
+);
+""")
 
-# Matrahlar tablosu
-c.execute('''
+# --- MATRAHLAR TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS matrahlar (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    gelir REAL,
-    gider REAL,
-    matrah REAL,
-    tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-)
-''')
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    gelir DOUBLE PRECISION,
+    gider DOUBLE PRECISION,
+    matrah DOUBLE PRECISION,
+    tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+""")
 
-# Mükellef tablosu
-c.execute('''
+# --- MÜKELLEF TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS mukellef (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     vergi_kimlik_no TEXT NOT NULL,
     unvan TEXT NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, vergi_kimlik_no)
-)
-''')
+);
+""")
 
-# Beyanname tablosu
-c.execute('''
+# --- BEYANNAME TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS beyanname (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    mukellef_id INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    mukellef_id INTEGER NOT NULL REFERENCES mukellef(id) ON DELETE CASCADE,
     donem TEXT NOT NULL,
     tur TEXT NOT NULL,
-    veriler TEXT,
+    veriler BYTEA,
     dosya_adi TEXT,
     yuklenme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY(mukellef_id) REFERENCES mukellef(id) ON DELETE CASCADE,
     UNIQUE(user_id, mukellef_id, donem, tur)
-)
-''')
+);
+""")
 
-# Teşvik belgeleri tablosu
-c.execute('''
+# --- TEŞVİK BELGELERİ TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     dosya_adi TEXT NOT NULL,
     yukleme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    -- Kimlik ve tarih bilgileri
     belge_no TEXT,
     belge_tarihi TEXT,
     karar TEXT,
@@ -85,65 +81,57 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     osb TEXT,
     bolge TEXT,
 
-    -- Oranlar
-    katki_orani REAL,
-    vergi_orani REAL,
-    diger_oran REAL,
+    katki_orani DOUBLE PRECISION,
+    vergi_orani DOUBLE PRECISION,
+    diger_oran DOUBLE PRECISION,
 
-    -- Yatırım tutar bilgileri
-    toplam_tutar REAL,
-    katki_tutari REAL,
-    diger_katki_tutari REAL,
-    cari_harcama_tutari REAL,
-    toplam_harcama_tutari REAL,
-    fiili_katki_tutari REAL,
-    endeks_katki_tutari REAL,
+    toplam_tutar DOUBLE PRECISION,
+    katki_tutari DOUBLE PRECISION,
+    diger_katki_tutari DOUBLE PRECISION,
+    cari_harcama_tutari DOUBLE PRECISION,
+    toplam_harcama_tutari DOUBLE PRECISION,
+    fiili_katki_tutari DOUBLE PRECISION,
+    endeks_katki_tutari DOUBLE PRECISION,
 
-    -- Önceki dönemlerden gelen
-    onceki_yatirim_katki_tutari REAL,
-    onceki_diger_katki_tutari REAL,
-    onceki_katki_tutari REAL,
+    onceki_yatirim_katki_tutari DOUBLE PRECISION,
+    onceki_diger_katki_tutari DOUBLE PRECISION,
+    onceki_katki_tutari DOUBLE PRECISION,
 
-    -- Cari ve genel toplam katkılar
-    cari_yatirim_katki REAL DEFAULT 0.0,
-    cari_diger_katki REAL DEFAULT 0.0,
-    cari_toplam_katki REAL DEFAULT 0.0,
-    genel_toplam_katki REAL DEFAULT 0.0,
+    cari_yatirim_katki DOUBLE PRECISION DEFAULT 0.0,
+    cari_diger_katki DOUBLE PRECISION DEFAULT 0.0,
+    cari_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
+    genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
 
-    -- Satış ve Faaliyet Dağılımı
-    brut_satis REAL,
-    ihracat REAL,
-    imalat REAL,
-    diger_faaliyet REAL,
-    use_detailed_profit_ratios BOOLEAN DEFAULT FALSE,
-
-    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    brut_satis DOUBLE PRECISION,
+    ihracat DOUBLE PRECISION,
+    imalat DOUBLE PRECISION,
+    diger_faaliyet DOUBLE PRECISION,
+    use_detailed_profit_ratios BOOLEAN DEFAULT FALSE
 );
-''')
+""")
 
-# Profit data tablosu
-c.execute('''
+# --- PROFIT_DATA TABLOSU ---
+cur.execute("""
 CREATE TABLE IF NOT EXISTS profit_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     aciklama_index INTEGER NOT NULL,
-    column_b REAL DEFAULT 0.0,
-    column_c REAL DEFAULT 0.0,
-    column_d REAL DEFAULT 0.0,
-    column_e REAL DEFAULT 0.0,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    column_b DOUBLE PRECISION DEFAULT 0.0,
+    column_c DOUBLE PRECISION DEFAULT 0.0,
+    column_d DOUBLE PRECISION DEFAULT 0.0,
+    column_e DOUBLE PRECISION DEFAULT 0.0,
     UNIQUE(user_id, aciklama_index)
-)
-''')
+);
+""")
 
-# Performans için indexler
-c.execute("CREATE INDEX IF NOT EXISTS idx_mukellef_user ON mukellef(user_id)")
-c.execute("CREATE INDEX IF NOT EXISTS idx_beyanname_user ON beyanname(user_id)")
-c.execute("CREATE INDEX IF NOT EXISTS idx_tesvik_user ON tesvik_belgeleri(user_id)")
+# --- İNDEKSLER ---
+cur.execute("CREATE INDEX IF NOT EXISTS idx_mukellef_user ON mukellef(user_id);")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_beyanname_user ON beyanname(user_id);")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_tesvik_user ON tesvik_belgeleri(user_id);")
 
-# Veritabanı işlemlerini kaydet ve kapat
+# Kaydet ve kapat
 conn.commit()
-
-print("✅ Veritabanı başarıyla oluşturuldu:", database_path)
-
+cur.close()
 conn.close()
+
+print("✅ PostgreSQL veritabanı başarıyla oluşturuldu (Supabase bağlantısı ile).")
