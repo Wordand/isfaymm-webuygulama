@@ -424,7 +424,7 @@ def mukellef_sec():
 
         with get_conn() as conn:
             c = conn.cursor()
-            c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = ?", (mukellef_id,))
+            c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s", (mukellef_id,))
             row = c.fetchone()
 
         if not row:
