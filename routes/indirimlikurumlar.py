@@ -587,7 +587,6 @@ def index():
 
 
 
-
 @bp.route("/form", methods=["POST"])
 @login_required
 def form_kaydet():
@@ -602,15 +601,9 @@ def form_kaydet():
             "message": "Lütfen önce bir mükellef seçiniz."
         }), 400
 
-    # 🧭 1️⃣ Teşvik ID tespiti (önce session, sonra form)
-    tesvik_id = session.get("current_tesvik_id")
-    if not tesvik_id:
-        try:
-            form_tesvik_id = request.form.get("tesvik_id")
-            tesvik_id = int(form_tesvik_id) if form_tesvik_id else None
-        except ValueError:
-            tesvik_id = None
-
+    # 🧭 1️⃣ Teşvik ID (güncelleme mi yeni kayıt mı?)
+    tesvik_id = session.get("current_tesvik_id") or request.form.get("tesvik_id")
+    tesvik_id = int(tesvik_id) if tesvik_id and tesvik_id.isdigit() else None
     print(f"→ Aktif Teşvik ID: {tesvik_id}")
 
     # 🧾 2️⃣ Form verileri
@@ -626,15 +619,13 @@ def form_kaydet():
     osb = request.form.get("osb")
     bolge = request.form.get("bolge")
 
-    # 🧮 Yardımcı sayı parse fonksiyonu
+    # 🧮 Sayı parse fonksiyonu
     def parse_amount(field):
         s = (request.form.get(field) or "0").replace(".", "").replace(",", ".")
-        try:
-            return float(s)
-        except ValueError:
-            return 0.0
+        try: return float(s)
+        except: return 0.0
 
-    # 💡 3️⃣ 9903 özel hesaplamalar
+    # 💡 9903 hesaplama
     if karar == "2025/9903":
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
         katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0))
@@ -645,7 +636,7 @@ def form_kaydet():
         vergi_orani = parse_amount("vergi_orani")
         diger_oran = parse_amount("diger_oran")
 
-    # 💰 4️⃣ Sayısal alanlar
+    # 💰 Sayısallar
     toplam_tutar = parse_amount("toplam_tutar")
     katki_tutari = parse_amount("katki_tutari")
     diger_katki_tutari = parse_amount("diger_katki_tutari")
@@ -669,9 +660,8 @@ def form_kaydet():
     with get_conn() as conn:
         c = conn.cursor()
         try:
-            # 🔄 5️⃣ GÜNCELLEME
+            # 🟡 GÜNCELLEME
             if tesvik_id:
-                print(f"🟡 Güncelleme başlatıldı ID={tesvik_id}")
                 c.execute("""
                     UPDATE tesvik_belgeleri
                     SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s, karar=%s,
@@ -699,11 +689,9 @@ def form_kaydet():
                     tesvik_id, user_id
                 ))
                 conn.commit()
-                print(f"✅ Güncelleme tamamlandı ID={tesvik_id}")
 
-            # 🆕 6️⃣ YENİ KAYIT
+            # 🆕 YENİ KAYIT
             else:
-                print("🆕 Yeni belge ekleniyor...")
                 c.execute("""
                     INSERT INTO tesvik_belgeleri (
                         user_id, mukellef_id, belge_no, belge_tarihi,
@@ -718,6 +706,7 @@ def form_kaydet():
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                     )
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    RETURNING id
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
@@ -731,17 +720,10 @@ def form_kaydet():
                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                 ))
 
-
-                from services.db import USE_SQLITE
-                if USE_SQLITE:
-                    tesvik_id = c.lastrowid
-                else:
-                    c.execute("SELECT currval(pg_get_serial_sequence('tesvik_belgeleri', 'id'))")
-                    tesvik_id = c.fetchone()[0]
-
+                tesvik_id = c.fetchone()[0]
                 session["current_tesvik_id"] = tesvik_id
                 conn.commit()
-                print(f"✅ Yeni belge oluşturuldu ID={tesvik_id}")
+                print(f"✅ Yeni belge oluşturuldu: ID={tesvik_id}")
 
             return jsonify({
                 "status": "success",
@@ -752,14 +734,12 @@ def form_kaydet():
 
         except Exception as e:
             conn.rollback()
-            print("❌ Hata Ayrıntısı:")
-            traceback.print_exc()   # >>> gerçek hatayı server loguna yazar
+            traceback.print_exc()
             return jsonify({
                 "status": "error",
                 "title": "Kayıt Hatası!",
-                "message": f"Veritabanı hatası: {repr(e)}"   # <<< gerçek hata metni gelir
+                "message": f"Veritabanı hatası: {repr(e)}"
             })
-
 
 
 
