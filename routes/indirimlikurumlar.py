@@ -4,16 +4,25 @@ import io
 import pdfkit
 import pdfplumber
 import re
+import tempfile
+import os
+import shutil
+import json
+
 from datetime import datetime
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, make_response, current_app, send_file, jsonify
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, flash, make_response, current_app, send_file, jsonify
 from werkzeug.utils import secure_filename
-import json # JSON modülünü import ediyoruz
+
 
 from services.db import get_conn
 from config import ILLER, BOLGE_MAP, BOLGE_MAP_9903, TESVIK_KATKILAR, TESVIK_VERGILER, TESVIK_KATKILAR_9903
 from auth import login_required
+from types import SimpleNamespace
 
 bp = Blueprint("indirimlikurumlar", __name__, url_prefix="/indirimlikurumlar")
+
+
+
 
 explanations = [
     "ORANLAR (%) (FAALİYET TÜRLERİ İTİBARİYLE)",                 #0
@@ -138,6 +147,8 @@ def format_date_for_input(date_str):
     except:
         return date_str  # zaten doğruysa olduğu gibi döndür
 
+
+
 # JSON serileştirme sorunlarını gidermek için yardımcı fonksiyon
 def _clean_json_value(val):
     if pd.isna(val):
@@ -209,6 +220,10 @@ def save_user_profit_df(user_id: int, dataframe: pd.DataFrame):
             """, (user_id, i, row['B'], row['C'], row['D'], row['E']))
         conn.commit()
 
+
+
+
+
 def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
     formatted_rows = []
     for index, row in dataframe.iterrows():
@@ -239,72 +254,116 @@ def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
         formatted_rows.append(formatted_row)
     return formatted_rows
 
-@bp.route('/ayrintili-kazanc', methods=['GET','POST'])
-@login_required 
+
+
+
+@bp.route('/ayrintili-kazanc', methods=['GET', 'POST'])
+@login_required
 def ayrintili_kazanc():
     user_id = session["user_id"]
 
-    # --- BU DAHA KAPSAMLI TRY-EXCEPT BLOĞUNU EKLEYİN ---
     try:
-        # POST geldiğinde hem import/export hem de kaydetme işlemi
         if request.method == 'POST':
-            # Bu satır, profit_data tablosu veya user_id ile ilgili bir sorun varsa hata verebilir
-            current_df_profit = get_user_profit_df(user_id) 
+            current_df_profit = get_user_profit_df(user_id)
 
+            # 🟦 İçe Aktar
             if 'import' in request.form:
-                return jsonify({"status": "warning", "title": "İçe Aktarılamadı!", "message": "İçe aktar henüz uygulanmadı."})      
-            elif 'export' in request.form:
-                buf = io.StringIO()
-                current_df_profit.to_csv(buf, index=False, encoding='utf-8-sig')
-                buf.seek(0)
+                return jsonify({
+                    "status": "warning",
+                    "title": "İçe Aktarılamadı!",
+                    "message": "İçe aktar henüz uygulanmadı."
+                })
+
+            # 📤 Dışa Aktar
+            elif 'export' in request.form or request.form.get("action") == "export":
+                df = get_user_profit_df(user_id).copy()
+
+                # 🧮 Formdan gelen değerleri oku
+                for i in range(len(df)):
+                    for col in ['B', 'C', 'D', 'E']:
+                        raw_val = (request.form.get(f"{col}_{i}") or "").replace(".", "").replace(",", ".")
+                        try:
+                            df.at[i, col] = float(raw_val)
+                        except ValueError:
+                            df.at[i, col] = 0.0
+
+
+
+                # 💡 1️⃣ Toplamları hesapla
+                total_b = df['B'].sum()
+                total_c = df['C'].sum()
+                total_d = df['D'].sum()
+                total_e = df['E'].sum()
+
+                # 💡 2️⃣ ORANLAR (%) (ilk satır)
+                df.at[0, 'Açıklama'] = "ORANLAR (%) (FAALİYET TÜRLERİ İTİBARİYLE)"
+                df.at[0, 'B'] = 100.00
+                if total_b != 0:
+                    df.at[0, 'C'] = round((total_c / total_b) * 100, 2)
+                    df.at[0, 'D'] = round((total_d / total_b) * 100, 2)
+                    df.at[0, 'E'] = round((total_e / total_b) * 100, 2)
+                else:
+                    df.at[0, ['C', 'D', 'E']] = 0.00
+
+                # 💡 3️⃣ İHRACAT, İMALAT VE DİĞER FAALİYETLERİN TOPLAM PAYLARI (%)
+                df.at[54, 'Açıklama'] = "İHRACAT, İMALAT VE DİĞER FAALİYETLERİN TOPLAM PAYLARI (%)"
+                df.at[54, 'B'] = 100.00
+                if total_b != 0:
+                    df.at[54, 'C'] = round((total_c / total_b) * 100, 2)
+                    df.at[54, 'D'] = round((total_d / total_b) * 100, 2)
+                    df.at[54, 'E'] = round((total_e / total_b) * 100, 2)
+                else:
+                    df.at[54, ['C', 'D', 'E']] = 0.00
+
+
+
+
+
+
+
+                # 📈 Excel oluştur
+                import io, xlsxwriter
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+                    df.to_excel(writer, index=False, sheet_name="Ayrıntılı Kazanç Tablosu")
+                output.seek(0)
                 return send_file(
-                    io.BytesIO(buf.getvalue().encode('utf-8-sig')),
-                    mimetype='text/csv',
+                    output,
+                    mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     as_attachment=True,
-                    download_name='kazanc_hesap_ayrintili.csv'
+                    download_name="ayrintili_kazanc_tablosu.xlsx"
                 )
-            else: # Bu, kaydetme bölümü (mevcut try-except bloğunuz burada)
+
+            # 💾 Kaydetme işlemi
+            else:
                 for i in range(len(explanations)):
-                    for col in ['B','C','D','E']:
+                    for col in ['B', 'C', 'D', 'E']:
                         raw = (request.form.get(f"{col}_{i}") or '').replace('.', '').replace(',', '.')
                         try:
-                            val = raw.replace('%','')
+                            val = raw.replace('%', '')
                             current_df_profit.at[i, col] = float(val) if val != '' else 0.0
                         except ValueError:
                             current_df_profit.at[i, col] = 0.0
 
-                try: # Mevcut içteki try-except bloğu
-                    save_user_profit_df(user_id, current_df_profit)
-                    return jsonify({"status": "success", "title": "Kaydedildi!", "message": "Ayrıntılı kazanç tablosu başarıyla kaydedildi."})
-                except Exception as e:
-                    print(f"Ayrıntılı kazanç tablosu kaydedilirken hata oluştu (iç blok): {e}") 
-                    return jsonify({"status": "error", "title": "Kaydetme Hatası!", "message": f"Veritabanına kaydedilirken bir sorun oluştu: {str(e)}"})
-            
-        # GET geldiğinde veya POST sonrası redirect sonrası:
-        # Bu kısım da hatalara karşı korumalı olmalı, özellikle current_df_profit çekilirken
-        current_df_profit = get_user_profit_df(user_id) 
+                save_user_profit_df(user_id, current_df_profit)
+                return jsonify({
+                    "status": "success",
+                    "title": "Kaydedildi!",
+                    "message": "Ayrıntılı kazanç tablosu başarıyla kaydedildi."
+                })
+
+        # 🟨 GET isteği — tabloyu yükle
+        current_df_profit = get_user_profit_df(user_id)
         formatted_data_for_html = format_df_for_html(current_df_profit)
 
-        # index() içindeki JSON hazırlama kodu birebir alındı - bu render_template bağlamı içindir
-        safe_bolge_map = {}
-        for k, v in BOLGE_MAP.items():
-            key = str(k)
-            safe_bolge_map[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
-
-        safe_katkilar_json = {}
-        for k, v in TESVIK_KATKILAR.items():
-            key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) and len(k)==2 else str(k)
-            safe_katkilar_json[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
-
-        safe_vergiler_json = {}
-        for k, v in TESVIK_VERGILER.items():
-            key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) and len(k)==2 else str(k)
-            safe_vergiler_json[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
+        safe_bolge_map = {str(k): v if v is not None else None for k, v in BOLGE_MAP.items()}
+        safe_katkilar_json = {f"{k[0]}|{k[1]}" if isinstance(k, tuple) else str(k): v for k, v in TESVIK_KATKILAR.items()}
+        safe_vergiler_json = {f"{k[0]}|{k[1]}" if isinstance(k, tuple) else str(k): v for k, v in TESVIK_VERGILER.items()}
 
         initial_ayrintili_ratios = {
-            "C": f"{current_df_profit.at[54,'C']:.2f}".replace('.',',') + "%" if not pd.isna(current_df_profit.at[54,'C']) else "0,00%",
-            "D": f"{current_df_profit.at[54,'D']:.2f}".replace('.',',') + "%" if not pd.isna(current_df_profit.at[54,'D']) else "0,00%",
-            "E": f"{current_df_profit.at[54,'E']:.2f}".replace('.',',') + "%" if not pd.isna(current_df_profit.at[54,'E']) else "0,00%",
+            "C": f"{current_df_profit.at[54,'C']:.2f}".replace('.', ',') + "%" if not pd.isna(current_df_profit.at[54,'C']) else "0,00%",
+            "D": f"{current_df_profit.at[54,'D']:.2f}".replace('.', ',') + "%" if not pd.isna(current_df_profit.at[54,'D']) else "0,00%",
+            "E": f"{current_df_profit.at[54,'E']:.2f}".replace('.', ',') + "%" if not pd.isna(current_df_profit.at[54,'E']) else "0,00%",
         }
 
         return render_template(
@@ -320,96 +379,211 @@ def ayrintili_kazanc():
         )
 
     except Exception as e:
-        # Ana POST veya GET bloğunda beklenmeyen bir hata oluştuğunda
-        print(f"ayrintili_kazanc fonksiyonunda genel hata oluştu: {e}")
-        # Frontend'e JSON hata yanıtı dön
-        return jsonify({"status": "error", "title": "Sunucu Hatası!", "message": f"Beklenmeyen bir sunucu hatası oluştu: {str(e)}"})
+        print(f"ayrintili_kazanc hata: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "Sunucu Hatası!",
+            "message": f"Beklenmeyen bir sunucu hatası oluştu: {str(e)}"
+        })
+
+
+
+
+
+
+
+@bp.route("/mukellef-listesi")
+@login_required
+def mukellef_listesi():
+    """Aktif kullanıcının mükellef listesini getirir"""
+    uid = session.get("user_id")
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s", (uid,))
+        rows = [dict(zip([desc[0] for desc in c.description], r)) for r in c.fetchall()]
+    return jsonify(rows)
+
+
+@bp.route("/mukellef-bilgi")
+@login_required
+def mukellef_bilgi():
+    user_id = session.get("user_id")
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s", (user_id,))
+        data = c.fetchall()
+    return render_template("mukellef_bilgi.html", mukellefler=data)
+
+
+@bp.route("/mukellef-sec", methods=["POST"])
+@login_required
+def mukellef_sec():
+    try:
+        data = request.get_json()
+        mukellef_id = data.get("id")
+
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = ?", (mukellef_id,))
+            row = c.fetchone()
+
+        if not row:
+            return jsonify({"status": "error", "message": "Mükellef bulunamadı."}), 404
+
+        # 🟢 Burada artık dict olarak erişiyoruz:
+        session["aktif_mukellef_id"] = mukellef_id
+        session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
+        session["aktif_mukellef_unvan"] = row["unvan"]
+
+        print(f"✅ Mükellef seçildi: {row['unvan']} ({row['vergi_kimlik_no']})")
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print("❌ mukellef-sec hatası:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@bp.route("/mukellef-ekle", methods=["POST"])
+@login_required
+def mukellef_ekle():
+    data = request.get_json()
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (%s, %s, %s)",
+            (session["user_id"], data["vergi_kimlik_no"], data["unvan"])
+        )
+        conn.commit()
+    return jsonify({"status": "success"})
+
+
+@bp.route("/mukellef-guncelle", methods=["POST"])
+@login_required
+def mukellef_guncelle():
+    data = request.get_json()
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            "UPDATE mukellef SET vergi_kimlik_no=%s, unvan=%s WHERE id=%s AND user_id=%s",
+            (data["vergi_kimlik_no"], data["unvan"], data["id"], session["user_id"])
+        )
+        conn.commit()
+    return jsonify({"status": "success"})
+
+
+@bp.route("/mukellef-sil", methods=["POST"])
+@login_required
+def mukellef_sil():
+    data = request.get_json()
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            "DELETE FROM mukellef WHERE id=%s AND user_id=%s",
+            (data["id"], session["user_id"])
+        )
+        conn.commit()
+    return jsonify({"status": "success"})
+
+
+
+
+
 
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    sekme = request.args.get("sekme", "form")
+    sekme = request.args.get("sekme", "mukellef")
     user_id = session["user_id"]
-    
-    # URL'den gelen 'view' parametresini her zaman kontrol edelim.
-    # Bu, hem 'tesvik' sekmesinde detay görmek hem de 'form' sekmesinde belge düzenlemek için kullanılır.
-    view_id = request.args.get("view", type=int) 
+    aktif_mukellef_id = session.get("aktif_mukellef_id")
 
-    # Kullanıcının tüm teşvik belgelerini çek
-    docs = get_all_tesvik_docs(user_id) 
+    if not aktif_mukellef_id and sekme != "mukellef":
+        return redirect(url_for("indirimlikurumlar.index", sekme="mukellef"))
 
-    # 'tesvik' sekmesinde belirli bir belgenin detayını göstermek için kullanılır
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute(
+            "SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s ORDER BY id DESC",
+            (user_id,),
+        )
+        mukellefler = c.fetchall()
+
+    docs, user_df, current_belge = [], None, None
     edit_doc = None
-    if sekme == "tesvik" and view_id:
-        edit_doc = next((d for d in docs if d["id"] == view_id), None)
 
-    # Kullanıcının ayrıntılı kâr tablosu verilerini çek
-    user_df = get_user_profit_df(user_id)
+    if aktif_mukellef_id:
+        docs = get_all_tesvik_docs(user_id)
+        user_df = get_user_profit_df(user_id)
 
-    # 'form' sekmesi için güncel belgeyi belirleme mantığı
-    current_belge = None
-    if sekme == "form":
-        # Eğer URL'de 'view_id' parametresi varsa (yani bir belgeyi güncellemek için gelindiyse)
-        if view_id: 
-            current_belge = next((d for d in docs if d["id"] == view_id), None)
-            if current_belge:
-                # Belge bulunduysa, ID'sini session'a kaydet (güncelleme durumunda bu ID kullanılacak)
-                session["current_tesvik_id"] = current_belge["id"]
-                print(f"→ Güncelleme isteği: current_belge ID set edildi: {session['current_tesvik_id']}")
-            else:
-                # view_id ile belge bulunamadıysa (örneğin ID yanlışsa), session'ı temizle
-                session["current_tesvik_id"] = None 
-                print("→ Güncelleme isteği için belge bulunamadı. session ID temizlendi.")
-        elif docs: 
-            # Eğer 'view_id' yoksa ve kullanıcının belgeleri varsa, en son belgeyi formda göster
-            # (Bu, kullanıcının en son çalıştığı belgeye devam etmesini sağlar)
-            current_belge = docs[0] # get_all_tesvik_docs ORDER BY id DESC yaptığı için en yenisi ilk sırada
-            session["current_tesvik_id"] = current_belge["id"]
-            print(f"→ En son belge current_belge ID set edildi: {session['current_tesvik_id']}")
-        else:
-            # Eğer hiç belge yoksa (yeni bir kullanıcı veya tüm belgeler silinmişse), formu boş başlat
-            session["current_tesvik_id"] = None
-            print("→ Hiç belge yok. current_belge ve session ID temizlendi.")
+        view_id = request.args.get("view", type=int)
+        if sekme == "tesvik" and view_id:
+            edit_doc = next((d for d in docs if d["id"] == view_id), None)
+            if edit_doc:
+                print(f"📄 Teşvik detayı görüntüleniyor: ID={view_id}")
 
-  
-
-    safe_bolge_map = {str(k): (v if v==v else None) for k,v in (BOLGE_MAP or {}).items()}
-    safe_katkilar_json = {}
-    for k, v in (TESVIK_KATKILAR or {}).items():
-        key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) else str(k)
-        safe_katkilar_json[key] = v if v==v else None
-    safe_vergiler_json = {}
-    for k, v in (TESVIK_VERGILER or {}).items():
-        key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) else str(k)
-        safe_vergiler_json[key] = v if v==v else None
-
-    initial_ayrintili_ratios = {
-        c: f"{user_df.at[54, c]:.2f}".replace(".", ",") + "%" if not pd.isna(user_df.at[54, c]) else "0,00%"
-        for c in ["C","D","E"]
-    }
-    saved = request.args.get("saved") == "1"
-
-    # Context’u hazırla
-    ctx = {
-        "sekme": sekme,
-        "iller": ILLER or [],
-        "bolge_json": safe_bolge_map,
-        "katkilar_json": safe_katkilar_json,
-        "vergiler_json": safe_vergiler_json,
-        "initial_ayrintili_ratios": initial_ayrintili_ratios,
-        "docs": docs,
-        "edit_doc": edit_doc,
-        "current_belge": current_belge,
-        "BOLGE_MAP_9903": BOLGE_MAP_9903,
-        "TESVIK_KATKILAR_9903": TESVIK_KATKILAR_9903,
-        "pdf_saved": saved
-    }
-    
+    # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
+    rows = []
     if sekme == "ayrintili":
-        ctx["rows"] = format_df_for_html(user_df)
+        try:
+            df = get_user_profit_df(user_id)
+            rows = format_df_for_html(df)
+        except Exception as e:
+            print(f"⚠️ Ayrıntılı tablo yüklenirken hata: {e}")
+            rows = []  # hata olsa bile boş liste dön
 
+    # Güvenli JSON objeleri
+    safe_bolge_map = {}
+    for k, v in (globals().get("BOLGE_MAP") or {}).items():
+        key = str(k)
+        safe_bolge_map[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
+
+    safe_katkilar_json = {}
+    for k, v in (globals().get("TESVIK_KATKILAR") or {}).items():
+        key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) and len(k)==2 else str(k)
+        safe_katkilar_json[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
+
+    safe_vergiler_json = {}
+    for k, v in (globals().get("TESVIK_VERGILER") or {}).items():
+        key = f"{k[0]}|{k[1]}" if isinstance(k, tuple) and len(k)==2 else str(k)
+        safe_vergiler_json[key] = v if v is not None and not (isinstance(v, float) and pd.isna(v)) else None
+
+
+    initial_ayrintili_ratios = {}
+    if user_df is not None:
+        initial_ayrintili_ratios = {
+            c: f"{user_df.at[54, c]:.2f}".replace(".", ",") + "%"
+            if not pd.isna(user_df.at[54, c])
+            else "0,00%"
+            for c in ["C", "D", "E"]
+        }
+
+    ctx = dict(
+        sekme=sekme,
+        mukellefler=mukellefler,
+        aktif_mukellef_id=aktif_mukellef_id,
+        iller = globals().get("ILLER", []),
+        bolge_json=safe_bolge_map,
+        katkilar_json=safe_katkilar_json,
+        vergiler_json=safe_vergiler_json,
+        initial_ayrintili_ratios=initial_ayrintili_ratios,
+        docs=docs,
+        current_belge=current_belge,
+        edit_doc=edit_doc,
+        BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}),
+        TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
+        rows=rows,
+    )
+
+    if sekme == "mukellef":
+        return render_template("mukellef_bilgi.html", **ctx)
     return render_template("indirimlikurumlar.html", **ctx)
+
+
+
+
 
 
 
@@ -417,187 +591,186 @@ def index():
 @login_required
 def form_kaydet():
     print(">>> form_kaydet GİRİLDİ")
-    print("POST verileri:", dict(request.form))
     user_id = session["user_id"]
-    print(">>> form_kaydet called. form data:", dict(request.form))
+    mukellef_id = session.get("aktif_mukellef_id")
 
-    # TEŞVİK ID BELİRLEME MANTIĞI:
-    form_tesvik_id_raw = request.form.get("tesvik_id")
-    if form_tesvik_id_raw:
+    if not mukellef_id:
+        return jsonify({
+            "status": "error",
+            "title": "Eksik Bilgi!",
+            "message": "Lütfen önce bir mükellef seçiniz."
+        }), 400
+
+    # 🧭 1️⃣ Teşvik ID tespiti (önce session, sonra form)
+    tesvik_id = session.get("current_tesvik_id")
+    if not tesvik_id:
         try:
-            tesvik_id = int(form_tesvik_id_raw)
+            form_tesvik_id = request.form.get("tesvik_id")
+            tesvik_id = int(form_tesvik_id) if form_tesvik_id else None
         except ValueError:
-            tesvik_id = None # Hatalı bir ID gelirse yeni kayıt olarak değerlendir
-    else:
-        tesvik_id = None # Formdan boş geldi: yeni kayıt
+            tesvik_id = None
 
-    print("→ belirlenen tesvik_id (INSERT/UPDATE için):", tesvik_id)
+    print(f"→ Aktif Teşvik ID: {tesvik_id}")
 
-    # Formdan gelen diğer verileri al
-    belge_no = request.form.get("belge_no") or request.form.get("belge_no_hidden") or "(otomatik)"
-    belge_tarihi = request.form.get("belge_tarihi") or request.form.get("belge_tarihi_hidden") or ""
-    
+    # 🧾 2️⃣ Form verileri
+    belge_no = request.form.get("belge_no") or "(otomatik)"
+    belge_tarihi = request.form.get("belge_tarihi") or ""
     karar = request.form.get("karar")
+    program_turu = request.form.get("program_turu") or ""
     yatirim_turu1 = request.form.get("yatirim_turu1")
     yatirim_turu2 = request.form.get("yatirim_turu2")
-    program_turu = request.form.get("program_turu")
     vize_durumu = request.form.get("vize_durumu")
     donem = request.form.get("donem")
     il = request.form.get("il")
     osb = request.form.get("osb")
-    bolge = request.form.get("bolge") or request.form.get("bolge_hidden")
-    
-    # Sayısal alanları parse etmek için yardımcı fonksiyon
+    bolge = request.form.get("bolge")
+
+    # 🧮 Yardımcı sayı parse fonksiyonu
     def parse_amount(field):
         s = (request.form.get(field) or "0").replace(".", "").replace(",", ".")
         try:
             return float(s)
         except ValueError:
             return 0.0
-    
 
-    # === 🔹 2025/9903 kararına göre özel hesaplama ===
+    # 💡 3️⃣ 9903 özel hesaplamalar
     if karar == "2025/9903":
-        print("→ 9903 sayılı karar seçildi: özel oranlar uygulanıyor.")
-
-        # (1) Bölge: BOLGE_MAP_9903'ten
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
-
-        # (2) Katkı oranı: TESVIK_KATKILAR_9903'tan
         katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0))
-
-        # (4) Vergi oranı: sabit %60
         vergi_orani = 60.0
-
-        # (5) Diğer kazanç oranı: sabit %50
         diger_oran = 50.0
-
-        print(f"→ Bölge: {bolge}, Program: {program_turu}, Katkı: {katki_orani}%, Vergi: {vergi_orani}%, Diğer: {diger_oran}%")
-
     else:
-        # === Diğer kararlar (normal mantık) ===
-        def get_oran(map_data, key_tuple):
-            return map_data.get(key_tuple, map_data.get((key_tuple[0], "OSB Dışında"), 0))
-
-        if il and il in BOLGE_MAP:
-            bolge = bolge or BOLGE_MAP[il]
-
-        katki_orani = get_oran(TESVIK_KATKILAR, (bolge, osb))
-        vergi_orani = get_oran(TESVIK_VERGILER, (bolge, osb))
+        katki_orani = parse_amount("katki_orani")
+        vergi_orani = parse_amount("vergi_orani")
         diger_oran = parse_amount("diger_oran")
 
-
-
-
+    # 💰 4️⃣ Sayısal alanlar
     toplam_tutar = parse_amount("toplam_tutar")
     katki_tutari = parse_amount("katki_tutari")
     diger_katki_tutari = parse_amount("diger_katki_tutari")
     cari_harcama_tutari = parse_amount("cari_harcama_tutari")
     toplam_harcama_tutari = parse_amount("toplam_harcama_tutari")
     fiili_katki_tutari = parse_amount("fiili_katki_tutari")
+    endeks_katki_tutari = parse_amount("endeks_katki_tutari")
     onceki_yatirim_katki_tutari = parse_amount("onceki_yatirim_katki_tutari")
     onceki_diger_katki_tutari = parse_amount("onceki_diger_katki_tutari")
     onceki_katki_tutari = parse_amount("onceki_katki_tutari")
-    kalan_katki_tutari = parse_amount("kalan_katki_tutari")
-    endeks_katki_tutari = parse_amount("endeks_katki_tutari")
+    cari_yatirim_katki = parse_amount("cari_yatirim_katki")
+    cari_diger_katki = parse_amount("cari_diger_katki")
+    cari_toplam_katki = parse_amount("cari_toplam_katki")
+    genel_toplam_katki = parse_amount("genel_toplam_katki")
     brut_satis = parse_amount("brut_satis")
     ihracat = parse_amount("ihracat")
     imalat = parse_amount("imalat")
     diger_faaliyet = parse_amount("diger_faaliyet")
     use_detailed_profit_ratios = 'use_detailed_profit_ratios' in request.form
-    cari_yatirim_katki = parse_amount("cari_yatirim_katki")
-    cari_diger_katki = parse_amount("cari_diger_katki")
-    cari_toplam_katki = parse_amount("cari_toplam_katki")
-    genel_toplam_katki = parse_amount("genel_toplam_katki")
 
     with get_conn() as conn:
         c = conn.cursor()
         try:
-            if tesvik_id is None: # Yeni belge oluştur
-                c.execute(
-                    """INSERT INTO tesvik_belgeleri (user_id, dosya_adi, belge_no, belge_tarihi,
-                                                    karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
-                                                    katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
-                                                    cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
-                                                    onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
-                                                    cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                                                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios)
-                               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    (user_id, belge_no, belge_no, belge_tarihi, # dosya_adi olarak belge_no kullanıldı
-                     karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
-                     katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
-                     cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
-                     onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
-                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios)
-                )
-                c.execute("SELECT currval(pg_get_serial_sequence('tesvik_belgeleri', 'id'))")
-                tesvik_id = c.fetchone()[0]
-                conn.commit()
-                # Yeni oluşturulan ID'yi session'a kaydet, böylece sonraki kaydetmeler update olur
-                session["current_tesvik_id"] = tesvik_id 
-                print(f"→ Yeni belge oluşturuldu. ID: {tesvik_id}")
-                return jsonify({"status": "success", "title": "Başarılı!", "message": "Yeni teşvik belgesi oluşturuldu."})
-
-            
-            else: # Mevcut belgeyi güncelle
-                c.execute(
-                    """
+            # 🔄 5️⃣ GÜNCELLEME
+            if tesvik_id:
+                print(f"🟡 Güncelleme başlatıldı ID={tesvik_id}")
+                c.execute("""
                     UPDATE tesvik_belgeleri
-                    SET
-                        belge_no = %s, belge_tarihi = %s, karar = %s, yatirim_turu1 = %s, yatirim_turu2 = %s,
-                        vize_durumu = %s, donem = %s, il = %s, osb = %s, bolge = %s,
-                        katki_orani = %s, vergi_orani = %s, diger_oran = %s,
-                        toplam_tutar = %s, katki_tutari = %s, diger_katki_tutari = %s,
-                        cari_harcama_tutari = %s, toplam_harcama_tutari = %s, fiili_katki_tutari = %s, endeks_katki_tutari = %s,
-                        onceki_yatirim_katki_tutari = %s, onceki_diger_katki_tutari = %s, onceki_katki_tutari = %s,
-                        cari_yatirim_katki = %s, cari_diger_katki = %s, cari_toplam_katki = %s, genel_toplam_katki = %s,
-                        brut_satis = %s, ihracat = %s, imalat = %s, diger_faaliyet = %s, use_detailed_profit_ratios = %s
-                    WHERE id = %s AND user_id = %s
-                    """,
-                    (
-                        belge_no, belge_tarihi, karar, yatirim_turu1, yatirim_turu2,
+                    SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s, karar=%s,
+                        program_turu=%s, yatirim_turu1=%s, yatirim_turu2=%s,
+                        vize_durumu=%s, donem=%s, il=%s, osb=%s, bolge=%s,
+                        katki_orani=%s, vergi_orani=%s, diger_oran=%s,
+                        toplam_tutar=%s, katki_tutari=%s, diger_katki_tutari=%s,
+                        cari_harcama_tutari=%s, toplam_harcama_tutari=%s,
+                        fiili_katki_tutari=%s, endeks_katki_tutari=%s,
+                        onceki_yatirim_katki_tutari=%s, onceki_diger_katki_tutari=%s, onceki_katki_tutari=%s,
+                        cari_yatirim_katki=%s, cari_diger_katki=%s, cari_toplam_katki=%s, genel_toplam_katki=%s,
+                        brut_satis=%s, ihracat=%s, imalat=%s, diger_faaliyet=%s, use_detailed_profit_ratios=%s
+                    WHERE id=%s AND user_id=%s
+                """, (
+                    mukellef_id, belge_no, belge_tarihi, karar,
+                    program_turu, yatirim_turu1, yatirim_turu2,
+                    vize_durumu, donem, il, osb, bolge,
+                    katki_orani, vergi_orani, diger_oran,
+                    toplam_tutar, katki_tutari, diger_katki_tutari,
+                    cari_harcama_tutari, toplam_harcama_tutari,
+                    fiili_katki_tutari, endeks_katki_tutari,
+                    onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
+                    cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
+                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios,
+                    tesvik_id, user_id
+                ))
+                conn.commit()
+                print(f"✅ Güncelleme tamamlandı ID={tesvik_id}")
+
+            # 🆕 6️⃣ YENİ KAYIT
+            else:
+                print("🆕 Yeni belge ekleniyor...")
+                c.execute("""
+                    INSERT INTO tesvik_belgeleri (
+                        user_id, mukellef_id, belge_no, belge_tarihi,
+                        karar, program_turu, yatirim_turu1, yatirim_turu2,
                         vize_durumu, donem, il, osb, bolge,
                         katki_orani, vergi_orani, diger_oran,
                         toplam_tutar, katki_tutari, diger_katki_tutari,
-                        cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
+                        cari_harcama_tutari, toplam_harcama_tutari,
+                        fiili_katki_tutari, endeks_katki_tutari,
                         onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                        brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios,
-                        tesvik_id, user_id
+                        brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                     )
-                )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """, (
+                    user_id, mukellef_id, belge_no, belge_tarihi,
+                    karar, program_turu, yatirim_turu1, yatirim_turu2,
+                    vize_durumu, donem, il, osb, bolge,
+                    katki_orani, vergi_orani, diger_oran,
+                    toplam_tutar, katki_tutari, diger_katki_tutari,
+                    cari_harcama_tutari, toplam_harcama_tutari,
+                    fiili_katki_tutari, endeks_katki_tutari,
+                    onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
+                    cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
+                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
+                ))
+
+                from services.db import USE_SQLITE
+                if USE_SQLITE:
+                    tesvik_id = c.lastrowid
+                else:
+                    c.execute("SELECT currval(pg_get_serial_sequence('tesvik_belgeleri', 'id'))")
+                    tesvik_id = c.fetchone()[0]
+
+                session["current_tesvik_id"] = tesvik_id
                 conn.commit()
-                print(f"→ Mevcut belge güncellendi. ID: {tesvik_id}")
-                return jsonify({"status": "success", "title": "Başarılı!", "message": "Teşvik belgesi başarıyla güncellendi."})
+                print(f"✅ Yeni belge oluşturuldu ID={tesvik_id}")
+
+            return jsonify({
+                "status": "success",
+                "title": "Başarılı!",
+                "message": "Teşvik belgesi kaydedildi.",
+                "tesvik_id": tesvik_id
+            })
+
         except Exception as e:
             conn.rollback()
-            print(f"Veritabanı işlemi sırasında hata oluştu: {e}")
-            return jsonify({"status": "error", "title": "Hata!", "message": f"Belge kaydedilirken bir hata oluştu: {str(e)}"})
+            print(f"❌ Hata: {e}")
+            return jsonify({
+                "status": "error",
+                "title": "Kayıt Hatası!",
+                "message": f"Veritabanı hatası: {str(e)}"
+            })
 
 
-@bp.route("/veri-giris", methods=["GET", "POST"])
-@login_required
-def veri_giris():
-    if request.method == "POST":
-        faaliyet_kodu = request.form.get("faaliyet_kodu")
-        faaliyet_adi  = request.form.get("faaliyet_adi")
-        user_id = session["user_id"]
-        # TODO: Veritabanına kaydetme işlemi - user_id'yi de eklemeyi unutmayın
-        flash(f"Kaydedildi: {faaliyet_kodu} - {faaliyet_adi}")
-        return redirect(url_for("indirimlikurumlar.index"))
-    return render_template("veri_giris.html")
+
 
 
 
 
 def get_all_tesvik_docs(user_id: int):
+    """Kullanıcının teşvik belgelerini döndürür (hem SQLite hem PostgreSQL uyumlu)."""
     with get_conn() as conn:
         c = conn.cursor()
         c.execute(
             """
             SELECT
-                id, user_id, dosya_adi, yukleme_tarihi, belge_no, belge_tarihi,
+                id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
                 karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
                 katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
                 cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
@@ -608,36 +781,64 @@ def get_all_tesvik_docs(user_id: int):
             WHERE user_id = %s
             ORDER BY id DESC
             """,
-            (user_id,)
+            (user_id,),
         )
-        cols = [d[0] for d in c.description]
+
         rows = c.fetchall()
-    return [dict(zip(cols, r)) for r in rows]
+
+        # 🔹 Eğer zaten dict döndüyse (FakeCursor veya RealDictCursor) doğrudan ver
+        if rows and isinstance(rows[0], dict):
+            return rows
+
+        # 🔹 Aksi halde kolon isimlerinden dict oluştur
+        colnames = [desc[0] for desc in c.description]
+        return [dict(zip(colnames, row)) for row in rows]
+
+
+
 
 @bp.route('/tesvik', methods=['GET', 'POST'])
 @login_required
 def tesvik():
-    user_id = session['user']
-    if request.method == 'POST':
-        # Buradaki POST logic'i artık kullanılmayacak, form_kaydet tarafından yönetilecek
-        # Ancak eğer tesvik.html'de ayrıca bir form varsa, o da AJAX'a çevrilmeli.
-        # Genelde bu kısım "Tesvik Belgesi Ekle/Güncelle" formunu yönetir.
-        # Şu anki HTML'de sadece "Detay" butonu edit_doc'u görüntülüyor, doğrudan update postu yok gibi.
-        # Bu yüzden bu kısım şimdilik sadece GET için geçerli olacak varsayıyorum.
-        pass # Bu bölüm boş bırakıldı, çünkü form_kaydet route'u işi devraldı
+    user_id = session.get("user_id")
 
-    # GET
-    docs = get_all_tesvik_docs(session['user'])
+    # 🔹 Tüm belgeleri listele
+    docs = get_all_tesvik_docs(user_id)
+
+    # 🔹 Eğer URL'de ?view=ID varsa detay moduna geç
     view_id = request.args.get('view', type=int)
     edit_doc = None
+
     if view_id:
-        edit_doc = next((d for d in docs if d['id'] == view_id), None)
+        # Daha güvenli: DB'den o belgeyi doğrudan çekelim
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute("""
+                SELECT *
+                FROM tesvik_belgeleri
+                WHERE id = %s AND user_id = %s
+            """, (view_id, user_id))
+            edit_doc = c.fetchone()
+
+        if edit_doc:
+            # Eğer SQLite kullanıyorsan Row → dict dönüştürelim
+            if not isinstance(edit_doc, dict):
+                edit_doc = dict(edit_doc)
+            print(f"🔍 Detay görüntüleniyor: {edit_doc.get('belge_no')} (ID: {view_id})")
+        else:
+            flash("Belge bulunamadı veya erişim yetkiniz yok.", "warning")
+
     return render_template('tesvik.html', docs=docs, edit_doc=edit_doc)
+
+
+
+
+
 
 @bp.route('/tesvik/delete/<int:doc_id>', methods=['POST'])
 @login_required
 def delete_tesvik(doc_id):
-    user_id = session['user']
+    user_id = session.get("user_id")
     with get_conn() as conn:
         c = conn.cursor()
         try:
@@ -652,62 +853,109 @@ def delete_tesvik(doc_id):
     # return redirect(url_for('indirimlikurumlar.tesvik')) # Bu satır artık kullanılmayacak
 
 
-from flask import Response
-@bp.route('/tesvik/pdf/<int:doc_id>')
+
+
+
+@bp.route("/tesvik/pdf/<int:doc_id>")
 @login_required
 def download_tesvik_pdf(doc_id):
-    user_id = session['user']
-    # 1) Veritabanından belgeyi çekelim
+    user_id = session["user_id"]
+
+    # 🧾 1️⃣ Veritabanından belgeyi çek
     with get_conn() as conn:
         c = conn.cursor()
-        # PDF için gerekli tüm sütunları çekiyoruz
-        c.execute(
-            """
+        c.execute("""
             SELECT
-                id, user_id, dosya_adi, yukleme_tarihi, belge_no, belge_tarihi,
-                karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
+                id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
+                karar, yatirim_turu1, yatirim_turu2, program_turu, vize_durumu, donem, il, osb, bolge,
                 katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
                 cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
                 onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                 cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                 brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
-            FROM tesvik_belgeleri WHERE id = %s AND user_id = %s
-            """,
-            (doc_id, user_id)
-        )
+            FROM tesvik_belgeleri
+            WHERE id = %s AND user_id = %s
+        """, (doc_id, user_id))
         row = c.fetchone()
+
     if not row:
-        # flash("Belge bulunamadı.", "danger")
-        return jsonify({"status": "error", "title": "Hata!", "message": "Belge bulunamadı."}) # Hata mesajı JSON olarak dönüldü
-        # return redirect(url_for("indirimlikurumlar.index", sekme="tesvik")) # Bu satır kullanılmayacak
+        return jsonify({
+            "status": "error",
+            "title": "Hata!",
+            "message": "Belge bulunamadı."
+        }), 404
 
-    cols = [d[0] for d in c.description]
-    data = dict(zip(cols, row))
+    # PostgreSQL tarafında RealDictCursor kullanıldığı için fetchone() zaten dict döner
+    if isinstance(row, dict):
+        data_dict = row
+    else:
+        cols = [d[0] for d in c.description]
+        data_dict = dict(zip(cols, row))
 
-    # pdfkit’e wkhtmltopdf’in tam yolunu göster
-    config = pdfkit.configuration(wkhtmltopdf=shutil.which("wkhtmltopdf"))
-
-    # 2) Şablonu render edip HTML elde edelim
-    html = render_template('kv_tablosu_pdf.html', data=data)
+    data = SimpleNamespace(**data_dict)
 
     try:
-        # 3) PDF’e dönüştürelim
-        pdf = pdfkit.from_string(html, False, configuration=config, options={
-            'page-size': 'A4',
-            'encoding': 'UTF-8',
-            'margin-top': '10mm',
-            'margin-bottom': '10mm',
-        })
+        # 2️⃣ wkhtmltopdf yolunu belirle
+        wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
+        if not wkhtml_path or not os.path.exists(wkhtml_path):
+            flash("❗ wkhtmltopdf bulunamadı.", "danger")
+            return jsonify({
+                "status": "error",
+                "title": "Eksik Araç",
+                "message": "PDF oluşturma için wkhtmltopdf bulunamadı. Lütfen yükleyin."
+            }), 500
 
-        # 4) PDF’i kullanıcıya dönelim
-        response = make_response(pdf)
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=tesvik_{data["belge_no"]}.pdf'
-        return response
+        config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+
+        # 3️⃣ HTML şablonunu oluştur
+        rendered = render_template(
+            "kv_tablosu_pdf.html",
+            data=data,
+            now=datetime.now  # 📅 tarih fonksiyonu şablona geçilir
+        )
+
+        # 4️⃣ PDF oluştur (geçici dosyaya)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+            pdfkit.from_string(
+                rendered,
+                tmpfile.name,
+                configuration=config,
+                options={
+                    "page-size": "A4",
+                    "encoding": "UTF-8",
+                    "enable-local-file-access": "",
+                    "margin-top": "15mm",
+                    "margin-bottom": "15mm",
+                    "margin-left": "12mm",
+                    "margin-right": "12mm",
+                    "dpi": 300,
+                    "zoom": "1.05",
+                    "print-media-type": None,
+                },
+            )
+            tmpfile.flush()
+
+        # 5️⃣ PDF’i kullanıcıya gönder
+        dosya_adi = f"tesvik_{data.belge_no or doc_id}.pdf"
+        return send_file(
+            tmpfile.name,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=dosya_adi
+        )
+
     except Exception as e:
-        print(f"PDF oluşturulurken hata oluştu: {e}")
-        # PDF oluşturma hatası durumunda JSON yanıtı dön
-        return jsonify({"status": "error", "title": "PDF Hatası!", "message": f"PDF oluşturulurken bir hata oluştu: {str(e)}"})
+        print(f"⚠️ PDF oluşturma hatası: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "PDF Hatası!",
+            "message": f"PDF oluşturulurken bir hata oluştu: {str(e)}"
+        }), 500
+        
+        
+        
+        
+        
     
     
 from io import BytesIO
@@ -788,9 +1036,92 @@ def upload_kv_beyan():
 
 
 
+
+
+@bp.route("/save_tesvik_kullanim", methods=["POST"])
+@login_required
+def save_tesvik_kullanim():
+    """
+    Her hesap dönemi için teşvik kullanım kaydı oluşturur veya günceller.
+    (Aşama 7 tamamlandığında otomatik çağrılır)
+    """
+    try:
+        user_id = session.get("user_id")
+        if not user_id:
+            return jsonify({"status": "error", "message": "Oturum bulunamadı."}), 401
+
+        data = request.get_json(force=True)
+        belge_no = data.get("belge_no")
+        hesap_donemi = int(data.get("hesap_donemi", datetime.now().year))
+
+        yatirim_kazanci = float(data.get("yatirim_kazanci", 0))
+        diger_kazanc = float(data.get("diger_kazanc", 0))
+        cari_yatirim_katkisi = float(data.get("cari_yatirim_katkisi", 0))
+        cari_diger_katkisi = float(data.get("cari_diger_katkisi", 0))
+        genel_toplam_katki = float(data.get("genel_toplam_katki", 0))
+        kalan_katki = float(data.get("kalan_katki", 0))
+
+        if not belge_no:
+            return jsonify({"status": "error", "message": "Belge numarası eksik."}), 400
+
+        with get_conn() as conn:
+            cur = conn.cursor()
+
+            
+            insert_sql = """
+                INSERT INTO tesvik_kullanim (
+                    user_id, belge_no, hesap_donemi,
+                    yatirim_kazanci, diger_kazanc,
+                    cari_yatirim_katkisi, cari_diger_katkisi,
+                    genel_toplam_katki, kalan_katki
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                ON CONFLICT (user_id, belge_no, hesap_donemi)
+                DO UPDATE SET
+                    yatirim_kazanci = EXCLUDED.yatirim_kazanci,
+                    diger_kazanc = EXCLUDED.diger_kazanc,
+                    cari_yatirim_katkisi = EXCLUDED.cari_yatirim_katkisi,
+                    cari_diger_katkisi = EXCLUDED.cari_diger_katkisi,
+                    genel_toplam_katki = EXCLUDED.genel_toplam_katki,
+                    kalan_katki = EXCLUDED.kalan_katki,
+                    kayit_tarihi = CURRENT_TIMESTAMP;
+            """
+
+            cur.execute(insert_sql, (
+                user_id, belge_no, hesap_donemi,
+                yatirim_kazanci, diger_kazanc,
+                cari_yatirim_katkisi, cari_diger_katkisi,
+                genel_toplam_katki, kalan_katki
+            ))
+
+            conn.commit()
+
+        return jsonify({
+            "status": "success",
+            "title": "Kayıt Başarılı",
+            "message": f"{belge_no} ({hesap_donemi}) dönemine ait teşvik kullanımı kaydedildi."
+        })
+
+    except Exception as e:
+        print(f"⚠️ save_tesvik_kullanim hata: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "Kayıt Hatası",
+            "message": f"Kaydedilirken bir hata oluştu: {str(e)}"
+        }), 500
+
+
+
+
+
+
+
+
 @bp.route("/mevzuat", methods=["GET"])
 @login_required
 def mevzuat():
-    return render_template("mevzuat.html")
-
-
+    """
+    İndirimli Kurumlar Vergisi uygulamasına ilişkin mevzuat, kanun ve kararların
+    açıklandığı bilgi sayfası (statik bilgilendirme sayfası).
+    """
+    return render_template("indirimlikurumlar/mevzuat.html", title="İndirimli Kurumlar Vergisi Mevzuatı")

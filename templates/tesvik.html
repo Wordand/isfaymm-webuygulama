@@ -1,11 +1,12 @@
 {# tesvik.html #}
 
-<table class="table table-striped" id="tesvik-belgeleri-table"> {# ID eklendi #}
+<table class="table table-striped align-middle" id="tesvik-belgeleri-table">
   <thead>
     <tr>
-      <th>ID</th>
       <th>Belge No</th>
       <th>Belge Tarihi</th>
+      <th>Karar</th>
+      <th>Toplam Yatırım Tutarı</th>
       <th>Tamamlama Vizesi Durumu</th>
       <th>Cari Toplam Katkı</th>
       <th>Genel Toplam Katkı</th>
@@ -15,23 +16,24 @@
   <tbody>
     {% for d in docs %}
     <tr>
-      <td>{{ d.id }}</td>
       <td>{{ d.belge_no }}</td>
-      <td>{{ d.belge_tarihi }}</td>
+      <td>{{ d.belge_tarihi | safe_date }}</td>
+      <td>{{ d.karar }}</td>
+      <td>{{ d.toplam_tutar | tlformat }}</td>
       <td>{{ d.vize_durumu }}</td>
       <td>{{ d.cari_toplam_katki | tlformat }}</td>
       <td>{{ d.genel_toplam_katki | tlformat }}</td>
       <td>
+        <div class="btn-group btn-group-sm">
+          <a href="{{ url_for('indirimlikurumlar.index', sekme='tesvik', view=d.id) }}" class="btn btn-info">Detay</a>
 
-        <a href="?sekme=tesvik&view={{ d.id }}" class="btn btn-sm btn-info">Detay</a>
-        <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id) }}"
-          class="btn btn-sm btn-warning me-1">Güncelle</a>
-        <form class="delete-tesvik-form d-inline" action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id) }}"
-          method="post">
-          <button type="submit" class="btn btn-sm btn-danger">Sil</button>
-        </form>
-        <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id) }}"
-          class="btn btn-sm btn-secondary">PDF İndir</a>
+
+          <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id|int) }}" class="btn btn-warning">Güncelle</a>
+          <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id|int) }}" class="btn btn-secondary">PDF İndir</a>
+          <form class="delete-tesvik-form d-inline" action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id|int) }}" method="post">
+            <button type="submit" class="btn btn-danger">Sil</button>
+          </form>
+        </div>
       </td>
     </tr>
     {% endfor %}
@@ -40,45 +42,52 @@
 
 {% if edit_doc %}
 <hr>
-<h4 class="mt-4 text-center">{{ edit_doc.id }} nolu Belge Detayı</h4>
+<h4 class="mt-4 text-center text-primary">{{ edit_doc.belge_no or edit_doc.id }} Nolu Belge Detayı</h4>
 
-{# PDF şablonundaki macro ile aynı yapıyı kullanıyoruz #}
 {% macro row(label, value) -%}
 <tr>
-  <td class="label">{{ label }}</td>
-  <td class="value">{{ value }}</td>
+  <td class="fw-semibold text-end" style="width:45%;">{{ label }}</td>
+  <td class="text-start">{{ value or '-' }}</td>
 </tr>
 {%- endmacro %}
 
-<table class="table table-bordered mx-auto" style="max-width:600px;">
-  <tbody>
-    {{ row("Teşvik Belgesi Numarası", edit_doc.belge_no) }}
-    {{ row("Belge Tarihi", edit_doc.belge_tarihi) }}
-    {{ row("Karar", edit_doc.karar) }}
-    {{ row("Yatırıma Başlama Tarihi", edit_doc.belge_tarihi) }}
-    {{ row("Yatırım Türü 1", edit_doc.yatirim_turu1) }}
-    {{ row("Yatırım Türü 2", edit_doc.yatirim_turu2) }}
-    {{ row("Tamamlama Vizesi Durumu", edit_doc.vize_durumu) }}
-    {{ row("Toplam Yatırım Tutarı", edit_doc.toplam_tutar | default("-", true) ) }}
-    {{ row("Yatırıma Katkı Oranı", edit_doc.katki_orani is not none and (edit_doc.katki_orani ~ "%") or "-") }}
-    {{ row("Vergi İndirim Oranı", edit_doc.vergi_orani is not none and (edit_doc.vergi_orani ~ "%") or "-") }}
-    {{ row("Yatırımın Yapıldığı Bölge", edit_doc.bolge | default("-", true)) }}
-    {{ row("Diğer Oran", edit_doc.diger_oran is not none and (edit_doc.diger_oran ~ "%") or "-") }}
-    {{ row("Toplam Katkı Tutarı", edit_doc.katki_tutari | default("-", true)) }}
-    {{ row("Diğer Faaliyet Katkı Tutarı", edit_doc.diger_katki_tutari | default("-", true)) }}
-    {{ row("Cari Harcama Tutarı", edit_doc.cari_harcama_tutari | default("-", true)) }}
-    {{ row("Toplam Harcama Tutarı", edit_doc.toplam_harcama_tutari | default("-", true)) }}
-    {{ row("Fiili Katkı Tutarı", edit_doc.fiili_katki_tutari | default("-", true)) }}
-    {{ row("Endekslenmiş Katkı Tutarı", edit_doc.endeks_katki_tutari | default("-", true)) }}
-    {{ row("Önceki Yatırım Katkı Tutarı", edit_doc.onceki_yatirim_katki_tutari | default("-", true)) }}
-    {{ row("Önceki Diğer Katkı Tutarı", edit_doc.onceki_diger_katki_tutari | default("-", true)) }}
-    {{ row("Önceki Toplam Katkı", edit_doc.onceki_katki_tutari | default("-", true)) }}
-    {{ row("Cari Yatırım Katkı Tutarı", edit_doc.cari_yatirim_katki | default("-", true)) }}
-    {{ row("Cari Diğer Katkı Tutarı", edit_doc.cari_diger_katki | default("-", true)) }}
-    {{ row("Cari Toplam Katkı Tutarı", edit_doc.cari_toplam_katki | default("-", true)) }}
-    {{ row("Genel Toplam Katkı Tutarı", edit_doc.genel_toplam_katki | default("-", true)) }}
-  </tbody>
-</table>
+<div class="table-responsive mx-auto" style="max-width:700px;">
+  <table class="table table-bordered table-hover align-middle">
+    <tbody>
+      {{ row("Teşvik Belgesi Numarası", edit_doc.belge_no) }}
+      {{ row("Belge Tarihi", edit_doc.belge_tarihi) }}
+      {{ row("Karar", edit_doc.karar) }}
+      {{ row("Program Türü", edit_doc.program_turu) }}
+      {{ row("Yatırıma Başlama Tarihi", edit_doc.belge_tarihi) }}
+      {{ row("Yatırım Türü 1", edit_doc.yatirim_turu1) }}
+      {{ row("Yatırım Türü 2", edit_doc.yatirim_turu2) }}
+      {{ row("Tamamlama Vizesi Durumu", edit_doc.vize_durumu) }}
+      {{ row("Toplam Yatırım Tutarı", edit_doc.toplam_tutar | tlformat) }}
+      {{ row("Yatırıma Katkı Oranı", (edit_doc.katki_orani|string + ' %') if edit_doc.katki_orani is not none else '-') }}
+      {{ row("Vergi İndirim Oranı", (edit_doc.vergi_orani|string + ' %') if edit_doc.vergi_orani is not none else '-') }}
+      {{ row("Diğer Oran", (edit_doc.diger_oran|string + ' %') if edit_doc.diger_oran is not none else '-') }}
+      {{ row("Yatırımın Yapıldığı Bölge", edit_doc.bolge) }}
+      {{ row("Cari Yılda Fiilen Gerçekleşen Harcama", edit_doc.cari_harcama_tutari | tlformat) }}
+      {{ row("Toplam Katkı Tutarı", edit_doc.katki_tutari | tlformat) }}
+      {{ row("Diğer Faaliyet Katkı Tutarı", edit_doc.diger_katki_tutari | tlformat) }}
+      {{ row("Fiili Katkı Tutarı", edit_doc.fiili_katki_tutari | tlformat) }}
+      {{ row("Endekslenmiş Katkı Tutarı", edit_doc.endeks_katki_tutari | tlformat) }}
+      {{ row("Önceki Yatırım Katkı Tutarı", edit_doc.onceki_yatirim_katki_tutari | tlformat) }}
+      {{ row("Önceki Diğer Katkı Tutarı", edit_doc.onceki_diger_katki_tutari | tlformat) }}
+      {{ row("Önceki Toplam Katkı", edit_doc.onceki_katki_tutari | tlformat) }}
+      {{ row("Cari Yatırım Katkı Tutarı", edit_doc.cari_yatirim_katki | tlformat) }}
+      {{ row("Cari Diğer Katkı Tutarı", edit_doc.cari_diger_katki | tlformat) }}
+      {{ row("Cari Toplam Katkı Tutarı", edit_doc.cari_toplam_katki | tlformat) }}
+      {{ row("Genel Toplam Katkı Tutarı", edit_doc.genel_toplam_katki | tlformat) }}
+    </tbody>
+  </table>
+</div>
+
+<div class="text-center mt-4">
+  <a href="?sekme=tesvik" class="btn btn-secondary px-4">← Listeye Dön</a>
+  <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=edit_doc.id|int) }}" class="btn btn-warning px-4">Güncelle</a>
+  <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=edit_doc.id|int) }}" class="btn btn-primary px-4">PDF İndir</a>
+</div>
 {% endif %}
 
 {% block extra_scripts %}
@@ -106,7 +115,6 @@
           });
           const data = await resp.json();
 
-          // Başarı / hata mesajını toast ile göster
           Swal.fire({
             icon: data.status,
             title: data.title,
@@ -118,7 +126,6 @@
           });
 
           if (data.status === 'success') {
-            // Satırı DOM'dan kaldır
             form.closest('tr')?.remove();
           }
 

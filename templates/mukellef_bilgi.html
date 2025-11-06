@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block title %}Mükellef Bilgileri{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h4 class="text-center mb-4">👤 Mükellef Bilgileri</h4>
+
+  <table class="table table-striped table-hover align-middle mt-4 shadow-sm">
+    <thead class="table-primary text-center">
+      <tr>
+        <th scope="col">Vergi Kimlik No</th>
+        <th scope="col">Unvan</th>
+        <th scope="col">İşlemler</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in mukellefler %}
+      <tr>
+        <td>{{ m.vergi_kimlik_no }}</td>
+        <td>{{ m.unvan }}</td>
+        <td class="text-center">
+          <button class="btn btn-success btn-sm" onclick="selectMukellef({{ m.id }})">Seç</button>
+          <button class="btn btn-warning btn-sm"
+            onclick="editMukellef({{ m.id }}, '{{ m.vergi_kimlik_no }}', '{{ m.unvan }}')">Düzenle</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMukellef({{ m.id }})">Sil</button>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3" class="text-center text-muted">Henüz mükellef kaydı bulunamadı</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#mukellefModal">+ Yeni Mükellef
+    Ekle</button>
+</div>
+
+<!-- 🧾 Mükellef Modal -->
+<div class="modal fade" id="mukellefModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Mükellef Bilgisi</h5>
+      </div>
+      <div class="modal-body">
+        <form id="mukellefForm">
+          <input type="hidden" name="id" id="mukellef_id">
+          <div class="mb-3">
+            <label class="form-label">Vergi Kimlik No</label>
+            <input type="text" name="vergi_kimlik_no" id="vkn" class="form-control" maxlength="11" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Unvan</label>
+            <input type="text" name="unvan" id="unvan" class="form-control" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button class="btn btn-primary" id="saveMukellef">Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function selectMukellef(id) {
+    fetch("/indirimlikurumlar/mukellef-sec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    }).then(r => r.json()).then(res => {
+      if (res.status === "success") {
+        Swal.fire({ icon: "success", title: "Mükellef Seçildi", timer: 1200, showConfirmButton: false })
+          .then(() => window.location.href = "/indirimlikurumlar?sekme=form");
+      }
+    });
+  }
+
+  function deleteMukellef(id) {
+    Swal.fire({
+      title: "Emin misiniz?",
+      text: "Bu mükellef tamamen silinecek!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "İptal"
+    }).then(r => {
+      if (r.isConfirmed) {
+        fetch("/indirimlikurumlar/mukellef-sil", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        }).then(() => location.reload());
+      }
+    });
+  }
+
+  function editMukellef(id, vkn, unvan) {
+    document.getElementById("mukellef_id").value = id;
+    document.getElementById("vkn").value = vkn;
+    document.getElementById("unvan").value = unvan;
+    new bootstrap.Modal(document.getElementById("mukellefModal")).show();
+  }
+
+  document.getElementById("saveMukellef").addEventListener("click", () => {
+    const data = {
+      id: document.getElementById("mukellef_id").value,
+      vergi_kimlik_no: document.getElementById("vkn").value,
+      unvan: document.getElementById("unvan").value
+    };
+    const url = data.id ? "/indirimlikurumlar/mukellef-guncelle" : "/indirimlikurumlar/mukellef-ekle";
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    }).then(() => location.reload());
+  });
+</script>
+{% endblock %}

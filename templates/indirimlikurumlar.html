@@ -6,7 +6,23 @@
   <i class="bi bi-bar-chart-fill"></i> İndirimli Kurumlar Vergisi
 </h3>
 
+<!-- 🧾 Aktif Mükellef Bilgisi -->
+{% if session.get('aktif_mukellef_unvan') %}
+<div id="aktifMukellefBox" class="alert alert-info mb-3 shadow-sm border-start border-3 border-primary">
+  <strong>Aktif Mükellef:</strong>
+  {{ session.get('aktif_mukellef_unvan') }}
+  (<span>{{ session.get('aktif_mukellef_vkn') }}</span>)
+</div>
+{% else %}
+<div id="aktifMukellefBox" class="alert alert-warning mb-3 shadow-sm border-start border-3 border-warning">
+  Henüz bir mükellef seçilmedi.
+  <a href="{{ url_for('indirimlikurumlar.mukellef_bilgi') }}" class="alert-link">Mükellef Seç</a>
+</div>
+{% endif %}
+
+
 <ul class="nav nav-tabs mt-4 justify-content-center">
+
   <li class="nav-item">
     <a class="nav-link {% if sekme == 'form' %}active{% endif %}" href="?sekme=form">🧾 Form Girişi</a>
   </li>
@@ -27,29 +43,44 @@
   </li>
 </ul>
 
+
+
 <div class="mt-4">
   {% if sekme == 'tesvik' %}
   {% include 'tesvik.html' %}
 
 
   {% elif sekme == 'mevzuat' %}
-  <ul>
-    <li>5520 sayılı Kurumlar Vergisi Kanunu Madde 32/A</li>
-    <li>Yatırım Teşvik Belgesi Tebliğleri</li>
-    <li>Resmi Gazete Kararları ve Yönetmelikler</li>
-  </ul>
+    {% include 'mevzuat.html' %}
+
 
   {% elif sekme == 'form' %}
   <form id="form-giris" method="POST" action="{{ url_for('indirimlikurumlar.form_kaydet') }}" novalidate class="mx-auto"
     style="max-width: 600px;">
 
-    <input type="hidden" name="tesvik_id" value="{{ current_belge.id if current_belge else '' }}">
-    <input type="hidden" name="belge_no_hidden" value="{{ current_belge.belge_no if current_belge else '' }}">
-    <input type="hidden" name="belge_tarihi_hidden" value="{{ current_belge.belge_tarihi if current_belge else '' }}">
-    <input type="hidden" name="bolge_hidden" id="bolge_hidden"
-      value="{{ current_belge.bolge if current_belge else '' }}">
+    <input type="hidden" name="mukellef_id" id="mukellef_id" value="{{ session.get('aktif_mukellef_id', '') }}">
+    <input type="hidden" name="tesvik_id" id="tesvik_id" value="{{ current_belge.id if current_belge else '' }}">
+    <input type="hidden" id="belge_no_hidden" value="{{ current_belge.belge_no if current_belge else '' }}">
+    <input type="hidden" id="belge_tarihi_hidden" value="{{ current_belge.belge_tarihi if current_belge else '' }}">
+    <input type="hidden" id="bolge_hidden" value="{{ current_belge.bolge if current_belge else '' }}">
 
 
+
+
+    <!-- 🧰 Form İşlem Butonları -->
+    <div class="mb-3 text-end">
+      <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('kvUploadInput').click()">
+        📂 PDF’den İçe Aktar
+      </button>
+      <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
+        🗑️ Verileri Temizle
+      </button>
+      <a href="{{ url_for('indirimlikurumlar.mukellef_bilgi') }}" class="btn btn-outline-secondary ms-2">
+        ↩️ Mükellef Seçimine Dön
+      </a>
+    </div>
+
+    <!-- 🔄 Aşama Progress Bar -->
     <div class="progress mb-4" style="height: 25px;">
       <div id="progressBar" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 20%;"
         aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
@@ -57,22 +88,12 @@
       </div>
     </div>
 
-
     <input id="kvUploadInput" type="file" accept="application/pdf" style="display: none">
 
+    <div id="step1" class="hidden-step" {% if session.get('aktif_mukellef_unvan') %} style="display:block;" {% else %}
+      style="display:none;" {% endif %}>
 
-    <div id="step1">
       <h5>Aşama 1 - Temel Bilgiler</h5>
-
-      <div class="mb-3 text-end">
-        <button type="button" class="btn btn-outline-primary"
-          onclick="document.getElementById('kvUploadInput').click()">
-          📂 PDF’den İçe Aktar
-        </button>
-        <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
-          🗑️ Verileri Temizle
-        </button>
-      </div>
 
       <div class="mb-3">
         <label>Yatırıma Başlama Tarihi</label>
@@ -81,7 +102,7 @@
 
       <div class="mb-3">
         <label>Teşvik Belgesi Hangi Karara Göre Düzenlendi</label>
-        <select id="karar" name="karar" class="form-select" required>
+        <select id="karar" name="karar" onchange="handleKarar9903()" class="form-select" required>
           <option value="">Seçiniz</option>
           <option value="2009/15199">2009/15199</option>
           <option value="2012/3305">2012/3305</option>
@@ -101,7 +122,8 @@
 
       <div class="mb-3">
         <label>Yatırım Türünü Seçiniz (1)</label>
-        <select id="yatirim_turu1" name="yatirim_turu1" class="form-select" required>
+        <select id="yatirim_turu1" name="yatirim_turu1" class="form-select" onchange="toggleInvestmentIncomeInputs()"
+          required>
           <option value="">Seçiniz</option>
           <option value="Komple">Komple</option>
           <option value="Tevsi">Tevsi</option>
@@ -157,7 +179,7 @@
           <option value="Hayır - Yatırım Döneminde">Hayır - Yatırım Döneminde</option>
         </select>
       </div>
-      <button type="button" class="btn btn-primary" onclick="goToStep2()">Devam</button>
+      <button type="button" class="btn btn-primary" id="btn-step1-next">Devam →</button>
     </div>
 
     <div id="step2" class="hidden-step">
@@ -359,25 +381,16 @@
     </div>
 
     <div id="step5" class="hidden-step">
-      <h5 class="mb-4">Aşama 5 - Tevsi Yatırım Bilgileri</h5>
+      <h5 class="mb-4">Aşama 5 - Yatırım Bilgileri</h5>
 
       <div class="mb-3">
-        <label>Gerçekleşen Tevsi Yatırım Tutarını Giriniz (TL):</label>
-        <input type="text" name="gerceklesen_tevsi_yatirim_tutari" id="gerceklesen_tevsi_yatirim_tutari"
-          class="form-control" placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+        <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
+        <input type="text" name="yatirimdan_elde_edilen_kazanc" id="yatirimdan_elde_edilen_kazanc" class="form-control"
+          placeholder="0,00 TL">
       </div>
 
-      <div class="mb-3">
 
-        <label>Toplam Sabit Kıymet Tutarını Giriniz (TL):</label>
-        <div class="input-group">
-          <span class="input-group-text info-icon-styled" onclick="showInfo('toplamSabitKiymetTutari')">
-            <i class="bi bi-info-circle"></i>
-          </span>
-          <input type="text" name="toplam_sabit_kiymet_tutari" id="toplam_sabit_kiymet_tutari" class="form-control"
-            placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
-        </div>
-      </div>
+
 
       <div class="mb-3">
         <label>Ticari Bilanço Karını Giriniz (TL):</label>
@@ -393,8 +406,36 @@
 
       <div class="mb-3">
         <label>Kurumlar Vergisi Matrahı (TL)</label>
-        <input type="text" name="kv_matrah" id="kv_matrah" class="form-control" placeholder="0,00 TL" readonly>
+        <div class="input-group">
+          <input type="text" name="kv_matrah" id="kv_matrah" class="form-control" placeholder="0,00 TL" readonly>
+          <button type="button" class="btn btn-outline-secondary" id="btn-manual-matrah">
+            Manuel Belirle
+          </button>
+        </div>
       </div>
+
+
+
+
+      <div class="mb-3">
+        <label>Gerçekleşen Tevsi Yatırım Tutarını Giriniz (TL):</label>
+        <input type="text" name="gerceklesen_tevsi_yatirim_tutari" id="gerceklesen_tevsi_yatirim_tutari"
+          class="form-control" placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+      </div>
+
+
+
+      <div class="mb-3">
+        <label>Toplam Sabit Kıymet Tutarını Giriniz (TL):</label>
+        <div class="input-group">
+          <span class="input-group-text info-icon-styled" onclick="showInfo('toplamSabitKiymetTutari')">
+            <i class="bi bi-info-circle"></i>
+          </span>
+          <input type="text" name="toplam_sabit_kiymet_tutari" id="toplam_sabit_kiymet_tutari" class="form-control"
+            placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+        </div>
+      </div>
+
 
       <div class="mb-3">
         <label>Tevsi Yatırımlardan Elde Edilen Kazanç Tutarı (TL):</label>
@@ -520,7 +561,7 @@
         <button type="button" class="btn btn-secondary" onclick="goToStep6()">← Geri</button>
 
         <button type="submit" id="btn-save-step7" name="submit_action" value="new_save" class="btn btn-success">
-          💾 Yeni Belge Kaydet
+          💾 Kaydet
         </button>
 
         {% if current_belge %}
@@ -545,10 +586,7 @@
   <form method="POST" class="mb-4" id="ayrintili-kazanc-form"
     action="{{ url_for('indirimlikurumlar.ayrintili_kazanc') }}">
     <div class="d-flex justify-content-between mb-3">
-      <button name="import" class="btn btn-primary" type="button" id="import-ayrintili">
-        📂 İçe Aktar
-      </button>
-      <button name="export" class="btn btn-success">
+      <button name="export" class="btn btn-success" type="submit" value="1">
         📤 Dışa Aktar
       </button>
     </div>
@@ -680,16 +718,49 @@
 
 
 
+  // === Global Format Fonksiyonları ===
+  function formatTL(num) {
+    if (isNaN(num) || num === null) return "0,00";
+    return Number(num)
+      .toFixed(2)
+      .replace(".", ",")
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  // 🔹 Binlik ve ondalık ayraçları doğru analiz eden versiyon
   function parseFormattedNumber(value) {
     if (!value) return 0;
-    const normalized = value.toString()
-      .replace(/\s+/g, '')
-      .replace('%', '')
-      .replace(/\./g, '')
-      .replace(',', '.');
-    const num = parseFloat(normalized);
+    let v = value.toString().trim();
+
+    // % veya TL simgelerini temizle
+    v = v.replace(/[%₺\s]/g, '');
+
+    const dotCount = (v.match(/\./g) || []).length;
+    const commaCount = (v.match(/,/g) || []).length;
+
+    // 🔹 1) Hem . hem , varsa → nokta binlik, virgül ondalık
+    if (dotCount > 0 && commaCount > 0) {
+      v = v.replace(/\./g, '').replace(',', '.');
+    }
+    // 🔹 2) Sadece virgül varsa → ondalık
+    else if (commaCount > 0) {
+      v = v.replace(',', '.');
+    }
+    // 🔹 3) Sadece nokta varsa ama birden fazla nokta varsa → binlik
+    else if (dotCount > 1) {
+      v = v.replace(/\./g, '');
+    }
+    // 🔹 4) Tek nokta var ama sonunda 3 hane varsa → binlik (ör: 10.000)
+    else if (dotCount === 1 && v.match(/\.\d{3}$/)) {
+      v = v.replace(/\./g, '');
+    }
+    // 🔹 5) Tek nokta + 1-2 hane varsa → ondalık (ör: 10.25)
+    // else if -> no change
+
+    const num = parseFloat(v);
     return isNaN(num) ? 0 : num;
   }
+
 
   function normalizeBN(s) { return (s || '').replace(/\D/g, ''); }
 
@@ -697,169 +768,6 @@
     const p = (t || '').split('/');
     return p.length === 3 ? `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}` : t;
   }
-
-
-
-
-  function kararDegisti() {
-    const karar = document.getElementById("karar")?.value;
-    const programSelect = document.getElementById("program_turu");
-    const yatirimTuru1 = document.getElementById("yatirim_turu1");
-    const yatirimTuru2 = document.getElementById("yatirim_turu2");
-    const katkiInput = document.getElementById("katki_orani");
-    const vergiInput = document.getElementById("vergi_orani");
-    const digerInput = document.getElementById("diger_oran");
-
-    if (karar === "2025/9903") {
-      console.log("→ 2025/9903 modu aktif!");
-
-      // Program aktif hale getir
-      programSelect.removeAttribute("disabled");
-      programSelect.disabled = false;
-      programSelect.classList.remove("bg-light");
-
-      // Yatırım türleri pasif
-      yatirimTuru1.disabled = true;
-      yatirimTuru2.disabled = true;
-      yatirimTuru1.value = "";
-      yatirimTuru2.value = "";
-      yatirimTuru1.classList.add("bg-light");
-      yatirimTuru2.classList.add("bg-light");
-
-      // Sabit oranlar
-      vergiInput.value = 60;
-      digerInput.value = 50;
-
-    } else {
-      console.log("→ Normal teşvik modu.");
-
-      // Program türü tekrar kapat
-      programSelect.setAttribute("disabled", "disabled");
-      programSelect.classList.add("bg-light");
-
-      // Yatırım türleri tekrar aktif
-      yatirimTuru1.disabled = false;
-      yatirimTuru2.disabled = false;
-      yatirimTuru1.classList.remove("bg-light");
-      yatirimTuru2.classList.remove("bg-light");
-
-      // Oranları sıfırla
-      vergiInput.value = "";
-      digerInput.value = "";
-      katkiInput.value = "";
-
-      setBolge();
-      setOranlar();
-    }
-  }
-
-
-
-  function setBolge() {
-    const karar = document.getElementById("karar")?.value;
-    if (karar === "2025/9903") {
-      console.log("📍 2025/9903 aktif — bölge ayarı yapıldı ama katkı oranı değiştirilmedi.");
-      return;
-    }
-
-    const ilSelect = document.getElementById("il");
-    const bolgeInput = document.getElementById("bolge");
-    if (ilSelect && bolgeInput) {
-      const il = ilSelect.value;
-      const bolge = bolgeMap[il];
-      bolgeInput.value = bolge;
-
-    }
-  }
-
-  function setOranlar() {
-    const karar = document.getElementById("karar")?.value;
-    if (karar === "2025/9903") return;
-    const bolgeInput = document.getElementById("bolge");
-    const osbSelect = document.getElementById("osb");
-    const vizeSelect = document.getElementById("vize_durumu");
-    const donemSelect = document.getElementById("donem");
-    if (!bolgeInput || !osbSelect || !vizeSelect || !donemSelect) return;
-
-    const bolge = bolgeInput.value;
-    const osb = osbSelect.value;
-    const key = bolge + "|" + osb;
-
-    const vize = vizeSelect.value;
-    const donem = donemSelect.value;
-    const donemYil = parseInt(donem.split(" - ")[0]);
-
-    // 1) YDO yaz/temizle
-    const yenidenDegerlemeOraniEl = document.getElementById("yeniden_degerleme_orani");
-    if (yenidenDegerlemeOraniEl) {
-      if (vize.includes("Hayır")) {
-        yenidenDegerlemeOraniEl.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YAPILMAZ";
-        yenidenDegerlemeOraniEl.classList.add("text-muted");   // opsiyonel: gri göster
-      } else {
-        const oranAnahtari = donem;
-        yenidenDegerlemeOraniEl.value = (yenidenDegerlemeOranlari[oranAnahtari] ?? "");
-        yenidenDegerlemeOraniEl.classList.remove("text-muted");
-      }
-    }
-
-    // 2) Katkı oranı
-    const katkiOraniEl = document.getElementById("katki_orani");
-    const manualKatki = sessionStorage.getItem('manual_katki') === 'true';
-    const manualKatkiVal = sessionStorage.getItem('manual_katki_value');
-    if (katkiOraniEl) {
-      if (manualKatki && manualKatkiVal !== null) {
-        katkiOraniEl.value = manualKatkiVal; // manuel değeri koru
-      } else {
-        let v = katkilar[key] ?? "";
-        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
-        katkiOraniEl.value = v;
-      }
-    }
-
-    // 3) Vergi indirim oranı
-    const vergiOraniEl = document.getElementById("vergi_orani");
-    const manualVergi = sessionStorage.getItem('manual_vergi') === 'true';
-    const manualVergiVal = sessionStorage.getItem('manual_vergi_value');
-    if (vergiOraniEl) {
-      if (manualVergi && manualVergiVal !== null) {
-        vergiOraniEl.value = manualVergiVal; // manuel değeri koru
-      } else {
-        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : (vergiler[key] ?? "");
-        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
-        vergiOraniEl.value = v;
-      }
-    }
-
-    // 4) Diğer kazanç oranı (manuel değişmiyorsa olduğu gibi bırak)
-    const digerOranEl = document.getElementById("diger_oran");
-    if (digerOranEl) {
-      if (vize.includes("Evet")) {
-        digerOranEl.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
-      } else {
-        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : 80;
-        v = Math.max(0, Math.min(100, Number(v)));
-        digerOranEl.value = v;
-      }
-    }
-
-
-    // 5) Sol “İndirimli KV Oranları (bilgi)” kutusunu güncelle
-    updateDiscountedRatesUI();
-
-    // 6) Aşama 3/4’te isek bağlı hesaplamaları tetikle
-    const step3El = document.getElementById("step3");
-    if (step3El && !step3El.classList.contains("hidden-step")) {
-      hesaplaKatkiTutari();
-      hesaplaDigerKatkiTutari();
-      hesaplaFiiliKatkiTutari();
-    }
-    const step4El = document.getElementById("step4");
-    if (step4El && !step4El.classList.contains("hidden-step")) {
-      hesaplaOncekiKatkiTutari();
-      hesaplaKalanVeEndeks();
-    }
-  }
-
 
 
 
@@ -976,6 +884,176 @@
     });
   }
 
+
+
+
+
+
+
+
+  // 🔹 Karar & Yatırım Türü kombinasyonuna göre kazanç alanlarını yönetir
+  function toggleInvestmentIncomeInputs() {
+    const karar = (document.getElementById('karar')?.value || "").trim();
+    const yatirimTuru = (document.getElementById('yatirim_turu1')?.value || "").trim().toLowerCase();
+
+    const yatirimKazanciInput = document.getElementById('yatirimdan_elde_edilen_kazanc');
+    const tevsiKazanciInput = document.getElementById('tevsi_yatirim_kazanci');
+    const toplamSabitInput = document.getElementById('toplam_sabit_kiymet_tutari');
+    const gerceklesenTevsiInput = document.getElementById('gerceklesen_tevsi_yatirim_tutari');
+
+    if (!yatirimKazanciInput || !tevsiKazanciInput) return;
+
+    // Başta hepsini pasifleştir
+    [yatirimKazanciInput, tevsiKazanciInput, toplamSabitInput, gerceklesenTevsiInput].forEach(el => {
+      if (el) {
+        el.setAttribute('readonly', true);
+        el.classList.add('disabled-input');
+      }
+    });
+
+    // 🔸 Eğer karar 2025/9903 ise → yalnızca yatırım kazancı aktif
+    if (karar === "2025/9903") {
+      yatirimKazanciInput.removeAttribute('readonly');
+      yatirimKazanciInput.classList.remove('disabled-input');
+    }
+    // 🔸 Eğer karar ≠ 2025/9903 ve yatırım türü = tevsi → yalnızca tevsi kazancı aktif
+    else if (yatirimTuru === "tevsi") {
+      tevsiKazanciInput.removeAttribute('readonly');
+      tevsiKazanciInput.classList.remove('disabled-input');
+      if (toplamSabitInput) toplamSabitInput.classList.remove('disabled-input'), toplamSabitInput.removeAttribute('readonly');
+      if (gerceklesenTevsiInput) gerceklesenTevsiInput.classList.remove('disabled-input'), gerceklesenTevsiInput.removeAttribute('readonly');
+    }
+    // 🔸 Diğer tüm durumlarda yalnızca yatırım kazancı aktif
+    else {
+      yatirimKazanciInput.removeAttribute('readonly');
+      yatirimKazanciInput.classList.remove('disabled-input');
+    }
+  }
+
+
+
+
+
+  // setBolge(): İl seçimine göre bölge alanını otomatik doldurur. 
+  // 2025/9903 kararı seçiliyse bölgeyi değiştirmez, yalnızca bilgi amaçlı log yazar.
+  function setBolge() {
+    const karar = document.getElementById("karar")?.value;
+    if (karar === "2025/9903") {
+      console.log("📍 2025/9903 aktif — bölge ayarı yapıldı ama katkı oranı değiştirilmedi.");
+      return;
+    }
+
+    const ilSelect = document.getElementById("il");
+    const bolgeInput = document.getElementById("bolge");
+    if (ilSelect && bolgeInput) {
+      const il = ilSelect.value;
+      const bolge = bolgeMap[il];
+      bolgeInput.value = bolge;
+
+    }
+  }
+
+
+
+  // setOranlar(): Bölge, OSB durumu, vize ve dönem bilgilerine göre katkı, vergi ve diğer oranlarını hesaplayıp alanlara yazar. 
+  // Manuel girilen değerleri korur, 2025/9903 için çalışmaz ve bağlı hesaplamaları otomatik tetikler.
+  function setOranlar() {
+    const karar = document.getElementById("karar")?.value;
+    if (karar === "2025/9903") return;
+    const bolgeInput = document.getElementById("bolge");
+    const osbSelect = document.getElementById("osb");
+    const vizeSelect = document.getElementById("vize_durumu");
+    const donemSelect = document.getElementById("donem");
+    if (!bolgeInput || !osbSelect || !vizeSelect || !donemSelect) return;
+
+    const bolge = bolgeInput.value;
+    const osb = osbSelect.value;
+    const key = bolge + "|" + osb;
+
+    const vize = vizeSelect.value;
+    const donem = donemSelect.value;
+    const donemYil = parseInt(donem.split(" - ")[0]);
+
+
+
+    // 1) YDO yaz/temizle
+    const yenidenDegerlemeOraniEl = document.getElementById("yeniden_degerleme_orani");
+    if (yenidenDegerlemeOraniEl) {
+      if (vize.includes("Hayır")) {
+        yenidenDegerlemeOraniEl.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YAPILMAZ";
+        yenidenDegerlemeOraniEl.classList.add("text-muted");   // opsiyonel: gri göster
+      } else {
+        const oranAnahtari = donem;
+        yenidenDegerlemeOraniEl.value = (yenidenDegerlemeOranlari[oranAnahtari] ?? "");
+        yenidenDegerlemeOraniEl.classList.remove("text-muted");
+      }
+    }
+
+    // 2) Katkı oranı
+    const katkiOraniEl = document.getElementById("katki_orani");
+    const manualKatki = sessionStorage.getItem('manual_katki') === 'true';
+    const manualKatkiVal = sessionStorage.getItem('manual_katki_value');
+    if (katkiOraniEl) {
+      if (manualKatki && manualKatkiVal !== null) {
+        katkiOraniEl.value = manualKatkiVal; // manuel değeri koru
+      } else {
+        let v = katkilar[key] ?? "";
+        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
+        katkiOraniEl.value = v;
+      }
+    }
+
+    // 3) Vergi indirim oranı
+    const vergiOraniEl = document.getElementById("vergi_orani");
+    const manualVergi = sessionStorage.getItem('manual_vergi') === 'true';
+    const manualVergiVal = sessionStorage.getItem('manual_vergi_value');
+    if (vergiOraniEl) {
+      if (manualVergi && manualVergiVal !== null) {
+        vergiOraniEl.value = manualVergiVal; // manuel değeri koru
+      } else {
+        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : (vergiler[key] ?? "");
+        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
+        vergiOraniEl.value = v;
+      }
+    }
+
+    // 4) Diğer kazanç oranı (manuel değişmiyorsa olduğu gibi bırak)
+    const digerOranEl = document.getElementById("diger_oran");
+    if (digerOranEl) {
+      if (vize.includes("Evet")) {
+        digerOranEl.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
+      } else {
+        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : 80;
+        v = Math.max(0, Math.min(100, Number(v)));
+        digerOranEl.value = v;
+      }
+    }
+
+
+    // 5) Sol “İndirimli KV Oranları (bilgi)” kutusunu güncelle
+    updateDiscountedRatesUI();
+
+    // 6) Aşama 3/4’te isek bağlı hesaplamaları tetikle
+    const step3El = document.getElementById("step3");
+    if (step3El && !step3El.classList.contains("hidden-step")) {
+      hesaplaKatkiTutari();
+      hesaplaDigerKatkiTutari();
+      hesaplaFiiliKatkiTutari();
+    }
+    const step4El = document.getElementById("step4");
+    if (step4El && !step4El.classList.contains("hidden-step")) {
+      hesaplaOncekiKatkiTutari();
+      hesaplaKalanVeEndeks();
+    }
+  }
+
+
+
+
+
+
+  // updateProgress(): İlerleme çubuğunu ve mevcut aşama sayısını günceller. 
+  // Geçerli aşamaya göre progress bar genişliğini ve "Aşama X / Y" göstergesini senkronize eder.
   function updateProgress(step) {
     const progressBar = document.getElementById("progressBar");
     const currentStageText = document.getElementById("current-stage-text"); // current-stage-text id'li span'i doğru al
@@ -988,6 +1066,10 @@
     }
   }
 
+
+  // _updateStepDisplay(): Belirtilen aşamayı görünür yapar, diğerlerini gizler. 
+  // Gerekli hesaplamaları ve alan güncellemelerini tetikler, ilerlemeyi ve sessionStorage bilgisini günceller. 
+  // Ayrıca karar 2025/9903 ise özel davranışları yeniden uygular.
   function _updateStepDisplay(stepNum) {
     ALL_STEPS_IDS.forEach((id, idx) => {
       const el = document.getElementById(id);
@@ -1028,6 +1110,7 @@
       toggleDetailedProfitInput();
 
       const belgeNoInput = document.querySelector('input[name="belge_no"]');
+
       const belgeTarihiInput = document.querySelector('input[name="belge_tarihi"]');
       const bolgeInput = document.getElementById('bolge');
 
@@ -1056,6 +1139,9 @@
   }
 
 
+
+
+  // updateDiscountedRatesUI(): Vergi indirim oranına göre ihracat, imalat ve diğer kazançlara ait indirimli KV oranlarını hesaplayıp bilgi alanında gösterir.
   function updateDiscountedRatesUI() {
     const vergiOraniEl = document.getElementById("vergi_orani");
     const spanIhr = document.getElementById("ind_kv_ihr");
@@ -1081,538 +1167,6 @@
   }
 
 
-
-
-
-  // Ayrıntılı kazanç tablosunu sunucuya kaydetmek için AJAX fonksiyonu
-  async function saveDetailedProfitData() {
-    const ayrTable = document.getElementById('ayrintili-kazanc-table');
-    if (!ayrTable) {
-      return;
-    }
-    const formData = new FormData();
-    let dataChanged = false;
-    ayrTable.querySelectorAll('tbody tr').forEach((rowEl) => {
-      rowEl.querySelectorAll('input').forEach(input => {
-        if (!input.readOnly) {
-          const originalValue = input.getAttribute('data-original-value');
-          const currentValue = input.value;
-          if (originalValue !== currentValue) {
-            formData.append(input.name, currentValue);
-            dataChanged = true;
-          }
-        }
-      });
-    });
-    if (!dataChanged) {
-      return;
-    }
-    try {
-      const response = await fetch("{{ url_for('indirimlikurumlar.ayrintili_kazanc') }}", {
-        method: "POST",
-        body: formData
-      });
-      if (response.ok) {
-        ayrTable.querySelectorAll('tbody input').forEach(input => {
-          input.setAttribute('data-original-value', input.value);
-        });
-        updateSessionStorageRatios();
-      } else {
-        console.error("Otomatik kaydetme başarısız oldu:", response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error("Otomatik kaydetme sırasında hata oluştu:", error);
-    }
-  }
-
-  function updateSessionStorageRatios() {
-    const ayrTable = document.getElementById('ayrintili-kazanc-table');
-    if (!ayrTable) {
-      return;
-    }
-    const C54_input = ayrTable.querySelector('input[name="C_54"]');
-    const D54_input = ayrTable.querySelector('input[name="D_54"]');
-    const E54_input = ayrTable.querySelector('input[name="E_54"]');
-    if (C54_input && D54_input && E54_input) {
-      sessionStorage.setItem('ayrintili_C54', C54_input.value);
-      sessionStorage.setItem('ayrintili_D54', D54_input.value);
-      sessionStorage.setItem('ayrintili_E54', E54_input.value);
-    }
-  }
-
-  function toggleDetailedProfitInput() {
-    const useDetailedCheckbox = document.getElementById("useDetailedProfitRatios");
-    if (!useDetailedCheckbox) return;
-    const useDetailed = useDetailedCheckbox.checked;
-    const brutInput = document.getElementById("brut_satis");
-    const ihracatInput = document.getElementById("ihracat");
-    const imalatInput = document.getElementById("imalat");
-    const digerFaaliyetInput = document.getElementById("diger_faaliyet");
-    if (!brutInput || !ihracatInput || !imalatInput || !digerFaaliyetInput) return;
-    if (useDetailed) {
-      brutInput.setAttribute('readonly', true);
-      ihracatInput.setAttribute('readonly', true);
-      imalatInput.setAttribute('readonly', true);
-      digerFaaliyetInput.setAttribute('readonly', true);
-      brutInput.value = '';
-      ihracatInput.value = '';
-      imalatInput.value = '';
-      digerFaaliyetInput.value = '';
-      calculateRatios();
-    } else {
-      brutInput.removeAttribute('readonly');
-      ihracatInput.removeAttribute('readonly');
-      imalatInput.removeAttribute('readonly');
-      digerFaaliyetInput.removeAttribute('readonly');
-      calculateRatios();
-    }
-  }
-
-  function clearProfitTable() {
-    Swal.fire({
-      title: "Emin misiniz?",
-      text: "Tüm ayrıntılı kazanç verilerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Evet, sil!",
-      cancelButtonText: "İptal"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const ayrTable = document.getElementById('ayrintili-kazanc-table');
-        if (ayrTable) {
-          // input değerlerini temizle
-          ayrTable.querySelectorAll('tbody input').forEach(input => {
-            if (!input.readOnly) {
-              isProgrammaticChange = true;
-              input.value = '';
-              input.setAttribute('data-original-value', '');
-              isProgrammaticChange = false;
-            }
-          });
-          // Session Storage'ı temizle
-          sessionStorage.removeItem('ayrintili_C54');
-          sessionStorage.removeItem('ayrintili_D54');
-          sessionStorage.removeItem('ayrintili_E54');
-
-          // Veritabanından temizlemek için AJAX isteği gönder
-          // Bu örnekte, Python tarafından özel bir 'temizle' endpoint'i olmadığını varsayıyorum.
-          // Eğer Flask'ta bir 'temizle' endpoint'i varsa, onu burada çağırırdık.
-          // Şimdilik sadece frontend'i temizledik ve bir mesaj gösterdik.
-          showSwalMessage("success", "Temizlendi!", "Ayrıntılı kazanç verileri temizlendi.");
-          calculateTable(); // Tabloyu yeniden hesapla ve boş değerleri göster
-        }
-      }
-    });
-  }
-
-  // Backend alanlarını form input "name"leriyle eşleştirip doldur
-  function fillFormWithParsedData(data) {
-    const map = {
-      belge_no: 'belge_no',
-      karar: 'karar',
-      baslama_tarihi: 'belge_tarihi',   // parser 'baslama_tarihi' döndürüyorsa
-      belge_tarihi: 'belge_tarihi',     // parser 'belge_tarihi' döndürüyorsa
-      yatirim_turu1: 'yatirim_turu1',
-      yatirim_turu2: 'yatirim_turu2',
-      bolge: 'bolge',
-
-      // oran ve tutarlar
-      katki_orani: 'katki_orani',
-      vergi_orani: 'vergi_orani',
-      ikv_orani: 'diger_oran',
-      diger_oran: 'diger_oran',
-
-      toplam_tutar: 'toplam_tutar',
-      katki_tutari: 'katki_tutari',
-      diger_katki_tutari: 'diger_katki_tutari',
-      cari_harcama_tutari: 'cari_harcama_tutari',
-      toplam_harcama_tutari: 'toplam_harcama_tutari',
-      fiili_katki_tutari: 'fiili_katki_tutari',
-      endeks_katki_tutari: 'endeks_katki_tutari',
-
-      onceki_yatirim_katki_tutari: 'onceki_yatirim_katki_tutari',
-      onceki_diger_katki_tutari: 'onceki_diger_katki_tutari',
-      onceki_katki_tutari: 'onceki_katki_tutari',
-
-      // cari alanlar
-      cari_yatirim_katki: 'cari_yatirim_katki',
-      cari_diger_katki: 'cari_diger_katki',
-      cari_toplam_katki: 'cari_toplam_katki',
-      genel_toplam_katki: 'genel_toplam_katki'
-    };
-
-    Object.entries(map).forEach(([src, destName]) => {
-      const el = document.querySelector(`[name="${destName}"]`);
-      if (!el) return;
-      const val = data[src];
-      const v = (el.type === 'date')
-        ? convertToInputDateFormat(val || '')
-        : (val ?? '');
-      el.value = v;
-
-      // ➕ PDF’den geleni kalıcılaştır
-      sessionStorage.setItem(`form_${destName}`, v);
-    });
-
-    // Bölge gizli alanı
-    const b = document.getElementById('bolge');
-    if (b) {
-      b.dispatchEvent(new Event('change'));
-      const bh = document.getElementById('bolge_hidden');
-      if (bh) {
-        bh.value = b.value;
-        sessionStorage.setItem('form_bolge', b.value);
-        sessionStorage.setItem('form_bolge_hidden', b.value);
-      }
-    }
-
-    // Kaldığın adımı da kaydet (ör: otomatik Step 2’ye geçeceksen)
-    sessionStorage.setItem('last_step', '2');
-
-    if (typeof goToStep2 === 'function') goToStep2();
-  }
-
-  async function handleKVUpload(ev) {
-    const file = ev.target.files?.[0];
-    if (!file) return;
-
-    // aynı dosyayı tekrar seçebilin
-    ev.target.value = '';
-
-    const fd = new FormData();
-    fd.append('kv_pdf', file);
-
-    // 1) Loading
-    Swal.fire({
-      title: 'Yükleniyor...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    let resp;
-    try {
-      // (opsiyonel) timeout
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 20000);
-
-      const r = await fetch('{{ url_for("indirimlikurumlar.upload_kv_beyan") }}', {
-        method: 'POST',
-        body: fd,
-        signal: ctrl.signal
-      });
-
-      clearTimeout(t);
-
-      const ct = r.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) {
-        const text = await r.text();
-        throw new Error('Beklenmeyen yanıt: ' + ct + ' / ' + text.slice(0, 200));
-      }
-
-      resp = await r.json();
-    } catch (e) {
-      Swal.close();
-      Swal.fire('Hata', 'PDF yüklenirken ağ/yanıt hatası oluştu.', 'error');
-      return;
-    } finally {
-      Swal.close();
-    }
-
-    console.log('KV upload resp:', resp);
-
-    // 2) Mutlu yollar
-    if (resp?.status === 'ok' && resp?.parsed) {
-      fillFormWithParsedData(resp.parsed);
-      await Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
-      return;
-    }
-
-    if (resp.status === 'multiple' && Array.isArray(resp.raw_data) && resp.raw_data.length) {
-      // Seçenekleri hazırla
-      const inputOptions = {};
-      resp.raw_data.forEach((item, i) => {
-        const no = (item.belge_no || `Belge ${i + 1}`).toString().trim();
-        const karar = item.karar ? ` • ${item.karar}` : '';
-        const tarih = item.belge_tarihi ? ` • ${item.belge_tarihi}` : '';
-        inputOptions[i] = `${no}${karar}${tarih}`;
-      });
-
-      // Kullanıcıya sor
-      const { value: idx } = await Swal.fire({
-        title: 'Hangi teşvik belgesini içe aktarmak istersiniz?',
-        input: 'select',
-        inputOptions,
-        inputPlaceholder: 'Seçiniz',
-        showCancelButton: true,
-        confirmButtonText: 'Seç',
-        cancelButtonText: 'İptal'
-      });
-
-      if (idx !== undefined) {
-        fillFormWithParsedData(resp.raw_data[Number(idx)]);
-        Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
-      }
-      return;
-    }
-
-
-    // 3) Özel: KV sayfası/tablosu bulunamadı senaryosu
-    if (
-      resp.status === 'not_found' ||     // backend böyle dönüyorsa
-      resp.status === 'no_kv' ||     // …veya bu
-      resp.status === 'empty' ||     // …veya bu
-      (resp.status === 'multiple' && (!resp.raw_data || !resp.raw_data.length || !resp.tablolar || !resp.tablolar.length)) ||
-      (resp.status === 'ok' && !resp.parsed)
-    ) {
-      Swal.fire('Bulunamadı', 'Yüklediğiniz PDF’de “İndirimli Kurumlar” bölümü tespit edilemedi.', 'warning');
-      return;
-    }
-
-    // 4) Diğer tüm hatalar
-    Swal.fire('Hata', resp.message || 'PDF verisi işlenemedi.', 'error');
-
-  }
-
-
-
-
-  // --- 2025/9903 MODU HESAPLAMALARI (TAM VE DENGELİ SÜRÜM) ---
-  window.hesaplaKatkiTutari9903Form = function () {
-    const karar = document.getElementById("karar")?.value;
-    if (karar !== "2025/9903") return;
-
-    const toplamInput = document.getElementById("toplam_tutar");
-    const oranInput = document.getElementById("katki_orani");
-    const katkiTutariInput = document.getElementById("katki_tutari");
-    const digerKatkiInput = document.getElementById("diger_katki_tutari");
-    const digerOranInput = document.getElementById("diger_oran");
-    const donemInput = document.getElementById("donem");
-    const baslangicYilInput = document.getElementById("baslangic_yili");
-
-    if (!toplamInput || !oranInput || !katkiTutariInput) return;
-
-    const toplam = parseFormattedNumber(toplamInput.value);
-    const oran = parseFormattedNumber(oranInput.value);
-    const digerOran = parseFormattedNumber(digerOranInput?.value || "0");
-
-    if (isNaN(toplam) || isNaN(oran)) {
-      katkiTutariInput.value = "";
-      if (digerKatkiInput) digerKatkiInput.value = "";
-      return;
-    }
-
-    // 1️⃣ Hesap dönemi farkı
-    const donemYil = parseInt((donemInput?.value || "").split(" - ")[0]) || 0;
-    const baslangicYil = parseInt(baslangicYilInput?.value || "0");
-    const donemFarki = (baslangicYil && donemYil) ? (donemYil - baslangicYil) : 0;
-
-    // 2️⃣ 10 hesap dönemi sınırı
-    if (baslangicYil && donemFarki >= 10) {
-      Swal.fire({
-        icon: "warning",
-        title: "10 Hesap Dönemi Sınırı",
-        html: "Yatırımdan elde edilen kazançlarda indirimli kurumlar vergisi uygulanabilecek süre dolmuştur.",
-        confirmButtonText: "Tamam"
-      });
-      document.getElementById('cari_yatirim_katki').value = "0,00";
-      return;
-    }
-
-    // 3️⃣ Katkı tutarı
-    const katkıTutarı = toplam * oran / 100;
-    katkiTutariInput.value = katkıTutarı.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-
-    // 🔹 Diğer faaliyet katkı tutarı
-    if (digerKatkiInput) {
-      const digerKatki = (!isNaN(digerOran) ? katkıTutarı * digerOran / 100 : 0);
-      digerKatkiInput.value = digerKatki.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-    }
-
-    // 4️⃣ 4 hesap dönemi bilgilendirmesi
-    if (baslangicYil && donemFarki >= 4) {
-      Swal.fire({
-        icon: "info",
-        title: "4 Hesap Dönemi Bilgilendirmesi",
-        html: "Diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulama süresi dolmak üzeredir.",
-        confirmButtonText: "Tamam"
-      });
-    }
-
-    // 5️⃣ 4 yıl sonrası diğer faaliyet kazanç hakkı sıfırlansın
-    if (baslangicYil && donemFarki > 3) {
-      Swal.fire({
-        icon: "warning",
-        title: "Süre Doldu",
-        html: `
-          <div style="text-align:justify;">
-            <b>${baslangicYil + 3}</b> hesap döneminden itibaren,
-            2025/9903 sayılı Karar uyarınca
-            diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulanamaz.
-            Bu nedenle, bu dönemde <b>diğer faaliyet katkısı 0</b> olarak değerlendirilmiştir.
-          </div>
-        `,
-        confirmButtonText: "Tamam"
-      });
-      if (digerKatkiInput) digerKatkiInput.value = "0,00";
-      sessionStorage.setItem("diger_kazanc_uygulama", "hayir");
-    }
-
-
-
-    // 6️⃣ Devredememe kontrolü
-    const tevsiKazanc = parseFormattedNumber(document.getElementById('tevsi_yatirim_kazanci')?.value) || 0;
-    const cariYatirimKatkisiVal = parseFormattedNumber(document.getElementById('cari_yatirim_katki')?.value) || 0;
-    if (tevsiKazanc > 0 && cariYatirimKatkisiVal === 0) {
-      Swal.fire({
-        icon: "info",
-        title: "Kullanılmayan Katkı Devredilemez",
-        html: "Kazanç bulunmasına rağmen bu dönemde katkı kullanılmamış. Bu tutar sonraki dönemlere devredilemez.",
-        confirmButtonText: "Anladım"
-      });
-    }
-  };
-
-
-
-
-
-
-
-
-
-  function hesaplaKatkiTutari() {
-    // Eğer karar 2025/9903 ise → özel fonksiyona yönlendir ve çık
-    if (document.getElementById("karar")?.value === "2025/9903") {
-      hesaplaKatkiTutari9903Form();
-      return;
-    }
-    const toplam = document.getElementById("toplam_tutar");
-    const oran = document.getElementById("katki_orani");
-    const katkiTutari = document.getElementById("katki_tutari");
-    if (toplam && oran && katkiTutari) {
-      const parsedToplam = parseFormattedNumber(toplam.value);
-      const parsedOran = parseFormattedNumber(oran.value); // ✅
-      if (!isNaN(parsedToplam) && !isNaN(parsedOran)) {
-        const tutar = parsedToplam * parsedOran / 100;
-        katkiTutari.value = tutar.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-        hesaplaDigerKatkiTutari();
-      } else {
-        katkiTutari.value = "";
-      }
-    }
-  }
-
-  function hesaplaDigerKatkiTutari() {
-    // Eğer karar 2025/9903 ise → özel fonksiyona yönlendir ve çık
-    if (document.getElementById("karar")?.value === "2025/9903") {
-      hesaplaKatkiTutari9903Form();
-      return;
-    }
-    const katkiInput = document.getElementById("katki_tutari");
-    const digerOranInput = document.getElementById("diger_oran");
-    const digerKatkiTutariInput = document.getElementById("diger_katki_tutari");
-
-    if (katkiInput && digerOranInput && digerKatkiTutariInput) {
-      const katki = parseFormattedNumber(katkiInput.value);
-      const digerOranText = digerOranInput.value;
-
-      const digerOran = parseFormattedNumber(digerOranText); // ✅ burası kritik
-      if (!isNaN(katki) && !isNaN(digerOran)) {
-        const sonuc = katki * digerOran / 100;
-        digerKatkiTutariInput.value = sonuc.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
-      } else {
-        digerKatkiTutariInput.value =
-          digerOranText.includes("İŞLETME DÖNEMİNDE HESAPLANMAZ") ? "İŞLETME DÖNEMİNDE HESAPLANMAZ" : "";
-      }
-    }
-  }
-
-  function hesaplaFiiliKatkiTutari() {
-    const karar = document.getElementById("karar")?.value;
-    const toplamHarcamaInput = document.getElementById("toplam_harcama_tutari");
-    const katkiOraniInput = document.getElementById("katki_orani");
-    const fiiliKatkiTutariInput = document.getElementById("fiili_katki_tutari");
-
-    if (!toplamHarcamaInput || !katkiOraniInput || !fiiliKatkiTutariInput) return;
-
-    const toplamHarcama = parseFormattedNumber(toplamHarcamaInput.value);
-    const oran = parseFormattedNumber(katkiOraniInput.value);
-
-    if (isNaN(toplamHarcama) || isNaN(oran)) {
-      fiiliKatkiTutariInput.value = "";
-      return;
-    }
-
-    // 🧮 Formül: Fiili Katkı = Toplam Harcama × Katkı Oranı / 100
-    const fiiliKatki = toplamHarcama * oran / 100;
-
-    fiiliKatkiTutariInput.value = fiiliKatki.toLocaleString("tr-TR", {
-      minimumFractionDigits: 2,
-    });
-
-    console.log(
-      `📊 [${karar}] Fiili Katkı Hesaplandı: ${toplamHarcama} × ${oran}% = ${fiiliKatki}`
-    );
-  }
-
-
-  function hesaplaOncekiKatkiTutari() {
-    const oncekiYatirimInput = document.getElementById("onceki_yatirim_katki_tutari");
-    const oncekiDigerInput = document.getElementById("onceki_diger_katki_tutari");
-    const oncekiKatkiInput = document.getElementById("onceki_katki_tutari");
-    if (oncekiYatirimInput && oncekiDigerInput && oncekiKatkiInput) {
-      const oncekiyatirim = parseFormattedNumber(oncekiYatirimInput.value);
-      const oncekidiger = parseFormattedNumber(oncekiDigerInput.value);
-      if (!isNaN(oncekiyatirim) && !isNaN(oncekidiger)) {
-        const oncekikatki = oncekiyatirim + oncekidiger;
-        oncekiKatkiInput.value = oncekikatki.toLocaleString("tr-TR", {
-          minimumFractionDigits: 2
-        });
-      } else {
-        oncekiKatkiInput.value = "";
-      }
-      hesaplaKalanVeEndeks();
-    }
-  }
-
-  function hesaplaKalanVeEndeks() {
-    const toplamKatkiInput = document.getElementById("katki_tutari");
-    const oncekiKatkiInput = document.getElementById("onceki_katki_tutari");
-    const vizeSelect = document.getElementById("vize_durumu");
-    const yenidenDegerlemeOraniInput = document.getElementById("yeniden_degerleme_orani");
-    const kalanKatkiInput = document.getElementById("kalan_katki_tutari");
-    const endeksKatkiInput = document.getElementById("endeks_katki_tutari");
-    if (!toplamKatkiInput || !oncekiKatkiInput || !vizeSelect || !yenidenDegerlemeOraniInput || !kalanKatkiInput || !endeksKatkiInput) {
-      return;
-    }
-    const toplamKatki = parseFormattedNumber(toplamKatkiInput.value);
-    const oncekiKatki = parseFormattedNumber(oncekiKatkiInput.value);
-    const vize = vizeSelect.value;
-    const ydoText = yenidenDegerlemeOraniInput.value;
-    const ydo = parseFloat(ydoText.replace(',', '.'));
-    const kalan = (!isNaN(toplamKatki) && !isNaN(oncekiKatki)) ? (toplamKatki - oncekiKatki) : 0;
-    if (!isNaN(kalan)) {
-      kalanKatkiInput.value = kalan.toLocaleString("tr-TR", {
-        minimumFractionDigits: 2
-      });
-    } else {
-      kalanKatkiInput.value = "";
-    }
-    if (vize.includes("Evet")) {
-      if (!isNaN(kalan) && !isNaN(ydo)) {
-        const endeksli = kalan * ydo / 100;
-        endeksKatkiInput.value = endeksli.toLocaleString("tr-TR", {
-          minimumFractionDigits: 2
-        });
-      } else {
-        endeksKatkiInput.value = "";
-      }
-    } else {
-      endeksKatkiInput.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YAPILMAZ";
-    }
-  }
 
   function calculateRatios() {
     const useDetailedCheckbox = document.getElementById("useDetailedProfitRatios");
@@ -1691,427 +1245,6 @@
       }
     }
   }
-
-  function calculateKVMatrah() {
-    const t = parseFormattedNumber(document.getElementById('ticari_bilanco_kari')?.value);
-    const k = parseFormattedNumber(document.getElementById('kkeg')?.value);
-    const out = document.getElementById('kv_matrah');
-    if (!out) return;
-    const val = (t || 0) + (k || 0);
-    out.value = (val || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-  }
-
-  function updateIKVAmountAndRate(ikvMatrah, ihrPct, imlPct, digPct, vergiIndirimOraniFraction) {
-    // Güvenli sayılar
-    const matrah = Number(ikvMatrah) || 0;
-    const pIhr = Number(ihrPct) || 0;   // 0..1
-    const pIml = Number(imlPct) || 0;   // 0..1
-    const pDig = Number(digPct) || 0;   // 0..1
-    const pDisc = Number(vergiIndirimOraniFraction) || 0; // 0..1
-
-    // Matrah kırılımı (Aşama 6’daki satır mantığına uygun)
-    const bespuan_matrah = matrah * pIhr; // İhracat
-    const birpuan_matrah = matrah * pIml; // İmalat
-    const normal_matrah = matrah * pDig; // Diğer + KKEG
-
-    // Genel (indirimsiz) KV oranları
-    const rIhrGen = 0.20; // ihracat
-    const rImlGen = 0.24; // imalat
-    const rDigGen = 0.25; // diğer
-
-    // İndirimli efektif oranlar: r * (1 - indirim)
-    const rIhrInd = rIhrGen * (1 - pDisc);
-    const rImlInd = rImlGen * (1 - pDisc);
-    const rDigInd = rDigGen * (1 - pDisc);
-
-    // Ağırlıklı efektif oran (0..1)
-    const effRate = (pIhr * rIhrInd) + (pIml * rImlInd) + (pDig * rDigInd);
-
-    // İndirimli KV (ödenecek vergi)
-    const ikvAmount = matrah * effRate;
-
-    // “İndirimli KV olmasaydı” vergi (bilgi satırı için)
-    const vergi_olsaydi = (bespuan_matrah * rIhrGen) + (birpuan_matrah * rImlGen) + (normal_matrah * rDigGen);
-
-    // UI yaz
-    const ikvEl = document.getElementById('indirimli_kv');
-    const ikvRateEl = document.getElementById('indirimli_kv_oran');
-    if (ikvEl) ikvEl.value = ikvAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    if (ikvRateEl) ikvRateEl.value = (effRate * 100).toFixed(2).replace('.', ',') + '%';
-
-    // Eğer step7’de “İndirimli KV Olmasaydı Hesaplanacak Vergi” için bir input eklersen (id: kv_olsaydi),
-    // otomatik doldurur. (Yoksa sessizce geçer.)
-    const kvOlsaydiEl = document.getElementById('kv_olsaydi');
-    if (kvOlsaydiEl) kvOlsaydiEl.value = vergi_olsaydi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-
-    // Gerekirse dışarıda kullanman için geri döndür
-    return {
-      bespuan_matrah,  // ihracat matrahı
-      birpuan_matrah,  // imalat matrahı
-      normal_matrah,   // diğer matrahı
-      vergi_olsaydi,
-      effRate,
-      ikvAmount
-    };
-  }
-
-
-  function hesaplaKatkiTutari9903({ advance = false } = {}) {
-    console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
-
-    const karar = document.getElementById("karar")?.value;
-    if (karar !== "2025/9903") return;
-
-    const safe = (x) => (isNaN(x) ? 0 : x);
-    const val = (id) => safe(parseFormattedNumber(document.getElementById(id)?.value));
-
-    // 1️⃣ Girdiler
-    const yatirimKazanci = Number(val('tevsi_yatirim_kazanci'));
-    const digerKazanc = Number(val('kv_matrah'));
-
-    // 🔸 Kullanıcı seçimine göre diğer kazancı devre dışı bırak
-    const gelirTipi = sessionStorage.getItem('gelir_uygulama_tipi');
-    let digerKazancFinal = digerKazanc;
-
-    if (gelirTipi === 'yatirim') {
-      digerKazancFinal = 0; // sadece yatırım kazancı dikkate alınır
-      console.log("🎯 Yalnız yatırım kazancı seçildi — diğer faaliyet kazancı hesap dışı bırakıldı.");
-    }
-
-    const toplamYatirim = val('toplam_tutar');
-    const harcamaYatirim = val('toplam_harcama_tutari');
-    const katkiOrani = val('katki_orani') / 100;
-    const vergiIndirimOrani = val('vergi_orani') / 100;
-    const digerOran = val('diger_oran') / 100; // CB oranı (%50 vb.)
-    const oncekiToplamKatki = val('onceki_katki_tutari');
-
-    // 2️⃣ KV oranları
-    const kvOranIhracat = safe(val('kv_oran_ihracat') / 100) || 0.20;
-    const kvOranImalat = safe(val('kv_oran_imalat') / 100) || 0.24;
-    const kvOranDiger = safe(val('kv_oran_diger') / 100) || 0.25;
-
-    const farkIhr = kvOranIhracat - (kvOranIhracat * (1 - vergiIndirimOrani));
-    const farkIml = kvOranImalat - (kvOranImalat * (1 - vergiIndirimOrani));
-    const farkDig = kvOranDiger - (kvOranDiger * (1 - vergiIndirimOrani));
-
-    // 3️⃣ Oran kaynağı
-    const useDetailedRatios = document.getElementById('useDetailedProfitRatios')?.checked || false;
-    let ihracatOraniFinal = 0, imalatOraniFinal = 0, digerOraniFinal = 0;
-
-    if (useDetailedRatios) {
-      ihracatOraniFinal = safe(parseFloat(document.getElementById('ratio_ihracat')?.textContent.replace('%', '').replace(',', '.'))) / 100;
-      imalatOraniFinal = safe(parseFloat(document.getElementById('ratio_imalat')?.textContent.replace('%', '').replace(',', '.'))) / 100;
-      digerOraniFinal = safe(parseFloat(document.getElementById('ratio_diger')?.textContent.replace('%', '').replace(',', '.'))) / 100;
-    } else {
-      const brutSatis = val('brut_satis');
-      const ihracatSatis = val('ihracat');
-      const imalatSatis = val('imalat');
-      const digerSatis = val('diger_faaliyet');
-      if (brutSatis > 0) {
-        ihracatOraniFinal = ihracatSatis / brutSatis;
-        imalatOraniFinal = imalatSatis / brutSatis;
-        digerOraniFinal = digerSatis / brutSatis;
-      } else {
-        digerOraniFinal = 1;
-      }
-    }
-
-    // 5️⃣ Katkı tabanları
-    const toplamKatki9903 = toplamYatirim * katkiOrani;
-    const hakEdilenKatki9903 = harcamaYatirim * katkiOrani;
-    const ustSinirDiger9903 = toplamKatki9903 * digerOran;
-    const digerKullanilabilir9903 = Math.min(hakEdilenKatki9903, ustSinirDiger9903);
-
-    // 6️⃣ Hesap dönemi farkı
-    const donemYil = parseInt((document.getElementById("donem")?.value || "").split(" - ")[0]) || 0;
-    const baslangicYil = parseInt(document.getElementById("baslangic_yili")?.value || "0");
-    const donemFarki = (baslangicYil && donemYil) ? (donemYil - baslangicYil) : 0;
-
-    console.log("🧮 Nihai Değerler:", { toplamKatki9903, hakEdilenKatki9903, ustSinirDiger9903, yatirimKazanci, digerKazanc: digerKazancFinal, donemFarki });
-
-    // 7️⃣ Cari dönem katkıları
-    let cariYatirimKatkisi9903 = 0;
-    let cariDigerKatkisi9903 = 0;
-
-    if (yatirimKazanci > 0 && digerKazancFinal <= 0) {
-      // 🟩 Yalnız yatırım kazancı
-      if (donemFarki >= 10) {
-        Swal.fire({
-          icon: "warning",
-          title: "10 Hesap Dönemi Sınırı",
-          html: "Yatırımdan elde edilen kazançlarda indirimli kurumlar vergisi uygulanabilecek süre dolmuştur.",
-          confirmButtonText: "Tamam"
-        });
-      } else {
-        cariYatirimKatkisi9903 =
-          (yatirimKazanci * ihracatOraniFinal * farkIhr) +
-          (yatirimKazanci * imalatOraniFinal * farkIml) +
-          (yatirimKazanci * digerOraniFinal * farkDig);
-      }
-    }
-    else if (yatirimKazanci <= 0 && digerKazancFinal > 0) {
-      // 🟨 Yalnız diğer kazanç
-      if (donemFarki >= 4) {
-        Swal.fire({
-          icon: "info",
-          title: "4 Hesap Dönemi Sınırı",
-          html: "Diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulama süresi dolmuştur.",
-          confirmButtonText: "Tamam"
-        });
-      } else {
-        cariDigerKatkisi9903 = digerKullanilabilir9903;
-      }
-    }
-    else if (yatirimKazanci > 0 && digerKazancFinal > 0) {
-      // 🟦 Karma durum
-      const yatirimKismi =
-        (yatirimKazanci * ihracatOraniFinal * farkIhr) +
-        (yatirimKazanci * imalatOraniFinal * farkIml) +
-        (yatirimKazanci * digerOraniFinal * farkDig);
-      const digerKismi = (donemFarki < 4) ? digerKullanilabilir9903 : 0;
-
-      cariYatirimKatkisi9903 = yatirimKismi;
-      cariDigerKatkisi9903 = digerKismi;
-    }
-
-    // 8️⃣ Toplam katkılar
-    const cariToplamKatki9903 = cariYatirimKatkisi9903 + cariDigerKatkisi9903;
-    const genelToplamKatki9903 = oncekiToplamKatki + cariToplamKatki9903;
-    const kalanKatki9903 = Math.max(0, toplamKatki9903 - genelToplamKatki9903);
-
-    // 9️⃣ UI güncelleme
-    const setVal9903 = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.value = val.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    };
-    setVal9903('cari_yatirim_katki', cariYatirimKatkisi9903);
-    setVal9903('cari_diger_katki', cariDigerKatkisi9903);
-    setVal9903('cari_toplam_katki', cariToplamKatki9903);
-    setVal9903('genel_toplam_katki', genelToplamKatki9903);
-    setVal9903('kalan_katki_tutari', kalanKatki9903);
-
-    // 💰 İndirimli KV matrahı ve vergisi
-    let indirimliMatrah9903 = 0;
-    let indirimliKV9903 = 0;
-
-    // 1) Diğer faaliyetlerden gelen indirimli matrah (mevcut mantığınız korunuyor)
-    const _farkIhr = kvOranIhracat - (kvOranIhracat * (1 - vergiIndirimOrani));
-    const _farkIml = kvOranImalat - (kvOranImalat * (1 - vergiIndirimOrani));
-    const _farkDig = kvOranDiger - (kvOranDiger * (1 - vergiIndirimOrani));
-
-    const toplamOran = (ihracatOraniFinal + imalatOraniFinal + digerOraniFinal) || 1;
-    const katkIhr = cariDigerKatkisi9903 * (ihracatOraniFinal / toplamOran);
-    const katkIml = cariDigerKatkisi9903 * (imalatOraniFinal / toplamOran);
-    const katkDig = cariDigerKatkisi9903 * (digerOraniFinal / toplamOran);
-
-    const matrahOtherIhr = _farkIhr > 0 ? (katkIhr / _farkIhr) : 0;
-    const matrahOtherIml = _farkIml > 0 ? (katkIml / _farkIml) : 0;
-    const matrahOtherDig = _farkDig > 0 ? (katkDig / _farkDig) : 0;
-
-    const matrahOther = matrahOtherIhr + matrahOtherIml + matrahOtherDig; // ör: 16.000.000
-
-    // 2) Yatırımdan elde edilen kazanç kısımdaki indirimli matrah = doğrudan yatırım kazancı
-    const matrahInvest = Math.max(0, yatirimKazanci); // ör: 2.000.000
-
-    // 3) TOPLAM indirimli matrah
-    indirimliMatrah9903 = matrahOther + matrahInvest; // ör: 18.000.000
-
-    // 4) Tek indirimli oran (mevzuat örneği gibi): %25 - %60 = %10
-    const reducedRate = kvOranDiger * (1 - vergiIndirimOrani); // 0.25 * 0.40 = 0.10
-    indirimliKV9903 = indirimliMatrah9903 * reducedRate;       // 18.000.000 * 0.10 = 1.800.000
-
-    setVal9903('indirimli_matrah', indirimliMatrah9903);
-    setVal9903('indirimli_kv', indirimliKV9903);
-
-    const efektifOran = (indirimliKV9903 / indirimliMatrah9903) * 100 || 0;
-    setVal9903('indirimli_kv_oran', efektifOran);
-
-    console.log("✅ hesaplaKatkiTutari9903() tamamlandı", {
-      cariYatirimKatkisi9903, cariDigerKatkisi9903, genelToplamKatki9903, kalanKatki9903
-    });
-
-    if (advance && typeof _updateStepDisplay === "function") {
-      _updateStepDisplay(7);
-      console.log("➡️ Aşama 7’ye geçildi (manual trigger)");
-    }
-  }
-
-
-
-
-
-
-
-  function calculateCariAndNext() {
-    const karar = document.getElementById("karar")?.value;
-
-    // ✅ Eğer karar 2025/9903 ise iki aşamalı özel hesap fonksiyonlarını çağır
-    if (karar === "2025/9903") {
-      console.log("⚙️ 2025/9903 aktif — önce form hesapla, sonra detaylı hesap başlatılıyor");
-
-      // 1️⃣ Form tabanlı hesaplama (dönem kontrolü, %50 sınırı, uyarılar vb.)
-      if (typeof hesaplaKatkiTutari9903Form === "function") {
-        hesaplaKatkiTutari9903Form();
-      } else {
-        console.warn("⚠️ hesaplaKatkiTutari9903Form() bulunamadı!");
-      }
-
-      // 2️⃣ Detaylı hesaplama (oranlar, matrah, Step7 geçişi)
-      if (typeof hesaplaKatkiTutari9903 === "function") {
-        hesaplaKatkiTutari9903();
-      } else {
-        console.warn("⚠️ hesaplaKatkiTutari9903() bulunamadı!");
-      }
-
-      return; // 🚀 9903 modu tamamen kendi akışını tamamlar, alttaki klasik akışa geçme
-    }
-
-    // 🔹 Diğer kararlar (klasik teşvik hesaplama)
-    console.log("--- calculateCariAndNext() BAŞLADI ---");
-
-    const vizeDurumuElement = document.getElementById('vize_durumu');
-    const vizeDurumuTercihi = vizeDurumuElement ? vizeDurumuElement.value : '';
-
-    const digerKazancUygulama = sessionStorage.getItem('diger_kazanc_uygulama');
-    const kucukOlanDigerFaaliyetTutari = parseFormattedNumber(sessionStorage.getItem('kucuk_olan_diger_faaliyet')) || 0;
-
-    console.log("sessionStorage Tercihleri ve HTML Vize Durumu:");
-    console.log("  vizeDurumuTercihi:", vizeDurumuTercihi);
-    console.log("  digerKazancUygulama:", digerKazancUygulama);
-    console.log("  kucukOlanDigerFaaliyetTutari (parsed):", kucukOlanDigerFaaliyetTutari);
-
-    // Doğrudan HTML inputlarından alınan değerler
-    const tevsiYatirimKazanci = parseFormattedNumber(document.getElementById('tevsi_yatirim_kazanci').value);
-    const vergiIndirimOrani = parseFormattedNumber(document.getElementById('vergi_orani').value) / 100;
-    const oncekiToplamKatki = parseFormattedNumber(document.getElementById('onceki_katki_tutari').value);
-
-    console.log("HTML Input Değerleri (parsed):", {
-      tevsiYatirimKazanci,
-      vergiIndirimOrani,
-      oncekiToplamKatki
-    });
-
-    // Oranların kaynağı seçimi
-    const useDetailedRatiosCheckbox = document.getElementById('useDetailedProfitRatios');
-    const useDetailedRatios = useDetailedRatiosCheckbox ? useDetailedRatiosCheckbox.checked : false;
-    console.log("useDetailedProfitRatios (Checkbox):", useDetailedRatios);
-
-    let ihracatOraniFinal = 0, imalatOraniFinal = 0, digerOraniFinal = 0;
-
-    if (useDetailedRatios) {
-      // span'den oku
-      const spanIhr = document.getElementById('ratio_ihracat').textContent;
-      const spanIml = document.getElementById('ratio_imalat').textContent;
-      const spanDig = document.getElementById('ratio_diger').textContent;
-
-      ihracatOraniFinal = parseFloat(spanIhr.replace('%', '').replace(',', '.')) / 100 || 0;
-      imalatOraniFinal = parseFloat(spanIml.replace('%', '').replace(',', '.')) / 100 || 0;
-      digerOraniFinal = parseFloat(spanDig.replace('%', '').replace(',', '.')) / 100 || 0;
-
-      console.log("Oran Kaynağı: Ayrıntılı Kazanç Tablosu (span)");
-    } else {
-      // manuel satış girişleri
-      const brutSatis = parseFormattedNumber(document.getElementById('brut_satis').value) || 0;
-      const ihracatSatis = parseFormattedNumber(document.getElementById('ihracat').value) || 0;
-      const imalatSatis = parseFormattedNumber(document.getElementById('imalat').value) || 0;
-      const digerSatis = parseFormattedNumber(document.getElementById('diger_faaliyet').value) || 0;
-
-      if (brutSatis > 0) {
-        ihracatOraniFinal = ihracatSatis / brutSatis;
-        imalatOraniFinal = imalatSatis / brutSatis;
-        digerOraniFinal = digerSatis / brutSatis;
-      }
-      console.log("Oran Kaynağı: Manuel Satış Girişleri");
-    }
-
-    console.log("Nihai Oranlar (Ondalık):", {
-      ihracatOraniFinal, imalatOraniFinal, digerOraniFinal
-    });
-
-    // Sabit KV oranları
-    const kvOranIhracat = 0.20;
-    const kvOranImalat = 0.24;
-    const kvOranDiger = 0.25;
-
-    let cariYatirimKatkisi = 0;
-    let cariDigerKatkisi = 0;
-    let indirimliKurumlarVergisiMatrahi = 0;
-
-    // Senaryo seçimleri
-    if (vizeDurumuTercihi.includes("Evet")) {
-      console.log("Senaryo: Tamamlama Vizesi -> EVET (İşletme Dönemi)");
-
-      indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
-      cariYatirimKatkisi =
-        (tevsiYatirimKazanci * ihracatOraniFinal * kvOranIhracat * vergiIndirimOrani) +
-        (tevsiYatirimKazanci * imalatOraniFinal * kvOranImalat * vergiIndirimOrani) +
-        (tevsiYatirimKazanci * digerOraniFinal * kvOranDiger * vergiIndirimOrani);
-      cariDigerKatkisi = 0;
-
-    } else if (vizeDurumuTercihi.includes("Hayır")) {
-      console.log("Senaryo: Tamamlama Vizesi -> HAYIR (Yatırım Dönemi)");
-
-      if (digerKazancUygulama === "evet") {
-        console.log("  Alt Senaryo: Diğer faaliyetlerden indirim -> EVET");
-
-        const kvMatrah = parseFormattedNumber(document.getElementById('kv_matrah')?.value) || 0;
-        const kalanKatki = parseFormattedNumber(document.getElementById('kalan_katki_tutari')?.value) || 0;
-        const mevzuatTavani = kucukOlanDigerFaaliyetTutari || 0;
-
-        const effRate =
-          (ihracatOraniFinal * (0.20 * (1 - vergiIndirimOrani))) +
-          (imalatOraniFinal * (0.24 * (1 - vergiIndirimOrani))) +
-          (digerOraniFinal * (0.25 * (1 - vergiIndirimOrani)));
-
-        const kvTavanVergi = effRate > 0 ? (kvMatrah * effRate) : 0;
-        const cariDigerKatkisiHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
-
-        cariDigerKatkisi = Math.max(0, cariDigerKatkisiHesap);
-        indirimliKurumlarVergisiMatrahi = (effRate > 0) ? (cariDigerKatkisi / effRate) : 0;
-        cariYatirimKatkisi = 0;
-
-      } else {
-        console.log("  Alt Senaryo: Diğer faaliyetlerden indirim -> HAYIR");
-
-        indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
-        cariYatirimKatkisi =
-          (tevsiYatirimKazanci * ihracatOraniFinal * kvOranIhracat * vergiIndirimOrani) +
-          (tevsiYatirimKazanci * imalatOraniFinal * kvOranImalat * vergiIndirimOrani) +
-          (tevsiYatirimKazanci * digerOraniFinal * kvOranDiger * vergiIndirimOrani);
-        cariDigerKatkisi = 0;
-      }
-    }
-
-    // Hesaplama sonuçları
-    console.log("--- Hesaplama Sonuçları ---", {
-      cariYatirimKatkisi,
-      cariDigerKatkisi,
-      indirimliKurumlarVergisiMatrahi
-    });
-
-    document.getElementById('cari_yatirim_katki').value = cariYatirimKatkisi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    document.getElementById('cari_diger_katki').value = cariDigerKatkisi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-
-    let cariToplamKatki = cariYatirimKatkisi + cariDigerKatkisi;
-    document.getElementById('cari_toplam_katki').value = cariToplamKatki.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-
-    let genelToplamKatki = oncekiToplamKatki + cariToplamKatki;
-    document.getElementById('genel_toplam_katki').value = genelToplamKatki.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-
-    document.getElementById('indirimli_matrah').value = indirimliKurumlarVergisiMatrahi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-
-    // İndirimli KV tutarı ve efektif oran
-    updateIKVAmountAndRate(
-      indirimliKurumlarVergisiMatrahi,
-      ihracatOraniFinal, imalatOraniFinal, digerOraniFinal,
-      vergiIndirimOrani
-    );
-
-    console.log("--- calculateCariAndNext() BİTTİ, _updateStepDisplay(7) çağrılıyor ---");
-    _updateStepDisplay(7);
-  }
-
-
 
 
 
@@ -2330,41 +1463,905 @@
     debounceTimeout = setTimeout(saveDetailedProfitData, 1500);
   }
 
-  // Tevsi Yatırım Kazancı Otomatik Hesaplama Fonksiyonu
-  function calculateTevsiKazancAutomatically() {
-    const gerceklesenTevsiElement = document.getElementById('gerceklesen_tevsi_yatirim_tutari');
-    const toplamSabitKiymetElement = document.getElementById('toplam_sabit_kiymet_tutari');
-    const ticariBilancoKariElement = document.getElementById('ticari_bilanco_kari');
-    const tevsiKazancTargetElement = document.getElementById('tevsi_yatirim_kazanci'); // Bu element aslında hesaplanan değeri gösterecek input
 
-    if (!gerceklesenTevsiElement || !toplamSabitKiymetElement || !ticariBilancoKariElement || !tevsiKazancTargetElement) {
-      console.error("calculateTevsiKazancAutomatically: Tevsi kazanç hesaplama için gerekli elementler bulunamadı!");
+  // Ayrıntılı kazanç tablosunu sunucuya kaydetmek için AJAX fonksiyonu
+  async function saveDetailedProfitData() {
+    const ayrTable = document.getElementById('ayrintili-kazanc-table');
+    if (!ayrTable) {
+      return;
+    }
+    const formData = new FormData();
+    let dataChanged = false;
+    ayrTable.querySelectorAll('tbody tr').forEach((rowEl) => {
+      rowEl.querySelectorAll('input').forEach(input => {
+        if (!input.readOnly) {
+          const originalValue = input.getAttribute('data-original-value');
+          const currentValue = input.value;
+          if (originalValue !== currentValue) {
+            formData.append(input.name, currentValue);
+            dataChanged = true;
+          }
+        }
+      });
+    });
+    if (!dataChanged) {
+      return;
+    }
+    try {
+      const response = await fetch("{{ url_for('indirimlikurumlar.ayrintili_kazanc') }}", {
+        method: "POST",
+        body: formData
+      });
+      if (response.ok) {
+        ayrTable.querySelectorAll('tbody input').forEach(input => {
+          input.setAttribute('data-original-value', input.value);
+        });
+        updateSessionStorageRatios();
+      } else {
+        console.error("Otomatik kaydetme başarısız oldu:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("Otomatik kaydetme sırasında hata oluştu:", error);
+    }
+  }
+
+  function updateSessionStorageRatios() {
+    const ayrTable = document.getElementById('ayrintili-kazanc-table');
+    if (!ayrTable) {
+      return;
+    }
+    const C54_input = ayrTable.querySelector('input[name="C_54"]');
+    const D54_input = ayrTable.querySelector('input[name="D_54"]');
+    const E54_input = ayrTable.querySelector('input[name="E_54"]');
+    if (C54_input && D54_input && E54_input) {
+      sessionStorage.setItem('ayrintili_C54', C54_input.value);
+      sessionStorage.setItem('ayrintili_D54', D54_input.value);
+      sessionStorage.setItem('ayrintili_E54', E54_input.value);
+    }
+  }
+
+  function toggleDetailedProfitInput() {
+    const useDetailedCheckbox = document.getElementById("useDetailedProfitRatios");
+    if (!useDetailedCheckbox) return;
+    const useDetailed = useDetailedCheckbox.checked;
+    const brutInput = document.getElementById("brut_satis");
+    const ihracatInput = document.getElementById("ihracat");
+    const imalatInput = document.getElementById("imalat");
+    const digerFaaliyetInput = document.getElementById("diger_faaliyet");
+    if (!brutInput || !ihracatInput || !imalatInput || !digerFaaliyetInput) return;
+    if (useDetailed) {
+      brutInput.setAttribute('readonly', true);
+      ihracatInput.setAttribute('readonly', true);
+      imalatInput.setAttribute('readonly', true);
+      digerFaaliyetInput.setAttribute('readonly', true);
+      brutInput.value = '';
+      ihracatInput.value = '';
+      imalatInput.value = '';
+      digerFaaliyetInput.value = '';
+      calculateRatios();
+    } else {
+      brutInput.removeAttribute('readonly');
+      ihracatInput.removeAttribute('readonly');
+      imalatInput.removeAttribute('readonly');
+      digerFaaliyetInput.removeAttribute('readonly');
+      calculateRatios();
+    }
+  }
+
+  function clearProfitTable() {
+    Swal.fire({
+      title: "Emin misiniz?",
+      text: "Tüm ayrıntılı kazanç verilerini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Evet, sil!",
+      cancelButtonText: "İptal"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const ayrTable = document.getElementById('ayrintili-kazanc-table');
+        if (ayrTable) {
+          // input değerlerini temizle
+          ayrTable.querySelectorAll('tbody input').forEach(input => {
+            if (!input.readOnly) {
+              isProgrammaticChange = true;
+              input.value = '';
+              input.setAttribute('data-original-value', '');
+              isProgrammaticChange = false;
+            }
+          });
+          // Session Storage'ı temizle
+          sessionStorage.removeItem('ayrintili_C54');
+          sessionStorage.removeItem('ayrintili_D54');
+          sessionStorage.removeItem('ayrintili_E54');
+
+          // Veritabanından temizlemek için AJAX isteği gönder
+          // Bu örnekte, Python tarafından özel bir 'temizle' endpoint'i olmadığını varsayıyorum.
+          // Eğer Flask'ta bir 'temizle' endpoint'i varsa, onu burada çağırırdık.
+          // Şimdilik sadece frontend'i temizledik ve bir mesaj gösterdik.
+          showSwalMessage("success", "Temizlendi!", "Ayrıntılı kazanç verileri temizlendi.");
+          calculateTable(); // Tabloyu yeniden hesapla ve boş değerleri göster
+        }
+      }
+    });
+  }
+
+
+
+
+  // fillFormWithParsedData(): PDF’den alınan verileri form alanlarına aktarır. 
+  // Backend’ten gelen field isimlerini input "name"leriyle eşleştirir, sessionStorage’a da kaydeder. 
+  // Bölge bilgisini günceller ve otomatik olarak 2. aşamaya geçer.
+  function fillFormWithParsedData(data) {
+    const map = {
+      belge_no: 'belge_no',
+      karar: 'karar',
+      baslama_tarihi: 'belge_tarihi',   // parser 'baslama_tarihi' döndürüyorsa
+      belge_tarihi: 'belge_tarihi',     // parser 'belge_tarihi' döndürüyorsa
+      yatirim_turu1: 'yatirim_turu1',
+      yatirim_turu2: 'yatirim_turu2',
+      bolge: 'bolge',
+
+      // oran ve tutarlar
+      katki_orani: 'katki_orani',
+      vergi_orani: 'vergi_orani',
+      ikv_orani: 'diger_oran',
+      diger_oran: 'diger_oran',
+
+      toplam_tutar: 'toplam_tutar',
+      katki_tutari: 'katki_tutari',
+      diger_katki_tutari: 'diger_katki_tutari',
+      cari_harcama_tutari: 'cari_harcama_tutari',
+      toplam_harcama_tutari: 'toplam_harcama_tutari',
+      fiili_katki_tutari: 'fiili_katki_tutari',
+      endeks_katki_tutari: 'endeks_katki_tutari',
+
+      onceki_yatirim_katki_tutari: 'onceki_yatirim_katki_tutari',
+      onceki_diger_katki_tutari: 'onceki_diger_katki_tutari',
+      onceki_katki_tutari: 'onceki_katki_tutari',
+
+      // cari alanlar
+      cari_yatirim_katki: 'cari_yatirim_katki',
+      cari_diger_katki: 'cari_diger_katki',
+      cari_toplam_katki: 'cari_toplam_katki',
+      genel_toplam_katki: 'genel_toplam_katki'
+    };
+
+    Object.entries(map).forEach(([src, destName]) => {
+      const el = document.querySelector(`[name="${destName}"]`);
+      if (!el) return;
+      const val = data[src];
+      const v = (el.type === 'date')
+        ? convertToInputDateFormat(val || '')
+        : (val ?? '');
+      el.value = v;
+
+      // ➕ PDF’den geleni kalıcılaştır
+      sessionStorage.setItem(`form_${destName}`, v);
+    });
+
+    // Bölge gizli alanı
+    const b = document.getElementById('bolge');
+    if (b) {
+      b.dispatchEvent(new Event('change'));
+      const bh = document.getElementById('bolge_hidden');
+      if (bh) {
+        bh.value = b.value;
+        sessionStorage.setItem('form_bolge', b.value);
+        sessionStorage.setItem('form_bolge_hidden', b.value);
+      }
+    }
+
+    // Kaldığın adımı da kaydet (ör: otomatik Step 2’ye geçeceksen)
+    sessionStorage.setItem('last_step', '2');
+
+    if (typeof goToStep2 === 'function') goToStep2();
+  }
+
+
+  // PDF yükleme ve parse işlemi: Kullanıcının seçtiği KV beyannamesi PDF'ini backend'e gönderir,
+  // gelen verileri kontrol eder ve uygun form alanlarına otomatik olarak doldurur.
+  // Çoklu belge varsa seçim yaptırır, hata veya eksik durumlarında uyarı gösterir.
+  async function handleKVUpload(ev) {
+    const file = ev.target.files?.[0];
+    if (!file) return;
+
+    // aynı dosyayı tekrar seçebilin
+    ev.target.value = '';
+
+    const fd = new FormData();
+    fd.append('kv_pdf', file);
+
+    // 1) Loading
+    Swal.fire({
+      title: 'Yükleniyor...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    let resp;
+    try {
+      // (opsiyonel) timeout
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 20000);
+
+      const r = await fetch('{{ url_for("indirimlikurumlar.upload_kv_beyan") }}', {
+        method: 'POST',
+        body: fd,
+        signal: ctrl.signal
+      });
+
+      clearTimeout(t);
+
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        const text = await r.text();
+        throw new Error('Beklenmeyen yanıt: ' + ct + ' / ' + text.slice(0, 200));
+      }
+
+      resp = await r.json();
+    } catch (e) {
+      Swal.close();
+      Swal.fire('Hata', 'PDF yüklenirken ağ/yanıt hatası oluştu.', 'error');
+      return;
+    } finally {
+      Swal.close();
+    }
+
+    console.log('KV upload resp:', resp);
+
+    // 2) Mutlu yollar
+    if (resp?.status === 'ok' && resp?.parsed) {
+      fillFormWithParsedData(resp.parsed);
+      await Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
       return;
     }
 
-    const gerceklesenTevsi = parseFormattedNumber(gerceklesenTevsiElement.value);
-    const toplamSabitKiymet = parseFormattedNumber(toplamSabitKiymetElement.value);
-    const ticariBilancoKari = parseFormattedNumber(ticariBilancoKariElement.value);
+    if (resp.status === 'multiple' && Array.isArray(resp.raw_data) && resp.raw_data.length) {
+      // Seçenekleri hazırla
+      const inputOptions = {};
+      resp.raw_data.forEach((item, i) => {
+        const no = (item.belge_no || `Belge ${i + 1}`).toString().trim();
+        const karar = item.karar ? ` • ${item.karar}` : '';
+        const tarih = item.belge_tarihi ? ` • ${item.belge_tarihi}` : '';
+        inputOptions[i] = `${no}${karar}${tarih}`;
+      });
 
-    let calculatedKazanc = 0;
-    if (toplamSabitKiymet !== 0) {
-      calculatedKazanc = (gerceklesenTevsi / toplamSabitKiymet) * ticariBilancoKari;
-    } else if (gerceklesenTevsi !== 0 || ticariBilancoKari !== 0) {
-      // Eğer toplam sabit kıymet 0 ama diğerleri 0 değilse (tanımsız durumlar için)
-      calculatedKazanc = 0;
+      // Kullanıcıya sor
+      const { value: idx } = await Swal.fire({
+        title: 'Hangi teşvik belgesini içe aktarmak istersiniz?',
+        input: 'select',
+        inputOptions,
+        inputPlaceholder: 'Seçiniz',
+        showCancelButton: true,
+        confirmButtonText: 'Seç',
+        cancelButtonText: 'İptal'
+      });
+
+      if (idx !== undefined) {
+        fillFormWithParsedData(resp.raw_data[Number(idx)]);
+        Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
+      }
+      return;
     }
 
 
-    if (typeof tevsiMask !== 'undefined' && tevsiMask && tevsiMask.el === tevsiKazancTargetElement) {
-      tevsiMask.unmaskedValue = String(calculatedKazanc);
-      tevsiMask.updateValue();
+    // 3) Özel: KV sayfası/tablosu bulunamadı senaryosu
+    if (
+      resp.status === 'not_found' ||     // backend böyle dönüyorsa
+      resp.status === 'no_kv' ||     // …veya bu
+      resp.status === 'empty' ||     // …veya bu
+      (resp.status === 'multiple' && (!resp.raw_data || !resp.raw_data.length || !resp.tablolar || !resp.tablolar.length)) ||
+      (resp.status === 'ok' && !resp.parsed)
+    ) {
+      Swal.fire('Bulunamadı', 'Yüklediğiniz PDF’de “İndirimli Kurumlar” bölümü tespit edilemedi.', 'warning');
+      return;
+    }
+
+    // 4) Diğer tüm hatalar
+    Swal.fire('Hata', resp.message || 'PDF verisi işlenemedi.', 'error');
+
+  }
+
+
+
+
+
+
+
+
+
+  function hesaplaKatkiTutari9903({ advance = false } = {}) {
+    console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
+
+    const karar = document.getElementById("karar")?.value;
+    if (karar !== "2025/9903") return;
+
+    const safe = (x) => (isNaN(x) ? 0 : x);
+    const val = (id) => safe(parseFormattedNumber(document.getElementById(id)?.value));
+
+    // 1️⃣ Girdiler
+    let yatirimKazanci = 0;
+    const yatirimKazancInput = document.getElementById("yatirimdan_elde_edilen_kazanc");
+    const tevsiKazancInput = document.getElementById("tevsi_yatirim_kazanci");
+
+    // hangisi doluysa onu al
+    if (yatirimKazancInput && parseFormattedNumber(yatirimKazancInput.value) > 0) {
+      yatirimKazanci = Number(val("yatirimdan_elde_edilen_kazanc"));
+    } else if (tevsiKazancInput && parseFormattedNumber(tevsiKazancInput.value) > 0) {
+      yatirimKazanci = Number(val("tevsi_yatirim_kazanci"));
+    }
+
+    const digerKazanc = Number(val("kv_matrah"));
+
+    // 🔸 Kullanıcı seçimine göre diğer kazancı devre dışı bırak
+    const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi");
+    let digerKazancFinal = digerKazanc;
+
+    if (gelirTipi === "yatirim") {
+      digerKazancFinal = 0;
+      console.log("🎯 Yalnız yatırım kazancı seçildi — diğer faaliyet kazancı hesap dışı bırakıldı.");
+    }
+
+    const toplamYatirim = val("toplam_tutar");
+    const harcamaYatirim = val("toplam_harcama_tutari");
+    const katkiOrani = val("katki_orani") / 100;
+    const vergiIndirimOrani = val("vergi_orani") / 100;
+    const digerOran = val("diger_oran") / 100;
+    const oncekiToplamKatki = val("onceki_katki_tutari");
+
+    // 2️⃣ KV oranları
+    const kvOranIhracat = safe(val("kv_oran_ihracat") / 100) || 0.20;
+    const kvOranImalat = safe(val("kv_oran_imalat") / 100) || 0.24;
+    const kvOranDiger = safe(val("kv_oran_diger") / 100) || 0.25;
+
+    const farkIhr = kvOranIhracat - kvOranIhracat * (1 - vergiIndirimOrani);
+    const farkIml = kvOranImalat - kvOranImalat * (1 - vergiIndirimOrani);
+    const farkDig = kvOranDiger - kvOranDiger * (1 - vergiIndirimOrani);
+
+    // 3️⃣ Oran kaynağı
+    const useDetailedRatios = document.getElementById("useDetailedProfitRatios")?.checked || false;
+    let ihracatOraniFinal = 0,
+      imalatOraniFinal = 0,
+      digerOraniFinal = 0;
+
+    if (useDetailedRatios) {
+      ihracatOraniFinal =
+        safe(parseFloat(document.getElementById("ratio_ihracat")?.textContent.replace("%", "").replace(",", "."))) / 100;
+      imalatOraniFinal =
+        safe(parseFloat(document.getElementById("ratio_imalat")?.textContent.replace("%", "").replace(",", "."))) / 100;
+      digerOraniFinal =
+        safe(parseFloat(document.getElementById("ratio_diger")?.textContent.replace("%", "").replace(",", "."))) / 100;
     } else {
-      tevsiKazancTargetElement.value = calculatedKazanc.toLocaleString('tr-TR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+      const brutSatis = val("brut_satis");
+      const ihracatSatis = val("ihracat");
+      const imalatSatis = val("imalat");
+      const digerSatis = val("diger_faaliyet");
+      if (brutSatis > 0) {
+        ihracatOraniFinal = ihracatSatis / brutSatis;
+        imalatOraniFinal = imalatSatis / brutSatis;
+        digerOraniFinal = digerSatis / brutSatis;
+      } else {
+        digerOraniFinal = 1;
+      }
+    }
+
+    // 5️⃣ Katkı tabanları
+    const toplamKatki9903 = toplamYatirim * katkiOrani;
+    const hakEdilenKatki9903 = harcamaYatirim * katkiOrani;
+    const ustSinirDiger9903 = toplamKatki9903 * digerOran;
+    const digerKullanilabilir9903 = Math.min(hakEdilenKatki9903, ustSinirDiger9903);
+
+    // 6️⃣ Hesap dönemi farkı
+    const donemYil = parseInt((document.getElementById("donem")?.value || "").split(" - ")[0]) || 0;
+    const baslangicYil = parseInt(document.getElementById("baslangic_yili")?.value || "0");
+    const donemFarki = baslangicYil && donemYil ? donemYil - baslangicYil : 0;
+
+    console.log("🧮 Nihai Değerler:", {
+      toplamKatki9903,
+      hakEdilenKatki9903,
+      ustSinirDiger9903,
+      yatirimKazanci,
+      digerKazanc: digerKazancFinal,
+      donemFarki,
+    });
+
+    // 7️⃣ Cari dönem katkıları
+    let cariYatirimKatkisi9903 = 0;
+    let cariDigerKatkisi9903 = 0;
+
+    if (yatirimKazanci > 0 && digerKazancFinal <= 0) {
+      // 🟩 Yalnız yatırım kazancı
+      if (donemFarki >= 10) {
+        Swal.fire({
+          icon: "warning",
+          title: "10 Hesap Dönemi Sınırı",
+          html: "Yatırımdan elde edilen kazançlarda indirimli kurumlar vergisi uygulanabilecek süre dolmuştur.",
+          confirmButtonText: "Tamam",
+        });
+      } else {
+        cariYatirimKatkisi9903 =
+          yatirimKazanci * ihracatOraniFinal * farkIhr +
+          yatirimKazanci * imalatOraniFinal * farkIml +
+          yatirimKazanci * digerOraniFinal * farkDig;
+      }
+    } else if (yatirimKazanci <= 0 && digerKazancFinal > 0) {
+      // 🟨 Yalnız diğer kazanç
+      if (donemFarki >= 4) {
+        Swal.fire({
+          icon: "info",
+          title: "4 Hesap Dönemi Sınırı",
+          html: "Diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulama süresi dolmuştur.",
+          confirmButtonText: "Tamam",
+        });
+      } else {
+        cariDigerKatkisi9903 = digerKullanilabilir9903;
+      }
+    } else if (yatirimKazanci > 0 && digerKazancFinal > 0) {
+      // 🟦 Karma durum
+      const yatirimKismi =
+        yatirimKazanci * ihracatOraniFinal * farkIhr +
+        yatirimKazanci * imalatOraniFinal * farkIml +
+        yatirimKazanci * digerOraniFinal * farkDig;
+      const digerKismi = donemFarki < 4 ? digerKullanilabilir9903 : 0;
+
+      cariYatirimKatkisi9903 = yatirimKismi;
+      cariDigerKatkisi9903 = digerKismi;
+    }
+
+    // 8️⃣ Toplam katkılar
+    const cariToplamKatki9903 = cariYatirimKatkisi9903 + cariDigerKatkisi9903;
+    const genelToplamKatki9903 = oncekiToplamKatki + cariToplamKatki9903;
+    const kalanKatki9903 = Math.max(0, toplamKatki9903 - genelToplamKatki9903);
+
+    // 9️⃣ UI güncelleme
+    const setVal9903 = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+    };
+
+    setVal9903("cari_yatirim_katki", cariYatirimKatkisi9903);
+    setVal9903("cari_diger_katki", cariDigerKatkisi9903);
+    setVal9903("cari_toplam_katki", cariToplamKatki9903);
+    setVal9903("genel_toplam_katki", genelToplamKatki9903);
+    setVal9903("kalan_katki_tutari", kalanKatki9903);
+    setVal9903("katki_tutari", toplamKatki9903); // 🔹 yeni eklendi
+    setVal9903("diger_katki_tutari", ustSinirDiger9903); // 🔹 yeni eklendi
+
+    // 💰 İndirimli KV matrahı ve vergisi
+    const _farkIhr = kvOranIhracat - kvOranIhracat * (1 - vergiIndirimOrani);
+    const _farkIml = kvOranImalat - kvOranImalat * (1 - vergiIndirimOrani);
+    const _farkDig = kvOranDiger - kvOranDiger * (1 - vergiIndirimOrani);
+
+    const toplamOran = ihracatOraniFinal + imalatOraniFinal + digerOraniFinal || 1;
+    const katkIhr = cariDigerKatkisi9903 * (ihracatOraniFinal / toplamOran);
+    const katkIml = cariDigerKatkisi9903 * (imalatOraniFinal / toplamOran);
+    const katkDig = cariDigerKatkisi9903 * (digerOraniFinal / toplamOran);
+
+    const matrahOtherIhr = _farkIhr > 0 ? katkIhr / _farkIhr : 0;
+    const matrahOtherIml = _farkIml > 0 ? katkIml / _farkIml : 0;
+    const matrahOtherDig = _farkDig > 0 ? katkDig / _farkDig : 0;
+
+    const matrahOther = matrahOtherIhr + matrahOtherIml + matrahOtherDig;
+    const matrahInvest = Math.max(0, yatirimKazanci);
+    const indirimliMatrah9903 = matrahOther + matrahInvest;
+    const reducedRate = kvOranDiger * (1 - vergiIndirimOrani);
+    const indirimliKV9903 = indirimliMatrah9903 * reducedRate;
+    const efektifOran = (indirimliKV9903 / indirimliMatrah9903) * 100 || 0;
+
+    setVal9903("indirimli_matrah", indirimliMatrah9903);
+    setVal9903("indirimli_kv", indirimliKV9903);
+    setVal9903("indirimli_kv_oran", efektifOran);
+
+    console.log("✅ hesaplaKatkiTutari9903() tamamlandı", {
+      cariYatirimKatkisi9903,
+      cariDigerKatkisi9903,
+      genelToplamKatki9903,
+      kalanKatki9903,
+    });
+
+    if (advance && typeof _updateStepDisplay === "function") {
+      _updateStepDisplay(7);
+      console.log("➡️ Aşama 7’ye geçildi (manual trigger)");
     }
   }
+
+  // 🧩 Otomatik tetikleme
+  ["yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "kv_matrah", "katki_orani", "diger_oran", "toplam_tutar", "toplam_harcama_tutari"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", hesaplaKatkiTutari9903);
+      el.addEventListener("change", hesaplaKatkiTutari9903);
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function hesaplaKatkiTutari() {
+    // Eğer karar 2025/9903 ise → özel fonksiyona yönlendir ve çık
+    if (document.getElementById("karar")?.value === "2025/9903") {
+      hesaplaKatkiTutari9903();
+      return;
+    }
+    const toplam = document.getElementById("toplam_tutar");
+    const oran = document.getElementById("katki_orani");
+    const katkiTutari = document.getElementById("katki_tutari");
+    if (toplam && oran && katkiTutari) {
+      const parsedToplam = parseFormattedNumber(toplam.value);
+      const parsedOran = parseFormattedNumber(oran.value); // ✅
+      if (!isNaN(parsedToplam) && !isNaN(parsedOran)) {
+        const tutar = parsedToplam * parsedOran / 100;
+        katkiTutari.value = tutar.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+        hesaplaDigerKatkiTutari();
+      } else {
+        katkiTutari.value = "";
+      }
+    }
+  }
+
+  function hesaplaDigerKatkiTutari() {
+    // Eğer karar 2025/9903 ise → özel fonksiyona yönlendir ve çık
+    if (document.getElementById("karar")?.value === "2025/9903") {
+      hesaplaKatkiTutari9903();
+      return;
+    }
+    const katkiInput = document.getElementById("katki_tutari");
+    const digerOranInput = document.getElementById("diger_oran");
+    const digerKatkiTutariInput = document.getElementById("diger_katki_tutari");
+
+    if (katkiInput && digerOranInput && digerKatkiTutariInput) {
+      const katki = parseFormattedNumber(katkiInput.value);
+      const digerOranText = digerOranInput.value;
+
+      const digerOran = parseFormattedNumber(digerOranText); // ✅ burası kritik
+      if (!isNaN(katki) && !isNaN(digerOran)) {
+        const sonuc = katki * digerOran / 100;
+        digerKatkiTutariInput.value = sonuc.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+      } else {
+        digerKatkiTutariInput.value =
+          digerOranText.includes("İŞLETME DÖNEMİNDE HESAPLANMAZ") ? "İŞLETME DÖNEMİNDE HESAPLANMAZ" : "";
+      }
+    }
+  }
+
+  function hesaplaFiiliKatkiTutari() {
+    const karar = document.getElementById("karar")?.value;
+    const toplamHarcamaInput = document.getElementById("toplam_harcama_tutari");
+    const katkiOraniInput = document.getElementById("katki_orani");
+    const fiiliKatkiTutariInput = document.getElementById("fiili_katki_tutari");
+
+    if (!toplamHarcamaInput || !katkiOraniInput || !fiiliKatkiTutariInput) return;
+
+    const toplamHarcama = parseFormattedNumber(toplamHarcamaInput.value);
+    const oran = parseFormattedNumber(katkiOraniInput.value);
+
+    if (!toplamHarcama || !oran) {
+      fiiliKatkiTutariInput.value = "";
+      return;
+    }
+
+    // 🧮 Formül: Fiili Katkı = Toplam Harcama × Katkı Oranı / 100
+    const fiiliKatki = (toplamHarcama * oran) / 100;
+
+    fiiliKatkiTutariInput.value = formatTL(fiiliKatki);
+
+    console.log(
+      `📊 [${karar}] Fiili Katkı Hesaplandı: ${formatTL(toplamHarcama)} × ${oran}% = ${formatTL(fiiliKatki)}`
+    );
+  }
+
+
+
+  function hesaplaOncekiKatkiTutari() {
+    const oncekiYatirimInput = document.getElementById("onceki_yatirim_katki_tutari");
+    const oncekiDigerInput = document.getElementById("onceki_diger_katki_tutari");
+    const oncekiKatkiInput = document.getElementById("onceki_katki_tutari");
+    if (oncekiYatirimInput && oncekiDigerInput && oncekiKatkiInput) {
+      const oncekiyatirim = parseFormattedNumber(oncekiYatirimInput.value);
+      const oncekidiger = parseFormattedNumber(oncekiDigerInput.value);
+      if (!isNaN(oncekiyatirim) && !isNaN(oncekidiger)) {
+        const oncekikatki = oncekiyatirim + oncekidiger;
+        oncekiKatkiInput.value = oncekikatki.toLocaleString("tr-TR", {
+          minimumFractionDigits: 2
+        });
+      } else {
+        oncekiKatkiInput.value = "";
+      }
+      hesaplaKalanVeEndeks();
+    }
+  }
+
+  function hesaplaKalanVeEndeks() {
+    const toplamKatkiInput = document.getElementById("katki_tutari");
+    const oncekiKatkiInput = document.getElementById("onceki_katki_tutari");
+    const vizeSelect = document.getElementById("vize_durumu");
+    const yenidenDegerlemeOraniInput = document.getElementById("yeniden_degerleme_orani");
+    const kalanKatkiInput = document.getElementById("kalan_katki_tutari");
+    const endeksKatkiInput = document.getElementById("endeks_katki_tutari");
+    if (!toplamKatkiInput || !oncekiKatkiInput || !vizeSelect || !yenidenDegerlemeOraniInput || !kalanKatkiInput || !endeksKatkiInput) {
+      return;
+    }
+    const toplamKatki = parseFormattedNumber(toplamKatkiInput.value);
+    const oncekiKatki = parseFormattedNumber(oncekiKatkiInput.value);
+    const vize = vizeSelect.value;
+    const ydoText = yenidenDegerlemeOraniInput.value;
+    const ydo = parseFloat(ydoText.replace(',', '.'));
+    const kalan = (!isNaN(toplamKatki) && !isNaN(oncekiKatki)) ? (toplamKatki - oncekiKatki) : 0;
+    if (!isNaN(kalan)) {
+      kalanKatkiInput.value = kalan.toLocaleString("tr-TR", {
+        minimumFractionDigits: 2
+      });
+    } else {
+      kalanKatkiInput.value = "";
+    }
+    if (vize.includes("Evet")) {
+      if (!isNaN(kalan) && !isNaN(ydo)) {
+        const endeksli = kalan * ydo / 100;
+        endeksKatkiInput.value = endeksli.toLocaleString("tr-TR", {
+          minimumFractionDigits: 2
+        });
+      } else {
+        endeksKatkiInput.value = "";
+      }
+    } else {
+      endeksKatkiInput.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YAPILMAZ";
+    }
+  }
+
+
+  function calculateKVMatrah() {
+    const t = parseFormattedNumber(document.getElementById('ticari_bilanco_kari')?.value);
+    const k = parseFormattedNumber(document.getElementById('kkeg')?.value);
+    const out = document.getElementById('kv_matrah');
+    if (!out) return;
+    const val = (t || 0) + (k || 0);
+    out.value = (val || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  }
+
+  function updateIKVAmountAndRate(ikvMatrah, ihrPct, imlPct, digPct, vergiIndirimOraniFraction) {
+    // Güvenli sayılar
+    const matrah = Number(ikvMatrah) || 0;
+    const pIhr = Number(ihrPct) || 0;   // 0..1
+    const pIml = Number(imlPct) || 0;   // 0..1
+    const pDig = Number(digPct) || 0;   // 0..1
+    const pDisc = Number(vergiIndirimOraniFraction) || 0; // 0..1
+
+    // Matrah kırılımı (Aşama 6’daki satır mantığına uygun)
+    const bespuan_matrah = matrah * pIhr; // İhracat
+    const birpuan_matrah = matrah * pIml; // İmalat
+    const normal_matrah = matrah * pDig; // Diğer + KKEG
+
+    // Genel (indirimsiz) KV oranları
+    const rIhrGen = 0.20; // ihracat
+    const rImlGen = 0.24; // imalat
+    const rDigGen = 0.25; // diğer
+
+    // İndirimli efektif oranlar: r * (1 - indirim)
+    const rIhrInd = rIhrGen * (1 - pDisc);
+    const rImlInd = rImlGen * (1 - pDisc);
+    const rDigInd = rDigGen * (1 - pDisc);
+
+    // Ağırlıklı efektif oran (0..1)
+    const effRate = (pIhr * rIhrInd) + (pIml * rImlInd) + (pDig * rDigInd);
+
+    // İndirimli KV (ödenecek vergi)
+    const ikvAmount = matrah * effRate;
+
+    // “İndirimli KV olmasaydı” vergi (bilgi satırı için)
+    const vergi_olsaydi = (bespuan_matrah * rIhrGen) + (birpuan_matrah * rImlGen) + (normal_matrah * rDigGen);
+
+    // UI yaz
+    const ikvEl = document.getElementById('indirimli_kv');
+    const ikvRateEl = document.getElementById('indirimli_kv_oran');
+    if (ikvEl) ikvEl.value = ikvAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    if (ikvRateEl) ikvRateEl.value = (effRate * 100).toFixed(2).replace('.', ',') + '%';
+
+    // Eğer step7’de “İndirimli KV Olmasaydı Hesaplanacak Vergi” için bir input eklersen (id: kv_olsaydi),
+    // otomatik doldurur. (Yoksa sessizce geçer.)
+    const kvOlsaydiEl = document.getElementById('kv_olsaydi');
+    if (kvOlsaydiEl) kvOlsaydiEl.value = vergi_olsaydi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    // Gerekirse dışarıda kullanman için geri döndür
+    return {
+      bespuan_matrah,  // ihracat matrahı
+      birpuan_matrah,  // imalat matrahı
+      normal_matrah,   // diğer matrahı
+      vergi_olsaydi,
+      effRate,
+      ikvAmount
+    };
+  }
+
+
+
+
+
+
+  function calculateCariAndNext() {
+    const karar = document.getElementById("karar")?.value;
+
+    // ✅ Eğer karar 2025/9903 ise iki aşamalı özel hesap fonksiyonlarını çağır
+    if (karar === "2025/9903") {
+      console.log("⚙️ 2025/9903 aktif — önce form hesapla, sonra detaylı hesap başlatılıyor");
+
+      // 1️⃣ Form tabanlı hesaplama (dönem kontrolü, %50 sınırı, uyarılar vb.)
+      if (typeof hesaplaKatkiTutari9903 === "function") {
+        hesaplaKatkiTutari9903();
+      } else {
+        console.warn("⚠️ hesaplaKatkiTutari9903() bulunamadı!");
+      }
+
+      // 2️⃣ Detaylı hesaplama (oranlar, matrah, Step7 geçişi)
+      if (typeof hesaplaKatkiTutari9903 === "function") {
+        hesaplaKatkiTutari9903();
+      } else {
+        console.warn("⚠️ hesaplaKatkiTutari9903() bulunamadı!");
+      }
+
+      return; // 🚀 9903 modu tamamen kendi akışını tamamlar, alttaki klasik akışa geçme
+    }
+
+    // 🔹 Diğer kararlar (klasik teşvik hesaplama)
+    console.log("--- calculateCariAndNext() BAŞLADI ---");
+
+    const vizeDurumuElement = document.getElementById('vize_durumu');
+    const vizeDurumuTercihi = vizeDurumuElement ? vizeDurumuElement.value : '';
+
+    const digerKazancUygulama = sessionStorage.getItem('diger_kazanc_uygulama');
+    const kucukOlanDigerFaaliyetTutari = parseFormattedNumber(sessionStorage.getItem('kucuk_olan_diger_faaliyet')) || 0;
+
+    console.log("sessionStorage Tercihleri ve HTML Vize Durumu:");
+    console.log("  vizeDurumuTercihi:", vizeDurumuTercihi);
+    console.log("  digerKazancUygulama:", digerKazancUygulama);
+    console.log("  kucukOlanDigerFaaliyetTutari (parsed):", kucukOlanDigerFaaliyetTutari);
+
+    // Doğrudan HTML inputlarından alınan değerler
+    const tevsiYatirimKazanci = parseFormattedNumber(document.getElementById('tevsi_yatirim_kazanci').value);
+    const vergiIndirimOrani = parseFormattedNumber(document.getElementById('vergi_orani').value) / 100;
+    const oncekiToplamKatki = parseFormattedNumber(document.getElementById('onceki_katki_tutari').value);
+
+    console.log("HTML Input Değerleri (parsed):", {
+      tevsiYatirimKazanci,
+      vergiIndirimOrani,
+      oncekiToplamKatki
+    });
+
+    // Oranların kaynağı seçimi
+    const useDetailedRatiosCheckbox = document.getElementById('useDetailedProfitRatios');
+    const useDetailedRatios = useDetailedRatiosCheckbox ? useDetailedRatiosCheckbox.checked : false;
+    console.log("useDetailedProfitRatios (Checkbox):", useDetailedRatios);
+
+    let ihracatOraniFinal = 0, imalatOraniFinal = 0, digerOraniFinal = 0;
+
+    if (useDetailedRatios) {
+      // span'den oku
+      const spanIhr = document.getElementById('ratio_ihracat').textContent;
+      const spanIml = document.getElementById('ratio_imalat').textContent;
+      const spanDig = document.getElementById('ratio_diger').textContent;
+
+      ihracatOraniFinal = parseFloat(spanIhr.replace('%', '').replace(',', '.')) / 100 || 0;
+      imalatOraniFinal = parseFloat(spanIml.replace('%', '').replace(',', '.')) / 100 || 0;
+      digerOraniFinal = parseFloat(spanDig.replace('%', '').replace(',', '.')) / 100 || 0;
+
+      console.log("Oran Kaynağı: Ayrıntılı Kazanç Tablosu (span)");
+    } else {
+      // manuel satış girişleri
+      const brutSatis = parseFormattedNumber(document.getElementById('brut_satis').value) || 0;
+      const ihracatSatis = parseFormattedNumber(document.getElementById('ihracat').value) || 0;
+      const imalatSatis = parseFormattedNumber(document.getElementById('imalat').value) || 0;
+      const digerSatis = parseFormattedNumber(document.getElementById('diger_faaliyet').value) || 0;
+
+      if (brutSatis > 0) {
+        ihracatOraniFinal = ihracatSatis / brutSatis;
+        imalatOraniFinal = imalatSatis / brutSatis;
+        digerOraniFinal = digerSatis / brutSatis;
+      }
+      console.log("Oran Kaynağı: Manuel Satış Girişleri");
+    }
+
+    console.log("Nihai Oranlar (Ondalık):", {
+      ihracatOraniFinal, imalatOraniFinal, digerOraniFinal
+    });
+
+    // Sabit KV oranları
+    const kvOranIhracat = 0.20;
+    const kvOranImalat = 0.24;
+    const kvOranDiger = 0.25;
+
+    let cariYatirimKatkisi = 0;
+    let cariDigerKatkisi = 0;
+    let indirimliKurumlarVergisiMatrahi = 0;
+
+    // Senaryo seçimleri
+    if (vizeDurumuTercihi.includes("Evet")) {
+      console.log("Senaryo: Tamamlama Vizesi -> EVET (İşletme Dönemi)");
+
+      indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
+      cariYatirimKatkisi =
+        (tevsiYatirimKazanci * ihracatOraniFinal * kvOranIhracat * vergiIndirimOrani) +
+        (tevsiYatirimKazanci * imalatOraniFinal * kvOranImalat * vergiIndirimOrani) +
+        (tevsiYatirimKazanci * digerOraniFinal * kvOranDiger * vergiIndirimOrani);
+      cariDigerKatkisi = 0;
+
+    } else if (vizeDurumuTercihi.includes("Hayır")) {
+      console.log("Senaryo: Tamamlama Vizesi -> HAYIR (Yatırım Dönemi)");
+
+      if (digerKazancUygulama === "evet") {
+        console.log("  Alt Senaryo: Diğer faaliyetlerden indirim -> EVET");
+
+        const kvMatrah = parseFormattedNumber(document.getElementById('kv_matrah')?.value) || 0;
+        const kalanKatki = parseFormattedNumber(document.getElementById('kalan_katki_tutari')?.value) || 0;
+        const mevzuatTavani = kucukOlanDigerFaaliyetTutari || 0;
+
+        const effRate =
+          (ihracatOraniFinal * (0.20 * (1 - vergiIndirimOrani))) +
+          (imalatOraniFinal * (0.24 * (1 - vergiIndirimOrani))) +
+          (digerOraniFinal * (0.25 * (1 - vergiIndirimOrani)));
+
+        const kvTavanVergi = effRate > 0 ? (kvMatrah * effRate) : 0;
+        const cariDigerKatkisiHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
+
+        cariDigerKatkisi = Math.max(0, cariDigerKatkisiHesap);
+        indirimliKurumlarVergisiMatrahi = (effRate > 0) ? (cariDigerKatkisi / effRate) : 0;
+        cariYatirimKatkisi = 0;
+
+      } else {
+        console.log("  Alt Senaryo: Diğer faaliyetlerden indirim -> HAYIR");
+
+        indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
+        cariYatirimKatkisi =
+          (tevsiYatirimKazanci * ihracatOraniFinal * kvOranIhracat * vergiIndirimOrani) +
+          (tevsiYatirimKazanci * imalatOraniFinal * kvOranImalat * vergiIndirimOrani) +
+          (tevsiYatirimKazanci * digerOraniFinal * kvOranDiger * vergiIndirimOrani);
+        cariDigerKatkisi = 0;
+      }
+    }
+
+    // Hesaplama sonuçları
+    console.log("--- Hesaplama Sonuçları ---", {
+      cariYatirimKatkisi,
+      cariDigerKatkisi,
+      indirimliKurumlarVergisiMatrahi
+    });
+
+    document.getElementById('cari_yatirim_katki').value = cariYatirimKatkisi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    document.getElementById('cari_diger_katki').value = cariDigerKatkisi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    let cariToplamKatki = cariYatirimKatkisi + cariDigerKatkisi;
+    document.getElementById('cari_toplam_katki').value = cariToplamKatki.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    let genelToplamKatki = oncekiToplamKatki + cariToplamKatki;
+    document.getElementById('genel_toplam_katki').value = genelToplamKatki.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    document.getElementById('indirimli_matrah').value = indirimliKurumlarVergisiMatrahi.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    // İndirimli KV tutarı ve efektif oran
+    updateIKVAmountAndRate(
+      indirimliKurumlarVergisiMatrahi,
+      ihracatOraniFinal, imalatOraniFinal, digerOraniFinal,
+      vergiIndirimOrani
+    );
+
+    console.log("--- calculateCariAndNext() BİTTİ, _updateStepDisplay(7) çağrılıyor ---");
+    _updateStepDisplay(7);
+  }
+
+
+
+
+
+
 
 
   async function askWhichIncomeToApplyDiscount() {
@@ -2463,11 +2460,7 @@
       await new Promise(r => setTimeout(r, 100));
 
       if (choice === 'yatirim') {
-        if (karar === "2025/9903") {
-          await askYatirimKazancQuestion9903();
-        } else {
-          await askYatirimKazanciGirisi();
-        }
+        await handleInvestmentIncomeFlow(); // ✅ yeni fonksiyon burada çağrılır
         return;
       }
 
@@ -2478,7 +2471,7 @@
 
       if (choice === 'herikisi') {
         if (karar === "2025/9903") {
-          await askYatirimKazancQuestion9903();
+          await await handleInvestmentIncomeFlow();
         } else {
           await askTevsiKazancQuestion();
         }
@@ -2487,6 +2480,168 @@
       }
     }
   }
+
+
+
+
+
+  async function handleInvestmentIncomeFlow() {
+    const karar = (document.getElementById('karar')?.value || "").trim();
+    const yatirimTuru = (document.getElementById('yatirim_turu1')?.value || "").trim().toLowerCase();
+
+    console.log("🔹 handleInvestmentIncomeFlow() çalıştı:", { karar, yatirimTuru });
+
+    const yatirimKazancInput = document.getElementById('yatirimdan_elde_edilen_kazanc');
+    const tevsiKazancInput = document.getElementById('tevsi_yatirim_kazanci');
+
+    const formatTL = (num) => num.toLocaleString('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    // --- 1️⃣ KARAR 2025/9903 ---
+    if (karar === "2025/9903") {
+      const result = await Swal.fire({
+        title: 'Yatırımdan Elde Edilen Kazanç (2025/9903)',
+        input: 'text',
+        inputPlaceholder: '0,00 TL',
+        showCancelButton: true,
+        confirmButtonText: 'Kaydet',
+        cancelButtonText: 'Vazgeç',
+        reverseButtons: true
+      });
+
+      if (result.isConfirmed && result.value && yatirimKazancInput) {
+        const val = parseFormattedNumber(result.value);
+        yatirimKazancInput.value = formatTL(val);
+        Swal.fire('✅ Kaydedildi', 'Yatırım kazancı Aşama 5’e aktarıldı.', 'success');
+      }
+    }
+
+    // --- 2️⃣ 2025/9903 DEĞİL VE YATIRIM TÜRÜ TEVSİ ---
+    else if (yatirimTuru === "tevsi") {
+      const result = await Swal.fire({
+        title: 'Tevsi Yatırım Bilgisi',
+        html: '<div style="text-align: justify;">Tevsi yatırımlardan elde edilen kazancı ayrı bir şekilde tespit edebiliyor musunuz?</div>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Evet',
+        cancelButtonText: 'Hayır',
+        reverseButtons: true
+      });
+
+      if (result.isConfirmed) {
+        // ✅ EVET → elle giriş
+        const inputResult = await Swal.fire({
+          title: 'Tevsi Yatırımlardan Elde Edilen Kazanç Tutarı (TL)',
+          input: 'text',
+          inputPlaceholder: '0,00 TL',
+          showCancelButton: true,
+          confirmButtonText: 'Kaydet',
+          cancelButtonText: 'Vazgeç',
+          reverseButtons: true
+        });
+
+        if (inputResult.isConfirmed && inputResult.value && tevsiKazancInput) {
+          const val = parseFormattedNumber(inputResult.value);
+          tevsiKazancInput.value = formatTL(val);
+          Swal.fire('✅ Kaydedildi', 'Tevsi kazancı ilgili satıra aktarıldı.', 'success');
+
+          // 🔹 EVET denirse aşağıdaki iki alanı pasif + gri yap
+          const sabitInput = document.getElementById('toplam_sabit_kiymet_tutari');
+          const tevsiInput = document.getElementById('gerceklesen_tevsi_yatirim_tutari');
+
+          [sabitInput, tevsiInput].forEach(el => {
+            if (el) {
+              el.setAttribute('readonly', true);
+              el.classList.add('disabled-input');
+            }
+          });
+        }
+      } else {
+        // ❌ HAYIR → otomatik hesaplanacak
+        await Swal.fire({
+          title: 'Bilgilendirme',
+          html: '<div style="text-align: justify;">Gerçekleşen tevsi yatırım tutarına, toplam sabit kıymet tutarına ve ticari bilanço kârına göre kazanç otomatik hesaplanacaktır.</div>',
+          icon: 'info',
+          confirmButtonText: 'Tamam'
+        });
+        if (typeof calculateTevsiKazancAutomatically === 'function') {
+          calculateTevsiKazancAutomatically();
+        }
+      }
+    }
+
+    // --- 3️⃣ 2025/9903 DEĞİL VE TEVSİ DEĞİL ---
+    else {
+      const result = await Swal.fire({
+        title: 'Yatırımdan Elde Edilen Kazanç',
+        input: 'text',
+        inputPlaceholder: '0,00 TL',
+        showCancelButton: true,
+        confirmButtonText: 'Kaydet',
+        cancelButtonText: 'Vazgeç',
+        reverseButtons: true
+      });
+
+      if (result.isConfirmed && result.value && yatirimKazancInput) {
+        const val = parseFormattedNumber(result.value);
+        yatirimKazancInput.value = formatTL(val);
+        Swal.fire('✅ Kaydedildi', 'Yatırım kazancı Aşama 5’e aktarıldı.', 'success');
+      }
+    }
+
+    // --- Ortak adım ---
+    if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
+      promptTicariKariVeKKEGThenGoTo6();
+    }
+    _updateStepDisplay(5);
+  }
+
+
+
+
+
+
+
+
+
+  // Tevsi Yatırım Kazancı Otomatik Hesaplama Fonksiyonu
+  function calculateTevsiKazancAutomatically() {
+    const gerceklesenTevsiElement = document.getElementById('gerceklesen_tevsi_yatirim_tutari');
+    const toplamSabitKiymetElement = document.getElementById('toplam_sabit_kiymet_tutari');
+    const ticariBilancoKariElement = document.getElementById('ticari_bilanco_kari');
+    const tevsiKazancTargetElement = document.getElementById('tevsi_yatirim_kazanci'); // Bu element aslında hesaplanan değeri gösterecek input
+
+    if (!gerceklesenTevsiElement || !toplamSabitKiymetElement || !ticariBilancoKariElement || !tevsiKazancTargetElement) {
+      console.error("calculateTevsiKazancAutomatically: Tevsi kazanç hesaplama için gerekli elementler bulunamadı!");
+      return;
+    }
+
+    const gerceklesenTevsi = parseFormattedNumber(gerceklesenTevsiElement.value);
+    const toplamSabitKiymet = parseFormattedNumber(toplamSabitKiymetElement.value);
+    const ticariBilancoKari = parseFormattedNumber(ticariBilancoKariElement.value);
+
+    let calculatedKazanc = 0;
+    if (toplamSabitKiymet !== 0) {
+      calculatedKazanc = (gerceklesenTevsi / toplamSabitKiymet) * ticariBilancoKari;
+    } else if (gerceklesenTevsi !== 0 || ticariBilancoKari !== 0) {
+      // Eğer toplam sabit kıymet 0 ama diğerleri 0 değilse (tanımsız durumlar için)
+      calculatedKazanc = 0;
+    }
+
+
+    if (typeof tevsiMask !== 'undefined' && tevsiMask && tevsiMask.el === tevsiKazancTargetElement) {
+      tevsiMask.unmaskedValue = String(calculatedKazanc);
+      tevsiMask.updateValue();
+    } else {
+      tevsiKazancTargetElement.value = calculatedKazanc.toLocaleString('tr-TR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+  }
+
 
 
 
@@ -2519,235 +2674,6 @@
       _updateStepDisplay(5);
     });
   }
-
-
-
-
-  async function askYatirimKazanciGirisi() {
-    const inputResult = await Swal.fire({
-      title: 'Yatırımdan Elde Edilen Kazanç Tutarını Giriniz (TL)',
-      input: 'text',
-      inputPlaceholder: '0,00 TL',
-      showCancelButton: true,
-      confirmButtonText: 'Tamam',
-      cancelButtonText: 'Vazgeç',
-      reverseButtons: true,
-      customClass: {
-        popup: 'swal2-green-theme-popup',
-        header: 'swal2-green-theme-header',
-        title: 'swal2-green-theme-title',
-        icon: 'swal2-green-theme-icon',
-        confirmButton: 'swal2-green-theme-confirm-button',
-        cancelButton: 'swal2-green-theme-cancel-button',
-        htmlContainer: 'swal2-green-theme-html-container'
-      },
-      inputValidator: (value) => {
-        if (!value) return 'Bir tutar girmelisiniz!';
-        if (isNaN(parseFormattedNumber(value))) return 'Geçerli bir sayı girmelisiniz!';
-        return null;
-      }
-    });
-
-    if (inputResult.isConfirmed && inputResult.value) {
-      const enteredAmount = parseFormattedNumber(inputResult.value);
-      document.getElementById('tevsi_yatirim_kazanci').value =
-        enteredAmount.toLocaleString('tr-TR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-    } else {
-      document.getElementById('tevsi_yatirim_kazanci').value = '';
-    }
-
-    // 📊 Son olarak ticari bilanço + KKEG popup’ını göster
-    if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
-      promptTicariKariVeKKEGThenGoTo6();
-    }
-
-    // 🚀 ama yönlendirme step 5'e olacak (önce ayrıntılı kazanç hesaplama)
-    _updateStepDisplay(5);
-  }
-
-
-
-  async function askYatirimKazancQuestion9903() {
-    const result = await Swal.fire({
-      title: 'Yatırımdan Elde Edilen Kazanç',
-      html: '<div style="text-align: justify;">Yatırımdan elde ettiğiniz kazancı ayrı bir şekilde tespit edebiliyor musunuz?</div>',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Evet',
-      cancelButtonText: 'Hayır',
-      reverseButtons: true,
-      customClass: {
-        popup: 'swal2-green-theme-popup',
-        header: 'swal2-green-theme-header',
-        title: 'swal2-green-theme-title',
-        icon: 'swal2-green-theme-icon',
-        confirmButton: 'swal2-green-theme-confirm-button',
-        cancelButton: 'swal2-green-theme-cancel-button',
-        htmlContainer: 'swal2-green-theme-html-container'
-      }
-    });
-
-    if (result.isConfirmed) {
-      const inputResult = await Swal.fire({
-        title: 'Yatırımdan Elde Edilen Kazanç Tutarını Giriniz (TL)',
-        input: 'text',
-        inputPlaceholder: '0,00 TL',
-        showCancelButton: true,
-        confirmButtonText: 'Tamam',
-        cancelButtonText: 'Vazgeç',
-        reverseButtons: true,
-        customClass: {
-          popup: 'swal2-green-theme-popup',
-          header: 'swal2-green-theme-header',
-          title: 'swal2-green-theme-title',
-          icon: 'swal2-green-theme-icon',
-          confirmButton: 'swal2-green-theme-confirm-button',
-          cancelButton: 'swal2-green-theme-cancel-button',
-          htmlContainer: 'swal2-green-theme-html-container'
-        },
-        inputValidator: (value) => {
-          if (!value) return 'Bir tutar girmelisiniz!';
-          if (isNaN(parseFormattedNumber(value))) return 'Geçerli bir sayı girmelisiniz!';
-          return null;
-        }
-      });
-
-      if (inputResult.isConfirmed && inputResult.value) {
-        const enteredAmount = parseFormattedNumber(inputResult.value);
-        document.getElementById('tevsi_yatirim_kazanci').value =
-          enteredAmount.toLocaleString('tr-TR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-      }
-    } else {
-      await Swal.fire({
-        title: 'Bilgilendirme',
-        html: '<div style="text-align: justify;">Gerçekleşen yatırım tutarına göre kazanç otomatik hesaplanacaktır. Gerekli alanları doldurmayı unutmayınız.</div>',
-        icon: 'info',
-        confirmButtonText: 'Tamam',
-        customClass: {
-          popup: 'swal2-green-theme-popup',
-          header: 'swal2-green-theme-header',
-          title: 'swal2-green-theme-title',
-          icon: 'swal2-green-theme-icon',
-          confirmButton: 'swal2-green-theme-confirm-button',
-          htmlContainer: 'swal2-green-theme-html-container'
-        }
-      });
-    }
-
-    // 📊 Son olarak ticari bilanço sorusuna geç
-    if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
-      promptTicariKariVeKKEGThenGoTo6();
-    }
-    _updateStepDisplay(5);
-  }
-
-
-  function askTevsiKazancQuestion() {
-    Swal.fire({
-      title: 'Tevsi Yatırım Bilgisi',
-      html: '<div style="text-align: justify;">Tevsi yatırımlardan elde edilen kazancı ayrı bir şekilde tespit edebiliyor musunuz?</div>',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Evet',
-      cancelButtonText: 'Hayır',
-      reverseButtons: true,
-      customClass: {
-        popup: 'swal2-green-theme-popup',
-        header: 'swal2-green-theme-header',
-        title: 'swal2-green-theme-title',
-        icon: 'swal2-green-theme-icon',
-        confirmButton: 'swal2-green-theme-confirm-button',
-        cancelButton: 'swal2-green-theme-cancel-button',
-        htmlContainer: 'swal2-green-theme-html-container'
-      }
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        // ✅ Kullanıcı "Evet" dedi — yatırım kazancını manuel girecek
-        const inputResult = await Swal.fire({
-          title: 'Tevsi Yatırımlardan Elde Edilen Kazanç Tutarını Giriniz (TL)',
-          input: 'text',
-          inputPlaceholder: '0,00 TL',
-          showCancelButton: true,
-          confirmButtonText: 'Tamam',
-          cancelButtonText: 'Vazgeç',
-          reverseButtons: true,
-          customClass: {
-            popup: 'swal2-green-theme-popup',
-            header: 'swal2-green-theme-header',
-            title: 'swal2-green-theme-title',
-            icon: 'swal2-green-theme-icon',
-            confirmButton: 'swal2-green-theme-confirm-button',
-            cancelButton: 'swal2-green-theme-cancel-button',
-            htmlContainer: 'swal2-green-theme-html-container'
-          },
-          inputValidator: (value) => {
-            if (!value) return 'Bir tutar girmelisiniz!';
-            if (isNaN(parseFormattedNumber(value))) return 'Geçerli bir sayı girmelisiniz!';
-            return null;
-          },
-          didOpen: () => {
-            // 🔹 Yazarken otomatik TL biçimleme
-            const inputEl = Swal.getInput();
-            inputEl.addEventListener('input', () => {
-              let val = inputEl.value.replace(/\./g, '').replace(',', '.');
-              const num = parseFloat(val);
-              if (!isNaN(num)) {
-                inputEl.value = num.toLocaleString('tr-TR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                });
-              }
-            });
-          }
-        });
-
-        if (inputResult.isConfirmed && inputResult.value) {
-          const enteredAmount = parseFormattedNumber(inputResult.value);
-          document.getElementById('tevsi_yatirim_kazanci').value =
-            enteredAmount.toLocaleString('tr-TR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            });
-        } else {
-          document.getElementById('tevsi_yatirim_kazanci').value = '';
-        }
-
-      } else {
-        // ❌ Kullanıcı "Hayır" dedi — otomatik hesaplanacak
-        await Swal.fire({
-          title: 'Bilgilendirme',
-          html: '<div style="text-align: justify;">Gerçekleşen Tevsi Yatırım Tutarını, Toplam Sabit Kıymet Tutarını ve Ticari Bilanço Karını girmeyi unutmayınız.</div>',
-          icon: 'info',
-          confirmButtonText: 'Tamam',
-          customClass: {
-            popup: 'swal2-green-theme-popup',
-            header: 'swal2-green-theme-header',
-            title: 'swal2-green-theme-title',
-            icon: 'swal2-green-theme-icon',
-            confirmButton: 'swal2-green-theme-confirm-button',
-            htmlContainer: 'swal2-green-theme-html-container'
-          }
-        });
-
-        document.getElementById('tevsi_yatirim_kazanci').value = '';
-      }
-
-      // 🔹 Kazanç bilgisi girildikten sonra ticari kâr + KKEG popup’ına geçelim
-      if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
-        promptTicariKariVeKKEGThenGoTo6();
-      } else {
-        _updateStepDisplay(5);
-      }
-    }); // ✅ Fazladan parantez kaldırıldı
-  }
-
-
 
 
 
@@ -2918,7 +2844,7 @@
 
       if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
 
-      _updateStepDisplay(6);
+      _updateStepDisplay(5);
     }
   }
 
@@ -2964,6 +2890,21 @@
       return;
     }
 
+    // 🔹 Aşama 1’deki değerleri gizli alanlara kopyala
+    const belgeNo = document.querySelector('[name="belge_no"]')?.value || '';
+    const belgeTarihi = document.querySelector('[name="belge_tarihi"]')?.value || '';
+    const bolge = document.querySelector('[name="bolge"]')?.value || '';
+
+    const hiddenBelgeNo = document.querySelector('[name="belge_no_hidden"]');
+    const hiddenBelgeTarihi = document.querySelector('[name="belge_tarihi_hidden"]');
+    const hiddenBolge = document.querySelector('[name="bolge_hidden"]');
+
+    if (hiddenBelgeNo) hiddenBelgeNo.value = belgeNo;
+    if (hiddenBelgeTarihi) hiddenBelgeTarihi.value = belgeTarihi;
+    if (hiddenBolge) hiddenBolge.value = bolge;
+
+    console.log("🟢 Gizli alanlar güncellendi:", { belgeNo, belgeTarihi, bolge });
+
     // 🔹 Her şey tamamsa bir sonraki adıma geç
     _updateStepDisplay(2);
   }
@@ -2982,21 +2923,20 @@
       const karar = (document.getElementById('karar')?.value || "").trim();
       const vizeDurumu = (document.getElementById('vize_durumu')?.value || "").trim().toLowerCase();
 
-      // 🟩 2025/9903 özel kuralı:
-      if (karar === "2025/9903") {
-        console.log("✅ 2025/9903 kararı: yeni kazanç seçimi sorusu gösteriliyor.");
-        await askWhichIncomeToApplyDiscount(); // 🆕 yatırım / diğer / her ikisi sorusu
-        return;
-      }
-
-      // 🟨 Diğer kararlar için klasik 32/A mantığı:
-      sessionStorage.removeItem('kucuk_olan_diger_faaliyet');
-
-      if (vizeDurumu.includes("evet") || vizeDurumu.includes("hayır") || vizeDurumu.includes("hayir")) {
-        console.log("📘 2025/9903 dışı karar: yeni kazanç seçimi sorusu gösteriliyor.");
-        await askWhichIncomeToApplyDiscount(); // ✅ yeni sistem burada da çalışacak
-      } else {
-        // Eğer vize durumu boş veya tanımsızsa doğrudan step 5’e geç
+      try {
+        if (karar === "2025/9903") {
+          console.log("✅ 2025/9903 kararı: yeni kazanç seçimi sorusu gösteriliyor.");
+          await askWhichIncomeToApplyDiscount();
+        } else if (vizeDurumu.includes("evet") || vizeDurumu.includes("hayır") || vizeDurumu.includes("hayir")) {
+          console.log("📘 2025/9903 dışı karar: klasik kazanç seçimi sorusu gösteriliyor.");
+          await askWhichIncomeToApplyDiscount();
+        } else {
+          console.log("⚪ Vize durumu boş, doğrudan aşama 5’e geçiliyor.");
+        }
+      } catch (e) {
+        console.warn("⚠️ Soru akışı hata verdi:", e);
+      } finally {
+        // 🟩 Her durumda aşama 5’e geç
         _updateStepDisplay(5);
       }
     }, 100);
@@ -3004,7 +2944,19 @@
 
 
 
-  function goToStep6() { _updateStepDisplay(6); }
+
+  function goToStep6() {
+    // 🟩 Eğer mevcut aşama 4'ten geliniyorsa (soruların ardından),
+    // otomatik olarak 5. aşamaya geç
+    if (CURRENT_STEP === 4) {
+      console.log("🔁 Aşama 4'ten gelindi → 6 yerine 5'e yönlendiriliyor.");
+      _updateStepDisplay(5);
+      return;
+    }
+
+    // Diğer durumlarda (ör. 5 → 6 veya 6 → 7) normal akışta ilerle
+    _updateStepDisplay(6);
+  }
 
   function goToStep7() { _updateStepDisplay(7); }
 
@@ -3054,6 +3006,8 @@
 
   document.addEventListener("DOMContentLoaded", function () {
 
+    toggleInvestmentIncomeInputs();
+
     // === 2025/9903 Kararı için özel davranışlar ===
     const kararSelect = document.getElementById("karar");
     const ilSelect = document.getElementById("il");
@@ -3067,68 +3021,10 @@
 
     const form = document.getElementById('form-giris');
 
-    // Form-Giriş submit (AJAX)
-    if (form) {
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const formData = new FormData(form);
 
-        // Hesap alanları da gönderilsin
-        formData.append('cari_yatirim_katki', document.getElementById('cari_yatirim_katki')?.value ?? '');
-        formData.append('cari_diger_katki', document.getElementById('cari_diger_katki')?.value ?? '');
-        formData.append('cari_toplam_katki', document.getElementById('cari_toplam_katki')?.value ?? '');
-        formData.append('genel_toplam_katki', document.getElementById('genel_toplam_katki')?.value ?? '');
 
-        // Hangi butonla geldi?
-        const submitter = event.submitter;
-        let actionType = '';
-        if (submitter && submitter.name === 'submit_action') actionType = submitter.value;
 
-        if (actionType === 'new_save') {
-          formData.set('tesvik_id', '');
-        }
 
-        try {
-          const response = await fetch(form.action, { method: 'POST', body: formData });
-          const data = await response.json();
-
-          let finalTitle = data.title;
-          let finalMessage = data.message;
-          let swalIcon = data.status;
-
-          if (data.status === 'success') {
-            if (actionType === 'new_save') {
-              finalTitle = 'Yeni Belge Kaydı';
-              finalMessage = 'Yeni teşvik belgesi başarıyla oluşturuldu.';
-              Swal.fire({
-                icon: swalIcon,
-                title: finalTitle,
-                text: finalMessage,
-                timer: 3000,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                didClose: () => {
-                  window.location.href = "{{ url_for('indirimlikurumlar.index') }}?sekme=form";
-                }
-              });
-              return;
-            } else if (actionType === 'update') {
-              finalTitle = 'Belge Güncelleme';
-              finalMessage = 'Teşvik belgesi başarıyla güncellendi.';
-            }
-          } else {
-            finalTitle = data.title || 'Hata!';
-            finalMessage = data.message || 'Bir sorun oluştu.';
-          }
-
-          showSwalMessage(swalIcon, finalTitle, finalMessage);
-        } catch (err) {
-          console.error('Form kaydetme hatası:', err);
-          showSwalMessage('error', 'Hata!', 'Veri gönderilirken bir ağ/sunucu hatası oluştu.');
-        }
-      });
-    }
 
     // 🔹 1. Daha önce kaydedilmiş form verilerini geri yükle
     document.querySelectorAll("input, select, textarea").forEach(el => {
@@ -3179,6 +3075,62 @@
         toggleDetailedProfitInput();
       });
     }
+
+
+    if (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // --- Gizli alanları görünür input'lardan güncelle ---
+        const belgeNoInput = form.querySelector('[name="belge_no"]');
+        const hiddenBelgeNo = document.getElementById('belge_no_hidden');
+        if (belgeNoInput && hiddenBelgeNo) {
+          belgeNoInput.value = hiddenBelgeNo.value || belgeNoInput.value;
+        }
+
+        const belgeTarihiInput = form.querySelector('[name="belge_tarihi"]');
+        const hiddenBelgeTarihi = document.getElementById('belge_tarihi_hidden');
+        if (belgeTarihiInput && hiddenBelgeTarihi) {
+          belgeTarihiInput.value = hiddenBelgeTarihi.value || belgeTarihiInput.value;
+        }
+
+        const bolgeInput = form.querySelector('[name="bolge"]');
+        const hiddenBolge = document.getElementById('bolge_hidden');
+        if (bolgeInput && hiddenBolge) {
+          bolgeInput.value = hiddenBolge.value || bolgeInput.value;
+        }
+
+        // --- Formu gönder ---
+        fetch(form.action, {
+          method: "POST",
+          body: new FormData(form)
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            Swal.fire({
+              icon: data.status,
+              title: data.title,
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              if (data.status === "success" && data.redirect) {
+                window.location.href = data.redirect;
+              }
+            });
+          })
+          .catch((err) => {
+            Swal.fire({
+              icon: "error",
+              title: "Hata",
+              text: "Kayıt işlemi sırasında bir hata oluştu."
+            });
+            console.error("Kaydetme hatası:", err);
+          });
+      });
+    }
+
+
 
 
 
@@ -3234,30 +3186,35 @@
 
     // 4) Diğer init işlemleri
     const clearButton = document.getElementById('clearProfitData');
-    if (clearButton) clearButton.addEventListener('click', clearProfitTable);
+    if (clearButton) {
+      clearButton.addEventListener('click', clearProfitTable);
+    }
 
     const ayrTable = document.getElementById('ayrintili-kazanc-table');
     if (ayrTable) {
       ayrTable.querySelectorAll('tbody input').forEach(input => {
         input.setAttribute('data-original-value', input.value);
         input.addEventListener('input', event => {
-          if (!isProgrammaticChange) calculateTable(event);
+          if (typeof isProgrammaticChange === "undefined" || !isProgrammaticChange) {
+            if (typeof calculateTable === "function") calculateTable(event);
+          }
         });
       });
-      calculateTable();
+      if (typeof calculateTable === "function") calculateTable();
     }
+
     const calculateBtn = document.getElementById('calculateCariBtn');
     if (calculateBtn) {
       calculateBtn.addEventListener('click', () => {
-        calculateRatios();
-        calculateKVMatrah();
+        if (typeof calculateRatios === "function") calculateRatios();
+        if (typeof calculateKVMatrah === "function") calculateKVMatrah();
 
         const karar = document.getElementById("karar")?.value;
         if (karar === "2025/9903") {
           console.log("⚙️ 2025/9903 aktif — form ve detaylı hesap başlatılıyor");
 
           // 1️⃣ Form hesaplama (kontroller + uyarılar)
-          if (typeof hesaplaKatkiTutari9903Form === "function") hesaplaKatkiTutari9903Form();
+          if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
 
           // 2️⃣ Detaylı hesaplama (oranlar, matrah vs.)
           if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
@@ -3267,25 +3224,39 @@
             console.log("➡️ 2025/9903 hesap tamamlandı — Step 7'ye geçiliyor");
             goToStep7();
           }
-
-        } else {
-          // Normal teşvik modu
+        } else if (typeof calculateCariAndNext === "function") {
           calculateCariAndNext();
         }
       });
     }
 
 
+    const kazancInput = document.getElementById('yatirimdan_elde_edilen_kazanc');
+    if (kazancInput) {
+      kazancInput.addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\./g, '').replace(',', '.');
+        const num = parseFloat(val);
+        if (!isNaN(num)) {
+          e.target.value = num
+            .toFixed(2)
+            .replace('.', ',')
+            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+      });
+    }
+
     const tevsiInput = document.getElementById("tevsi_yatirim_kazanci");
-    tevsiMask = IMask(tevsiInput, {
-      mask: Number,
-      scale: 2,
-      thousandsSeparator: '.',
-      radix: ',',
-      mapToRadix: [','],
-      normalizeZeros: false,
-      padFractionalZeros: false
-    });
+    if (tevsiInput) {
+      tevsiMask = IMask(tevsiInput, {
+        mask: Number,
+        scale: 2,
+        thousandsSeparator: '.',
+        radix: ',',
+        mapToRadix: [','],
+        normalizeZeros: false,
+        padFractionalZeros: false
+      });
+    }
 
     [
       "gerceklesen_tevsi_yatirim_tutari",
@@ -3329,7 +3300,7 @@
       toplamTutarEl.addEventListener('input', () => {
         const karar = document.getElementById("karar")?.value;
         if (karar === "2025/9903") {
-          hesaplaKatkiTutari9903Form();
+          hesaplaKatkiTutari9903();
           hesaplaDigerKatkiTutari();
         } else {
           hesaplaKatkiTutari();
@@ -3345,7 +3316,7 @@
       if (el) el.addEventListener('input', () => {
         const karar = document.getElementById("karar")?.value;
         if (karar === "2025/9903") {
-          hesaplaKatkiTutari9903Form(); // hızlı uyarı ve anlık hesap
+          hesaplaKatkiTutari9903(); // hızlı uyarı ve anlık hesap
         } else {
           hesaplaKatkiTutari();
           hesaplaDigerKatkiTutari();
@@ -3359,37 +3330,116 @@
 
     Object.keys(idConfig).forEach(id => {
       const field = document.getElementById(id);
-      if (!field) return;
-      // Mask’i oluştur ve sakla
-      const mask = IMask(field, {
-        mask: Number, scale: 2, thousandsSeparator: '.', radix: ',',
-        mapToRadix: [','], normalizeZeros: false, padFractionalZeros: false
-      });
-      maskMap[id] = mask;
 
+      // 💡 Güvenlik kontrolü: sadece gerçekten DOM’da varsa devam et
+      if (!field || !(field instanceof HTMLElement)) {
+        console.warn(`IMask atlandı: #${id} bulunamadı`);
+        return;
+      }
 
-      mask.on("accept", () => {
-        const karar = document.getElementById("karar")?.value;
-        const type = idConfig[id];
+      try {
+        // ✅ Mask oluştur
+        const mask = IMask(field, {
+          mask: Number,
+          scale: 2,
+          thousandsSeparator: '.',
+          radix: ',',
+          mapToRadix: [','],
+          normalizeZeros: false,
+          padFractionalZeros: false
+        });
+        maskMap[id] = mask;
 
-        if (type === "katki") {
-          if (karar === "2025/9903") {
-            hesaplaKatkiTutari9903Form(); // sadece form seviyesi
-          } else {
-            hesaplaKatkiTutari();
+        // ✅ Kabul edildiğinde hesaplamaları tetikle
+        mask.on("accept", () => {
+          const karar = document.getElementById("karar")?.value;
+          const type = idConfig[id];
+
+          if (type === "katki") {
+            if (karar === "2025/9903") {
+              hesaplaKatkiTutari9903();
+            } else {
+              hesaplaKatkiTutari();
+            }
+            hesaplaDigerKatkiTutari();
+            hesaplaFiiliKatkiTutari();
+            hesaplaOncekiKatkiTutari();
+            hesaplaKalanVeEndeks();
+          } else if (type === "ratios") {
+            calculateRatios();
+          } else if (type === "tevsi") {
+            calculateTevsiKazancAutomatically();
           }
-          hesaplaDigerKatkiTutari();
-          hesaplaFiiliKatkiTutari();
-          hesaplaOncekiKatkiTutari();
-          hesaplaKalanVeEndeks();
-        } else if (type === "ratios") {
-          calculateRatios();
-        } else if (type === "tevsi") {
-          calculateTevsiKazancAutomatically();
-        }
-      });
+        });
 
+      } catch (err) {
+        console.warn(`IMask oluşturulamadı (#${id}):`, err);
+      }
     });
+
+
+
+
+
+    const btnStep1Next = document.getElementById("btn-step1-next");
+    if (!btnStep1Next) return;
+
+    btnStep1Next.addEventListener("click", async () => {
+      const form = document.getElementById("form-giris");
+      if (!form) {
+        console.warn("❌ Form bulunamadı, kayıt yapılamadı.");
+        goToStep2(); // yine de geçsin
+        return;
+      }
+
+      const formData = new FormData(form);
+      formData.append("submit_action", "new_save");
+
+      try {
+        const res = await fetch(form.action, { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.status === "success") {
+          console.log("✅ Form otomatik kaydedildi:", data);
+          if (data.tesvik_id) sessionStorage.setItem("current_tesvik_id", data.tesvik_id);
+          Swal.fire({
+            icon: "success",
+            title: "Kaydedildi!",
+            text: "Teşvik belgesi otomatik oluşturuldu.",
+            timer: 1000,
+            showConfirmButton: false
+          }).then(() => goToStep2());
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: data.title || "Hata!",
+            text: data.message || "Kayıt başarısız."
+          });
+        }
+      } catch (err) {
+        console.error("❌ Otomatik kayıt hatası:", err);
+        Swal.fire("Hata", "Sunucuya bağlanılamadı.", "error");
+      }
+    });
+
+
+
+
+    // 🔹 Otomatik olarak mevcut ID'yi form alanına yaz
+    const existingTesvikId = sessionStorage.getItem("current_tesvik_id");
+    if (existingTesvikId) {
+      const hiddenTesvikField = document.querySelector('input[name="tesvik_id"]');
+      if (hiddenTesvikField) hiddenTesvikField.value = existingTesvikId;
+    }
+
+
+
+
+
+
+
+
+
 
     function getIndirimSure(karar, belgeTarihi) {
       if (karar === "2025/9903") {
@@ -3470,15 +3520,18 @@
     }
 
     // İl değiştiğinde bölgeyi güncelle
-    ilSelect.addEventListener("change", () => {
-      const karar = kararSelect.value;
-      const il = ilSelect.value;
-      if (karar === "2025/9903") {
-        bolgeInput.value = bolgeMap9903[il] || "";
-      } else {
-        setBolge();
-      }
-    });
+    if (ilSelect) {
+      ilSelect.addEventListener("change", () => {
+        const karar = kararSelect?.value;
+        const il = ilSelect.value;
+        if (!bolgeInput) return;
+        if (karar === "2025/9903") {
+          bolgeInput.value = bolgeMap9903[il] || "";
+        } else if (typeof setBolge === "function") {
+          setBolge();
+        }
+      });
+    }
 
     // Program değiştiğinde katkı oranını güncelle
     programSelect.addEventListener("change", () => {
@@ -3555,31 +3608,52 @@
     toggleDetailedProfitInput();
   }
 
-  // Ayrıntılı Kazanç Formu (AJAX)
+
+
+
+
+  // Ayrıntılı Kazanç Formu (güvenli dışa aktar + AJAX kayıt)
   const ayrintiliKazancForm = document.getElementById('ayrintili-kazanc-form');
   if (ayrintiliKazancForm) {
+    const exportButton = ayrintiliKazancForm.querySelector('button[name="export"]');
+
     ayrintiliKazancForm.addEventListener('submit', async (event) => {
+      // Eğer "Dışa Aktar" butonuna basıldıysa, normal form gönderimine izin ver
+      if (document.activeElement === exportButton) {
+        ayrintiliKazancForm.removeAttribute('data-action');
+        return; // preventDefault yapma → tarayıcı indirmeyi başlatır
+      }
+
+      // 💾 Normal kayıt işlemi için AJAX kullan
       event.preventDefault();
       const formData = new FormData(ayrintiliKazancForm);
-      formData.append('save', '1');
+      formData.append("action", "save");
 
       try {
-        const response = await fetch(ayrintiliKazancForm.action, { method: 'POST', body: formData });
+        const response = await fetch(ayrintiliKazancForm.action, {
+          method: 'POST',
+          body: formData
+        });
+
         const contentType = response.headers.get("content-type");
         if (response.ok && contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          showSwalMessage(data.status, data.title, data.message);
+          if (typeof showSwalMessage === "function")
+            showSwalMessage(data.status, data.title, data.message);
         } else {
-          const errorText = await response.text();
-          console.error('Ayrıntılı kazanç kaydetme yanıtı:', errorText);
-          showSwalMessage('error', 'Hata!', `Kaydetme sırasında sunucu sorunu: ${response.status} ${response.statusText}`);
+          console.error('Ayrıntılı kazanç kaydetme hatası:', response.statusText);
+          if (typeof showSwalMessage === "function")
+            showSwalMessage('error', 'Hata!', 'Sunucu hatası oluştu.');
         }
       } catch (err) {
         console.error('Ayrıntılı kazanç kaydetme hatası:', err);
-        showSwalMessage('error', 'Hata!', 'Veri gönderilirken bir ağ/istemci hatası oluştu.');
+        if (typeof showSwalMessage === "function")
+          showSwalMessage('error', 'Hata!', 'Ağ hatası oluştu.');
       }
     });
   }
+
+
 
   // MANUEL BELİRLE: Yatırıma Katkı Oranı
   document.getElementById('btn-manual-katki')?.addEventListener('click', async () => {
@@ -3629,6 +3703,60 @@
       updateDiscountedRatesUI();
     }
   });
+
+
+
+  // === MANUEL BELİRLE: Kurumlar Vergisi Matrahı ===
+  document.getElementById('btn-manual-matrah')?.addEventListener('click', async () => {
+    const { value: val } = await Swal.fire({
+      title: 'Kurumlar Vergisi Matrahını giriniz (TL)',
+      input: 'text',
+      inputPlaceholder: 'örn: 2.500.000,00',
+      showCancelButton: true,
+      confirmButtonText: 'Kaydet',
+      cancelButtonText: 'Vazgeç',
+      reverseButtons: true,
+      allowOutsideClick: false,
+      customClass: {
+        popup: 'swal2-green-theme-popup',
+        confirmButton: 'swal2-green-theme-confirm-button',
+        cancelButton: 'swal2-green-theme-cancel-button'
+      },
+      didOpen: () => {
+        const inputEl = Swal.getInput();
+        // Yazarken sadece sayı, nokta ve virgül izin ver
+        inputEl.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/[^\d.,]/g, '');
+        });
+      },
+      inputValidator: (v) => {
+        const n = parseFormattedNumber(v);
+        if (isNaN(n) || n <= 0) return 'Geçerli bir tutar giriniz.';
+        return null;
+      }
+    });
+
+    // --- Kaydedildiğinde biçimlendir ---
+    if (val !== undefined) {
+      const n = parseFormattedNumber(val);
+      const formatted = n
+        .toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+      document.getElementById('kv_matrah').value = formatted;
+      sessionStorage.setItem('manual_kv_matrah', 'true');
+      sessionStorage.setItem('manual_kv_matrah_value', String(n));
+
+      Swal.fire('✅ Kaydedildi', `Kurumlar Vergisi Matrahı: <b>${formatted} TL</b> olarak güncellendi.`, 'success');
+    }
+  });
+
+
+
+
+
+
 
   // Teşvik belgeleri silme (AJAX)
   document.querySelectorAll('.delete-tesvik-form').forEach(formElement => {

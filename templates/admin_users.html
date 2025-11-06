@@ -36,28 +36,28 @@
             <tbody>
                 {% for u in users %}
                 <tr>
-                    <td>{{ u[0] }}</td>
-                    <td>{{ u[1] }}</td>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.username }}</td>
                     <td>
-                        {% if u[2] == 1 %}
+                        {% if u.is_approved == 1 %}
                         <span class="badge bg-success">Onaylı</span>
                         {% else %}
                         <span class="badge bg-warning text-dark">Bekliyor</span>
                         {% endif %}
                     </td>
                     <td>
-                        {% if u[2] == 0 %}
-                        <a href="{{ url_for('approve_user', user_id=u[0]) }}" class="btn btn-sm btn-success">Onayla</a>
+                        {% if u.is_approved == 0 %}
+                        <a href="{{ url_for('approve_user', user_id=u.id) }}" class="btn btn-sm btn-success">Onayla</a>
                         {% else %}
                         <span class="badge bg-success">Onaylı</span>
                         {% endif %}
 
-                        {% if u[1] != 'admin' %}
-                        <a href="{{ url_for('reject_user', user_id=u[0]) }}" class="btn btn-sm btn-danger ms-2"
+                        {% if u.username != 'admin' %}
+                        <a href="{{ url_for('reject_user', user_id=u.id) }}" class="btn btn-sm btn-danger ms-2"
                             onclick="return confirm('Bu kullanıcıyı kalıcı olarak silmek istediğinize emin misiniz?')">
                             Sil
                         </a>
-                        <a href="{{ url_for('admin_reset_password', user_id=u[0]) }}"
+                        <a href="{{ url_for('admin_reset_password', user_id=u.id) }}"
                             class="btn btn-sm btn-warning ms-2">
                             Şifre Sıfırla
                         </a>

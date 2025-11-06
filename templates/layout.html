@@ -157,7 +157,7 @@
                         {% endif %}
                     </li>
 
-                    {% if session.get('user') == 'admin' %}
+                    {% if session.get('username', '').lower() == 'admin' %}
                     <li class="nav-item">
                         <a class="nav-link text-danger fw-semibold" href="{{ url_for('admin_users') }}">
                             👤 Kullanıcı Onayları

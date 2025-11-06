@@ -52,13 +52,36 @@ from hesaplar import BILANCO_HESAPLARI
 from gelir import GELIR_TABLOSU_HESAPLARI
 from finansal_oranlar import hesapla_finansal_oranlar, analiz_olustur
 from auth import login_required
-from services.db import migrate_tesvik_columns
+from services.db import (
+    get_conn,
+    migrate_tesvik_columns,
+    migrate_users_table,
+    migrate_tesvik_kullanim_table,
+    migrate_profit_data_table
+)
 from routes.indirimlikurumlar import bp as indirim_bp
 from routes.blog import blog_bp, blog_posts
 from config import tarifeler, asgari_ucretler
 
 
+
+
+try:
+    from flask.json.provider import DefaultJSONProvider
+except ImportError:
+    from flask.json import JSONEncoder as DefaultJSONProvider
+from jinja2 import Undefined
+
+class SafeJSONProvider(DefaultJSONProvider):
+    def default(self, obj):
+        if isinstance(obj, Undefined):
+            return None
+        return super().default(obj)
+
+
 app = Flask(__name__)
+
+app.config.from_object("config")
 
 # ✅ Supabase bağlantısı (Render Environment'dan)
 app.config["DATABASE_URL"] = os.getenv("DATABASE_URL")
@@ -66,15 +89,21 @@ app.config["DATABASE_URL"] = os.getenv("DATABASE_URL")
 if not app.config["DATABASE_URL"]:
     raise ValueError("DATABASE_URL bulunamadı. Render environment ayarlarını kontrol et.")
 
-# ✅ Yeni bağlantı fonksiyonu
-def get_conn():
-    conn = psycopg2.connect(app.config["DATABASE_URL"])
-    return conn
+
+
+
+
+
+
+app.json = SafeJSONProvider(app)
+
+
+
+
 
 
 
 from werkzeug.security import generate_password_hash
-
 
 def bootstrap_admin_from_env():
     username = os.getenv("ADMIN_USERNAME")
@@ -84,23 +113,40 @@ def bootstrap_admin_from_env():
         print("⚠️ Ortam değişkenleri eksik, admin oluşturulmadı.")
         return
 
+    hashed_pw = generate_password_hash(password)
+
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT password FROM users WHERE username = %s", (username,))
-        row = c.fetchone()
+        with conn.cursor() as c:
+            c.execute("SELECT password FROM users WHERE username = %s", (username,))
+            row = c.fetchone()
 
-        hashed_pw = generate_password_hash(password)
+            if not row:
+                c.execute(
+                    "INSERT INTO users (username, password, is_approved) VALUES (%s, %s, 1)",
+                    (username, hashed_pw),
+                )
+                print(f"✅ Admin oluşturuldu ve onaylandı: {username}")
+            else:
+                c.execute(
+                    "UPDATE users SET password = %s WHERE username = %s",
+                    (hashed_pw, username),
+                )
+                print(f"🔄 Admin şifresi güncellendi: {username}")
+        conn.commit()
 
-        if not row:
-            c.execute("""
-                INSERT INTO users (username, password, is_approved)
-                VALUES (%s, %s, 1)
-            """, (username, hashed_pw))
-            conn.commit()
-            print(f"✅ Admin oluşturuldu ve onaylandı: {username}")
-        else:
-            print(f"ℹ️ Admin zaten mevcut: {username}")
 
+
+
+with app.app_context():
+    try:
+        migrate_users_table()   
+        migrate_tesvik_columns()
+        migrate_tesvik_kullanim_table()
+        migrate_profit_data_table()
+        bootstrap_admin_from_env()
+        print("✅ Tüm tablo kontrolleri ve admin kurulumu tamamlandı.")
+    except Exception as e:
+        print(f"⚠️ Başlangıçta tablo migrasyonları veya admin kurulumu hatası: {e}")
 
 
     
@@ -144,11 +190,11 @@ def inject_login_status():
 # --- Supabase Bağlantı Kontrolü ---
 try:
     print("🔍 Supabase bağlantısı test ediliyor...")
-    conn = get_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT 1 FROM users LIMIT 1;")
-    conn.close()
-    print("✅ Supabase bağlantısı aktif ve tablo erişimi başarılı.")
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1;")
+            _ = cur.fetchone()
+    print("✅ Supabase bağlantısı aktif ve erişim başarılı.")
 except Exception as e:
     print(f"⚠️ Supabase bağlantı testi başarısız: {e}")
 
@@ -166,6 +212,30 @@ app.register_blueprint(indirim_bp)
 app.register_blueprint(blog_bp, url_prefix='/blog')
 
 
+
+
+
+
+
+def safe_date(value):
+    """Hem datetime hem string değerler için güvenli tarih formatı döner."""
+    if not value:
+        return "-"
+    try:
+        if isinstance(value, str):
+            try:
+                value = datetime.fromisoformat(value)
+            except Exception:
+                try:
+                    value = datetime.strptime(value, "%d.%m.%Y")
+                except Exception:
+                    return value  # Tanınmazsa orijinal haliyle bırak
+        return value.strftime("%d.%m.%Y")
+    except Exception:
+        return str(value)
+
+# 🔧 Flask Jinja filtre kaydı
+app.jinja_env.filters["safe_date"] = safe_date
 
 
 
@@ -195,13 +265,21 @@ def register():
         try:
             with get_conn() as conn:
                 c = conn.cursor()
-                c.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
+                c.execute(
+                    "INSERT INTO users (username, password) VALUES (%s, %s)",
+                    (username, hashed_password)
+                )
                 conn.commit()
             flash("Kayıt başarılı! Giriş yapabilirsiniz.", "success")
             return redirect(url_for("login"))
-        except psycopg2.IntegrityError:            
-            conn.rollback()
+
+        except psycopg2.IntegrityError:
+            # conn burada kapanmış olacağı için yeniden açıp rollback yapmak gereksiz
             flash("Bu kullanıcı adı zaten var. Lütfen farklı bir kullanıcı adı seçin.", "danger")
+            return render_template("register.html")
+
+        except Exception as e:
+            flash(f"Beklenmeyen hata: {e}", "danger")
             return render_template("register.html")
         
     return render_template("register.html")
@@ -209,9 +287,8 @@ def register():
 
 
 @app.route("/login", methods=["GET", "POST"])
-@limiter.limit("50 per 10 minutes")  # 10 dakikada en fazla 5 deneme
+@limiter.limit("50 per 10 minutes")
 def login():
-    # Eğer kullanıcı zaten giriş yapmışsa, ana sayfaya yönlendir
     if session.get("user_id"):
         return redirect(url_for('home'))
 
@@ -220,32 +297,29 @@ def login():
         password = request.form["password"]
 
         with get_conn() as conn:
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute(
                 "SELECT id, password, is_approved FROM users WHERE username = %s",
                 (username,)
             )
             result = c.fetchone()
 
-        # Kullanıcı bulunduysa ve şifre doğruysa
-        if result and check_password_hash(result[1], password):
-            user_id, hashed_pw, is_approved = result
+        if result and check_password_hash(result["password"], password):
+            user_id = result["id"]
+            is_approved = result["is_approved"]
 
-            # Onay kontrolü
             if is_approved == 0:
                 flash("Hesabınız henüz admin tarafından onaylanmadı.", "warning")
                 return render_template("login.html")
 
-            # 🔐 Giriş başarılı
-            session.clear()  # önceki session'ı temizle
-            session["user_id"] = user_id       # ✅ integer ID
-            session["username"] = username      # ✅ gösterim için
+            session.clear()
+            session["user_id"] = user_id
+            session["username"] = username
             session["logged_in"] = True
-            session.permanent = True  # 30 dk session süresi aktif
+            session.permanent = True
 
             flash(f"Hoş geldiniz, {username}!", "success")
 
-            # 👑 Admin ise doğrudan admin paneline yönlendir
             if username.lower() == "admin":
                 return redirect(url_for("admin_users"))
             else:
@@ -253,11 +327,8 @@ def login():
 
         else:
             flash("Hatalı kullanıcı adı veya şifre.", "danger")
-            return render_template("login.html")
 
     return render_template("login.html")
-
-
 
 
 @app.route("/logout")
@@ -841,21 +912,25 @@ def yukle_coklu():
 
 
 def kaydet_beyanname(sonuc, belge_turu):
+    """
+    Hem SQLite hem PostgreSQL ortamlarında uyumlu beyanname kayıt fonksiyonu.
+    Verileri şifreler, yeni kayıt ekler veya mevcut kaydı günceller.
+    """
     mesajlar = []
     file_vkn   = sonuc.get("vergi_kimlik_no", "")
     file_unvan = sonuc.get("unvan", "")
     file_donem = sonuc.get("donem", "")
     veriler    = sonuc.get("veriler", {})
 
+    # 🧩 Eksik bilgi kontrolü
     if not file_vkn or file_vkn == "Bilinmiyor" or not file_donem or file_donem == "Bilinmiyor":
-        mesajlar.append({
+        return [{
             "type": "error",
             "title": "❌ Tanınmadı",
-            "text": "Dosyadan VKN/Dönem okunamadı, yüklenmedi."
-        })
-        return mesajlar
+            "text": "Dosyadan VKN veya Dönem okunamadı, yüklenmedi."
+        }]
 
-    # --- JSON yapısını normalize et (şablon uyum garantisi) ---
+    # --- JSON yapısını normalize et (bilanço / gelir / kdv) ---
     if belge_turu == "bilanco":
         veriler = { 
             "aktif": veriler.get("aktif", []),
@@ -886,7 +961,7 @@ def kaydet_beyanname(sonuc, belge_turu):
             "vergi_kimlik_no": file_vkn,
             "veriler": veriler if isinstance(veriler, list) else []
         }
-        
+
     uid = session.get("user_id")
     if not uid:
         return [{
@@ -895,28 +970,35 @@ def kaydet_beyanname(sonuc, belge_turu):
             "text": "Kullanıcı oturumu bulunamadı."
         }]
 
+    # ----------------------------------------------------------------
+    # 🔗 Veritabanı bağlantısı (db.py'deki get_conn() üzerinden)
+    # ----------------------------------------------------------------
     with get_conn() as conn:
         c = conn.cursor()
 
-        # --- mükellef kontrol ---
+        # --- Mükellef kontrolü ---
         c.execute("SELECT id FROM mukellef WHERE user_id=%s AND vergi_kimlik_no=%s", (uid, file_vkn))
         row = c.fetchone()
+
         if row:
-            mukellef_id = row[0]
-            c.execute("UPDATE mukellef SET unvan=%s WHERE id=%s AND user_id=%s", (file_unvan, mukellef_id, uid))
+            mukellef_id = row["id"] if isinstance(row, dict) else row[0]
+            c.execute("UPDATE mukellef SET unvan=%s WHERE id=%s AND user_id=%s",
+                      (file_unvan, mukellef_id, uid))
         else:
-            c.execute(
-                "INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (%s, %s, %s)",
-                (uid, file_vkn, file_unvan)
-            )
-            mukellef_id = c.fetchone()[0]
+            # FakeCursor sayesinde SQLite için %s → ? dönüşümü otomatik yapılır
+            c.execute("""
+                INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan)
+                VALUES (%s, %s, %s)
+                RETURNING id
+            """, (uid, file_vkn, file_unvan))
+            fetched = c.fetchone()
+            # SQLite için RETURNING desteklenmiyorsa fallback olarak lastrowid kullan
+            mukellef_id = (fetched["id"] if fetched else getattr(c, "lastrowid", None))
 
-        # --- veriyi şifrele ---
-        encrypted_data = fernet.encrypt(
-            json.dumps(veriler, ensure_ascii=False).encode("utf-8")
-        )
+        # --- Veriyi şifrele ---
+        encrypted_data = fernet.encrypt(json.dumps(veriler, ensure_ascii=False).encode("utf-8"))
 
-        # --- beyanname kontrol ---
+        # --- Beyanname kontrolü ---
         c.execute("""
             SELECT id FROM beyanname 
             WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s
@@ -924,21 +1006,19 @@ def kaydet_beyanname(sonuc, belge_turu):
         existing = c.fetchone()
 
         if existing:
-            # ✅ Güncelleme
             c.execute("""
-                UPDATE beyanname 
-                SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP 
+                UPDATE beyanname
+                SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
                 WHERE id=%s
-            """, (encrypted_data, existing[0]))
+            """, (encrypted_data, existing["id"] if isinstance(existing, dict) else existing[0]))
             mesajlar.append({
                 "type": "info",
                 "title": "🔄 Güncellendi",
                 "text": f"{file_unvan} / {file_donem} - {belge_turu.upper()} güncellendi."
             })
         else:
-            # ✅ Yeni kayıt
             c.execute("""
-                INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler) 
+                INSERT INTO beyanname (user_id, mukellef_id, donem, tur, veriler)
                 VALUES (%s, %s, %s, %s, %s)
             """, (uid, mukellef_id, file_donem, belge_turu, encrypted_data))
             mesajlar.append({
@@ -948,10 +1028,12 @@ def kaydet_beyanname(sonuc, belge_turu):
             })
 
         conn.commit()
-        
-        # 🔄 Ek olarak, eğer bilanço dosyasında "önceki dönem" verisi varsa, onu da DB'ye yaz
-        if belge_turu == "bilanco":
-            try:
+
+        # ----------------------------------------------------------------
+        # 🧮 Önceki dönem verilerini otomatik oluşturma (bilanço / gelir)
+        # ----------------------------------------------------------------
+        try:
+            if belge_turu == "bilanco":
                 aktif_df = pd.DataFrame(veriler.get("aktif", []))
                 pasif_df = pd.DataFrame(veriler.get("pasif", []))
 
@@ -961,20 +1043,15 @@ def kaydet_beyanname(sonuc, belge_turu):
                     "Önceki Dönem" in pasif_df.columns and pasif_df["Önceki Dönem"].sum() != 0
                 ):
                     onceki_yil = str(int(file_donem) - 1)
-
                     aktif_prev = aktif_df[["Kod", "Açıklama", "Önceki Dönem"]].rename(columns={"Önceki Dönem": "Cari Dönem"})
                     pasif_prev = pasif_df[["Kod", "Açıklama", "Önceki Dönem"]].rename(columns={"Önceki Dönem": "Cari Dönem"})
-
                     veriler_prev = {
                         "aktif": aktif_prev.to_dict(orient="records"),
                         "pasif": pasif_prev.to_dict(orient="records"),
                         "toplamlar": veriler.get("toplamlar", {"AKTİF": {}, "PASİF": {}}),
                         "has_inflation": veriler.get("has_inflation", False)
                     }
-
-                    encrypted_prev = fernet.encrypt(
-                        json.dumps(veriler_prev, ensure_ascii=False).encode("utf-8")
-                    )
+                    encrypted_prev = fernet.encrypt(json.dumps(veriler_prev, ensure_ascii=False).encode("utf-8"))
 
                     c.execute("""
                         SELECT id FROM beyanname
@@ -987,7 +1064,7 @@ def kaydet_beyanname(sonuc, belge_turu):
                             UPDATE beyanname
                             SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
                             WHERE id=%s
-                        """, (encrypted_prev, exists_prev[0]))
+                        """, (encrypted_prev, exists_prev["id"] if isinstance(exists_prev, dict) else exists_prev[0]))
                         mesajlar.append({
                             "type": "info",
                             "title": "🔁 Önceki Dönem Güncellendi",
@@ -1003,28 +1080,17 @@ def kaydet_beyanname(sonuc, belge_turu):
                             "title": "➕ Önceki Dönem Eklendi",
                             "text": f"{file_unvan} / {onceki_yil} - BİLANÇO otomatik oluşturuldu."
                         })
-
                     conn.commit()
 
-            except Exception:
-                pass
-        
-        # 🔄 Ek olarak, eğer gelir tablosu dosyasında "önceki dönem" verisi varsa, onu da DB'ye yaz
-        elif belge_turu == "gelir":
-            try:
-                # Veriler list formatında mı kontrol et
+            elif belge_turu == "gelir":
                 tablo = veriler if isinstance(veriler, list) else veriler.get("tablo") or veriler.get("veriler") or []
                 df_gelir = pd.DataFrame(tablo)
 
-                # Eğer önceki dönem sütunu yoksa veya değerler sıfırsa, geç
                 if "onceki_donem" in df_gelir.columns and df_gelir["onceki_donem"].fillna(0).sum() != 0:
                     onceki_yil = str(int(file_donem) - 1)
-
-                    # Sadece önceki dönem sütununu "cari_donem" olarak yeniden adlandır
                     df_prev = df_gelir.copy()
                     df_prev["cari_donem"] = df_prev["onceki_donem"]
                     df_prev["onceki_donem"] = None
-
                     veriler_prev = [
                         {
                             "kod": row.get("kod"),
@@ -1034,10 +1100,7 @@ def kaydet_beyanname(sonuc, belge_turu):
                         }
                         for _, row in df_prev.iterrows()
                     ]
-
-                    encrypted_prev = fernet.encrypt(
-                        json.dumps(veriler_prev, ensure_ascii=False).encode("utf-8")
-                    )
+                    encrypted_prev = fernet.encrypt(json.dumps(veriler_prev, ensure_ascii=False).encode("utf-8"))
 
                     c.execute("""
                         SELECT id FROM beyanname
@@ -1050,7 +1113,7 @@ def kaydet_beyanname(sonuc, belge_turu):
                             UPDATE beyanname
                             SET veriler=%s, yuklenme_tarihi=CURRENT_TIMESTAMP
                             WHERE id=%s
-                        """, (encrypted_prev, exists_prev[0]))
+                        """, (encrypted_prev, exists_prev["id"] if isinstance(exists_prev, dict) else exists_prev[0]))
                         mesajlar.append({
                             "type": "info",
                             "title": "🔁 Önceki Dönem Güncellendi",
@@ -1066,14 +1129,13 @@ def kaydet_beyanname(sonuc, belge_turu):
                             "title": "➕ Önceki Dönem Eklendi",
                             "text": f"{file_unvan} / {onceki_yil} - GELİR TABLOSU otomatik oluşturuldu."
                         })
-
                     conn.commit()
 
-
-            except Exception:
-                pass
+        except Exception:
+            pass
 
     return mesajlar
+
 
 
 @app.route("/pdf-belgeler-tablo/<string:tur>", methods=["GET"])

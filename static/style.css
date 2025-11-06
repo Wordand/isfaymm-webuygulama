@@ -1416,3 +1416,21 @@ html {
 #blog {
   scroll-margin-top: 100px;
 }
+
+
+
+
+
+
+/* 🔹 Pasif (gri) input görünümü */
+.disabled-input {
+  background-color: #f5f5f5 !important;
+  color: #888 !important;
+  pointer-events: none !important;
+  opacity: 0.8 !important;
+}
+
+/* 🔹 Pasif input'larda placeholder rengi daha soluk */
+.disabled-input::placeholder {
+  color: #aaa !important;
+}

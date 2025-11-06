@@ -1,124 +1,350 @@
 import os
+import sqlite3
 from psycopg2 import pool, extras
+from contextlib import contextmanager
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- PostgreSQL bağlantı havuzu ---
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL bulunamadı. Render Environment ayarını kontrol et.")
+# ============================================================
+# 🌍 Ortam Algılama
+# ============================================================
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+FLASK_ENV = os.getenv("FLASK_ENV", "development").lower()
+DEBUG_MODE = FLASK_ENV == "development" or os.getenv("FLASK_DEBUG", "0") == "1"
 
-# Bağlantı havuzu (1–10 arası aktif bağlantı tutar)
-db_pool = pool.SimpleConnectionPool(
-    1, 10, DATABASE_URL, cursor_factory=extras.RealDictCursor
-)
+USE_SQLITE = DATABASE_URL.startswith("sqlite:///") or DEBUG_MODE
 
+if USE_SQLITE:
+    DB_PATH = DATABASE_URL.replace("sqlite:///", "") or "instance/database.db"
+    print(f"🧩 Yerel ortam algılandı — SQLite kullanılacak ({DB_PATH})")
+else:
+    print("☁️ Production ortam algılandı — Supabase PostgreSQL kullanılacak")
+
+_db_pool = None
+
+
+# ============================================================
+# 🔗 PostgreSQL Bağlantı Havuzu
+# ============================================================
+def get_pool():
+    global _db_pool
+    if _db_pool is None and not USE_SQLITE:
+        _db_pool = pool.SimpleConnectionPool(
+            1, 5,
+            DATABASE_URL,
+            cursor_factory=extras.RealDictCursor
+        )
+    return _db_pool
+
+
+# ============================================================
+# 🧩 PostgreSQL-benzeri SQLite Wrapper
+# ============================================================
+class FakeCursor:
+    def __init__(self, sqlite_cursor):
+        self.sqlite_cursor = sqlite_cursor
+
+    def execute(self, query, params=None):
+        q = query.replace("%s", "?")
+        self.sqlite_cursor.execute(q, params or ())
+
+    def fetchall(self):
+        return [dict(row) for row in self.sqlite_cursor.fetchall()]
+
+    def fetchone(self):
+        row = self.sqlite_cursor.fetchone()
+        return dict(row) if row else None
+
+    @property
+    def description(self):
+        if self.sqlite_cursor.description:
+            return [(col[0],) for col in self.sqlite_cursor.description]
+        return []
+
+    @property
+    def lastrowid(self):
+        return self.sqlite_cursor.lastrowid
+
+    def close(self):
+        self.sqlite_cursor.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+
+class FakeConnection:
+    def __init__(self, path):
+        self.conn = sqlite3.connect(path)
+        self.conn.row_factory = sqlite3.Row
+
+    def cursor(self, *args, **kwargs):
+        return FakeCursor(self.conn.cursor())
+
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
+    def close(self):
+        self.conn.close()
+
+
+# ============================================================
+# 🔒 get_conn() — Ortama Göre Bağlantı
+# ============================================================
+@contextmanager
 def get_conn():
     """
-    Havuzdan bir bağlantı alır.
-    Her sorguda yeniden bağlantı açmak yerine bu havuzu kullanır.
+    Ortama göre (SQLite veya PostgreSQL) bağlantı döndürür.
+    PostgreSQL'de her cursor otomatik olarak RealDictCursor olur.
     """
-    global db_pool  # ✅ global tanımı fonksiyonun başında olmalı
+    if USE_SQLITE:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+        conn = FakeConnection(DB_PATH)
+        try:
+            yield conn
+        finally:
+            conn.close()
+    else:
+        conn = get_pool().getconn()
+        try:
+            # ✅ Her cursor RealDictCursor olarak dönecek
+            conn.cursor_factory = extras.RealDictCursor
+            yield conn
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            get_pool().putconn(conn)
 
-    try:
-        return db_pool.getconn()
-    except Exception:
-        # Hatalı bağlantı olursa havuzu yeniden kur
-        db_pool = pool.SimpleConnectionPool(1, 10, DATABASE_URL, cursor_factory=extras.RealDictCursor)
-        return db_pool.getconn()
-
-def put_conn(conn):
-    """
-    Kullanım bittiğinde bağlantıyı havuza geri verir.
-    (Normalde 'with' kullanılmazsa manuel çağrılabilir.)
-    """
-    if conn:
-        db_pool.putconn(conn)
 
 
 
+# ============================================================
+# 📚 Yardımcı Fonksiyonlar
+# ============================================================
+def fetch_all(query, params=None):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params or ())
+            return cur.fetchall()
 
-def migrate_tesvik_columns():
-    """
-    tesvik_belgeleri tablosunda eksik sütunları kontrol eder ve ekler.
-    PostgreSQL için uygun hale getirilmiştir.
-    """
+
+def execute(query, params=None):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, params or ())
+        conn.commit()
+
+
+# ============================================================
+# 🧱 migrate_* Fonksiyonları
+# ============================================================
+def migrate_users_table():
+    """users tablosuna is_approved ekler (varsa atlar)."""
     with get_conn() as conn:
         cur = conn.cursor()
 
-        # Mevcut sütun adlarını al
-        cur.execute("""
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'tesvik_belgeleri';
-        """)
-        existing = {row['column_name'] for row in cur.fetchall()}
+        if USE_SQLITE:
+            cur.execute("PRAGMA table_info(users)")
+            existing = {r["name"] for r in cur.fetchall()}
+        else:
+            cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='users'")
+            existing = {r["column_name"] for r in cur.fetchall()}
+
+        if "is_approved" not in existing:
+            print("🆕 'is_approved' sütunu ekleniyor...")
+            cur.execute('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0;')
+            conn.commit()
+        else:
+            print("✅ users tablosu zaten güncel.")
+
+
+def migrate_tesvik_columns():
+    """tesvik_belgeleri tablosuna eksik sütunları ekler."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+
+        if USE_SQLITE:
+            cur.execute("PRAGMA table_info(tesvik_belgeleri)")
+            existing = {r["name"] for r in cur.fetchall()}
+        else:
+            cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='tesvik_belgeleri'")
+            existing = {r["column_name"] for r in cur.fetchall()}
 
         to_add = {
-            "belge_no":                   "TEXT",
-            "belge_tarihi":               "TEXT",
-            "karar":                      "TEXT",
-            "yatirim_turu1":              "TEXT",
-            "yatirim_turu2":              "TEXT",
-            "toplam_tutar":               "DOUBLE PRECISION",
-            "katki_orani":                "DOUBLE PRECISION",
-            "vergi_orani":                "DOUBLE PRECISION",
-            "bolge":                      "TEXT",
-            "diger_oran":                 "DOUBLE PRECISION",
-            "katki_tutari":               "DOUBLE PRECISION",
-            "cari_harcama_tutari":        "DOUBLE PRECISION",
-            "toplam_harcama_tutari":      "DOUBLE PRECISION",
-            "fiili_katki_tutari":         "DOUBLE PRECISION",
-            "endeks_katki_tutari":        "DOUBLE PRECISION",
-            "onceki_yatirim_katki_tutari":"DOUBLE PRECISION",
-            "onceki_diger_katki_tutari":  "DOUBLE PRECISION",
-            "onceki_katki_tutari":        "DOUBLE PRECISION",
-            "cari_yatirim_katki":         "DOUBLE PRECISION",
-            "cari_diger_katki":           "DOUBLE PRECISION",
-            "cari_toplam_katki":          "DOUBLE PRECISION",
-            "genel_toplam_katki":         "DOUBLE PRECISION"
+            "yukleme_tarihi": "TEXT",
+            "belge_no": "TEXT",
+            "belge_tarihi": "TEXT",
+            "karar": "TEXT",
+            "yatirim_turu1": "TEXT",
+            "yatirim_turu2": "TEXT",
+            "program_turu": "TEXT",
+            "vize_durumu": "TEXT",
+            "donem": "TEXT",
+            "il": "TEXT",
+            "osb": "TEXT",
+            "bolge": "TEXT",
+            "katki_orani": "REAL",
+            "vergi_orani": "REAL",
+            "diger_oran": "REAL",
+            "toplam_tutar": "REAL",
+            "katki_tutari": "REAL",
+            "diger_katki_tutari": "REAL",
+            "cari_harcama_tutari": "REAL",
+            "toplam_harcama_tutari": "REAL",
+            "fiili_katki_tutari": "REAL",
+            "endeks_katki_tutari": "REAL",
+            "onceki_yatirim_katki_tutari": "REAL",
+            "onceki_diger_katki_tutari": "REAL",
+            "onceki_katki_tutari": "REAL",
+            "cari_yatirim_katki": "REAL",
+            "cari_diger_katki": "REAL",
+            "cari_toplam_katki": "REAL",
+            "genel_toplam_katki": "REAL",
+            "brut_satis": "REAL",
+            "ihracat": "REAL",
+            "imalat": "REAL",
+            "diger_faaliyet": "REAL",
+            "use_detailed_profit_ratios": "INTEGER DEFAULT 0"
         }
 
         for col, col_type in to_add.items():
             if col not in existing:
                 print(f"🆕 '{col}' sütunu ekleniyor...")
-                cur.execute(f'ALTER TABLE tesvik_belgeleri ADD COLUMN "{col}" {col_type};')
-
-        # Belgeler tablosu oluşturulmamışsa oluştur
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS belgeler (
-            id SERIAL PRIMARY KEY,
-            unvan TEXT NOT NULL,
-            donem TEXT NOT NULL,
-            belge_adi TEXT NOT NULL,
-            belge_turu TEXT NOT NULL,
-            dosya_yolu TEXT NOT NULL,
-            yuklenme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """)
+                cur.execute(f'ALTER TABLE tesvik_belgeleri ADD COLUMN "{col}" {col_type}')
 
         conn.commit()
-        print("✅ migrate_tesvik_columns tamamlandı.")
+        print("✅ tesvik_belgeleri tablosu güncel.")
 
 
-def migrate_users_table():
-    """
-    users tablosunda 'is_approved' sütunu yoksa ekler.
+def migrate_tesvik_kullanim_table():
+    """tesvik_kullanim tablosunu oluşturur (yoksa)."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+
+        if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS tesvik_kullanim (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                belge_no TEXT NOT NULL,
+                hesap_donemi INTEGER NOT NULL,
+                yatirim_kazanci REAL DEFAULT 0.0,
+                diger_kazanc REAL DEFAULT 0.0,
+                cari_yatirim_katkisi REAL DEFAULT 0.0,
+                cari_diger_katkisi REAL DEFAULT 0.0,
+                genel_toplam_katki REAL DEFAULT 0.0,
+                kalan_katki REAL DEFAULT 0.0,
+                kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, belge_no, hesap_donemi)
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS tesvik_kullanim (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                belge_no TEXT NOT NULL,
+                hesap_donemi INT NOT NULL,
+                yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
+                diger_kazanc DOUBLE PRECISION DEFAULT 0.0,
+                cari_yatirim_katkisi DOUBLE PRECISION DEFAULT 0.0,
+                cari_diger_katkisi DOUBLE PRECISION DEFAULT 0.0,
+                genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
+                kalan_katki DOUBLE PRECISION DEFAULT 0.0,
+                kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, belge_no, hesap_donemi)
+            );
+            """)
+
+        conn.commit()
+        print("✅ tesvik_kullanim tablosu kontrol edildi / oluşturuldu.")
+
+
+
+def migrate_profit_data_table():
+    """profit_data tablosuna (user_id, aciklama_index) için benzersiz kısıt ekler.
+    Hem SQLite hem PostgreSQL için uyumlu çalışır.
     """
     with get_conn() as conn:
         cur = conn.cursor()
-        cur.execute("""
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'users';
-        """)
-        existing = {row['column_name'] for row in cur.fetchall()}
+        try:
+            if USE_SQLITE:
+                # SQLite ortamı
+                cur.execute("PRAGMA table_info(profit_data)")
+                existing_cols = {r["name"] for r in cur.fetchall()}
 
-        if "is_approved" not in existing:
-            print("🛠️ 'is_approved' sütunu users tablosuna ekleniyor...")
-            cur.execute('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0;')
+                # Eğer tablo yoksa oluştur
+                if not existing_cols:
+                    print("🆕 profit_data tablosu oluşturuluyor (SQLite)...")
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS profit_data (
+                            user_id INTEGER NOT NULL,
+                            aciklama_index INTEGER NOT NULL,
+                            column_b REAL,
+                            column_c REAL,
+                            column_d REAL,
+                            column_e REAL,
+                            PRIMARY KEY (user_id, aciklama_index)
+                        );
+                    """)
+                    print("✅ profit_data tablosu oluşturuldu.")
+                else:
+                    # Tablo varsa, PRIMARY KEY yoksa yeniden oluştur
+                    cur.execute("""
+                        SELECT sql FROM sqlite_master 
+                        WHERE type='table' AND name='profit_data';
+                    """)
+                    table_sql = cur.fetchone()
+                    if table_sql and "PRIMARY KEY" not in str(table_sql["sql"]).upper():
+                        print("🛠️ SQLite: PRIMARY KEY ekleniyor (profit_data)...")
+                        cur.execute("PRAGMA foreign_keys=off;")
+                        cur.execute("""
+                            CREATE TABLE profit_data_new (
+                                user_id INTEGER NOT NULL,
+                                aciklama_index INTEGER NOT NULL,
+                                column_b REAL,
+                                column_c REAL,
+                                column_d REAL,
+                                column_e REAL,
+                                PRIMARY KEY (user_id, aciklama_index)
+                            );
+                        """)
+                        cur.execute("""
+                            INSERT OR IGNORE INTO profit_data_new
+                            SELECT user_id, aciklama_index, column_b, column_c, column_d, column_e
+                            FROM profit_data;
+                        """)
+                        cur.execute("DROP TABLE profit_data;")
+                        cur.execute("ALTER TABLE profit_data_new RENAME TO profit_data;")
+                        cur.execute("PRAGMA foreign_keys=on;")
+                        print("✅ SQLite: PRIMARY KEY (user_id, aciklama_index) eklendi.")
+                    else:
+                        print("✅ profit_data tablosu zaten güncel (SQLite).")
+
+            else:
+                # PostgreSQL ortamı
+                cur.execute("""
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM pg_constraint
+                            WHERE conname = 'profit_data_user_idx_unique'
+                        ) THEN
+                            ALTER TABLE profit_data
+                            ADD CONSTRAINT profit_data_user_idx_unique
+                            UNIQUE (user_id, aciklama_index);
+                        END IF;
+                    END$$;
+                """)
+                print("✅ PostgreSQL: UNIQUE constraint kontrol edildi / eklendi.")
+
             conn.commit()
-            print("✅ 'is_approved' sütunu başarıyla eklendi.")
-        else:
-            print("✅ 'is_approved' sütunu zaten mevcut.")
+        except Exception as e:
+            print(f"⚠️ migrate_profit_data_table hatası: {e}")
