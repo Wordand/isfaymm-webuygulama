@@ -716,7 +716,18 @@ def form_kaydet():
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    VALUES (
+                        %s,%s,%s,%s,
+                        %s,%s,%s,%s,
+                        %s,%s,%s,%s,%s,
+                        %s,%s,%s,
+                        %s,%s,%s,
+                        %s,%s,
+                        %s,%s,
+                        %s,%s,%s,
+                        %s,%s,%s,%s,
+                        %s,%s,%s,%s,%s
+                    )
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
