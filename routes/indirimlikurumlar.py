@@ -8,6 +8,7 @@ import tempfile
 import os
 import shutil
 import json
+import traceback
 
 from datetime import datetime
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, flash, make_response, current_app, send_file, jsonify
@@ -716,18 +717,7 @@ def form_kaydet():
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                     )
-                    VALUES (
-                        %s,%s,%s,%s,
-                        %s,%s,%s,%s,
-                        %s,%s,%s,%s,%s,
-                        %s,%s,%s,
-                        %s,%s,%s,
-                        %s,%s,
-                        %s,%s,
-                        %s,%s,%s,
-                        %s,%s,%s,%s,
-                        %s,%s,%s,%s,%s
-                    )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
@@ -740,6 +730,7 @@ def form_kaydet():
                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                 ))
+
 
                 from services.db import USE_SQLITE
                 if USE_SQLITE:
@@ -761,11 +752,12 @@ def form_kaydet():
 
         except Exception as e:
             conn.rollback()
-            print(f"❌ Hata: {e}")
+            print("❌ Hata Ayrıntısı:")
+            traceback.print_exc()   # >>> gerçek hatayı server loguna yazar
             return jsonify({
                 "status": "error",
                 "title": "Kayıt Hatası!",
-                "message": f"Veritabanı hatası: {str(e)}"
+                "message": f"Veritabanı hatası: {repr(e)}"   # <<< gerçek hata metni gelir
             })
 
 
