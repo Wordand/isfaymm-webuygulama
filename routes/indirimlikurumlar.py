@@ -720,7 +720,7 @@ def form_kaydet():
                 if not row:
                     raise Exception("INSERT başarılı fakat RETURNING id boş döndü!")
 
-                tesvik_id = row[0]
+                tesvik_id = row["id"]
                 session["current_tesvik_id"] = tesvik_id
                 conn.commit()
                 print(f"✅ Yeni belge oluşturuldu: ID={tesvik_id}")
@@ -771,6 +771,10 @@ def get_all_tesvik_docs(user_id: int):
 
         colnames = [desc[0] for desc in c.description]
         return [dict(zip(colnames, row)) for row in rows]
+
+
+
+
 
 
 @bp.route('/tesvik', methods=['GET', 'POST'])
