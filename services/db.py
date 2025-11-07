@@ -13,7 +13,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 FLASK_ENV = os.getenv("FLASK_ENV", "development").lower()
 DEBUG_MODE = FLASK_ENV == "development" or os.getenv("FLASK_DEBUG", "0") == "1"
 
-USE_SQLITE = DATABASE_URL.startswith("sqlite:///") or DEBUG_MODE
+USE_SQLITE = DATABASE_URL.startswith("sqlite:///")
 
 if USE_SQLITE:
     DB_PATH = DATABASE_URL.replace("sqlite:///", "") or "instance/database.db"

@@ -702,7 +702,7 @@ def form_kaydet():
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                     )
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    RETURNING id
+                    RETURNING id;
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
@@ -743,8 +743,6 @@ def form_kaydet():
 
 
 
-
-
 def get_all_tesvik_docs(user_id: int):
     """Kullanıcının teşvik belgelerini döndürür (hem SQLite hem PostgreSQL uyumlu)."""
     with get_conn() as conn:
@@ -753,7 +751,7 @@ def get_all_tesvik_docs(user_id: int):
             """
             SELECT
                 id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
-                karar, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
+                karar, program_turu, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
                 katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
                 cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
                 onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
@@ -768,15 +766,11 @@ def get_all_tesvik_docs(user_id: int):
 
         rows = c.fetchall()
 
-        # 🔹 Eğer zaten dict döndüyse (FakeCursor veya RealDictCursor) doğrudan ver
         if rows and isinstance(rows[0], dict):
             return rows
 
-        # 🔹 Aksi halde kolon isimlerinden dict oluştur
         colnames = [desc[0] for desc in c.description]
         return [dict(zip(colnames, row)) for row in rows]
-
-
 
 
 @bp.route('/tesvik', methods=['GET', 'POST'])
@@ -787,25 +781,33 @@ def tesvik():
     # 🔹 Tüm belgeleri listele
     docs = get_all_tesvik_docs(user_id)
 
-    # 🔹 Eğer URL'de ?view=ID varsa detay moduna geç
+    # 🔹 Eğer ?view=ID varsa detay moduna geç
     view_id = request.args.get('view', type=int)
     edit_doc = None
 
     if view_id:
-        # Daha güvenli: DB'den o belgeyi doğrudan çekelim
         with get_conn() as conn:
             c = conn.cursor()
             c.execute("""
-                SELECT *
+                SELECT
+                    id, user_id, mukellef_id, yukleme_tarihi,
+                    belge_no, belge_tarihi, karar, program_turu,
+                    yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
+                    katki_orani, vergi_orani, diger_oran,
+                    toplam_tutar, katki_tutari, diger_katki_tutari,
+                    cari_harcama_tutari, toplam_harcama_tutari,
+                    fiili_katki_tutari, endeks_katki_tutari,
+                    onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
+                    cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
+                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                 FROM tesvik_belgeleri
                 WHERE id = %s AND user_id = %s
             """, (view_id, user_id))
-            edit_doc = c.fetchone()
+            row = c.fetchone()
 
-        if edit_doc:
-            # Eğer SQLite kullanıyorsan Row → dict dönüştürelim
-            if not isinstance(edit_doc, dict):
-                edit_doc = dict(edit_doc)
+        if row:
+            colnames = [desc[0] for desc in c.description]  # cursor.description okunduğunda saklanmış olur
+            edit_doc = dict(zip(colnames, row))              # ✅ tuple → dict dönüşümü
             print(f"🔍 Detay görüntüleniyor: {edit_doc.get('belge_no')} (ID: {view_id})")
         else:
             flash("Belge bulunamadı veya erişim yetkiniz yok.", "warning")
@@ -814,27 +816,38 @@ def tesvik():
 
 
 
-
-
-
 @bp.route('/tesvik/delete/<int:doc_id>', methods=['POST'])
 @login_required
 def delete_tesvik(doc_id):
     user_id = session.get("user_id")
+
     with get_conn() as conn:
         c = conn.cursor()
         try:
-            c.execute("DELETE FROM tesvik_belgeleri WHERE id=%s AND user_id=%s", (doc_id, user_id))
+            # 🟢 Önce silinen belge aktif belgemiz miydi?
+            if session.get("current_tesvik_id") == doc_id:
+                session.pop("current_tesvik_id", None)  # ✅ temizle
+
+            c.execute(
+                "DELETE FROM tesvik_belgeleri WHERE id=%s AND user_id=%s",
+                (doc_id, user_id)
+            )
             conn.commit()
-            # flash('Belge silindi.', 'warning')
-            return jsonify({"status": "success", "title": "Silindi!", "message": "Belge başarıyla silindi."})
+
+            return jsonify({
+                "status": "success",
+                "title": "Silindi!",
+                "message": "Belge başarıyla silindi."
+            })
+
         except Exception as e:
             conn.rollback()
-            print(f"Belge silinirken hata oluştu: {e}")
-            return jsonify({"status": "error", "title": "Hata!", "message": f"Belge silinirken bir hata oluştu: {str(e)}"})
-    # return redirect(url_for('indirimlikurumlar.tesvik')) # Bu satır artık kullanılmayacak
-
-
+            print(f"❌ Belge silinirken hata oluştu: {e}")
+            return jsonify({
+                "status": "error",
+                "title": "Hata!",
+                "message": f"Belge silinirken hata oluştu: {str(e)}"
+            })
 
 
 
@@ -849,91 +862,64 @@ def download_tesvik_pdf(doc_id):
         c.execute("""
             SELECT
                 id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
-                karar, yatirim_turu1, yatirim_turu2, program_turu, vize_durumu, donem, il, osb, bolge,
-                katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
-                cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
+                karar, program_turu, yatirim_turu1, yatirim_turu2,
+                vize_durumu, donem, il, osb, bolge,
+                katki_orani, vergi_orani, diger_oran,
+                toplam_tutar, katki_tutari, diger_katki_tutari,
+                cari_harcama_tutari, toplam_harcama_tutari,
+                fiili_katki_tutari, endeks_katki_tutari,
                 onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                 cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                 brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
             FROM tesvik_belgeleri
             WHERE id = %s AND user_id = %s
         """, (doc_id, user_id))
+
         row = c.fetchone()
+        if not row:
+            return jsonify({"status": "error", "title": "Hata!", "message": "Belge bulunamadı."}), 404
 
-    if not row:
-        return jsonify({
-            "status": "error",
-            "title": "Hata!",
-            "message": "Belge bulunamadı."
-        }), 404
+        # 🟢 Burada cursor hala açık → güvenli dict dönüşümü
+        if isinstance(row, dict):
+            data_dict = row
+        else:
+            colnames = [desc[0] for desc in c.description]
+            data_dict = dict(zip(colnames, row))
 
-    # PostgreSQL tarafında RealDictCursor kullanıldığı için fetchone() zaten dict döner
-    if isinstance(row, dict):
-        data_dict = row
-    else:
-        cols = [d[0] for d in c.description]
-        data_dict = dict(zip(cols, row))
-
+    # 🟢 Artık bağlantı kapansa da sorun yok
     data = SimpleNamespace(**data_dict)
 
     try:
-        # 2️⃣ wkhtmltopdf yolunu belirle
+        # 2️⃣ wkhtmltopdf yolu
         wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
-        if not wkhtml_path or not os.path.exists(wkhtml_path):
-            flash("❗ wkhtmltopdf bulunamadı.", "danger")
-            return jsonify({
-                "status": "error",
-                "title": "Eksik Araç",
-                "message": "PDF oluşturma için wkhtmltopdf bulunamadı. Lütfen yükleyin."
-            }), 500
+        if not wkhtml_path:
+            return jsonify({"status": "error", "title": "Eksik Araç", "message": "wkhtmltopdf bulunamadı."}), 500
 
         config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
 
-        # 3️⃣ HTML şablonunu oluştur
-        rendered = render_template(
-            "kv_tablosu_pdf.html",
-            data=data,
-            now=datetime.now  # 📅 tarih fonksiyonu şablona geçilir
-        )
+        # 3️⃣ HTML şablonu
+        rendered = render_template("kv_tablosu_pdf.html", data=data, now=datetime.now)
 
-        # 4️⃣ PDF oluştur (geçici dosyaya)
+        # 4️⃣ PDF oluşturma (geçici dosya)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
-            pdfkit.from_string(
-                rendered,
-                tmpfile.name,
-                configuration=config,
-                options={
-                    "page-size": "A4",
-                    "encoding": "UTF-8",
-                    "enable-local-file-access": "",
-                    "margin-top": "15mm",
-                    "margin-bottom": "15mm",
-                    "margin-left": "12mm",
-                    "margin-right": "12mm",
-                    "dpi": 300,
-                    "zoom": "1.05",
-                    "print-media-type": None,
-                },
-            )
+            pdfkit.from_string(rendered, tmpfile.name, configuration=config, options={
+                "page-size": "A4",
+                "encoding": "UTF-8",
+                "enable-local-file-access": "",
+                "margin-top": "15mm", "margin-bottom": "15mm",
+                "margin-left": "12mm", "margin-right": "12mm",
+                "dpi": 300,
+            })
             tmpfile.flush()
 
-        # 5️⃣ PDF’i kullanıcıya gönder
-        dosya_adi = f"tesvik_{data.belge_no or doc_id}.pdf"
-        return send_file(
-            tmpfile.name,
-            mimetype="application/pdf",
-            as_attachment=True,
-            download_name=dosya_adi
-        )
+        # 5️⃣ Kullanıcıya gönder
+        filename = f"tesvik_{data.belge_no or doc_id}.pdf"
+        return send_file(tmpfile.name, mimetype="application/pdf", as_attachment=True, download_name=filename)
 
     except Exception as e:
         print(f"⚠️ PDF oluşturma hatası: {e}")
-        return jsonify({
-            "status": "error",
-            "title": "PDF Hatası!",
-            "message": f"PDF oluşturulurken bir hata oluştu: {str(e)}"
-        }), 500
-        
+        return jsonify({"status": "error", "title": "PDF Hatası!", "message": str(e)}), 500
+
         
         
         
@@ -970,10 +956,12 @@ def upload_kv_beyan():
                     if e["alan"] == alan:
                         return e["deger"]
                 return ''
+
             return {
                 'belge_no':    find_deger('Teşvik Belgesi Numarası'),
                 'karar':       find_deger('Teşvik Belgesinin Hangi Karara Göre Düzenlendiği'),
                 'belge_tarihi':find_deger('Yatırıma Başlama Tarihi'),
+                'program_turu': find_deger('Program Türü') or find_deger('Programın Türü'),
                 'yatirim_turu1': find_deger('Yatırımın Türü 1'),
                 'yatirim_turu2': find_deger('Yatırımın Türü 2'),
                 'toplam_tutar': find_deger('Toplam Yatırım Tutarı (İndirimli KV Kapsamında Olmayan Harcamalar Hariç)'),
@@ -989,11 +977,8 @@ def upload_kv_beyan():
                 'onceki_yatirim_katki_tutari': find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)'),
                 'onceki_diger_katki_tutari':   find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)'),
                 'onceki_katki_tutari':         find_deger('Önceki Dönemlerde Yararlanılan Toplam Yatırıma Katkı Tutarı'),
-                'cari_yatirim_katki':    find_deger('Cari Dönemde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)'),
-                'cari_diger_katki':      find_deger('Cari Dönemde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)'),
-                'cari_toplam_katki':     find_deger('Cari Dönemde Yararlanılan Toplam Yatırıma Katkı Tutarı'),
-                'genel_toplam_katki':    find_deger('Cari Dönem Dahil Olmak Üzere Yararlanılan Toplam Yatırıma Katkı Tutarı'),
             }
+
 
         if len(tablolar) > 1:
             parsed_list = []
