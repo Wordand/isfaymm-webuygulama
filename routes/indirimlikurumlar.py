@@ -585,8 +585,6 @@ def index():
 
 
 
-
-
 @bp.route("/form", methods=["POST"])
 @login_required
 def form_kaydet():
@@ -601,12 +599,20 @@ def form_kaydet():
             "message": "Lütfen önce bir mükellef seçiniz."
         }), 400
 
-    # 🧭 1️⃣ Teşvik ID (güncelleme mi yeni kayıt mı?)
+    # Teşvik ID tespiti
     tesvik_id = session.get("current_tesvik_id") or request.form.get("tesvik_id")
-    tesvik_id = int(tesvik_id) if tesvik_id and tesvik_id.isdigit() else None
+    tesvik_id = int(tesvik_id) if tesvik_id and str(tesvik_id).isdigit() else None
     print(f"→ Aktif Teşvik ID: {tesvik_id}")
 
-    # 🧾 2️⃣ Form verileri
+    # Yardımcı fonksiyon
+    def parse_amount(field):
+        s = (request.form.get(field) or "0").replace(".", "").replace(",", ".")
+        try: 
+            return float(s)
+        except:
+            return 0.0
+
+    # Form alanları
     belge_no = request.form.get("belge_no") or "(otomatik)"
     belge_tarihi = request.form.get("belge_tarihi") or ""
     karar = request.form.get("karar")
@@ -619,13 +625,6 @@ def form_kaydet():
     osb = request.form.get("osb")
     bolge = request.form.get("bolge")
 
-    # 🧮 Sayı parse fonksiyonu
-    def parse_amount(field):
-        s = (request.form.get(field) or "0").replace(".", "").replace(",", ".")
-        try: return float(s)
-        except: return 0.0
-
-    # 💡 9903 hesaplama
     if karar == "2025/9903":
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
         katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0))
@@ -636,7 +635,6 @@ def form_kaydet():
         vergi_orani = parse_amount("vergi_orani")
         diger_oran = parse_amount("diger_oran")
 
-    # 💰 Sayısallar
     toplam_tutar = parse_amount("toplam_tutar")
     katki_tutari = parse_amount("katki_tutari")
     diger_katki_tutari = parse_amount("diger_katki_tutari")
@@ -660,7 +658,6 @@ def form_kaydet():
     with get_conn() as conn:
         c = conn.cursor()
         try:
-            # 🟡 GÜNCELLEME
             if tesvik_id:
                 c.execute("""
                     UPDATE tesvik_belgeleri
@@ -690,7 +687,6 @@ def form_kaydet():
                 ))
                 conn.commit()
 
-            # 🆕 YENİ KAYIT
             else:
                 c.execute("""
                     INSERT INTO tesvik_belgeleri (
@@ -720,7 +716,11 @@ def form_kaydet():
                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
                 ))
 
-                tesvik_id = c.fetchone()[0]
+                row = c.fetchone()
+                if not row:
+                    raise Exception("INSERT başarılı fakat RETURNING id boş döndü!")
+
+                tesvik_id = row[0]
                 session["current_tesvik_id"] = tesvik_id
                 conn.commit()
                 print(f"✅ Yeni belge oluşturuldu: ID={tesvik_id}")
@@ -740,7 +740,6 @@ def form_kaydet():
                 "title": "Kayıt Hatası!",
                 "message": f"Veritabanı hatası: {repr(e)}"
             })
-
 
 
 
