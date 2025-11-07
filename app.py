@@ -57,6 +57,7 @@ from services.db import (
     migrate_tesvik_columns,
     migrate_users_table,
     migrate_tesvik_kullanim_table,
+    migrate_login_logs_table,
     migrate_profit_data_table
 )
 from routes.indirimlikurumlar import bp as indirim_bp
@@ -140,6 +141,7 @@ def bootstrap_admin_from_env():
 with app.app_context():
     try:
         migrate_users_table()   
+        migrate_login_logs_table()
         migrate_tesvik_columns()
         migrate_tesvik_kullanim_table()
         migrate_profit_data_table()
@@ -162,6 +164,17 @@ app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
 app.secret_key = config.SECRET_KEY
 fernet = Fernet(config.FERNET_KEY)
+
+
+
+# 🕓 Oturum süresini kalıcı yapabilmek için
+app.config['SESSION_PERMANENT'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['SESSION_COOKIE_NAME'] = 'isfa_session'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+
 
 app.debug = os.getenv("FLASK_DEBUG", "0") == "1"
 
@@ -266,8 +279,8 @@ def register():
             with get_conn() as conn:
                 c = conn.cursor()
                 c.execute(
-                    "INSERT INTO users (username, password) VALUES (%s, %s)",
-                    (username, hashed_password)
+                    "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
+                    (username, hashed_password, 'user')
                 )
                 conn.commit()
             flash("Kayıt başarılı! Giriş yapabilirsiniz.", "success")
@@ -299,24 +312,65 @@ def login():
         with get_conn() as conn:
             c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute(
-                "SELECT id, password, is_approved FROM users WHERE username = %s",
+                "SELECT id, password, is_approved, is_suspended, role FROM users WHERE username = %s",
                 (username,)
             )
             result = c.fetchone()
 
+        # 🔍 Kullanıcı bulunduysa
         if result and check_password_hash(result["password"], password):
             user_id = result["id"]
+            log_login_attempt(username, success=True, user_id=user_id)
             is_approved = result["is_approved"]
+            is_suspended = result.get("is_suspended", 0)
+            
+            # 🛡️ Ek güvenlik: admin rolü sadece sistem yöneticisine aittir
+            if result.get("role") == "admin" and username.lower() != "admin":
+                flash("Admin rolü yalnızca sistem yöneticisine ayrılmıştır.", "danger")
+                return render_template("login.html")
 
+            # Onaylı değilse
             if is_approved == 0:
                 flash("Hesabınız henüz admin tarafından onaylanmadı.", "warning")
                 return render_template("login.html")
 
+            # Askıya alınmışsa
+            if is_suspended == 1:
+                flash("Hesabınız askıya alınmıştır. Lütfen yöneticiyle iletişime geçin.", "danger")
+                return render_template("login.html")
+
+
+            
+            
+
+            # ✅ Giriş başarılı
             session.clear()
             session["user_id"] = user_id
             session["username"] = username
             session["logged_in"] = True
-            session.permanent = True
+
+            remember = request.form.get("remember")
+
+            # 🕒 Session süresi: 30 dk veya 30 gün
+            if remember:
+                app.permanent_session_lifetime = timedelta(days=30)
+                session.permanent = True
+            else:
+                app.permanent_session_lifetime = timedelta(minutes=30)
+                session.permanent = False
+
+
+            # 🕒 Son giriş tarihini güncelle
+            with get_conn() as conn:
+                c = conn.cursor()
+
+                # Ortam türüne göre SQL ifadesi seçelim
+                if "sqlite3" in conn.__class__.__module__:
+                    c.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s", (user_id,))
+                else:
+                    c.execute("UPDATE users SET last_login = NOW() WHERE id = %s", (user_id,))
+
+                conn.commit()
 
             flash(f"Hoş geldiniz, {username}!", "success")
 
@@ -326,6 +380,7 @@ def login():
                 return redirect(url_for("home"))
 
         else:
+            log_login_attempt(username, success=False)
             flash("Hatalı kullanıcı adı veya şifre.", "danger")
 
     return render_template("login.html")
@@ -337,6 +392,36 @@ def logout():
     flash("Başarıyla çıkış yaptınız.", "info")
     return redirect(url_for("home"))
 
+
+
+def log_login_attempt(username, success, user_id=None):
+    with get_conn() as conn:
+        c = conn.cursor()
+        ip = request.remote_addr
+        agent = request.headers.get("User-Agent", "Bilinmiyor")[:255]
+
+        # PostgreSQL ve SQLite uyumlu olacak şekilde boolean değeri gönderiyoruz
+        c.execute(
+            "INSERT INTO login_logs (user_id, username, ip_address, user_agent, success) VALUES (%s, %s, %s, %s, %s)",
+            (user_id, username, ip, agent, bool(success))
+        )
+        conn.commit()
+
+        
+        
+@app.route("/admin/login_logs")
+@login_required
+def login_logs():
+    if session.get("username", "").lower() != "admin":
+        flash("Bu sayfaya erişim izniniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("SELECT * FROM login_logs ORDER BY id DESC LIMIT 100")
+        logs = c.fetchall()
+
+    return render_template("admin_login_logs.html", logs=logs)
 
 
 @app.route("/")
@@ -368,11 +453,34 @@ def admin_users():
         flash("Bu sayfaya erişim izniniz yok.", "danger")
         return redirect(url_for("home"))
 
+    q = request.args.get("q", "").strip()
+    status = request.args.get("status")
+    role = request.args.get("role")
+
+    query = "SELECT id, username, is_approved, is_suspended, role, created_at, last_login, admin_notes FROM users WHERE 1=1"
+    params = []
+
+    if q:
+        query += " AND username ILIKE %s"
+        params.append(f"%{q}%")
+
+    if status in ("0", "1"):
+        query += " AND is_approved = %s"
+        params.append(status)
+
+    if role in ("admin", "editor", "user"):
+        query += " AND role = %s"
+        params.append(role)
+
+    query += " ORDER BY id DESC"
+
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT id, username, is_approved FROM users")
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute(query, tuple(params))
         users = c.fetchall()
+
     return render_template("admin_users.html", users=users)
+
 
 
 @app.route("/admin/approve/<int:user_id>")
@@ -403,7 +511,7 @@ def reject_user(user_id):
         # Kullanıcı adı admin olan hesap silinemez
         c.execute("SELECT username FROM users WHERE id = %s", (user_id,))
         row = c.fetchone()
-        if row and row[0].lower() == "admin":
+        if row and row["username"].lower() == "admin":
             flash("Admin hesabı silinemez ❌", "warning")
             return redirect(url_for("admin_users"))
 
@@ -414,7 +522,67 @@ def reject_user(user_id):
     flash("Kullanıcı kaydı silindi ❌", "info")
     return redirect(url_for("admin_users"))
 
+# --- Admin: Gelişmiş Kullanıcı Yönetimi (askıya alma, rol değişimi, ad düzenleme) ---
+@app.route('/admin/update_username/<int:user_id>', methods=['POST'])
+@login_required
+def update_username(user_id):
+    if session.get("username", "").lower() != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
 
+    new_username = request.form.get('new_username', '').strip()
+    if not new_username:
+        flash("Yeni kullanıcı adı boş olamaz.", "warning")
+        return redirect(url_for('admin_users'))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE users SET username = %s WHERE id = %s", (new_username, user_id))
+        conn.commit()
+
+    flash("Kullanıcı adı başarıyla güncellendi ✅", "success")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/suspend/<int:user_id>')
+@login_required
+def suspend_user(user_id):
+    if session.get("username", "").lower() != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("""
+            UPDATE users
+            SET is_suspended = CASE WHEN is_suspended = 1 THEN 0 ELSE 1 END
+            WHERE id = %s
+        """, (user_id,))
+        conn.commit()
+
+    flash("Kullanıcının askıya alma durumu değiştirildi.", "info")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/change_role/<int:user_id>', methods=['POST'])
+@login_required
+def change_role(user_id):
+    if session.get("username", "").lower() != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("home"))
+
+    new_role = request.form.get('role')
+    if new_role not in ['editor', 'user']:
+        flash("Sadece 'Kullanıcı' veya 'Editör' rolü atanabilir.", "warning")
+        return redirect(url_for('admin_users'))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("UPDATE users SET role = %s WHERE id = %s", (new_role, user_id))
+        conn.commit()
+
+    flash("Kullanıcı rolü başarıyla güncellendi.", "success")
+    return redirect(url_for('admin_users'))
 
 
 
@@ -469,7 +637,6 @@ def change_password():
     return render_template("change_password.html")
 
 
-
 # --- Admin: herhangi bir kullanıcının şifresini sıfırlama ---
 @app.route("/admin/reset_password/<int:user_id>", methods=["GET", "POST"])
 @login_required
@@ -479,8 +646,8 @@ def admin_reset_password(user_id):
         return redirect(url_for("home"))
 
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT id, username FROM users WHERE id = %s", (user_id,))
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("SELECT id, username, role FROM users WHERE id = %s", (user_id,))
         user = c.fetchone()
         if not user:
             flash("Kullanıcı bulunamadı.", "warning")
@@ -504,7 +671,7 @@ def admin_reset_password(user_id):
             return render_template("admin_reset_password.html", user=user)
 
         # Admin kendi hesabını sıfırlıyorsa ekstra onay (opsiyonel)
-        if user[1].lower() == "admin":
+        if user["username"].lower() == "admin":
             flash("Admin hesabını sadece admin değiştirebilir.", "danger")
             return redirect(url_for("admin_users"))
 
@@ -514,7 +681,7 @@ def admin_reset_password(user_id):
             c.execute("UPDATE users SET password = %s WHERE id = %s", (new_hash, user_id))
             conn.commit()
 
-        flash(f"{user[1]} kullanıcısının şifresi sıfırlandı.", "success")
+        flash(f"{user['username']} kullanıcısının şifresi başarıyla sıfırlandı.", "success")
         return redirect(url_for("admin_users"))
 
     return render_template("admin_reset_password.html", user=user)

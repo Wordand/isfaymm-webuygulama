@@ -11,9 +11,11 @@ load_dotenv()
 # ============================================================
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 FLASK_ENV = os.getenv("FLASK_ENV", "development").lower()
-DEBUG_MODE = FLASK_ENV == "development" or os.getenv("FLASK_DEBUG", "0") == "1"
+DEBUG_MODE = (FLASK_ENV == "development") or (os.getenv("FLASK_DEBUG", "0") == "1")
 
-USE_SQLITE = DATABASE_URL.startswith("sqlite:///")
+USE_SQLITE = DATABASE_URL.startswith("sqlite:///") or (
+    DEBUG_MODE and not DATABASE_URL.startswith("postgresql://")
+)
 
 if USE_SQLITE:
     DB_PATH = DATABASE_URL.replace("sqlite:///", "") or "instance/database.db"
@@ -23,16 +25,13 @@ else:
 
 _db_pool = None
 
-
-# ============================================================
-# 🔗 PostgreSQL Bağlantı Havuzu
-# ============================================================
 def get_pool():
     global _db_pool
     if _db_pool is None and not USE_SQLITE:
         _db_pool = pool.SimpleConnectionPool(
             1, 5,
             DATABASE_URL,
+            connect_timeout=5,  # ✅ Kullandık
             cursor_factory=extras.RealDictCursor
         )
     return _db_pool
@@ -46,7 +45,14 @@ class FakeCursor:
         self.sqlite_cursor = sqlite_cursor
 
     def execute(self, query, params=None):
+        # PostgreSQL sözdizimini SQLite uyumlu hale getir
         q = query.replace("%s", "?")
+
+        # 🔧 Ek düzeltmeler (SQLite ile tam uyumluluk)
+        q = q.replace("NOW()", "CURRENT_TIMESTAMP")  # <-- HATAYI GİDERİR
+        q = q.replace("ILIKE", "LIKE")               # case-insensitive aramalarda sorun çıkmasın
+        q = q.replace("TRUE", "1").replace("FALSE", "0")
+
         self.sqlite_cursor.execute(q, params or ())
 
     def fetchall(self):
@@ -74,6 +80,7 @@ class FakeCursor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
 
 
 class FakeConnection:
@@ -146,23 +153,84 @@ def execute(query, params=None):
 # 🧱 migrate_* Fonksiyonları
 # ============================================================
 def migrate_users_table():
-    """users tablosuna is_approved ekler (varsa atlar)."""
+    """
+    users tablosunu kontrol eder ve eksik sütunları ekler.
+    Hem SQLite hem PostgreSQL için tam uyumludur.
+    """
     with get_conn() as conn:
         cur = conn.cursor()
 
-        if USE_SQLITE:
-            cur.execute("PRAGMA table_info(users)")
-            existing = {r["name"] for r in cur.fetchall()}
-        else:
-            cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='users'")
-            existing = {r["column_name"] for r in cur.fetchall()}
+        try:
+            # PostgreSQL ortamı
+            cur.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE LOWER(table_name) = 'users';
+            """)
+            rows = cur.fetchall()
+            # Bazı sürümler dict döner, bazıları tuple
+            existing = {r["column_name"] if isinstance(r, dict) else r[0] for r in rows}
+        except Exception:
+            # SQLite ortamı
+            cur.execute("PRAGMA table_info(users);")
+            rows = cur.fetchall()
+            existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
 
-        if "is_approved" not in existing:
-            print("🆕 'is_approved' sütunu ekleniyor...")
-            cur.execute('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0;')
-            conn.commit()
+        # Eksik kolonlar
+        columns_to_add = [
+            ("is_approved", "INTEGER DEFAULT 0"),
+            ("is_suspended", "INTEGER DEFAULT 0"),
+            ("role", "TEXT DEFAULT 'user'"),
+            ("created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+            ("last_login", "TIMESTAMP NULL"),
+            ("admin_notes", "TEXT NULL"),
+        ]
+
+        # Sütunları sırayla kontrol et ve ekle
+        for name, definition in columns_to_add:
+            if name not in existing:
+                try:
+                    cur.execute(f"ALTER TABLE users ADD COLUMN {name} {definition};")
+                    print(f"🆕 '{name}' sütunu eklendi.")
+                except Exception as e:
+                    # Eğer zaten varsa ya da ALTER TABLE kısıtı varsa sessiz geç
+                    print(f"⚠️ '{name}' sütunu eklenemedi veya zaten mevcut: {e}")
+
+        conn.commit()
+        print("✅ users tablosu kontrol edildi / güncellendi.")
+
+
+
+
+def migrate_login_logs_table():
+    with get_conn() as conn:
+        c = conn.cursor()
+        if USE_SQLITE:
+            c.execute("""
+            CREATE TABLE IF NOT EXISTS login_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                username TEXT,
+                ip_address TEXT,
+                user_agent TEXT,
+                login_time TEXT DEFAULT CURRENT_TIMESTAMP,
+                success INTEGER DEFAULT 1
+            );
+            """)
         else:
-            print("✅ users tablosu zaten güncel.")
+            c.execute("""
+            CREATE TABLE IF NOT EXISTS login_logs (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                username TEXT,
+                ip_address TEXT,
+                user_agent TEXT,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                success BOOLEAN DEFAULT TRUE
+            );
+            """)
+        conn.commit()
+        print("✅ login_logs tablosu kontrol edildi / oluşturuldu.")
 
 
 def migrate_tesvik_columns():

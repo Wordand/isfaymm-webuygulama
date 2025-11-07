@@ -22,15 +22,22 @@ if DATABASE_URL.startswith("sqlite:///"):
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    # --- USERS TABLOSU ---
+
+    # --- USERS TABLOSU (SQLite) ---
     c.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        is_approved INTEGER DEFAULT 0
+        is_approved INTEGER DEFAULT 0,
+        is_suspended INTEGER DEFAULT 0,
+        role TEXT DEFAULT 'user',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        last_login TEXT,
+        admin_notes TEXT
     );
     """)
+
 
     # --- MÜKELLEF TABLOSU ---
     c.execute("""
@@ -151,13 +158,18 @@ print("☁️ Production ortam algılandı — PostgreSQL (Supabase) kullanılac
 conn = psycopg.connect(DATABASE_URL)
 cur = conn.cursor()
 
-# --- USERS TABLOSU ---
+# --- USERS TABLOSU (PostgreSQL) ---
 cur.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    is_approved INTEGER DEFAULT 0
+    is_approved INTEGER DEFAULT 0,
+    is_suspended INTEGER DEFAULT 0,
+    role TEXT DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    admin_notes TEXT
 );
 """)
 
