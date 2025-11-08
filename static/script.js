@@ -65,81 +65,36 @@ function uploadOverwrite(msg) {
         });
 }
 
-// --------------------------------------------------
-// Sidebar toggle & no-sidebar-layout kontrolü
-// --------------------------------------------------
+
+
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const body = document.body;
     const mobileOverlay = document.getElementById('mobile-overlay');
-    const toggleBtn = document.querySelector('.toggle-btn');
 
+    // Ana sayfa gibi sidebar'sız sayfalarda çalışmasın
     if (body.classList.contains('no-sidebar-layout')) return;
 
+    // 💻 Masaüstü görünüm
     if (window.innerWidth > 768) {
         sidebar.classList.toggle('collapsed');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', sidebar.classList.contains('collapsed'));
-    } else {
+    } 
+    // 📱 Mobil görünüm
+    else {
         body.classList.toggle('mobile-menu-open');
         if (body.classList.contains('mobile-menu-open')) {
             mobileOverlay.style.display = 'block';
-            setTimeout(() => mobileOverlay.style.opacity = '1', 10);
+            setTimeout(() => (mobileOverlay.style.opacity = '1'), 10);
         } else {
             mobileOverlay.style.opacity = '0';
-            setTimeout(() => mobileOverlay.style.display = 'none', 300);
+            setTimeout(() => (mobileOverlay.style.display = 'none'), 300);
         }
-        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', body.classList.contains('mobile-menu-open'));
     }
 }
 
 
-
-window.addEventListener('DOMContentLoaded', () => {
-
-    const kvInput = document.getElementById('kvUploadInput');
-
-
-    if (kvInput) {
-        kvInput.addEventListener('change', handleKVUpload);
-    }
-});
-
-
-// Teşvik belgeleri silme formları (AJAX)
-document.querySelectorAll('.delete-tesvik-form').forEach(formElement => {
-    formElement.addEventListener('submit', async event => {
-        event.preventDefault();
-        Swal.fire({
-            title: "Emin misiniz?",
-            text: "Bu belge silinecek. Bu işlem geri alınamaz!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Evet, sil!",
-            cancelButtonText: "İptal"
-        }).then(async result => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch(formElement.action, {
-                        method: 'POST',
-                        body: new FormData(formElement)
-                    });
-                    const data = await response.json();
-                    showSwalMessage(data.status, data.title, data.message);
-                    if (data.status === "success") {
-                        const row = formElement.closest('tr');
-                        if (row) row.remove();
-                    }
-                } catch (err) {
-                    console.error('Belge silme hatası:', err);
-                    showSwalMessage('error', 'Hata!', 'Belge silinirken bir sorun oluştu.');
-                }
-            }
-        });
-    });
-});
 
 
 // --------------------------------------------------
@@ -178,7 +133,52 @@ window.addEventListener('resize', () => {
     }
 });
 
+// --------------------------------------------------
+// DOMContentLoaded: tüm yüklemeler burada
+// --------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
+    // 🧾 KV upload
+    const kvInput = document.getElementById('kvUploadInput');
+    if (kvInput) {
+        kvInput.addEventListener('change', handleKVUpload);
+    }
+
+    // 🗑️ Teşvik belgeleri silme (AJAX)
+    document.querySelectorAll('.delete-tesvik-form').forEach(formElement => {
+        formElement.addEventListener('submit', async event => {
+            event.preventDefault();
+            Swal.fire({
+                title: "Emin misiniz?",
+                text: "Bu belge silinecek. Bu işlem geri alınamaz!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Evet, sil!",
+                cancelButtonText: "İptal"
+            }).then(async result => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(formElement.action, {
+                            method: 'POST',
+                            body: new FormData(formElement)
+                        });
+                        const data = await response.json();
+                        showSwalMessage(data.status, data.title, data.message);
+                        if (data.status === "success") {
+                            const row = formElement.closest('tr');
+                            if (row) row.remove();
+                        }
+                    } catch (err) {
+                        console.error('Belge silme hatası:', err);
+                        showSwalMessage('error', 'Hata!', 'Belge silinirken bir sorun oluştu.');
+                    }
+                }
+            });
+        });
+    });
+
+    // 📦 Sürükle-bırak alanları
     const draggables = document.querySelectorAll('.draggable');
     const dropzones = document.querySelectorAll('.dropzone');
     const btnFA = document.getElementById('btnFA');
@@ -186,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const faInputs = document.getElementById('faInputs');
     const kdvInput = document.getElementById('kdvPeriodsInput');
 
-    // Durumu güncelle: gizli input'lar + buton enable/disable
     function updateState() {
         if (!faInputs || !kdvInput || !btnFA || !btnKDV) return;
         faInputs.innerHTML = '';
@@ -199,21 +198,16 @@ document.addEventListener('DOMContentLoaded', () => {
             inp.value = year;
             faInputs.appendChild(inp);
         });
-
-        // 2) KDV dönemleri CSV olarak sakla
         const kdvPeriods = [...document.querySelectorAll('#kdvPeriods li:not(.placeholder)')]
             .map(li => li.textContent.trim());
         kdvInput.value = kdvPeriods.join(',');
-
-        // 3) Buton durumları
         btnFA.disabled = faYears.length === 0;
         btnKDV.disabled = kdvPeriods.length === 0;
     }
 
-    // Eğer dropzone boşaldıysa placeholder ekle
     function ensurePlaceholder(zone) {
-        if (zone.querySelectorAll('li:not(.placeholder)').length === 0
-            && !zone.querySelector('.placeholder')) {
+        if (zone.querySelectorAll('li:not(.placeholder)').length === 0 &&
+            !zone.querySelector('.placeholder')) {
             const ph = document.createElement('li');
             ph.className = 'placeholder text-muted text-center';
             ph.textContent = 'Buraya sürükleyebilirsiniz';
@@ -221,14 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Sürüklenebilirleri ayarla
     draggables.forEach(item => {
         item.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', item.textContent.trim());
         });
     });
 
-    // Bırakma bölgelerini ayarla
     dropzones.forEach(zone => {
         zone.addEventListener('dragover', e => e.preventDefault());
         zone.addEventListener('drop', e => {
@@ -236,23 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const text = e.dataTransfer.getData('text/plain');
             const isFA = zone.id === 'faYears';
             const isKDV = zone.id === 'kdvPeriods';
-
-            // Format kontrolleri
             const yearRe = /^\d{4}$/;
             const monthYearRe = /^[^\/]+ \/ \d{4}$/;
             if (isFA && !yearRe.test(text)) return;
             if (isKDV && !monthYearRe.test(text)) return;
-
-            // Aynısı eklenmiş mi?
             if (![...zone.children].some(li => li.textContent.trim() === text)) {
-                // varsa placeholder’ı sil
                 zone.querySelectorAll('.placeholder').forEach(ph => ph.remove());
-                // yeni <li> ekle
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
                 li.textContent = text;
                 li.style.cursor = 'pointer';
-                // tıklayınca silinsin
                 li.addEventListener('click', () => {
                     li.remove();
                     ensurePlaceholder(zone);
@@ -264,10 +249,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ilk yüklemede placeholder varsa temizle / butonları güncelle
-    document.querySelectorAll('.dropzone').forEach(zone => {
-        // eğer başlangıçta içine otomatik placeholder koyduysak sorun yok
-        ensurePlaceholder(zone);
-    });
+    document.querySelectorAll('.dropzone').forEach(zone => ensurePlaceholder(zone));
     updateState();
+
+    // 🟩 Sidebar aç/kapat ve kapatma olayları
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            console.log("🟦 Sidebar aç/kapat tıklandı");
+            toggleSidebar();
+        });
+    }
+
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', () => {
+            console.log("🟥 Sidebar kapatıldı (✕)");
+            toggleSidebar();
+        });
+    }
+
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', () => {
+            console.log("⬛ Overlay tıklandı — Sidebar kapatıldı");
+            document.body.classList.remove('mobile-menu-open');
+        });
+    }
+
 });

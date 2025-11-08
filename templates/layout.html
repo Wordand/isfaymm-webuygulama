@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 
-<!DOCTYPE html>
-<html lang="tr">
+
 
 <head>
     <meta charset="UTF-8">
@@ -165,77 +164,79 @@
         <h3 id="loading-text" class="loading-text">Bilgi</h3>
     </div>
 
+    <!-- 🟩 SIDEBAR -->
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <a href="{{ url_for('home') }}" class="sidebar-brand" title="İSFA YMM Ana Sayfa">
-                <i class="bi bi-calculator-fill sidebar-icon"></i>
-                <span class="sidebar-text d-none d-md-inline">İSFA YMM</span>
+        <div class="sidebar-header d-flex justify-content-between align-items-center px-3 py-2">
+            <a href="{{ url_for('home') }}" class="sidebar-brand text-white fw-bold text-decoration-none">
+                <i class="bi bi-calculator-fill me-2"></i> İSFA YMM
             </a>
+            <!-- ✕ butonu sadece mobilde görünür -->
+            <button id="sidebarClose" class="btn btn-sm text-white d-lg-none">✕</button>
         </div>
+
         <nav class="sidebar-nav">
-            <a href="{{ url_for('home') }}" title="Ana Sayfa"
+            <a href="{{ url_for('home') }}"
                 class="sidebar-link {% if request.path == url_for('home') %}active{% endif %}">
-                <i class="bi bi-house-door sidebar-icon"></i> <span class="sidebar-text d-none d-md-inline">Ana
-                    Sayfa</span>
+                <i class="bi bi-house-door sidebar-icon"></i>
+                <span class="sidebar-text">Ana Sayfa</span>
             </a>
-            <a href="{{ url_for('veri_giris') }}" title="Finansal Analiz ve Raporlama"
+            <a href="{{ url_for('veri_giris') }}"
                 class="sidebar-link {% if request.path.startswith('/veri-giris') or request.path.startswith('/finansal-analiz') or request.path.startswith('/raporlama') %}active{% endif %}">
-                <i class="bi bi-pencil-square sidebar-icon"></i> <span class="sidebar-text">Finansal Analiz ve
-                    Raporlama</span>
+                <i class="bi bi-pencil-square sidebar-icon"></i> Finansal Analiz ve Raporlama
             </a>
-            <a href="{{ url_for('indirimlikurumlar.index') }}" title="İndirimli Kurumlar Vergisi"
+            <a href="{{ url_for('indirimlikurumlar.index') }}"
                 class="sidebar-link {% if request.path.startswith('/indirimlikurumlar') %}active{% endif %}">
-                <i class="bi bi-building sidebar-icon"></i> <span class="sidebar-text">İndirimli Kurumlar Vergisi</span>
+                <i class="bi bi-building sidebar-icon"></i> İndirimli Kurumlar Vergisi
             </a>
-
-            <a href="{{ url_for('vergi_hesaplamalari') }}" title="Vergi Hesaplamaları"
+            <a href="{{ url_for('vergi_hesaplamalari') }}"
                 class="sidebar-link {% if request.path.startswith('/vergi_hesaplamalari') %}active{% endif %}">
-                <i class="bi bi-cash-coin sidebar-icon"></i> <span class="sidebar-text">Vergi Hesaplamaları</span>
+                <i class="bi bi-cash-coin sidebar-icon"></i> Vergi Hesaplamaları
             </a>
-            <a href="{{ url_for('asgari') }}" title="Asgari Vergi"
+            <a href="{{ url_for('asgari') }}"
                 class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
-                <i class="bi bi-percent sidebar-icon"></i> <span class="sidebar-text">Asgari Kurumlar Vergisi
-                    Hesaplama</span>
+                <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi
             </a>
-            <a href="{{ url_for('sermaye') }}" title="Sermaye Artırımı"
+            <a href="{{ url_for('sermaye') }}"
                 class="sidebar-link {% if request.path.startswith('/sermaye') %}active{% endif %}">
-                <i class="bi bi-cash-stack sidebar-icon"></i> <span class="sidebar-text">Nakdi Sermaye Artırım
-                    İndirimi</span>
+                <i class="bi bi-cash-stack sidebar-icon"></i> Nakdi Sermaye Artırım İndirimi
             </a>
-            <a href="{{ url_for('finansman') }}" title="Finansman Gideri"
+            <a href="{{ url_for('finansman') }}"
                 class="sidebar-link {% if request.path.startswith('/finansman') %}active{% endif %}">
-                <i class="bi bi-currency-dollar sidebar-icon"></i> <span class="sidebar-text">Finansman Gider
-                    Kısıtlaması</span>
+                <i class="bi bi-currency-dollar sidebar-icon"></i> Finansman Gider Kısıtlaması
             </a>
-
-
         </nav>
     </div>
 
-
-
+    <!-- 🟦 NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNavbar">
-        <div class="container-fluid px-4 px-lg-5">
+        <div class="container-fluid px-4 px-lg-5 d-flex align-items-center justify-content-between">
 
+            <!-- 🔹 Sol tarafta: Sidebar toggler -->
+            {% if is_logged_in %}
+            <button id="sidebarToggle" class="btn btn-outline-primary d-lg-none me-2" type="button">
+                <i class="bi bi-list" style="font-size:1.6rem;"></i>
+            </button>
+            {% endif %}
+
+            <!-- 🔸 Ortada: Logo veya marka -->
+            <a class="navbar-brand fw-bold text-isfa" href="{{ url_for('home') }}">
+                <i class="bi bi-calculator-fill me-1"></i> İSFA YMM
+            </a>
+
+            <!-- 🔹 Sağ tarafta: Navbar menü toggler -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
-                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Menüyü Aç/Kapat">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Anasayfa</a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}#services">Hizmetlerimiz</a>
+            <!-- 🟢 Menü -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarResponsive">
+                <ul class="navbar-nav my-2 my-lg-0 navbar-nav-scroll text-center">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Anasayfa</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#services">Hizmetlerimiz</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}#about">Hakkımızda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}#team">Ekibimiz</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#about">Hakkımızda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#team">Ekibimiz</a></li>
 
                     <li class="nav-item">
                         {% if not is_logged_in %}
@@ -261,22 +262,14 @@
                     </li>
                     {% endif %}
 
-                    {# Kullanıcı girişli mi diye bakıyoruz #}
                     {% if is_logged_in %}
-                    <li class="nav-item">
-                        <a class="nav-link text-primary fw-semibold" href="{{ url_for('change_password') }}">
-                            🔒 Şifre Değiştir
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-danger btn-sm ms-lg-3 btn-gradient-hover-small"
-                            href="{{ url_for('logout') }}">Çıkış Yap</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link text-primary fw-semibold"
+                            href="{{ url_for('change_password') }}">🔒 Şifre Değiştir</a></li>
+                    <li class="nav-item"><a class="btn btn-danger btn-sm ms-lg-3 btn-gradient-hover-small"
+                            href="{{ url_for('logout') }}">Çıkış Yap</a></li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary btn-sm ms-lg-3 btn-gradient-hover-small"
-                            href="{{ url_for('login') }}">Giriş Yap</a>
-                    </li>
+                    <li class="nav-item"><a class="btn btn-primary btn-sm ms-lg-3 btn-gradient-hover-small"
+                            href="{{ url_for('login') }}">Giriş Yap</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -284,14 +277,14 @@
         </div>
     </nav>
 
+
+    <!-- 🧱 Ana içerik -->
     <div id="main" class="main-content">
-        <div id="mobile-overlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
+        <div id="mobile-overlay" class="mobile-overlay"></div>
 
         {% if request.path.startswith('/veri-giris')
         or request.path.startswith('/finansal-analiz')
         or request.path.startswith('/raporlama') %}
-
-        <!-- Açılan container, nav ile içeriği aynı grid’e alıyor -->
         <div class="container mt-5">
             <nav class="navbar navbar-light bg-light mb-3 border-bottom rounded page-tabs-nav px-0">
                 <ul class="nav nav-tabs justify-content-center w-100">
@@ -349,7 +342,7 @@
                 sessionStorage.setItem("isfa_intro_shown", "1");
             }
 
-            
+
             const texts = ["Bilgi", "Güven", "Hız"];
             let i = 0;
             const textEl = document.getElementById("loading-text");

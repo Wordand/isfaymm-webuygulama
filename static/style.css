@@ -1,14 +1,30 @@
+/* 🟦 Sidebar olmayan sayfalar (örneğin login, contact, blog, home vb.) */
 .no-sidebar-layout #sidebar,
-.no-sidebar-layout .toggle-btn,
 .no-sidebar-layout #mobile-overlay,
 .no-sidebar-layout .hidden-initial {
   display: none !important;
 }
+
+/* 🟩 Ana içerik alanını tam genişliğe yay */
 .no-sidebar-layout .main-content {
-  margin: 0 !important;  /* margin-left, paddingları tek satıra indirebilirsiniz */
+  margin: 0 !important;
   padding: 0 !important;
+  width: 100% !important;
 }
 
+/* 🟧 Navbar sabit durmalı (sidebar yoksa bile üstte kalır) */
+.no-sidebar-layout #mainNavbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2000;
+}
+
+/* 🟨 Navbar sabitken içerik aşağıdan başlasın */
+.no-sidebar-layout .main-content {
+  padding-top: 80px !important; /* navbar yüksekliği kadar boşluk */
+}
 
 
 
@@ -101,10 +117,9 @@ body {
     background: #555; /* Mouse üzerine gelince daha koyu */
 }
 
-
 /* --- Sidebar (Yan Menü) Stilleri --- */
 .sidebar {
-    width: 240px; /* Varsayılan genişlik */
+    width: 270px; /* Varsayılan genişlik */
     background: var(--dark-sidebar); /* Koyu arka plan */
     color: var(--white);
     padding: 20px;
@@ -112,47 +127,48 @@ body {
     flex-direction: column; /* İçeriği dikey sırala */
     transition: all var(--transition-speed-normal) ease-in-out; /* Animasyonlu geçişler */
     overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu */
-    min-height: 100vh; /* Bu, sidebar'ın içeriği az olsa bile ekran yüksekliği kadar olmasını sağlar */
-    height: auto; /* İçerik 100vh'yi aşarsa uzamasını sağlar */
-    position: relative; /* Z-index yönetimi için */
-    z-index: 1000;
-    flex-shrink: 0; /* İçeriğin sidebar'ı sıkıştırmasını engeller */
+    min-height: 100vh; /* İçerik azsa bile tam yükseklik */
+    height: auto; /* İçerik fazla olursa uzasın */
+    position: fixed; /* 🔹 Ekrana sabitle (navbar altına kaymaz) */
+    top: 80px;
+    left: 0;
+    z-index: 1100; /* 🔹 Navbar'dan bir tık düşük, overlay'den düşük değil */
+    flex-shrink: 0;
 }
 
 /* Sidebar Başlık Alanı (Logo/Marka Adı) */
 .sidebar-header {
     padding-bottom: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Alt çizgi */
-    text-align: center; /* İçeriği ortala */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
 }
 
+/* Marka linki */
 .sidebar-brand {
     display: flex;
-    align-items: center; /* Dikeyde hizala */
-    justify-content: center; /* Yatayda ortala */
-    color: var(--white) !important; /* Metin rengi */
-    text-decoration: none; /* Alt çizgi olmasın */
-    font-size: 1.5rem; /* Başlık font boyutu */
+    align-items: center;
+    justify-content: center;
+    color: var(--white) !important;
+    text-decoration: none;
+    font-size: 1.5rem;
     font-weight: bold;
     transition: all var(--transition-speed-fast);
 }
-
 .sidebar-brand:hover {
-    color: var(--primary-blue) !important; /* Hover efekti */
+    color: var(--primary-blue) !important;
 }
-
 .sidebar-brand .sidebar-icon {
-    margin-right: 10px; /* İkon ile metin arası boşluk */
-    font-size: 1.8rem; /* İkon boyutu */
+    margin-right: 10px;
+    font-size: 1.8rem;
 }
 
-/* Sidebar Navigasyon Bölümü */
+/* Navigasyon */
 .sidebar-nav {
-    flex-grow: 1; /* Kalan alanı kapla */
+    flex-grow: 1;
 }
 
-/* Sidebar bağlantıları (menü öğeleri) */
+/* Sidebar bağlantıları */
 .sidebar-nav .sidebar-link {
     color: var(--light-gray);
     text-decoration: none;
@@ -160,21 +176,18 @@ body {
     display: flex;
     align-items: center;
     transition: all var(--transition-speed-fast);
-    padding: 10px 12px; /* Tıklama alanı */
+    padding: 10px 12px;
     border-radius: var(--border-radius-sm);
     font-size: 1.05rem;
 }
-
 .sidebar-nav .sidebar-link i.sidebar-icon {
     margin-right: 12px;
     font-size: 1.2rem;
 }
-
 .sidebar-nav .sidebar-link:hover {
     color: var(--white);
     background-color: var(--hover-dark);
-    padding-left: 15px; /* Hover'da hafif kaydırma efekti */
-    border-radius: var(--border-radius-sm);
+    padding-left: 15px;
 }
 
 /* Aktif menü öğesi */
@@ -184,70 +197,57 @@ body {
     font-weight: bold;
     padding-left: 15px;
     border-radius: var(--border-radius-sm);
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3); /* Aktif butona gölge */
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
 }
 
-/* Daraltılmış sidebar görünümü (Masaüstü) */
+/* Daraltılmış sidebar görünümü */
 .collapsed {
-    width: 60px !important; /* Daraltılmış genişlik */
+    width: 60px !important;
 }
 .collapsed .sidebar-text {
-    display: none !important; /* Metinleri gizle */
+    display: none !important;
 }
-/* Daraltılmışken ikonları ortala */
 .collapsed .sidebar-header .sidebar-brand .sidebar-text,
 .collapsed .sidebar-nav .sidebar-link .sidebar-text {
-    display: none !important; /* Daraltıldığında tüm metinleri gizle */
+    display: none !important;
 }
 .collapsed .sidebar-header .sidebar-brand .sidebar-icon,
 .collapsed .sidebar-nav .sidebar-link i.sidebar-icon {
-    margin: 0 auto !important; /* İkonları ortala */
+    margin: 0 auto !important;
     width: 100%;
     text-align: center;
 }
 
 
+
 /* --- Ana İçerik Alanı --- */
 .main-content {
-    flex: 1; /* Kalan tüm alanı kapla */
-    /* Navbar yüksekliği kadar üst boşluk ekle, navbar-scrolled yüksekliği ortalama 70-80px */
-    padding: calc(75px + 40px) 40px 40px; /* Navbar ve kendi padding'i toplamı */
+    flex: 1;
     background: var(--light-bg);
-    overflow-y: auto; /* İçerik taşarsa dikey kaydırma çubuğu */
+    overflow-y: auto;
     transition: margin-left var(--transition-speed-normal) ease;
-    margin-left: 0; /* Başlangıçta sol kenar boşluğu yok */
-    /* main-content'in minimum yüksekliği, ekran yüksekliğinden üst/alt padding çıkarılarak hesaplanır */
-    min-height: calc(100vh - (75px + 40px) - 40px);
+    
+    /* 🟩 Başlangıç konumu — sidebar genişliği kadar boşluk bırak */
+    margin-left: 240px;
+    padding: 100px 40px 40px; /* Navbar (80px) + ekstra 20px güvenlik boşluğu */
+    
+    /* Yüksekliği ekranla orantılı ayarla */
+    min-height: calc(100vh - 80px); /* Navbar yüksekliğini çıkar */
+}
+
+/* Sidebar daraltıldığında içerik sola yaklaşır */
+.collapsed ~ .main-content {
+    margin-left: 60px; /* Daraltılmış sidebar genişliği kadar */
+    transition: margin-left var(--transition-speed-normal) ease;
+}
+
+/* Sidebar olmayan sayfalar (no-sidebar-layout) için içerik sıfırlanır */
+.no-sidebar-layout .main-content {
+    margin-left: 0 !important;
+    padding-top: 80px !important;
 }
 
 
-/* --- Sidebar Toggle Butonu --- */
-.toggle-btn {
-    position: fixed; /* Ekranda sabit durur */
-    top: 20px;
-    left: 260px; /* Sidebar genişliği (240px) + 20px boşluk */
-    z-index: 1100; /* Sidebar'dan daha üstte */
-    background: var(--primary-blue);
-    color: var(--white);
-    border: none;
-    padding: 8px 15px;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-speed-normal) ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    font-size: 1.2rem; /* İkon için boyut */
-    display: flex; /* İkonu ortalamak için */
-    align-items: center;
-    justify-content: center;
-}
-.toggle-btn:hover {
-    background-color: var(--dark-info-blue); /* Hover rengi */
-    transform: translateY(-1px); /* Hafif yukarı kalkma efekti */
-}
-/* Sidebar daraldığında butonun konumu */
-.collapsed ~ .toggle-btn {
-    left: 80px; /* Daraltılmış sidebar genişliği (60px) + 20px boşluk */
-}
 
 
 /* --- Mobil Menü Overlay'i --- */
@@ -257,8 +257,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Yarı şeffaf siyah */
-    z-index: 1040; /* Sidebar'dan düşük, main-content'ten yüksek */
+    background-color: rgba(0, 0, 0, 0.55); /* Biraz daha koyu karartma */
+    z-index: 1500; /* 🔹 Sidebar'dan daha YÜKSEK, toggle'dan düşük olmalı */
     display: none; /* Başlangıçta gizli */
     transition: opacity var(--transition-speed-normal) ease;
     opacity: 0; /* Geçiş için başlangıç opaklığı */
@@ -268,54 +268,26 @@ body {
 body.mobile-menu-open .mobile-overlay {
     display: block;
     opacity: 1;
+    pointer-events: all;
 }
 
-
-/* --- Gradyan Efektli Butonlar (`btn-gradient-hover`) --- */
-.btn-gradient-hover {
-    background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
-    transition: transform var(--transition-speed-fast) ease, box-shadow var(--transition-speed-fast) ease, background var(--transition-speed-normal) ease;
-    text-align: center;
-    color: var(--white); /* Metin rengi beyaz olsun */
-    border: none;
-    padding: .75rem 1.5rem; /* Dolgun butonlar */
-    border-radius: var(--border-radius-sm);
-}
-
-.btn-gradient-hover:hover {
-    transform: translateY(-3px); /* Hafif yukarı kalkma */
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Gölge efekti */
-    background: linear-gradient(135deg, var(--btn-gradient-hover-start), var(--btn-gradient-hover-end)); /* Hover gradyanı */
-}
-
-/* Küçük butonlar için gradient (Navbar'daki "Giriş Yap" gibi) */
-.btn-gradient-hover-small {
-    background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
-    transition: transform var(--transition-speed-fast) ease, box-shadow var(--transition-speed-fast) ease, background var(--transition-speed-normal) ease;
-    color: var(--white);
-    border: none;
-    padding: .5rem 1rem; /* Daha küçük padding */
-    border-radius: var(--border-radius-sm);
-    font-size: 0.875rem; /* Daha küçük font */
-}
-
-.btn-gradient-hover-small:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    background: linear-gradient(135deg, var(--btn-gradient-hover-start), var(--btn-gradient-hover-end));
-}
-
-
-/* --- Yeni Navbar Stilleri --- */
+/* --- Navbar (Ana Üst Menü) --- */
 #mainNavbar {
-    background-color: var(--white); /* Varsayılan arka plan */
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Hafif gölge */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--white);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: background-color var(--transition-speed-slow) ease, padding var(--transition-speed-slow) ease;
-    z-index: 1030; /* Sidebar ve toggle button'dan daha düşük, ancak diğer içerikten yüksek */
+    z-index: 2000; /* 🔹 Sidebar ve overlay'den YÜKSEK */
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
 }
 
+/* Marka */
 #mainNavbar .navbar-brand {
-    color: var(--dark-text); /* Marka rengi */
+    color: var(--dark-text);
     font-size: 1.5rem;
     font-weight: bold;
 }
@@ -323,6 +295,7 @@ body.mobile-menu-open .mobile-overlay {
     color: var(--primary-blue);
 }
 
+/* Linkler */
 #mainNavbar .nav-link {
     color: var(--dark-text);
     font-weight: 500;
@@ -333,47 +306,44 @@ body.mobile-menu-open .mobile-overlay {
     color: var(--primary-blue);
 }
 
-/* Navbar şeffaf iken (genellikle hero bölümünün üstünde) */
+/* Navbar şeffafken (örneğin hero video üzerinde) */
 .navbar-transparent {
     background-color: transparent !important;
     box-shadow: none !important;
+    z-index: 2000; /* Yine en üstte kalır */
 }
-
 .navbar-transparent .navbar-brand,
 .navbar-transparent .nav-link {
-    color: var(--white); /* Şeffafken metin rengini beyaz yap */
+    color: var(--white);
 }
 .navbar-transparent .navbar-toggler-icon {
-    filter: invert(1); /* Hamburger ikonunu beyaz yap */
+    filter: invert(1);
 }
 .navbar-transparent .navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.5); /* Beyaz kenarlık */
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Navbar aşağı kaydırıldığında */
+/* Scroll sonrası (küçülmüş) navbar */
 .navbar-scrolled {
-    background-color: var(--white) !important; /* Beyaz renkli arka plan */
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-    padding-top: 1rem !important; /* Daha küçük padding */
+    background-color: var(--white) !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1) !important;
+    padding-top: 1rem !important;
     padding-bottom: 1rem !important;
 }
-
 .navbar-scrolled .navbar-brand,
 .navbar-scrolled .nav-link {
-    color: var(--dark-text); /* Kaydırıldığında metin rengini koyu yap */
+    color: var(--dark-text);
 }
 
-
-/* Sadece İç Panellerdeki Navbar */
+/* İç sayfa sekmeleri */
 .page-tabs-nav {
-    position: relative; /* Sabit değil */
-    top: auto;
-    left: auto;
+    position: relative;
     width: auto;
     margin-top: 0;
     box-shadow: none;
     background-color: var(--white) !important;
     border-bottom: 1px solid #e9ecef !important;
+    z-index: 100; /* Navbar altında kalmalı */
 }
 .page-tabs-nav .nav-link {
     color: var(--dark-text);
@@ -391,13 +361,13 @@ body.mobile-menu-open .mobile-overlay {
 }
 
 
-/* --- Responsive Ayarlamalar (Mobil Uyum) --- */
+/* --- [A] Mobil Navbar Menü Düzeni (Bootstrap collapse için) --- */
 @media (max-width: 991.98px) { /* Medium ve altı ekranlar için navbar düzeni */
     #mainNavbar .navbar-collapse {
-        background-color: var(--white); /* Mobil menü açıldığında arka plan rengi */
+        background-color: var(--white);
         border-radius: var(--border-radius-sm);
-        padding: 1rem;
-        margin-top: 0.5rem;
+        padding: 0.3rem 0;      /* 🔹 Daha az boşluk */
+        margin-top: 0;          /* 🔹 Üstten boşluk kaldır */
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     #mainNavbar .navbar-nav .nav-link {
@@ -419,64 +389,158 @@ body.mobile-menu-open .mobile-overlay {
     }
 }
 
-@media (max-width: 768px) {
-    /* Mobil görünümde sidebar */
-    .sidebar {
-        position: fixed; /* Ekranı kaydırmaz */
-        left: -240px; /* Başlangıçta gizli */
-        top: 0;
-        height: 100%; /* Tam ekran yüksekliği */
-        z-index: 1050; /* Toggle butondan daha yüksek */
-        box-shadow: 2px 0 10px rgba(0,0,0,0.3); /* Açıldığında gölge */
-    }
 
-    /* Mobil menü açıkken sidebar'ı göster */
-    body.mobile-menu-open .sidebar {
-        left: 0 !important;
-    }
+/* --- [B] Mobil ve Tablet için Sidebar & İçerik Davranışı --- */
+@media (max-width: 991.98px) {
+  /* Sidebar gizli başlar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -240px;
+    height: 100%;
+    width: 240px;
+    background: #111827;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+    transition: left 0.3s ease;
+    z-index: 2000;
+  }
 
-    /* Mobil menü açıkken ana içeriği karart ve tıklamayı engelle */
-    body.mobile-menu-open .main-content {
-        overflow: hidden; /* Ana içeriğin kaydırmasını engelle */
-        filter: brightness(0.7); /* Ana içeriği hafif karart */
-        pointer-events: none; /* Ana içeriğe tıklamayı engelle */
-    }
+  /* Sidebar açıkken */
+  body.mobile-menu-open .sidebar {
+    left: 0 !important;
+    z-index: 2100;
+  }
 
-    /* Mobil görünümde toggle butonu */
-    .toggle-btn {
-        left: 20px !important; /* Her zaman sol üstte sabit kalsın */
-        top: 20px;
-        z-index: 1100; /* Navbar'dan daha üstte */
-        /* Navbar ile çakışmaması için burada dikkat edin */
-        /* Eğer navbar üstte sabitse ve toggle-btn de sabitse */
-        /* toggle-btn'i navbar'ın altına alabilir veya sağ üste taşıyabiliriz. */
-        /* Şu anki durumda navbar'dan yüksek z-index'e sahip, sorun çıkarmayabilir. */
-    }
+  /* Arka plan karartma */
+  .mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 2050;
+  }
+  body.mobile-menu-open .mobile-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
 
-    /* Mobil görünümde ana içerik paddingleri */
-    .main-content {
-        /* Navbar ve kendi padding'i toplamı, mobil için Navbar yüksekliği değişebilir */
-        padding-top: calc(75px + 20px); /* Ortalama Navbar yüksekliği + ek boşluk */
-        padding-left: 20px; /* Yanlardan boşluk */
-        padding-right: 20px;
-        min-height: calc(100vh - (75px + 20px) - 20px); /* Mobil için de min-height ayarı */
-    }
-    
-    /* Mobil'de sidebar daraltma (collapsed) durumu artık sadece masaüstü için geçerli olduğundan,
-       mobil menü her zaman tam genişlikte açılır ve metinler görünür olur. */
-    .collapsed {
-        width: 240px !important; /* Mobil'de hep tam genişlik */
-    }
-    .collapsed .sidebar-text {
-        display: inline !important; /* Mobil'de hep göster */
-    }
 
-    /* Mobil buton metinleri (eğer buton içinde metin varsa) */
-    .btn-gradient-hover {
-        white-space: normal; /* Metin taşarsa alt satıra geç */
-        line-height: 1.2;
-    }
+
+
+  /* Ana içerik sola kaymasın */
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 90px; /* navbar yüksekliği kadar boşluk */
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Mobil menü açıkken içerik tıklanmasın */
+  body.mobile-menu-open .main-content {
+    overflow: hidden;
+    filter: brightness(0.7);
+    pointer-events: none;
+  }
+
+  /* Hero içindeki butonlar dikeyde aralıklı */
+  .hero .btn-gradient-hover {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    text-align: center;
+  }
 }
+
+/* 🔧 Navbar yüksekliğini sabitle ve mobilde taşmayı önle */
+#mainNavbar {
+  min-height: 80px !important;
+  overflow: visible !important; /* Menü açıldığında aşağı taşmayı engeller */
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+}
+
+/* 🔧 Menü açıldığında tam ekran taşmadan görünsün */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    position: absolute;
+    top: 80px; /* Navbar yüksekliği kadar */
+    left: 0;
+    width: 100%;
+    background-color: var(--white);
+    z-index: 2100;
+    border-top: 1px solid #ddd; /* Hafif ayırıcı çizgi */
+  }
+}
+
+
+
+
+
+/* 🔴 Modern İSFA tarzı Navbar Toggler */
+.navbar-toggler {
+  border: none !important;
+  outline: none !important;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+/* Kırmızı beyaz çizgili özel ikon */
+.navbar-toggler-icon {
+  width: 24px;
+  height: 2px;
+  background-color: #dc3545; /* İSFA kırmızısı */
+  position: relative;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+  display: inline-block;
+}
+
+/* Üst ve alt çizgiler */
+.navbar-toggler-icon::before,
+.navbar-toggler-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background-color: #dc3545;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+}
+
+.navbar-toggler-icon::before { top: -7px; }
+.navbar-toggler-icon::after { top: 7px; }
+
+/* Hover efekti */
+.navbar-toggler:hover .navbar-toggler-icon,
+.navbar-toggler:hover .navbar-toggler-icon::before,
+.navbar-toggler:hover .navbar-toggler-icon::after {
+  background-color: #b02a37; /* koyu kırmızı */
+  transform: scaleX(1.05);
+}
+
+/* Açıkken (X şekli animasyonu) */
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+  background-color: transparent;
+}
+
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
+  transform: rotate(45deg);
+  top: 0;
+}
+
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
+  transform: rotate(-45deg);
+  top: 0;
+}
+
+
 
 
 /* --- Dashboard ve Genel Bileşen Stilleri --- */
@@ -487,6 +551,10 @@ body.mobile-menu-open .mobile-overlay {
     margin-top: 1.5rem; /* Daha fazla boşluk */
     color: var(--dark-text);
 }
+
+
+
+
 
 .card {
     border-radius: var(--border-radius-lg); /* Yuvarlak köşeler (16px) */
@@ -1433,4 +1501,38 @@ html {
 /* 🔹 Pasif input'larda placeholder rengi daha soluk */
 .disabled-input::placeholder {
   color: #aaa !important;
+}
+
+
+/* ✅ Yeni Sidebar Toggler (Navbar içindeki sol buton) */
+#sidebarToggle {
+  position: relative;
+  z-index: 1051; /* Navbar’ın üstünde kalır */
+  border: none;
+  background: transparent;
+}
+
+#sidebarToggle i {
+  font-size: 1.6rem;
+  color: var(--primary-blue);
+}
+
+/* Küçük ekranlarda solda hizalı kal */
+@media (max-width: 991.98px) {
+  #sidebarToggle {
+    margin-right: auto;
+    margin-left: 0;
+  }
+}
+
+
+
+
+/* 🔴 İSFA kırmızısı marka rengi */
+.text-isfa {
+  color: #dc3545 !important;
+}
+
+.text-isfa:hover {
+  color: #b02a37 !important; /* biraz koyu ton hover için */
 }
