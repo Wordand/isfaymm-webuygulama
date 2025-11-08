@@ -1,3 +1,7 @@
+# ✅ .env dosyasını en erken yükle
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
 from flask import (
     Flask, render_template, request, redirect,
     url_for, jsonify, session, make_response,
