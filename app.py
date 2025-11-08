@@ -1349,7 +1349,14 @@ def pdf_belgeler_tablo(tur):
         return redirect(url_for("veri_giris", unvan=unvan, donem=donem))
     
     # 🔓 Decrypt et
-    decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+        
+    try:
+        decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+    except Exception as e:
+        print(f"⚠️ Bozuk veya eski şifreli kayıt atlandı (vkn={vkn}, donem={donem}, tur={tur}): {e}")
+        flash("❗ Kayıt okunamadı veya şifre hatalı. Lütfen beyannameyi yeniden yükleyin.")
+        return redirect(url_for("veri_giris", vkn=vkn, donem=donem))
+
     veriler = json.loads(decrypted_data)
 
 
