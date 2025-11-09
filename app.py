@@ -173,6 +173,7 @@ if not FERNET_KEY:
     raise ValueError("❌ FERNET_KEY bulunamadı! .env veya Render environment ayarlarını kontrol et.")
 
 fernet = Fernet(FERNET_KEY.encode())
+print(f"🔐 Fernet key length: {len(config.FERNET_KEY)} karakter")
 
 
 
