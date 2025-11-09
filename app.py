@@ -1039,6 +1039,11 @@ from PyPDF2 import PdfReader
 @app.route("/yukle-coklu", methods=["POST"])
 @login_required
 def yukle_coklu():
+    
+    print("🧩 [UPLOAD] Fernet key first 10:", FERNET_KEY[:10])
+    if not FERNET_KEY:
+        print("❌ [ERROR] FERNET_KEY boş! Ortam değişkeni okunmamış.")
+        
     uploaded_files = request.files.getlist("belgeler")
     mesajlar = []
 
@@ -1123,6 +1128,7 @@ def yukle_coklu():
 
 
 def kaydet_beyanname(sonuc, belge_turu):
+    print("🔑 [ENCRYPT] Fernet key first 10:", FERNET_KEY[:10])
     """
     Hem SQLite hem PostgreSQL ortamlarında uyumlu beyanname kayıt fonksiyonu.
     Verileri şifreler, yeni kayıt ekler veya mevcut kaydı günceller.
@@ -1352,6 +1358,7 @@ def kaydet_beyanname(sonuc, belge_turu):
 @app.route("/pdf-belgeler-tablo/<string:tur>", methods=["GET"])
 @login_required
 def pdf_belgeler_tablo(tur):
+    print("🧩 [DECRYPT] Fernet key first 10:", FERNET_KEY[:10])
     vkn   = request.args.get("vkn")
     unvan = request.args.get("unvan")
     donem = request.args.get("donem")
