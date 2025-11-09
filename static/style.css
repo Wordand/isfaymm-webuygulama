@@ -1536,3 +1536,15 @@ html {
 .text-isfa:hover {
   color: #b02a37 !important; /* biraz koyu ton hover için */
 }
+
+
+/* 🧁 SweetAlert Toast Mesajlarının Navbar ve Diğer Katmanların ÜSTÜNDE GÖRÜNMESİ için */
+.swal2-container {
+  z-index: 10000 !important;
+}
+
+/* Eğer sadece toast bildirimi için istiyorsan (daha dar kapsamlı) */
+.swal2-container.swal2-top-end,
+.swal2-container.swal2-top {
+  z-index: 10000 !important;
+}

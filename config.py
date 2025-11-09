@@ -1,9 +1,6 @@
 # config.py
 import os
-from dotenv import load_dotenv, find_dotenv
 
-# .env dosyasını yükle
-load_dotenv(find_dotenv())
 
 # Ortam değişkenlerinden oku
 SECRET_KEY = os.getenv("SECRET_KEY")

@@ -87,6 +87,7 @@ class FakeConnection:
     def __init__(self, path):
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA foreign_keys = ON;")
 
     def cursor(self, *args, **kwargs):
         return FakeCursor(self.conn.cursor())

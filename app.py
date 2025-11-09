@@ -167,7 +167,12 @@ limiter = Limiter(
 app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
 app.secret_key = config.SECRET_KEY
-fernet = Fernet(config.FERNET_KEY)
+
+FERNET_KEY = config.FERNET_KEY
+if not FERNET_KEY:
+    raise ValueError("❌ FERNET_KEY bulunamadı! .env veya Render environment ayarlarını kontrol et.")
+
+fernet = Fernet(FERNET_KEY.encode())
 
 
 
@@ -426,6 +431,23 @@ def login_logs():
         logs = c.fetchall()
 
     return render_template("admin_login_logs.html", logs=logs)
+
+
+@app.route("/admin/delete_all_logs", methods=["POST"])
+@login_required
+def delete_all_logs():
+    if session.get("username", "").lower() != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("login_logs"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM login_logs")
+        conn.commit()
+
+    flash("Tüm log kayıtları başarıyla silindi.", "success")
+    return redirect(url_for("login_logs"))
+
 
 
 @app.route("/")
@@ -1348,16 +1370,21 @@ def pdf_belgeler_tablo(tur):
         flash("❗ Belge bulunamadı.")
         return redirect(url_for("veri_giris", unvan=unvan, donem=donem))
     
-    # 🔓 Decrypt et
-        
+    
+    
+    # 🔓 Decrypt et        
     try:
-        decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+        data = row["veriler"]
+        if isinstance(data, memoryview):  # PostgreSQL BYTEA fix
+            data = data.tobytes()
+
+        decrypted_data = fernet.decrypt(data).decode("utf-8")  # 👈 Eksik olan satır eklendi
+        veriler = json.loads(decrypted_data)
     except Exception as e:
         print(f"⚠️ Bozuk veya eski şifreli kayıt atlandı (vkn={vkn}, donem={donem}, tur={tur}): {e}")
         flash("❗ Kayıt okunamadı veya şifre hatalı. Lütfen beyannameyi yeniden yükleyin.")
         return redirect(url_for("veri_giris", vkn=vkn, donem=donem))
 
-    veriler = json.loads(decrypted_data)
 
 
 
@@ -1474,6 +1501,7 @@ def pdf_belgeler_tablo(tur):
 
     flash("❗ Geçersiz tablo türü.")
     return redirect(url_for("veri_giris", unvan=unvan, donem=donem))
+
 
 
 
@@ -2558,9 +2586,14 @@ def rapor_kdv_excel():
 
             for row in rows:
                 try:
-                    decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+                    data = row["veriler"]
+                    if isinstance(data, memoryview):  # PostgreSQL BYTEA fix
+                        data = data.tobytes()
+
+                    decrypted_data = fernet.decrypt(data).decode("utf-8")
                     parsed = json.loads(decrypted_data)
-                except Exception:
+                except Exception as e:
+                    print(f"⚠️ Decrypt hatası: {type(e).__name__} - {e}")
                     continue
 
                 if not parsed:
@@ -2698,9 +2731,14 @@ def rapor_kdv():
 
             for row in rows:
                 try:
-                    decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+                    data = row["veriler"]
+                    if isinstance(data, memoryview):  # ✅ PostgreSQL BYTEA fix
+                        data = data.tobytes()
+
+                    decrypted_data = fernet.decrypt(data).decode("utf-8")
                     parsed = json.loads(decrypted_data)
-                except Exception:
+                except Exception as e:
+                    print(f"⚠️ Decrypt hatası: {type(e).__name__} - {e}")
                     continue
 
                 if not parsed:
@@ -2854,8 +2892,20 @@ def raporlama():
                 row_b = c.fetchone()
                 if not row_b:
                     continue
-                decrypted_data = fernet.decrypt(row_b["veriler"]).decode("utf-8")
-                parsed = json.loads(decrypted_data)
+                
+                
+                try:
+                    data = row_b["veriler"]
+                    if isinstance(data, memoryview):  # ✅ PostgreSQL BYTEA fix
+                        data = data.tobytes()
+
+                    decrypted_data = fernet.decrypt(data).decode("utf-8")
+                    parsed = json.loads(decrypted_data)
+                except Exception as e:
+                    print(f"⚠️ Decrypt hatası (bilanco): {type(e).__name__} - {e}")
+                    continue
+                
+                
                 df_aktif = pd.DataFrame(parsed.get("aktif", []))
                 if not df_aktif.empty and "Cari Dönem" in df_aktif.columns:
                     df_num = pd.to_numeric(df_aktif["Cari Dönem"], errors="coerce").fillna(0)
@@ -2886,9 +2936,20 @@ def raporlama():
                 if not rows:
                     continue
 
+                # KDV özeti
                 for row_k in rows:
-                    decrypted_data = fernet.decrypt(row_k["veriler"]).decode("utf-8")
-                    parsed = json.loads(decrypted_data)
+                    try:
+                        data = row_k["veriler"]
+                        if isinstance(data, memoryview):  # ✅ PostgreSQL BYTEA fix
+                            data = data.tobytes()
+
+                        decrypted_data = fernet.decrypt(data).decode("utf-8")
+                        parsed = json.loads(decrypted_data)
+                    except Exception as e:
+                        print(f"⚠️ Decrypt hatası (kdv): {type(e).__name__} - {e}")
+                        continue
+                    
+                    
                     raw_donem = parsed.get("donem") or row_k["donem"]
                     try:
                         ay, yil = [p.strip() for p in raw_donem.split("/") if p.strip()]
@@ -2977,10 +3038,15 @@ def tablo_mizan(tur):
         return redirect(url_for("veri_giris", vkn=vkn, donem=donem))
 
     try:
-        decrypted_data = fernet.decrypt(row["veriler"]).decode("utf-8")
+        data = row["veriler"]
+        if isinstance(data, memoryview):  # ✅ PostgreSQL BYTEA fix
+            data = data.tobytes()
+
+        decrypted_data = fernet.decrypt(data).decode("utf-8")
         mizan_data = json.loads(decrypted_data)
-    except Exception:
-        flash("❗ Mizan verisi okunamadı.")
+    except Exception as e:
+        print(f"⚠️ Decrypt hatası (mizan): {type(e).__name__} - {e}")
+        flash("❗ Mizan verisi okunamadı veya şifre hatalı.")
         return redirect(url_for("veri_giris", vkn=vkn, donem=donem))
 
     donem_mapping = {"cari": donem}
@@ -3411,7 +3477,9 @@ def kaydet_mizan_meta():
             })
 
     except Exception as e:
+        import traceback
         print("❌ Kayıt hatası:", e)
+        traceback.print_exc()
         return jsonify({
             "status": "error",
             "title": "❌ Kayıt Hatası",
