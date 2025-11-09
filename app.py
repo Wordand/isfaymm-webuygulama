@@ -168,12 +168,29 @@ app.permanent_session_lifetime = timedelta(minutes=30)  # 30 dk
 
 app.secret_key = config.SECRET_KEY
 
+
+
+
 FERNET_KEY = config.FERNET_KEY
 if not FERNET_KEY:
     raise ValueError("❌ FERNET_KEY bulunamadı! .env veya Render environment ayarlarını kontrol et.")
 
 fernet = Fernet(FERNET_KEY.encode())
 print(f"🔐 Fernet key length: {len(config.FERNET_KEY)} karakter")
+
+# --- 🔍 Fernet roundtrip test ---
+def test_roundtrip():
+    try:
+        test_token = fernet.encrypt(b"ISFA_TEST")
+        decrypted = fernet.decrypt(test_token)
+        print("🔒 Fernet test OK:", decrypted)
+    except Exception as e:
+        print("❌ Fernet test FAILED:", e)
+
+test_roundtrip()
+# --- 🔍 Fernet roundtrip test sonu ---
+
+
 
 
 
