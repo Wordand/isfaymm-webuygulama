@@ -127,13 +127,14 @@ if DATABASE_URL.startswith("sqlite:///"):
 
 
 
-    # --- TEŞVİK KULLANIM TABLOSU ---
+    # --- TEŞVİK KULLANIM TABLOSU (SQLite) ---
     c.execute("""
     CREATE TABLE IF NOT EXISTS tesvik_kullanim (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         belge_no TEXT NOT NULL,
         hesap_donemi INTEGER NOT NULL,
+        donem_turu TEXT DEFAULT 'KURUMLAR',
         yatirim_kazanci REAL DEFAULT 0.0,
         diger_kazanc REAL DEFAULT 0.0,
         cari_yatirim_katkisi REAL DEFAULT 0.0,
@@ -141,7 +142,7 @@ if DATABASE_URL.startswith("sqlite:///"):
         genel_toplam_katki REAL DEFAULT 0.0,
         kalan_katki REAL DEFAULT 0.0,
         kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, belge_no, hesap_donemi)
+        UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
     );
     """)
 
@@ -267,13 +268,14 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
 );
 """)
 
-# --- TEŞVİK KULLANIM TABLOSU ---
+# --- TEŞVİK KULLANIM TABLOSU (PostgreSQL) ---
 cur.execute("""
 CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     belge_no TEXT NOT NULL,
     hesap_donemi INT NOT NULL,
+    donem_turu TEXT DEFAULT 'KURUMLAR',
     yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
     diger_kazanc DOUBLE PRECISION DEFAULT 0.0,
     cari_yatirim_katkisi DOUBLE PRECISION DEFAULT 0.0,
@@ -281,7 +283,7 @@ CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
     kalan_katki DOUBLE PRECISION DEFAULT 0.0,
     kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, belge_no, hesap_donemi)
+    UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
 );
 """)
 

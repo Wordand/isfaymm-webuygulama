@@ -28,14 +28,54 @@
           <a href="{{ url_for('indirimlikurumlar.index', sekme='tesvik', view=d.id) }}" class="btn btn-info">Detay</a>
 
 
-          <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id|int) }}" class="btn btn-warning">Güncelle</a>
-          <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id|int) }}" class="btn btn-secondary">PDF İndir</a>
-          <form class="delete-tesvik-form d-inline" action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id|int) }}" method="post">
+          <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id|int) }}"
+            class="btn btn-warning">Güncelle</a>
+          <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id|int) }}"
+            class="btn btn-secondary">PDF İndir</a>
+          <form class="delete-tesvik-form d-inline"
+            action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id|int) }}" method="post">
             <button type="submit" class="btn btn-danger">Sil</button>
           </form>
         </div>
       </td>
     </tr>
+    {# 🔹 Yeni satır: belgeye ait dönemleri göster #}
+    <tr class="bg-light">
+      <td colspan="8">
+        <div class="p-2">
+          <strong>Dönemler:</strong>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            {% for donem in d.donemler %}
+            <div class="border rounded p-2 bg-white d-flex align-items-center justify-content-between"
+              style="min-width:230px;">
+              <span>{{ donem.hesap_donemi }} - {{ donem.donem_turu }}</span>
+              <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('indirimlikurumlar.edit_tesvik_kullanim', belge_no=d.belge_no, yil=donem.hesap_donemi, turu=donem.donem_turu) }}"
+                  class="btn btn-outline-primary" title="Dönemi Görüntüle"><i class="bi bi-eye"></i></a>
+
+                <button class="btn btn-outline-secondary clone-donem" data-belge="{{ d.belge_no }}"
+                  data-yil="{{ donem.hesap_donemi }}" title="Bu Dönemi Klonla">
+                  <i class="bi bi-layers"></i>
+                </button>
+
+                <button class="btn btn-outline-danger delete-donem" data-belge="{{ d.belge_no }}"
+                  data-yil="{{ donem.hesap_donemi }}" title="Sil">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+            {% else %}
+            <span class="text-muted">Henüz dönem eklenmemiş.</span>
+            {% endfor %}
+          </div>
+
+          <button class="btn btn-outline-danger btn-sm mt-3 add-donem-btn" data-belge="{{ d.belge_no }}">
+            <i class="bi bi-layers"></i> Yeni Dönem Ekle
+          </button>
+        </div>
+      </td>
+    </tr>
+
     {% endfor %}
   </tbody>
 </table>
@@ -63,8 +103,10 @@
       {{ row("Yatırım Türü 2", edit_doc.yatirim_turu2) }}
       {{ row("Tamamlama Vizesi Durumu", edit_doc.vize_durumu) }}
       {{ row("Toplam Yatırım Tutarı", edit_doc.toplam_tutar | tlformat) }}
-      {{ row("Yatırıma Katkı Oranı", (edit_doc.katki_orani|string + ' %') if edit_doc.katki_orani is not none else '-') }}
-      {{ row("Vergi İndirim Oranı", (edit_doc.vergi_orani|string + ' %') if edit_doc.vergi_orani is not none else '-') }}
+      {{ row("Yatırıma Katkı Oranı", (edit_doc.katki_orani|string + ' %') if edit_doc.katki_orani is not none else '-')
+      }}
+      {{ row("Vergi İndirim Oranı", (edit_doc.vergi_orani|string + ' %') if edit_doc.vergi_orani is not none else '-')
+      }}
       {{ row("Diğer Oran", (edit_doc.diger_oran|string + ' %') if edit_doc.diger_oran is not none else '-') }}
       {{ row("Yatırımın Yapıldığı Bölge", edit_doc.bolge) }}
       {{ row("Cari Yılda Fiilen Gerçekleşen Harcama", edit_doc.cari_harcama_tutari | tlformat) }}
@@ -85,8 +127,10 @@
 
 <div class="text-center mt-4">
   <a href="?sekme=tesvik" class="btn btn-secondary px-4">← Listeye Dön</a>
-  <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=edit_doc.id|int) }}" class="btn btn-warning px-4">Güncelle</a>
-  <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=edit_doc.id|int) }}" class="btn btn-primary px-4">PDF İndir</a>
+  <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=edit_doc.id|int) }}"
+    class="btn btn-warning px-4">Güncelle</a>
+  <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=edit_doc.id|int) }}"
+    class="btn btn-primary px-4">PDF İndir</a>
 </div>
 {% endif %}
 

@@ -51,7 +51,7 @@
 
 
   {% elif sekme == 'mevzuat' %}
-    {% include 'mevzuat.html' %}
+  {% include 'mevzuat.html' %}
 
 
   {% elif sekme == 'form' %}
@@ -560,17 +560,19 @@
       <div class="d-flex justify-content-start gap-2 mt-4">
         <button type="button" class="btn btn-secondary" onclick="goToStep6()">← Geri</button>
 
-        <button type="submit" id="btn-save-step7" name="submit_action" value="new_save" class="btn btn-success">
+        <!-- 💾 Kaydet -->
+        <button type="button" id="btn-save-step7" class="btn btn-success" onclick="kaydetTesvikKullanim()">
           💾 Kaydet
         </button>
 
         {% if current_belge %}
-        <button type="submit" id="btn-guncelle-step7" name="submit_action" value="update" class="btn btn-warning">
+        <!-- 🔄 Güncelle -->
+        <button type="button" id="btn-guncelle-step7" class="btn btn-warning" onclick="kaydetTesvikKullanim()">
           🔄 Güncelle
         </button>
         {% endif %}
-
       </div>
+
     </div>
   </form>
 
@@ -1773,10 +1775,11 @@
 
 
   function hesaplaKatkiTutari9903({ advance = false } = {}) {
-    console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
+
 
     const karar = document.getElementById("karar")?.value;
     if (karar !== "2025/9903") return;
+    console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
 
     const safe = (x) => (isNaN(x) ? 0 : x);
     const val = (id) => safe(parseFormattedNumber(document.getElementById(id)?.value));
@@ -1918,7 +1921,8 @@
     // 9️⃣ UI güncelleme
     const setVal9903 = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.value = val.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
+      if (!el) return; // ❗ yoksa direkt çık
+      el.value = val.toLocaleString("tr-TR", { minimumFractionDigits: 2 });
     };
 
     setVal9903("cari_yatirim_katki", cariYatirimKatkisi9903);
@@ -1971,10 +1975,19 @@
   ["yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "kv_matrah", "katki_orani", "diger_oran", "toplam_tutar", "toplam_harcama_tutari"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
-      el.addEventListener("input", hesaplaKatkiTutari9903);
-      el.addEventListener("change", hesaplaKatkiTutari9903);
+      el.addEventListener("input", () => {
+        const karar = document.getElementById("karar")?.value;
+        if (karar === "2025/9903") hesaplaKatkiTutari9903();
+        else hesaplaKatkiTutari(); // klasik mod
+      });
+      el.addEventListener("change", () => {
+        const karar = document.getElementById("karar")?.value;
+        if (karar === "2025/9903") hesaplaKatkiTutari9903();
+        else hesaplaKatkiTutari();
+      });
     }
   });
+
 
 
 
@@ -2227,7 +2240,21 @@
     console.log("  kucukOlanDigerFaaliyetTutari (parsed):", kucukOlanDigerFaaliyetTutari);
 
     // Doğrudan HTML inputlarından alınan değerler
-    const tevsiYatirimKazanci = parseFormattedNumber(document.getElementById('tevsi_yatirim_kazanci').value);
+    // 🔹 Komple yeni veya tevsi fark etmeksizin kazancı al
+    let tevsiYatirimKazanci = 0;
+
+    // Önce tevsi kazancı varsa onu al
+    const tevsiEl = document.getElementById('tevsi_yatirim_kazanci');
+    if (tevsiEl && parseFormattedNumber(tevsiEl.value) > 0) {
+      tevsiYatirimKazanci = parseFormattedNumber(tevsiEl.value);
+    } else {
+      // değilse klasik “yatırımdan elde edilen kazanç” alanını kullan
+      const klasikEl = document.getElementById('yatirimdan_elde_edilen_kazanc');
+      if (klasikEl && parseFormattedNumber(klasikEl.value) > 0) {
+        tevsiYatirimKazanci = parseFormattedNumber(klasikEl.value);
+      }
+    }
+
     const vergiIndirimOrani = parseFormattedNumber(document.getElementById('vergi_orani').value) / 100;
     const oncekiToplamKatki = parseFormattedNumber(document.getElementById('onceki_katki_tutari').value);
 
@@ -3004,6 +3031,84 @@
   }
 
 
+
+
+  // 🟢 Yeni fonksiyon buraya geliyor
+  async function kaydetTesvikKullanim() {
+    try {
+      const belgeNo = document.getElementById("belge_no_hidden")?.value || "";
+      const donemSecimi = document.getElementById("donem")?.value || "";
+
+      if (!belgeNo || !donemSecimi) {
+        Swal.fire("Uyarı", "Belge numarası veya dönem seçimi eksik!", "warning");
+        return;
+      }
+
+      let hesap_donemi = null;
+      let donem_turu = "KURUMLAR";
+      const match = donemSecimi.match(/(\d{4})\s*-\s*(.+)/);
+      if (match) {
+        hesap_donemi = parseInt(match[1]);
+        donem_turu = match[2].trim();
+      } else {
+        hesap_donemi = new Date().getFullYear();
+      }
+
+      const payload = {
+        belge_no: belgeNo,
+        hesap_donemi,
+        donem_turu,
+        toplam_tutar: parseFormattedNumber(document.getElementById("toplam_tutar")?.value),
+        katki_tutari: parseFormattedNumber(document.getElementById("katki_tutari")?.value),
+        diger_katki_tutari: parseFormattedNumber(document.getElementById("diger_katki_tutari")?.value),
+        cari_harcama_tutari: parseFormattedNumber(document.getElementById("cari_harcama_tutari")?.value),
+        toplam_harcama_tutari: parseFormattedNumber(document.getElementById("toplam_harcama_tutari")?.value),
+        fiili_katki_tutari: parseFormattedNumber(document.getElementById("fiili_katki_tutari")?.value),
+        onceki_yatirim_katki_tutari: parseFormattedNumber(document.getElementById("onceki_yatirim_katki_tutari")?.value),
+        onceki_diger_katki_tutari: parseFormattedNumber(document.getElementById("onceki_diger_katki_tutari")?.value),
+        onceki_katki_tutari: parseFormattedNumber(document.getElementById("onceki_katki_tutari")?.value),
+        kalan_katki_tutari: parseFormattedNumber(document.getElementById("kalan_katki_tutari")?.value),
+        endeks_katki_tutari: parseFormattedNumber(document.getElementById("endeks_katki_tutari")?.value),
+        yatirimdan_elde_edilen_kazanc: parseFormattedNumber(document.getElementById("yatirimdan_elde_edilen_kazanc")?.value),
+        tevsi_yatirim_kazanci: parseFormattedNumber(document.getElementById("tevsi_yatirim_kazanci")?.value),
+        diger_faaliyet: parseFormattedNumber(document.getElementById("diger_faaliyet")?.value),
+        brut_satis: parseFormattedNumber(document.getElementById("brut_satis")?.value),
+        ihracat: parseFormattedNumber(document.getElementById("ihracat")?.value),
+        imalat: parseFormattedNumber(document.getElementById("imalat")?.value),
+        cari_yatirim_katki: parseFormattedNumber(document.getElementById("cari_yatirim_katki")?.value),
+        cari_diger_katki: parseFormattedNumber(document.getElementById("cari_diger_katki")?.value),
+        cari_toplam_katki: parseFormattedNumber(document.getElementById("cari_toplam_katki")?.value),
+        genel_toplam_katki: parseFormattedNumber(document.getElementById("genel_toplam_katki")?.value),
+        kalan_katki: parseFormattedNumber(document.getElementById("kalan_katki_tutari")?.value)
+      };
+
+      console.log("📤 Gönderilen veri:", payload);
+
+      const res = await fetch("/save_tesvik_kullanim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      Swal.fire({
+        icon: data.status,
+        title: data.title,
+        text: data.message,
+        timer: 2500,
+        showConfirmButton: false
+      });
+
+    } catch (err) {
+      console.error("❌ Kayıt hatası:", err);
+      Swal.fire("Hata", "Kayıt işlemi sırasında bir hata oluştu.", "error");
+    }
+  }
+
+
+
+
   document.addEventListener("DOMContentLoaded", function () {
 
     toggleInvestmentIncomeInputs();
@@ -3402,6 +3507,7 @@
         if (data.status === "success") {
           console.log("✅ Form otomatik kaydedildi:", data);
           if (data.tesvik_id) sessionStorage.setItem("current_tesvik_id", data.tesvik_id);
+          sessionStorage.setItem("current_belge_no", belgeNoInput?.value || "");
           Swal.fire({
             icon: "success",
             title: "Kaydedildi!",
@@ -3543,6 +3649,62 @@
         setOranlar();
       }
     });
+
+
+
+
+
+    // === AŞAMA 7: Kaydet butonuna tıklanınca teşvik kullanımını kaydet ===
+    const btnSaveStep7 = document.getElementById("btn-save-step7");
+    if (btnSaveStep7) {
+      btnSaveStep7.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const belgeNo = document.getElementById("belge_no")?.value || "";
+        const donemText = document.getElementById("donem")?.value || "";
+        const hesap_donemi = parseInt(donemText.split(" - ")[0]) || new Date().getFullYear();
+
+        const parseNum = (id) => {
+          const el = document.getElementById(id);
+          if (!el) return 0;
+          return parseFloat(el.value.replace(/\./g, "").replace(",", ".")) || 0;
+        };
+
+        const payload = {
+          belge_no: belgeNo,
+          hesap_donemi: hesap_donemi,
+          yatirim_kazanci: parseNum("yatirimdan_elde_edilen_kazanc"),
+          diger_kazanc: parseNum("kv_matrah"),
+          cari_yatirim_katkisi: parseNum("cari_yatirim_katki"),
+          cari_diger_katkisi: parseNum("cari_diger_katki"),
+          genel_toplam_katki: parseNum("genel_toplam_katki"),
+          kalan_katki: parseNum("kalan_katki_tutari")
+        };
+
+        console.log("💾 Teşvik kaydediliyor:", payload);
+
+        try {
+          const res = await fetch("/save_tesvik_kullanim", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+
+          Swal.fire({
+            icon: data.status === "success" ? "success" : "error",
+            title: data.title || "Sonuç",
+            text: data.message || "Bir hata oluştu",
+            confirmButtonText: "Tamam"
+          });
+        } catch (err) {
+          console.error("❌ Kaydetme hatası:", err);
+          Swal.fire("Hata", "Sunucuya bağlanılamadı.", "error");
+        }
+      });
+    }
+
+
 
     // Karar değişikliğini dinle
     kararSelect.addEventListener("change", handleKarar9903);

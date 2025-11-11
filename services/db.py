@@ -25,15 +25,22 @@ else:
 
 _db_pool = None
 
+
+
 def get_pool():
     global _db_pool
     if _db_pool is None and not USE_SQLITE:
         _db_pool = pool.SimpleConnectionPool(
             1, 5,
             DATABASE_URL,
-            connect_timeout=5,  # ✅ Kullandık
+            connect_timeout=5,
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=5,
             cursor_factory=extras.RealDictCursor
         )
+        print("🔗 PostgreSQL bağlantı havuzu keepalive ile başlatıldı.")
     return _db_pool
 
 
@@ -125,7 +132,10 @@ def get_conn():
             conn.cursor_factory = extras.RealDictCursor
             yield conn
         except Exception as e:
-            conn.rollback()
+            try:
+                conn.rollback()
+            except Exception:
+                pass  # bağlantı zaten kapanmış olabilir
             raise e
         finally:
             get_pool().putconn(conn)
@@ -280,7 +290,9 @@ def migrate_tesvik_columns():
             "ihracat": "REAL",
             "imalat": "REAL",
             "diger_faaliyet": "REAL",
-            "use_detailed_profit_ratios": "INTEGER DEFAULT 0"
+            "use_detailed_profit_ratios": "INTEGER DEFAULT 0",
+            "olusturan_id": "INTEGER"
+            
         }
 
         for col, col_type in to_add.items():
@@ -293,10 +305,13 @@ def migrate_tesvik_columns():
 
 
 def migrate_tesvik_kullanim_table():
-    """tesvik_kullanim tablosunu oluşturur (yoksa)."""
+    """tesvik_kullanim tablosunu oluşturur (yoksa) ve eksik sütunları ekler."""
     with get_conn() as conn:
         cur = conn.cursor()
 
+        # -------------------------------
+        # 🔹 SQLite Ortamı
+        # -------------------------------
         if USE_SQLITE:
             cur.execute("""
             CREATE TABLE IF NOT EXISTS tesvik_kullanim (
@@ -304,6 +319,7 @@ def migrate_tesvik_kullanim_table():
                 user_id INTEGER NOT NULL,
                 belge_no TEXT NOT NULL,
                 hesap_donemi INTEGER NOT NULL,
+                donem_turu TEXT DEFAULT 'KURUMLAR',
                 yatirim_kazanci REAL DEFAULT 0.0,
                 diger_kazanc REAL DEFAULT 0.0,
                 cari_yatirim_katkisi REAL DEFAULT 0.0,
@@ -311,9 +327,12 @@ def migrate_tesvik_kullanim_table():
                 genel_toplam_katki REAL DEFAULT 0.0,
                 kalan_katki REAL DEFAULT 0.0,
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, belge_no, hesap_donemi)
+                UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
             );
             """)
+        # -------------------------------
+        # 🔹 PostgreSQL Ortamı
+        # -------------------------------
         else:
             cur.execute("""
             CREATE TABLE IF NOT EXISTS tesvik_kullanim (
@@ -321,6 +340,7 @@ def migrate_tesvik_kullanim_table():
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 belge_no TEXT NOT NULL,
                 hesap_donemi INT NOT NULL,
+                donem_turu TEXT DEFAULT 'KURUMLAR',
                 yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
                 diger_kazanc DOUBLE PRECISION DEFAULT 0.0,
                 cari_yatirim_katkisi DOUBLE PRECISION DEFAULT 0.0,
@@ -328,12 +348,28 @@ def migrate_tesvik_kullanim_table():
                 genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
                 kalan_katki DOUBLE PRECISION DEFAULT 0.0,
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, belge_no, hesap_donemi)
+                UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
             );
             """)
 
+        # 🔍 Eğer mevcut tablo eskiyse ve `donem_turu` sütunu yoksa ekle
+        try:
+            if USE_SQLITE:
+                cur.execute("PRAGMA table_info(tesvik_kullanim)")
+                existing = {r["name"] for r in cur.fetchall()}
+            else:
+                cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='tesvik_kullanim'")
+                existing = {r["column_name"] for r in cur.fetchall()}
+
+            if "donem_turu" not in existing:
+                cur.execute("ALTER TABLE tesvik_kullanim ADD COLUMN donem_turu TEXT DEFAULT 'KURUMLAR';")
+                print("🆕 'donem_turu' sütunu eklendi.")
+        except Exception as e:
+            print(f"⚠️ donem_turu sütunu kontrolü sırasında hata: {e}")
+
         conn.commit()
         print("✅ tesvik_kullanim tablosu kontrol edildi / oluşturuldu.")
+
 
 
 

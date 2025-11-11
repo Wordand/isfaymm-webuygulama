@@ -19,7 +19,7 @@
         <td>{{ m.vergi_kimlik_no }}</td>
         <td>{{ m.unvan }}</td>
         <td class="text-center">
-          <button class="btn btn-success btn-sm" onclick="selectMukellef({{ m.id }})">Seç</button>
+          <button class="btn btn-success btn-sm" onclick="selectMukellef({{ m.id }}, '{{ m.unvan }}')">Seç</button>
           <button class="btn btn-warning btn-sm"
             onclick="editMukellef({{ m.id }}, '{{ m.vergi_kimlik_no }}', '{{ m.unvan }}')">Düzenle</button>
           <button class="btn btn-danger btn-sm" onclick="deleteMukellef({{ m.id }})">Sil</button>
@@ -33,9 +33,9 @@
     </tbody>
   </table>
 
-
-  <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#mukellefModal">+ Yeni Mükellef
-    Ekle</button>
+  <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#mukellefModal">
+    + Yeni Mükellef Ekle
+  </button>
 </div>
 
 <!-- 🧾 Mükellef Modal -->
@@ -67,19 +67,111 @@
 </div>
 
 <script>
-  function selectMukellef(id) {
-    fetch("/indirimlikurumlar/mukellef-sec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    }).then(r => r.json()).then(res => {
-      if (res.status === "success") {
-        Swal.fire({ icon: "success", title: "Mükellef Seçildi", timer: 1200, showConfirmButton: false })
-          .then(() => window.location.href = "/indirimlikurumlar?sekme=form");
+  // 🟩 Mükellef seçimi
+  async function selectMukellef(id, unvan) {
+    try {
+      const resp = await fetch("/indirimlikurumlar/mukellef-sec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+      const res = await resp.json();
+
+      if (res.status !== "success") {
+        Swal.fire("Hata", res.message || "Mükellef seçilemedi.", "error");
+        return;
       }
-    });
+
+      const mukellefUnvan = unvan || res.unvan || "Seçilen Mükellef";
+
+      // 🔹 Yeni belge mi mevcut belge mi?
+      const result = await Swal.fire({
+        title: `${mukellefUnvan}`,
+        text: "Bu mükellef için yeni bir teşvik belgesi mi oluşturmak istiyorsunuz, yoksa mevcut bir belge üzerinde mi işlem yapacaksınız?",
+        icon: "question",
+        showDenyButton: true,
+        confirmButtonText: "🆕 Yeni Belge",
+        denyButtonText: "📄 Var Olan Belge"
+      });
+
+      if (result.isConfirmed) {
+        // 🆕 Yeni belge oluşturma akışı
+        const { value: formValues } = await Swal.fire({
+          title: "Yeni Belge Bilgileri",
+          html: `
+            <input id="belgeNo" class="swal2-input" placeholder="Belge No giriniz">
+            <input id="belgeTarihi" type="date" class="swal2-input">
+          `,
+          focusConfirm: false,
+          preConfirm: () => {
+            const belge_no = document.getElementById("belgeNo").value.trim();
+            const belge_tarihi = document.getElementById("belgeTarihi").value.trim();
+            if (!belge_no || !belge_tarihi) {
+              Swal.showValidationMessage("⚠️ Lütfen hem Belge No hem de Belge Tarihi giriniz!");
+              return false;
+            }
+            return { belge_no, belge_tarihi };
+          },
+          confirmButtonText: "Oluştur",
+          showCancelButton: true
+        });
+
+        if (formValues) {
+          const newDoc = await fetch("/indirimlikurumlar/new_tesvik", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formValues)
+          }).then(r => r.json());
+
+          if (newDoc.status === "success") {
+            Swal.fire({
+              icon: "success",
+              title: "Yeni Belge Oluşturuldu",
+              text: "Aşama 1 ekranına yönlendiriliyorsunuz...",
+              showConfirmButton: false,
+              timer: 1200
+            });
+            setTimeout(() => {
+              location.href = `/indirimlikurumlar/?sekme=form&view=${newDoc.id}`;
+            }, 1200);
+          } else {
+            Swal.fire("Hata", newDoc.message || "Belge oluşturulamadı.", "error");
+          }
+        }
+      } else if (result.isDenied) {
+        // 📄 Var olan belgeleri getir
+        const docsResp = await fetch("/indirimlikurumlar/list_tesvik_docs");
+        const docsData = await docsResp.json();
+
+        if (!docsData.docs?.length) {
+          Swal.fire("Bilgi", "Bu mükellefe ait mevcut teşvik belgesi bulunamadı.", "info");
+          return;
+        }
+
+        const inputOptions = {};
+        docsData.docs.forEach(d => {
+          inputOptions[d.id] = `${d.belge_no} (${d.belge_tarihi})`;
+        });
+
+        const { value: selectedId } = await Swal.fire({
+          title: "Belge Seçin",
+          input: "select",
+          inputOptions,
+          inputPlaceholder: "Bir teşvik belgesi seçin",
+          showCancelButton: true
+        });
+
+        if (selectedId) {
+          location.href = `/indirimlikurumlar/?sekme=form&view=${selectedId}`;
+        }
+      }
+    } catch (err) {
+      console.error("❌ Mükellef seçme hatası:", err);
+      Swal.fire("Hata", "Sunucu ile iletişim kurulamadı.", "error");
+    }
   }
 
+  // 🗑️ Mükellef silme
   function deleteMukellef(id) {
     Swal.fire({
       title: "Emin misiniz?",
@@ -99,6 +191,7 @@
     });
   }
 
+  // ✏️ Düzenleme
   function editMukellef(id, vkn, unvan) {
     document.getElementById("mukellef_id").value = id;
     document.getElementById("vkn").value = vkn;
@@ -106,6 +199,7 @@
     new bootstrap.Modal(document.getElementById("mukellefModal")).show();
   }
 
+  // 💾 Kaydet
   document.getElementById("saveMukellef").addEventListener("click", () => {
     const data = {
       id: document.getElementById("mukellef_id").value,

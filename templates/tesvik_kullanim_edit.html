@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+{% block title %}{{ belge_no }} - {{ yil }} {{ turu }} Dönemi | İSFA YMM{% endblock %}
+
+{% block content %}
+<div class="container py-5" data-aos="fade-up">
+  <div class="card shadow-lg border-0 rounded-3">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">
+        💼 {{ belge_no }} — {{ yil }} {{ turu }} Dönemi Teşvik Kullanımı
+      </h4>
+    </div>
+    <div class="card-body">
+      <form id="edit-donem-form">
+        <input type="hidden" name="belge_no" value="{{ belge_no }}">
+        <input type="hidden" name="hesap_donemi" value="{{ yil }}">
+        <input type="hidden" name="donem_turu" value="{{ turu }}">
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Yatırımdan Elde Edilen Kazanç</label>
+            <input type="number" step="0.01" class="form-control" name="yatirim_kazanci"
+              value="{{ kayit.yatirim_kazanci or 0 }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Diğer Faaliyet Kazancı</label>
+            <input type="number" step="0.01" class="form-control" name="diger_kazanc"
+              value="{{ kayit.diger_kazanc or 0 }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cari Yatırım Katkısı</label>
+            <input type="number" step="0.01" class="form-control" name="cari_yatirim_katkisi"
+              value="{{ kayit.cari_yatirim_katkisi or 0 }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cari Diğer Katkısı</label>
+            <input type="number" step="0.01" class="form-control" name="cari_diger_katkisi"
+              value="{{ kayit.cari_diger_katkisi or 0 }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Genel Toplam Katkı</label>
+            <input type="number" step="0.01" class="form-control" name="genel_toplam_katki"
+              value="{{ kayit.genel_toplam_katki or 0 }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Kalan Katkı</label>
+            <input type="number" step="0.01" class="form-control" name="kalan_katki"
+              value="{{ kayit.kalan_katki or 0 }}">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{{ url_for('indirimlikurumlar.index', sekme='tesvik') }}" class="btn btn-secondary px-4">
+            ← Listeye Dön
+          </a>
+          <button type="submit" class="btn btn-success px-4">
+            💾 Kaydet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("edit-donem-form");
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const formData = Object.fromEntries(new FormData(form).entries());
+
+      const res = await fetch("/save_tesvik_kullanim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+      Swal.fire({
+        icon: data.status,
+        title: data.title || (data.status === "success" ? "Kaydedildi" : "Hata"),
+        text: data.message,
+        confirmButtonText: "Tamam",
+      }).then(() => {
+        if (data.status === "success") {
+          window.location.href = "{{ url_for('indirimlikurumlar.index', sekme='tesvik') }}";
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

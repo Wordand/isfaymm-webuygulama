@@ -9,6 +9,8 @@ import os
 import shutil
 import json
 import traceback
+import psycopg2
+import psycopg2.extras
 
 from datetime import datetime
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, flash, make_response, current_app, send_file, jsonify
@@ -491,12 +493,59 @@ def mukellef_sil():
 
 
 
+@bp.route("/list_tesvik_docs")
+@login_required
+def list_tesvik_docs():
+    """Aktif kullanıcıya ait tüm teşvik belgelerini JSON olarak döner."""
+    user_id = session["user_id"]
+    docs = get_all_tesvik_docs(user_id)
+    return jsonify({"docs": docs})
+
+
+@bp.route("/new_tesvik", methods=["POST"])
+@login_required
+def new_tesvik():
+    try:
+        data = request.get_json(force=True)
+        print("📨 Gelen JSON:", data)
+
+        user_id = session["user_id"]
+        aktif_mukellef_id = session.get("aktif_mukellef_id")
+
+        if not aktif_mukellef_id:
+            return jsonify({"status": "error", "message": "Aktif mükellef seçilmedi."}), 400
+
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute("""
+                INSERT INTO tesvik_belgeleri (mukellef_id, belge_no, belge_tarihi, olusturan_id)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id;
+            """, (aktif_mukellef_id, data["belge_no"], data["belge_tarihi"], user_id))
+            row = c.fetchone()
+            new_id = row["id"] if row else None
+            conn.commit()
+
+        if not new_id:
+            raise Exception("Yeni belge ID alınamadı.")
+
+        return jsonify({
+            "status": "success",
+            "title": "Belge Oluşturuldu",
+            "message": "Yeni teşvik belgesi başarıyla oluşturuldu.",
+            "id": new_id
+        })
+
+    except Exception as e:
+        print("⚠️ new_tesvik hata:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 
 @bp.route("/", methods=["GET", "POST"])
 @login_required
 def index():
+    print("🔥 indirimlikurumlar.index çalıştı")
     sekme = request.args.get("sekme", "mukellef")
     user_id = session["user_id"]
     aktif_mukellef_id = session.get("aktif_mukellef_id")
@@ -518,6 +567,25 @@ def index():
     if aktif_mukellef_id:
         docs = get_all_tesvik_docs(user_id)
         user_df = get_user_profit_df(user_id)
+        
+        
+        # 🔹 Sadece "Teşvik" sekmesindeyken belge dönemlerini getir
+        if sekme == "tesvik":
+            for d in docs:
+                belge_no = d.get("belge_no")
+                if not belge_no:
+                    d["donemler"] = []
+                    continue
+
+                with get_conn() as conn2:
+                    cur2 = conn2.cursor()
+                    cur2.execute("""
+                        SELECT hesap_donemi, donem_turu
+                        FROM tesvik_kullanim
+                        WHERE user_id = %s AND belge_no = %s
+                        ORDER BY hesap_donemi DESC, donem_turu
+                    """, (user_id, belge_no))
+                    d["donemler"] = cur2.fetchall() or []
 
         view_id = request.args.get("view", type=int)
         if sekme == "tesvik" and view_id:
@@ -775,15 +843,31 @@ def get_all_tesvik_docs(user_id: int):
 
 
 
-
-
 @bp.route('/tesvik', methods=['GET', 'POST'])
 @login_required
 def tesvik():
+    print("🔥 indirimlikurumlar.tesvik çalıştı")
     user_id = session.get("user_id")
 
     # 🔹 Tüm belgeleri listele
     docs = get_all_tesvik_docs(user_id)
+
+    # 🔹 Her teşvik belgesi için ilgili dönemleri getir
+    for d in docs:
+        belge_no = d.get("belge_no")
+        if not belge_no:
+            d["donemler"] = []
+            continue
+
+        with get_conn() as conn2:
+            cur2 = conn2.cursor()
+            cur2.execute("""
+                SELECT hesap_donemi, donem_turu
+                FROM tesvik_kullanim
+                WHERE user_id = %s AND belge_no = %s
+                ORDER BY hesap_donemi DESC, donem_turu
+            """, (user_id, belge_no))
+            d["donemler"] = cur2.fetchall() or []
 
     # 🔹 Eğer ?view=ID varsa detay moduna geç
     view_id = request.args.get('view', type=int)
@@ -810,8 +894,8 @@ def tesvik():
             row = c.fetchone()
 
         if row:
-            colnames = [desc[0] for desc in c.description]  # cursor.description okunduğunda saklanmış olur
-            edit_doc = dict(zip(colnames, row))              # ✅ tuple → dict dönüşümü
+            colnames = [desc[0] for desc in c.description]
+            edit_doc = dict(zip(colnames, row))
             print(f"🔍 Detay görüntüleniyor: {edit_doc.get('belge_no')} (ID: {view_id})")
         else:
             flash("Belge bulunamadı veya erişim yetkiniz yok.", "warning")
@@ -1008,7 +1092,6 @@ def upload_kv_beyan():
 
 
 
-
 @bp.route("/save_tesvik_kullanim", methods=["POST"])
 @login_required
 def save_tesvik_kullanim():
@@ -1024,6 +1107,7 @@ def save_tesvik_kullanim():
         data = request.get_json(force=True)
         belge_no = data.get("belge_no")
         hesap_donemi = int(data.get("hesap_donemi", datetime.now().year))
+        donem_turu = data.get("donem_turu", "KURUMLAR")
 
         yatirim_kazanci = float(data.get("yatirim_kazanci", 0))
         diger_kazanc = float(data.get("diger_kazanc", 0))
@@ -1038,16 +1122,15 @@ def save_tesvik_kullanim():
         with get_conn() as conn:
             cur = conn.cursor()
 
-            
-            insert_sql = """
+            cur.execute("""
                 INSERT INTO tesvik_kullanim (
-                    user_id, belge_no, hesap_donemi,
+                    user_id, belge_no, hesap_donemi, donem_turu,
                     yatirim_kazanci, diger_kazanc,
                     cari_yatirim_katkisi, cari_diger_katkisi,
                     genel_toplam_katki, kalan_katki
                 )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT (user_id, belge_no, hesap_donemi)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                ON CONFLICT (user_id, belge_no, hesap_donemi, donem_turu)
                 DO UPDATE SET
                     yatirim_kazanci = EXCLUDED.yatirim_kazanci,
                     diger_kazanc = EXCLUDED.diger_kazanc,
@@ -1056,10 +1139,8 @@ def save_tesvik_kullanim():
                     genel_toplam_katki = EXCLUDED.genel_toplam_katki,
                     kalan_katki = EXCLUDED.kalan_katki,
                     kayit_tarihi = CURRENT_TIMESTAMP;
-            """
-
-            cur.execute(insert_sql, (
-                user_id, belge_no, hesap_donemi,
+            """, (
+                user_id, belge_no, hesap_donemi, donem_turu,
                 yatirim_kazanci, diger_kazanc,
                 cari_yatirim_katkisi, cari_diger_katkisi,
                 genel_toplam_katki, kalan_katki
@@ -1070,7 +1151,7 @@ def save_tesvik_kullanim():
         return jsonify({
             "status": "success",
             "title": "Kayıt Başarılı",
-            "message": f"{belge_no} ({hesap_donemi}) dönemine ait teşvik kullanımı kaydedildi."
+            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemine ait teşvik kullanımı kaydedildi."
         })
 
     except Exception as e:
@@ -1083,6 +1164,146 @@ def save_tesvik_kullanim():
 
 
 
+# ============================================================
+# 🧩 1️⃣ Dönem Klonlama
+# ============================================================
+@bp.route("/clone_tesvik_donem", methods=["POST"])
+@login_required
+def clone_tesvik_donem():
+    """Belirli bir teşvik belgesi için yeni dönem oluşturur (isteğe bağlı klonlama ile)."""
+    try:
+        user_id = session.get("user_id")
+        data = request.get_json(force=True)
+        belge_no = data.get("belge_no")
+        donem_text = data.get("donem_text", "").strip()
+
+        if not belge_no or not donem_text:
+            return jsonify({
+                "status": "error",
+                "title": "Eksik Bilgi",
+                "message": "Belge numarası veya dönem bilgisi eksik."
+            }), 400
+
+        # Örn: "2025 - 2. Geçici" → yıl + dönem_turu ayrıştır
+        parts = donem_text.split("-", 1)
+        hesap_donemi = int(parts[0].strip()) if parts else datetime.now().year
+        donem_turu = parts[1].strip().upper() if len(parts) > 1 else "KURUMLAR"
+
+        with get_conn() as conn:
+            cur = conn.cursor()
+
+            # 🔹 Önceki bir dönem varsa onu klonla
+            cur.execute("""
+                SELECT yatirim_kazanci, diger_kazanc,
+                       cari_yatirim_katkisi, cari_diger_katkisi,
+                       genel_toplam_katki, kalan_katki
+                FROM tesvik_kullanim
+                WHERE user_id=%s AND belge_no=%s
+                ORDER BY hesap_donemi DESC LIMIT 1
+            """, (user_id, belge_no))
+            prev = cur.fetchone()
+
+            prev_vals = list(prev.values()) if prev else [0, 0, 0, 0, 0, 0]
+
+            # 🔹 Yeni dönemi oluştur
+            cur.execute("""
+                INSERT INTO tesvik_kullanim (
+                    user_id, belge_no, hesap_donemi, donem_turu,
+                    yatirim_kazanci, diger_kazanc,
+                    cari_yatirim_katkisi, cari_diger_katkisi,
+                    genel_toplam_katki, kalan_katki
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (user_id, belge_no, hesap_donemi, donem_turu, *prev_vals))
+            conn.commit()
+
+        return jsonify({
+            "status": "success",
+            "title": "Yeni Dönem Eklendi",
+            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemi oluşturuldu."
+        })
+
+    except Exception as e:
+        print(f"⚠️ clone_tesvik_donem hata: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "Hata",
+            "message": f"Yeni dönem eklenirken hata oluştu: {str(e)}"
+        }), 500
+
+
+
+# ============================================================
+# 🗑️ 2️⃣ Dönem Silme
+# ============================================================
+@bp.route("/delete_tesvik_donem", methods=["POST"])
+@login_required
+def delete_tesvik_donem():
+    """Belirli bir belge + hesap dönemi kaydını siler."""
+    try:
+        user_id = session.get("user_id")
+        data = request.get_json(force=True)
+        belge_no = data.get("belge_no")
+        hesap_donemi = data.get("hesap_donemi")
+
+        if not belge_no or not hesap_donemi:
+            return jsonify({
+                "status": "error",
+                "title": "Eksik Bilgi",
+                "message": "Belge numarası veya dönem bilgisi eksik."
+            }), 400
+
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                DELETE FROM tesvik_kullanim
+                WHERE user_id = %s AND belge_no = %s AND hesap_donemi = %s
+            """, (user_id, belge_no, hesap_donemi))
+            conn.commit()
+
+        return jsonify({
+            "status": "success",
+            "title": "Silindi",
+            "message": f"{belge_no} ({hesap_donemi}) dönemi silindi."
+        })
+
+    except Exception as e:
+        print(f"⚠️ delete_tesvik_donem hata: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "Silme Hatası",
+            "message": f"Hata: {e}"
+        }), 500
+
+
+# ============================================================
+# 🧾 3️⃣ Dönem Düzenleme (açma)
+# ============================================================
+@bp.route("/edit_tesvik_kullanim/<belge_no>/<yil>/<turu>")
+@login_required
+def edit_tesvik_kullanim(belge_no, yil, turu):
+    """Belirli belge ve döneme ait kayıtları formda görüntüler."""
+    user_id = session.get("user_id")
+
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT * FROM tesvik_kullanim
+            WHERE user_id = %s AND belge_no = %s AND hesap_donemi = %s AND donem_turu = %s
+        """, (user_id, belge_no, yil, turu))
+        kayit = cur.fetchone()
+
+    if not kayit:
+        flash("Kayıt bulunamadı.", "warning")
+        return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
+
+    return render_template(
+        "tesvik_kullanim_edit.html",
+        belge_no=belge_no,
+        yil=yil,
+        turu=turu,
+        kayit=kayit
+    )
 
 
 
