@@ -66,14 +66,18 @@ if DATABASE_URL.startswith("sqlite:///"):
     );
     """)
 
-    # --- TEŞVİK BELGELERİ TABLOSU ---
+
     c.execute("""
     CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        mukellef_id INTEGER,
+        
+        -- Zorunlu İlişkiler ve Kimlikler
+        user_id INTEGER NOT NULL, 
+        mukellef_id INTEGER NOT NULL, 
+        belge_no TEXT NOT NULL, 
+        
+        -- Tarih ve Karar Bilgileri
         yukleme_tarihi TEXT DEFAULT CURRENT_TIMESTAMP,
-        belge_no TEXT,
         belge_tarihi TEXT,
         karar TEXT,
         program_turu TEXT,
@@ -84,10 +88,14 @@ if DATABASE_URL.startswith("sqlite:///"):
         il TEXT,
         osb TEXT,
         bolge TEXT,
+        
+        -- Oranlar ve Temel Tutarlar
         katki_orani REAL,
         vergi_orani REAL,
         diger_oran REAL,
         toplam_tutar REAL,
+        
+        -- Ara ve Önceki Dönem Hesaplama Verileri (Aşama 3 ve 4 verileri)
         katki_tutari REAL,
         diger_katki_tutari REAL,
         cari_harcama_tutari REAL,
@@ -97,6 +105,8 @@ if DATABASE_URL.startswith("sqlite:///"):
         onceki_yatirim_katki_tutari REAL,
         onceki_diger_katki_tutari REAL,
         onceki_katki_tutari REAL,
+        
+        -- Sonuç ve Dağılım Verileri (Aşama 7 ve Aşama 6)
         cari_yatirim_katki REAL DEFAULT 0.0,
         cari_diger_katki REAL DEFAULT 0.0,
         cari_toplam_katki REAL DEFAULT 0.0,
@@ -105,7 +115,9 @@ if DATABASE_URL.startswith("sqlite:///"):
         ihracat REAL,
         imalat REAL,
         diger_faaliyet REAL,
-        use_detailed_profit_ratios INTEGER DEFAULT 0
+        use_detailed_profit_ratios INTEGER DEFAULT 0,
+        olusturan_id INTEGER,
+        UNIQUE(user_id, mukellef_id, belge_no)
     );
     """)
 
@@ -127,7 +139,7 @@ if DATABASE_URL.startswith("sqlite:///"):
 
 
 
-    # --- TEŞVİK KULLANIM TABLOSU (SQLite) ---
+    # --- TEŞVİK KULLANIM TABLOSU (Doğru Sürüm - SQLite) ---
     c.execute("""
     CREATE TABLE IF NOT EXISTS tesvik_kullanim (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,16 +147,33 @@ if DATABASE_URL.startswith("sqlite:///"):
         belge_no TEXT NOT NULL,
         hesap_donemi INTEGER NOT NULL,
         donem_turu TEXT DEFAULT 'KURUMLAR',
-        yatirim_kazanci REAL DEFAULT 0.0,
-        diger_kazanc REAL DEFAULT 0.0,
-        cari_yatirim_katkisi REAL DEFAULT 0.0,
-        cari_diger_katkisi REAL DEFAULT 0.0,
+
+        -- 🔹 Kazanç Bilgileri
+        yatirimdan_elde_edilen_kazanc REAL DEFAULT 0.0,
+        tevsi_yatirim_kazanci REAL DEFAULT 0.0,
+        diger_faaliyet REAL DEFAULT 0.0,
+
+        -- 🔹 Cari Dönem Katkıları
+        cari_yatirim_katki REAL DEFAULT 0.0,
+        cari_diger_katki REAL DEFAULT 0.0,
+        cari_toplam_katki REAL DEFAULT 0.0,
+
+        -- 🔹 Genel ve Kalan Katkılar
         genel_toplam_katki REAL DEFAULT 0.0,
-        kalan_katki REAL DEFAULT 0.0,
+        kalan_katki_tutari REAL DEFAULT 0.0,
+
+        -- 🔹 İndirimli KV Bilgileri
+        indirimli_matrah REAL DEFAULT 0.0,
+        indirimli_kv REAL DEFAULT 0.0,
+        indirimli_kv_oran REAL DEFAULT 0.0,
+
+        -- 🔹 Sistem Alanı
         kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
         UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
     );
     """)
+
 
     conn.commit()
     conn.close()
@@ -225,17 +254,21 @@ CREATE TABLE IF NOT EXISTS profit_data (
 """)
 
 
-# --- TEŞVİK BELGELERİ TABLOSU ---
+
 cur.execute("""
 CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     id SERIAL PRIMARY KEY,
+    
+    -- Zorunlu İlişkiler ve Kimlikler
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    mukellef_id INTEGER REFERENCES mukellef(id) ON DELETE CASCADE,
+    mukellef_id INTEGER NOT NULL REFERENCES mukellef(id) ON DELETE CASCADE,
+    belge_no TEXT NOT NULL, 
+    
+    -- Tarih ve Karar Bilgileri
     yukleme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    belge_no TEXT,
     belge_tarihi TEXT,
     karar TEXT,
-    program_turu TEXT,   -- ✅ EKLENDİ
+    program_turu TEXT,
     yatirim_turu1 TEXT,
     yatirim_turu2 TEXT,
     vize_durumu TEXT,
@@ -243,10 +276,14 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     il TEXT,
     osb TEXT,
     bolge TEXT,
+    
+    -- Oranlar ve Temel Tutarlar
     katki_orani DOUBLE PRECISION,
     vergi_orani DOUBLE PRECISION,
     diger_oran DOUBLE PRECISION,
     toplam_tutar DOUBLE PRECISION,
+    
+    -- Ara ve Önceki Dönem Hesaplama Verileri
     katki_tutari DOUBLE PRECISION,
     diger_katki_tutari DOUBLE PRECISION,
     cari_harcama_tutari DOUBLE PRECISION,
@@ -256,6 +293,8 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     onceki_yatirim_katki_tutari DOUBLE PRECISION,
     onceki_diger_katki_tutari DOUBLE PRECISION,
     onceki_katki_tutari DOUBLE PRECISION,
+    
+    -- Sonuç ve Dağılım Verileri
     cari_yatirim_katki DOUBLE PRECISION DEFAULT 0.0,
     cari_diger_katki DOUBLE PRECISION DEFAULT 0.0,
     cari_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
@@ -264,11 +303,13 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     ihracat DOUBLE PRECISION,
     imalat DOUBLE PRECISION,
     diger_faaliyet DOUBLE PRECISION,
-    use_detailed_profit_ratios BOOLEAN DEFAULT FALSE
+    use_detailed_profit_ratios BOOLEAN DEFAULT FALSE,
+    olusturan_id INTEGER,    
+    UNIQUE(user_id, mukellef_id, belge_no)
 );
 """)
 
-# --- TEŞVİK KULLANIM TABLOSU (PostgreSQL) ---
+# --- TEŞVİK KULLANIM TABLOSU (Doğru Sürüm - PostgreSQL) ---
 cur.execute("""
 CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     id SERIAL PRIMARY KEY,
@@ -276,13 +317,29 @@ CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     belge_no TEXT NOT NULL,
     hesap_donemi INT NOT NULL,
     donem_turu TEXT DEFAULT 'KURUMLAR',
-    yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
-    diger_kazanc DOUBLE PRECISION DEFAULT 0.0,
-    cari_yatirim_katkisi DOUBLE PRECISION DEFAULT 0.0,
-    cari_diger_katkisi DOUBLE PRECISION DEFAULT 0.0,
+
+    -- 🔹 Kazanç Bilgileri
+    yatirimdan_elde_edilen_kazanc DOUBLE PRECISION DEFAULT 0.0,
+    tevsi_yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
+    diger_faaliyet DOUBLE PRECISION DEFAULT 0.0,
+
+    -- 🔹 Cari Dönem Katkıları
+    cari_yatirim_katki DOUBLE PRECISION DEFAULT 0.0,
+    cari_diger_katki DOUBLE PRECISION DEFAULT 0.0,
+    cari_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
+
+    -- 🔹 Genel ve Kalan Katkılar
     genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
-    kalan_katki DOUBLE PRECISION DEFAULT 0.0,
+    kalan_katki_tutari DOUBLE PRECISION DEFAULT 0.0,
+
+    -- 🔹 İndirimli KV Bilgileri
+    indirimli_matrah DOUBLE PRECISION DEFAULT 0.0,
+    indirimli_kv DOUBLE PRECISION DEFAULT 0.0,
+    indirimli_kv_oran DOUBLE PRECISION DEFAULT 0.0,
+
+    -- 🔹 Sistem Alanı
     kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
 );
 """)

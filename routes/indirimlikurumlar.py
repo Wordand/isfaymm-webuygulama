@@ -496,49 +496,78 @@ def mukellef_sil():
 @bp.route("/list_tesvik_docs")
 @login_required
 def list_tesvik_docs():
-    """Aktif kullanıcıya ait tüm teşvik belgelerini JSON olarak döner."""
     user_id = session["user_id"]
-    docs = get_all_tesvik_docs(user_id)
+    mukellef_id = session.get("aktif_mukellef_id")
+
+    docs = get_all_tesvik_docs(user_id, mukellef_id)
+
     return jsonify({"docs": docs})
 
 
-@bp.route("/new_tesvik", methods=["POST"])
+@bp.route('/new_tesvik', methods=['POST'])
 @login_required
 def new_tesvik():
+    """Yeni teşvik belgesi oluşturur (mükellef + kullanıcı bazında)."""
     try:
-        data = request.get_json(force=True)
-        print("📨 Gelen JSON:", data)
+        data = request.get_json()
+        mukellef_id = session.get("aktif_mukellef_id")
+        user_id = session.get("user_id")
 
-        user_id = session["user_id"]
-        aktif_mukellef_id = session.get("aktif_mukellef_id")
+        if not user_id or not mukellef_id:
+            return jsonify({
+                "status": "error",
+                "title": "Oturum Bilgisi Eksik",
+                "message": "Kullanıcı veya mükellef bilgisi bulunamadı. Lütfen tekrar giriş yapın."
+            }), 400
 
-        if not aktif_mukellef_id:
-            return jsonify({"status": "error", "message": "Aktif mükellef seçilmedi."}), 400
+        belge_no = data.get("belge_no", "").strip()
+        belge_tarihi = data.get("belge_tarihi", "").strip()
+
+        if not belge_no or not belge_tarihi:
+            return jsonify({
+                "status": "warning",
+                "title": "Eksik Bilgi",
+                "message": "Belge numarası ve tarihi zorunludur."
+            }), 400
 
         with get_conn() as conn:
             c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
             c.execute("""
-                INSERT INTO tesvik_belgeleri (mukellef_id, belge_no, belge_tarihi, olusturan_id)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO tesvik_belgeleri (
+                    user_id, mukellef_id, yukleme_tarihi,
+                    belge_no, belge_tarihi, olusturan_id
+                )
+                VALUES (%s, %s, NOW(), %s, %s, %s)
                 RETURNING id;
-            """, (aktif_mukellef_id, data["belge_no"], data["belge_tarihi"], user_id))
+            """, (user_id, mukellef_id, belge_no, belge_tarihi, user_id))
+
             row = c.fetchone()
-            new_id = row["id"] if row else None
+            if not row:
+                raise Exception("INSERT başarılı fakat id döndürülmedi.")
+
+            new_id = row["id"]
             conn.commit()
 
-        if not new_id:
-            raise Exception("Yeni belge ID alınamadı.")
+        # 🔥 Kritik: Form akışının düzgün çalışması için ID'yi session'a kaydediyoruz.
+        session["current_tesvik_id"] = new_id
 
         return jsonify({
             "status": "success",
-            "title": "Belge Oluşturuldu",
-            "message": "Yeni teşvik belgesi başarıyla oluşturuldu.",
+            "title": "Yeni Belge Oluşturuldu",
+            "message": f"Belge başarıyla oluşturuldu. (ID: {new_id})",
             "id": new_id
-        })
+        }), 200
 
     except Exception as e:
-        print("⚠️ new_tesvik hata:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
+        current_app.logger.error(f"❌ new_tesvik hatası: {e}")
+        return jsonify({
+            "status": "error",
+            "title": "Sunucu Hatası",
+            "message": str(e)
+        }), 500
+
+
 
 
 
@@ -565,34 +594,34 @@ def index():
     edit_doc = None
 
     if aktif_mukellef_id:
-        docs = get_all_tesvik_docs(user_id)
+        docs = get_all_tesvik_docs(user_id, aktif_mukellef_id)
         user_df = get_user_profit_df(user_id)
         
         
-        # 🔹 Sadece "Teşvik" sekmesindeyken belge dönemlerini getir
-        if sekme == "tesvik":
-            for d in docs:
-                belge_no = d.get("belge_no")
-                if not belge_no:
-                    d["donemler"] = []
-                    continue
 
-                with get_conn() as conn2:
-                    cur2 = conn2.cursor()
-                    cur2.execute("""
-                        SELECT hesap_donemi, donem_turu
-                        FROM tesvik_kullanim
-                        WHERE user_id = %s AND belge_no = %s
-                        ORDER BY hesap_donemi DESC, donem_turu
-                    """, (user_id, belge_no))
-                    d["donemler"] = cur2.fetchall() or []
+                    
 
         view_id = request.args.get("view", type=int)
+
         if sekme == "tesvik" and view_id:
-            edit_doc = next((d for d in docs if d["id"] == view_id), None)
+            edit_doc = next((d for d in docs if d["id"] == view_id and d["mukellef_id"] == aktif_mukellef_id), None)
             if edit_doc:
                 print(f"📄 Teşvik detayı görüntüleniyor: ID={view_id}")
 
+        elif sekme == "form" and view_id:
+            with get_conn() as conn_form:
+                cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                cur.execute("""
+                    SELECT *
+                    FROM tesvik_belgeleri
+                    WHERE id = %s AND user_id = %s AND mukellef_id = %s
+                """, (view_id, user_id, aktif_mukellef_id))
+                current_belge = cur.fetchone()
+
+            if current_belge:
+                print(f"📝 Form için belge yüklendi: ID={view_id}")
+                
+                    
     # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
     rows = []
     if sekme == "ayrintili":
@@ -651,8 +680,6 @@ def index():
     return render_template("indirimlikurumlar.html", **ctx)
 
 
-
-
 @bp.route("/form", methods=["POST"])
 @login_required
 def form_kaydet():
@@ -667,22 +694,66 @@ def form_kaydet():
             "message": "Lütfen önce bir mükellef seçiniz."
         }), 400
 
-    # Teşvik ID tespiti
-    tesvik_id = session.get("current_tesvik_id") or request.form.get("tesvik_id")
-    tesvik_id = int(tesvik_id) if tesvik_id and str(tesvik_id).isdigit() else None
-    print(f"→ Aktif Teşvik ID: {tesvik_id}")
+    # ---------------------------------------------------
+    #        🔍 1) TESVIK ID BELİRLEME
+    # ---------------------------------------------------
+    view_id = request.args.get("view", type=int)
+    tesvik_id = None
 
-    # Yardımcı fonksiyon
+    if view_id:
+        tesvik_id = view_id
+        print(f"🔗 URL’den gelen view_id kullanılıyor: {tesvik_id}")
+
+    else:
+        tesvik_id_raw = request.form.get("tesvik_id")
+        if tesvik_id_raw and tesvik_id_raw.isdigit():
+            tesvik_id = int(tesvik_id_raw)
+            print(f"📌 Formdaki tesvik_id kullanılıyor: {tesvik_id}")
+
+        elif session.get("current_tesvik_id"):
+            tesvik_id = session["current_tesvik_id"]
+            print(f"📌 Session’daki mevcut tesvik_id kullanılıyor: {tesvik_id}")
+
+    belge_no = request.form.get("belge_no") \
+         or request.form.get("belge_no_hidden") \
+         or "(otomatik)"
+         
+    belge_tarihi = request.form.get("belge_tarihi") \
+               or request.form.get("belge_tarihi_hidden") \
+               or ""
+
+    bolge = request.form.get("bolge") \
+            or request.form.get("bolge_hidden")
+
+    if tesvik_id is None and belge_no and belge_no != "(otomatik)":
+        with get_conn() as conn0:
+            c0 = conn0.cursor()
+            c0.execute("""
+                SELECT id
+                FROM tesvik_belgeleri
+                WHERE user_id=%s AND mukellef_id=%s AND belge_no=%s
+            """, (user_id, mukellef_id, belge_no))
+            row0 = c0.fetchone()
+            if row0:
+                tesvik_id = row0["id"]
+                print(f"🔄 Belge no ile mevcut ID bulundu: {tesvik_id}")
+
+    print("🎯 SON KULLANILACAK TESVIK ID =", tesvik_id)
+
+    # ---------------------------------------------------
+    #        🔢 2) SAYISAL PARSER
+    # ---------------------------------------------------
     def parse_amount(field):
         s = (request.form.get(field) or "0").replace(".", "").replace(",", ".")
-        try: 
+        try:
             return float(s)
         except:
             return 0.0
 
-    # Form alanları
-    belge_no = request.form.get("belge_no") or "(otomatik)"
-    belge_tarihi = request.form.get("belge_tarihi") or ""
+    # ---------------------------------------------------
+    #        📄 3) FORM ALANLARI
+    # ---------------------------------------------------
+
     karar = request.form.get("karar")
     program_turu = request.form.get("program_turu") or ""
     yatirim_turu1 = request.form.get("yatirim_turu1")
@@ -691,7 +762,7 @@ def form_kaydet():
     donem = request.form.get("donem")
     il = request.form.get("il")
     osb = request.form.get("osb")
-    bolge = request.form.get("bolge")
+
 
     if karar == "2025/9903":
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
@@ -723,10 +794,30 @@ def form_kaydet():
     diger_faaliyet = parse_amount("diger_faaliyet")
     use_detailed_profit_ratios = 'use_detailed_profit_ratios' in request.form
 
+    # ---------------------------------------------------
+    #        🔔 YENİ: HATA AYIKLAMA İÇİN LOGLAMA 🔔
+    # ---------------------------------------------------
+    # Hata anında tüm bu değişkenlerin değerlerini konsola yazdırır.
+    log_vars = {
+        'tesvik_id': tesvik_id, 'user_id': user_id, 'mukellef_id': mukellef_id, 
+        'karar': karar, 'belge_no': belge_no, 'toplam_tutar': toplam_tutar, 
+        'katki_orani': katki_orani, 'vergi_orani': vergi_orani, 'belge_tarihi': belge_tarihi,
+        'vize_durumu': vize_durumu, 'cari_toplam_katki': cari_toplam_katki, 'brut_satis': brut_satis,
+        'program_turu': program_turu, 'il': il, 'osb': osb, 'bolge': bolge
+        # Diğer kritik alanları buraya ekleyebilirsiniz
+    }
+    # ---------------------------------------------------
+
+    # ---------------------------------------------------
+    #        💾 4) KAYDET / GÜNCELLE  (TRY–EXCEPT TAM!)
+    # ---------------------------------------------------
     with get_conn() as conn:
         c = conn.cursor()
+
         try:
             if tesvik_id:
+                # ------------------ UPDATE ------------------
+                # 🔥 KRİTİK: UPDATE sorgusuna RETURNING id ekle (Hata kontrolü için)
                 c.execute("""
                     UPDATE tesvik_belgeleri
                     SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s, karar=%s,
@@ -739,7 +830,8 @@ def form_kaydet():
                         onceki_yatirim_katki_tutari=%s, onceki_diger_katki_tutari=%s, onceki_katki_tutari=%s,
                         cari_yatirim_katki=%s, cari_diger_katki=%s, cari_toplam_katki=%s, genel_toplam_katki=%s,
                         brut_satis=%s, ihracat=%s, imalat=%s, diger_faaliyet=%s, use_detailed_profit_ratios=%s
-                    WHERE id=%s AND user_id=%s
+                    WHERE id=%s AND user_id=%s AND mukellef_id=%s
+                    RETURNING id
                 """, (
                     mukellef_id, belge_no, belge_tarihi, karar,
                     program_turu, yatirim_turu1, yatirim_turu2,
@@ -751,11 +843,20 @@ def form_kaydet():
                     onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                     brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios,
-                    tesvik_id, user_id
+                    tesvik_id, user_id, mukellef_id
                 ))
+                
+                row = c.fetchone()
+                if not row and c.rowcount == 0:
+                    # KRİTİK KONTROL: Eğer güncelleme 0 satırı etkilediyse, bu hatayı fırlatırız.
+                    raise Exception(f"UPDATE başarısız: ID={tesvik_id}, User={user_id}, Mukellef={mukellef_id} için eşleşen kayıt bulunamadı.")
+
+                session["current_tesvik_id"] = tesvik_id
                 conn.commit()
+                print(f"✅ Belge ID {tesvik_id} başarıyla güncellendi.")
 
             else:
+                # ------------------ INSERT ------------------
                 c.execute("""
                     INSERT INTO tesvik_belgeleri (
                         user_id, mukellef_id, belge_no, belge_tarihi,
@@ -767,10 +868,10 @@ def form_kaydet():
                         fiili_katki_tutari, endeks_katki_tutari,
                         onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                        brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
+                        brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios, olusturan_id
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    RETURNING id;
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    RETURNING id
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
@@ -791,226 +892,253 @@ def form_kaydet():
                 tesvik_id = row["id"]
                 session["current_tesvik_id"] = tesvik_id
                 conn.commit()
-                print(f"✅ Yeni belge oluşturuldu: ID={tesvik_id}")
-
-            return jsonify({
-                "status": "success",
-                "title": "Başarılı!",
-                "message": "Teşvik belgesi kaydedildi.",
-                "tesvik_id": tesvik_id
-            })
 
         except Exception as e:
             conn.rollback()
+            # 🔔 KRİTİK LOGLAMA: Hata izini ve değişkenleri konsola yazdır
+            print("-" * 50)
+            print(f"❌ KAYIT BAŞARISIZ! Tespit Edilen Hata: {repr(e)}")
+            print(f"❌ Hataya Neden Olan Değişkenler: {log_vars}")
+            print("-" * 50)
             traceback.print_exc()
             return jsonify({
                 "status": "error",
                 "title": "Kayıt Hatası!",
-                "message": f"Veritabanı hatası: {repr(e)}"
+                "message": f"Veritabanı hatası oluştu. Logları kontrol ediniz. Detay: {repr(e).splitlines()[0]}"
             })
 
+    # -------------------------------------
+    #  Sonuç
+    # -------------------------------------
+    return jsonify({
+        "status": "success",
+        "title": "Başarılı!",
+        "message": "Teşvik belgesi kaydedildi.",
+        "tesvik_id": tesvik_id
+    })
 
 
-def get_all_tesvik_docs(user_id: int):
-    """Kullanıcının teşvik belgelerini döndürür (hem SQLite hem PostgreSQL uyumlu)."""
+
+
+
+
+def get_all_tesvik_docs(user_id: int, mukellef_id: int = None):
+    """Kullanıcının teşvik belgelerini ve dönemlerini döndürür."""
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            """
-            SELECT
-                id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
-                karar, program_turu, yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
-                katki_orani, vergi_orani, diger_oran, toplam_tutar, katki_tutari, diger_katki_tutari,
-                cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari, endeks_katki_tutari,
-                onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
-                cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
-            FROM tesvik_belgeleri
-            WHERE user_id = %s
-            ORDER BY id DESC
-            """,
-            (user_id,),
-        )
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        rows = c.fetchall()
+        # 🔹 1) Eğer mükellef filtresi varsa ona göre çek
+        if mukellef_id:
+            c.execute("""
+                SELECT *
+                FROM tesvik_belgeleri
+                WHERE user_id = %s AND mukellef_id = %s
+                ORDER BY id DESC
+            """, (user_id, mukellef_id))
+        else:
+            c.execute("""
+                SELECT *
+                FROM tesvik_belgeleri
+                WHERE user_id = %s
+                ORDER BY id DESC
+            """, (user_id,))
 
-        if rows and isinstance(rows[0], dict):
-            return rows
+        docs = c.fetchall()
+        if not docs:
+            return []
 
-        colnames = [desc[0] for desc in c.description]
-        return [dict(zip(colnames, row)) for row in rows]
+        # 🔹 2) Her belgeye dönem listesini ekle
+        for d in docs:
+            belge_no = d["belge_no"]
 
-
-
-
-@bp.route('/tesvik', methods=['GET', 'POST'])
-@login_required
-def tesvik():
-    print("🔥 indirimlikurumlar.tesvik çalıştı")
-    user_id = session.get("user_id")
-
-    # 🔹 Tüm belgeleri listele
-    docs = get_all_tesvik_docs(user_id)
-
-    # 🔹 Her teşvik belgesi için ilgili dönemleri getir
-    for d in docs:
-        belge_no = d.get("belge_no")
-        if not belge_no:
-            d["donemler"] = []
-            continue
-
-        with get_conn() as conn2:
-            cur2 = conn2.cursor()
-            cur2.execute("""
+            c.execute("""
                 SELECT hesap_donemi, donem_turu
                 FROM tesvik_kullanim
                 WHERE user_id = %s AND belge_no = %s
-                ORDER BY hesap_donemi DESC, donem_turu
+                ORDER BY hesap_donemi ASC
             """, (user_id, belge_no))
-            d["donemler"] = cur2.fetchall() or []
 
-    # 🔹 Eğer ?view=ID varsa detay moduna geç
-    view_id = request.args.get('view', type=int)
-    edit_doc = None
+            d["donemler"] = c.fetchall() or []
 
-    if view_id:
-        with get_conn() as conn:
-            c = conn.cursor()
-            c.execute("""
-                SELECT
-                    id, user_id, mukellef_id, yukleme_tarihi,
-                    belge_no, belge_tarihi, karar, program_turu,
-                    yatirim_turu1, yatirim_turu2, vize_durumu, donem, il, osb, bolge,
-                    katki_orani, vergi_orani, diger_oran,
-                    toplam_tutar, katki_tutari, diger_katki_tutari,
-                    cari_harcama_tutari, toplam_harcama_tutari,
-                    fiili_katki_tutari, endeks_katki_tutari,
-                    onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
-                    cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
-                FROM tesvik_belgeleri
-                WHERE id = %s AND user_id = %s
-            """, (view_id, user_id))
-            row = c.fetchone()
-
-        if row:
-            colnames = [desc[0] for desc in c.description]
-            edit_doc = dict(zip(colnames, row))
-            print(f"🔍 Detay görüntüleniyor: {edit_doc.get('belge_no')} (ID: {view_id})")
-        else:
-            flash("Belge bulunamadı veya erişim yetkiniz yok.", "warning")
-
-    return render_template('tesvik.html', docs=docs, edit_doc=edit_doc)
+        return docs
 
 
 
-@bp.route('/tesvik/delete/<int:doc_id>', methods=['POST'])
+
+
+
+
+@bp.route('/delete/<int:doc_id>', methods=['POST'])
 @login_required
 def delete_tesvik(doc_id):
+    """Bir teşvik belgesini ve ona bağlı dönem kayıtlarını güvenli şekilde siler."""
     user_id = session.get("user_id")
 
     with get_conn() as conn:
         c = conn.cursor()
-        try:
-            # 🟢 Önce silinen belge aktif belgemiz miydi?
-            if session.get("current_tesvik_id") == doc_id:
-                session.pop("current_tesvik_id", None)  # ✅ temizle
 
-            c.execute(
-                "DELETE FROM tesvik_belgeleri WHERE id=%s AND user_id=%s",
-                (doc_id, user_id)
-            )
+        try:
+            # ----------------------------------------------------------
+            # 1) Belge gerçekten bu kullanıcıya mı ait? Güvenlik kontrolü
+            # ----------------------------------------------------------
+            c.execute("""
+                SELECT belge_no
+                FROM tesvik_belgeleri
+                WHERE id=%s AND user_id=%s
+            """, (doc_id, user_id))
+
+            row = c.fetchone()
+            if not row:
+                return jsonify({
+                    "status": "error",
+                    "title": "Yetki Hatası",
+                    "message": "Bu belge size ait değil veya bulunamadı."
+                }), 403
+
+            belge_no = row["belge_no"]
+
+            # ----------------------------------------------------------
+            # 2) Eğer silinen belge aktif seçili belgemizse -> session temizle
+            # ----------------------------------------------------------
+            if session.get("current_tesvik_id") == doc_id:
+                session.pop("current_tesvik_id", None)
+
+            # ----------------------------------------------------------
+            # 3) Önce dönem kayıtlarını sil
+            # ----------------------------------------------------------
+            c.execute("""
+                DELETE FROM tesvik_kullanim
+                WHERE user_id=%s AND belge_no=%s
+            """, (user_id, belge_no))
+
+            # ----------------------------------------------------------
+            # 4) Sonra belgenin kendisini sil
+            # ----------------------------------------------------------
+            c.execute("""
+                DELETE FROM tesvik_belgeleri
+                WHERE id=%s AND user_id=%s
+            """, (doc_id, user_id))
+
             conn.commit()
 
             return jsonify({
                 "status": "success",
                 "title": "Silindi!",
-                "message": "Belge başarıyla silindi."
+                "message": "Belge ve tüm dönem kayıtları başarıyla silindi."
             })
 
         except Exception as e:
             conn.rollback()
-            print(f"❌ Belge silinirken hata oluştu: {e}")
+            print(f"❌ Belge silme hatası: {e}")
             return jsonify({
                 "status": "error",
                 "title": "Hata!",
-                "message": f"Belge silinirken hata oluştu: {str(e)}"
-            })
-
+                "message": f"Silme sırasında hata oluştu: {str(e)}"
+            }), 500
 
 
 @bp.route("/tesvik/pdf/<int:doc_id>")
 @login_required
 def download_tesvik_pdf(doc_id):
-    user_id = session["user_id"]
+    user_id = session.get("user_id")
 
-    # 🧾 1️⃣ Veritabanından belgeyi çek
+    # 1️⃣ Belgeyi DB'den Çek
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         c.execute("""
-            SELECT
-                id, user_id, yukleme_tarihi, belge_no, belge_tarihi,
-                karar, program_turu, yatirim_turu1, yatirim_turu2,
-                vize_durumu, donem, il, osb, bolge,
-                katki_orani, vergi_orani, diger_oran,
-                toplam_tutar, katki_tutari, diger_katki_tutari,
-                cari_harcama_tutari, toplam_harcama_tutari,
-                fiili_katki_tutari, endeks_katki_tutari,
-                onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
-                cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
+            SELECT *
             FROM tesvik_belgeleri
             WHERE id = %s AND user_id = %s
         """, (doc_id, user_id))
 
         row = c.fetchone()
-        if not row:
-            return jsonify({"status": "error", "title": "Hata!", "message": "Belge bulunamadı."}), 404
 
-        # 🟢 Burada cursor hala açık → güvenli dict dönüşümü
-        if isinstance(row, dict):
-            data_dict = row
-        else:
-            colnames = [desc[0] for desc in c.description]
-            data_dict = dict(zip(colnames, row))
+    if not row:
+        return jsonify({
+            "status": "error",
+            "title": "Bulunamadı",
+            "message": "Teşvik belgesi bulunamadı."
+        }), 404
 
-    # 🟢 Artık bağlantı kapansa da sorun yok
-    data = SimpleNamespace(**data_dict)
+    # 🟢 Dict → Namespace
+    data = SimpleNamespace(**row)
 
+    # 2️⃣ wkhtmltopdf Yolu
+    wkhtml_path = (
+        current_app.config.get("WKHTMLTOPDF_PATH")
+        or shutil.which("wkhtmltopdf")
+    )
+
+    if not wkhtml_path:
+        return jsonify({
+            "status": "error",
+            "title": "Eksik Araç",
+            "message": "wkhtmltopdf bulunamadı. Sunucu yapılandırmasını kontrol edin."
+        }), 500
+
+    config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+
+    # 3️⃣ HTML Oluştur
     try:
-        # 2️⃣ wkhtmltopdf yolu
-        wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
-        if not wkhtml_path:
-            return jsonify({"status": "error", "title": "Eksik Araç", "message": "wkhtmltopdf bulunamadı."}), 500
+        rendered_html = render_template(
+            "kv_tablosu_pdf.html",
+            data=data,
+            now=datetime.now
+        )
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "title": "Şablon Hatası",
+            "message": f"PDF HTML şablonu oluşturulamadı: {e}"
+        }), 500
 
-        config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
-
-        # 3️⃣ HTML şablonu
-        rendered = render_template("kv_tablosu_pdf.html", data=data, now=datetime.now)
-
-        # 4️⃣ PDF oluşturma (geçici dosya)
+    # 4️⃣ Geçici PDF Dosyası (otomatik silinecek)
+    try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
-            pdfkit.from_string(rendered, tmpfile.name, configuration=config, options={
-                "page-size": "A4",
-                "encoding": "UTF-8",
-                "enable-local-file-access": "",
-                "margin-top": "15mm", "margin-bottom": "15mm",
-                "margin-left": "12mm", "margin-right": "12mm",
-                "dpi": 300,
-            })
-            tmpfile.flush()
 
-        # 5️⃣ Kullanıcıya gönder
-        filename = f"tesvik_{data.belge_no or doc_id}.pdf"
-        return send_file(tmpfile.name, mimetype="application/pdf", as_attachment=True, download_name=filename)
+            pdfkit.from_string(
+                rendered_html,
+                tmpfile.name,
+                configuration=config,
+                options={
+                    "page-size": "A4",
+                    "encoding": "UTF-8",
+                    "enable-local-file-access": "",
+                    "margin-top": "15mm",
+                    "margin-bottom": "15mm",
+                    "margin-left": "12mm",
+                    "margin-right": "12mm",
+                    "dpi": 300,
+                },
+            )
+
+            tmp_path = tmpfile.name
 
     except Exception as e:
-        print(f"⚠️ PDF oluşturma hatası: {e}")
-        return jsonify({"status": "error", "title": "PDF Hatası!", "message": str(e)}), 500
+        print("❌ PDF oluşturma hatası:", e)
+        return jsonify({
+            "status": "error",
+            "title": "PDF Hatası",
+            "message": str(e)
+        }), 500
 
-        
-        
-        
+    # 5️⃣ PDF Döndür ve sonra dosyayı sil
+    try:
+        filename = f"tesvik_{data.belge_no or doc_id}.pdf"
+        response = send_file(
+            tmp_path,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename
+        )
+    finally:
+        try:
+            os.remove(tmp_path)
+        except:
+            pass
+
+    return response
+
         
     
     
@@ -1087,17 +1215,16 @@ def upload_kv_beyan():
     except Exception as e:
         current_app.logger.exception("PDF parse hatası")
         return jsonify(status='error', title='Parse Hatası', message=str(e)), 500
-
-
-
-
-
+    
+    
+    
+    
 @bp.route("/save_tesvik_kullanim", methods=["POST"])
 @login_required
 def save_tesvik_kullanim():
-    """
-    Her hesap dönemi için teşvik kullanım kaydı oluşturur veya günceller.
-    (Aşama 7 tamamlandığında otomatik çağrılır)
+    """ 
+    Her hesap dönemi için teşvik kullanım kaydını oluşturur veya günceller. 
+    Bu fonksiyon, sadece tesvik_kullanim tablosuna ait sütunları kullanır.
     """
     try:
         user_id = session.get("user_id")
@@ -1105,77 +1232,100 @@ def save_tesvik_kullanim():
             return jsonify({"status": "error", "message": "Oturum bulunamadı."}), 401
 
         data = request.get_json(force=True)
+
         belge_no = data.get("belge_no")
-        hesap_donemi = int(data.get("hesap_donemi", datetime.now().year))
+        hesap_donemi = int(data.get("hesap_donemi"))
         donem_turu = data.get("donem_turu", "KURUMLAR")
 
-        yatirim_kazanci = float(data.get("yatirim_kazanci", 0))
-        diger_kazanc = float(data.get("diger_kazanc", 0))
-        cari_yatirim_katkisi = float(data.get("cari_yatirim_katkisi", 0))
-        cari_diger_katkisi = float(data.get("cari_diger_katkisi", 0))
-        genel_toplam_katki = float(data.get("genel_toplam_katki", 0))
-        kalan_katki = float(data.get("kalan_katki", 0))
-
         if not belge_no:
-            return jsonify({"status": "error", "message": "Belge numarası eksik."}), 400
+            return jsonify({"status": "error", "message": "Belge no eksik."}), 400
+        
+        # ⚠️ TABLO ŞEMANIZDA KESİNLİKLE VAR OLAN SÜTUNLAR İLE EŞLEŞTİRİLDİ
+        # Hata veren 'onceki_yatirim_katki_tutari', 'onceki_katki_tutari' gibi alanlar çıkarıldı.
+        # Bunlar formda gösterilse bile tesvik_kullanim tablonuzda tanımlı değildir.
+        fields = [
+            # Kazanç Tipleri (init_db'de mevcut)
+            "yatirimdan_elde_edilen_kazanc",
+            "tevsi_yatirim_kazanci",
+            "diger_faaliyet", 
+            
+            # Cari Dönem Katkıları (init_db'de mevcut)
+            "cari_yatirim_katki",
+            "cari_diger_katki",
+            "cari_toplam_katki",
+            
+            # Genel Sonuçlar (init_db'de mevcut)
+            "genel_toplam_katki",
+            "kalan_katki_tutari", # init_db'de var
+            
+            # İndirimli KV Bilgileri (init_db'de mevcut)
+            "indirimli_matrah", 
+            "indirimli_kv", 
+            "indirimli_kv_oran",
+            
+            # NOT: Frontend'den gelen 'kalan_katki' ve Aşama 4 verileri 
+            # (onceki_yatirim_katki_tutari, endeks_katki_tutari) bu listeden çıkarıldı,
+            # çünkü tablo şemasında bu sütunlar yok. Sadece güvenli olanları tutuyoruz.
+        ]
+        
+        # EK KONTROL: Eğer Frontend'den 'kalan_katki' ve 'kalan_katki_tutari' farklı isimlerle geliyorsa
+        # ve her ikisi de tabloda yoksa, en az hata verecek olan 'kalan_katki_tutari' tercih edilir.
+        # Ancak buradaki listeye sadece 'kalan_katki_tutari' dahil edilmiştir (init_db'de olduğu için).
+        
+        # Sayısal değerleri çek ve sadece fields listesindekileri kullan
+        values = [float(data.get(f, 0)) for f in fields]
 
         with get_conn() as conn:
             cur = conn.cursor()
 
-            cur.execute("""
+            # SQL sorgusu, sadece tabloda var olan sütunları kullanır.
+            cur.execute(f"""
                 INSERT INTO tesvik_kullanim (
                     user_id, belge_no, hesap_donemi, donem_turu,
-                    yatirim_kazanci, diger_kazanc,
-                    cari_yatirim_katkisi, cari_diger_katkisi,
-                    genel_toplam_katki, kalan_katki
+                    {", ".join(fields)}
                 )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                VALUES (
+                    %s, %s, %s, %s,
+                    {", ".join(["%s"] * len(fields))}
+                )
                 ON CONFLICT (user_id, belge_no, hesap_donemi, donem_turu)
                 DO UPDATE SET
-                    yatirim_kazanci = EXCLUDED.yatirim_kazanci,
-                    diger_kazanc = EXCLUDED.diger_kazanc,
-                    cari_yatirim_katkisi = EXCLUDED.cari_yatirim_katkisi,
-                    cari_diger_katkisi = EXCLUDED.cari_diger_katkisi,
-                    genel_toplam_katki = EXCLUDED.genel_toplam_katki,
-                    kalan_katki = EXCLUDED.kalan_katki,
+                    {", ".join([f"{col} = EXCLUDED.{col}" for col in fields])},
                     kayit_tarihi = CURRENT_TIMESTAMP;
-            """, (
-                user_id, belge_no, hesap_donemi, donem_turu,
-                yatirim_kazanci, diger_kazanc,
-                cari_yatirim_katkisi, cari_diger_katkisi,
-                genel_toplam_katki, kalan_katki
-            ))
+            """, (user_id, belge_no, hesap_donemi, donem_turu, *values))
 
             conn.commit()
 
         return jsonify({
             "status": "success",
             "title": "Kayıt Başarılı",
-            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemine ait teşvik kullanımı kaydedildi."
+            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönem kaydedildi."
         })
 
     except Exception as e:
-        print(f"⚠️ save_tesvik_kullanim hata: {e}")
+        print("save_tesvik_kullanim hatası:", e)
+        import traceback
+        traceback.print_exc()
+        
         return jsonify({
             "status": "error",
             "title": "Kayıt Hatası",
-            "message": f"Kaydedilirken bir hata oluştu: {str(e)}"
+            "message": str(e)
         }), 500
-
-
-
-# ============================================================
-# 🧩 1️⃣ Dönem Klonlama
-# ============================================================
+        
+        
+        
+        
 @bp.route("/clone_tesvik_donem", methods=["POST"])
 @login_required
 def clone_tesvik_donem():
-    """Belirli bir teşvik belgesi için yeni dönem oluşturur (isteğe bağlı klonlama ile)."""
+    """Yeni dönem ekler. Eğer önceki dönem varsa değerler klonlanır, yoksa sıfırdan açılır."""
     try:
         user_id = session.get("user_id")
         data = request.get_json(force=True)
+
         belge_no = data.get("belge_no")
-        donem_text = data.get("donem_text", "").strip()
+        donem_text = (data.get("donem_text") or "").strip()
 
         if not belge_no or not donem_text:
             return jsonify({
@@ -1184,67 +1334,115 @@ def clone_tesvik_donem():
                 "message": "Belge numarası veya dönem bilgisi eksik."
             }), 400
 
-        # Örn: "2025 - 2. Geçici" → yıl + dönem_turu ayrıştır
-        parts = donem_text.split("-", 1)
-        hesap_donemi = int(parts[0].strip()) if parts else datetime.now().year
-        donem_turu = parts[1].strip().upper() if len(parts) > 1 else "KURUMLAR"
+        # ======================================================
+        # 🧠 Dönem ayrıştırma (2025 - Kurumlar)
+        # ======================================================
+        import re
+        match = re.match(r"(\d{4})\s*-\s*(.+)", donem_text)
 
+        if match:
+            hesap_donemi = int(match.group(1))
+            donem_turu = match.group(2).strip()
+        else:
+            hesap_donemi = datetime.now().year
+            donem_turu = "KURUMLAR"
+
+        donem_turu = donem_turu.upper()
+
+        # ======================================================
+        # 🔍 Önceki dönem değerlerini çek
+        # ======================================================
         with get_conn() as conn:
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-            # 🔹 Önceki bir dönem varsa onu klonla
-            cur.execute("""
-                SELECT yatirim_kazanci, diger_kazanc,
-                       cari_yatirim_katkisi, cari_diger_katkisi,
-                       genel_toplam_katki, kalan_katki
+            # Sadece tesvik_kullanim tablosunda KESİN var olan kolonlar seçiliyor
+            clone_fields = [
+                "yatirimdan_elde_edilen_kazanc",
+                "tevsi_yatirim_kazanci",
+                "diger_faaliyet",
+                "cari_yatirim_katki",
+                "cari_diger_katki",
+                "cari_toplam_katki",
+                "genel_toplam_katki",
+                "kalan_katki_tutari"
+            ]
+
+            cur.execute(f"""
+                SELECT {", ".join(clone_fields)}
                 FROM tesvik_kullanim
-                WHERE user_id=%s AND belge_no=%s
-                ORDER BY hesap_donemi DESC LIMIT 1
+                WHERE user_id = %s 
+                  AND belge_no = %s
+                ORDER BY hesap_donemi DESC, donem_turu DESC
+                LIMIT 1
             """, (user_id, belge_no))
+
             prev = cur.fetchone()
+            
+            # Önceki değerleri al, yoksa varsayılan 0 kullan
+            if prev:
+                # Klonlama mantığı: Önceki dönemden sadece kalan katkı tutarını alıp 
+                # diğer cari katkıları sıfırlamak isteyebilirsiniz. 
+                # Ancak burada basit klonlama mantığı korundu.
+                prev_vals = [prev.get(k, 0) for k in clone_fields]
+            else:
+                prev_vals = [0.0] * len(clone_fields)
 
-            prev_vals = list(prev.values()) if prev else [0, 0, 0, 0, 0, 0]
-
-            # 🔹 Yeni dönemi oluştur
-            cur.execute("""
+            # ======================================================
+            # ➕ Yeni dönem ekle
+            # ======================================================
+            cur.execute(f"""
                 INSERT INTO tesvik_kullanim (
                     user_id, belge_no, hesap_donemi, donem_turu,
-                    yatirim_kazanci, diger_kazanc,
-                    cari_yatirim_katkisi, cari_diger_katkisi,
-                    genel_toplam_katki, kalan_katki
+                    {", ".join(clone_fields)}
                 )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                VALUES (
+                    %s, %s, %s, %s,
+                    {", ".join(["%s"]*len(clone_fields))}
+                )
+                ON CONFLICT (user_id, belge_no, hesap_donemi, donem_turu) 
+                DO NOTHING;
             """, (user_id, belge_no, hesap_donemi, donem_turu, *prev_vals))
+
             conn.commit()
 
         return jsonify({
             "status": "success",
             "title": "Yeni Dönem Eklendi",
-            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemi oluşturuldu."
+            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemi başarıyla oluşturuldu."
         })
 
     except Exception as e:
-        print(f"⚠️ clone_tesvik_donem hata: {e}")
+        # Benzersizlik hatası varsa (PostgreSQL/SQLite)
+        if 'duplicate key' in str(e) or 'UNIQUE constraint' in str(e):
+             return jsonify({
+                "status": "warning",
+                "title": "Kayıt Mevcut",
+                "message": f"{belge_no} ({donem_text}) dönemi zaten eklenmiş."
+            }), 409 # Conflict
+             
+        print("⚠️ clone_tesvik_donem hata:", e)
         return jsonify({
             "status": "error",
             "title": "Hata",
-            "message": f"Yeni dönem eklenirken hata oluştu: {str(e)}"
+            "message": str(e)
         }), 500
 
 
 
-# ============================================================
-# 🗑️ 2️⃣ Dönem Silme
-# ============================================================
+
+
 @bp.route("/delete_tesvik_donem", methods=["POST"])
 @login_required
 def delete_tesvik_donem():
-    """Belirli bir belge + hesap dönemi kaydını siler."""
+    """Belirli bir belge + hesap dönemi + dönem türü kaydını siler."""
     try:
         user_id = session.get("user_id")
         data = request.get_json(force=True)
+
         belge_no = data.get("belge_no")
-        hesap_donemi = data.get("hesap_donemi")
+        # Gelen veriyi güvenli bir şekilde tam sayıya dönüştürme
+        hesap_donemi = int(data.get("hesap_donemi")) 
+        donem_turu = (data.get("donem_turu") or "").strip().upper()
 
         if not belge_no or not hesap_donemi:
             return jsonify({
@@ -1253,61 +1451,175 @@ def delete_tesvik_donem():
                 "message": "Belge numarası veya dönem bilgisi eksik."
             }), 400
 
+        if not donem_turu:
+            return jsonify({
+                "status": "error",
+                "title": "Eksik Bilgi",
+                "message": "Dönem türü eksik."
+            }), 400
+
         with get_conn() as conn:
             cur = conn.cursor()
+
             cur.execute("""
                 DELETE FROM tesvik_kullanim
-                WHERE user_id = %s AND belge_no = %s AND hesap_donemi = %s
-            """, (user_id, belge_no, hesap_donemi))
+                WHERE user_id = %s 
+                  AND belge_no = %s
+                  AND hesap_donemi = %s
+                  AND UPPER(donem_turu) = %s
+            """, (user_id, belge_no, hesap_donemi, donem_turu))
+
+            # Kaç satırın silindiğini kontrol etmek isterseniz (opsiyonel)
+            row_count = cur.rowcount
             conn.commit()
 
+        if row_count == 0:
+            return jsonify({
+                "status": "warning",
+                "title": "Silme Başarısız",
+                "message": "Belirtilen dönem kaydı bulunamadı."
+            })
+            
         return jsonify({
             "status": "success",
             "title": "Silindi",
-            "message": f"{belge_no} ({hesap_donemi}) dönemi silindi."
+            "message": f"{belge_no} ({hesap_donemi} - {donem_turu}) dönemi başarıyla silindi."
         })
 
+    except ValueError:
+        # Hesap döneminin int'e çevrilememesi gibi hataları yakalar
+        return jsonify({
+            "status": "error",
+            "title": "Veri Hatası",
+            "message": "Hesap dönemi geçerli bir sayı olmalıdır."
+        }), 400
+        
     except Exception as e:
         print(f"⚠️ delete_tesvik_donem hata: {e}")
         return jsonify({
             "status": "error",
             "title": "Silme Hatası",
-            "message": f"Hata: {e}"
+            "message": str(e)
         }), 500
 
 
-# ============================================================
-# 🧾 3️⃣ Dönem Düzenleme (açma)
-# ============================================================
-@bp.route("/edit_tesvik_kullanim/<belge_no>/<yil>/<turu>")
-@login_required
-def edit_tesvik_kullanim(belge_no, yil, turu):
-    """Belirli belge ve döneme ait kayıtları formda görüntüler."""
-    user_id = session.get("user_id")
+
+
+
+def _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu):
+    """ Veritabanından belirli bir döneme ait tesvik_kullanim verilerini çeker. """
+    turu_upper = turu.upper().replace('%20', ' ').replace('%C4%B0', 'İ').replace('%C3%87', 'Ç') 
 
     with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT * FROM tesvik_kullanim
-            WHERE user_id = %s AND belge_no = %s AND hesap_donemi = %s AND donem_turu = %s
-        """, (user_id, belge_no, yil, turu))
-        kayit = cur.fetchone()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        # 1. Belge ID'sini bul
+        cur.execute("SELECT id FROM tesvik_belgeleri WHERE user_id = %s AND belge_no = %s", (user_id, belge_no))
+        belge_row = cur.fetchone()
+        if not belge_row:
+            return None, None
+        tesvik_id = belge_row["id"]
 
-    if not kayit:
-        flash("Kayıt bulunamadı.", "warning")
+        # 2. Dönem kullanım verilerini çek
+        cur.execute("""
+            SELECT *
+            FROM tesvik_kullanim
+            WHERE user_id = %s AND belge_no = %s AND hesap_donemi = %s AND UPPER(donem_turu) = %s
+        """, (user_id, belge_no, yil, turu_upper))
+        kullanim_verisi = cur.fetchone()
+
+    return kullanim_verisi, tesvik_id
+
+
+@bp.route("/edit_tesvik_kullanim/<belge_no>/<int:yil>/<turu>")
+@login_required
+def edit_tesvik_kullanim(belge_no, yil, turu):
+    """
+    Bir teşvik belgesine ait dönem seçildiğinde form ekranına yönlendirir ve DÖNEM VERİLERİNİ yükler.
+    """
+    user_id = session.get("user_id")
+    
+    kullanim_verisi, tesvik_id = _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu)
+
+    if not kullanim_verisi:
+        flash("Dönem kaydı veya belge bulunamadı.", "warning")
         return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
 
-    return render_template(
-        "tesvik_kullanim_edit.html",
-        belge_no=belge_no,
-        yil=yil,
-        turu=turu,
-        kayit=kayit
-    )
+    # Session doldurma (Aynı kalır)
+    session["current_belge_no"] = belge_no
+    session["current_hesap_donemi"] = yil
+    session["current_donem_turu"] = turu
+    session["current_tesvik_id"] = tesvik_id 
+
+    for key, value in kullanim_verisi.items():
+        if key not in ['user_id', 'belge_no', 'hesap_donemi', 'donem_turu', 'kayit_tarihi']:
+            if value is not None:
+                session[f"form_{key}"] = str(value)
+            else:
+                session.pop(f"form_{key}", None)
+
+    # Form ekranına yönlendir
+    return redirect(f"/indirimlikurumlar/?sekme=form&view={tesvik_id}&editdonem=1")
 
 
 
+@bp.route("/api/get_tesvik_kullanim/<belge_no>/<int:yil>/<turu>")
+@login_required
+def get_tesvik_kullanim_data(belge_no, yil, turu):
+    """ Dönemler sayfasındaki modal için verileri çeker (AJAX). """
+    from flask import jsonify, current_app 
+    
+    user_id = session.get("user_id")
+    
+    # 1. Yardımcı fonksiyonu çağır
+    kullanim_verisi, tesvik_id = _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu)
+    
+    # 2. turu_upper'ı doğrudan _fetch_and_prepare_kullanim içindeki mantığa uygun olarak ayarla
+    # Böylece HTML'e göndermek için doğru formatı kullanabiliriz.
+    turu_display = turu.upper().replace('%20', ' ').replace('%C4%B0', 'İ').replace('%C3%87', 'Ç')
+    
+    
 
+    if not kullanim_verisi:
+        return jsonify({
+            "status": "warning", 
+            "message": f"{yil} - {turu} dönemine ait kullanım kaydı bulunamadı.",
+            "html": "Detay bulunamadı."
+        }), 200
+
+    # Veriyi HTML formatına hazırla (Detay Modal için)
+    html_content = f"""
+    <h5>Belge No: {belge_no} | Dönem: {yil} - {turu_display}</h5>
+    <table class="table table-sm table-bordered">
+        <thead><th>Açıklama</th><th>Tutar (TL)</th></thead>
+        <tbody>
+        """
+    
+    for key, value in kullanim_verisi.items():
+        if isinstance(value, (float, int)) and value != 0 and key not in ['id', 'user_id']:
+            formatted_value = f"{value:,.2f} TL".replace(',', 'X').replace('.', ',').replace('X', '.')
+            clean_key = key.replace('_', ' ').title().replace('Kv', 'KV').replace('Tutari', 'Tutarı')
+            
+            html_content += f"""
+            <tr>
+                <td>{clean_key}</td>
+                <td>{formatted_value}</td>
+            </tr>
+            """
+    
+    html_content += """
+        </tbody>
+    </table>
+    """
+    
+    return jsonify({
+        "status": "success",
+        "html": html_content
+    }), 200
+    
+    
+    
+    
 
 @bp.route("/mevzuat", methods=["GET"])
 @login_required

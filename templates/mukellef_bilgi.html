@@ -50,7 +50,9 @@
           <input type="hidden" name="id" id="mukellef_id">
           <div class="mb-3">
             <label class="form-label">Vergi Kimlik No</label>
-            <input type="text" name="vergi_kimlik_no" id="vkn" class="form-control" maxlength="11" required>
+            <input type="text" name="vergi_kimlik_no" id="vkn" class="form-control" maxlength="11" required
+              inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+
           </div>
           <div class="mb-3">
             <label class="form-label">Unvan</label>
@@ -124,6 +126,9 @@
           }).then(r => r.json());
 
           if (newDoc.status === "success") {
+            sessionStorage.setItem("belge_no", formValues.belge_no);
+            sessionStorage.setItem("belge_tarihi", formValues.belge_tarihi);
+
             Swal.fire({
               icon: "success",
               title: "Yeni Belge Oluşturuldu",
@@ -131,6 +136,7 @@
               showConfirmButton: false,
               timer: 1200
             });
+
             setTimeout(() => {
               location.href = `/indirimlikurumlar/?sekme=form&view=${newDoc.id}`;
             }, 1200);
@@ -138,8 +144,9 @@
             Swal.fire("Hata", newDoc.message || "Belge oluşturulamadı.", "error");
           }
         }
-      } else if (result.isDenied) {
-        // 📄 Var olan belgeleri getir
+      }
+
+      else if (result.isDenied) {
         const docsResp = await fetch("/indirimlikurumlar/list_tesvik_docs");
         const docsData = await docsResp.json();
 
@@ -186,12 +193,28 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id })
-        }).then(() => location.reload());
+        })
+          .then(resp => resp.json())
+          .then(data => {
+            Swal.fire({
+              icon: data.status,
+              title: data.title || "Mükellef başarıyla silindi.",
+              text: data.message || ""
+            }).then(() => {
+              if (data.status === "success") {
+                location.reload();
+              }
+            });
+          })
+          .catch(err => {
+            console.error("Silme hatası:", err);
+            Swal.fire("Hata", "Sunucuya bağlanılamadı.", "error");
+          });
       }
     });
   }
 
-  // ✏️ Düzenleme
+  // ✏️ Mükellef düzenleme
   function editMukellef(id, vkn, unvan) {
     document.getElementById("mukellef_id").value = id;
     document.getElementById("vkn").value = vkn;
@@ -201,17 +224,84 @@
 
   // 💾 Kaydet
   document.getElementById("saveMukellef").addEventListener("click", () => {
+    // 💡 1. Yükleniyor durumunu göster
+    Swal.fire({
+      title: 'Kaydediliyor...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
     const data = {
       id: document.getElementById("mukellef_id").value,
       vergi_kimlik_no: document.getElementById("vkn").value,
       unvan: document.getElementById("unvan").value
     };
-    const url = data.id ? "/indirimlikurumlar/mukellef-guncelle" : "/indirimlikurumlar/mukellef-ekle";
+
+    const url = data.id
+      ? "/indirimlikurumlar/mukellef-guncelle"
+      : "/indirimlikurumlar/mukellef-ekle";
+
+
+    // --- Doğrulama Kontrolleri ---
+    const vknValue = data.vergi_kimlik_no.trim();
+    const unvanValue = data.unvan.trim();
+
+    // VKN/TCKN Kontrolü
+    if (vknValue.length !== 10 && vknValue.length !== 11) {
+      Swal.fire("Uyarı", "Vergi Kimlik No (VKN) veya T.C. Kimlik No (TCKN) 10 veya 11 haneli olmalıdır.", "warning");
+      return; // İşlemi burada durdur.
+    }
+
+    // Unvan Kontrolü
+    if (unvanValue === "") {
+      Swal.fire("Uyarı", "Unvan alanı boş bırakılamaz.", "warning");
+      return;
+    }
+    // --- Doğrulama Kontrolleri Bitti ---
+
+
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
-    }).then(() => location.reload());
+    })
+      .then(resp => {
+        // Hata durumunda (400, 500) bile JSON okumaya çalış
+        if (!resp.ok) {
+          return resp.json().then(errorData => {
+            throw new Error(errorData.message || `Sunucu Hatası: ${resp.status}`);
+          });
+        }
+        return resp.json();
+      })
+      .then(data => {
+        // Modal'ı kapat
+        const modalElement = document.getElementById("mukellefModal");
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+
+        // SweetAlert ile sonucu göster
+        Swal.fire({
+          icon: data.status, // Sunucudan gelen status: 'success' veya 'error'
+          title: data.title || (data.status === "success" ? "İşlem Başarılı" : "Hata"),
+          text: data.message || (data.status === "success" ? "Mükellef bilgisi başarıyla kaydedildi." : "Kayıt işlemi sırasında bir sorun oluştu."),
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          // Başarılıysa sayfayı yenile
+          if (data.status === "success") {
+            location.reload();
+          }
+        });
+      })
+      .catch(err => {
+        // Ağ, JSON parse veya sunucu tarafından fırlatılan hatayı yakala
+        Swal.fire("Hata", err.message || "Sunucu ile iletişim hatası oluştu.", "error");
+        console.error("Kaydetme hatası:", err);
+      });
   });
 </script>
+
 {% endblock %}

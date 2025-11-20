@@ -291,7 +291,7 @@ def migrate_tesvik_columns():
             "imalat": "REAL",
             "diger_faaliyet": "REAL",
             "use_detailed_profit_ratios": "INTEGER DEFAULT 0",
-            "olusturan_id": "INTEGER"
+            "olusturan_id": "INTEGER" if USE_SQLITE else "INTEGER"
             
         }
 
@@ -303,15 +303,18 @@ def migrate_tesvik_columns():
         conn.commit()
         print("✅ tesvik_belgeleri tablosu güncel.")
 
-
 def migrate_tesvik_kullanim_table():
-    """tesvik_kullanim tablosunu oluşturur (yoksa) ve eksik sütunları ekler."""
+    """
+    tesvik_kullanim tablosunu oluşturur veya eksik sütunları ekler.
+    Güncel alan isimleri: yatirimdan_elde_edilen_kazanc, tevsi_yatirim_kazanci, diger_faaliyet, vb.
+    Hem SQLite hem PostgreSQL ortamlarıyla uyumludur.
+    """
     with get_conn() as conn:
         cur = conn.cursor()
 
-        # -------------------------------
-        # 🔹 SQLite Ortamı
-        # -------------------------------
+        # ===========================
+        # 🔹 TABLO OLUŞTURMA BLOĞU
+        # ===========================
         if USE_SQLITE:
             cur.execute("""
             CREATE TABLE IF NOT EXISTS tesvik_kullanim (
@@ -320,19 +323,26 @@ def migrate_tesvik_kullanim_table():
                 belge_no TEXT NOT NULL,
                 hesap_donemi INTEGER NOT NULL,
                 donem_turu TEXT DEFAULT 'KURUMLAR',
-                yatirim_kazanci REAL DEFAULT 0.0,
-                diger_kazanc REAL DEFAULT 0.0,
-                cari_yatirim_katkisi REAL DEFAULT 0.0,
-                cari_diger_katkisi REAL DEFAULT 0.0,
+
+                yatirimdan_elde_edilen_kazanc REAL DEFAULT 0.0,
+                tevsi_yatirim_kazanci REAL DEFAULT 0.0,
+                diger_faaliyet REAL DEFAULT 0.0,
+
+                cari_yatirim_katki REAL DEFAULT 0.0,
+                cari_diger_katki REAL DEFAULT 0.0,
+                cari_toplam_katki REAL DEFAULT 0.0,
+
                 genel_toplam_katki REAL DEFAULT 0.0,
-                kalan_katki REAL DEFAULT 0.0,
+                kalan_katki_tutari REAL DEFAULT 0.0,
+
+                indirimli_matrah REAL DEFAULT 0.0,
+                indirimli_kv REAL DEFAULT 0.0,
+                indirimli_kv_oran REAL DEFAULT 0.0,
+
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
             );
             """)
-        # -------------------------------
-        # 🔹 PostgreSQL Ortamı
-        # -------------------------------
         else:
             cur.execute("""
             CREATE TABLE IF NOT EXISTS tesvik_kullanim (
@@ -341,34 +351,80 @@ def migrate_tesvik_kullanim_table():
                 belge_no TEXT NOT NULL,
                 hesap_donemi INT NOT NULL,
                 donem_turu TEXT DEFAULT 'KURUMLAR',
-                yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
-                diger_kazanc DOUBLE PRECISION DEFAULT 0.0,
-                cari_yatirim_katkisi DOUBLE PRECISION DEFAULT 0.0,
-                cari_diger_katkisi DOUBLE PRECISION DEFAULT 0.0,
+
+                yatirimdan_elde_edilen_kazanc DOUBLE PRECISION DEFAULT 0.0,
+                tevsi_yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
+                diger_faaliyet DOUBLE PRECISION DEFAULT 0.0,
+
+                cari_yatirim_katki DOUBLE PRECISION DEFAULT 0.0,
+                cari_diger_katki DOUBLE PRECISION DEFAULT 0.0,
+                cari_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
+
                 genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
-                kalan_katki DOUBLE PRECISION DEFAULT 0.0,
+                kalan_katki_tutari DOUBLE PRECISION DEFAULT 0.0,
+
+                indirimli_matrah DOUBLE PRECISION DEFAULT 0.0,
+                indirimli_kv DOUBLE PRECISION DEFAULT 0.0,
+                indirimli_kv_oran DOUBLE PRECISION DEFAULT 0.0,
+
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, belge_no, hesap_donemi, donem_turu)
             );
             """)
 
-        # 🔍 Eğer mevcut tablo eskiyse ve `donem_turu` sütunu yoksa ekle
+        # ===========================
+        # 🔍 EKSİK SÜTUN KONTROLÜ
+        # ===========================
         try:
             if USE_SQLITE:
                 cur.execute("PRAGMA table_info(tesvik_kullanim)")
-                existing = {r["name"] for r in cur.fetchall()}
+                existing_cols = {r["name"] if isinstance(r, dict) else r[1] for r in cur.fetchall()}
             else:
-                cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='tesvik_kullanim'")
-                existing = {r["column_name"] for r in cur.fetchall()}
+                cur.execute("""
+                    SELECT column_name FROM information_schema.columns
+                    WHERE table_name = 'tesvik_kullanim';
+                """)
+                existing_cols = {r["column_name"] if isinstance(r, dict) else r[0] for r in cur.fetchall()}
 
-            if "donem_turu" not in existing:
-                cur.execute("ALTER TABLE tesvik_kullanim ADD COLUMN donem_turu TEXT DEFAULT 'KURUMLAR';")
-                print("🆕 'donem_turu' sütunu eklendi.")
+            required_cols = [
+                "yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "diger_faaliyet",
+                "cari_yatirim_katki", "cari_diger_katki", "cari_toplam_katki",
+                "genel_toplam_katki", "kalan_katki_tutari",
+                "indirimli_matrah", "indirimli_kv", "indirimli_kv_oran"
+            ]
+
+            for col in required_cols:
+                if col not in existing_cols:
+                    col_type = "REAL" if USE_SQLITE else "DOUBLE PRECISION"
+                    cur.execute(f"ALTER TABLE tesvik_kullanim ADD COLUMN {col} {col_type} DEFAULT 0.0;")
+                    print(f"🆕 '{col}' sütunu eklendi.")
+
         except Exception as e:
-            print(f"⚠️ donem_turu sütunu kontrolü sırasında hata: {e}")
+            print(f"⚠️ Eksik sütun kontrolü sırasında hata: {e}")
+
+        # ===========================
+        # 🔒 UNIQUE CONSTRAINT (PostgreSQL)
+        # ===========================
+        if not USE_SQLITE:
+            try:
+                cur.execute("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint WHERE conname = 'tesvik_kullanim_unique'
+                    ) THEN
+                        ALTER TABLE tesvik_kullanim
+                        ADD CONSTRAINT tesvik_kullanim_unique
+                        UNIQUE (user_id, belge_no, hesap_donemi, donem_turu);
+                    END IF;
+                END $$;
+                """)
+                print("✅ UNIQUE constraint kontrol edildi / eklendi (PostgreSQL).")
+            except Exception as e:
+                print(f"⚠️ UNIQUE constraint kontrolü sırasında hata: {e}")
 
         conn.commit()
-        print("✅ tesvik_kullanim tablosu kontrol edildi / oluşturuldu.")
+        print("✅ tesvik_kullanim tablosu kontrol edildi / güncellendi.")
 
 
 

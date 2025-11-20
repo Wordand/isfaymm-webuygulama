@@ -319,50 +319,48 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             {% with messages = get_flashed_messages(with_categories = true) %}
             {% if messages %}
             {% for category, message in messages %}
             Swal.fire({
                 icon: "{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'error' }}",
-                title: "{{ message|escape }}",
-                showConfirmButton: false,
-                timer: 2500,
-                timerProgressBar: true
-            });
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
+                title: {{ message| tojson }},
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true
+        });
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
+        // 🟦 Tek seferlik gösterim
+        const screen = document.getElementById("loading-screen");
+        if (sessionStorage.getItem("isfa_intro_shown")) {
+            if (screen) screen.remove();
+        } else {
+            sessionStorage.setItem("isfa_intro_shown", "1");
+        }
 
-
-            // Tek seferlik gösterim (isteğe bağlı)
-            if (sessionStorage.getItem("isfa_intro_shown")) {
-                document.getElementById("loading-screen").remove();
-            } else {
-                sessionStorage.setItem("isfa_intro_shown", "1");
-            }
-
-
-            const texts = ["Bilgi", "Güven", "Hız"];
-            let i = 0;
-            const textEl = document.getElementById("loading-text");
-
-            // Kelime geçişi animasyonu
+        // 🟩 Kelime geçişi animasyonu
+        const texts = ["Bilgi", "Güven", "Hız"];
+        let i = 0;
+        const textEl = document.getElementById("loading-text");
+        if (textEl) {
             setInterval(() => {
                 textEl.textContent = texts[i++ % texts.length];
             }, 2000);
+        }
 
-            // Sayfa tam yüklenince 7 saniye sonra gizle
-            window.addEventListener("load", () => {
-                setTimeout(() => {
-                    const screen = document.getElementById("loading-screen");
+        // 🟨 Sayfa yüklenince 7 sn sonra gizle
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                if (screen) {
                     screen.classList.add("fade-out");
                     setTimeout(() => screen.remove(), 800);
-                }, 7000);
-            });
-
-
-
+                }
+            }, 7000);
+        });
         });
     </script>
 

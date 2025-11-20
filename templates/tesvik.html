@@ -1,187 +1,342 @@
-{# tesvik.html #}
+{% extends "layout.html" %}
+{% block title %}Teşvik Belgeleri | İSFA YMM{% endblock %}
 
-<table class="table table-striped align-middle" id="tesvik-belgeleri-table">
-  <thead>
-    <tr>
-      <th>Belge No</th>
-      <th>Belge Tarihi</th>
-      <th>Karar</th>
-      <th>Toplam Yatırım Tutarı</th>
-      <th>Tamamlama Vizesi Durumu</th>
-      <th>Cari Toplam Katkı</th>
-      <th>Genel Toplam Katkı</th>
-      <th>İşlemler</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for d in docs %}
-    <tr>
-      <td>{{ d.belge_no }}</td>
-      <td>{{ d.belge_tarihi | safe_date }}</td>
-      <td>{{ d.karar }}</td>
-      <td>{{ d.toplam_tutar | tlformat }}</td>
-      <td>{{ d.vize_durumu }}</td>
-      <td>{{ d.cari_toplam_katki | tlformat }}</td>
-      <td>{{ d.genel_toplam_katki | tlformat }}</td>
-      <td>
-        <div class="btn-group btn-group-sm">
-          <a href="{{ url_for('indirimlikurumlar.index', sekme='tesvik', view=d.id) }}" class="btn btn-info">Detay</a>
+{% block content %}
+<div class="container-fluid py-4">
 
+  <h3 class="mb-4 text-center text-primary fw-bold">📄 Teşvik Belgelerim</h3>
 
-          <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id|int) }}"
-            class="btn btn-warning">Güncelle</a>
-          <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id|int) }}"
-            class="btn btn-secondary">PDF İndir</a>
-          <form class="delete-tesvik-form d-inline"
-            action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id|int) }}" method="post">
-            <button type="submit" class="btn btn-danger">Sil</button>
-          </form>
-        </div>
-      </td>
-    </tr>
-    {# 🔹 Yeni satır: belgeye ait dönemleri göster #}
-    <tr class="bg-light">
-      <td colspan="8">
-        <div class="p-2">
-          <strong>Dönemler:</strong>
-          <div class="d-flex flex-wrap gap-2 mt-2">
-            {% for donem in d.donemler %}
-            <div class="border rounded p-2 bg-white d-flex align-items-center justify-content-between"
-              style="min-width:230px;">
-              <span>{{ donem.hesap_donemi }} - {{ donem.donem_turu }}</span>
-              <div class="btn-group btn-group-sm">
-                <a href="{{ url_for('indirimlikurumlar.edit_tesvik_kullanim', belge_no=d.belge_no, yil=donem.hesap_donemi, turu=donem.donem_turu) }}"
-                  class="btn btn-outline-primary" title="Dönemi Görüntüle"><i class="bi bi-eye"></i></a>
+  <!-- ========================= -->
+  <!-- 🔷 TEŞVİK BELGELERİ TABLOSU -->
+  <!-- ========================= -->
+  <div class="table-responsive shadow-sm rounded">
+    <table class="table table-hover align-middle">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>Belge No</th>
+          <th>Belge Tarihi</th>
+          <th>Karar</th>
+          <th>Toplam Yatırım</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
 
-                <button class="btn btn-outline-secondary clone-donem" data-belge="{{ d.belge_no }}"
-                  data-yil="{{ donem.hesap_donemi }}" title="Bu Dönemi Klonla">
-                  <i class="bi bi-layers"></i>
-                </button>
+      <tbody>
+        {% for d in docs %}
 
-                <button class="btn btn-outline-danger delete-donem" data-belge="{{ d.belge_no }}"
-                  data-yil="{{ donem.hesap_donemi }}" title="Sil">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
+        <!-- ========================== -->
+        <!-- 🔽 Belge Satırı (Accordion Trigger) -->
+        <!-- ========================== -->
+        <tr class="text-center accordion-toggle"
+            data-bs-toggle="collapse"
+            data-bs-target="#belge_{{ d.id }}"
+            style="cursor:pointer;">
+          <td class="fw-bold">{{ d.belge_no }}</td>
+          <td>{{ d.belge_tarihi | safe_date }}</td>
+          <td>{{ d.karar }}</td>
+          <td>{{ d.toplam_tutar | tlformat }}</td>
+
+          <td>
+            <div class="btn-group btn-group-sm">
+
+              <!-- Güncelle -->
+              <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=d.id) }}"
+                 class="btn btn-warning">Güncelle</a>
+
+              <!-- PDF -->
+              <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=d.id) }}"
+                 class="btn btn-secondary">PDF</a>
+
+              <!-- Sil -->
+              <form method="post"
+                    action="{{ url_for('indirimlikurumlar.delete_tesvik', doc_id=d.id) }}"
+                    class="delete-tesvik-form d-inline">
+                <button class="btn btn-danger">Sil</button>
+              </form>
+
             </div>
-            {% else %}
-            <span class="text-muted">Henüz dönem eklenmemiş.</span>
-            {% endfor %}
-          </div>
+          </td>
+        </tr>
 
-          <button class="btn btn-outline-danger btn-sm mt-3 add-donem-btn" data-belge="{{ d.belge_no }}">
-            <i class="bi bi-layers"></i> Yeni Dönem Ekle
-          </button>
-        </div>
-      </td>
-    </tr>
+        <!-- ========================== -->
+        <!-- 🔽 Belge Altı — Yıllara Göre Dönem Akordiyonu -->
+        <!-- ========================== -->
+        <tr>
+          <td colspan="5" class="p-0">
+            <div id="belge_{{ d.id }}" class="collapse">
 
-    {% endfor %}
-  </tbody>
-</table>
+              <div class="p-3 bg-light border-top">
 
-{% if edit_doc %}
-<hr>
-<h4 class="mt-4 text-center text-primary">{{ edit_doc.belge_no or edit_doc.id }} Nolu Belge Detayı</h4>
+                <h6 class="fw-bold mb-2">📙 Dönemler</h6>
 
-{% macro row(label, value) -%}
-<tr>
-  <td class="fw-semibold text-end" style="width:45%;">{{ label }}</td>
-  <td class="text-start">{{ value or '-' }}</td>
-</tr>
-{%- endmacro %}
+                {% set groups = d.donemler | groupby("hesap_donemi") %}
 
-<div class="table-responsive mx-auto" style="max-width:700px;">
-  <table class="table table-bordered table-hover align-middle">
-    <tbody>
-      {{ row("Teşvik Belgesi Numarası", edit_doc.belge_no) }}
-      {{ row("Belge Tarihi", edit_doc.belge_tarihi) }}
-      {{ row("Karar", edit_doc.karar) }}
-      {{ row("Program Türü", edit_doc.program_turu) }}
-      {{ row("Yatırıma Başlama Tarihi", edit_doc.belge_tarihi) }}
-      {{ row("Yatırım Türü 1", edit_doc.yatirim_turu1) }}
-      {{ row("Yatırım Türü 2", edit_doc.yatirim_turu2) }}
-      {{ row("Tamamlama Vizesi Durumu", edit_doc.vize_durumu) }}
-      {{ row("Toplam Yatırım Tutarı", edit_doc.toplam_tutar | tlformat) }}
-      {{ row("Yatırıma Katkı Oranı", (edit_doc.katki_orani|string + ' %') if edit_doc.katki_orani is not none else '-')
-      }}
-      {{ row("Vergi İndirim Oranı", (edit_doc.vergi_orani|string + ' %') if edit_doc.vergi_orani is not none else '-')
-      }}
-      {{ row("Diğer Oran", (edit_doc.diger_oran|string + ' %') if edit_doc.diger_oran is not none else '-') }}
-      {{ row("Yatırımın Yapıldığı Bölge", edit_doc.bolge) }}
-      {{ row("Cari Yılda Fiilen Gerçekleşen Harcama", edit_doc.cari_harcama_tutari | tlformat) }}
-      {{ row("Toplam Katkı Tutarı", edit_doc.katki_tutari | tlformat) }}
-      {{ row("Diğer Faaliyet Katkı Tutarı", edit_doc.diger_katki_tutari | tlformat) }}
-      {{ row("Fiili Katkı Tutarı", edit_doc.fiili_katki_tutari | tlformat) }}
-      {{ row("Endekslenmiş Katkı Tutarı", edit_doc.endeks_katki_tutari | tlformat) }}
-      {{ row("Önceki Yatırım Katkı Tutarı", edit_doc.onceki_yatirim_katki_tutari | tlformat) }}
-      {{ row("Önceki Diğer Katkı Tutarı", edit_doc.onceki_diger_katki_tutari | tlformat) }}
-      {{ row("Önceki Toplam Katkı", edit_doc.onceki_katki_tutari | tlformat) }}
-      {{ row("Cari Yatırım Katkı Tutarı", edit_doc.cari_yatirim_katki | tlformat) }}
-      {{ row("Cari Diğer Katkı Tutarı", edit_doc.cari_diger_katki | tlformat) }}
-      {{ row("Cari Toplam Katkı Tutarı", edit_doc.cari_toplam_katki | tlformat) }}
-      {{ row("Genel Toplam Katkı Tutarı", edit_doc.genel_toplam_katki | tlformat) }}
-    </tbody>
-  </table>
+                {% for year, items in groups %}
+                <div class="mt-2">
+
+                  <!-- ► Yıl Butonu -->
+                  <button class="btn btn-outline-primary w-100 text-start"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#yil_{{ d.id }}_{{ year }}">
+                    {{ year }} Dönemleri
+                  </button>
+
+                  <!-- ► Yıl İçeriği -->
+                  <div id="yil_{{ d.id }}_{{ year }}" class="collapse ms-3 mt-2">
+
+                    {% for donem in items %}
+                    <div class="border rounded p-2 bg-white d-flex justify-content-between align-items-center mb-2"
+                         style="min-width:260px;">
+
+                      <span>{{ donem.hesap_donemi }} - {{ donem.donem_turu }}</span>
+
+                      <div class="btn-group btn-group-sm">
+
+                        <!-- Dönemi Formda Düzenle -->
+                        <a href="{{ url_for('indirimlikurumlar.edit_tesvik_kullanim',
+                                            belge_no=d.belge_no,
+                                            yil=donem.hesap_donemi,
+                                            turu=donem.donem_turu) }}"
+                           class="btn btn-warning">
+                          <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <!-- Dönem Detay (Modal) -->
+                        <button class="btn btn-outline-primary view-donem"
+                                data-belge="{{ d.belge_no }}"
+                                data-yil="{{ donem.hesap_donemi }}"
+                                data-turu="{{ donem.donem_turu }}">
+                          <i class="bi bi-eye"></i>
+                        </button>
+
+                        <!-- Klonla -->
+                        <button class="btn btn-outline-secondary clone-donem"
+                                data-belge="{{ d.belge_no }}"
+                                data-yil="{{ donem.hesap_donemi }}"
+                                data-turu="{{ donem.donem_turu }}">
+                          <i class="bi bi-layers"></i>
+                        </button>
+
+                        <!-- Sil -->
+                        <button class="btn btn-outline-danger delete-donem"
+                                data-belge="{{ d.belge_no }}"
+                                data-yil="{{ donem.hesap_donemi }}"
+                                data-turu="{{ donem.donem_turu }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+
+                      </div>
+
+                    </div>
+                    {% endfor %}
+
+                  </div>
+
+                </div>
+                {% endfor %}
+
+                <!-- Yeni Dönem -->
+                <button class="btn btn-outline-success btn-sm mt-3 add-donem-btn"
+                        data-belge="{{ d.belge_no }}">
+                  + Yeni Dönem Ekle
+                </button>
+
+              </div>
+
+            </div>
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+
+    </table>
+  </div>
+
 </div>
 
-<div class="text-center mt-4">
-  <a href="?sekme=tesvik" class="btn btn-secondary px-4">← Listeye Dön</a>
-  <a href="{{ url_for('indirimlikurumlar.index', sekme='form', view=edit_doc.id|int) }}"
-    class="btn btn-warning px-4">Güncelle</a>
-  <a href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=edit_doc.id|int) }}"
-    class="btn btn-primary px-4">PDF İndir</a>
+<!-- Modal -->
+<div class="modal fade" id="donemModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Dönem Detayı</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="donemModalContent">Yükleniyor...</div>
+    </div>
+  </div>
 </div>
-{% endif %}
+
+{% endblock %}
+
 
 {% block extra_scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.delete-tesvik-form').forEach(form => {
-      form.addEventListener('submit', async ev => {
-        ev.preventDefault();
+  document.addEventListener("DOMContentLoaded", () => {
 
-        const result = await Swal.fire({
+    // ============================
+    // 🗑 Belge Silme
+    // ============================
+    document.querySelectorAll(".delete-tesvik-form").forEach(form => {
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const ok = await Swal.fire({
           title: "Emin misiniz?",
-          text: "Bu belge silinecek. Bu işlem geri alınamaz!",
+          text: "Bu belge tamamen silinecek!",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonText: "Evet, sil!",
-          cancelButtonText: "İptal"
+          confirmButtonText: "Evet, sil",
+          cancelButtonText: "Vazgeç"
         });
 
-        if (!result.isConfirmed) return;
+        if (!ok.isConfirmed) return;
 
-        try {
-          const resp = await fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form)
-          });
-          const data = await resp.json();
+        const resp = await fetch(form.action, { method: "POST", body: new FormData(form) });
+        const data = await resp.json();
 
-          Swal.fire({
-            icon: data.status,
-            title: data.title,
-            text: data.message,
-            toast: true,
-            position: 'top-end',
-            timer: 2000,
-            showConfirmButton: false
-          });
-
-          if (data.status === 'success') {
-            form.closest('tr')?.remove();
-          }
-
-        } catch (err) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Hata',
-            text: 'Silme işlemi sırasında bir hata oluştu.'
-          });
-        }
+        Swal.fire(data.title, data.message, data.status);
+        if (data.status === "success") location.reload();
       });
     });
+
+
+
+    document.querySelectorAll(".add-donem-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+
+        const { value } = await Swal.fire({
+          title: "Yeni Dönem",
+          input: "text",
+          inputLabel: "Örn: 2025 - Kurumlar",
+          showCancelButton: true
+        });
+
+        if (!value) return;
+
+        const res = await fetch("/indirimlikurumlar/clone_tesvik_donem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ belge_no: btn.dataset.belge, donem_text: value })
+        });
+
+        const data = await res.json();
+        Swal.fire(data.title, data.message, data.status);
+        if (data.status === "success") location.reload();
+
+      });
+    });
+
+
+    document.querySelectorAll(".delete-donem").forEach(btn => {
+      btn.addEventListener("click", async () => {
+
+        const belge = btn.dataset.belge;
+        const yil = btn.dataset.yil;
+        const tur = btn.dataset.turu;
+
+        if (!tur) {
+          Swal.fire("Hata", "Dönem türü alınamadı!", "error");
+          return;
+        }
+
+        const ok = await Swal.fire({
+          title: "Dönem silinsin mi?",
+          text: `${belge} (${yil} - ${tur})`,
+          icon: "warning",
+          showCancelButton: true
+        });
+
+        if (!ok.isConfirmed) return;
+
+        const resp = await fetch("/indirimlikurumlar/delete_tesvik_donem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            belge_no: belge,
+            hesap_donemi: yil,
+            donem_turu: tur
+          })
+        });
+
+        const data = await resp.json();
+
+        Swal.fire(data.title, data.message, data.status);
+
+        if (data.status === "success") location.reload();
+      });
+    });
+
+
+
+    document.querySelectorAll(".clone-donem").forEach(btn => {
+      btn.addEventListener("click", async () => {
+
+        const belge = btn.dataset.belge;
+        const yil = btn.dataset.yil;
+        const tur = btn.dataset.turu;
+
+        // Önce uyarı
+        const ok = await Swal.fire({
+          title: "Dönemi Klonla?",
+          text: `${belge} (${yil}) dönemi kopyalanacak.`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Evet, klonla",
+          cancelButtonText: "Vazgeç"
+        });
+
+        if (!ok.isConfirmed) return;
+
+        // ✔ DOĞRU OLAN — fetch yapılıyor
+        const res = await fetch("/indirimlikurumlar/clone_tesvik_donem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            belge_no: belge,
+            donem_text: `${yil} - ${tur}`
+          })
+        });
+
+        const data = await res.json();
+
+        Swal.fire(data.title, data.message, data.status);
+
+        if (data.status === "success") location.reload();
+      });
+    });
+
+
+    document.querySelectorAll(".view-donem").forEach(btn => {
+      btn.addEventListener("click", async () => {
+
+        const belge = btn.dataset.belge;
+        const yil = btn.dataset.yil;
+        const tur = btn.dataset.turu;
+
+        // 🔥 KRİTİK DÜZELTME 1: apiUrl'yi tanımla ve fetch çağrısını yap
+        const apiUrl = `/indirimlikurumlar/api/get_tesvik_kullanim/${belge}/${yil}/${tur}`;
+        const res = await fetch(apiUrl);
+
+        // KRİTİK DÜZELTME 2: 404/HTML hatasını yakalamak için kontrol
+        if (!res.ok) {
+          Swal.fire("Hata", "Sunucuya ulaşılamadı veya API hatası oluştu (Hata Kodu: " + res.status + ")", "error");
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.status !== "success") {
+          Swal.fire("Hata", data.message, "error");
+          return;
+        }
+
+        document.getElementById("donemModalContent").innerHTML = data.html;
+        new bootstrap.Modal(document.getElementById("donemModal")).show();
+      });
+    });
+
   });
 </script>
 {% endblock %}
