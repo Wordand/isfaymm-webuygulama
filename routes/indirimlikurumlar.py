@@ -829,7 +829,7 @@ def form_kaydet():
                         fiili_katki_tutari=%s, endeks_katki_tutari=%s,
                         onceki_yatirim_katki_tutari=%s, onceki_diger_katki_tutari=%s, onceki_katki_tutari=%s,
                         cari_yatirim_katki=%s, cari_diger_katki=%s, cari_toplam_katki=%s, genel_toplam_katki=%s,
-                        brut_satis=%s, ihracat=%s, imalat=%s, diger_faaliyet=%s, use_detailed_profit_ratios=%s
+                        brut_satis=%s, ihracat=%s, imalat=%s, diger_faaliyet=%s, use_detailed_profit_ratios=%s, olusturan_id=%s
                     WHERE id=%s AND user_id=%s AND mukellef_id=%s
                     RETURNING id
                 """, (
@@ -842,7 +842,7 @@ def form_kaydet():
                     fiili_katki_tutari, endeks_katki_tutari,
                     onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios,
+                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios, user_id,
                     tesvik_id, user_id, mukellef_id
                 ))
                 
@@ -882,7 +882,7 @@ def form_kaydet():
                     fiili_katki_tutari, endeks_katki_tutari,
                     onceki_yatirim_katki_tutari, onceki_diger_katki_tutari, onceki_katki_tutari,
                     cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
-                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios
+                    brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios, user_id
                 ))
 
                 row = c.fetchone()

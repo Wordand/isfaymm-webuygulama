@@ -698,6 +698,15 @@
     "toplam_tutar": "katki",
     "cari_harcama_tutari": "katki",
     "toplam_harcama_tutari": "katki",
+
+    "onceki_yatirim_katki_tutari": "katki",
+    "onceki_diger_katki_tutari": "katki",
+
+    "katki_orani": "percent",
+    "vergi_orani": "percent",
+    "diger_oran": "percent",
+
+
     "brut_satis": "ratios",
     "ihracat": "ratios",
     "imalat": "ratios",
@@ -758,74 +767,151 @@
 
 
 
+
+
+
+
+
+
+  function getVal(id) {
+    const mask = maskMap[id];
+    const el = document.getElementById(id);
+    if (!el) return 0;
+
+    const type = idConfig[id];
+
+    // Eğer IMask uygulanmışsa
+    if (mask) {
+      const raw = mask.unmaskedValue || "";
+      if (!raw) return 0;
+
+      const n = Number(raw);
+
+      // YÜZDE ALANLARI
+      if (type === "percent") {
+        // Örn: "40" -> 40
+        // "400" -> 40
+        // "4000" -> 40
+        // "40000" -> 40
+        // "400000" -> 40
+        //
+        // Genel formül:
+        // divider = 10^(raw.length - 2)
+        // 2 hane = tam değer
+        // fazlası → bölünür
+
+        const divider = Math.pow(10, Math.max(0, raw.length - 2));
+        return n / divider;
+      }
+
+      // PARA ALANLARI (10000000 → 100000,00)
+      return n / 100;
+    }
+
+    // Eğer IMask yoksa → Türk formatlı parse
+    return parseFormattedNumber(el.value);
+  }
+
+
+
+
+
+  function formatTL(num) {
+    if (isNaN(num) || num === null || num === undefined) return "0,00";
+    return Number(num).toLocaleString("tr-TR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+
+  function parseFormattedNumber(value) {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'number') return value; // Zaten sayıysa döndür
+
+    let v = value.toString().trim();
+    // % ve TL işaretlerini temizle
+    v = v.replace(/[%₺\s]/g, '');
+
+    if (v === "") return 0;
+
+    // 1) İçinde virgül varsa Türk formatıdır (1.000,50)
+    // Noktaları sil, virgülü nokta yap
+    if (v.indexOf(',') > -1) {
+      v = v.replace(/\./g, '').replace(',', '.');
+    }
+    // 2) Virgül YOK, Nokta VAR
+    else if (v.indexOf('.') > -1) {
+      // Eğer birden fazla nokta varsa (1.000.000) -> Binliktir, sil.
+      // VEYA safeSet ile biz yazdırdıysak (19.60) ondalıktır, dokunma.
+      // Hata şuradaydı: Kod her noktayı binlik sanıyordu.
+
+      // Basit çözüm: IMask'tan gelen unmaskedValue genellikle nokta ile ondalık ayrılır.
+      // Ancak kullanıcı elle "1.000" yazarsa bu binliktir.
+      // Karışıklığı önlemek için sayıya çevirip kontrol edelim.
+      const parts = v.split('.');
+      if (parts.length > 2) {
+        // 1.000.000 gibi -> noktaları sil
+        v = v.replace(/\./g, '');
+      }
+      // Tek nokta varsa (19.60 veya 1000), JS parseFloat bunu doğru anlar.
+    }
+
+    const num = parseFloat(v);
+    return isNaN(num) ? 0 : num;
+  }
+
+
+
+
   function safeSet(id, val) {
     const el = document.getElementById(id);
     if (!el) return;
 
     const mask = maskMap[id];
+    const type = idConfig[id];
 
-    // 🚫 MASK Event’lerini kapat
-    programmaticMaskUpdate = true;
+    // Numerik güvenlik
+    let numVal = Number(val);
+    if (isNaN(numVal)) numVal = 0;
 
-    if (mask) {
-      mask.unmaskedValue = String(val);
-      mask.updateValue();
-    } else {
-      el.value = Number(val).toLocaleString("tr-TR", {
-        minimumFractionDigits: 2
-      });
-    }
+    /* -------------------------------------------------------------
+       1) YÜZDE ALANLARI
+       ------------------------------------------------------------- */
+    if (mask && type === "percent") {
+      // unmaskedValue = yüzde * 100 → 20 → 2000
+      const unmasked = Math.round(numVal * 100);
 
-    // ✔ MASK Event’lerini aç
-    setTimeout(() => {
+      programmaticMaskUpdate = true;
+      mask.unmaskedValue = String(unmasked);
       programmaticMaskUpdate = false;
-    }, 0);
+
+      return;
+    }
+
+    /* -------------------------------------------------------------
+       2) PARA ALANLARI
+       ------------------------------------------------------------- */
+    if (mask && type !== "none") {
+      const unmasked = Math.round(numVal * 100);
+
+      programmaticMaskUpdate = true;
+      mask.unmaskedValue = String(unmasked);
+      programmaticMaskUpdate = false;
+
+      return;
+    }
+
+    /* -------------------------------------------------------------
+       3) MASKESİZ ALANLAR
+       ------------------------------------------------------------- */
+    el.value = numVal.toLocaleString("tr-TR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
 
-
-  // === Global Format Fonksiyonları ===
-  function formatTL(num) {
-    if (isNaN(num) || num === null) return "0,00";
-    return Number(num)
-      .toFixed(2)
-      .replace(".", ",")
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
-
-  // 🔹 Binlik ve ondalık ayraçları doğru analiz eden versiyon
-  function parseFormattedNumber(value) {
-    if (!value) return 0;
-    let v = value.toString().trim();
-
-    // % veya TL simgelerini temizle
-    v = v.replace(/[%₺\s]/g, '');
-
-    const dotCount = (v.match(/\./g) || []).length;
-    const commaCount = (v.match(/,/g) || []).length;
-
-    // 🔹 1) Hem . hem , varsa → nokta binlik, virgül ondalık
-    if (dotCount > 0 && commaCount > 0) {
-      v = v.replace(/\./g, '').replace(',', '.');
-    }
-    // 🔹 2) Sadece virgül varsa → ondalık
-    else if (commaCount > 0) {
-      v = v.replace(',', '.');
-    }
-    // 🔹 3) Sadece nokta varsa ama birden fazla nokta varsa → binlik
-    else if (dotCount > 1) {
-      v = v.replace(/\./g, '');
-    }
-    // 🔹 4) Tek nokta var ama sonunda 3 hane varsa → binlik (ör: 10.000)
-    else if (dotCount === 1 && v.match(/\.\d{3}$/)) {
-      v = v.replace(/\./g, '');
-    }
-    // 🔹 5) Tek nokta + 1-2 hane varsa → ondalık (ör: 10.25)
-    // else if -> no change
-
-    const num = parseFloat(v);
-    return isNaN(num) ? 0 : num;
-  }
 
 
   function normalizeBN(s) { return (s || '').replace(/\D/g, ''); }
@@ -834,6 +920,7 @@
     const p = (t || '').split('/');
     return p.length === 3 ? `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}` : t;
   }
+
 
 
 
@@ -955,7 +1042,6 @@
 
 
 
-
   function toggleInvestmentIncomeInputs() {
     const karar = (document.getElementById('karar')?.value || "").trim();
     const yatirimTuru = (document.getElementById('yatirim_turu1')?.value || "").trim().toLowerCase();
@@ -967,75 +1053,102 @@
 
     if (!yatirimKazanciInput || !tevsiKazanciInput) return;
 
-    // 1) Her şeyi kapat
-    [yatirimKazanciInput, tevsiKazanciInput, toplamSabitInput, gerceklesenTevsiInput].forEach(el => {
-      if (el) {
-        el.setAttribute('readonly', true);
-        el.classList.add('disabled-input');
-      }
+    // 🔴 Önce HER ŞEYİ kapat
+    const allInputs = [
+      yatirimKazanciInput,
+      tevsiKazanciInput,
+      toplamSabitInput,
+      gerceklesenTevsiInput
+    ];
+
+    allInputs.forEach(el => {
+      if (!el) return;
+      el.setAttribute("readonly", true);
+      el.classList.add("disabled-input");
+
+      const m = maskMap[el.id];
+      if (m) m.updateOptions({ readonly: true });
     });
 
-    // ⭐ 2) 2025/9903 → sadece yatırım kazancı açık (TEVSI ASLA YOK)
+    // 🟥 9903 → TEVSİ YOK! SADECE yatırım kazancı açık
     if (karar === "2025/9903") {
-      yatirimKazanciInput.removeAttribute('readonly');
-      yatirimKazanciInput.classList.remove('disabled-input');
-      return; // ❗ tevsi kontrolüne hiç girme!
+      yatirimKazanciInput.removeAttribute("readonly");
+      yatirimKazanciInput.classList.remove("disabled-input");
+
+      const m = maskMap["yatirimdan_elde_edilen_kazanc"];
+      if (m) m.updateOptions({ readonly: false });
+
+      return; // kesin blokaj → tevsi asla çalışmasın
     }
 
-    // 3) Klasik karar + tevsi türü → tevsi kazancı aktif
+    // 🟦 Klasik karar → Tevsi türünde Tevsi kazancı aktif
     if (yatirimTuru === "tevsi") {
-      tevsiKazanciInput.removeAttribute('readonly');
-      tevsiKazanciInput.classList.remove('disabled-input');
+      // Tevsi kazancı aktif
+      tevsiKazanciInput.removeAttribute("readonly");
+      tevsiKazanciInput.classList.remove("disabled-input");
 
-      if (toplamSabitInput) {
-        toplamSabitInput.removeAttribute('readonly');
-        toplamSabitInput.classList.remove('disabled-input');
-      }
-      if (gerceklesenTevsiInput) {
-        gerceklesenTevsiInput.removeAttribute('readonly');
-        gerceklesenTevsiInput.classList.remove('disabled-input');
-      }
+      const m1 = maskMap["tevsi_yatirim_kazanci"];
+      if (m1) m1.updateOptions({ readonly: false });
+
+      // Tevsi girdileri aktif
+      [toplamSabitInput, gerceklesenTevsiInput].forEach(el => {
+        if (!el) return;
+        el.removeAttribute("readonly");
+        el.classList.remove("disabled-input");
+        const m = maskMap[el.id];
+        if (m) m.updateOptions({ readonly: false });
+      });
+
       return;
     }
 
-    // 4) Klasik karar + tevsiden farklı → yatırım kazancı aktif
-    yatirimKazanciInput.removeAttribute('readonly');
-    yatirimKazanciInput.classList.remove('disabled-input');
+    // 🟩 Klasik → tevsi değil → sadece yatırım kazancı açık
+    yatirimKazanciInput.removeAttribute("readonly");
+    yatirimKazanciInput.classList.remove("disabled-input");
+
+    const m3 = maskMap["yatirimdan_elde_edilen_kazanc"];
+    if (m3) m3.updateOptions({ readonly: false });
   }
 
 
 
 
-  // setBolge(): İl seçimine göre bölge alanını otomatik doldurur. 
-  // 2025/9903 kararı seçiliyse bölgeyi değiştirmez, yalnızca bilgi amaçlı log yazar.
+
   function setBolge() {
     const karar = document.getElementById("karar")?.value;
+
+    // 2025/9903 → Bölge değiştirilmez
     if (karar === "2025/9903") {
-      console.log("📍 2025/9903 aktif — bölge ayarı yapıldı ama katkı oranı değiştirilmedi.");
+      console.log("📍 2025/9903 aktif — setBolge() pasif bırakıldı.");
       return;
     }
 
     const ilSelect = document.getElementById("il");
     const bolgeInput = document.getElementById("bolge");
-    if (ilSelect && bolgeInput) {
-      const il = ilSelect.value;
-      const bolge = bolgeMap[il];
-      bolgeInput.value = bolge;
+    if (!ilSelect || !bolgeInput) return;
 
-    }
+    const il = ilSelect.value;
+    const bolge = bolgeMap[il] ?? "";
+    bolgeInput.value = bolge;
   }
 
 
 
-  // setOranlar(): Bölge, OSB durumu, vize ve dönem bilgilerine göre katkı, vergi ve diğer oranlarını hesaplayıp alanlara yazar. 
-  // Manuel girilen değerleri korur, 2025/9903 için çalışmaz ve bağlı hesaplamaları otomatik tetikler.
   function setOranlar() {
     const karar = document.getElementById("karar")?.value;
-    if (karar === "2025/9903") return;
+
+    // 🔥 1) 2025/9903 → ORAN HESABI YOK, HESAP TETİKLEME YOK
+    if (karar === "2025/9903") {
+      console.log("⚪ setOranlar() 9903 modunda pasif.");
+      return;
+    }
+
+    // Gerekli alanlar
     const bolgeInput = document.getElementById("bolge");
     const osbSelect = document.getElementById("osb");
     const vizeSelect = document.getElementById("vize_durumu");
     const donemSelect = document.getElementById("donem");
+
     if (!bolgeInput || !osbSelect || !vizeSelect || !donemSelect) return;
 
     const bolge = bolgeInput.value;
@@ -1046,79 +1159,79 @@
     const donem = donemSelect.value;
     const donemYil = parseInt(donem.split(" - ")[0]);
 
+    // ============================================================
+    //   📌 2) SADECE ORAN DEĞERLERİNİ INPUTLARA YAZ (HESAP YOK!)
+    // ============================================================
 
-
-    // 1) YDO yaz/temizle
-    const yenidenDegerlemeOraniEl = document.getElementById("yeniden_degerleme_orani");
-    if (yenidenDegerlemeOraniEl) {
+    // Yeniden değerleme oranı
+    const ydo = document.getElementById("yeniden_degerleme_orani");
+    if (ydo) {
       if (vize.includes("Hayır")) {
-        yenidenDegerlemeOraniEl.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YAPILMAZ";
-        yenidenDegerlemeOraniEl.classList.add("text-muted");   // opsiyonel: gri göster
+        ydo.value = "YATIRIM DÖNEMİNDE OLDUĞUNUZ İÇİN ENDEKSLEME YOK";
       } else {
-        const oranAnahtari = donem;
-        yenidenDegerlemeOraniEl.value = (yenidenDegerlemeOranlari[oranAnahtari] ?? "");
-        yenidenDegerlemeOraniEl.classList.remove("text-muted");
+        ydo.value = yenidenDegerlemeOranlari[donem] ?? "";
       }
     }
 
-    // 2) Katkı oranı
-    const katkiOraniEl = document.getElementById("katki_orani");
-    const manualKatki = sessionStorage.getItem('manual_katki') === 'true';
-    const manualKatkiVal = sessionStorage.getItem('manual_katki_value');
-    if (katkiOraniEl) {
-      if (manualKatki && manualKatkiVal !== null) {
-        katkiOraniEl.value = manualKatkiVal; // manuel değeri koru
+    // Katkı oranı
+    const katkiEl = document.getElementById("katki_orani");
+    const manualKatki = sessionStorage.getItem("manual_katki") === "true";
+    const manualKatkiVal = sessionStorage.getItem("manual_katki_value");
+
+    if (katkiEl) {
+      if (manualKatki) {
+        safeSet("katki_orani", manualKatkiVal);
       } else {
         let v = katkilar[key] ?? "";
-        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
-        katkiOraniEl.value = v;
+        safeSet("katki_orani", v);
       }
     }
 
-    // 3) Vergi indirim oranı
-    const vergiOraniEl = document.getElementById("vergi_orani");
-    const manualVergi = sessionStorage.getItem('manual_vergi') === 'true';
-    const manualVergiVal = sessionStorage.getItem('manual_vergi_value');
-    if (vergiOraniEl) {
-      if (manualVergi && manualVergiVal !== null) {
-        vergiOraniEl.value = manualVergiVal; // manuel değeri koru
+    // Vergi indirim oranı
+    const vergiEl = document.getElementById("vergi_orani");
+    const manualVergi = sessionStorage.getItem("manual_vergi") === "true";
+    const manualVergiVal = sessionStorage.getItem("manual_vergi_value");
+
+    if (vergiEl) {
+      if (manualVergi) {
+        safeSet("vergi_orani", manualVergiVal);
       } else {
         let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : (vergiler[key] ?? "");
-        if (v !== "") v = Math.max(0, Math.min(100, Number(v)));
-        vergiOraniEl.value = v;
+        safeSet("vergi_orani", v);
       }
     }
 
-    // 4) Diğer kazanç oranı (manuel değişmiyorsa olduğu gibi bırak)
-    const digerOranEl = document.getElementById("diger_oran");
-    if (digerOranEl) {
+    // Diğer kazanç oranı
+    const digerEl = document.getElementById("diger_oran");
+    if (digerEl) {
       if (vize.includes("Evet")) {
-        digerOranEl.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
+        safeSet("diger_oran", 0);
       } else {
-        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : 80;
-        v = Math.max(0, Math.min(100, Number(v)));
-        digerOranEl.value = v;
+        safeSet("diger_oran", (donemYil >= 2017 && donemYil <= 2022) ? 100 : 80);
       }
     }
 
-
-    // 5) Sol “İndirimli KV Oranları (bilgi)” kutusunu güncelle
+    // Sol bilgi paneli güncelle
     updateDiscountedRatesUI();
 
-    // 6) Aşama 3/4’te isek bağlı hesaplamaları tetikle
-    const step3El = document.getElementById("step3");
-    if (step3El && !step3El.classList.contains("hidden-step")) {
+    // ============================================================
+    //   📌 3) Hesaplamaları sadece Step 3 veya Step 4 aktifse çalıştır
+    // ============================================================
+
+    const step3Active = !document.getElementById("step3")?.classList.contains("hidden-step");
+    const step4Active = !document.getElementById("step4")?.classList.contains("hidden-step");
+
+    if (step3Active) {
       hesaplaKatkiTutari();
       hesaplaDigerKatkiTutari();
       hesaplaFiiliKatkiTutari();
     }
-    const step4El = document.getElementById("step4");
-    if (step4El && !step4El.classList.contains("hidden-step")) {
+
+    if (step4Active) {
       hesaplaOncekiKatkiTutari();
       hesaplaKalanVeEndeks();
     }
   }
-
 
   window.handleKarar9903 = function () {
 
@@ -1138,12 +1251,9 @@
     if (!kararSelect) return;
 
     const karar = kararSelect.value;
-    const sabitMetin = "2025/9903 NOLU KARAR OLDUĞU İÇİN SEÇİLEMEZ";
 
-    // -------------------------------
-    //     YARDIMCI — READONLY SELECT
-    // -------------------------------
     const makeSelectReadonly = (sel) => {
+      if (!sel) return;
       sel.dataset.readonly = "1";
       sel.addEventListener("mousedown", e => {
         if (sel.dataset.readonly === "1") e.preventDefault();
@@ -1153,90 +1263,82 @@
     };
 
     const makeSelectWritable = (sel) => {
+      if (!sel) return;
       sel.dataset.readonly = "0";
       sel.style.pointerEvents = "auto";
       sel.classList.remove("bg-light");
     };
 
-    // ===============================
-    //   2025/9903 ÖZEL MODU
-    // ===============================
+    // ======================================================
+    //            2025 / 9903  ÖZEL MODU
+    // ======================================================
     if (karar === "2025/9903") {
 
       console.log("→ 2025/9903 modu aktif!");
 
-      // il / osb / bolge readonly
       makeSelectReadonly(ilSelect);
       makeSelectReadonly(osbSelect);
-      bolgeInput.readOnly = true;
-      bolgeInput.classList.add("bg-light");
 
-      // Sabit metin / mevcut seçenek üzerine yaz
-      ilSelect.value = sabitMetin;
-      osbSelect.value = sabitMetin;
-      bolgeInput.value = sabitMetin;
+      if (bolgeInput) {
+        bolgeInput.readOnly = true;
+        bolgeInput.classList.add("bg-light");
+        bolgeInput.value = "0";   // gerçek bölge değeri
+      }
 
-      // Program türü aktif
       programSelect.readOnly = false;
       programSelect.style.pointerEvents = "auto";
       programSelect.classList.remove("bg-light");
 
-      // Yatırım türleri kilit
-      tur1.readOnly = true;
-      tur2.readOnly = true;
-      tur1.style.pointerEvents = "none";
-      tur2.style.pointerEvents = "none";
-      tur1.classList.add("bg-light");
-      tur2.classList.add("bg-light");
+      [tur1, tur2].forEach(el => {
+        if (!el) return;
+        el.readOnly = true;
+        el.style.pointerEvents = "none";
+        el.classList.add("bg-light");
+      });
 
-      // Sabit oranlar
-      vergiInput.value = 60;
-      digerInput.value = 50;
+      safeSet("vergi_orani", 60);
+      safeSet("diger_oran", 50);
 
       const program = programSelect.value;
-      if (typeof katkilar9903 !== 'undefined') {
-        katkiInput.value = katkilar9903[program] || "";
+      if (katkilar9903) {
+        safeSet("katki_orani", katkilar9903[program] || 0);
       }
 
+      toggleInvestmentIncomeInputs();
+      return;
     }
-    // ===============================
-    //      Klasik Teşvik Modu
-    // ===============================
-    else {
 
-      console.log("→ Normal teşvik modu aktif");
+    // ======================================================
+    //            KLASİK TEŞVİK MODU
+    // ======================================================
+    console.log("→ Normal teşvik modu aktif");
 
-      // Alanları tekrar yazılabilir yap
-      makeSelectWritable(ilSelect);
-      makeSelectWritable(osbSelect);
+    makeSelectWritable(ilSelect);
+    makeSelectWritable(osbSelect);
+
+    if (bolgeInput) {
       bolgeInput.readOnly = false;
-
-      // Sabit metni kaldır (varsa değiştirmeden bırak)
-      if (ilSelect.value === sabitMetin) ilSelect.value = "";
-      if (osbSelect.value === sabitMetin) osbSelect.value = "";
-      if (bolgeInput.value === sabitMetin) bolgeInput.value = "";
-
-      // Program türü kilitlenir
-      programSelect.readOnly = true;
-      programSelect.style.pointerEvents = "none";
-      programSelect.classList.add("bg-light");
-
-      // Yatırım türleri açılır
-      tur1.readOnly = false;
-      tur2.readOnly = false;
-      tur1.style.pointerEvents = "auto";
-      tur2.style.pointerEvents = "auto";
-      tur1.classList.remove("bg-light");
-      tur2.classList.remove("bg-light");
-
-      // Oranların klasik hesapla güncellenmesi
-      katkiInput.value = "";
-      vergiInput.value = "";
-      digerInput.value = "";
-
-      if (typeof setBolge === 'function') setBolge();
-      if (typeof setOranlar === 'function') setOranlar();
+      bolgeInput.classList.remove("bg-light");
     }
+
+    // Program türü kilit
+    programSelect.readOnly = true;
+    programSelect.style.pointerEvents = "none";
+    programSelect.classList.add("bg-light");
+
+    [tur1, tur2].forEach(el => {
+      if (!el) return;
+      el.readOnly = false;
+      el.style.pointerEvents = "auto";
+      el.classList.remove("bg-light");
+    });
+
+    safeSet("katki_orani", 0);
+    safeSet("vergi_orani", 0);
+    safeSet("diger_oran", 0);
+
+    if (typeof setBolge === 'function') setBolge();
+    if (typeof setOranlar === 'function') setOranlar();
 
     toggleInvestmentIncomeInputs();
   };
@@ -1245,8 +1347,6 @@
 
 
 
-  // updateProgress(): İlerleme çubuğunu ve mevcut aşama sayısını günceller. 
-  // Geçerli aşamaya göre progress bar genişliğini ve "Aşama X / Y" göstergesini senkronize eder.
   function updateProgress(step) {
     const progressBar = document.getElementById("progressBar");
     const currentStageText = document.getElementById("current-stage-text"); // current-stage-text id'li span'i doğru al
@@ -1261,57 +1361,73 @@
 
 
   function _updateStepDisplay(stepNum) {
+
+    // 1) Step görünürlüğü yönetimi
     ALL_STEPS_IDS.forEach((id, idx) => {
       const el = document.getElementById(id);
       if (!el) return;
 
-      // aktif step
-      if (idx + 1 === stepNum) {
-        el.classList.remove("hidden-step");
-      }
-      // pasif step
-      else {
-        el.classList.add("hidden-step");
-      }
+      if (idx + 1 === stepNum) el.classList.remove("hidden-step");
+      else el.classList.add("hidden-step");
     });
 
+    // 2) Progress bar güncelle
     updateProgress(stepNum);
+
+    // 3) Son step kaydı (geri dönüşte restore için)
     sessionStorage.setItem('last_step', stepNum);
 
-    // Step-specific triggers
+    const karar = document.getElementById("karar")?.value || "";
+
+    // ======================================================
+    //   STEP-BASED TRIGGERLAR — 9903 KONTROLÜ EKLENDİ
+    // ======================================================
+
+    // ---- STEP 2: Bölge ve oranlar (9903 DEĞİLSE!)
     if (stepNum === 2) {
-      setBolge();
-      setOranlar();
+      if (karar !== "2025/9903") {
+        setBolge();
+        setOranlar();
+      }
     }
-    else if (stepNum === 4) {
+
+    // ---- STEP 4: Önceki katkı + endeks hesaplamaları
+    if (stepNum === 4) {
       hesaplaOncekiKatkiTutari();
       hesaplaKalanVeEndeks();
     }
-    else if (stepNum === 6) {
-      toggleDetailedProfitInput();
+
+    // ---- STEP 6: Detailed Profit toggle, hidden input eşitleme
+    if (stepNum === 6) {
+
+      // IMask + değerler hazırlandıktan sonra çağır
+      setTimeout(() => {
+        if (typeof toggleDetailedProfitInput === "function") {
+          toggleDetailedProfitInput();
+        }
+      }, 50);
 
       const belgeNoInput = document.querySelector('input[name="belge_no"]');
       const belgeTarihiInput = document.querySelector('input[name="belge_tarihi"]');
       const bolgeInput = document.getElementById('bolge');
 
-      if (belgeNoInput) {
-        const h = document.querySelector('input[name="belge_no_hidden"]');
-        if (h) h.value = belgeNoInput.value;
-      }
-      if (belgeTarihiInput) {
-        const h = document.querySelector('input[name="belge_tarihi_hidden"]');
-        if (h) h.value = belgeTarihiInput.value;
-      }
-      if (bolgeInput) {
-        const h = document.getElementById('bolge_hidden');
-        if (h) h.value = bolgeInput.value;
-      }
+      const h1 = document.querySelector('input[name="belge_no_hidden"]');
+      if (h1 && belgeNoInput) h1.value = belgeNoInput.value;
+
+      const h2 = document.querySelector('input[name="belge_tarihi_hidden"]');
+      if (h2 && belgeTarihiInput) h2.value = belgeTarihiInput.value;
+
+      const h3 = document.getElementById('bolge_hidden');
+      if (h3 && bolgeInput) h3.value = bolgeInput.value;
     }
 
-    CURRENT_STEP = stepNum;
-
+    // Değişik bilgi ikonlarını blink et (isteğe bağlı)
     if (typeof blinkAllInfoIcons === "function") blinkAllInfoIcons();
+
+    // Global CURRENT_STEP güncelle
+    CURRENT_STEP = stepNum;
   }
+
 
 
 
@@ -1952,18 +2068,21 @@
     console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
 
     const safe = (x) => (isNaN(x) ? 0 : x);
-    const val = (id) => safe(parseFormattedNumber(document.getElementById(id)?.value));
+
+    const val = (id) => safe(getVal(id));
 
     // 1️⃣ Girdiler
     let yatirimKazanci = 0;
-    const yatirimKazancInput = document.getElementById("yatirimdan_elde_edilen_kazanc");
-    const tevsiKazancInput = document.getElementById("tevsi_yatirim_kazanci");
 
-    if (yatirimKazancInput && parseFormattedNumber(yatirimKazancInput.value) > 0) {
+
+
+    if (getVal("yatirimdan_elde_edilen_kazanc") > 0) {
       yatirimKazanci = val("yatirimdan_elde_edilen_kazanc");
-    } else if (tevsiKazancInput && parseFormattedNumber(tevsiKazancInput.value) > 0) {
+
+    } else if (getVal("tevsi_yatirim_kazanci") > 0) {
       yatirimKazanci = val("tevsi_yatirim_kazanci");
     }
+
 
     const digerKazanc = val("kv_matrah");
 
@@ -1978,9 +2097,9 @@
 
     const toplamYatirim = val("toplam_tutar");
     const harcamaYatirim = val("toplam_harcama_tutari");
-    const katkiOrani = val("katki_orani") / 100;
-    const vergiIndirimOrani = val("vergi_orani") / 100;
-    const digerOran = val("diger_oran") / 100;
+    const katkiOrani = val("katki_orani");
+    const vergiIndirimOrani = val("vergi_orani");
+    const digerOran = val("diger_oran");
     const oncekiToplamKatki = val("onceki_katki_tutari");
 
     // 2️⃣ KV oranları
@@ -2024,7 +2143,8 @@
     // 5️⃣ Katkı tabanları
     const toplamKatki9903 = toplamYatirim * katkiOrani;
     const hakEdilenKatki9903 = harcamaYatirim * katkiOrani;
-    const ustSinirDiger9903 = toplamKatki9903 * digerOran;
+    const digerOranFraction = digerOran > 1 ? digerOran / 100 : digerOran;
+    const ustSinirDiger9903 = toplamKatki9903 * digerOranFraction;
     const digerKullanilabilir9903 = Math.min(hakEdilenKatki9903, ustSinirDiger9903);
 
     // 6️⃣ Hesap dönemi farkı
@@ -2144,9 +2264,11 @@
   }
 
 
+
   function hesaplaKatkiTutari() {
     const karar = document.getElementById("karar")?.value;
 
+    // 1) 9903 Kararı → özel fonksiyon çalışır
     if (karar === "2025/9903") {
       if (typeof hesaplaKatkiTutari9903 === "function") {
         hesaplaKatkiTutari9903();
@@ -2154,28 +2276,23 @@
       return;
     }
 
-    const toplamInput = document.getElementById("toplam_tutar");
-    const oranInput = document.getElementById("katki_orani");
-    const outputId = "katki_tutari";
+    // 2) Girdiler
+    const toplam = getVal("toplam_tutar");
+    const oran = getVal("katki_orani");  // ← Hata düzeltilmiş
 
-    if (!toplamInput || !oranInput) {
-      safeSet(outputId, 0);
+    // 3) Geçersiz Kontrol
+    if (isNaN(toplam) || isNaN(oran)) {
+      safeSet("katki_tutari", 0);
       return;
     }
 
-    const toplam = parseFormattedNumber(toplamInput.value);
-    const oran = parseFormattedNumber(oranInput.value);
+    // 4) Hesaplama
+    const tutar = toplam * oran;
 
-    const invalid = (v) => v === null || isNaN(v) || v === undefined;
+    // 5) Sonucu yaz
+    safeSet("katki_tutari", tutar);
 
-    if (invalid(toplam) || invalid(oran)) {
-      safeSet(outputId, 0);
-      return;
-    }
-
-    const tutar = (toplam * oran) / 100;
-    safeSet(outputId, tutar);
-
+    // 6) Bağlı fonksiyonlar
     if (typeof hesaplaDigerKatkiTutari === "function") hesaplaDigerKatkiTutari();
     if (typeof hesaplaFiiliKatkiTutari === "function") hesaplaFiiliKatkiTutari();
     if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
@@ -2184,130 +2301,43 @@
 
 
 
-  function hesaplaDigerKatkiTutari() {
-    // 9903 ise — özel hesaplamaya geç
-    if (document.getElementById("karar")?.value === "2025/9903") {
-      hesaplaKatkiTutari9903();
-      return;
-    }
-
-    const katki = parseFormattedNumber(document.getElementById("katki_tutari")?.value);
-    const digerOranText = document.getElementById("diger_oran")?.value || "";
-    const digerOran = parseFormattedNumber(digerOranText);
-    const input = document.getElementById("diger_katki_tutari");
-
-    // 1️⃣ Normal sayı hesabı
-    if (!isNaN(katki) && !isNaN(digerOran)) {
-
-      // Eğer mask daha önce kaldırılmışsa, maskeyi geri yükle
-      if (!maskMap["diger_katki_tutari"]) {
-        maskMap["diger_katki_tutari"] = IMask(input, {
-          mask: Number,
-          scale: 2,
-          thousandsSeparator: ".",
-          radix: ",",
-          mapToRadix: ["."],
-          lazy: false  // 🔥 CRITICAL FIX — event fırlatma sorununu engeller
-        });
-      }
-
-      const sonuc = (katki * digerOran) / 100;
-      safeSet("diger_katki_tutari", sonuc);
-      return;
-    }
-
-    // 2️⃣ “İşletme Döneminde Hesaplanmaz”
-    if (digerOranText.includes("İŞLETME DÖNEMİNDE HESAPLANMAZ")) {
-
-      // Maskeyi kaldır
-      if (maskMap["diger_katki_tutari"]) {
-        maskMap["diger_katki_tutari"].destroy();
-        delete maskMap["diger_katki_tutari"];
-      }
-
-      // Metni serbestçe yaz
-      input.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
-      return;
-    }
-
-    // 3️⃣ Boş / geçersiz durumda 0 yaz
-    if (!maskMap["diger_katki_tutari"]) {
-      maskMap["diger_katki_tutari"] = IMask(input, {
-        mask: Number,
-        scale: 2,
-        thousandsSeparator: ".",
-        radix: ",",
-        mapToRadix: ["."],
-        lazy: false  // 🔥 Tekrar aynı düzeltme
-      });
-    }
-
-    safeSet("diger_katki_tutari", 0);
-  }
-
 
 
 
   function hesaplaDigerKatkiTutari() {
-    // 9903 ise — özel hesaplamaya geç
+
+    // 1) 9903 → klasik hesaplama yok
     if (document.getElementById("karar")?.value === "2025/9903") {
-      hesaplaKatkiTutari9903();
+      if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
       return;
     }
 
-    const katki = parseFormattedNumber(document.getElementById("katki_tutari")?.value);
-    const digerOranText = document.getElementById("diger_oran")?.value || "";
-    const digerOran = parseFormattedNumber(digerOranText);
-    const input = document.getElementById("diger_katki_tutari");
+    // 2) Oran metinsel engel kontrolü
+    const digerOranRaw = document.getElementById("diger_oran")?.value || "";
 
-    // 1️⃣ Normal sayı hesabı
-    if (!isNaN(katki) && !isNaN(digerOran)) {
-
-      // Eğer mask daha önce kaldırılmışsa, maskeyi geri yükle
-      if (!maskMap["diger_katki_tutari"]) {
-        maskMap["diger_katki_tutari"] = IMask(input, {
-          mask: Number,
-          scale: 2,
-          thousandsSeparator: ".",
-          radix: ",",
-          mapToRadix: ["."],
-          lazy: false
-        });
-      }
-
-      const sonuc = (katki * digerOran) / 100;
-      safeSet("diger_katki_tutari", sonuc);
+    if (digerOranRaw.includes("HESAPLANMAZ") || digerOranRaw.includes("YOK")) {
+      const input = document.getElementById("diger_katki_tutari");
+      if (input) input.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
       return;
     }
 
-    // 2️⃣ “İşletme Döneminde Hesaplanmaz”
-    if (digerOranText.includes("İŞLETME DÖNEMİNDE HESAPLANMAZ")) {
+    // 3) Sayısal değerler
+    const katki = getVal("katki_tutari");
+    const digerOran = getVal("diger_oran");
 
-      // Maskeyi kaldır
-      if (maskMap["diger_katki_tutari"]) {
-        maskMap["diger_katki_tutari"].destroy();
-        delete maskMap["diger_katki_tutari"];
-      }
-
-      // Metni serbestçe yaz
-      input.value = "İŞLETME DÖNEMİNDE HESAPLANMAZ";
+    if (isNaN(katki) || isNaN(digerOran)) {
+      safeSet("diger_katki_tutari", 0);
       return;
     }
 
-    // 3️⃣ Boş / geçersiz durumda 0 yaz
-    if (!maskMap["diger_katki_tutari"]) {
-      maskMap["diger_katki_tutari"] = IMask(input, {
-        mask: Number,
-        scale: 2,
-        thousandsSeparator: ".",
-        radix: ",",
-        mapToRadix: ["."],
-        lazy: false
-      });
-    }
+    // 4) Hesap
+    const sonuc = katki * digerOran / 100;
 
-    safeSet("diger_katki_tutari", 0);
+    // 5) Sonuç yaz
+    safeSet("diger_katki_tutari", sonuc);
   }
+
+
 
 
 
@@ -2320,56 +2350,43 @@
       return;
     }
 
-    const karar = document.getElementById("karar")?.value;
-    const toplamHarcamaInput = document.getElementById("toplam_harcama_tutari");
-    const katkiOraniInput = document.getElementById("katki_orani");
+    // 1) Değerleri IMask uyumlu olarak oku
+    const toplamHarcama = getVal("toplam_harcama_tutari");
+    const oran = getVal("katki_orani");
 
-    if (!toplamHarcamaInput || !katkiOraniInput) return;
-
-    const toplamHarcama = parseFormattedNumber(toplamHarcamaInput.value);
-    const oran = parseFormattedNumber(katkiOraniInput.value);
-
-    // ❗ NaN kontrolü — 0'a asla yanlış işlem yapılmaz
+    // 2) Geçersiz kontrol
     if (isNaN(toplamHarcama) || isNaN(oran)) {
       safeSet("fiili_katki_tutari", 0);
       return;
     }
 
-    // 🧮 Fiili Katkı = Harcama × Oran / 100
-    const fiiliKatki = (toplamHarcama * oran) / 100;
+    // 3) Hesap
+    const fiiliKatki = toplamHarcama * oran;
 
-    // ⛑ IMask uyumlu şekilde yaz
+    // 4) Sonucu yaz
     safeSet("fiili_katki_tutari", fiiliKatki);
-
-    console.log(
-      `📊 [${karar}] Fiili Katkı Hesaplandı: ${formatTL(toplamHarcama)} × ${oran}% = ${formatTL(fiiliKatki)}`
-    );
   }
 
 
 
 
-
   function hesaplaOncekiKatkiTutari() {
+
     // 9903 modunda bu hesaplama yapılmaz
     if (document.getElementById("karar")?.value === "2025/9903") {
       return;
     }
 
-    const oncekiYatirimInput = document.getElementById("onceki_yatirim_katki_tutari");
-    const oncekiDigerInput = document.getElementById("onceki_diger_katki_tutari");
+    const y = getVal("onceki_yatirim_katki_tutari");
+    const d = getVal("onceki_diger_katki_tutari");
 
-    if (!oncekiYatirimInput || !oncekiDigerInput) return;
+    const oncekiToplam = (isNaN(y) ? 0 : y) + (isNaN(d) ? 0 : d);
 
-    const oncekiYatirim = parseFormattedNumber(oncekiYatirimInput.value);
-    const oncekiDiger = parseFormattedNumber(oncekiDigerInput.value);
+    safeSet("onceki_katki_tutari", oncekiToplam);
 
-    const y = isNaN(oncekiYatirim) ? 0 : oncekiYatirim;
-    const d = isNaN(oncekiDiger) ? 0 : oncekiDiger;
-
-    safeSet("onceki_katki_tutari", y + d);
-
-    hesaplaKalanVeEndeks();
+    if (typeof hesaplaKalanVeEndeks === "function") {
+      hesaplaKalanVeEndeks();
+    }
   }
 
 
@@ -2455,16 +2472,16 @@
 
 
   function calculateKVMatrah() {
-    const tRaw = parseFormattedNumber(document.getElementById('ticari_bilanco_kari')?.value);
-    const kRaw = parseFormattedNumber(document.getElementById('kkeg')?.value);
 
-    const t = isNaN(tRaw) ? 0 : tRaw;
-    const k = isNaN(kRaw) ? 0 : kRaw;
+    // getVal → hem masked hem unmasked alanları otomatik çözer
+    const t = getVal("ticari_bilanco_kari");
+    const k = getVal("kkeg");
 
-    const val = t + k;
+    const toplam = (isNaN(t) ? 0 : t) + (isNaN(k) ? 0 : k);
 
-    safeSet("kv_matrah", val);
+    safeSet("kv_matrah", toplam);
   }
+
 
   function updateIKVAmountAndRate(ikvMatrah, ihrPct, imlPct, digPct, vergiIndirimOraniFraction) {
 
@@ -2533,7 +2550,6 @@
 
 
 
-
   function calculateCariAndNext() {
     const karar = document.getElementById("karar")?.value;
 
@@ -2545,52 +2561,38 @@
 
       if (typeof hesaplaKatkiTutari9903 === "function") {
         hesaplaKatkiTutari9903({ advance: true });
-      } else {
-        console.warn("⚠️ hesaplaKatkiTutari9903() bulunamadı!");
       }
-
-      return; // klasik hesaplama yok
+      return;
     }
 
     // ============================================================
-    // 🟦 3305 / 15199 KLASİK AKIŞ BAŞLANGICI
+    // 🟦 KLASİK AKIŞ
     // ============================================================
     console.log("--- calculateCariAndNext() BAŞLADI ---");
 
-    const vizeDurumuTercihi =
-      document.getElementById("vize_durumu")?.value || "";
+    const vizeDurumuTercihi = document.getElementById("vize_durumu")?.value || "";
+    const digerKazancUygulama = sessionStorage.getItem("diger_kazanc_uygulama") || "hayir";
 
-    const digerKazancUygulama =
-      sessionStorage.getItem("diger_kazanc_uygulama") || "hayir";
-
+    // sessionStorage'taki rakam da formatlı olabilir → getVal yerine manuel temizliyoruz
     const kucukOlanDigerFaaliyetTutari =
-      parseFormattedNumber(sessionStorage.getItem("kucuk_olan_diger_faaliyet")) || 0;
+      Number((sessionStorage.getItem("kucuk_olan_diger_faaliyet") || "0")
+        .replace(/\./g, "")
+        .replace(",", ".")) || 0;
 
     // ------------------------------------------------------------
-    // YATIRIM KAZANCI / TEVSİ KAZANCI OKUMA
+    // YATIRIM/TEVSİ KAZANÇ OKUMA (getVal)
     // ------------------------------------------------------------
-    let tevsiYatirimKazanci = 0;
+    const tevsiVal = getVal("tevsi_yatirim_kazanci");
+    const klasikVal = getVal("yatirimdan_elde_edilen_kazanc");
+    let tevsiYatirimKazanci = tevsiVal > 0 ? tevsiVal : klasikVal;
 
-    const tevsiEl = document.getElementById("tevsi_yatirim_kazanci");
-    const klasikEl = document.getElementById("yatirimdan_elde_edilen_kazanc");
+    tevsiYatirimKazanci = Math.max(0, tevsiYatirimKazanci);
 
-    const tevsiVal = tevsiEl ? parseFormattedNumber(tevsiEl.value) : 0;
-    const klasikVal = klasikEl ? parseFormattedNumber(klasikEl.value) : 0;
-
-    if (tevsiVal > 0) tevsiYatirimKazanci = tevsiVal;
-    else if (klasikVal > 0) tevsiYatirimKazanci = klasikVal;
-
-    tevsiYatirimKazanci = Math.max(0, tevsiYatirimKazanci); // negatif önleme
-
-    const vergiIndirimOrani =
-      (parseFormattedNumber(document.getElementById("vergi_orani").value) || 0) /
-      100;
-
-    const oncekiToplamKatki =
-      parseFormattedNumber(document.getElementById("onceki_katki_tutari").value) || 0;
+    const vergiIndirimOrani = getVal("vergi_orani") / 100;
+    const oncekiToplamKatki = getVal("onceki_katki_tutari");
 
     // ------------------------------------------------------------
-    // ORAN KAYNAKLARI (Ayrıntılı tablodan veya manuel girişten)
+    // ORANLAR
     // ------------------------------------------------------------
     const useDetailedRatios =
       document.getElementById("useDetailedProfitRatios")?.checked || false;
@@ -2600,41 +2602,14 @@
     let digerOraniFinal = 0;
 
     if (useDetailedRatios) {
-      ihracatOraniFinal =
-        parseFloat(
-          document
-            .getElementById("ratio_ihracat")
-            .textContent.replace("%", "")
-            .replace(",", ".")
-        ) /
-        100 || 0;
-
-      imalatOraniFinal =
-        parseFloat(
-          document
-            .getElementById("ratio_imalat")
-            .textContent.replace("%", "")
-            .replace(",", ".")
-        ) /
-        100 || 0;
-
-      digerOraniFinal =
-        parseFloat(
-          document
-            .getElementById("ratio_diger")
-            .textContent.replace("%", "")
-            .replace(",", ".")
-        ) /
-        100 || 0;
+      ihracatOraniFinal = (Number(document.getElementById("ratio_ihracat").textContent.replace("%", "").replace(",", ".")) || 0) / 100;
+      imalatOraniFinal = (Number(document.getElementById("ratio_imalat").textContent.replace("%", "").replace(",", ".")) || 0) / 100;
+      digerOraniFinal = (Number(document.getElementById("ratio_diger").textContent.replace("%", "").replace(",", ".")) || 0) / 100;
     } else {
-      const brutSatis =
-        parseFormattedNumber(document.getElementById("brut_satis").value) || 0;
-      const ihracatSatis =
-        parseFormattedNumber(document.getElementById("ihracat").value) || 0;
-      const imalatSatis =
-        parseFormattedNumber(document.getElementById("imalat").value) || 0;
-      const digerSatis =
-        parseFormattedNumber(document.getElementById("diger_faaliyet").value) || 0;
+      const brutSatis = getVal("brut_satis");
+      const ihracatSatis = getVal("ihracat");
+      const imalatSatis = getVal("imalat");
+      const digerSatis = getVal("diger_faaliyet");
 
       if (brutSatis > 0) {
         ihracatOraniFinal = ihracatSatis / brutSatis;
@@ -2643,9 +2618,6 @@
       }
     }
 
-    // ------------------------------------------------------------
-    // KURUMLAR VERGİSİ ORANLARI
-    // ------------------------------------------------------------
     const kvOranIhracat = 0.20;
     const kvOranImalat = 0.24;
     const kvOranDiger = 0.25;
@@ -2654,12 +2626,11 @@
     let cariDigerKatkisi = 0;
     let indirimliKurumlarVergisiMatrahi = 0;
 
-    // ------------------------------------------------------------
-    // SENARYOLAR
-    // ------------------------------------------------------------
-
-    // 🟩 1) Tamamlama Vizesi → EVET (İşletme Dönemi)
+    // ============================================================
+    // 🟩 1) İşletme Dönemi — EVET
+    // ============================================================
     if (vizeDurumuTercihi.includes("Evet")) {
+
       indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
 
       cariYatirimKatkisi =
@@ -2672,28 +2643,31 @@
       cariDigerKatkisi = 0;
     }
 
-    // 🟨 2) Tamamlama Vizesi → HAYIR (Yatırım Dönemi)
+    // ============================================================
+    // 🟨 2) Yatırım Dönemi — HAYIR
+    // ============================================================
     else if (vizeDurumuTercihi.includes("Hayır")) {
-      // 🟨 Alt Senaryo A → Diğer faaliyetlerden yararlanılacak
+
+      // -------------------------
+      // A) Diğer faaliyet kullanılacak
+      // -------------------------
       if (digerKazancUygulama === "evet") {
-        const kvMatrah =
-          parseFormattedNumber(document.getElementById("kv_matrah")?.value) || 0;
 
-        const kalanKatki =
-          parseFormattedNumber(document.getElementById("kalan_katki_tutari")?.value) || 0;
+        const kvMatrah = getVal("kv_matrah");
+        const kalanKatki = getVal("kalan_katki_tutari");
 
-        const mevzuatTavani = kucukOlanDigerFaaliyetTutari || 0;
+        const mevzuatTavani = kucukOlanDigerFaaliyetTutari;
 
         const effRate =
-          ihracatOraniFinal * (0.20 * (1 - vergiIndirimOrani)) +
-          imalatOraniFinal * (0.24 * (1 - vergiIndirimOrani)) +
-          digerOraniFinal * (0.25 * (1 - vergiIndirimOrani));
+          ihracatOraniFinal * kvOranIhracat * (1 - vergiIndirimOrani) +
+          imalatOraniFinal * kvOranImalat * (1 - vergiIndirimOrani) +
+          digerOraniFinal * kvOranDiger * (1 - vergiIndirimOrani);
 
         const kvTavanVergi = effRate > 0 ? kvMatrah * effRate : 0;
 
-        const cariDigerKatkisiHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
+        const cariDigerHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
 
-        cariDigerKatkisi = Math.max(0, cariDigerKatkisiHesap);
+        cariDigerKatkisi = Math.max(0, cariDigerHesap);
 
         indirimliKurumlarVergisiMatrahi =
           effRate > 0 ? cariDigerKatkisi / effRate : 0;
@@ -2701,7 +2675,9 @@
         cariYatirimKatkisi = 0;
       }
 
-      // 🟨 Alt Senaryo B → Diğer faaliyetlerden yararlanılmayacak
+      // -------------------------
+      // B) Diğer faaliyet kullanılmayacak
+      // -------------------------
       else {
         indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
 
@@ -2717,7 +2693,7 @@
     }
 
     // ============================================================
-    // 📌 SONUÇ YAZIMLARI — SAFESET zorunlu
+    // 🔥 SONUÇLAR
     // ============================================================
     const cariToplamKatki = cariYatirimKatkisi + cariDigerKatkisi;
     const genelToplamKatki = oncekiToplamKatki + cariToplamKatki;
@@ -2728,7 +2704,6 @@
     safeSet("genel_toplam_katki", genelToplamKatki);
     safeSet("indirimli_matrah", indirimliKurumlarVergisiMatrahi);
 
-    // KV Hesabı
     updateIKVAmountAndRate(
       indirimliKurumlarVergisiMatrahi,
       ihracatOraniFinal,
@@ -3607,33 +3582,6 @@
 
 
 
-  function restoreFormFromSession() {
-    RESTORE_MODE = true;
-
-    document.querySelectorAll("input, select, textarea").forEach(el => {
-      if (el.type === "file") return;
-      const name = el.name || el.id;
-      if (!name) return;
-
-      const saved = sessionStorage.getItem(`form_${name}`);
-      if (saved !== null) {
-        el.value = saved;
-      }
-    });
-
-    // 🔄 Gecikmeli tetiklemeler (MASK → ORANLAR → HESAPLAR)
-    setTimeout(() => {
-      if (typeof loadAllMasks === "function") loadAllMasks();
-      setBolge();
-      setOranlar();
-      calculateRatios();
-      calculateKVMatrah();
-      calculateTevsiKazancAutomatically();
-
-      RESTORE_MODE = false;  // ✔ doğru yer
-    }, 300);
-  }
-
 
 
 
@@ -3710,7 +3658,7 @@
       if (!kararSelect) return;
 
       kararSelect.addEventListener("change", handleKarar9903);
-      handleKarar9903();
+
 
       if (ilSelect) {
         ilSelect.addEventListener("change", () => {
@@ -3730,7 +3678,7 @@
         const program = programSelect.value;
 
         if (karar === "2025/9903") {
-          katkiInput.value = katkilar9903?.[program] || 0;
+          safeSet("katki_orani", katkilar9903?.[program] || 0);
         } else if (typeof setOranlar === "function") {
           setOranlar();
         }
@@ -3796,58 +3744,106 @@
         const field = document.getElementById(id);
         if (!field) return;
 
-        try {
-          const mask = IMask(field, {
-            mask: Number,
-            scale: 2,
-            thousandsSeparator: '.',
-            radix: ',',
-            mapToRadix: [','],
-            normalizeZeros: false,
-            padFractionalZeros: false
-          });
+        const type = idConfig[id];
 
-          maskMap[id] = mask;
+        /* ============================================================
+           1) YÜZDE ALANLARI MASKESİ (%)
+           ============================================================ */
+        if (type === "percent") {
+          try {
+            const mask = IMask(field, {
+              mask: Number,
+              scale: 2,
+              thousandsSeparator: '.',
+              radix: ',',
+              mapToRadix: [','],
+              padFractionalZeros: true,
+              normalizeZeros: true,
+              min: 0,
+              max: 100
+            });
 
-          field.addEventListener("input", () => {
-            userTyped[id] = true;
-          });
+            maskMap[id] = mask;
 
-          mask.on("complete", () => {
-            if (RESTORE_MODE) return;
-            if (programmaticMaskUpdate) return;
-            if (!userTyped[id]) return;
+            field.addEventListener("input", () => (userTyped[id] = true));
 
-            const karar = refs.kararSelect?.value;
-            const type = idConfig[id];
+            mask.on("complete", () => {
+              if (RESTORE_MODE) return;
+              if (programmaticMaskUpdate) return;
+            });
 
-            if (type === "none") return;
+          } catch (err) {
+            console.warn(`Percent IMask oluşturulamadı (#${id}):`, err);
+          }
 
-            if (karar === "2025/9903") {
-              if (type === "katki") hesaplaKatkiTutari9903();
-              if (type === "ratios") calculateRatios();
-              if (type === "kv") calculateKVMatrah();
-              return;
-            }
-
-            if (type === "katki") {
-              hesaplaKatkiTutari();
-              hesaplaDigerKatkiTutari();
-              hesaplaFiiliKatkiTutari();
-              hesaplaOncekiKatkiTutari();
-              hesaplaKalanVeEndeks();
-            }
-
-            else if (type === "ratios") calculateRatios();
-            else if (type === "tevsi") calculateTevsiKazancAutomatically();
-            else if (type === "kv") calculateKVMatrah();
-          });
-
-        } catch (err) {
-          console.warn(`IMask oluşturulamadı (#${id}):`, err);
+          return; // ❗ Yüzde alanları başka maskeye girmesin
         }
+
+        /* ============================================================
+           2) PARA ALANLARI MASKESİ (TL)
+           ============================================================ */
+        if (type !== "none") {
+          try {
+            const mask = IMask(field, {
+              mask: Number,
+              scale: 2,
+              thousandsSeparator: '.',
+              radix: ',',
+              mapToRadix: [','],
+              normalizeZeros: false,
+              padFractionalZeros: false
+            });
+
+            maskMap[id] = mask;
+
+            field.addEventListener("input", () => {
+              userTyped[id] = true;
+            });
+
+            mask.on("complete", () => {
+              if (RESTORE_MODE) return;
+              if (programmaticMaskUpdate) return;
+              if (!userTyped[id]) return;
+
+              const karar = refs.kararSelect?.value;
+              const t = type;
+
+              if (t === "none") return;
+
+              if (karar === "2025/9903") {
+                if (t === "katki") hesaplaKatkiTutari9903();
+                if (t === "ratios") calculateRatios();
+                if (t === "kv") calculateKVMatrah();
+                return;
+              }
+
+              // klasik mod
+              if (t === "katki") {
+                hesaplaKatkiTutari();
+                hesaplaDigerKatkiTutari();
+                hesaplaFiiliKatkiTutari();
+                hesaplaOncekiKatkiTutari();
+                hesaplaKalanVeEndeks();
+              } else if (t === "ratios") calculateRatios();
+              else if (t === "tevsi") calculateTevsiKazancAutomatically();
+              else if (t === "kv") calculateKVMatrah();
+            });
+
+          } catch (err) {
+            console.warn(`IMask oluşturulamadı (#${id}):`, err);
+          }
+        }
+
       });
+
+      // 9903 modu restore sonrası oranları set etsin
+      setTimeout(() => {
+        if (typeof handleKarar9903 === "function") {
+          handleKarar9903();
+        }
+      }, 50);
     }
+
 
 
 
@@ -3856,6 +3852,7 @@
     // ============================================================
     function initRestoreSystem() {
 
+      // 1) input – select restore
       document.querySelectorAll("input, select, textarea").forEach(el => {
         if (el.type === "file") return;
         const name = el.name || el.id;
@@ -3863,6 +3860,7 @@
         if (saved !== null) el.value = saved;
       });
 
+      // 2) değişiklikleri kaydet
       document.querySelectorAll("input, select, textarea").forEach(el => {
         if (el.type === "file") return;
         el.addEventListener("input", () => {
@@ -3871,7 +3869,7 @@
         });
       });
 
-      // mukellef_bilgi → belge no & tarih restore
+      // 3) belge no & tarih restore
       const bNo = sessionStorage.getItem("belge_no");
       const bTarih = sessionStorage.getItem("belge_tarihi");
 
@@ -3888,7 +3886,15 @@
         sessionStorage.removeItem("belge_no");
         sessionStorage.removeItem("belge_tarihi");
       }
+
+      // 🔥 4) IMask restore sonrası MUTLAKA senkronize et
+      setTimeout(() => {
+        safeSet("katki_orani", getVal("katki_orani"));
+        safeSet("vergi_orani", getVal("vergi_orani"));
+        safeSet("diger_oran", getVal("diger_oran"));
+      }, 200);
     }
+
 
 
 
@@ -4059,13 +4065,12 @@
     toggleInvestmentIncomeInputs();
     ALL_STEPS_IDS.forEach(id => document.getElementById(id)?.classList.add("hidden-step"));
 
-    restoreFormFromSession();
+    initMaskSystem();
     initRestoreSystem();
     initDefaultValues();
     init9903Logic();
     initClassicLogic();
     initTevsiLogic();
-    initMaskSystem();
     initProfitTable();
     initCalculateButton();
     initFormSubmit();
@@ -4076,15 +4081,6 @@
   });
 
 
-
-  // ⏪ Kullanıcı geri tuşuyla dönmüşse son aşamaya otomatik dön
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted) {
-      restoreFormFromSession();
-      const lastStep = parseInt(sessionStorage.getItem('last_step') || '1');
-      _updateStepDisplay(lastStep);
-    }
-  });
 
 
   // Mevcut belge verisini forma bas (isteğe bağlı kısa yardımcılar)
