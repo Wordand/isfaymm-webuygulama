@@ -4556,6 +4556,10 @@ def asgari_istisna_api():
         return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
 
     
+    
+@app.route("/ceza")
+def ceza():
+    return render_template("ceza.html")
 
 # ✅ Uygulama çalıştırma kodu EN ALTA konur
 if __name__ == "__main__":

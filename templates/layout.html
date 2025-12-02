@@ -192,6 +192,11 @@
                 class="sidebar-link {% if request.path.startswith('/vergi_hesaplamalari') %}active{% endif %}">
                 <i class="bi bi-cash-coin sidebar-icon"></i> Vergi Hesaplamaları
             </a>
+            <a href="{{ url_for('ceza') }}"
+                class="sidebar-link {% if request.path.startswith('/ceza') %}active{% endif %}">
+                <i class="bi bi-exclamation-triangle sidebar-icon"></i>
+                <span class="sidebar-text">Vergi Cezaları</span>
+            </a>    
             <a href="{{ url_for('asgari') }}"
                 class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
                 <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi

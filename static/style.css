@@ -1548,3 +1548,110 @@ html {
 .swal2-container.swal2-top {
   z-index: 10000 !important;
 }
+
+
+
+
+<style>
+    table {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+    }
+
+    td,
+    th {
+        border: 1px solid #bfbfbf !important;
+    }
+
+    .degree-separator td {
+        border-top: 3px solid #999 !important;
+    }
+
+    .first-bent-cell {
+        border-top: 2px solid #999 !important;
+        border-left: 2px solid #999 !important;
+    }
+
+    /* Sütun genişlik ayarı */
+    .col-degree {
+        width: 150px;
+    }
+
+    .col-fail {
+        width: 45%;
+    }
+
+    /* daraltıldı */
+    .col-ceza {
+        width: 35%;
+    }
+
+    .ceza-inner-table {
+        width: 100%;
+        font-size: 0.92rem;
+        color: #c62828;
+    }
+
+    .ceza-inner-table td {
+        padding: 3px 6px;
+        vertical-align: middle;
+        border: none !important;
+    }
+
+    .ceza-title {
+        text-align: left;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    .ceza-amount {
+        text-align: right;
+        white-space: nowrap;
+        font-weight: 700;
+    }
+
+    /* Ceza sütununun daha geniş görünmesi için */
+    .ceza-col {
+        width: 330px !important;
+    }
+
+
+
+
+    .ozel-table td,
+    .ozel-table th {
+        border: 1px solid #bfbfbf !important;
+        vertical-align: top;
+        font-size: 0.90rem;
+        line-height: 1.4;
+    }
+
+    .ozel-table th {
+        background: #e3f1ff;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .ceza-cell {
+        text-align: right;
+        font-weight: 400 !important;
+        color: #c62828;
+        white-space: nowrap;
+        padding-right: 10px !important;
+    }
+
+    .ceza-cell strong {
+        font-weight: 700 !important;
+        /* Sadece strong kalın */
+    }
+
+    .ceza-cell em {
+        font-style: italic;
+        font-weight: 400 !important;
+    }
+
+    .fiil-title {
+        font-weight: 700;
+        color: #333;
+    }
+</style>
