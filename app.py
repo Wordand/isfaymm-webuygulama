@@ -4561,6 +4561,14 @@ def asgari_istisna_api():
 def ceza():
     return render_template("ceza.html")
 
+@app.route("/mevzuat")
+def mevzuat():
+    return render_template("mevzuat.html")
+
+@app.route("/indirim")
+def indirim():
+    return render_template("indirim.html")
+
 # ✅ Uygulama çalıştırma kodu EN ALTA konur
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1620,12 +1620,3 @@ def get_tesvik_kullanim_data(belge_no, yil, turu):
     
     
     
-
-@bp.route("/mevzuat", methods=["GET"])
-@login_required
-def mevzuat():
-    """
-    İndirimli Kurumlar Vergisi uygulamasına ilişkin mevzuat, kanun ve kararların
-    açıklandığı bilgi sayfası (statik bilgilendirme sayfası).
-    """
-    return render_template("indirimlikurumlar/mevzuat.html", title="İndirimli Kurumlar Vergisi Mevzuatı")

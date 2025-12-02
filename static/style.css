@@ -1656,12 +1656,19 @@ th {
 }
 
 
-
-.sticky-kategori-menu {
-    position: sticky;
-    top: 75px; /* navbar yüksekliği kadar */
-    z-index: 5000;
-    background: white;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
+/* İzah tablosu başlığı – açık yeşil */
+.izah-head th {
+    background-color: #d4edda !important;  /* Açık yeşil */
+    color: #155724 !important;             /* Koyu yeşil yazı */
+    font-weight: 700 !important;
+    border-color: #b2d8b2 !important;      /* Yumuşak yeşil kenarlık */
 }
+
+
+.hover-mevzuat:hover {
+    background-color: #c62828;
+    color: #fff !important;
+    transition: 0.25s ease;
+}
+
+

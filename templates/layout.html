@@ -153,7 +153,7 @@
 {# BODY ETİKETİNE KOŞULLU SINIF EKLENDİ #}
 
 <body
-    class="{% if not is_logged_in and (request.endpoint=='home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='contact') %}no-sidebar-layout{% endif %}">
+    class="{% if not is_logged_in and (request.endpoint=='home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='contact' or request.endpoint=='mevzuat' or request.endpoint=='indirim' or request.endpoint=='ceza') %}no-sidebar-layout{% endif %}">
 
     <!-- 🟦 YÜKLENİYOR EKRANI (İSFA) -->
     <div id="loading-screen">
@@ -192,11 +192,7 @@
                 class="sidebar-link {% if request.path.startswith('/vergi_hesaplamalari') %}active{% endif %}">
                 <i class="bi bi-cash-coin sidebar-icon"></i> Vergi Hesaplamaları
             </a>
-            <a href="{{ url_for('ceza') }}"
-                class="sidebar-link {% if request.path.startswith('/ceza') %}active{% endif %}">
-                <i class="bi bi-exclamation-triangle sidebar-icon"></i>
-                <span class="sidebar-text">Vergi Cezaları</span>
-            </a>    
+
             <a href="{{ url_for('asgari') }}"
                 class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
                 <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi
@@ -243,6 +239,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#about">Hakkımızda</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#team">Ekibimiz</a></li>
 
+
                     <li class="nav-item">
                         {% if not is_logged_in %}
                         <a class="nav-link" href="{{ url_for('home') }}#blog">Vergisel Haberler</a>
@@ -257,6 +254,13 @@
                         {% else %}
                         <a class="nav-link" href="{{ url_for('contact') }}">İletişim</a>
                         {% endif %}
+                    </li>
+
+                    <li class="nav-item ms-2">
+                        <a class="nav-link fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat"
+                            href="{{ url_for('mevzuat') }}">
+                            <i class="bi bi-book-half me-1"></i> Mevzuat
+                        </a>
                     </li>
 
                     {% if session.get('username', '').lower() == 'admin' %}

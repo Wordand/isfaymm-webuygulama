@@ -19,7 +19,8 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
 <section class="hero text-center position-relative overflow-hidden">
   <div class="hero-background">
-    <video autoplay muted playsinline class="hero-video">
+    <video autoplay muted playsinline preload="none" poster="{{ url_for('static', filename='images/hero-bg.jpg') }}"
+      class="hero-video">
       <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
       <source src="{{ url_for('static', filename='videos/hero-video.webm') }}" type="video/webm">
       <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Finansal Danışmanlık Arka Planı"
@@ -31,7 +32,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
       <span class="text-isfa">İSFA</span><br>
       YEMİNLİ MALİ MÜŞAVİRLİK
     </h1>
-    <p class="lead mb-4 text-white-75">
+    <p class="lead mb-4 text-white-50">
       İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi, vergi danışmanlığı ve inceleme
       danışmanlığında uzman ekibimizle yanınızdayız.
     </p>
@@ -749,44 +750,46 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
 {% block extra_scripts %}
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
 
-<script>
-  AOS.init({ duration: 800, once: true });
+<script defer>
+  document.addEventListener("DOMContentLoaded", function () {
+    AOS.init({ duration: 800, once: true });
 
-  // Sayı Sayaçları Animasyonu (Intersection Observer ile performans iyileştirmesi)
-  const counters = document.querySelectorAll('.counter');
-  const animateCounter = (entry) => {
-    if (entry.isIntersecting) {
-      const counter = entry.target;
-      counter.innerText = '0'; // Animasyondan önce sıfırla
-      const target = +counter.getAttribute('data-target');
-      const speed = 200; // Animasyon süresi (çerçeve veya iterasyon cinsinden)
-      const increment = target / speed;
+    // Sayı Sayaçları Animasyonu (Intersection Observer ile performans iyileştirmesi)
+    const counters = document.querySelectorAll('.counter');
+    const animateCounter = (entry) => {
+      if (entry.isIntersecting) {
+        const counter = entry.target;
+        counter.innerText = '0'; // Animasyondan önce sıfırla
+        const target = +counter.getAttribute('data-target');
+        const speed = 200; // Animasyon süresi (çerçeve veya iterasyon cinsinden)
+        const increment = target / speed;
 
-      let count = 0;
-      const updateCount = () => {
-        count += increment;
-        if (count < target) {
-          counter.innerText = Math.ceil(count);
-          requestAnimationFrame(updateCount); // Tarayıcının render döngüsüyle senkronize
-        } else {
-          counter.innerText = target;
-        }
-      };
-      requestAnimationFrame(updateCount);
-      observer.unobserve(counter); // Animasyon bittikten sonra gözlemlemeyi durdur
-    }
-  };
+        let count = 0;
+        const updateCount = () => {
+          count += increment;
+          if (count < target) {
+            counter.innerText = Math.ceil(count);
+            requestAnimationFrame(updateCount); // Tarayıcının render döngüsüyle senkronize
+          } else {
+            counter.innerText = target;
+          }
+        };
+        requestAnimationFrame(updateCount);
+        observer.unobserve(counter); // Animasyon bittikten sonra gözlemlemeyi durdur
+      }
+    };
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(animateCounter);
-  }, {
-    threshold: 0.5 // Elementin %50'si görünür olduğunda tetikle
-  });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(animateCounter);
+    }, {
+      threshold: 0.5 // Elementin %50'si görünür olduğunda tetikle
+    });
 
-  counters.forEach(counter => {
-    observer.observe(counter);
+    counters.forEach(counter => {
+      observer.observe(counter);
+    });
   });
 </script>
 {% endblock %}
