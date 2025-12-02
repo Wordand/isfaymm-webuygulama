@@ -1552,106 +1552,116 @@ html {
 
 
 
-<style>
-    table {
-        border-collapse: separate !important;
-        border-spacing: 0 !important;
-    }
 
-    td,
-    th {
-        border: 1px solid #bfbfbf !important;
-    }
+table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
 
-    .degree-separator td {
-        border-top: 3px solid #999 !important;
-    }
+td,
+th {
+    border: 1px solid #bfbfbf !important;
+}
 
-    .first-bent-cell {
-        border-top: 2px solid #999 !important;
-        border-left: 2px solid #999 !important;
-    }
+.degree-separator td {
+    border-top: 3px solid #999 !important;
+}
 
-    /* Sütun genişlik ayarı */
-    .col-degree {
-        width: 150px;
-    }
+.first-bent-cell {
+    border-top: 2px solid #999 !important;
+    border-left: 2px solid #999 !important;
+}
 
-    .col-fail {
-        width: 45%;
-    }
+/* Sütun genişlik ayarı */
+.col-degree {
+    width: 150px;
+}
 
-    /* daraltıldı */
-    .col-ceza {
-        width: 35%;
-    }
+.col-fail {
+    width: 45%;
+}
 
-    .ceza-inner-table {
-        width: 100%;
-        font-size: 0.92rem;
-        color: #c62828;
-    }
+/* daraltıldı */
+.col-ceza {
+    width: 35%;
+}
 
-    .ceza-inner-table td {
-        padding: 3px 6px;
-        vertical-align: middle;
-        border: none !important;
-    }
+.ceza-inner-table {
+    width: 100%;
+    font-size: 0.92rem;
+    color: #c62828;
+}
 
-    .ceza-title {
-        text-align: left;
-        white-space: nowrap;
-        font-weight: 600;
-    }
+.ceza-inner-table td {
+    padding: 3px 6px;
+    vertical-align: middle;
+    border: none !important;
+}
 
-    .ceza-amount {
-        text-align: right;
-        white-space: nowrap;
-        font-weight: 700;
-    }
+.ceza-title {
+    text-align: left;
+    white-space: nowrap;
+    font-weight: 600;
+}
 
-    /* Ceza sütununun daha geniş görünmesi için */
-    .ceza-col {
-        width: 330px !important;
-    }
+.ceza-amount {
+    text-align: right;
+    white-space: nowrap;
+    font-weight: 700;
+}
 
-
+/* Ceza sütununun daha geniş görünmesi için */
+.ceza-col {
+    width: 330px !important;
+}
 
 
-    .ozel-table td,
-    .ozel-table th {
-        border: 1px solid #bfbfbf !important;
-        vertical-align: top;
-        font-size: 0.90rem;
-        line-height: 1.4;
-    }
 
-    .ozel-table th {
-        background: #e3f1ff;
-        font-weight: 700;
-        text-align: center;
-    }
 
-    .ceza-cell {
-        text-align: right;
-        font-weight: 400 !important;
-        color: #c62828;
-        white-space: nowrap;
-        padding-right: 10px !important;
-    }
+.ozel-table td,
+.ozel-table th {
+    border: 1px solid #bfbfbf !important;
+    vertical-align: top;
+    font-size: 0.90rem;
+    line-height: 1.4;
+}
 
-    .ceza-cell strong {
-        font-weight: 700 !important;
-        /* Sadece strong kalın */
-    }
+.ozel-table th {
+    background: #e3f1ff;
+    font-weight: 700;
+    text-align: center;
+}
 
-    .ceza-cell em {
-        font-style: italic;
-        font-weight: 400 !important;
-    }
+.ceza-cell {
+    text-align: right;
+    font-weight: 400 !important;
+    color: #c62828;
+    white-space: nowrap;
+    padding-right: 10px !important;
+}
 
-    .fiil-title {
-        font-weight: 700;
-        color: #333;
-    }
-</style>
+.ceza-cell strong {
+    font-weight: 700 !important;
+    /* Sadece strong kalın */
+}
+
+.ceza-cell em {
+    font-style: italic;
+    font-weight: 400 !important;
+}
+
+.fiil-title {
+    font-weight: 700;
+    color: #333;
+}
+
+
+
+.sticky-kategori-menu {
+    position: sticky;
+    top: 75px; /* navbar yüksekliği kadar */
+    z-index: 5000;
+    background: white;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}

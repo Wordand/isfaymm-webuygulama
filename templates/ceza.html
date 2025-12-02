@@ -14,16 +14,23 @@
         <p class="text-muted fs-5">Vergi Usul Kanunu kapsamındaki tüm ceza türleri tek sayfada.</p>
     </div>
 
+
     <!-- ===== KATEGORİ MENÜSÜ ===== -->
-    <div class="d-flex justify-content-center mb-5">
-        <div class="btn-group">
-            <a href="#vergi-ziyasi" class="btn btn-danger">Vergi Ziyaı</a>
-            <a href="#usulsuzluk" class="btn btn-warning text-dark">Usulsüzlük</a>
-            <a href="#ozel-usulsuzluk1" class="btn btn-primary">Özel Usulsüzlük / 353</a>
-            <a href="#ozel-usulsuzluk2" class="btn btn-primary">Özel Usulsüzlük / Mükerrer 355</a>
-            <a href="#izah-pismanlik" class="btn btn-warning text-dark">İzaha Davet / Pişmanlık / İndirim / Uzlaşma</a>
+    <div class="kategori-menu-wrapper">
+        <div class="d-flex justify-content-center mb-5 sticky-menu">
+            <div class="btn-group">
+                <a href="#ortak-hukumler" class="btn btn-secondary">Ortak Hükümler</a>
+                <a href="#vergi-ziyasi" class="btn btn-danger">Vergi Ziyaı</a>
+                <a href="#usulsuzluk" class="btn btn-warning text-dark">Usulsüzlük</a>
+                <a href="#ozel-usulsuzluk1" class="btn btn-info text-dark">Özel Usulsüzlük / 353</a>
+                <a href="#ozel-usulsuzluk2" class="btn btn-primary">Özel Usulsüzlük / Mükerrer 355</a>
+                <a href="#izah-pismanlik" class="btn btn-success">
+                    İzaha Davet / Pişmanlık / İndirim / Uzlaşma / Kanun Yolundan Vazgeçme
+                </a>
+            </div>
         </div>
     </div>
+
 
 
 
@@ -199,53 +206,6 @@
                 </thead>
                 <tbody>
 
-                    <!-- =================================================== -->
-                    <!-- VERGİ ZİYAİ REJİMİNE AİT EK MADDELER                -->
-                    <!-- =================================================== -->
-
-                    <tr>
-                        <td class="fw-bold text-center">VUK 335</td>
-                        <td>
-                            Aynı fiil birden fazla vergi türünde vergi ziyaına sebep oluyorsa:<br>
-                            Her bir vergi için ayrı ayrı vergi ziyaı cezası uygulanır.
-                        </td>
-                        <td class="text-center">Ayrı ayrı 1 kat / 3 kat</td>
-                    </tr>
-
-                    <tr>
-                        <td class="fw-bold text-center">VUK 336</td>
-                        <td>
-                            Aynı fiil hem usulsüzlük hem vergi ziyaı oluşturuyorsa:<br>
-                            <strong>Sadece en ağır ceza uygulanır.</strong><br><br>
-                            Usulsüzlük cezası önce kesilmiş ve daha sonra aynı fiilin vergi ziyaına
-                            sebep olduğu ortaya çıkarsa:<br>
-                            <em>Aradaki fark kadar vergi ziyaı cezası tamamlanır.</em>
-                        </td>
-                        <td class="text-center">—</td>
-                    </tr>
-
-                    <tr>
-                        <td class="fw-bold text-center">VUK 337</td>
-                        <td>
-                            Birden fazla bağımsız fiil işlenmişse:<br>
-                            <strong>Her fiil için ayrı ayrı ceza uygulanır.</strong><br><br>
-                            Aynı tür usulsüzlükler aynı yıl içinde tekrar edilirse:<br>
-                            Sonraki ceza <strong>%25 (1/4) oranında</strong> uygulanır.
-                        </td>
-                        <td class="text-center">—</td>
-                    </tr>
-
-                    <tr>
-                        <td class="fw-bold text-center">VUK 339</td>
-                        <td>
-                            Vergi ziyaı cezası kesinleştikten sonra 5 yıl içinde aynı tür fiil yeniden
-                            işlenirse:<br>
-                            Ceza <strong>%50 artırımlı</strong> uygulanır.<br><br>
-                            Artırım tutarı önceki ceza tutarını geçemez.
-                        </td>
-                        <td class="fw-bold text-center text-danger">%50 Artırımlı</td>
-                    </tr>
-
 
                     <tr>
                         <td class="fw-bold text-center">VUK 341</td>
@@ -285,6 +245,34 @@
                         </td>
                         <td class="fw-bold text-center text-danger">%50 Artırımlı</td>
                     </tr>
+
+                    <tr>
+                        <td class="fw-bold text-center">VUK 370</td>
+                        <td>
+                            İzaha Davet<br>
+                            İzah yetersizse vergi ziyaı cezasının <strong>%20'si</strong> uygulanır.
+                        </td>
+                        <td class="fw-bold text-center text-danger">%20'si</td>
+                    </tr>
+
+                    <tr>
+                        <td class="fw-bold text-center">VUK 371</td>
+                        <td>
+                            Pişmanlık<br>
+                            Şartlar sağlanıyorsa vergi ziyaı cezası yok, sadece <strong>Pişmanlık Zammı</strong> var.
+                        </td>
+                        <td class="fw-bold text-center text-danger">Ceza yok</td>
+                    </tr>
+
+                    <tr>
+                        <td class="fw-bold text-center">VUK 376</td>
+                        <td>
+                            İndirim<br>
+                            Şartlar sağlanıyorsa vergi ziyaı cezası <strong>%50 indirimli</strong> uygulanır.
+                        </td>
+                        <td class="fw-bold text-center text-danger">%50 İndirimli</td>
+                    </tr>
+
                 </tbody>
             </table>
         </div>
@@ -1147,7 +1135,8 @@
 
     <section id="izah-pismanlik" class="mb-5 pt-5">
 
-        <h3 class="fw-bold mt-5 mb-3 text-primary">📘 Vergi Ceza Rejimleri – Tek Bakış Tablosu</h3>
+        <h3 class="fw-bold mt-5 mb-3 text-primary">📘 İzaha Davet / Pişmanlık / İndirim / Uzlaşma / Kanun Yolundan
+            Vazgeçme</h3>
 
         <div class="table-responsive shadow-sm mb-4">
             <table class="table table-bordered table-hover align-middle">
@@ -1288,6 +1277,7 @@
                         <td class="text-center fw-bold">İnceleme Safhasında Uzlaşma</td>
                     </tr>
 
+
                     <!-- KANUN YOLUNDAN VAZGEÇME – VUK 379 -->
                     <tr>
                         <td class="fw-bold text-center">
@@ -1295,22 +1285,40 @@
                             <br>Kanun Yolundan Vazgeçme
                         </td>
                         <td>
-                            Dava açılmışken kanun yolundan vazgeçilirse:<br><br>
+                            Vergi/ceza ihbarnamesine karşı açılan davalarda,<br>
+                            vergi mahkemesi kararının istinaf yolu açık olması veya<br>
+                            bölge idare mahkemesi kararının temyiz yolu açık olması durumunda,<br>
+                            mükellef kanun yolundan vazgeçebilir.<br><br>
 
-                            <strong>Vergide:</strong><br>
-                            • Kaldırılanın %60’ı<br>
-                            • Onaylanan kısmın tamamı<br><br>
+                            <strong>Ödenecek Vergiler:</strong><br>
+                            • Kaldırılan verginin %60’ı<br>
+                            • Tasdik edilen (onaylanan) verginin tamamı<br>
+                            • Tasdik edilen vergiye ilişkin vergi ziyaı cezasının %75’i<br><br>
 
-                            <strong>Cezada:</strong><br>
-                            • Kaldırılanın %25’i<br>
-                            • Onaylananın %75’i<br><br>
+                            <strong>Vergi Aslına Bağlı Olmayan Cezalar:</strong><br>
+                            • Kaldırılan kısmın %25’i<br>
+                            • Tasdik edilen kısmın %75’i<br><br>
+
+                            <strong>Prosedür:</strong><br>
+                            • Mükellef, kanun yolu süresi içinde vergi dairesine dilekçe verir<br>
+                            • Dilekçenin verildiği anda tahakkuk gerçekleşir<br><br>
 
                             <strong>Ödeme:</strong><br>
-                            • 1 ay içinde<br>
-                            • %80’i ödenirse → %20 indirim
+                            • Tahakkuk tarihinden itibaren 1 ay içinde ödeme<br>
+                            • Bu tutarların %80’i gecikme faiziyle birlikte 1 ay içinde ödenirse →
+                            <strong>%20 indirim</strong><br>
+                            • Tasdik edilen vergi tutarında indirim uygulanmaz<br><br>
+
+                            <strong>Diğer Hükümler:</strong><br>
+                            • Daha önce ödenmiş gecikme zammı/faizi mahsup edilir<br>
+                            • Taraflar karşılıklı yargılama gideri/avukatlık ücreti talep edemez<br>
+                            • Kanun yolundan vazgeçilmesine rağmen yapılan istinaf/temyiz başvuruları incelenmez
                         </td>
-                        <td class="text-center fw-bold text-danger">Uyuşmazlık Biter</td>
+                        <td class="text-center fw-bold text-danger">
+                            Uyuşmazlık Kesin Olarak Sona Erer
+                        </td>
                     </tr>
+
 
                 </tbody>
             </table>
