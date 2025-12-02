@@ -759,31 +759,27 @@ def currency_filter(amount):
 
 
 
-
 @app.route('/sitemap.xml')
 def sitemap():
     pages = []
     now = datetime.now().date().isoformat()
 
     static_urls = [
-        # Ana sayfa ve bölümler
-        ('home', {}),  # https://www.isfaymm.com/
-        # Alt bölümler (tek sayfa içinde anchor linkler)
-        ('home', {'_anchor': 'services'}),   # https://www.isfaymm.com/#services
-        ('home', {'_anchor': 'about'}),      # https://www.isfaymm.com/#about
-        ('home', {'_anchor': 'team'}),       # https://www.isfaymm.com/#team
-        ('home', {'_anchor': 'blog'}),       # https://www.isfaymm.com/#blog
-        ('home', {'_anchor': 'contact'}),    # https://www.isfaymm.com/#contact
+        # Ana sayfa
+        ('home', {}),
 
-        # Bağımsız sayfalar
-        ('contact', {}),                     # https://www.isfaymm.com/contact
-        ('indirimlikurumlar.index', {}),     # https://www.isfaymm.com/indirimlikurumlar
-        ('asgari', {}),                      # https://www.isfaymm.com/asgari
-        ('sermaye', {}),                     # https://www.isfaymm.com/sermaye
-        ('finansman', {}),                   # https://www.isfaymm.com/finansman
+        # Bağımsız sayfalar (SEO açısından önemli)
+        ('mevzuat', {}),
+        ('indirim', {}),
+        ('ceza', {}),
+        ('contact', {}),
+        ('indirimlikurumlar.index', {}),
+        ('asgari', {}),
+        ('sermaye', {}),
+        ('finansman', {}),
 
         # Blog (liste sayfası)
-        ('blog.index', {}),                  # https://www.isfaymm.com/blog
+        ('blog.index', {}),
     ]
 
     # URL’leri oluştur
@@ -794,13 +790,11 @@ def sitemap():
         except Exception:
             continue
 
-
-    # XML çıktı oluştur
+    # XML çıktı üretimi
     xml = render_template('sitemap_template.xml', pages=pages, lastmod=now)
     response = make_response(xml)
     response.headers["Content-Type"] = "application/xml"
     return response
-
 
 
 

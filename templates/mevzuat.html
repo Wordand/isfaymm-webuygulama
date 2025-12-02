@@ -1,14 +1,23 @@
 {% extends "layout.html" %}
 
-{% block title %}Mevzuat – İSFA YMM{% endblock %}
+{% block title %}
+Vergi Mevzuatı – İndirimli Kurumlar Vergisi, Yatırım Teşvik, Vergi Cezaları | İSFA YMM
+{% endblock %}
+
+{% block description %}
+İndirimli kurumlar vergisi (KVK 32/A), yatırım teşvik mevzuatı, 3305–9903 sayılı kararlar, vergi cezaları, vergi ziyaı
+ve usulsüzlük cezaları dahil tüm vergi mevzuatının güncel ve açıklamalı kaynağı.
+{% endblock %}
 
 {% block content %}
 
-<!-- ⭐ ÜST BAŞLIK -->
+<!-- ⭐ ÜST BAŞLIK (SEO – H1 buradadır) -->
 <section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad, #007bff);">
     <div class="container" data-aos="fade-up">
-        <h1 class="fw-bold mb-3">Mevzuat Portalı</h1>
-
+        <h1 class="fw-bold mb-3">Mevzuat Portalı – Vergi ve Teşvik Rehberi</h1>
+        <p class="lead text-white-50">
+            İndirimli kurumlar vergisi, yatırım teşvik sistemi ve vergi cezaları hakkında güncel ve açıklamalı mevzuat.
+        </p>
     </div>
 </section>
 
@@ -24,21 +33,24 @@
                         <div class="card-body text-center">
                             <i class="bi bi-graph-up-arrow text-primary fs-1"></i>
                             <h5 class="fw-bold mt-3">İndirimli Kurumlar Vergisi</h5>
-                            <p class="text-muted small">KVK 32/A – 2025/9903 Sayılı Karar işlenmiş şekilde</p>
+                            <p class="text-muted small">
+                                KVK 32/A – 2025/9903 Sayılı Karar işlenmiş ve açıklamalı şekilde
+                            </p>
                         </div>
                     </div>
                 </a>
             </div>
 
-
-            <!-- 6️⃣ VERGİ CEZALARI -->
+            <!-- 2️⃣ VERGİ CEZALARI -->
             <div class="col-md-6 col-lg-4">
                 <a href="{{ url_for('ceza') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
                         <div class="card-body text-center">
                             <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
                             <h5 class="fw-bold mt-3">Vergi Cezaları</h5>
-                            <p class="text-muted small">VUK ceza maddeleri, vergi ziyaı, usulsüzlük, özel usulsüzlük</p>
+                            <p class="text-muted small">
+                                Vergi ziyaı, usulsüzlük, özel usulsüzlük – VUK ceza hükümleri
+                            </p>
                         </div>
                     </div>
                 </a>
@@ -48,12 +60,43 @@
     </div>
 </section>
 
-<style>
-.hover-card:hover {
-    transform: translateY(-4px);
-    transition: 0.2s;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+<!-- ⭐ STRUCTURED DATA – Google SEO için çok önemli -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Vergi Mevzuatı – İndirimli Kurumlar Vergisi, Yatırım Teşvik, Vergi Cezaları",
+  "description": "İndirimli kurumlar vergisi (KVK 32/A), yatırım teşvik sistemi (3305–9903), vergi cezaları ve usulsüzlük cezaları dahil tüm mevzuatın açıklamalı kaynağı.",
+  "url": "https://www.isfaymm.com/mevzuat",
+  
+  "hasPart": {
+    "@type": "ItemList",
+    "name": "Mevzuat Kategorileri",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "İndirimli Kurumlar Vergisi (KVK 32/A)",
+        "url": "https://www.isfaymm.com/indirim"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Vergi Cezaları (VUK)",
+        "url": "https://www.isfaymm.com/ceza"
+      }
+    ]
+  }
 }
+</script>
+
+<!-- ⭐ KART HOVER STİLİ -->
+<style>
+    .hover-card:hover {
+        transform: translateY(-4px);
+        transition: 0.2s;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+    }
 </style>
 
 {% endblock %}
