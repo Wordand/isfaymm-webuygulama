@@ -1,4 +1,14 @@
 User-agent: *
 Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /user/
+Disallow: /login/
+Disallow: /register/
+Disallow: /reset-password/
+Disallow: /*?*
+Allow: /static/
+Allow: /static/css/
+Allow: /static/js/
+Allow: /static/images/
 
 Sitemap: https://www.isfaymm.com/sitemap.xml

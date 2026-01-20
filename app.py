@@ -47,6 +47,7 @@ from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from zoneinfo import ZoneInfo
 from io import BytesIO
 from difflib import get_close_matches
@@ -66,7 +67,7 @@ from services.db import (
 )
 from routes.indirimlikurumlar import bp as indirim_bp
 from routes.blog import blog_bp, blog_posts
-from config import tarifeler, asgari_ucretler
+from config import tarifeler, asgari_ucretler, GECIKME_ZAMMI_ORANLARI
 
 
 
@@ -759,42 +760,43 @@ def currency_filter(amount):
 
 
 
+
 @app.route('/sitemap.xml')
 def sitemap():
     pages = []
     now = datetime.now().date().isoformat()
 
     static_urls = [
-        # Ana sayfa
-        ('home', {}),
-
-        # Bağımsız sayfalar (SEO açısından önemli)
-        ('mevzuat', {}),
-        ('indirim', {}),
-        ('ceza', {}),
-        ('contact', {}),
-        ('indirimlikurumlar.index', {}),
-        ('asgari', {}),
-        ('sermaye', {}),
-        ('finansman', {}),
-
-        # Blog (liste sayfası)
-        ('blog.index', {}),
+        ('home', {}),                 # Ana sayfa
+        ('mevzuat', {}),              # Mevzuat sayfası
+        ('indirim', {}),              # KVK 32/A
+        ('ceza', {}),                 # Vergi cezaları
+        ('contact', {}),              # İletişim
+        ('indirimlikurumlar.index', {}),  # Teşvik modülü
+        ('asgari', {}),               # Asgari KV
+        ('sermaye', {}),              # Sermaye avansı
+        ('finansman', {}),            # Finansman gider kısıtlaması
+        ('blog.index', {}),           # Blog liste
     ]
 
-    # URL’leri oluştur
+    # URL’leri topla
     for endpoint, params in static_urls:
         try:
-            url = f"https://www.isfaymm.com{url_for(endpoint, **params)}"
-            pages.append(url)
-        except Exception:
+            path = url_for(endpoint, **params)
+            full_url = f"https://www.isfaymm.com{path}"
+            pages.append({
+                "loc": full_url,
+                "lastmod": now
+            })
+        except:
             continue
 
-    # XML çıktı üretimi
-    xml = render_template('sitemap_template.xml', pages=pages, lastmod=now)
+    # XML üretimi
+    xml = render_template('sitemap_template.xml', pages=pages)
     response = make_response(xml)
     response.headers["Content-Type"] = "application/xml"
     return response
+
 
 
 
@@ -4414,6 +4416,9 @@ def finansman():
     # Finansman gideri kısıtlaması sayfası
     return render_template("finansman.html")
 
+
+
+
 @app.route("/vergi_hesaplamalari")
 @login_required
 def vergi_hesaplamalari():    
@@ -4549,7 +4554,93 @@ def asgari_istisna_api():
     except Exception as e:
         return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
 
-    
+
+
+
+
+
+def gecikme_orani_bul(tarih):
+    for r in GECIKME_ZAMMI_ORANLARI:
+        bas = datetime.strptime(r["baslangic"], "%Y-%m-%d").date()
+
+        if r["bitis"]:
+            bit = datetime.strptime(r["bitis"], "%Y-%m-%d").date()
+            if bas <= tarih <= bit:
+                return Decimal(str(r["oran"]))
+        else:
+            if tarih >= bas:
+                return Decimal(str(r["oran"]))
+
+    raise ValueError("Gecikme zammı oranı bulunamadı")
+
+
+
+def efektif_gecikme_orani(aylik_oran, borc_turu):
+    if borc_turu == "mahkeme_cezasi":
+        return aylik_oran / Decimal("2")
+    if borc_turu == "usulsuzluk":
+        return Decimal("0")
+    return aylik_oran
+
+
+def gunluk_gecikme_orani(aylik_oran):
+    oran = Decimal(str(aylik_oran)) / Decimal("30")
+    return oran.quantize(Decimal("0.000000"), rounding=ROUND_HALF_UP)
+
+def gecikme_zammi_hesapla(borc, vade, odeme, borc_turu):
+    if odeme <= vade:
+        return Decimal("0")
+
+    aylik_oran = gecikme_orani_bul(vade)
+    oran = efektif_gecikme_orani(aylik_oran, borc_turu)
+
+    if oran == Decimal("0"):
+        return Decimal("0")
+
+    gun_sayisi = (odeme - vade).days
+    gunluk_oran = gunluk_gecikme_orani(oran)
+
+    zam = borc * gunluk_oran * Decimal(gun_sayisi)
+
+    # 6183 md.51 – 1 TL alt sınır
+    if Decimal("0") < zam < Decimal("1"):
+        return Decimal("1")
+
+    return zam.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+@app.route("/gecikme-zammi-hesapla", methods=["POST"])
+@login_required
+def gecikme_zammi_hesapla_api():
+    print("👉 AUTH OK – ROUTE ÇAĞRILDI")
+    data = request.get_json(silent=True)
+    print("👉 GELEN DATA:", data)
+    try:
+        data = request.get_json(silent=True)
+        print("GELEN DATA:", data)
+
+        borc = Decimal(str(data["borc"]))
+        vade = datetime.strptime(data["vade"], "%Y-%m-%d").date()
+        odeme = datetime.strptime(data["odeme"], "%Y-%m-%d").date()
+        borc_turu = data["borc_turu"]
+
+        print("PARSE OK")
+
+        zam = gecikme_zammi_hesapla(borc, vade, odeme, borc_turu)
+
+        print("HESAP OK:", zam)
+
+        return jsonify({
+            "gecikme_zammi": float(zam),
+            "toplam_borc": float((borc + zam).quantize(Decimal("0.01")))
+        })
+
+    except Exception as e:
+        print("❌ GERÇEK HATA:", repr(e))
+        raise
+
+
+
     
 @app.route("/ceza")
 def ceza():
