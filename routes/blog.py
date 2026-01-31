@@ -253,7 +253,7 @@ blog_posts = [
 def index():
     """Tüm blog yazılarını listeleme sayfası."""
     # latest_posts sadece ana sayfada gösterildiği için, burada tüm blog_posts'u gönderiyoruz.
-    return render_template('blog_list.html', posts=blog_posts)
+    return render_template('blog/blog_list.html', posts=blog_posts)
 
 @blog_bp.route('/<string:slug>')
 def detail(slug):
@@ -262,4 +262,4 @@ def detail(slug):
     if post is None:
         abort(404) # Yazı bulunamazsa 404 hatası döndür
 
-    return render_template('blog_detail.html', post=post)
+    return render_template('blog/blog_detail.html', post=post)

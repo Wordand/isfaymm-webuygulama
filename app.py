@@ -67,6 +67,7 @@ from services.db import (
 )
 from routes.indirimlikurumlar import bp as indirim_bp
 from routes.blog import blog_bp, blog_posts
+from routes.calculators import calculators_bp
 from config import tarifeler, asgari_ucretler, GECIKME_ZAMMI_ORANLARI
 
 
@@ -251,6 +252,7 @@ with app.app_context():
 
 app.register_blueprint(indirim_bp)
 app.register_blueprint(blog_bp, url_prefix='/blog')
+app.register_blueprint(calculators_bp)
 
 
 
@@ -296,10 +298,10 @@ def register():
         
         if not username or not password:
             flash("Kullanıcı adı ve şifre boş olamaz.", "warning")
-            return render_template("register.html")
+            return render_template("auth/register.html")
         if len(password) < 6:
             flash("Şifre en az 6 karakter olmalı.", "warning")
-            return render_template("register.html")
+            return render_template("auth/register.html")
         
         hashed_password = generate_password_hash(password)
 
@@ -317,13 +319,13 @@ def register():
         except psycopg2.IntegrityError:
             # conn burada kapanmış olacağı için yeniden açıp rollback yapmak gereksiz
             flash("Bu kullanıcı adı zaten var. Lütfen farklı bir kullanıcı adı seçin.", "danger")
-            return render_template("register.html")
+            return render_template("auth/register.html")
 
         except Exception as e:
             flash(f"Beklenmeyen hata: {e}", "danger")
-            return render_template("register.html")
+            return render_template("auth/register.html")
         
-    return render_template("register.html")
+    return render_template("auth/register.html")
 
 
 
@@ -355,17 +357,17 @@ def login():
             # 🛡️ Ek güvenlik: admin rolü sadece sistem yöneticisine aittir
             if result.get("role") == "admin" and username.lower() != "admin":
                 flash("Admin rolü yalnızca sistem yöneticisine ayrılmıştır.", "danger")
-                return render_template("login.html")
+                return render_template("auth/login.html")
 
             # Onaylı değilse
             if is_approved == 0:
                 flash("Hesabınız henüz admin tarafından onaylanmadı.", "warning")
-                return render_template("login.html")
+                return render_template("auth/login.html")
 
             # Askıya alınmışsa
             if is_suspended == 1:
                 flash("Hesabınız askıya alınmıştır. Lütfen yöneticiyle iletişime geçin.", "danger")
-                return render_template("login.html")
+                return render_template("auth/login.html")
 
 
             
@@ -411,7 +413,7 @@ def login():
             log_login_attempt(username, success=False)
             flash("Hatalı kullanıcı adı veya şifre.", "danger")
 
-    return render_template("login.html")
+    return render_template("auth/login.html")
 
 
 @app.route("/logout")
@@ -449,7 +451,7 @@ def login_logs():
         c.execute("SELECT * FROM login_logs ORDER BY id DESC LIMIT 100")
         logs = c.fetchall()
 
-    return render_template("admin_login_logs.html", logs=logs)
+    return render_template("admin/admin_login_logs.html", logs=logs)
 
 
 @app.route("/admin/delete_all_logs", methods=["POST"])
@@ -524,7 +526,7 @@ def admin_users():
         c.execute(query, tuple(params))
         users = c.fetchall()
 
-    return render_template("admin_users.html", users=users)
+    return render_template("admin/admin_users.html", users=users)
 
 
 
@@ -650,16 +652,16 @@ def change_password():
         # Basit doğrulamalar
         if not current or not new1 or not new2:
             flash("Tüm alanları doldurun.", "warning")
-            return render_template("change_password.html")
+            return render_template("auth/change_password.html")
 
         if new1 != new2:
             flash("Yeni şifreler eşleşmiyor.", "warning")
-            return render_template("change_password.html")
+            return render_template("auth/change_password.html")
 
         # Parola güçlülüğü (örnek): en az 8 karakter ve rakam içermeli
         if len(new1) < 8 or not re.search(r"\d", new1) or not re.search(r"[A-Za-z]", new1):
             flash("Yeni şifre en az 8 karakter olmalı ve hem harf hem rakam içermelidir.", "warning")
-            return render_template("change_password.html")
+            return render_template("auth/change_password.html")
 
         # Mevcut parola kontrolü
         with get_conn() as conn:
@@ -669,7 +671,7 @@ def change_password():
 
             if not row or not check_password_hash(row[1], current):
                 flash("Mevcut şifre hatalı.", "danger")
-                return render_template("change_password.html")
+                return render_template("auth/change_password.html")
 
             # Güncelle
             new_hash = generate_password_hash(new1)
@@ -679,7 +681,7 @@ def change_password():
         flash("Şifreniz başarıyla değiştirildi.", "success")
         return redirect(url_for("home"))
 
-    return render_template("change_password.html")
+    return render_template("auth/change_password.html")
 
 
 # --- Admin: herhangi bir kullanıcının şifresini sıfırlama ---
@@ -704,16 +706,16 @@ def admin_reset_password(user_id):
 
         if not new1 or not new2:
             flash("Lütfen yeni şifre alanlarını doldurun.", "warning")
-            return render_template("admin_reset_password.html", user=user)
+            return render_template("admin/admin_reset_password.html", user=user)
 
         if new1 != new2:
             flash("Yeni şifreler eşleşmiyor.", "warning")
-            return render_template("admin_reset_password.html", user=user)
+            return render_template("admin/admin_reset_password.html", user=user)
 
         # Parola güçlülüğü kontrolü
         if len(new1) < 8 or not re.search(r"\d", new1) or not re.search(r"[A-Za-z]", new1):
             flash("Yeni şifre en az 8 karakter olmalı ve hem harf hem rakam içermelidir.", "warning")
-            return render_template("admin_reset_password.html", user=user)
+            return render_template("admin/admin_reset_password.html", user=user)
 
         # Admin kendi hesabını sıfırlıyorsa ekstra onay (opsiyonel)
         if user["username"].lower() == "admin":
@@ -729,7 +731,7 @@ def admin_reset_password(user_id):
         flash(f"{user['username']} kullanıcısının şifresi başarıyla sıfırlandı.", "success")
         return redirect(url_for("admin_users"))
 
-    return render_template("admin_reset_password.html", user=user)
+    return render_template("admin/admin_reset_password.html", user=user)
 
 
 
@@ -1427,7 +1429,7 @@ def pdf_belgeler_tablo(tur):
             donem_mapping["cari_enflasyon"] = donem
 
         return render_template(
-            "tablo_bilanco.html",
+            "tables/tablo_bilanco.html",
             vkn=vkn,
             unvan=unvan,
             donem=donem,
@@ -1505,7 +1507,7 @@ def pdf_belgeler_tablo(tur):
 
         try:
             return render_template(
-                "tablo_gelir.html",
+                "tables/tablo_gelir.html",
                 tablo=tablo,
                 unvan=unvan,
                 donem=donem,
@@ -3085,7 +3087,7 @@ def tablo_mizan(tur):
             "PASİF": {"cari": pd.to_numeric(df_pasif["Cari Dönem"], errors="coerce").sum()},
         }
 
-        return render_template("tablo_bilanco.html",
+        return render_template("tables/tablo_bilanco.html",
                                unvan=secili_unvan,
                                donem=donem,
                                aktif_list=aktif_list,
@@ -3102,7 +3104,7 @@ def tablo_mizan(tur):
         df_gelir = pd.DataFrame(mizan_data.get("gelir", []))
         tablo_gelir_list = df_gelir.to_dict("records")
 
-        return render_template("tablo_gelir.html",
+        return render_template("tables/tablo_gelir.html",
                                tablo=tablo_gelir_list,
                                unvan=secili_unvan,
                                donem=donem,
@@ -4393,7 +4395,7 @@ def contact():
         flash("📨 Mesajınız bize ulaştı, teşekkür ederiz!", "success")
         return redirect(url_for("contact"))
 
-    return render_template("contact.html")
+    return render_template("pages/contact.html")
 
 
 # --- Vergi / Finansal Araç Sayfaları ---
@@ -4419,10 +4421,7 @@ def finansman():
 
 
 
-@app.route("/vergi_hesaplamalari")
-@login_required
-def vergi_hesaplamalari():    
-    return render_template("vergi_hesaplamalari.html")
+
 # --- GELİR VERGİSİ HESAPLAMA FONKSİYONU ---
 def gelir_vergisi_hesapla(yil: int, gelir: float, tarifeler: dict, ucret: bool = False) -> float:
     """
@@ -4644,15 +4643,15 @@ def gecikme_zammi_hesapla_api():
     
 @app.route("/ceza")
 def ceza():
-    return render_template("ceza.html")
+    return render_template("pages/ceza.html")
 
 @app.route("/mevzuat")
 def mevzuat():
-    return render_template("mevzuat.html")
+    return render_template("pages/mevzuat.html")
 
 @app.route("/indirim")
 def indirim():
-    return render_template("indirim.html")
+    return render_template("pages/indirim.html")
 
 # ✅ Uygulama çalıştırma kodu EN ALTA konur
 if __name__ == "__main__":

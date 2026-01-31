@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Vergi Hesaplama Araçları | İSFA YMM
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h1 class="mb-4">Vergi Hesaplama Araçları</h1>
+
+    <p class="text-muted mb-4">
+        Güncel mevzuat ve idari görüşler esas alınarak hazırlanmış,
+        bilgilendirme amaçlı vergi hesaplama araçları.
+    </p>
+
+    <div class="row g-4">
+
+        <!-- İthalatta KDV -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        İthalatta Ödenen KDV’nin İndirimi
+                    </h5>
+                    <p class="card-text text-muted small">
+                        KDV GUT (III/C-2.6) kapsamında gözetim, korunma önlemleri
+                        ve benzeri uygulamalara bağlı indirilebilir /
+                        indirilemez KDV hesaplaması.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 text-end">
+                    <a href="{{ url_for('calculators.ithalat_kdv') }}"
+                       class="btn btn-outline-primary btn-sm">
+                        Hesaplama Aracına Git →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ileride buraya yeni hesaplamalar eklenecek -->
+
+    </div>
+
+</div>
+{% endblock %}

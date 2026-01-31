@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+
+{% block title %}
+İthalatta Ödenen KDV’nin İndirimi | İSFA YMM
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h1 class="mb-3">
+        İthalatta Ödenen KDV’nin İndirim Hesaplaması
+    </h1>
+
+
+    <p class="text-muted">
+        7846 sayılı Cumhurbaşkanı Kararı ve KDV Genel Uygulama Tebliği
+        (III/C-2.6) kapsamında ithalatta gözetim, korunma önlemleri ve
+        haksız rekabet uygulamaları nedeniyle ödenen KDV’nin
+        indirilebilir / indirilemez kısmının hesaplanması.
+    </p>
+
+    <div class="alert alert-warning">
+        ⚠️ <strong>Tevsik edilemeyen gözetim bedeline</strong> ve bu bedele
+        isabet eden vergi, resim ve harçlar üzerinden hesaplanan
+        KDV <strong>indirilemez</strong>.
+    </div>
+
+    <form id="ithalatKdvForm" class="card p-4 bg-light">
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">CIF Bedeli (TL)</label>
+                <input type="number" class="form-control" id="cif" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Toplam Gümrük Kıymeti (TL)</label>
+                <input type="number" class="form-control" id="gumruk" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Gümrük Vergisi (%)</label>
+                <input type="number" class="form-control" id="gv" value="10">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">İlave Gümrük Vergisi (%)</label>
+                <input type="number" class="form-control" id="igv" value="15">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">KDV Oranı (%)</label>
+                <input type="number" class="form-control" id="kdv" value="20">
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary mt-4" onclick="hesaplaIthalatKdv()">
+            Hesapla
+        </button>
+    </form>
+
+    <div id="sonuc" class="mt-4 d-none">
+        <div class="alert alert-success">
+            <strong>İndirilebilecek KDV:</strong>
+            <span id="indirilebilirKdv"></span> TL
+        </div>
+        <div class="alert alert-danger">
+            <strong>İndirilemeyecek KDV:</strong>
+            <span id="indirilemezKdv"></span> TL
+        </div>
+    </div>
+    <div id="detay" class="card mt-3 d-none">
+        <div class="card-header fw-bold">
+            Hesaplama Detayı (Tebliğ III/C-2.6)
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>Gözetim Farkı (Tevsik Edilemeyen Tutar): <strong><span id="gzetimFarki"></span> TL</strong></li>
+                <li>Gözetim Farkına İsabet Eden GV: <strong><span id="gvYurtDisi"></span> TL</strong></li>
+                <li>Gözetim Farkına İsabet Eden İGV: <strong><span id="igvYurtDisi"></span> TL</strong></li>
+                <li>İndirilemez KDV Matrahı: <strong><span id="indirilemezMatrah"></span> TL</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="ymmUyari" class="alert alert-warning mt-3 d-none"></div>
+    <div class="mt-5">
+        {% include "partials/tax_disclaimer.html" %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/calculators/ithalat_kdv.js') }}"></script>
+{% endblock %}

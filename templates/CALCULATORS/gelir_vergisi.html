@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Gelir Vergisi Hesaplama | İSFA YMM
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="mb-3">Gelir Vergisi Hesaplama</h2>
+
+    <p class="text-muted">
+        Ücret ve ücret dışı gelirler için Gelir Vergisi Kanunu’na göre hesaplama aracıdır.
+    </p>
+
+    <form id="gelirVergisiForm" class="mb-4">
+        <div class="card p-4 shadow-sm">
+
+            <div class="mb-3">
+                <label for="yilInput" class="form-label">Hesaplama Yılı</label>
+                <select class="form-select" id="yilInput" required>
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="gelirTuru" class="form-label">Gelir Türü</label>
+                <select class="form-select" id="gelirTuru" required>
+                    <option value="ucret" selected>Ücret Geliri</option>
+                    <option value="normal">Ücret Dışı Gelir</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="brutUcret" class="form-label">Vergi Matrahı (₺)</label>
+                <input type="text" class="form-control" id="brutUcret" required>
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="asgariIstisna" checked>
+                <label class="form-check-label" for="asgariIstisna">
+                    Asgari Ücret İstisnası Uygulansın
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label for="aySecimi" class="form-label">Hesaplama Dönemi</label>
+                <select class="form-select" id="aySecimi" required>
+                    <option value="0" selected>Yıllık</option>
+                    {% set aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"] %}
+                    {% for ay in aylar %}
+                    <option value="{{ loop.index }}">{{ ay }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-gradient-hover">
+                Hesapla
+            </button>
+        </div>
+    </form>
+
+    <hr class="my-4">
+
+    <h5>📋 Yapılan Hesaplamalar</h5>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle" id="logTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Yıl</th>
+                    <th>Gelir Türü</th>
+                    <th>Vergi Matrahı</th>
+                    <th>Asgari İstisna</th>
+                    <th>Dönem</th>
+                    <th>Gelir Vergisi</th>
+                    <th>İstisna</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-secondary mt-4 small">
+        ⚖️ Bu hesaplama aracı bilgilendirme amaçlıdır.
+        İşlemin özelliklerine göre farklı vergisel sonuçlar doğabilir.
+        Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/calculators/gelir.js') }}"></script>
+{% endblock %}

@@ -153,7 +153,7 @@
 {# BODY ETİKETİNE KOŞULLU SINIF EKLENDİ #}
 
 <body
-    class="{% if not is_logged_in and (request.endpoint=='home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='contact' or request.endpoint=='mevzuat' or request.endpoint=='indirim' or request.endpoint=='ceza') %}no-sidebar-layout{% endif %}">
+    class="{% if not is_logged_in and (request.endpoint=='home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='contact' or request.endpoint=='mevzuat' or request.endpoint=='indirim' or request.endpoint=='ceza' or request.endpoint=='vergi_hesaplamalari') %}no-sidebar-layout{% endif %}">
 
     <!-- 🟦 YÜKLENİYOR EKRANI (İSFA) -->
     <div id="loading-screen">
@@ -188,10 +188,7 @@
                 class="sidebar-link {% if request.path.startswith('/indirimlikurumlar') %}active{% endif %}">
                 <i class="bi bi-building sidebar-icon"></i> İndirimli Kurumlar Vergisi
             </a>
-            <a href="{{ url_for('vergi_hesaplamalari') }}"
-                class="sidebar-link {% if request.path.startswith('/vergi_hesaplamalari') %}active{% endif %}">
-                <i class="bi bi-cash-coin sidebar-icon"></i> Vergi Hesaplamaları
-            </a>
+
 
             <a href="{{ url_for('asgari') }}"
                 class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
@@ -255,6 +252,73 @@
                         <a class="nav-link" href="{{ url_for('contact') }}">İletişim</a>
                         {% endif %}
                     </li>
+
+                    <li class="nav-item dropdown ms-2">
+
+                        <a class="nav-link dropdown-toggle fw-semibold px-3 py-1 rounded-pill border border-primary text-primary hover-vergi"
+                            href="#" id="vergiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-cash-coin me-1"></i> Vergi Hesaplamaları
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="vergiDropdown">
+
+                            <!-- 📄 GELİR VERGİSİ -->
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('calculators.gelir_vergisi') }}">
+                                    📄 Gelir Vergisi Hesapla
+                                </a>
+                            </li>
+
+                            <!-- 🚢 İTHALATTA KDV -->
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('calculators.ithalat_kdv') }}">
+                                    🚢 İthalatta KDV Hesapla
+                                </a>
+                            </li>
+
+                            <!-- ⏱️ GECİKME ZAMMI -->
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('calculators.gecikme_zammi') }}">
+                                    ⏱️ Gecikme Zammı Hesapla
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <!-- 🧾 DAMGA VERGİSİ -->
+                            <li>
+                                <a class="dropdown-item disabled">
+                                    🧾 Damga Vergisi (yakında)
+                                </a>
+                            </li>
+
+                            <!-- 💸 STOPAJ -->
+                            <li>
+                                <a class="dropdown-item disabled">
+                                    💸 Stopaj Vergisi (yakında)
+                                </a>
+                            </li>
+
+                            <!-- 🚗 MTV -->
+                            <li>
+                                <a class="dropdown-item disabled">
+                                    🚗 Motorlu Taşıtlar Vergisi (yakında)
+                                </a>
+                            </li>
+
+                            <!-- 📅 VERGİ TAKVİMİ -->
+                            <li>
+                                <a class="dropdown-item disabled">
+                                    📅 Vergi Takvimi (yakında)
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+
+
 
                     <li class="nav-item ms-2">
                         <a class="nav-link fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat"

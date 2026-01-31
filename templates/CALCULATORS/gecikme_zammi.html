@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Gecikme Zammı Hesaplama | İSFA YMM
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="mb-3">Gecikme Zammı Hesaplama</h2>
+
+    <p class="text-muted">
+        6183 sayılı Kanun md.51 kapsamında vergi, ceza ve diğer amme alacakları için
+        gecikme zammı hesaplama aracıdır.
+    </p>
+
+    <div class="card p-4 shadow-sm mb-4">
+
+        <div class="mb-3">
+            <label class="form-label">Borç Türü</label>
+            <select id="borcTuru" class="form-select">
+                <option value="vergi_asli">Vergi Aslı</option>
+                <option value="vergi_ziyasi">Vergi Ziyaı Cezası</option>
+                <option value="mahkeme_cezasi">Mahkeme Cezası</option>
+                <option value="usulsuzluk">Usulsüzlük Cezası</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Borç Tutarı (TL)</label>
+            <input type="number" id="borc" class="form-control" placeholder="Örn: 100000">
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Vade Tarihi</label>
+                <input type="date" id="vade" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ödeme Tarihi</label>
+                <input type="date" id="odeme" class="form-control">
+            </div>
+        </div>
+
+        <button class="btn btn-danger" id="hesaplaBtn">
+            Gecikme Zammını Hesapla
+        </button>
+    </div>
+
+    <hr class="my-4">
+
+    <h5>📋 Yapılan Hesaplamalar</h5>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle" id="gecikmeLogTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Borç Türü</th>
+                    <th>Borç Tutarı</th>
+                    <th>Vade</th>
+                    <th>Ödeme</th>
+                    <th>Gecikme Zammı</th>
+                    <th>Toplam Borç</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-secondary mt-4 small">
+        ⚖️ Bu hesaplama aracı bilgilendirme amaçlıdır.
+        Gecikme zammı oranları Cumhurbaşkanı kararlarıyla değişebilmektedir.
+        Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/calculators/gecikme.js') }}"></script>
+{% endblock %}
