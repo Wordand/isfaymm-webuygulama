@@ -28,3 +28,6 @@ def ithalat_kdv():
 @calculators_bp.route("/gecikme-zammi")
 def gecikme_zammi():
     return render_template("calculators/gecikme_zammi.html")
+
+
+# deploy trigger – no functional change
