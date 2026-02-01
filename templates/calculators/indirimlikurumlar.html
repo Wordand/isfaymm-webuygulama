@@ -21,23 +21,25 @@
 {% endif %}
 
 
-<ul class="nav nav-tabs mt-4 justify-content-center">
+<ul class="nav nav-pills mt-4 justify-content-center gap-3">
 
   <li class="nav-item">
-    <a class="nav-link {% if sekme == 'form' %}active{% endif %}" href="?sekme=form">🧾 Form Girişi</a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {% if sekme == 'ayrintili' %}active{% endif %}" href="?sekme=ayrintili">
-      📈 Ayrıntılı Kazanç Hesaplama
+    <a class="nav-link rounded-pill px-4 py-2 {% if sekme == 'form' %}active shadow-sm{% endif %}" href="?sekme=form">
+      <i class="bi bi-pencil-square me-1"></i> Form Girişi
     </a>
   </li>
 
   <li class="nav-item">
-    <a class="nav-link {% if sekme=='tesvik' %}active{% endif %}" href="?sekme=tesvik">📂 Teşvik Belgelerim</a>
+    <a class="nav-link rounded-pill px-4 py-2 {% if sekme == 'ayrintili' %}active shadow-sm{% endif %}" href="?sekme=ayrintili">
+      <i class="bi bi-bar-chart-line me-1"></i> Ayrıntılı Kazanç
+    </a>
   </li>
 
-
+  <li class="nav-item">
+    <a class="nav-link rounded-pill px-4 py-2 {% if sekme=='tesvik' %}active shadow-sm{% endif %}" href="?sekme=tesvik">
+      <i class="bi bi-folder2-open me-1"></i> Teşvik Belgelerim
+    </a>
+  </li>
 
 </ul>
 
@@ -45,7 +47,7 @@
 
 <div class="mt-4">
   {% if sekme == 'tesvik' %}
-  {% include 'tesvik.html' %}
+  {% include 'reports/tesvik.html' %}
 
 
 
@@ -85,20 +87,45 @@
       </a>
     </div>
 
-    <!-- 🔄 Aşama Progress Bar -->
-    <div class="progress mb-4" style="height: 25px;">
-      <div id="progressBar" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 20%;"
-        aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-        Aşama <span id="current-stage-text">1</span>/7
+    <!-- 🔄 Modern Stepper -->
+    <div class="modern-stepper mb-5">
+      <div class="stepper-item active" id="step-i-1">
+        <div class="step-counter">1</div>
+        <div class="step-name">Temel Bilgiler</div>
+      </div>
+      <div class="stepper-item" id="step-i-2">
+        <div class="step-counter">2</div>
+        <div class="step-name">Bölge & Oran</div>
+      </div>
+      <div class="stepper-item" id="step-i-3">
+        <div class="step-counter">3</div>
+        <div class="step-name">Yatırım Tutarı</div>
+      </div>
+      <div class="stepper-item" id="step-i-4">
+        <div class="step-counter">4</div>
+        <div class="step-name">Önceki Dönem</div>
+      </div>
+      <div class="stepper-item" id="step-i-5">
+        <div class="step-counter">5</div>
+        <div class="step-name">Dönem Kazancı</div>
+      </div>
+      <div class="stepper-item" id="step-i-6">
+        <div class="step-counter">6</div>
+        <div class="step-name">İndirimli Matrah</div>
+      </div>
+      <div class="stepper-item" id="step-i-7">
+        <div class="step-counter">7</div>
+        <div class="step-name">Sonuç</div>
       </div>
     </div>
 
     <input id="kvUploadInput" type="file" accept="application/pdf" style="display: none">
 
-    <div id="step1" class="hidden-step" {% if session.get('aktif_mukellef_unvan') %} style="display:block;" {% else %}
+    <!-- Step 1 -->
+    <div id="step1" class="hidden-step corporate-card" {% if session.get('aktif_mukellef_unvan') %} style="display:block;" {% else %}
       style="display:none;" {% endif %}>
 
-      <h5>Aşama 1 - Temel Bilgiler</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-info-circle me-2"></i>Aşama 1 - Temel Bilgiler</h5>
 
       <div class="mb-3">
         <label>Yatırım Teşvik Belgesi Numarası</label>
@@ -186,12 +213,15 @@
           <option value="Hayır - Yatırım Döneminde">Hayır - Yatırım Döneminde</option>
         </select>
       </div>
-      <button type="button" class="btn btn-primary" id="btn-step1-next">Devam →</button>
+      <div class="mt-4 text-end">
+        <button type="button" class="btn btn-modern btn-modern-primary" id="btn-step1-next">
+          Devam Et <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
     </div>
 
-    <div id="step2" class="hidden-step">
-      <hr>
-      <h5>Aşama 2 - Detaylar</h5>
+    <div id="step2" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-gear-fill me-2"></i>Aşama 2 - Detaylar</h5>
 
       <div class="mb-3">
         <label>Dönem Seçiniz</label>
@@ -293,10 +323,14 @@
         </div>
       </div>
 
-      <!-- 🔹 Butonları ayrı bir satıra al -->
-      <div class="mt-3">
-        <button type="button" class="btn btn-secondary me-2" onclick="goToStep1()">← Geri</button>
-        <button type="button" class="btn btn-primary" onclick="goToStep3()">Devam</button>
+      <!-- 🔹 Butonlar -->
+      <div class="mt-4 d-flex justify-content-between">
+        <button type="button" class="btn btn-modern btn-outline-secondary" onclick="goToStep1()">
+          <i class="bi bi-arrow-left"></i> Geri
+        </button>
+        <button type="button" class="btn btn-modern btn-modern-primary" onclick="goToStep3()">
+          Devam Et <i class="bi bi-arrow-right"></i>
+        </button>
       </div>
     </div>
 
@@ -305,8 +339,8 @@
 
 
 
-    <div id="step3" class="hidden-step">
-      <h5>Aşama 3 - Yatırım Bilgileri</h5>
+    <div id="step3" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-cash-stack me-2"></i>Aşama 3 - Yatırım Bilgileri</h5>
 
       <div class="mb-3">
         <label>Toplam Yatırım Tutarını Giriniz</label>
@@ -350,8 +384,8 @@
 
     </div>
 
-    <div id="step4" class="hidden-step">
-      <h5>Aşama 4 - Hesaplamalar</h5>
+    <div id="step4" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-calculator-fill me-2"></i>Aşama 4 - Önceki Dönem Verileri</h5>
 
       <div class="mb-3">
         <label>Önceki Dönemlerde Yararlanılan Yatırıma Katkı Tutarını Giriniz<br>
@@ -369,12 +403,12 @@
 
       <div class="mb-3">
         <label>Önceki Dönemlerde Yararlanılan Toplam Yatırıma Katkı Tutarı</label>
-        <input type="text" name="onceki_katki_tutari" id="onceki_katki_tutari" class="form-control" readonly>
+        <input type="text" name="onceki_katki_tutari" id="onceki_katki_tutari" class="form-control calculation-result" readonly>
       </div>
 
       <div class="mb-3">
         <label>Cari Hesaplama Öncesi Kalan Katkı Tutarı</label>
-        <input type="text" name="kalan_katki_tutari" id="kalan_katki_tutari" class="form-control" readonly>
+        <input type="text" name="kalan_katki_tutari" id="kalan_katki_tutari" class="form-control calculation-result" readonly>
       </div>
 
       <div class="mb-3">
@@ -383,12 +417,18 @@
         <input type="text" name="endeks_katki_tutari" id="endeks_katki_tutari" class="form-control" readonly>
       </div>
 
-      <button type="button" class="btn btn-secondary me-2" onclick="goToStep3()">← Geri</button>
-      <button type="button" class="btn btn-primary" onclick="goToStep5()">Devam</button>
+      <div class="mt-4 d-flex justify-content-between">
+        <button type="button" class="btn btn-modern btn-outline-secondary" onclick="goToStep3()">
+          <i class="bi bi-arrow-left"></i> Geri
+        </button>
+        <button type="button" class="btn btn-modern btn-modern-primary" onclick="goToStep5()">
+          Devam Et <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
     </div>
 
-    <div id="step5" class="hidden-step">
-      <h5 class="mb-4">Aşama 5 - Yatırım Bilgileri</h5>
+    <div id="step5" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Aşama 5 - Cari Dönem Kazanç Bilgileri</h5>
 
       <div class="mb-3">
         <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
@@ -402,19 +442,18 @@
       <div class="mb-3">
         <label>Ticari Bilanço Karını Giriniz (TL):</label>
         <input type="text" name="ticari_bilanco_kari" id="ticari_bilanco_kari" class="form-control"
-          placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
-
+          placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically(); calculateKVMatrah();">
       </div>
 
       <div class="mb-3">
         <label>KKEG Giriniz (TL):</label>
-        <input type="text" name="kkeg" id="kkeg" class="form-control" placeholder="0,00 TL">
+        <input type="text" name="kkeg" id="kkeg" class="form-control" placeholder="0,00 TL" oninput="calculateKVMatrah();">
       </div>
 
       <div class="mb-3">
         <label>Kurumlar Vergisi Matrahı (TL)</label>
         <div class="input-group">
-          <input type="text" name="kv_matrah" id="kv_matrah" class="form-control" placeholder="0,00 TL" readonly>
+          <input type="text" name="kv_matrah" id="kv_matrah" class="form-control calculation-result" placeholder="0,00 TL" readonly>
           <button type="button" class="btn btn-outline-secondary" id="btn-manual-matrah">
             Manuel Belirle
           </button>
@@ -450,17 +489,23 @@
           <span class="input-group-text info-icon-styled" onclick="showInfo('tevsiYatirimdanEldeEdilenKazancTutari')">
             <i class="bi bi-info-circle"></i>
           </span>
-          <input type="text" name="tevsi_yatirim_kazanci" id="tevsi_yatirim_kazanci" class="form-control"
+          <input type="text" name="tevsi_yatirim_kazanci" id="tevsi_yatirim_kazanci" class="form-control calculation-result"
             placeholder="0,00 TL" readonly>
         </div>
       </div>
 
-      <button type="button" class="btn btn-secondary me-2" onclick="goToStep4()">← Geri</button>
-      <button type="button" class="btn btn-primary" onclick="goToStep6()">Devam</button>
+      <div class="mt-4 d-flex justify-content-between">
+        <button type="button" class="btn btn-modern btn-outline-secondary" onclick="goToStep4()">
+          <i class="bi bi-arrow-left"></i> Geri
+        </button>
+        <button type="button" class="btn btn-modern btn-modern-primary" onclick="goToStep6()">
+          Devam Et <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
     </div>
 
-    <div id="step6" class="hidden-step">
-      <h5>Aşama 6 – Satış & Faaliyet Dağılımı</h5>
+    <div id="step6" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-diagram-3-fill me-2"></i>Aşama 6 – Satış & Faaliyet Dağılımı</h5>
 
       <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" id="useDetailedProfitRatios" name="use_detailed_profit_ratios"
@@ -507,25 +552,36 @@
 
 
 
-      <button type="button" class="btn btn-secondary me-2" onclick="goToStep5('from6')">← Geri</button>
-      <button id="calculateCariBtn" type="button" class="btn btn-primary">
-        CARİ KATKI TUTARINI HESAPLA
-      </button>
+      <div class="mt-4 d-flex justify-content-between">
+        <button type="button" class="btn btn-modern btn-outline-secondary" onclick="goToStep5('from6')">
+          <i class="bi bi-arrow-left"></i> Geri
+        </button>
+        <button id="calculateCariBtn" type="button" class="btn btn-modern btn-modern-primary">
+          <i class="bi bi-calculator"></i> CARİ KATKI TUTARINI HESAPLA
+        </button>
+      </div>
 
       <div class="mt-5 d-flex justify-content-center">
-        <a href="?sekme=ayrintili" class="btn btn-lg text-white text-decoration-none
-                                        px-5 py-3 rounded-pill btn-gradient-hover shadow-lg">
+        <a href="?sekme=ayrintili" class="btn btn-modern btn-modern-primary px-5 py-3 shadow-lg">
           <i class="bi bi-pie-chart-fill me-2"></i>
-          Kazanç Dağılımını <br class="d-none d-md-block">
-          Ayrıntılı Olarak Hesaplamak İstiyorum
+          Kazanç Dağılımını Ayrıntılı Olarak Hesaplamak İstiyorum
           <i class="bi bi-arrow-right ms-2"></i>
         </a>
       </div>
     </div>
 
-    <div id="step7" class="hidden-step">
-      <h5>Aşama 7 - Sonuçlar & Kaydet</h5>
+    <div id="step7" class="hidden-step corporate-card">
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Aşama 7 - Sonuçlar & Kaydet</h5>
 
+
+      <div id="info-9903-limits" class="alert alert-warning small mb-3 shadow-sm" style="display: none; border-left: 5px solid #ffc107;">
+        <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill"></i> 2025/9903 Kararı Özel Sınırları (Diğer Faaliyetler):</div>
+        <ul class="mb-0 ps-3">
+          <li>1. Sınır (Toplam Katkının %50’si - Kalan): <span id="span-limit1-9903" class="fw-semibold text-dark">0,00 TL</span></li>
+          <li>2. Sınır (Fiili Harcama / Hak Edilen Bakiye): <span id="span-limit2-9903" class="fw-semibold text-dark">0,00 TL</span></li>
+          <li>Uygulanan Sınır: <span class="fw-bold text-danger" id="span-limit-used-9903">0,00 TL</span></li>
+        </ul>
+      </div>
 
       <div class="mb-3">
         <label>Cari Dönemde Yararlanılan Yatırıma Katkı Tutarı (Yatırımdan Elde Edilen Kazanç Dolayısıyla)</label>
@@ -720,6 +776,15 @@
     "onceki_katki_tutari": "none",
     "kalan_katki_tutari": "none",
     "endeks_katki_tutari": "none",
+
+    "kv_matrah": "none",
+    "cari_yatirim_katki": "none",
+    "cari_diger_katki": "none",
+    "cari_toplam_katki": "none",
+    "genel_toplam_katki": "none",
+    "indirimli_matrah": "none",
+    "indirimli_kv": "none",
+    "indirimli_kv_oran": "none",
   };
 
 
@@ -774,37 +839,14 @@
     const el = document.getElementById(id);
     if (!el) return 0;
 
-    const type = idConfig[id];
-
-    // Eğer IMask uygulanmışsa
+    // 1) Eğer IMask uygulanmışsa -> typedValue doğrudan Number döner
     if (mask) {
-      const raw = mask.unmaskedValue || "";
-      if (!raw) return 0;
-
-      const n = Number(raw);
-
-      // YÜZDE ALANLARI
-      if (type === "percent") {
-        // Örn: "40" -> 40
-        // "400" -> 40
-        // "4000" -> 40
-        // "40000" -> 40
-        // "400000" -> 40
-        //
-        // Genel formül:
-        // divider = 10^(raw.length - 2)
-        // 2 hane = tam değer
-        // fazlası → bölünür
-
-        const divider = Math.pow(10, Math.max(0, raw.length - 2));
-        return n / divider;
-      }
-
-      // PARA ALANLARI (10000000 → 100000,00)
-      return n / 100;
+      const v = mask.typedValue;
+      if (v === null || v === undefined || v === "") return 0;
+      return typeof v === "number" ? v : (Number(v) || 0);
     }
 
-    // Eğer IMask yoksa → Türk formatlı parse
+    // 2) Eğer IMask yoksa -> Türk formatlı parse
     return parseFormattedNumber(el.value);
   }
 
@@ -865,46 +907,29 @@
     if (!el) return;
 
     const mask = maskMap[id];
-    const type = idConfig[id];
 
     // Numerik güvenlik
     let numVal = Number(val);
     if (isNaN(numVal)) numVal = 0;
 
-    /* -------------------------------------------------------------
-       1) YÜZDE ALANLARI
-       ------------------------------------------------------------- */
-    if (mask && type === "percent") {
-      // unmaskedValue = yüzde * 100 → 20 → 2000
-      const unmasked = Math.round(numVal * 100);
-
+    // 1) Eğer IMask varsa -> typedValue üzerinden set et
+    if (mask) {
       programmaticMaskUpdate = true;
-      mask.unmaskedValue = String(unmasked);
+      mask.typedValue = numVal;
       programmaticMaskUpdate = false;
-
-      return;
+    } else {
+      // 2) Maskesiz Alanlar -> Yerel format (tr-TR)
+      el.value = numVal.toLocaleString("tr-TR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     }
 
-    /* -------------------------------------------------------------
-       2) PARA ALANLARI
-       ------------------------------------------------------------- */
-    if (mask && type !== "none") {
-      const unmasked = Math.round(numVal * 100);
-
-      programmaticMaskUpdate = true;
-      mask.unmaskedValue = String(unmasked);
-      programmaticMaskUpdate = false;
-
-      return;
+    // ✨ Görsel Geri Bildirim (Flash Efekti)
+    if (el.classList.contains("calculation-result")) {
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 600);
     }
-
-    /* -------------------------------------------------------------
-       3) MASKESİZ ALANLAR
-       ------------------------------------------------------------- */
-    el.value = numVal.toLocaleString("tr-TR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
   }
 
 
@@ -1309,6 +1334,10 @@
     // ======================================================
     console.log("→ Normal teşvik modu aktif");
 
+    // 9903 için özel kutuyu gizle
+    const infoBox9903 = document.getElementById("info-9903-limits");
+    if (infoBox9903) infoBox9903.style.display = "none";
+
     makeSelectWritable(ilSelect);
     makeSelectWritable(osbSelect);
 
@@ -1344,14 +1373,20 @@
 
 
   function updateProgress(step) {
-    const progressBar = document.getElementById("progressBar");
-    const currentStageText = document.getElementById("current-stage-text"); // current-stage-text id'li span'i doğru al
+    const currentStageText = document.getElementById("current-stage-text");
+    if (currentStageText) currentStageText.textContent = step;
 
-    if (progressBar && currentStageText) {
-      const percent = (step / TOTAL_STEPS) * 100;
-      progressBar.style.width = percent + "%";
-      progressBar.setAttribute("aria-valuenow", percent);
-      currentStageText.textContent = step; // Sadece sayıyı günceller, "Aşama X / Y" metni HTML'de sabit kalır
+    // Modern Stepper Güncelle
+    for (let i = 1; i <= 7; i++) {
+      const item = document.getElementById(`step-i-${i}`);
+      if (!item) continue;
+
+      item.classList.remove("active", "completed");
+      if (i === step) {
+        item.classList.add("active");
+      } else if (i < step) {
+        item.classList.add("completed");
+      }
     }
   }
 
@@ -1481,10 +1516,10 @@
         spanDig.textContent = initialRatios.E;
       }
     } else {
-      const brut = parseFormattedNumber(brutInput.value) || 0;
-      const ihracat = parseFormattedNumber(ihracatInput.value) || 0;
-      const imalat = parseFormattedNumber(imalatInput.value) || 0;
-      const diger = parseFormattedNumber(digerFaaliyetInput.value) || 0;
+      const brut = getVal("brut_satis");
+      const ihracat = getVal("ihracat");
+      const imalat = getVal("imalat");
+      const diger = getVal("diger_faaliyet");
       let pctIhr = 0,
         pctIml = 0,
         pctDig = 0;
@@ -2057,205 +2092,161 @@
 
 
   function hesaplaKatkiTutari9903({ advance = false } = {}) {
-
     const karar = document.getElementById("karar")?.value;
     if (karar !== "2025/9903") return;
 
-    console.log("🔹 hesaplaKatkiTutari9903() BAŞLADI");
+    console.log("🔹 hesaplaKatkiTutari9903() [GÜNCELLENMİŞ] BAŞLADI");
 
     const safe = (x) => (isNaN(x) ? 0 : x);
-
     const val = (id) => safe(getVal(id));
 
-    // 1️⃣ Girdiler
+    // 1️⃣ Temel Girdiler
+    const toplamYatirim = val("toplam_tutar");
+    const harcamaYatirim = val("toplam_harcama_tutari");
+    const katkiOraniInput = val("katki_orani");
+    const vergiIndirimOraniInput = val("vergi_orani");
+    const digerOranInput = val("diger_oran");
+    
+    // Oranları 0-1 aralığına çek
+    const katkiOrani = val("katki_orani") / 100;
+    const vergiIndirimOrani = val("vergi_orani") / 100;
+    const digerOranBudgetOrani = val("diger_oran") / 100;
+
+    const oncekiYatirimKatkisi = val("onceki_yatirim_katki_tutari");
+    const oncekiDigerKatkisi = val("onceki_diger_katki_tutari");
+    const oncekiToplamKatki = oncekiYatirimKatkisi + oncekiDigerKatkisi;
+
+    // 2️⃣ Katkı Havuzları
+    const toplamKatkiPotansiyeli = toplamYatirim * katkiOrani;
+    const hakEdilenKatkiBirikmis = harcamaYatirim * katkiOrani;
+    
+    // Diğer faaliyetler için "Bütçe": (Toplam * %50) - Daha önce kullanılan
+    const digerFaaliyetButcesi = (toplamKatkiPotansiyeli * digerOranBudgetOrani) - oncekiDigerKatkisi;
+    
+    // Kullanılabilir toplam "Hak Edilen" bakiyesi: Birikmiş - Toplam Kullanılan
+    const kullanilabilirHakEdilenBakiye = Math.max(0, hakEdilenKatkiBirikmis - oncekiToplamKatki);
+
+    // 3️⃣ Kazançlar ve Zaman Sınırı
+    const donemYil = parseInt((document.getElementById("donem")?.value || "").split(" - ")[0]) || 0;
+    const baslangicYil = parseInt(document.getElementById("baslangic_yili")?.value || "0");
+    const donemFarki = (baslangicYil && donemYil) ? (donemYil - baslangicYil) : 0;
+
     let yatirimKazanci = 0;
-
-
-
     if (getVal("yatirimdan_elde_edilen_kazanc") > 0) {
       yatirimKazanci = val("yatirimdan_elde_edilen_kazanc");
-
     } else if (getVal("tevsi_yatirim_kazanci") > 0) {
       yatirimKazanci = val("tevsi_yatirim_kazanci");
     }
 
+    const kvMatrah = val("kv_matrah");
+    const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi"); // 'yatirim', 'diger', 'karma'
+    let digerFaaliyetKazanci = (gelirTipi === "yatirim") ? 0 : kvMatrah;
 
-    const digerKazanc = val("kv_matrah");
-
-    // 🔸 Kullanıcı seçimine göre diğer kazancı devre dışı bırak
-    const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi");
-    let digerKazancFinal = digerKazanc;
-
-    if (gelirTipi === "yatirim") {
-      digerKazancFinal = 0;
-      console.log("🎯 Yalnız yatırım kazancı seçildi — diğer faaliyet kazancı hesap dışı bırakıldı.");
-    }
-
-    const toplamYatirim = val("toplam_tutar");
-    const harcamaYatirim = val("toplam_harcama_tutari");
-    const katkiOrani = val("katki_orani");
-    const vergiIndirimOrani = val("vergi_orani");
-    const digerOran = val("diger_oran");
-    const oncekiToplamKatki = val("onceki_katki_tutari");
-
-    // 2️⃣ KV oranları
+    // 4️⃣ Vergi Farkları (KV Oranı - İndirimli Oran)
     const kvOranIhracat = safe(val("kv_oran_ihracat") / 100) || 0.20;
     const kvOranImalat = safe(val("kv_oran_imalat") / 100) || 0.24;
     const kvOranDiger = safe(val("kv_oran_diger") / 100) || 0.25;
 
-    const farkIhr = kvOranIhracat - kvOranIhracat * (1 - vergiIndirimOrani);
-    const farkIml = kvOranImalat - kvOranImalat * (1 - vergiIndirimOrani);
-    const farkDig = kvOranDiger - kvOranDiger * (1 - vergiIndirimOrani);
+    const farkIhr = kvOranIhracat * vergiIndirimOrani;
+    const farkIml = kvOranImalat * vergiIndirimOrani;
+    const farkDig = kvOranDiger * vergiIndirimOrani;
 
-    // 3️⃣ Oran kaynağı
+    // 5️⃣ Satış Oranları
     const useDetailedRatios = document.getElementById("useDetailedProfitRatios")?.checked || false;
-
-    let ihracatOraniFinal = 0,
-      imalatOraniFinal = 0,
-      digerOraniFinal = 0;
+    let ihrOran = 0, imlOran = 0, digOran = 0;
 
     if (useDetailedRatios) {
-      ihracatOraniFinal =
-        safe(parseFloat(document.getElementById("ratio_ihracat")?.textContent.replace("%", "").replace(",", "."))) / 100;
-      imalatOraniFinal =
-        safe(parseFloat(document.getElementById("ratio_imalat")?.textContent.replace("%", "").replace(",", "."))) / 100;
-      digerOraniFinal =
-        safe(parseFloat(document.getElementById("ratio_diger")?.textContent.replace("%", "").replace(",", "."))) / 100;
+      ihrOran = safe(parseFloat(document.getElementById("ratio_ihracat")?.textContent.replace("%", "").replace(",", "."))) / 100;
+      imlOran = safe(parseFloat(document.getElementById("ratio_imalat")?.textContent.replace("%", "").replace(",", "."))) / 100;
+      digOran = safe(parseFloat(document.getElementById("ratio_diger")?.textContent.replace("%", "").replace(",", "."))) / 100;
     } else {
-      const brutSatis = val("brut_satis");
-      const ihracatSatis = val("ihracat");
-      const imalatSatis = val("imalat");
-      const digerSatis = val("diger_faaliyet");
-
-      if (brutSatis > 0) {
-        ihracatOraniFinal = ihracatSatis / brutSatis;
-        imalatOraniFinal = imalatSatis / brutSatis;
-        digerOraniFinal = digerSatis / brutSatis;
-      } else {
-        digerOraniFinal = 1;
-      }
+      const brut = val("brut_satis");
+      if (brut > 0) {
+        ihrOran = val("ihracat") / brut;
+        imlOran = val("imalat") / brut;
+        digOran = val("diger_faaliyet") / brut;
+      } else { digOran = 1; }
     }
 
-    // 5️⃣ Katkı tabanları
-    const toplamKatki9903 = toplamYatirim * katkiOrani;
-    const hakEdilenKatki9903 = harcamaYatirim * katkiOrani;
-    const digerOranFraction = digerOran > 1 ? digerOran / 100 : digerOran;
-    const ustSinirDiger9903 = toplamKatki9903 * digerOranFraction;
-    const digerKullanilabilir9903 = Math.min(hakEdilenKatki9903, ustSinirDiger9903);
-
-    // 6️⃣ Hesap dönemi farkı
-    const donemYil = parseInt((document.getElementById("donem")?.value || "").split(" - ")[0]) || 0;
-    const baslangicYil = parseInt(document.getElementById("baslangic_yili")?.value || "0");
-    const donemFarki = baslangicYil && donemYil ? donemYil - baslangicYil : 0;
-
-    console.log("🧮 Nihai Değerler:", {
-      toplamKatki9903,
-      hakEdilenKatki9903,
-      ustSinirDiger9903,
-      yatirimKazanci,
-      digerKazanc: digerKazancFinal,
-      donemFarki,
-    });
-
-    // 7️⃣ Cari dönem katkıları
-    let cariYatirimKatkisi9903 = 0;
-    let cariDigerKatkisi9903 = 0;
-
-    if (yatirimKazanci > 0 && digerKazancFinal <= 0) {
-      // Yalnız yatırım kazancı
-      if (donemFarki >= 10) {
-        Swal.fire({
-          icon: "warning",
-          title: "10 Hesap Dönemi Sınırı",
-          html: "Yatırımdan elde edilen kazançlarda indirimli kurumlar vergisi uygulanabilecek süre dolmuştur.",
-          confirmButtonText: "Tamam",
-        });
-      } else {
-        cariYatirimKatkisi9903 =
-          yatirimKazanci * ihracatOraniFinal * farkIhr +
-          yatirimKazanci * imalatOraniFinal * farkIml +
-          yatirimKazanci * digerOraniFinal * farkDig;
-      }
+    // 6️⃣ HESAPLAMA: Yatırım Kazancı Tarafı (10 Yıl Sınırı)
+    let cariYatirimKatkisi = 0;
+    if (yatirimKazanci > 0 && donemFarki < 10) {
+      // Yatırım kazancı katkısı için birikmiş harcama (hak edilen) sınırı var mı? 
+      // Mevzuat "on yıllık süreyle sınırlı kaydıyla hak kazanılan katki tutarına ulaşılıncaya kadar" diyor.
+      const potansiyelYatirimKatkisi = yatirimKazanci * (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+      cariYatirimKatkisi = Math.min(potansiyelYatirimKatkisi, kullanilabilirHakEdilenBakiye);
     }
 
-    else if (yatirimKazanci <= 0 && digerKazancFinal > 0) {
-      // Yalnız diğer kazanç
-      if (donemFarki >= 4) {
-        Swal.fire({
-          icon: "info",
-          title: "4 Hesap Dönemi Sınırı",
-          html: "Diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulama süresi dolmuştur.",
-          confirmButtonText: "Tamam",
-        });
-      } else {
-        cariDigerKatkisi9903 = digerKullanilabilir9903;
-      }
+    // 7️⃣ HESAPLAMA: Diğer Faaliyet Kazancı Tarafı (4 Yıl Sınırı)
+    let cariDigerKatkisi = 0;
+    if (digerFaaliyetKazanci > 0 && donemFarki < 4) {
+      // Kalan Hak Edilen Bakiye (Yatırım katkısı düşüldükten sonra)
+      const bakiyeSonraYatirim = Math.max(0, kullanilabilirHakEdilenBakiye - cariYatirimKatkisi);
+      
+      // Üst Sınır: min(Bütçe, Kalan Hak Edilen)
+      const azamiDigerKatkiLimit = Math.min(digerFaaliyetButcesi, bakiyeSonraYatirim);
+      
+      const potansiyelDigerKatkisi = digerFaaliyetKazanci * (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+      
+      cariDigerKatkisi = Math.min(potansiyelDigerKatkisi, azamiDigerKatkiLimit);
     }
 
-    else if (yatirimKazanci > 0 && digerKazancFinal > 0) {
-      // Karma durum
-      const yatirimKismi =
-        yatirimKazanci * ihracatOraniFinal * farkIhr +
-        yatirimKazanci * imalatOraniFinal * farkIml +
-        yatirimKazanci * digerOraniFinal * farkDig;
+    // 8️⃣ Final Değerler
+    const cariToplamKatki = cariYatirimKatkisi + cariDigerKatkisi;
+    const genelToplamKatki = oncekiToplamKatki + cariToplamKatki;
+    const kalanKatkiTutari = Math.max(0, toplamKatkiPotansiyeli - genelToplamKatki);
 
-      const digerKismi = donemFarki < 4 ? digerKullanilabilir9903 : 0;
+    // 9️⃣ UI SET
+    safeSet("cari_yatirim_katki", cariYatirimKatkisi);
+    safeSet("cari_diger_katki", cariDigerKatkisi);
+    safeSet("cari_toplam_katki", cariToplamKatki);
+    safeSet("genel_toplam_katki", genelToplamKatki);
+    safeSet("kalan_katki_tutari", kalanKatkiTutari);
+    
+    // Alt Bilgi Alanları
+    safeSet("katki_tutari", toplamKatkiPotansiyeli);
+    safeSet("diger_katki_tutari", (toplamKatkiPotansiyeli * digerOranBudgetOrani)); // Toplam Bütçe (Statik)
+    safeSet("fiili_katki_tutari", hakEdilenKatkiBirikmis); // Toplam Hak Edilen (Statik)
 
-      cariYatirimKatkisi9903 = yatirimKismi;
-      cariDigerKatkisi9903 = digerKismi;
+    // UI SET for Limits (2025/9903 specific feedback)
+    const infoBox = document.getElementById("info-9903-limits");
+    if (infoBox) {
+      infoBox.style.display = "block";
+      const fNum = (v) => v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " TL";
+      
+      document.getElementById("span-limit1-9903").textContent = 
+        fNum(toplamKatkiPotansiyeli * digerOranBudgetOrani) + " - Kullanılan (" + fNum(oncekiDigerKatkisi) + ") = " + fNum(digerFaaliyetButcesi);
+      
+      const bakiyeSonraYatirim = Math.max(0, kullanilabilirHakEdilenBakiye - cariYatirimKatkisi);
+      document.getElementById("span-limit2-9903").textContent = fNum(bakiyeSonraYatirim);
+      document.getElementById("span-limit-used-9903").textContent = fNum(Math.min(digerFaaliyetButcesi, bakiyeSonraYatirim));
     }
 
-    // 8️⃣ Toplam katkılar
-    const cariToplamKatki9903 = cariYatirimKatkisi9903 + cariDigerKatkisi9903;
-    const genelToplamKatki9903 = oncekiToplamKatki + cariToplamKatki9903;
-    const kalanKatki9903 = Math.max(0, toplamKatki9903 - genelToplamKatki9903);
+    // 🔟 Matrah ve Vergi Sonuçları
+    // Matrah = Kullanılan Katkı / Efektif Vergi Avantajı
+    const efektifFark = (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+    
+    const matrahYatirim = yatirimKazanci; // Yatırım kazancı zaten matrahın kendisidir (indirimli orana tabi olan kısım)
+    const matrahDiger = efektifFark > 0 ? (cariDigerKatkisi / efektifFark) : 0;
+    
+    const indirimliMatrah = matrahYatirim + matrahDiger;
+    const indirimliKV = (matrahYatirim + matrahDiger) * (kvOranDiger * (1 - vergiIndirimOrani));
+    const indirimliKVOran = (indirimliMatrah > 0) ? (indirimliKV / indirimliMatrah) * 100 : 0;
 
-    // 9️⃣ UI güncelleme (sadece safeSet!)
-    safeSet("cari_yatirim_katki", cariYatirimKatkisi9903);
-    safeSet("cari_diger_katki", cariDigerKatkisi9903);
-    safeSet("cari_toplam_katki", cariToplamKatki9903);
-    safeSet("genel_toplam_katki", genelToplamKatki9903);
-    safeSet("kalan_katki_tutari", kalanKatki9903);
-    safeSet("katki_tutari", toplamKatki9903);
-    safeSet("diger_katki_tutari", ustSinirDiger9903);
-    safeSet("fiili_katki_tutari", hakEdilenKatki9903);
+    safeSet("indirimli_matrah", indirimliMatrah);
+    safeSet("indirimli_kv", indirimliKV);
+    safeSet("indirimli_kv_oran", indirimliKVOran);
 
-    // 💰 İndirimli KV matrahı ve vergisi
-    const toplamOran = ihracatOraniFinal + imalatOraniFinal + digerOraniFinal || 1;
-
-    const katkIhr = cariDigerKatkisi9903 * (ihracatOraniFinal / toplamOran);
-    const katkIml = cariDigerKatkisi9903 * (imalatOraniFinal / toplamOran);
-    const katkDig = cariDigerKatkisi9903 * (digerOraniFinal / toplamOran);
-
-    const matrahOtherIhr =
-      farkIhr > 0 ? katkIhr / farkIhr : 0;
-    const matrahOtherIml =
-      farkIml > 0 ? katkIml / farkIml : 0;
-    const matrahOtherDig =
-      farkDig > 0 ? katkDig / farkDig : 0;
-
-    const matrahOther = matrahOtherIhr + matrahOtherIml + matrahOtherDig;
-    const matrahInvest = Math.max(0, yatirimKazanci);
-    const indirimliMatrah9903 = matrahOther + matrahInvest;
-
-    const reducedRate = kvOranDiger * (1 - vergiIndirimOrani);
-    const indirimliKV9903 = indirimliMatrah9903 * reducedRate;
-    const efektifOran = (indirimliKV9903 / indirimliMatrah9903) * 100 || 0;
-
-    safeSet("indirimli_matrah", indirimliMatrah9903);
-    safeSet("indirimli_kv", indirimliKV9903);
-    safeSet("indirimli_kv_oran", efektifOran);
-
-    console.log("✅ hesaplaKatkiTutari9903() tamamlandı", {
-      cariYatirimKatkisi9903,
-      cariDigerKatkisi9903,
-      genelToplamKatki9903,
-      kalanKatki9903,
+    console.log("✅ 9903 Hesaplama Tamam:", {
+      cariYatirimKatkisi,
+      cariDigerKatkisi,
+      indirimliMatrah,
+      digerFaaliyetButcesi,
+      kullanilabilirHakEdilenBakiye
     });
 
     if (advance && typeof _updateStepDisplay === "function") {
       _updateStepDisplay(7);
-      console.log("➡️ Aşama 7’ye geçildi (manual trigger)");
     }
   }
 
@@ -2274,7 +2265,7 @@
 
     // 2) Girdiler
     const toplam = getVal("toplam_tutar");
-    const oran = getVal("katki_orani");  // ← Hata düzeltilmiş
+    const oran = getVal("katki_orani") / 100;
 
     // 3) Geçersiz Kontrol
     if (isNaN(toplam) || isNaN(oran)) {
@@ -2357,7 +2348,7 @@
     }
 
     // 3) Hesap
-    const fiiliKatki = toplamHarcama * oran;
+    const fiiliKatki = toplamHarcama * (oran / 100);
 
     // 4) Sonucu yaz
     safeSet("fiili_katki_tutari", fiiliKatki);
@@ -2485,10 +2476,10 @@
     const matrahRaw = Number(ikvMatrah) || 0;
     const matrah = matrahRaw < 0 ? 0 : matrahRaw;
 
-    // 🔹 Oranlar 0–1 formatına zorla
-    const pIhr = (Number(ihrPct) > 1) ? (Number(ihrPct) / 100) : Number(ihrPct) || 0;
-    const pIml = (Number(imlPct) > 1) ? (Number(imlPct) / 100) : Number(imlPct) || 0;
-    const pDig = (Number(digPct) > 1) ? (Number(digPct) / 100) : Number(digPct) || 0;
+    // 🔹 Oranlar 0–1 formatına (zaten caller tarafından böyle gönderilir)
+    const pIhr = Number(ihrPct) || 0;
+    const pIml = Number(imlPct) || 0;
+    const pDig = Number(digPct) || 0;
 
     // 🔹 Vergi indirim oranı 0–1
     const pDisc = Number(vergiIndirimOraniFraction) || 0;
@@ -2981,12 +2972,12 @@
       return;
     }
 
-    const gerceklesen = parseFormattedNumber(elGerceklesen.value);
-    const sabit = parseFormattedNumber(elSabit.value);
-    const kar = parseFormattedNumber(elKar.value);
+    const gerceklesen = getVal("gerceklesen_tevsi_yatirim_tutari");
+    const sabit = getVal("toplam_sabit_kiymet_tutari");
+    const kar = getVal("ticari_bilanco_kari");
 
     let kazanc = 0;
-    if (!isNaN(gerceklesen) && !isNaN(sabit) && !isNaN(kar) && sabit !== 0) {
+    if (sabit !== 0) {
       kazanc = (gerceklesen / sabit) * kar;
     }
 
@@ -3004,6 +2995,9 @@
 
     // Değeri sadece safeSet ile yaz → tam uyumlu
     safeSet("tevsi_yatirim_kazanci", kazanc);
+
+    // 🔹 Bağımlı hesaplamayı tetikle
+    if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
   }
 
 
@@ -3205,9 +3199,9 @@
       const kOut = document.getElementById('kkeg');
       const mOut = document.getElementById('kv_matrah');
 
-      if (tOut) tOut.value = formatTL(vals.t);
-      if (kOut) kOut.value = formatTL(vals.k);
-      if (mOut) mOut.value = formatTL(vals.m);
+      if (tOut) safeSet('ticari_bilanco_kari', vals.t);
+      if (kOut) safeSet('kkeg', vals.k);
+      if (mOut) safeSet('kv_matrah', vals.m);
 
       if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
 
@@ -3342,8 +3336,7 @@
 
 
 
-  const currentBelgeJSData = {{ current_belge | tojson | safe
-  }};
+  const currentBelgeJSData = {{ current_belge | tojson | safe if current_belge else 'null' }};
 
   function clearAllFormData() {
     Swal.fire({
@@ -3847,16 +3840,20 @@
     // 7) MODÜL 7 — FORM RESTORE / SESSION SYSTEM
     // ============================================================
     function initRestoreSystem() {
+      const params = new URLSearchParams(window.location.search);
+      const isViewMode = params.has("view") || params.has("id") || params.get("sekme") === "form" && currentBelgeJSData;
 
-      // 1) input – select restore
-      document.querySelectorAll("input, select, textarea").forEach(el => {
-        if (el.type === "file") return;
-        const name = el.name || el.id;
-        const saved = sessionStorage.getItem(`form_${name}`);
-        if (saved !== null) el.value = saved;
-      });
+      // 1) input – select restore (VIEW MODUNDA DEĞİLSEK YAP)
+      if (!isViewMode) {
+        document.querySelectorAll("input, select, textarea").forEach(el => {
+          if (el.type === "file") return;
+          const name = el.name || el.id;
+          const saved = sessionStorage.getItem(`form_${name}`);
+          if (saved !== null) el.value = saved;
+        });
+      }
 
-      // 2) değişiklikleri kaydet
+      // 2) değişiklikleri her zaman kaydet
       document.querySelectorAll("input, select, textarea").forEach(el => {
         if (el.type === "file") return;
         el.addEventListener("input", () => {
@@ -3865,29 +3862,32 @@
         });
       });
 
-      // 3) belge no & tarih restore
-      const bNo = sessionStorage.getItem("belge_no");
-      const bTarih = sessionStorage.getItem("belge_tarihi");
+      // 3) belge no & tarih restore (VIEW MODUNDA DEĞİLSEK YAP)
+      if (!isViewMode) {
+        const bNo = sessionStorage.getItem("belge_no");
+        const bTarih = sessionStorage.getItem("belge_tarihi");
 
-      if (bNo) {
-        const el = document.querySelector("input[name='belge_no']");
-        if (el) el.value = bNo;
-      }
-      if (bTarih) {
-        const el = document.querySelector("input[name='belge_tarihi']");
-        if (el) el.value = bTarih;
-      }
-
-      if (bNo || bTarih) {
-        sessionStorage.removeItem("belge_no");
-        sessionStorage.removeItem("belge_tarihi");
+        if (bNo) {
+          const el = document.querySelector("input[name='belge_no']");
+          if (el) el.value = bNo;
+        }
+        if (bTarih) {
+          const el = document.querySelector("input[name='belge_tarihi']");
+          if (el) el.value = bTarih;
+        }
+        if (bNo || bTarih) {
+          sessionStorage.removeItem("belge_no");
+          sessionStorage.removeItem("belge_tarihi");
+        }
       }
 
       // 🔥 4) IMask restore sonrası MUTLAKA senkronize et
       setTimeout(() => {
-        safeSet("katki_orani", getVal("katki_orani"));
-        safeSet("vergi_orani", getVal("vergi_orani"));
-        safeSet("diger_oran", getVal("diger_oran"));
+        if (typeof safeSet === "function") {
+          safeSet("katki_orani", getVal("katki_orani"));
+          safeSet("vergi_orani", getVal("vergi_orani"));
+          safeSet("diger_oran", getVal("diger_oran"));
+        }
       }, 200);
     }
 
@@ -4074,6 +4074,76 @@
     initInfoBlink();
     initGlobalListeners();
 
+    // ============================================================
+    // 15) BELGE İNCELEME (VIEW) VERİ YÜKLEME
+    // ============================================================
+    if (currentBelgeJSData && window.location.search.includes('sekme=form')) {
+      console.log("📂 Belge verileri forma yükleniyor...");
+      
+      const smartSet = (id, val) => {
+        if (!id) return;
+        const config = idConfig[id];
+        if (config && config !== "none") {
+          safeSet(id, val);
+        } else {
+          // name attribute'u veya ID ile bul
+          const el = document.querySelector(`[name="${id}"], #${id}`);
+          if (el) el.value = val ?? '';
+        }
+      };
+
+      try {
+        // Step 1
+        const formattedDate = convertToInputDateFormat(currentBelgeJSData.belge_tarihi);
+        smartSet('belge_tarihi', formattedDate);
+        smartSet('karar', currentBelgeJSData.karar);
+        
+        if (typeof handleKarar9903 === "function") handleKarar9903();
+
+        smartSet('program_turu', currentBelgeJSData.program_turu);
+        smartSet('yatirim_turu1', currentBelgeJSData.yatirim_turu1);
+        smartSet('yatirim_turu2', currentBelgeJSData.yatirim_turu2);
+        smartSet('belge_no', currentBelgeJSData.belge_no);
+        smartSet('vize_durumu', currentBelgeJSData.vize_durumu);
+        
+        if (typeof toggleInvestmentIncomeInputs === "function") toggleInvestmentIncomeInputs();
+
+        // Step 2
+        smartSet('donem', currentBelgeJSData.donem);
+        smartSet('il', currentBelgeJSData.il);
+        smartSet('osb', currentBelgeJSData.osb);
+        smartSet('katki_orani', currentBelgeJSData.katki_orani);
+        smartSet('vergi_orani', currentBelgeJSData.vergi_orani);
+        smartSet('diger_oran', currentBelgeJSData.diger_oran);
+        
+        if (typeof setBolge === "function") setBolge();
+        if (typeof setOranlar === "function") setOranlar();
+
+        // Step 3
+        smartSet('toplam_tutar', currentBelgeJSData.toplam_tutar);
+        smartSet('cari_harcama_tutari', currentBelgeJSData.cari_harcama_tutari);
+        smartSet('toplam_harcama_tutari', currentBelgeJSData.toplam_harcama_tutari);
+
+        // Step 4
+        smartSet('onceki_yatirim_katki_tutari', currentBelgeJSData.onceki_yatirim_katki_tutari);
+        smartSet('onceki_diger_katki_tutari', currentBelgeJSData.onceki_diger_katki_tutari);
+
+        // Step 6
+        const chk = document.getElementById('useDetailedProfitRatios');
+        if (chk) chk.checked = !!currentBelgeJSData.use_detailed_profit_ratios;
+        
+        ['brut_satis', 'ihracat', 'imalat', 'diger_faaliyet'].forEach(id => {
+          smartSet(id, currentBelgeJSData[id]);
+        });
+        
+        if (typeof toggleDetailedProfitInput === "function") toggleDetailedProfitInput();
+        
+        console.log("✅ Belge verileri başarıyla yüklendi.");
+      } catch (err) {
+        console.error("❌ Veri yükleme hatası:", err);
+      }
+    }
+
   });
 
 
@@ -4088,45 +4158,6 @@
   // Gizli file input → PDF parser
   const kvInput = document.getElementById('kvUploadInput');
   if (kvInput) kvInput.addEventListener('change', handleKVUpload);
-
-
-  // currentBelge varsa forma doldur
-  if (currentBelgeJSData && window.location.search.includes('sekme=form')) {
-    // Step 1
-    setVal('input[name="belge_tarihi"]', currentBelgeJSData.belge_tarihi);
-    setVal('select[name="karar"]', currentBelgeJSData.karar);
-    setVal('select[name="yatirim_turu1"]', currentBelgeJSData.yatirim_turu1);
-    setVal('select[name="yatirim_turu2"]', currentBelgeJSData.yatirim_turu2);
-    setVal('input[name="belge_no"]', currentBelgeJSData.belge_no);
-    setVal('select[name="vize_durumu"]', currentBelgeJSData.vize_durumu);
-
-    // Step 2 (otomatik oranlar için tetikleyelim)
-    setVal('select[name="donem"]', currentBelgeJSData.donem);
-    setVal('select[name="il"]', currentBelgeJSData.il);
-    setVal('select[name="osb"]', currentBelgeJSData.osb);
-    setBolge();
-    setOranlar();
-
-    // Step 3
-    const s3 = id => document.getElementById(id);
-    if (s3('toplam_tutar')) s3('toplam_tutar').value = fmt(currentBelgeJSData.toplam_tutar);
-    if (s3('cari_harcama_tutari')) s3('cari_harcama_tutari').value = fmt(currentBelgeJSData.cari_harcama_tutari);
-    if (s3('toplam_harcama_tutari')) s3('toplam_harcama_tutari').value = fmt(currentBelgeJSData.toplam_harcama_tutari);
-
-    // Step 4
-    if (s3('onceki_yatirim_katki_tutari')) s3('onceki_yatirim_katki_tutari').value = fmt(currentBelgeJSData.onceki_yatirim_katki_tutari);
-    if (s3('onceki_diger_katki_tutari')) s3('onceki_diger_katki_tutari').value = fmt(currentBelgeJSData.onceki_diger_katki_tutari);
-
-    // Step 6 (satış/dağılım)
-    const chk = document.getElementById('useDetailedProfitRatios');
-    if (chk) chk.checked = !!currentBelgeJSData.use_detailed_profit_ratios;
-    ['brut_satis', 'ihracat', 'imalat', 'diger_faaliyet'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = fmt(currentBelgeJSData[id]);
-    });
-    toggleDetailedProfitInput();
-  }
-
 
 
   // Ayrıntılı Kazanç Formu (güvenli dışa aktar + AJAX kayıt)

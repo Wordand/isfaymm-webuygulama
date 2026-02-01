@@ -19,7 +19,7 @@ from services.db import (
     migrate_login_logs_table,
     migrate_profit_data_table
 )
-from services.utils import safe_date, currency_filter
+from services.utils import safe_date, currency_filter, tlformat
 
 # Blueprints
 from routes.main_routes import bp as main_bp
@@ -83,6 +83,7 @@ def inject_login_status():
 
 app.jinja_env.filters["safe_date"] = safe_date
 app.jinja_env.filters["currency"] = currency_filter 
+app.jinja_env.filters["tlformat"] = tlformat
 
 # --- Admin Bootstrap ---
 def bootstrap_admin_from_env():

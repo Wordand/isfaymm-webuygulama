@@ -128,14 +128,15 @@
 
 
                     <li class="nav-item dropdown ms-2">
-                        <a class="nav-link dropdown-toggle fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat"
+                        <a class="nav-link dropdown-toggle fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat text-blink-red"
                             href="#" id="mevzuatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-book-half me-1"></i> Mevzuat
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="mevzuatDropdown">
                             <li>
-                                <a class="dropdown-item" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
-                                    📢 Mevzuat Değişiklikleri
+                                <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
+                                    <span>📢 Mevzuat Değişiklikleri</span>
+                                    <span class="badge bg-danger ms-2">Yeni</span>
                                 </a>
                             </li>
                             <li>

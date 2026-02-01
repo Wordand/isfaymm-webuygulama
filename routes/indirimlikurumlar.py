@@ -620,8 +620,25 @@ def index():
 
             if current_belge:
                 print(f"📝 Form için belge yüklendi: ID={view_id}")
-                
-                    
+
+    # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
+    kullanimlar = {}
+    if docs:
+        with get_conn() as conn_k:
+            cur_k = conn_k.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            belge_nolar = [d["belge_no"] for d in docs if d.get("belge_no")]
+            if belge_nolar:
+                cur_k.execute("""
+                    SELECT * FROM tesvik_kullanim 
+                    WHERE user_id = %s AND belge_no = ANY(%s)
+                    ORDER BY hesap_donemi DESC
+                """, (user_id, belge_nolar))
+                all_k = cur_k.fetchall()
+                for item in all_k:
+                    bno = item["belge_no"]
+                    if bno not in kullanimlar:
+                        kullanimlar[bno] = []
+                    kullanimlar[bno].append(item)
     # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
     rows = []
     if sekme == "ayrintili":
@@ -670,6 +687,7 @@ def index():
         docs=docs,
         current_belge=current_belge,
         edit_doc=edit_doc,
+        kullanimlar=kullanimlar,
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}),
         TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
         rows=rows,

@@ -55,7 +55,7 @@ table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
     /* Renk Paleti */
     --primary-blue: #0d6efd; /* Ana vurgu rengi (Bootstrap primary) */
     --dark-sidebar: #1e1e2f; /* Sidebar arka plan rengi */
-    --light-bg: #f1f3f5; /* Genel sayfa arka plan rengi */
+    --light-bg: #f8f9fa; /* Daha ferah bir sayfa arka planı */
     --dark-text: #343a40; /* Koyu metin rengi */
     --muted-text: #6c757d; /* Soluk metin rengi */
     --white: #ffffff; /* Beyaz renk */
@@ -88,6 +88,38 @@ table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
     --transition-speed-normal: 0.3s; /* Normal geçiş hızı */
     --transition-speed-fast: 0.2s; /* Hızlı geçiş hızı */
     --transition-speed-slow: 0.5s; /* Navbar geçişi için yavaş hız */
+}
+
+/* --- Pulse / Bildirim Efektleri --- */
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.pulse-red {
+    animation: pulse-red 2s infinite;
+}
+
+/* Yeni: Metin Yanıp Sönme Efekti */
+@keyframes blink-red-text {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+.text-blink-red {
+    animation: blink-red-text 1.5s infinite ease-in-out;
+}
+
+.dot-notification {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #dc3545;
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
 }
 
 /* Genel Body Ayarları */
@@ -1665,10 +1697,428 @@ th {
 }
 
 
-.hover-mevzuat:hover {
-    background-color: #c62828;
-    color: #fff !important;
-    transition: 0.25s ease;
+
+/* ============================================================ */
+/* 🟦 MODERN KURUMSAL UI BİLEŞENLERİ (Modernizasyon) */
+/* ============================================================ */
+
+/* 1) Kurumsal Kart Mimarisi */
+.corporate-card {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08); /* Kenarlık belirginleştirildi */
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    transition: transform var(--transition-speed-normal), box-shadow var(--transition-speed-normal);
+}
+.corporate-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* 2) Modern Stepper (Adım Göstergesi) */
+.modern-stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    position: relative;
+    padding: 0 1rem;
+}
+.modern-stepper::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 0;
+}
+.stepper-item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+.step-counter {
+    width: 42px;
+    height: 42px;
+    background: var(--white);
+    border: 2px solid #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--muted-text);
+    transition: all var(--transition-speed-normal);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.stepper-item.active .step-counter {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: var(--white);
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
+}
+.stepper-item.completed .step-counter {
+    background: var(--success-green);
+    border-color: var(--success-green);
+    color: var(--white);
+}
+.step-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-text);
+    text-align: center;
+    max-width: 80px;
+    line-height: 1.2;
+}
+.stepper-item.active .step-name {
+    color: var(--primary-blue);
+}
+
+/* 3) Akıllı Hesaplama Çıktıları */
+.calculation-result {
+    background-color: #f8fbff !important;
+    border-left: 5px solid var(--primary-blue) !important;
+    font-weight: 700 !important;
+    color: var(--dark-sidebar) !important;
+    transition: background-color 0.5s ease;
+}
+.calculation-result.flash {
+    background-color: #e3f2fd !important;
+}
+
+/* 4) Gelişmiş Tablo ve Rozetler */
+.dashboard-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+.dashboard-table tbody tr {
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Satır konturu eklendi */
+    transition: all 0.2s ease-in-out;
+}
+.dashboard-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.dashboard-table td {
+    border: none !important;
+    padding: 1.2rem 1rem !important;
+}
+.dashboard-table td:first-child {
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+}
+.dashboard-table td:last-child {
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+}
+
+.custom-badge {
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-karar { background: #e7f3ff; color: #007bff; }
+.badge-yil { background: #fff4e5; color: #ff8800; }
+
+/* Buton İyileştirmeleri */
+.btn-modern {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-modern-primary {
+    background: linear-gradient(135deg, var(--btn-gradient-start), var(--btn-gradient-end));
+    color: white;
+    border: none;
+}
+
+/* 5) Dashboard Stat Cards (Özet İstatistikler) */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.stat-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.stat-icon.primary { background: rgba(13, 110, 253, 0.1); color: var(--primary-blue); }
+.stat-icon.success { background: rgba(76, 175, 80, 0.1); color: var(--success-green); }
+.stat-icon.warning { background: rgba(255, 136, 0, 0.1); color: #ff8800; }
+
+.stat-info .stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted-text);
+    margin-bottom: 2px;
+}
+.stat-info .stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark-sidebar);
+}
+
+/* 6) Modern Belge Kartları (Table-Free List) */
+.tesvik-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.tesvik-card {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+.tesvik-card:hover {
+    border-color: var(--primary-blue);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.05);
+}
+.tesvik-card-header {
+    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    cursor: pointer;
+}
+
+/* ============================================================
+   🏛️ PROFESSIONAL LEDGER DESIGN (NEW GENERATION)
+   ============================================================ */
+.ledger-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    padding: 1rem 0;
+}
+
+.ledger-sheet {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ledger-sheet:hover {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.07);
+}
+
+/* Ledger Header */
+.ledger-header {
+    background: #fcfdfe;
+    padding: 2rem;
+    border-bottom: 3px solid #f1f4f8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ledger-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ledger-no {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.ledger-date {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 600;
+}
+
+/* Summary Bar */
+.ledger-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: #fff;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.summary-item {
+    padding: 1.25rem 2rem;
+    border-right: 1px solid #f1f4f8;
+}
+
+.summary-item:last-child {
+    border-right: none;
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #a0aec0;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+/* Period Section */
+.ledger-body {
+    padding: 2rem;
+}
+
+.period-table-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr 180px;
+    padding: 0.75rem 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.period-table-header span {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.period-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr 180px;
+    padding: 1.25rem 1.5rem;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.period-row:hover {
+    background: #fbfcfe;
+}
+
+.period-row:last-child {
+    border-bottom: none;
+}
+
+.period-year-badge {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #3b82f6;
+}
+
+.period-type-pill {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.period-amount {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Action Center */
+.action-center {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.btn-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.btn-action-edit { background: #fff7ed; color: #ea580c; }
+.btn-action-edit:hover { background: #ffedd5; transform: scale(1.1); }
+
+.btn-action-view { background: #f0f9ff; color: #0284c7; }
+.btn-action-view:hover { background: #e0f2fe; transform: scale(1.1); }
+
+.btn-action-delete { background: #fef2f2; color: #dc2626; }
+.btn-action-delete:hover { background: #fee2e2; transform: scale(1.1); }
+
+.btn-ledger-inspect {
+    background: #1e293b;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-ledger-inspect:hover {
+    background: #0f172a;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.25);
+}
+
+@media (max-width: 992px) {
+    .ledger-summary-bar { grid-template-columns: 1fr 1fr; }
+    .period-table-header { display: none; }
+    .period-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    .action-center { justify-content: flex-start; }
 }
 
 
