@@ -112,6 +112,10 @@ table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
     animation: blink-red-text 1.5s infinite ease-in-out;
 }
 
+.text-blink {
+    animation: blink-red-text 1.5s infinite ease-in-out;
+}
+
 .dot-notification {
     display: inline-block;
     width: 8px;

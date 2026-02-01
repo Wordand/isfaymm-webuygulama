@@ -1,590 +1,322 @@
 {% extends "layout.html" %}
 
-{% block title %}Mevzuat – İSFA YMM{% endblock %}
+{% block title %}İndirimli Kurumlar Vergisi Mevzuatı – İSFA YMM{% endblock %}
 
 {% block content %}
 
 <!-- 🟦 Başlık Alanı -->
-<section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad 0%, #007bff 100%);">
-    <div class="container" data-aos="fade-up">
-        <h1 class="fw-bold mb-3">İndirimli Kurumlar Vergisi Mevzuatı</h1>
-        <p class="text-white-50 mb-0">Kanun, Tebliğ ve Gelir İdaresi Başkanlığı Özelgeleri</p>
+<section class="py-5 text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #004aad 0%, #007bff 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1;"></div>
+    <div class="container position-relative" data-aos="fade-up">
+        <h1 class="fw-bold display-5 mb-3">İndirimli Kurumlar Vergisi</h1>
+        <p class="lead text-white-50 mb-0">5520 Sayılı KVK Madde 32/A ve İlgili Tebliğ Hükümleri</p>
     </div>
 </section>
 
 <!-- 🧭 Sekme Menü -->
-<section class="bg-white shadow-sm py-3 sticky-top" style="z-index: 1020;">
+<section class="bg-white shadow-sm py-3 sticky-top" style="z-index: 1020; top: 0px;">
     <div class="container text-center">
-        <div class="d-inline-flex justify-content-center gap-3 flex-wrap">
-            <button class="btn btn-outline-primary fw-semibold active" onclick="showSection('kanunSection', this)">📘
-                Kanun</button>
-            <button class="btn btn-outline-success fw-semibold" onclick="showSection('tebligSection', this)">📗
-                Tebliğ</button>
-            <button class="btn btn-outline-warning fw-semibold" onclick="showSection('ozelgeSection', this)">📙
-                Özelge</button>
+        <div class="d-inline-flex bg-light p-1 rounded-pill border">
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold active-tab-btn active" onclick="showSection('kanunSection', this)" id="btnKanun">
+                <i class="bi bi-book me-2"></i>KANUN METNİ
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('tebligSection', this)" id="btnTeblig">
+                <i class="bi bi-journal-text me-2"></i>TEBLİĞ REHBERİ
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('ozelgeSection', this)" id="btnOzelge">
+                <i class="bi bi-chat-square-text me-2"></i>ÖZELGELER
+            </button>
         </div>
     </div>
 </section>
 
-<!-- 📚 Kanun Bölümü -->
-<section id="kanunSection" class="py-5 section-content">
-    <div class="container" data-aos="fade-up">
-
-        <div class="accordion shadow-sm rounded-3" id="kanunAccordion">
-
-            <!-- 🟦 5520 Sayılı KVK Madde 32/A -->
-            <div class="accordion-item border-0 shadow-sm rounded-3 overflow-hidden mb-3">
-                <h2 class="accordion-header" id="kanunHeading32A">
-                    <button class="accordion-button fw-bold text-primary d-flex align-items-center" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#kanunCollapse32A" aria-expanded="true">
-                        <i class="bi bi-balance-scale me-2 fs-5"></i>
-                        <span class="flex-grow-1">5520 Sayılı Kurumlar Vergisi Kanunu – Madde 32/A (İndirimli Kurumlar
-                            Vergisi)</span>
-                    </button>
-                </h2>
-
-                <div id="kanunCollapse32A" class="accordion-collapse collapse show" aria-labelledby="kanunHeading32A">
-                    <div class="accordion-body bg-light">
-
-                        <!-- 🔹 Özet -->
-                        <div class="alert alert-primary mb-4">
-                            <strong>Özet:</strong> Bu madde, yatırım teşvik belgesi kapsamındaki yatırımlardan elde
-                            edilen kazançlara
-                            indirimli kurumlar vergisi oranı uygulanmasını düzenler. Cumhurbaşkanına, yatırıma katkı
-                            oranlarını ve
-                            indirim oranlarını belirleme, diğer faaliyet kazançlarına indirimli vergi uygulamasını
-                            genişletme yetkisi
-                            tanınır. 2025 yılında yürürlüğe girecek 7555 sayılı Kanun değişiklikleriyle süre, oran ve
-                            uygulama koşulları
-                            güncellenmiştir.
-                        </div>
-
-                        <!-- 🔸 Tam Metin Akordiyon İçinde Sekmeler -->
-                        <ul class="nav nav-pills mb-3" id="kanunTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="madde-tab" data-bs-toggle="pill"
-                                    data-bs-target="#madde" type="button" role="tab">Madde Metni</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="degisim-tab" data-bs-toggle="pill"
-                                    data-bs-target="#degisim" type="button" role="tab">Değişiklikler</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="yorum-tab" data-bs-toggle="pill" data-bs-target="#yorum"
-                                    type="button" role="tab">Açıklama</button>
-                            </li>
-                        </ul>
-
-                        <div class="tab-content" id="kanunTabsContent">
-                            <!-- 📜 Madde Metni -->
-                            <div class="tab-pane fade show active" id="madde" role="tabpanel"
-                                aria-labelledby="madde-tab">
-                                <div class="card border-0 shadow-sm mb-3">
-                                    <div class="card-body" style="max-height: 550px; overflow-y: auto;">
-                                        <h5 class="fw-bold text-primary mb-3">Madde 32/A – İndirimli Kurumlar Vergisi
-                                        </h5>
-                                        <p><em>(5838 Sayılı Kanunun 9 uncu maddesiyle eklenen madde)</em></p>
-
-                                        <p>Finans ve sigortacılık sektörlerinde faaliyet gösteren kurumlar, iş
-                                            ortaklıkları, taahhüt işleri,
-                                            4283 ve 3996 sayılı Kanunlar kapsamındaki yatırımlar ile rödovans
-                                            sözleşmelerine bağlı olarak yapılan
-                                            yatırımlar hariç olmak üzere, Sanayi ve Teknoloji Bakanlığı tarafından
-                                            düzenlenen yatırım teşvik
-                                            belgesi kapsamındaki yatırımlardan elde edilen kazançlara, yatırımın
-                                            işletilmesine başlanılan
-                                            hesap döneminden itibaren yatırıma katkı tutarına ulaşıncaya kadar indirimli
-                                            kurumlar vergisi oranı
-                                            uygulanır.</p>
-
-                                        <p><strong>Yatırıma katkı tutarı</strong>, indirimli kurumlar vergisi uygulanmak
-                                            suretiyle tahsilinden
-                                            vazgeçilen vergi yoluyla yatırımların Devletçe karşılanacak kısmıdır. Bu
-                                            tutarın yapılan toplam
-                                            yatırıma oranı <strong>yatırıma katkı oranı</strong> olarak tanımlanır.</p>
-
-                                        <p>Yatırımın tamamlanması şartıyla, yararlanılmayan katkı tutarları, yatırımın
-                                            tamamlandığı yılı
-                                            izleyen dönemlerde Vergi Usul Kanunu’na göre belirlenen yeniden değerleme
-                                            oranında artırılarak
-                                            dikkate alınır.</p>
-
-                                        <p><strong>2025 yılında 7555 sayılı Kanun’la yapılan değişiklikle:</strong>
-                                            İndirim hakkı en fazla
-                                            10 hesap dönemi boyunca kullanılabilir hale gelmiştir. Ayrıca kazanç
-                                            bulunmasına rağmen kullanılmayan
-                                            katkı tutarları müteakip yıllarda dikkate alınmaz.</p>
-
-                                        <p><strong>Cumhurbaşkanı;</strong> il, bölge, sektör ve yatırım türlerine göre
-                                            farklı yatırıma katkı
-                                            oranları belirlemeye, diğer kazançlara indirimli vergi uygulamasını %50’ye
-                                            kadar genişletmeye ve
-                                            oranları sıfıra kadar indirmeye yetkilidir.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 🧾 Değişiklikler -->
-                            <div class="tab-pane fade" id="degisim" role="tabpanel" aria-labelledby="degisim-tab">
-                                <div class="card border-0 shadow-sm mb-3">
-                                    <div class="card-body">
-                                        <h5 class="fw-bold text-dark mb-3">Madde 32/A'daki Değişiklikler</h5>
-                                        <ul>
-                                            <li><strong>5838 sayılı Kanun (2009):</strong> Madde ilk kez yürürlüğe
-                                                girdi.</li>
-                                            <li><strong>6322 sayılı Kanun (2012):</strong> Bakanlar Kurulu yetkileri
-                                                güncellendi.</li>
-                                            <li><strong>6745 sayılı Kanun (2016):</strong> Endeksleme hükmü eklendi.
-                                            </li>
-                                            <li><strong>7338 sayılı Kanun (2021):</strong> %10 vergi borcu terkin imkânı
-                                                getirildi.</li>
-                                            <li><strong>7555 sayılı Kanun (2025):</strong> Uygulama süresi 10 yıla
-                                                çıkarıldı, kazanç bulunmasına
-                                                rağmen kullanılmayan katkı tutarlarının sonraki yıllarda kullanımı
-                                                engellendi.</li>
-                                        </ul>
-                                        <p class="text-muted small mb-0">Son değişiklikler 16.06.2025 tarihinden
-                                            itibaren yürürlüğe
-                                            girecektir.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 💬 Açıklama -->
-                            <div class="tab-pane fade" id="yorum" role="tabpanel" aria-labelledby="yorum-tab">
-                                <div class="card border-0 shadow-sm mb-3">
-                                    <div class="card-body">
-                                        <h5 class="fw-bold text-dark mb-3">Uygulama Açıklaması</h5>
-                                        <p>Madde 32/A, teşvik belgeli yatırımlarda indirimli kurumlar vergisi
-                                            uygulamasının temel
-                                            dayanağıdır. İndirim, yatırımın kısmen veya tamamen faaliyete geçtiği yıldan
-                                            itibaren
-                                            kullanılabilir.</p>
-                                        <p>Tevsi yatırımlarda, kazançların ayrı izlenmesi esastır. Ayrı izlenemiyorsa,
-                                            toplam sabit
-                                            kıymet içindeki oran dikkate alınır. Ayrıca 7338 sayılı Kanun
-                                            değişikliğiyle, hak edilen katkı
-                                            tutarının %10’una kadar diğer vergi borçlarından mahsup imkânı tanınmıştır.
-                                        </p>
-                                        <p><em>Örnek:</em> 100 milyon TL yatırımın %30 yatırıma katkı oranı varsa, 30
-                                            milyon TL’lik kısmı
-                                            indirimli kurumlar vergisiyle tahsil edilmeyerek yatırımcıya destek olarak
-                                            yansır.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-end">
-                            <a href="https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5520&MevzuatTur=1&MevzuatTertip=5"
-                                target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                <i class="bi bi-link-45deg"></i> Resmî Mevzuat Kaynağı
-                            </a>
-                        </div>
+<!-- 📚 KANUN BÖLÜMÜ -->
+<section id="kanunSection" class="py-5 section-content bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sol Menü -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="kanunNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3" style="font-size: 0.8rem; letter-spacing: 1px;">İÇERİK</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-2" href="#k-metin"><i class="bi bi-caret-right-fill me-2 small-icon"></i>Madde Metni (32/A)</a>
+                            <a class="nav-link mb-2" href="#k-degisim"><i class="bi bi-clock-history me-2 small-icon"></i>Değişiklik Tarihçesi</a>
+                            <a class="nav-link mb-2" href="#k-aciklama"><i class="bi bi-info-circle-fill me-2 small-icon"></i>Uygulama Açıklaması</a>
+                        </nav>
                     </div>
-                </div>
+                </nav>
             </div>
 
-        </div>
-    </div>
-</section>
-
-
-
-
-<section id="tebligSection" class="section-content d-none">
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold text-success">
-                Kurumlar Vergisi Genel Tebliği
-            </h2>
-            <p class="text-muted">
-                -5520 sayılı Kurumlar Vergisi Kanunu’nun 32/A maddesinin değişikliklerine ilişkin uygulama esasları-
-            </p>
-        </div>
-
-        <!-- 🔹 Özet Kutusu -->
-        <div class="alert alert-success shadow-sm">
-            <h5 class="fw-bold">Özet</h5>
-            <p>
-                Bu Tebliğ, 7555 sayılı Kanunla değiştirilen <strong>5520 sayılı KVK 32/A</strong> maddesine ilişkin
-                uygulamaları
-                açıklamakta olup, <strong>yatırım teşvik belgeli yatırımlardan elde edilen kazançlarda indirimli
-                    kurumlar vergisi</strong>
-                uygulamasına dair usul ve esasları belirlemektedir.
-                <br><br>
-                Yeni düzenlemeyle birlikte:
-            <ul>
-                <li>İndirimli vergi oranı en fazla <strong>10 hesap dönemi</strong> boyunca uygulanabilecektir.</li>
-                <li>İndirim oranı <strong>%60</strong> olarak belirlenmiştir.</li>
-                <li>Diğer faaliyet kazançlarına uygulama hakkı en fazla <strong>4 dönemle</strong> sınırlandırılmıştır.
-                </li>
-                <li>Arsa, bina ve amortismana tabi olmayan kıymetler katkı hesaplamasına <strong>dahil
-                        edilemeyecektir</strong>.</li>
-            </ul>
-            </p>
-        </div>
-
-        <!-- 📚 Ana Sekmeler -->
-        <ul class="nav nav-tabs mb-4" id="tebligTabs" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#esaslar">📘
-                    Uygulama Esasları</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ornekler">🧮 Örnek
-                    Hesaplamalar</button></li>
-        </ul>
-
-        <div class="tab-content">
-
-            <!-- 📘 1️⃣ Uygulama Esasları -->
-            <div class="tab-pane fade show active" id="esaslar">
-                <div class="accordion" id="esasAccordion">
-
-                    <!-- 32.2.1 Kapsam -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#kapsam">32.2.1.
-                                Kapsam</button>
-                        </h2>
-                        <div id="kapsam" class="accordion-collapse collapse show">
-                            <div class="accordion-body">
-                                <p>
-                                    Kurumlar vergisi mükellefleri, <strong>Sanayi ve Teknoloji Bakanlığınca yatırım
-                                        teşvik belgesine bağlanan yatırımlarından</strong>
-                                    elde ettikleri kazançlar dolayısıyla indirimli kurumlar vergisi uygulamasından
-                                    yararlanabilirler.
-                                </p>
-                                <p>
-                                    Ayrıca, <strong>yatırıma katkı tutarının %50’si</strong>ne kadar olan kısmı,
-                                    yatırımın ilk dört hesap dönemi içinde diğer
-                                    faaliyet kazançlarına da uygulanabilir.
-                                    Gelir vergisi mükellefleri de bu hükümden yararlanabilir.
-                                </p>
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#kanunNavbar" data-bs-smooth-scroll="true" tabindex="0">
+                    
+                    <!-- Madde Metni -->
+                    <div id="k-metin" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4 px-4 px-md-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2 rounded-pill me-3">KVK Md. 32/A</span>
+                                <h2 class="h3 fw-bold mb-0 text-dark">İndirimli Kurumlar Vergisi</h2>
+                            </div>
+                            <div class="alert alert-light border-start border-4 border-primary bg-opacity-50 p-4 mb-0">
+                                <h5 class="alert-heading fw-bold text-primary h6"><i class="bi bi-lightning-charge-fill me-2"></i>Özetle Ne Diyor?</h5>
+                                <p class="mb-0 text-muted small">Yatırım Teşvik Belgesi kapsamında yapılan yatırımlardan elde edilen kazançlara, belirli bir <strong>katkı tutarına</strong> ulaşılıncaya kadar indirimli kurumlar vergisi oranı uygulanır. Bu, devletin alacağı vergiden vazgeçerek yatırımı finanse etme yöntemidir.</p>
                             </div>
                         </div>
-                    </div>
+                        <div class="card-body px-4 px-md-5 pb-5 pt-0">
+                            <hr class="text-muted opacity-25 mb-4">
+                            <div class="legal-text">
+                                <p><strong>Madde 32/A –</strong> (Ek: 18/2/2009-5838/9 md.)</p>
+                                <p>(1) Finans ve sigortacılık sektörlerinde faaliyet gösteren kurumlar, iş ortaklıkları, taahhüt işleri, 16/7/1997 tarihli ve 4283 sayılı Kanun ile 8/6/1994 tarihli ve 3996 sayılı Kanun kapsamında yapılan yatırımlar ile rödovans sözleşmelerine bağlı olarak yapılan yatırımlar hariç olmak üzere, bu maddenin ikinci fıkrasındaki şartları sağlayan teşvik belgesine bağlanmış yatırımlardan elde edilen kazançlar, yatırımın kısmen veya tamamen işletilmesine başlanılan hesap döneminden itibaren yatırıma katkı tutarına ulaşıncaya kadar indirimli oranlar üzerinden kurumlar vergisine tabi tutulur.</p>
 
-                    <!-- 32.2.2 Yararlanamayacaklar -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#yararlanamaz">32.2.2. Yararlanamayacaklar</button>
-                        </h2>
-                        <div id="yararlanamaz" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>Finans ve sigortacılık sektörleri</li>
-                                    <li>İş ortaklıkları</li>
-                                    <li>Taahhüt işleri</li>
-                                    <li>3996 ve 4283 sayılı Kanun kapsamındaki yatırımlar</li>
-                                    <li>Rödovans sözleşmesine bağlı yatırımlar</li>
+                                <p>(2) <strong>Yatırıma katkı tutarı</strong>, indirimli kurumlar vergisi uygulanmak suretiyle tahsilinden vazgeçilen vergi yoluyla yatırımların Devletçe karşılanacak tutarını, bu tutarın yapılan toplam yatırıma bölünmesi suretiyle bulunacak oran ise <strong>yatırıma katkı oranını</strong> ifade eder.</p>
+
+                                <p>Yatırımın tamamlanması şartıyla, indirimli kurumlar vergisi uygulanmak suretiyle yararlanılan kısmı hariç olmak üzere kalan yatırıma katkı tutarı, yatırımın tamamlandığı hesap dönemini izleyen yıllarda Vergi Usul Kanunu hükümlerine göre bu yıllar için belirlenen yeniden değerleme oranında artırılarak dikkate alınır.</p>
+
+                                <div class="alert alert-warning border-0 d-flex align-items-center mt-4">
+                                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning-emphasis"></i>
+                                    <div>
+                                        <strong>2025/7555 Sayılı Kanun Değişikliği:</strong><br>
+                                        Yatırım teşvik belgelerine istinaden bu madde kapsamında indirimli kurumlar vergisi, yatırımın işletilmeye başlanılan hesap döneminden itibaren <strong>yatırıma katkı tutarına ulaşılıncaya kadar ve her halükarda en fazla 10 hesap dönemi</strong> uygulanır. Yatırımdan elde edilen kazanç bulunmasına rağmen, bu süre içinde yıllık beyannamede indirimli kurumlar vergisi uygulanmaması veya eksik uygulanması nedeniyle yararlanılmayan yatırıma katkı tutarları, on hesap döneminin sona ermesinden sonra veya müteakip yıllarda indirimli kurumlar vergisi matrahının tespitinde dikkate alınmaz.
+                                    </div>
+                                </div>
+
+                                <p>(3) Cumhurbaşkanı;</p>
+                                <ul class="text-muted">
+                                   <li>a) İstatistikî bölge birimleri sınıflandırması ile kişi başına düşen milli gelir veya sosyo-ekonomik gelişmişlik düzeylerini dikkate almak suretiyle illeri gruplandırmaya ve gruplar itibarıyla teşvik edilecek sektörleri ve bunlara ilişkin yatırım ve istihdam büyüklüklerini belirlemeye,</li>
+                                   <li>b) Her bir il grubu, stratejik yatırımlar veya (a) bendinde belirtilen yerler için yatırıma katkı oranını %55’e, yatırım tutarı 50 milyon Türk Lirasını aşan büyük ölçekli yatırımlarda ise %65’e kadar artırmaya; kurumlar vergisi oranını %100’e kadar indirimli uygulatmaya,</li>
+                                   <li>c) Yatırımın faaliyete geçmesinden önce devri halinde, indirimli vergi uygulamasından devralan kurumun yararlanmasına ilişkin usul ve esasları belirlemeye yetkilidir.</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 32.2.3 İndirimli kurumlar vergisi uygulaması -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#indirimli">32.2.3. İndirimli kurumlar vergisi uygulaması</button>
-                        </h2>
-                        <div id="indirimli" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    İndirimli kurumlar vergisi, yatırımın işletilmeye başlandığı dönemden itibaren
-                                    <strong>yatırıma katkı tutarına ulaşılıncaya kadar</strong>, en fazla <strong>on
-                                        hesap dönemi</strong> uygulanır.
-                                </p>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Kriter</th>
-                                                <th>Açıklama</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Azami süre</td>
-                                                <td>10 hesap dönemi</td>
-                                            </tr>
-                                            <tr>
-                                                <td>İndirim oranı</td>
-                                                <td>%60</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Yatırıma katkı oranı</td>
-                                                <td>%40 (örnek oran)</td>
-                                            </tr>
-                                            <tr>
-                                                <td>İstisna</td>
-                                                <td>Arsa, bina, amortismana tabi olmayan varlıklar hariç</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (B) A.Ş. 8.000.000 TL’lik yatırım yapmış, katkı oranı
-                                    %40’tır.<br>
-                                    Toplam katkı: 3.200.000 TL. 300.000 TL kazançta uygulanacak indirimli KV oranı: %8.
-                                </div>
+                    <!-- Değişiklikler -->
+                    <div id="k-degisim" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-dark mb-4">📜 Değişiklik Tarihçesi</h3>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Kanun/Tarih</th>
+                                            <th>Açıklama</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold text-nowrap">5838 s.K. (2009)</td>
+                                            <td>Madde 32/A, 5520 sayılı Kanuna eklenerek yürürlüğe girdi.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-nowrap">6322 s.K. (2012)</td>
+                                            <td>Bakanlar Kurulu yetkileri ve sektörel ayrımlar güncellendi.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-nowrap">6745 s.K. (2016)</td>
+                                            <td>Kalan yatırıma katkı tutarının endekslenmesi hükmü eklendi.</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold text-nowrap">7338 s.K. (2021)</td>
+                                            <td>Yatırıma katkı tutarının %10'unun diğer vergi borçlarından terkin edilmesi imkanı getirildi.</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td class="fw-bold text-nowrap">7555 s.K. (2025)</td>
+                                            <td>
+                                                <span class="badge bg-dark mb-1">YENİ</span><br>
+                                                Uygulama süresi 10 yıl ile sınırlandırıldı. Kullanılmayan hakların sonraki yıllara devri kısıtlandı.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 32.2.5 Diğer Faaliyetlerden Elde Edilen Kazançlarda İndirimli KV -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_5">
-                                32.2.5. Diğer Faaliyetlerden Elde Edilen Kazançlarda İndirimli Kurumlar Vergisi
-                                Uygulaması
-                            </button>
-                        </h2>
-                        <div id="b32_2_5" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazançların yanı sıra,
-                                    toplam yatırıma katkı tutarının Cumhurbaşkanı Kararı ile belirlenecek oranını ve hak
-                                    edilen yatırıma katkı tutarını
-                                    geçmemek üzere; diğer faaliyetlerden elde edilen kazançlara da indirimli kurumlar
-                                    vergisi uygulanabilir.
-                                </p>
-                                <p>
-                                    24/7/2025 tarihinden itibaren alınan belgeler için bu hak, <strong>ilk hesap dönemi
-                                        dahil dört hesap dönemiyle</strong>
-                                    sınırlıdır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (E) A.Ş., 24/7/2025 sonrası alınmış teşvik belgesi
-                                    kapsamındaki yatırımı nedeniyle 2025’te diğer faaliyetlerinden 25.000.000 TL kazanç
-                                    elde etmiş olup, örneğin yararlanabileceği yatırıma katkı tutarı üst sınırı
-                                    5.250.000 TL’dir.
-                                </div>
+                     <!-- Açıklama -->
+                     <div id="k-aciklama" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-dark mb-4">💡 Uygulama Açıklaması</h3>
+                            <p class="lead">Madde 32/A, bölgesel gelişmişlik farklarını azaltmak ve stratejik yatırımları desteklemek amacıyla kurgulanmış bir vergi teşvik mekanizmasıdır.</p>
+                            
+                            <h5 class="fw-bold mt-4">Temel Prensipler</h5>
+                            <ul>
+                                <li class="mb-2"><strong>Başlangıç:</strong> İndirim, yatırımın kısmen veya tamamen işletilmeye başlandığı geçici vergi döneminden itibaren uygulanır.</li>
+                                <li class="mb-2"><strong>Dönem Sınırlaması:</strong> Tevsi yatırımlarda kazancın tespiti zor olduğundan, oranlama yöntemi kullanılır.</li>
+                                <li class="mb-2"><strong>Diğer Faaliyetler:</strong> Yatırım tamamlanmasa dahi, toplam yatırıma katkı tutarının belirli bir oranı (genelde %80 veya %100'e kadar çıkabilir, Karar'a bağlıdır) diğer faaliyetlerden elde edilen kazançlara uygulanabilir.</li>
+                            </ul>
+
+                            <div class="card bg-light border-0 p-3 mt-4">
+                                <h6 class="fw-bold text-dark"><i class="bi bi-calculator me-2"></i>Basit Hesaplama Mantığı</h6>
+                                <p class="mb-0 text-muted">Örneğin; Kurumlar Vergisi oranı %25 iken, teşvik belgesinde %80 vergi indirim oranı varsa;<br>
+                                <strong>Uygulanacak Oran = %25 - (%25 x %80) = %5</strong> olacaktır.<br>
+                                Yatırımcı %25 yerine %5 vergi öder, aradaki %20'lik fark "Yatırıma Katkı Tutarı"ndan düşülür.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 32.2.6 Yatırımın Devri -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_6">
-                                32.2.6. Yatırımın Devri
-                            </button>
-                        </h2>
-                        <div id="b32_2_6" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Yatırım teşvik belgesi kapsamındaki yatırımın <strong>faaliyete geçmeden
-                                        önce</strong> veya
-                                    <strong>kısmen/tam olarak işletmeye geçtikten sonra</strong> devri halinde indirimli
-                                    kurumlar vergisi
-                                    uygulamasının devralan ve devreden kurum açısından nasıl işleyeceği açıklanır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (K) A.Ş., yatırımını 2015 hesap döneminde başlatmış ve yıl
-                                    sonunda devretmiştir.
-                                    Devralan kurum, koşulları sağladığı takdirde kalan yatırıma katkı tutarı üzerinden
-                                    indirimli vergi uygulamasından
-                                    yararlanabilecektir.
-                                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📗 TEBLİĞ BÖLÜMÜ -->
+<section id="tebligSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sol Menü -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="tebligNavbar" class="h-100 d-flex flex-column">
+                     <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3" style="font-size: 0.8rem; letter-spacing: 1px;">TEBLİĞ BAŞLIKLARI</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav sidebar-teblig">
+                            <a class="nav-link mb-2" href="#t-kapsam">32.2.1. Kapsam</a>
+                            <a class="nav-link mb-2" href="#t-yararlanamaz">32.2.2. Yararlanamayacaklar</a>
+                            <a class="nav-link mb-2" href="#t-uygulama">32.2.3. Uygulama Esasları</a>
+                            <a class="nav-link mb-2" href="#t-diger">32.2.5. Diğer Faaliyet Kazançları</a>
+                            <a class="nav-link mb-2" href="#t-devir">32.2.6. Yatırımın Devri</a>
+                            <a class="nav-link mb-2" href="#t-tevsi">32.2.8. Tevsi Yatırımlar</a>
+                            <a class="nav-link mb-2" href="#t-endeks">32.2.11. Endeksleme</a>
+                            <a class="nav-link mb-2" href="#t-ornekler"><i class="bi bi-lightbulb-fill me-2 small-icon"></i>Örnek Hesaplamalar</a>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#tebligNavbar" data-bs-smooth-scroll="true" tabindex="0">
+
+                    <!-- Kapsam -->
+                    <div id="t-kapsam" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-success mb-3">32.2.1. Kapsam</h3>
+                            <p>Kurumlar vergisi mükellefleri, Sanayi ve Teknoloji Bakanlığınca yatırım teşvik belgesine bağlanan yatırımlarından elde ettikleri kazançlar dolayısıyla indirimli kurumlar vergisi uygulamasından yararlanabilirler. Gerekli şartları taşıyan gelir vergisi mükelleflerinin de bu uygulamadan yararlanabilmesi mümkündür.</p>
+                            <p>İndirimli kurumlar vergisi, esas itibarıyla, yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazançlara uygulanmakla birlikte, yatırıma katkı tutarının belirli bir yüzdesine tekabül eden kısmı için yatırım döneminde diğer faaliyetlerden elde edilen kazançlara da uygulanabilmektedir.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Yararlanamayacaklar -->
+                    <div id="t-yararlanamaz" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                         <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-success mb-3">32.2.2. İndirimli Kurumlar Vergisinden Yararlanamayacak Olanlar</h3>
+                            <p>Aşağıda sayılan faaliyet ve yatırımlardan elde edilen kazançlar için indirimli kurumlar vergisi uygulanmaz:</p>
+                            <ul>
+                                <li>Finans ve sigortacılık sektörlerinde faaliyet gösteren kurumlar,</li>
+                                <li>İş ortaklıkları,</li>
+                                <li>Taahhüt işleri,</li>
+                                <li>16/7/1997 tarihli ve 4283 sayılı Yap-İşlet-Devret Modeli kapsamındaki yatırımlar,</li>
+                                <li>8/6/1994 tarihli ve 3996 sayılı Bazı Yatırım ve Hizmetlerin Yap-İşlet-Devret Modeli Çerçevesinde Yaptırılması Hakkında Kanun kapsamındaki yatırımlar,</li>
+                                <li>Rödovans sözleşmelerine bağlı olarak yapılan yatırımlar.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Uygulama -->
+                    <div id="t-uygulama" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-success mb-3">32.2.3. İndirimli Kurumlar Vergisi Uygulaması</h3>
+                            <p>Yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazançlarla sınırlı olmak üzere, yatırımın işletilmeye başlandığı hesap döneminden itibaren <strong>yatırıma katkı tutarına ulaşılıncaya kadar</strong> indirimli kurumlar vergisi uygulanır.</p>
+                            <p><strong>Yatırıma Katkı Tutarının Hesabı:</strong> Toplam Yatırım Tutarı × Yatırıma Katkı Oranı.</p>
+                            <p>Arazi, arsa, royalti, yedek parça ve amortismana tabi olmayan diğer kıymetler için yapılan harcamalar, indirimli vergi uygulamasında <strong>yatırım tutarına dahil edilmez.</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Diğer Faaliyetler -->
+                    <div id="t-diger" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                         <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-success mb-3">32.2.5. Diğer Faaliyetlerden Elde Edilen Kazançlar</h3>
+                            <div class="alert alert-success bg-opacity-10 border-success mb-4">
+                                <p class="mb-0"><strong>Önemli Kural:</strong> Yatırım tamamlanmamış olsa bile, mükellefler yatırım döneminde diğer faaliyetlerinden (üretim, ticaret, hizmet vb.) elde ettikleri kazançlarına indirimli kurumlar vergisi uygulayabilirler.</p>
+                            </div>
+                            <p>Cumhurbaşkanı Kararları ile belirlenen oranlarda (örneğin yatırıma katkı tutarının %80'i veya %100'ü), yatırım dönemi içerisinde diğer kazançlara indirim uygulanabilir. Ancak bu uygulama, <strong>toplam yatırıma katkı tutarını</strong> aşamaz.</p>
+                        </div>
+                    </div>
+
+                     <!-- Devir -->
+                     <div id="t-devir" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                           <h3 class="fw-bold text-success mb-3">32.2.6. Yatırımın Devri</h3>
+                            <p>Yatırımın faaliyete geçmeden devredilmesi halinde, devralan kurum, aynı şartları yerine getirmek kaydıyla, teşvik belgesindeki imkanlardan yararlanabilir. Devreden kurum ise yararlanamaz.</p>
+                            <p>Yatırımın işletmeye geçtikten sonra devredilmesi halinde ise, devir tarihine kadar devreden kurum, devir tarihinden sonra ise devralan kurum kalan yatırıma katkı tutarından yararlanabilir.</p>
+                       </div>
+                   </div>
+
+                    <!-- Tevsi -->
+                    <div id="t-tevsi" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
+                            <h3 class="fw-bold text-success mb-3">32.2.8. Tevsi Yatırımlardan Doğan Kazançlar</h3>
+                            <p>Tevsi yatırımlardan elde edilen kazancın işletme bütünlüğü çerçevesinde ayrı hesaplarda izlenmek suretiyle tespit edilebilmesi halinde, bu kazanca indirimli oran uygulanır.</p>
+                            <p><strong>Oranlama Yöntemi:</strong> Kazancın ayrı izlenememesi durumunda;</p>
+                            <div class="card bg-success-subtle border-0 p-3 mt-3 text-center">
+                                <span class="fs-5 fw-bold text-dark mb-2 d-block">Tevsi Yatırım İndirim Oranı =</span>
+                                <div class="badge bg-white text-dark shadow-sm px-3 py-2 fs-6 border" style="max-width: fit-content; margin: 0 auto;">Tevsi Yatırım Tutarı / (Dönem Sonu Toplam Sabit Kıymet Tutarı)</div>
+                                <p class="mt-2 text-muted small">Bu oran, o yılki toplam ticari bilanço kârına uygulanarak indirime tabi matrah bulunur.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 32.2.7 Kurumlar Vergisi Matrahının Birden Fazla Yatırım Teşvik Belgesi Kapsamındaki Kazançtan Düşük Olması -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_7">
-                                32.2.7. Kurumlar Vergisi Matrahının Birden Fazla Yatırım Teşvik Belgesi Kapsamındaki
-                                Kazançtan Düşük Olması
-                            </button>
-                        </h2>
-                        <div id="b32_2_7" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Kurumun birden fazla teşvik belgesi kapsamında yatırım yapması halinde, matrahın
-                                    yetersiz olduğu hesap dönemlerinde
-                                    ilgili kazançlara oransal olarak indirimli vergi uygulanır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (G) A.Ş., iki ayrı teşvik belgesi kapsamındaki
-                                    yatırımlarından 300.000 TL ve 200.000 TL kazanç elde etmiş, kurumlar vergisi matrahı
-                                    400.000 TL’dir. Buna göre matrahın %60’ı 240.000 TL’ye, %40’ı 160.000 TL’ye oransal
-                                    olarak indirim uygulanabilecektir.
+                    <!-- Endeksleme -->
+                    <div id="t-endeks" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                         <div class="card-body p-4 p-md-5">
+                             <h3 class="fw-bold text-success mb-3">32.2.11. Yatırıma Katkı Tutarında Endeksleme</h3>
+                             <p>Yatırımın tamamlandığı hesap dönemini izleyen yıllarda, henüz yararlanılmamış olan yatırıma katkı tutarları, her yıl <strong>Vergi Usul Kanunu bülteninde açıklanan Yeniden Değerleme Oranı (YDO)</strong> kadar artırılarak dikkate alınır.</p>
+                             <p class="text-muted fst-italic">Not: Yatırımın devam ettiği yıllarda endeksleme yapılmaz, sadece tamamlandıktan sonraki yıllar için geçerlidir.</p>
+                         </div>
+                     </div>
+
+
+                    <!-- ÖRNEKLER -->
+                    <h3 id="t-ornekler" class="fw-bold text-center mb-4 text-muted border-top pt-5">ÖRNEK HESAPLAMALAR</h3>
+
+                    <div class="row g-4">
+                        <!-- Örnek 1 -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border-primary border-2">
+                                <div class="card-header bg-primary text-white fw-bold">Örnek 1: Temel Hesaplama</div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Veri:</strong> (A) A.Ş. 5.000.000 TL yatırım yapmış, katkı oranı %25'tir.</p>
+                                    <hr>
+                                    <p><strong>Yatırıma Katkı Tutarı:</strong><br>5.000.000 TL x %25 = <strong>1.250.000 TL</strong></p>
+                                    <p class="small text-muted">Devlet bu şirketten toplamda 1.250.000 TL daha az vergi alacaktır.</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 32.2.8 Tevsi Yatırımlardan Doğan Kazançlarda İndirimli Kurumlar Vergisi Oranı Uygulaması -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_8">
-                                32.2.8. Tevsi Yatırımlardan Doğan Kazançlarda İndirimli Kurumlar Vergisi Oranı
-                                Uygulaması
-                            </button>
-                        </h2>
-                        <div id="b32_2_8" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Tevsi yatırımlar (mevcut sabit kıymetlere yapılan ilaveler) özel bir oranlama
-                                    sistemine tabi tutulur:
-                                    <br>
-                                    - Kazanç ayrı izlenebiliyorsa doğrudan uygulanır.
-                                    - Ayrı izlenemiyorsa, yapılan tevsi yatırım tutarının kurumun aktifine kayıtlı
-                                    toplam sabit kıymet tutarına oranı esas alınır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (H) A.Ş., 1.000.000 TL tevsi yatırım yapmış, kurumun sabit
-                                    kıymet brüt toplamı 4.000.000 TL biridir. Bu durumda oran %25’tir ve bu oranla
-                                    200.000 TL kazanca indirimli kurumlar vergisi uygulanır…
+                        <!-- Örnek 2 -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border-info border-2">
+                                <div class="card-header bg-info text-white fw-bold">Örnek 2: İndirimli Oran</div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Veri:</strong> KV Oranı %25, İndirim Oranı %60.</p>
+                                    <hr>
+                                    <p><strong>Uygulanacak Oran:</strong><br>%25 - (%25 x %60) = <strong>%10</strong></p>
+                                    <p class="small text-muted">Şirket, teşvik kapsamındaki kazancı için %25 yerine %10 vergi ödeyecektir.</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 32.2.9 – Yatırımın Devri Halinde İndirimli KV -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_9">
-                                32.2.9. Yatırımın Devri Halinde İndirimli Kurumlar Vergisi Uygulaması
-                            </button>
-                        </h2>
-                        <div id="b32_2_9" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Yatırımın <strong>faaliyete geçmeden önce</strong> veya <strong>faaliyete geçtikten
-                                        sonra</strong> devri halinde,
-                                    devreden ve devralan kurumların indirimli kurumlar vergisi uygulamasından yararlanma
-                                    hakları farklıdır.
-                                </p>
-                                <ul>
-                                    <li>Yatırım faaliyete geçmeden devredilirse: Devralan, aynı şartları sağlaması
-                                        koşuluyla indirimden yararlanır.</li>
-                                    <li>Yatırım faaliyete geçtikten sonra devredilirse: Devir tarihine kadar devreden,
-                                        sonrasında devralan yararlanır.</li>
-                                </ul>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (İ) A.Ş. yatırımını 2024 yılında tamamlamadan önce (J)
-                                    A.Ş.’ye devretmiştir.
-                                    (J) A.Ş. aynı yatırım teşvik belgesi kapsamındaki yükümlülükleri devraldığından,
-                                    indirimli kurumlar vergisinden kalan tutar üzerinden yararlanmaya devam edebilir.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 32.2.10 – Süre Sınırlaması -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_10">
-                                32.2.10. İndirimli Kurumlar Vergisinden Yararlanılacak Süre
-                            </button>
-                        </h2>
-                        <div id="b32_2_10" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    24/7/2025 sonrası alınan teşvik belgeleri için, yatırımdan elde edilen kazançlara
-                                    <strong>yatırıma katkı tutarına ulaşıncaya kadar</strong> en fazla 10 hesap dönemi
-                                    uygulanabilir.
-                                    Diğer faaliyet kazançlarına uygulama süresi ise <strong>ilk hesap dönemi dahil 4
-                                        hesap dönemi</strong> ile sınırlıdır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (K) A.Ş. 2025 yılında aldığı yatırım teşvik belgesiyle 2035
-                                    yılı sonuna kadar (10 hesap dönemi)
-                                    indirimli kurumlar vergisinden yararlanabilir.
-                                    Diğer faaliyet kazançları için 2025 – 2028 hesap dönemleri (4 dönem) sonunda hak
-                                    sona erer.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 32.2.11 – Yatırıma Katkı Tutarında Endeksleme -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_11">
-                                32.2.11. Yatırıma Katkı Tutarında Endeksleme
-                            </button>
-                        </h2>
-                        <div id="b32_2_11" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    Yatırımın tamamlanması şartıyla, indirimli kurumlar vergisi uygulanmak suretiyle
-                                    yararlanılan kısmı hariç
-                                    olmak üzere kalan yatırıma katkı tutarı, yatırımın tamamlandığı yılı izleyen
-                                    yıllarda
-                                    <strong>VUK yeniden değerleme oranı</strong> kadar artırılarak dikkate alınır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (L) A.Ş., yatırımını 2024’te tamamlamış, kullanılmayan 5
-                                    milyon TL yatırıma katkı tutarı kalmıştır.
-                                    2025 yılı VUK yeniden değerleme oranı %25’tir.
-                                    Bu durumda kalan katkı tutarı 5.000.000 × 1,25 = 6.250.000 TL olarak izleyen yıl
-                                    dikkate alınacaktır.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 32.2.12 – Diğer Vergi Borçlarından Terkin -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_12">
-                                32.2.12. Diğer Vergi Borçlarından Terkin Yoluyla Kullanım
-                            </button>
-                        </h2>
-                        <div id="b32_2_12" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    7338 sayılı Kanun ile getirilen düzenleme uyarınca, hak edilen yatırıma katkı
-                                    tutarının
-                                    <strong>%10’luk kısmı</strong> diğer vergi borçlarının terkininde kullanılabilir.
-                                    Terkin edilen tutarın bir katına isabet eden katkı tutarından vazgeçilmiş sayılır.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (M) A.Ş.’nin hak ettiği katkı tutarı 10 milyon TL’dir.
-                                    Bunun 1 milyon TL’si ( %10 ) kadarını KDV veya ÖTV dışındaki diğer vergi
-                                    borçlarından terkin ettirebilir.
-                                    Bu durumda 1 milyon TL terkin edilir, aynı tutarda yatırıma katkı tutarından
-                                    vazgeçilmiş sayılır.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 32.2.13 – Beyanname ve Belgelerin Sunulması -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#b32_2_13">
-                                32.2.13. Beyanname Üzerinde Gösterim ve Belgelerin Sunulması
-                            </button>
-                        </h2>
-                        <div id="b32_2_13" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                <p>
-                                    İndirimli kurumlar vergisi uygulamasından yararlanan kurumlar, beyanname ekinde
-                                    <strong>yatırıma katkı tutarı, kullanılan katkı tutarı ve kalan tutarı</strong> ayrı
-                                    ayrı göstermek zorundadır.
-                                    Ayrıca yatırım teşvik belgesi örneği ve hesaplama tabloları da beyannameye
-                                    eklenmelidir.
-                                </p>
-                                <div class="bg-light p-3 rounded">
-                                    <strong>Örnek:</strong> (N) A.Ş. 2025 hesap döneminde 2.000.000 TL katkı kullanmış,
-                                    3.000.000 TL katkı hakkı kalmıştır.
-                                    Beyannamesinde “İndirimli KV Uygulaması – Kalan Katkı 3.000.000 TL” olarak ayrıca
-                                    gösterilecektir.
+                        <!-- Örnek 3: Tevsi -->
+                        <div class="col-md-12">
+                            <div class="card border-warning border-2">
+                                <div class="card-header bg-warning text-dark fw-bold">Örnek 3: Tevsi Yatırımda Oranlama</div>
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <ul class="list-unstyled">
+                                                <li><strong>Tevsi Yatırım:</strong> 2.000.000 TL</li>
+                                                <li><strong>Toplam Sabit Kıymet:</strong> 10.000.000 TL</li>
+                                                <li><strong>Dönem Kârı:</strong> 500.000 TL</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6 border-start">
+                                            <p><strong>Oran:</strong> 2M / 10M = <strong>%20</strong></p>
+                                            <p><strong>İnd. Tabi Matrah:</strong> 500.000 x %20 = <strong>100.000 TL</strong></p>
+                                            <div class="alert alert-warning py-2 mb-0 small">Sadece 100.000 TL için indirimli vergi ödenir, kalan 400.000 TL normal vergilenir.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -592,814 +324,149 @@
 
                 </div>
             </div>
-
-            <!-- 🧮 2️⃣ Örnek Hesaplamalar -->
-            <div class="tab-pane fade" id="ornekler">
-                <!-- 📘 Tebliğ Örnekleri (1–6) -->
-                <div class="accordion" id="tebligExamples">
-
-                    <!-- ÖRNEK 1 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example1">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample1">
-                                📘 Örnek 1 – Yatırımdan Elde Edilen Kazanç (A.Ş. 2015)
-                            </button>
-                        </h2>
-                        <div id="collapseExample1" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p><strong>Konu:</strong> Yatırım teşvik belgesi kapsamındaki kazançlara uygulanacak
-                                    indirimli kurumlar vergisi.</p>
-                                <p><strong>Durum:</strong> (A) A.Ş.’nin yatırım tutarı 5.000.000 TL, yatırıma katkı
-                                    oranı %25’tir.</p>
-                                <table class="table table-bordered table-sm align-middle text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Toplam Yatırım Harcaması</th>
-                                            <td>5.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Yatırıma Katkı Oranı</th>
-                                            <td>%25</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <th>Toplam Yatırıma Katkı Tutarı</th>
-                                            <td>1.250.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p>Bu tutar, Devletin tahsilinden vazgeçtiği kurumlar vergisini ifade eder.</p>
-                                <p><strong>Sonuç:</strong> (A) A.Ş.’nin yatırım kazançlarına 1.250.000 TL’lik yatırıma
-                                    katkı tutarı kapsamında indirimli kurumlar vergisi uygulanabilecektir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 2 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example2">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample2">
-                                📗 Örnek 2 – 2015 Yılı Kısmi İşletmeye Başlama (B A.Ş.)
-                            </button>
-                        </h2>
-                        <div id="collapseExample2" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (B) A.Ş. 8.000.000 TL’lik yatırım yapmış, 2015’te 1.000.000
-                                    TL’si işletmeye başlamıştır.</p>
-                                <table class="table table-bordered table-sm text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Toplam Yatırım Tutarı</th>
-                                            <td>8.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Yatırıma Katkı Oranı</th>
-                                            <td>%40</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Vergi İndirim Oranı</th>
-                                            <td>%60</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <th>Toplam Katkı Tutarı</th>
-                                            <td>3.200.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>2015’te Gerçekleştirilen Harcama</th>
-                                            <td>1.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Hak Edilen Katkı</th>
-                                            <td>400.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p><strong>İndirimli KV Oranı Hesabı:</strong></p>
-                                <p>%20 - (%20 × %60) = <strong>%8</strong></p>
-                                <table class="table table-sm table-bordered text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Yatırımdan Elde Edilen Kazanç</th>
-                                            <td>300.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>İndirimsiz KV (%20)</th>
-                                            <td>60.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>İndirimli KV (%8)</th>
-                                            <td>24.000 TL</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <th>Yararlanılan Katkı</th>
-                                            <td>36.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p><strong>Sonuç:</strong> 2015 döneminde 400.000 TL hak edilmesine rağmen 36.000 TL
-                                    kullanılmış, 364.000 TL izleyen yıllarda kullanılabilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 3 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example3">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample3">
-                                📙 Örnek 3 – Yeni Düzenleme Sonrası (24/7/2025 sonrası belgeler)
-                            </button>
-                        </h2>
-                        <div id="collapseExample3" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p>Bu örnekte yatırım teşvik belgesi 24/7/2025 sonrası alınmıştır. Buna göre indirimli
-                                    kurumlar vergisi uygulaması <strong>en fazla 10 hesap dönemi</strong> boyunca
-                                    geçerli olacaktır.</p>
-                                <p><strong>Sonuç:</strong> 10 yıllık süre sonunda kullanılmayan yatırıma katkı tutarları
-                                    artık indirime konu edilemeyecektir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 4 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example4">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample4">
-                                📕 Örnek 4 – Diğer Faaliyetlerden Kazanç (B A.Ş. 2025)
-                            </button>
-                        </h2>
-                        <div id="collapseExample4" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (B) A.Ş. 18/8/2025 tarihli teşvik belgesiyle yatırım
-                                    harcamasına başlamış, 2025’te 1.000.000 TL matrah elde etmiştir.</p>
-                                <p>İndirim hakkı 2025 hesap döneminde başlar ve en fazla 10 dönem sürer. 2034 sonu
-                                    itibarıyla indirim hakkı sona erer.</p>
-                                <p><strong>Sonuç:</strong> Kazanç 2025-2034 arasında indirime tabi olur, 2035 ve
-                                    sonrasında uygulanamaz.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 5 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example5">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample5">
-                                📘 Örnek 5 – Diğer Faaliyetlerden Elde Edilen Kazançlar (D A.Ş.)
-                            </button>
-                        </h2>
-                        <div id="collapseExample5" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (D) A.Ş. toplam 21.000.000 TL yatırım, %40 katkı oranı, %60
-                                    vergi indirimi, %50 diğer faaliyet katkısı.</p>
-                                <table class="table table-bordered table-sm text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Toplam Katkı Tutarı</th>
-                                            <td>8.400.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Hak Edilen Katkı</th>
-                                            <td>4.800.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Diğer Faaliyet Katkı Üst Sınırı</th>
-                                            <td>4.200.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p>İndirimli oran hesabı: %25 - (%25 × %60) = %10</p>
-                                <p><strong>Matrah:</strong> 30.000.000 TL → 28.000.000 TL’sine indirimli oran
-                                    uygulanmıştır.</p>
-                                <p><strong>Sonuç:</strong> 2025’te 4.200.000 TL katkı tamamen kullanılmıştır. 2026’dan
-                                    itibaren diğer kazançlara indirim uygulanamaz.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 6 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example6">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample6">
-                                📗 Örnek 6 – Diğer Faaliyetler (E A.Ş. 2025)
-                            </button>
-                        </h2>
-                        <div id="collapseExample6" class="accordion-collapse collapse" data-bs-parent="#tebligExamples">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (E) A.Ş. yatırım: 35.000.000 TL, katkı %30, indirim %60,
-                                    diğer faaliyet katkı oranı %50.</p>
-                                <table class="table table-sm table-bordered text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Toplam Katkı</th>
-                                            <td>10.500.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Hak Edilen (2025)</th>
-                                            <td>840.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Diğer Faaliyet Katkısı Üst Sınırı</th>
-                                            <td>5.250.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>İndirimli Oran</th>
-                                            <td>%10</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p><strong>Sonuç:</strong> 2025’te 840.000 TL katkı kullanılmış, kalan 4.410.000 TL
-                                    sonraki üç dönem içinde kullanılabilir. 2028 sonrası sadece yatırım kazancına
-                                    indirim uygulanabilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 7 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example7">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample7">
-                                📘 Örnek 7 – Tevsi Yatırım Kazançlarının Ayrıştırılması
-                            </button>
-                        </h2>
-                        <div id="collapseExample7" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (F) A.Ş. 2025 yılında tevsi yatırım yapmış, toplam sabit
-                                    kıymetleri 80 milyon TL, tevsi yatırım 20 milyon TL’dir.</p>
-                                <table class="table table-bordered table-sm text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Tevsi Yatırım Tutarı</th>
-                                            <td>20.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Toplam Sabit Kıymet Tutarı</th>
-                                            <td>80.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Tevsi Oranı</th>
-                                            <td>%25</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p>İşletme kazancı 12 milyon TL olduğuna göre, bunun %25’i olan 3 milyon TL tevsi
-                                    yatırıma isabet eder.</p>
-                                <p><strong>Sonuç:</strong> 3 milyon TL kazanç indirimli kurumlar vergisine tabi
-                                    olacaktır.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 8 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example8">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample8">
-                                📗 Örnek 8 – Kısmen Ayrıştırılabilen Tevsi Yatırımlar
-                            </button>
-                        </h2>
-                        <div id="collapseExample8" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (G) A.Ş. tevsi yatırımın kazancını ayrı takip edebilmekte,
-                                    yatırım kazancı 2.000.000 TL’dir.</p>
-                                <p>Toplam kazanç 6.000.000 TL, yatırım dışı kazanç 4.000.000 TL’dir.</p>
-                                <p><strong>Sonuç:</strong> 2 milyon TL’lik kazanç için indirimli oran uygulanır, 4
-                                    milyon TL’lik kısım normal oranda vergilendirilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 9 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example9">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample9">
-                                📙 Örnek 9 – Yatırım Devri Halinde Durum
-                            </button>
-                        </h2>
-                        <div id="collapseExample9" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (H) A.Ş. yatırımını 2027’de devretmiş, devralan (I) A.Ş. aynı
-                                    koşulları sürdürmüştür.</p>
-                                <p><strong>Sonuç:</strong> 2027’ye kadar (H) A.Ş., sonrasında (I) A.Ş. indirimli
-                                    kurumlar vergisinden yararlanabilir.</p>
-                                <p>Ancak yatırım tamamlanmadan devredilmişse ve devralan faaliyete geçirmezse, önceki
-                                    yıllara ait indirimli vergiler gecikme faiziyle tahsil edilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 10 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example10">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample10">
-                                📕 Örnek 10 – Yatırıma Katkı Tutarının Endekslenmesi
-                            </button>
-                        </h2>
-                        <div id="collapseExample10" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (K) A.Ş. yatırımını 2025’te tamamlamış, kalan katkı tutarı
-                                    2.000.000 TL’dir. Yeniden değerleme oranı %30.</p>
-                                <table class="table table-bordered table-sm text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Kalan Katkı (Nominal)</th>
-                                            <td>2.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>YDO (%30)</th>
-                                            <td>600.000 TL</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <th>Yeni Katkı Tutarı</th>
-                                            <td>2.600.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p><strong>Sonuç:</strong> 2.600.000 TL olarak dikkate alınır. Yeniden değerleme oranı
-                                    her yıl VUK’a göre uygulanabilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 11 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example11">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample11">
-                                📗 Örnek 11 – Diğer Vergi Borçlarından Mahsup (L A.Ş.)
-                            </button>
-                        </h2>
-                        <div id="collapseExample11" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (L) A.Ş. teşvikli yatırımı için 10.000.000 TL katkı hakkı
-                                    elde etmiştir.</p>
-                                <table class="table table-bordered table-sm text-center">
-                                    <tbody>
-                                        <tr>
-                                            <th>Hak Edilen Katkı</th>
-                                            <td>10.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>İKV Yoluyla Kullanılan</th>
-                                            <td>4.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Kalan Katkı</th>
-                                            <td>6.000.000 TL</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Terkin Oranı</th>
-                                            <td>%10</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <th>Terkin Edilebilecek Tutar</th>
-                                            <td>600.000 TL</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <p><strong>Sonuç:</strong> Bu 600.000 TL, ÖTV ve KDV hariç diğer vergi borçlarına mahsup
-                                    edilebilir. Bu tutarın 2 katı kadar katkıdan vazgeçilmiş sayılır.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 12 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example12">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample12">
-                                📘 Örnek 12 – Tamamlanmayan Yatırımın Devri
-                            </button>
-                        </h2>
-                        <div id="collapseExample12" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (M) A.Ş. yatırımını 2026’da devretmiş, devralan (N) A.Ş.
-                                    faaliyete geçmemiştir.</p>
-                                <p><strong>Sonuç:</strong> Yatırım tamamlanmadığı için geçmişte indirimli kurumlar
-                                    vergisi uygulanan kazançlar yeniden hesaplanır; eksik tahakkuk eden vergiler gecikme
-                                    faiziyle tahsil edilir.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ÖRNEK 13 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="example13">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseExample13">
-                                📙 Örnek 13 – Yatırımın Kısmen Tamamlanması
-                            </button>
-                        </h2>
-                        <div id="collapseExample13" class="accordion-collapse collapse"
-                            data-bs-parent="#tebligExamples2">
-                            <div class="accordion-body">
-                                <p><strong>Durum:</strong> (T) A.Ş. yatırımın %60’ını tamamlamış, işletmeye kısmen
-                                    geçmiştir.</p>
-                                <p><strong>Sonuç:</strong> 60% oranındaki kısmı için yatırım kazançlarına indirimli
-                                    kurumlar vergisi uygulanabilir. Kalan yatırım tamamlandıkça oran artırılır.</p>
-                                <p>Yatırım tamamlansa da toplam katkı tutarı aşılmadığı sürece yeni kazançlar için
-                                    indirim uygulanabilir.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>        
         </div>
     </div>
 </section>
 
 
-
-<!-- 📙 Özelge Bölümü -->
-<section id="ozelgeSection" class="py-5 section-content d-none">
-    <div class="container" data-aos="fade-up">
-        <div class="accordion shadow-sm rounded-3" id="ozelgeAccordion">
-
-            <div class="accordion-item border-0 shadow-sm rounded-3 overflow-hidden mb-3">
-                <h2 class="accordion-header" id="ozelge1Heading">
-                    <button class="accordion-button fw-semibold bg-white" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#ozelge1Collapse" aria-expanded="true">
-                        <i class="bi bi-chat-square-text me-2"></i> Komple Yeni Yatırımda Diğer Faaliyetlerden Doğan
-                        Kazançlar Kapsamında İndirimli Kurumlar Vergisi
-                    </button>
-                </h2>
-
-                <!-- Samsun Özelgesi -->
-                <div id="ozelge1Collapse" class="accordion-collapse collapse show" aria-labelledby="ozelge1Heading">
-                    <div class="accordion-body bg-light">
-                        <p class="small text-muted mb-3">Samsun Vergi Dairesi Başkanlığı – 11.04.2023</p>
-                        <p><strong>Özet:</strong> 2012/3305 sayılı Karar kapsamındaki yatırım devam ederken diğer
-                            faaliyetlerden elde edilen kazançlara da indirimli kurumlar vergisi uygulanabileceği
-                            belirtilmiştir.</p>
-                        <a href="https://www.gib.gov.tr/mevzuat/kanun/435/ozelge/28753" target="_blank"
-                            class="btn btn-outline-secondary btn-sm me-2">
-                            <i class="bi bi-link-45deg"></i> Kaynağa Git (GİB)
-                        </a>
-                        <button class="btn btn-warning btn-sm text-white" data-bs-toggle="modal"
-                            data-bs-target="#ozelge1Modal">
-
-                            <i class="bi bi-file-text"></i> Tam Metni Gör
-                        </button>
+<!-- 📙 ÖZELGELER BÖLÜMÜ -->
+<section id="ozelgeSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4">
+             <!-- Sol Menü -->
+             <div class="col-lg-3 d-none d-lg-block">
+                <nav id="ozelgeNavbar" class="h-100 d-flex flex-column">
+                     <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3" style="font-size: 0.8rem; letter-spacing: 1px;">ÖZELGE LİSTESİ</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav sidebar-ozelge">
+                            <a class="nav-link mb-2" href="#o-samsun">Samsun (2023) - Yeni Yatırım</a>
+                            <a class="nav-link mb-2" href="#o-bolu">Bolu (2023) - Endeksleme</a>
+                        </nav>
                     </div>
-                </div>
+                </nav>
             </div>
 
-
-
-            <div class="accordion-item shadow-sm rounded-3 overflow-hidden mb-3">
-                <h2 class="accordion-header" id="ozelge2Heading">
-                    <button class="accordion-button fw-semibold bg-white" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#ozelge2Collapse" aria-expanded="true">
-                        <i class="bi bi-chat-square-text me-2"></i> Tamamlanan Yatırımdan Kalan Katkı Tutarının
-                        Endekslenmesi ve Kullanımı
-                    </button>
-                </h2>
-
-                <div id="ozelge2Collapse" class="accordion-collapse collapse show" aria-labelledby="ozelge2Heading">
-                    <div class="accordion-body bg-light">
-                        <p class="small text-muted mb-3">Bolu Defterdarlığı Gelir Müdürlüğü – 10.04.2023</p>
-                        <p><strong>Özet:</strong> Tamamlanan yatırım sonrası yararlanılamayan yatırıma katkı
-                            tutarlarının, yeniden değerleme yapılarak sonraki dönemlerde indirimli kurumlar vergisi
-                            olarak
-                            kullanılamayacağı, sadece düzeltme beyannamesi yoluyla düzeltilebileceği belirtilmiştir.</p>
-                        <a href="https://www.gib.gov.tr/mevzuat/kanun/435/ozelge/28754" target="_blank"
-                            class="btn btn-outline-secondary btn-sm me-2">
-                            <i class="bi bi-link-45deg"></i> Kaynağa Git (GİB)
-                        </a>
-                        <button class="btn btn-warning btn-sm text-white" data-bs-toggle="modal"
-                            data-bs-target="#ozelge2Modal">
-                            <i class="bi bi-file-text"></i> Tam Metni Gör
-                        </button>
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                 <div data-bs-spy="scroll" data-bs-target="#ozelgeNavbar" data-bs-smooth-scroll="true" tabindex="0">
+                     
+                    <!-- Samsun -->
+                    <div id="o-samsun" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-warning text-dark">Samsun VDB - 11.04.2023</span>
+                                <a href="https://www.gib.gov.tr/mevzuat/kanun/435/ozelge/28753" target="_blank" class="text-decoration-none small text-muted"><i class="bi bi-box-arrow-up-right me-1"></i>GİB Kaynağı</a>
+                            </div>
+                            <h4 class="fw-bold mb-0">Komple Yeni Yatırımda Diğer Faaliyet Kazançları</h4>
+                        </div>
+                        <div class="card-body px-4 pb-4 pt-0">
+                            <div class="alert alert-light border border-warning-subtle p-3">
+                                <p class="mb-0 text-dark small"><strong>Konu:</strong> Yatırım devam ederken, firmanın diğer faaliyetlerinden elde ettiği kazançlara indirimli vergi uygulaması.</p>
+                            </div>
+                            <hr class="opacity-25">
+                            <div class="small text-muted">
+                                <p><strong>Soru:</strong> Şirketimiz komple yeni yatırım kapsamında teşvik belgesi almıştır. Yatırım süresi devam ederken, şirketin mevcut diğer faaliyetlerinden (satış, hizmet) elde ettiği kazançlara indirimli kurumlar vergisi uygulanabilir mi?</p>
+                                <p><strong>Cevap:</strong> Evet. 2012/3305 sayılı Karar'a göre; yatırım dönemi içerisinde, gerçekleştirilen yatırım harcaması tutarını aşmamak ve toplam yatırıma katkı tutarının belirli bir oranını (genelde %80) geçmemek kaydıyla, diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanabilir.</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- İstersen buraya yeni özelgeler eklenebilir -->
+                    <!-- Bolu -->
+                     <div id="o-bolu" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-info text-dark">Bolu Defterdarlık - 10.04.2023</span>
+                                <a href="https://www.gib.gov.tr/mevzuat/kanun/435/ozelge/28754" target="_blank" class="text-decoration-none small text-muted"><i class="bi bi-box-arrow-up-right me-1"></i>GİB Kaynağı</a>
+                            </div>
+                            <h4 class="fw-bold mb-0">Kalan Katkı Tutarının Endekslenmesi</h4>
+                        </div>
+                        <div class="card-body px-4 pb-4 pt-0">
+                             <div class="alert alert-light border border-info-subtle p-3">
+                                <p class="mb-0 text-dark small"><strong>Konu:</strong> Yıllık beyannamede kullanılmayan katkı tutarının sonraki yıla endekslenerek devredilmesi.</p>
+                            </div>
+                            <hr class="opacity-25">
+                             <div class="small text-muted">
+                                <p><strong>Soru:</strong> 2021 yılında tamamlanan yatırımımızdan kalan 1 Milyon TL'lik katkı tutarını 2021 beyannamesinde kullanmadık. 2022'ye devrederken endeksleme (YDO artışı) yapabilir miyiz?</p>
+                                <p><strong>Cevap:</strong> Hayır. İlgili yılda kazanç bulunmasına rağmen indirim hakkı kullanılmamışsa, bu hak o yıl için tüketilmiş sayılmaz ancak endeksleme de yapılamaz. Hakkın kaybedilmemesi ve endekslemenin doğru yapılması için ilgili yıl (2021) beyannamesinin düzeltilmesi gerekmektedir.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                 </div>
+            </div>
         </div>
     </div>
 </section>
 
-
-
-
-
-<!-- Özelge Modal1 -->
-<div class="modal fade" id="ozelge1Modal" tabindex="-1" aria-labelledby="ozelge1ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ozelge1ModalLabel">Samsun Vergi Dairesi Başkanlığı – 11.04.2023</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Konu:</strong> Komple yeni yatırımda diğer faaliyetlerden doğan kazançlar kapsamında
-                    indirimli kurumlar vergisi</p>
-                <hr>
-                <p>
-                    2012/3305 sayılı Karar kapsamındaki yatırım devam ederken, diğer faaliyetlerden elde edilen
-                    kazançlara da indirimli kurumlar vergisi uygulanabileceği belirtilmiştir.
-                    İndirimli kurumlar vergisi, ticari bilanço kârına kanunen kabul edilmeyen giderlerin eklenmesi,
-                    istisna ve indirimlerin düşülmesinden sonra kalan kazanç üzerinden hesaplanacaktır.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Özelge Modal2 -->
-<div class="modal fade" id="ozelge2Modal" tabindex="-1" aria-labelledby="ozelge2ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ozelge2ModalLabel">Bolu Defterdarlığı Gelir Müdürlüğü – 10.04.2023</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Konu:</strong> İndirimli Kurumlar Vergisi – Yatırıma Katkı Tutarlarının Endekslenmesi</p>
-                <hr>
-                <p>
-                    Tamamlanmış yatırımınıza ilişkin önceki dönemlerden kalan yatırıma katkı tutarlarının,
-                    sonraki dönemlerde yeniden değerleme yapılarak kullanılamayacağı; yatırımın tamamlandığı
-                    dönemden sonra yararlanılmayan katkı tutarlarının, indirimli kurumlar vergisi uygulaması
-                    kapsamında değerlendirilemeyeceği belirtilmiştir.
-                </p>
-                <p>
-                    Ancak, düzeltme zamanaşımı süresi içinde ilgili dönem beyannamelerinde düzeltme yapılarak
-                    gerekli işlemlerin gerçekleştirilebileceği ifade edilmiştir.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 🎨 Stil -->
-<style>
-    /* 🟦 Genel Accordion Stili */
-    .accordion-button {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        width: 100% !important;
-        min-height: 70px;
-        background-color: #fff !important;
-        overflow: visible !important;
-        white-space: nowrap !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-        font-size: 1.05rem;
-        text-align: left;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.2s ease-in-out;
-    }
-
-    .accordion-button:hover {
-        transform: scale(1.01);
-        background-color: #f8f9fb !important;
-    }
-
-    .accordion-button:not(.collapsed) {
-        white-space: normal !important;
-        text-overflow: unset !important;
-        line-height: 1.4;
-    }
-
-    .accordion-item {
-        border: 1px solid #e5e9f2 !important;
-        border-radius: 10px !important;
-        background-color: #fff;
-        transition: all 0.2s ease-in-out;
-        margin-bottom: 1rem;
-    }
-
-    .accordion-item:hover {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    /* 🧭 Sekme Aktif Durumu */
-    .btn.active {
-        background-color: #004aad !important;
-        color: #fff !important;
-    }
-
-    /* 🟩 Tebliğ sekmeleri */
-    #tebligTab .nav-link {
-        font-weight: 600;
-        border-radius: 8px 8px 0 0;
-    }
-
-    #tebligTab .nav-link.active {
-        background-color: #198754;
-        /* Yeşil ton */
-        color: #fff;
-    }
-
-    /* 🔹 Tebliğ Accordion özel renk */
-    #tebligSection .accordion-button {
-        color: #198754 !important;
-    }
-
-    #tebligSection .accordion-button:not(.collapsed) {
-        background-color: #f6fff7 !important;
-        border-left: 5px solid #198754 !important;
-    }
-
-    /* 🔵 Kanun Accordion özel renk */
-    #kanunSection .accordion-button {
-        color: #004aad !important;
-    }
-
-    #kanunSection .accordion-button:not(.collapsed) {
-        background-color: #eaf2ff !important;
-        border-left: 5px solid #004aad !important;
-    }
-
-    /* 🟧 Özelge kartları renk sistemi */
-    :root {
-        --ozelge-colors: #ffc107, #198754, #0d6efd, #dc3545, #20c997, #6f42c1;
-    }
-
-    .ozelge-card {
-        border-left: 6px solid var(--ozelge-color);
-        background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(0, 0, 0, 0.02));
-        transition: all 0.3s ease;
-        border-radius: 10px;
-    }
-
-    .ozelge-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .btn-ozelge {
-        background-color: var(--ozelge-color);
-        border-color: var(--ozelge-color);
-        color: #fff;
-    }
-
-    .btn-ozelge:hover {
-        background-color: var(--ozelge-color);
-        opacity: 0.85;
-        color: #fff;
-    }
-
-    /* 🔹 Nav pills (Kanun sekmeleri) */
-    .nav-pills .nav-link {
-        border-radius: 20px;
-        margin-right: 5px;
-        font-weight: 500;
-    }
-
-    .nav-pills .nav-link.active {
-        background-color: #004aad;
-        color: #fff;
-    }
-
-    /* Genel kart metni */
-    .card-body {
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-</style>
-
-
-
-<!-- ⭐ SCHEMA – İndirimli Kurumlar Vergisi / KVK 32/A -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "İndirimli Kurumlar Vergisi (KVK 32/A) – 2025/9903 Sayılı Karar Açıklamalı",
-  "description": "İndirimli kurumlar vergisi (KVK 32/A), yatırıma katkı oranı, indirimli vergi oranı, tevsi yatırımlar, diğer faaliyet kazançlarına uygulama ve 2025/9903 sayılı karar kapsamındaki tüm güncel düzenlemelerin açıklamalı kaynağı.",
-  "articleBody": "İndirimli kurumlar vergisi (KVK 32/A), yatırım teşvik sistemi kapsamında yatırımlardan elde edilen kazançların indirimli kurumlar vergisi oranı ile vergilendirilmesine imkan sağlar. Yatırıma katkı oranı, indirimli vergi oranı, bölgesel destekler, tevsi yatırımların kazanç ayrıştırması, diğer faaliyet kazançlarına indirimli vergi uygulanması, yatırım döneminde katkı tutarı kullanımı ve 2025/9903 sayılı karar ile yapılan değişikliklerin tamamı bu sayfada açıklamalı olarak yer almaktadır.",
-  "keywords": [
-    "indirimli kurumlar vergisi",
-    "kvk 32/a",
-    "yatırıma katkı oranı",
-    "9903 sayılı karar",
-    "yatırım teşvik",
-    "tevsi yatırım",
-    "indirimli kv hesaplama",
-    "yatırıma katkı tutarı",
-    "indirime konu kazanç"
-  ],
-  "author": {
-    "@type": "Organization",
-    "name": "İSFA YMM"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "İSFA Yeminli Mali Müşavirlik",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://www.isfaymm.com/static/images/logo.png"
-    }
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://www.isfaymm.com/indirim"
-  }
-}
-</script>
-
-<!-- ⭐ Breadcrumb – Google için çok önemli -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Mevzuat",
-      "item": "https://www.isfaymm.com/mevzuat"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "İndirimli Kurumlar Vergisi (KVK 32/A)",
-      "item": "https://www.isfaymm.com/indirim"
-    }
-  ]
-}
-</script>
-
-
-
-<!-- 🧩 JS: Sekme tıklanınca sadece ilgili bölüm kalsın -->
+<!-- 🖱️ Scripts -->
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // 🎨 Kullanılacak renk paleti
-        const colors = [
-            "#ffc107", // sarı
-            "#198754", // yeşil
-            "#0d6efd", // mavi
-            "#dc3545", // kırmızı
-            "#20c997", // turkuaz
-            "#6f42c1"  // mor
-        ];
-
-        // 🎯 Her özelge için sırayla renk ata
-        const accordionItems = document.querySelectorAll("#ozelgeAccordion .accordion-item");
-
-        accordionItems.forEach((item, i) => {
-            const color = colors[i % colors.length];
-
-            // 🔸 Kartın sol kenar ve hover efekti
-            item.style.setProperty("--ozelge-color", color);
-            item.classList.add("ozelge-card");
-
-            // 🔹 Başlıktaki accordion butonu (yazı + kenar rengi)
-            const headerBtn = item.querySelector(".accordion-button");
-            if (headerBtn) {
-                headerBtn.style.color = color;
-                headerBtn.style.borderLeft = `5px solid ${color}`;
-            }
-
-            // 🔹 “Tam Metni Gör” butonu rengi
-            const tamMetinBtn = item.querySelector("button.btn:not(.accordion-button)");
-            if (tamMetinBtn) {
-                tamMetinBtn.style.backgroundColor = color;
-                tamMetinBtn.style.borderColor = color;
-                tamMetinBtn.style.color = "#fff";
-            }
-
-            // 🔹 Modal penceresini bul ve başlık rengini eşitle
-            const modalId = tamMetinBtn?.getAttribute("data-bs-target");
-            if (modalId) {
-                const modalHeader = document.querySelector(`${modalId} .modal-header`);
-                if (modalHeader) {
-                    modalHeader.style.backgroundColor = color;
-                    modalHeader.style.color = "#fff";
-                }
-            }
-        });
-    });
-
-    // 🧭 Sekme geçiş fonksiyonu
-    function showSection(sectionId, btn) {
-        // 🔹 Tüm bölümleri gizle
+   function showSection(sectionId, btn) {
+        // İçerik geçişi
         document.querySelectorAll(".section-content").forEach(el => el.classList.add("d-none"));
+        const target = document.getElementById(sectionId);
+        target.classList.remove("d-none");
+        target.classList.add("fade-in-up");
 
-        // 🔹 İlgili bölümü göster
-        document.getElementById(sectionId).classList.remove("d-none");
+        // Buton Reset
+        document.querySelectorAll(".active-tab-btn, #btnKanun, #btnTeblig, #btnOzelge").forEach(b => {
+             b.classList.remove("active", "bg-primary", "bg-success", "bg-warning", "text-white");
+             b.classList.add("text-muted");
+        });
 
-        // 🔹 Aktif sekme rengini güncelle
-        document.querySelectorAll(".btn-outline-primary, .btn-outline-success, .btn-outline-warning")
-            .forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+        // Aktif Buton
+        btn.classList.remove("text-muted");
+        btn.classList.add("active", "text-white");
+        
+        if(sectionId === 'kanunSection') btn.classList.add("bg-primary");
+        if(sectionId === 'tebligSection') btn.classList.add("bg-success");
+        if(sectionId === 'ozelgeSection') btn.classList.add("bg-warning"); 
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 
+<style>
+/* Modern Butonlar */
+.active-tab-btn.active {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+#btnKanun.active { background-color: #0d6efd !important; }
+#btnTeblig.active { background-color: #198754 !important; }
+#btnOzelge.active { background-color: #ffc107 !important; color: #000 !important; } /* Sarı buton siyah yazı */
+
+/* Menü Linkleri */
+.sidebar-modern-nav .nav-link {
+    color: #495057;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.sidebar-modern-nav .nav-link:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
+.sidebar-modern-nav .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+}
+
+.sidebar-teblig .nav-link.active {
+    background-color: #198754;
+    box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2);
+}
+
+.sidebar-ozelge .nav-link.active {
+    background-color: #ffc107;
+    color: black;
+    box-shadow: 0 4px 6px rgba(255, 193, 7, 0.2);
+}
+
+.small-icon { font-size: 0.8rem; opacity: 0.7; }
+.fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 {% endblock %}

@@ -1,0 +1,385 @@
+{% extends "layout.html" %}
+
+{% block title %}Tek Düzen Hesap Planı - Pratik Rehber{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    
+    <!-- 🔍 Pratik Arama Alanı (Estetik & Sticky) -->
+    <div class="sticky-top py-3 mb-4" style="z-index: 1000; top: 70px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.03); margin-left: -15px; margin-right: -15px; padding-left: 15px; padding-right: 15px;">
+        
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                
+                <div class="text-center mb-3">
+                    <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px;">Tek Düzen Hesap Planı ve Açıklamaları</h2>
+                </div>
+
+                <div class="position-relative group-search transition-all">
+                    <div class="position-absolute top-50 start-0 translate-middle-y ps-4 pointer-events-none">
+                        <i class="bi bi-search text-primary fs-5"></i>
+                    </div>
+                    <input type="text" id="tdhpSearch" 
+                           class="form-control form-control-lg border-0 shadow-lg ps-5 py-3 rounded-pill text-dark bg-white" 
+                           style="padding-left: 3.5rem !important; font-size: 1.1rem; transition: transform 0.2s;"
+                           placeholder="Hesap kodu veya adı ara..." autocomplete="off" autofocus>
+                    
+                    <!-- Temizle Butonu -->
+                    <button class="btn btn-circle btn-sm btn-light text-muted position-absolute top-50 end-0 translate-middle-y me-3 d-none shadow-sm" 
+                            id="clearSearch" type="button" onclick="resetSearch()" style="width: 32px; height: 32px;">
+                        <i class="bi bi-x-lg small"></i>
+                    </button>
+                </div>
+
+                <!-- 🏷️ Hızlı Filtreler -->
+                <div class="d-flex justify-content-center gap-2 mt-3" id="filterButtons">
+                    <button class="btn btn-sm btn-dark rounded-pill px-4 py-2 fw-medium shadow-sm transition-transform active-filter" onclick="filterCategory('bilanco', this)">
+                        Bilanço (1-5)
+                    </button>
+                    <button class="btn btn-sm btn-light border rounded-pill px-4 py-2 fw-medium shadow-sm transition-transform text-muted" onclick="filterCategory('gelir', this)">
+                        Gelir Tablosu (6)
+                    </button>
+                    <button class="btn btn-sm btn-light border rounded-pill px-4 py-2 fw-medium shadow-sm transition-transform text-muted" onclick="filterCategory('diger', this)">
+                        Maliyet & Nazım (7-9)
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 Hesap Listesi -->
+    <div id="accountsContainer" class="fade-in">
+        
+        <!-- BİLANÇO -->
+        <div class="account-section" data-category="bilanco">
+            <div class="d-flex align-items-center mb-3 mt-4">
+                <span class="badge bg-primary rounded-pill me-2">1-5</span>
+
+            </div>
+            
+            <div class="accordion accordion-flush bg-white rounded-4 shadow-sm border" id="accBilanco">
+                {% macro render_item(key, value, parent_id, loop_index) %}
+                    {% set clean_id = parent_id + '-' + loop_index|string %}
+                    {% if value is mapping %}
+                        <!-- Grup Başlığı (Accordion) -->
+                        <div class="accordion-item bg-transparent border-bottom search-item group-item">
+                            <h2 class="accordion-header" id="head-{{ clean_id }}">
+                                <button class="accordion-button collapsed fw-semibold py-3" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#collapse-{{ clean_id }}" 
+                                        aria-expanded="false">
+                                    <span class="text-muted me-2 font-monospace">{{ key.split(' ')[0] }}</span>
+                                    <span class="text-dark">{{ key.split(' ', 1)[1] if ' ' in key else key }}</span>
+                                </button>
+                            </h2>
+                            <div id="collapse-{{ clean_id }}" class="accordion-collapse collapse" data-bs-parent="#{{ parent_id }}">
+                                <div class="accordion-body py-2 ps-4 bg-light-subtle">
+                                    <div class="accordion accordion-flush" id="sub-{{ clean_id }}">
+                                        {% for k, v in value.items() %}
+                                            {{ render_item(k, v, 'sub-' + clean_id, loop.index) }}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Hesap Satırı (Tekil) -->
+                        <div class="list-group-item border-0 border-bottom py-2 px-3 search-item leaf-item d-flex align-items-center"
+                             data-code="{{ key }}" data-name="{{ value }}" onclick="handleAccountClick(this)">
+                            <div class="d-flex align-items-center text-truncate">
+                                <span class="badge bg-white text-black border border-secondary me-3 font-monospace rounded-2 px-2 py-1 fs-6 shadow-sm" style="min-width: 60px;">{{ key }}</span>
+                                <span class="text-dark fw-medium search-text">{{ value }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endmacro %}
+
+                {% for key, val in bilanco.items() %}
+                    {{ render_item(key, val, 'accBilanco', loop.index) }}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- GELİR TABLOSU -->
+        <div class="account-section d-none" data-category="gelir">
+             <div class="d-flex align-items-center mb-3 mt-5">
+                <span class="badge bg-danger rounded-pill me-2">6</span>
+                <h5 class="fw-bold text-danger mb-0">Gelir Tablosu Hesapları</h5>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="list-group list-group-flush">
+                    {% for group, accounts in gelir.items() %}
+                        <div class="list-group-item bg-light border-0 fw-bold text-danger pt-3 pb-2 search-item group-head">
+                            {{ group }}
+                        </div>
+                        {% for code, name in accounts.items() %}
+                        <div class="list-group-item border-0 border-bottom py-2 px-3 search-item leaf-item d-flex align-items-center"
+                             data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
+                            <div class="d-flex align-items-center text-truncate">
+                                <span class="badge bg-white text-black border border-danger me-3 font-monospace rounded-2 px-2 py-1 fs-6 shadow-sm" style="min-width: 60px;">{{ code }}</span>
+                                <span class="text-dark fw-medium search-text">{{ name }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- MALİYET & NAZIM -->
+        <div class="account-section d-none" data-category="diger">
+            <div class="d-flex align-items-center mb-3 mt-5">
+                <span class="badge bg-secondary rounded-pill me-2">7 & 9</span>
+                <h5 class="fw-bold text-secondary mb-0">Maliyet ve Nazım Hesaplar</h5>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white fw-bold py-3 text-secondary border-bottom-0">7. Maliyet Hesapları</div>
+                        <div class="list-group list-group-flush">
+                            {% for group, accounts in maliyet.items() %}
+                                {% for code, name in accounts.items() %}
+                                <div class="list-group-item border-0 border-bottom py-2 px-3 d-flex align-items-center search-item leaf-item"
+                                     data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
+                                    <span class="badge bg-white text-black border border-secondary me-3 font-monospace fs-6 shadow-sm" style="min-width: 50px;">{{ code }}</span>
+                                    <span class="small search-text text-dark fw-medium">{{ name }}</span>
+                                </div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white fw-bold py-3 text-secondary border-bottom-0">9. Nazım Hesaplar</div>
+                         <div class="list-group list-group-flush">
+                            {% for group, accounts in nazim.items() %}
+                                {% for code, name in accounts.items() %}
+                                <div class="list-group-item border-0 border-bottom py-2 px-3 d-flex align-items-center search-item leaf-item"
+                                     data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
+                                    <span class="badge bg-white text-black border border-dark me-3 font-monospace fs-6 shadow-sm" style="min-width: 50px;">{{ code }}</span>
+                                    <span class="small search-text text-dark fw-medium">{{ name }}</span>
+                                </div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results -->
+        <div id="msgNoResults" class="text-center py-5 d-none">
+            <p class="text-muted fw-bold fs-5">Sonuç bulunamadı 😔</p>
+        </div>
+
+    </div>
+
+    <!-- 📖 Offcanvas (Yan Panel) - Açıklama İçin -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="accountOffcanvas" aria-labelledby="offcanvasLabel" style="width: 500px;">
+        <div class="offcanvas-header bg-primary text-white">
+            <h5 class="offcanvas-title fw-bold" id="offcanvasLabel">Hesap Detayı</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="offcanvasContent">
+                <!-- İçerik JS ile buraya gelecek -->
+                <div class="text-center mt-5 text-muted">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .accordian-button:focus { box-shadow: none !important; color: var(--bs-primary); }
+    .btn-circle { width: 24px; height: 24px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    
+    /* Vurgulama */
+    mark.highlight { background-color: #ffc107; color: black; padding: 0 2px; border-radius: 2px; }
+    
+    /* Zorlayıcı Renk Düzeltmesi (Override) */
+    .badge.bg-white { color: #000000 !important; }
+
+    /* Clickable row */
+    .leaf-item { cursor: pointer; transition: background-color 0.1s; }
+    .leaf-item:hover { background-color: #f1f5f9; }
+</style>
+
+<script>
+    // 📦 Tüm Açıklama Verisi (Backend'den geliyor)
+    const tdhpData = {{ descriptions|tojson|safe }};
+
+    function handleAccountClick(el) {
+        // Dataset'ten bilgileri al
+        const code = el.dataset.code;
+        const name = el.dataset.name;
+        
+        const offcanvasEl = document.getElementById('accountOffcanvas');
+        const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+        
+        // İçeriği temizle ve başlığı ayarla
+        document.getElementById('offcanvasLabel').innerText = code + " - " + name;
+        
+        const contentDiv = document.getElementById('offcanvasContent');
+        
+        // Veriyi bul
+        let desc = "Bu hesap için detaylı açıklama bulunamadı.";
+        if (tdhpData && tdhpData[code] && tdhpData[code].description) {
+            desc = tdhpData[code].description;
+        }
+
+        // Formatla (Yeni satırları paragraf yap)
+        let formattedDesc = desc.replace(/\n\n/g, '<br><br>').replace(/\n/g, ' ');
+        
+        contentDiv.innerHTML = `
+            <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3 border">
+                <span class="display-6 fw-bold text-primary me-3">${code}</span>
+                <span class="fs-5 fw-semibold text-dark lh-sm">${name}</span>
+            </div>
+            
+            <div class="description-text text-dark" style="text-align: justify; line-height: 1.6;">
+                ${formattedDesc}
+            </div>
+            
+            <hr class="my-4">
+            <div class="alert alert-warning border-0 d-flex align-items-center small shadow-sm">
+                <i class="bi bi-lightbulb-fill me-2 fs-5 text-warning"></i>
+                <div class="text-muted">
+                    Bu açıklamalar <strong>Tek Düzen Hesap Planı</strong> tebliğlerinden otomatik olarak derlenmiştir.
+                </div>
+            </div>
+        `;
+
+        bsOffcanvas.show();
+    }
+
+    // 🔍 Search Function
+    const searchInput = document.getElementById('tdhpSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    let allItems = document.querySelectorAll('.search-item');
+
+    searchInput.addEventListener('input', function() {
+        let val = this.value.toLowerCase().trim();
+        let sections = document.querySelectorAll('.account-section');
+        
+        // Show/Hide Clear Button
+        if (val.length > 0) clearBtn.classList.remove('d-none');
+        else clearBtn.classList.add('d-none');
+
+        // Reset display
+        if (val === "") {
+             allItems.forEach(el => {
+                 el.classList.remove('d-none');
+             });
+             closeAllAccordions();
+             updateCategoryVisibility(); // Respect active filter
+             document.getElementById('msgNoResults').classList.add('d-none');
+             clearHighlights();
+             return;
+        }
+
+        let hasTotal = false;
+
+        // Perform Search
+        allItems.forEach(item => {
+            let text = item.innerText.toLowerCase();
+            let isMatch = text.includes(val);
+            
+            if (isMatch) {
+                item.classList.remove('d-none');
+                hasTotal = true;
+                
+                // Highlight text in leaf items
+                if (item.classList.contains('leaf-item')) {
+                    let span = item.querySelector('.search-text');
+                    highlightText(span, val);
+                }
+
+                // If inside accordion, open parents
+                let parentCollapse = item.closest('.accordion-collapse');
+                if (parentCollapse) {
+                    parentCollapse.classList.add('show');
+                    let groupItem = parentCollapse.closest('.group-item');
+                    if (groupItem) groupItem.classList.remove('d-none'); 
+                }
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+        
+        if (!hasTotal) document.getElementById('msgNoResults').classList.remove('d-none');
+        else document.getElementById('msgNoResults').classList.add('d-none');
+    });
+
+    function highlightText(element, filter) {
+        if (!element) return;
+        let inner = element.innerText;
+        let regex = new RegExp(`(${filter})`, 'gi');
+        element.innerHTML = inner.replace(regex, '<mark class="highlight">$1</mark>');
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll('.search-text').forEach(el => {
+            el.innerHTML = el.innerText;
+        });
+    }
+
+    function resetSearch() {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+    
+    function closeAllAccordions() {
+        document.querySelectorAll('.accordion-collapse.show').forEach(el => el.classList.remove('show'));
+    }
+
+    // 🏷️ Filter Logic
+    let currentCategory = 'bilanco';
+    
+    function filterCategory(cat, btn) {
+        currentCategory = cat;
+        
+        // Update Buttons
+        document.querySelectorAll('#filterButtons button').forEach(b => {
+             b.classList.remove('btn-dark', 'active-filter', 'text-white');
+             b.classList.add('btn-light', 'border', 'text-muted');
+        });
+        
+        updateButtonStyles(btn);
+        
+        updateCategoryVisibility();
+    }
+
+    function updateButtonStyles(activeBtn) {
+         // Reset all buttons to inactive state
+         const btns = document.getElementById('filterButtons').children;
+         for (let b of btns) {
+             b.classList.remove('btn-dark', 'active-filter', 'text-white');
+             b.classList.add('btn-light', 'border', 'text-muted');
+         }
+         
+         // Apply active style to clicked button
+         activeBtn.classList.remove('btn-light', 'border', 'text-muted');
+         activeBtn.classList.add('btn-dark', 'active-filter', 'text-white');
+    }
+
+    function updateCategoryVisibility() {
+        const sections = document.querySelectorAll('.account-section');
+        sections.forEach(sec => {
+            if (sec.dataset.category === currentCategory) {
+                sec.classList.remove('d-none');
+            } else {
+                sec.classList.add('d-none');
+            }
+        });
+    }
+    
+    // Init button styles correctly on load
+    updateButtonStyles(document.querySelector('#filterButtons button'));
+
+</script>
+{% endblock %}

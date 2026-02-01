@@ -101,3 +101,7 @@ def mevzuat_degisiklikleri():
 @bp.route("/indirim")
 def indirim():
     return render_template("pages/indirim.html")
+
+@bp.route("/birlesme")
+def birlesme():
+    return render_template("pages/birlesme.html")

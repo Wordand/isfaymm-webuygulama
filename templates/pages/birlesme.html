@@ -1,0 +1,418 @@
+{% extends "layout.html" %}
+
+{% block title %}Birleşme, Devir, Bölünme ve Hisse Değişimi Mevzuatı{% endblock %}
+
+{% block content %}
+
+<!-- 🟦 Başlık Alanı -->
+<section class="py-5 text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%) !important;">
+    <div class="container position-relative">
+        <h1 class="fw-bold display-5 mb-3">Kurumlar Vergisi Mevzuat Rehberi</h1>
+        <p class="lead text-white-50 mb-0">Tasfiye, Birleşme, Devir, Bölünme ve Hisse Değişimi (KVK Md. 17-20)</p>
+    </div>
+</section>
+
+<!-- 🧭 Sekme Menü -->
+<section class="bg-white shadow-sm py-3 sticky-top" style="z-index: 1020; top: 0px;">
+    <div class="container text-center">
+        <div class="d-inline-flex bg-light p-1 rounded-pill border shadow-sm">
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold active bg-dark text-white" onclick="showSection('kanunSection', this)" id="btnKanun">
+                <i class="bi bi-book me-2"></i>KANUN MADDELERİ
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('aciklamaSection', this)" id="btnAciklama">
+                <i class="bi bi-file-text me-2"></i>TEBLİĞ AÇIKLAMALARI
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('ornekSection', this)" id="btnOrnek">
+                <i class="bi bi-calculator me-2"></i>UYGULAMA ÖRNEKLERİ
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- 📚 1. KANUN BÖLÜMÜ -->
+<section id="kanunSection" class="py-5 section-content bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="kanunNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3 small">MADDELER</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-1" href="#k-17">Md. 17: Tasfiye</a>
+                            <a class="nav-link mb-1" href="#k-18">Md. 18: Birleşme</a>
+                            <a class="nav-link mb-1" href="#k-19">Md. 19: Devir/Bölünme</a>
+                            <a class="nav-link mb-1" href="#k-20">Md. 20: Vergilendirme</a>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#kanunNavbar" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                    
+                    <!-- Md 17 -->
+                    <div id="k-17" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-0"><h4 class="fw-bold mb-0 text-success">Madde 17: Tasfiye</h4></div>
+                        <div class="card-body pt-0">
+                            <p class="text-dark">Tasfiye halindeki kurumların vergilendirilmesinde hesap dönemi yerine tasfiye dönemi geçerli olur.</p>
+                            <p class="text-dark">Tasfiye kârı, tasfiye döneminin sonundaki servet değeri ile tasfiye döneminin başındaki servet değeri arasındaki olumlu farktır.</p>
+                        </div>
+                    </div>
+
+                    <!-- Md 18 -->
+                    <div id="k-18" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-0"><h4 class="fw-bold mb-0 text-primary">Madde 18: Birleşme</h4></div>
+                        <div class="card-body pt-0">
+                            <p class="text-dark">Bir veya birkaç kurumun diğer bir kurumla birleşmesi, infisah eden kurumlar bakımından tasfiye hükmündedir. Birleşme kârı vergiye matrah olur.</p>
+                        </div>
+                    </div>
+
+                    <!-- Md 19 -->
+                    <div id="k-19" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-0"><h4 class="fw-bold mb-0 text-warning">Madde 19: Devir, Bölünme ve Hisse Değişimi</h4></div>
+                        <div class="card-body pt-0">
+                            <h6 class="fw-bold text-dark">Devir</h6>
+                            <p class="text-dark small">Tam mükellef kurumlar arasında, münfesih kurumun devir tarihindeki bilanço değerlerinin bir bütün halinde devralınması ve aynen bilançoya geçirilmesi.</p>
+                            <h6 class="fw-bold text-dark">Tam Bölünme</h6>
+                            <p class="text-dark small">Tam mükellef bir sermaye şirketinin tasfiyesiz olarak infisah ederek bütün mal varlığını mevcut veya yeni kurulacak iki şirkete devretmesi.</p>
+                            <h6 class="fw-bold text-dark">Kısmi Bölünme</h6>
+                            <p class="text-dark small">Taşınmazlar, en az iki tam yıl süreyle elde tutulan iştirak hisseleri ya da üretim veya hizmet işletmelerinin ayni sermaye olarak konulması.</p>
+                        </div>
+                    </div>
+
+                    <!-- Md 20 -->
+                    <div id="k-20" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3 border-0"><h4 class="fw-bold mb-0 text-danger">Madde 20: Vergilendirme</h4></div>
+                        <div class="card-body pt-0">
+                            <p class="text-dark">Devir ve bölünme hallerinde, münfesih kurumun sadece devir veya bölünme tarihine kadar elde ettiği kazançlar vergilendirilir; birleşme veya bölünme kârı hesaplanmaz.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📘 2. TEBLİĞ AÇIKLAMALARI BÖLÜMÜ -->
+<section id="aciklamaSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sol Menü -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="aciklamaNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px; max-height: 80vh; overflow-y: auto;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3 small">TEBLİĞ REHBERİ</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-1" href="#t-17">17. Tasfiye</a>
+                            <a class="nav-link mb-1 ps-4 small" href="#t-17-1">17.1 Dönem</a>
+                            <a class="nav-link mb-1 ps-4 small" href="#t-17-2">17.2 Vazgeçme</a>
+                            <a class="nav-link mb-1" href="#t-18">18. Birleşme</a>
+                            <a class="nav-link mb-1" href="#t-19-1">19.1 Devir</a>
+                            <a class="nav-link mb-1" href="#t-19-2">19.2 Bölünme</a>
+                            <a class="nav-link mb-1 ps-4 small" href="#t-19-2-1">a) Tam Bölünme</a>
+                            <a class="nav-link mb-1 ps-4 small" href="#t-19-2-2">b) Kısmi Bölünme</a>
+                            <a class="nav-link mb-1" href="#t-19-3">19.3 Ortak Hususlar</a>
+                            <a class="nav-link mb-1" href="#t-19-4">19.4 Hisse Değişimi</a>
+                            <a class="nav-link mb-1" href="#t-20">20. Vergilendirme</a>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#aciklamaNavbar" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                    
+                    <!-- 17. TASFİYE -->
+                    <div id="t-17" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-success text-white py-3"><h4 class="mb-0 fw-bold">17. Tasfiye İşlemleri</h4></div>
+                            <div class="card-body p-4">
+                                <div id="t-17-1" class="mb-4">
+                                    <h5 class="fw-bold text-dark">17.1. Tasfiye Dönemi</h5>
+                                    <p>Her ne sebeple olursa olsun, tasfiye haline giren kurumların vergilendirilmesinde hesap dönemi yerine tasfiye dönemi geçerli olacaktır. Tasfiye, kurumun tasfiyeye girmesine ilişkin genel kurul kararının tescil edildiği tarihte başlar.</p>
+                                    <div class="alert alert-info py-2 small">Tasfiyenin zararla kapanması halinde tasfiye sonucu, önceki tasfiye dönemlerine doğru düzeltilir ve fazla ödenen vergiler iade edilir.</div>
+                                </div>
+                                <div id="t-17-2" class="mb-4">
+                                    <h5 class="fw-bold text-dark">17.2. Tasfiyeden Vazgeçilmesi</h5>
+                                    <p>Tasfiyeden vazgeçilmesi halinde, kurum hakkında tasfiye hükümleri uygulanmaz. Tasfiyeden vazgeçme kararı, bu kararın alındığı tasfiye döneminin başından itibaren geçerli olur.</p>
+                                </div>
+                                <div id="t-17-3">
+                                    <h5 class="fw-bold text-dark">17.3. Tasfiye Beyannameleri</h5>
+                                    <p>Tasfiye beyannamesi, tasfiyenin sonuçlandığı tarihten itibaren 30 gün içinde verilir.</p>
+                                    <p>Tasfiye kârı, tasfiye döneminin sonundaki servet değeri ile tasfiye döneminin başındaki servet değeri arasındaki olumlu farktır.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 18. BİRLEŞME -->
+                    <div id="t-18" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white py-3"><h4 class="mb-0 fw-bold">18. Birleşme</h4></div>
+                            <div class="card-body p-4">
+                                <p>Birleşme sebebiyle infisah eden kurumların birleşme kârı için tasfiye hükümleri geçerli olacaktır. Ancak, birleşmede tasfiye kârı yerine birleşme kârı vergiye matrah olur.</p>
+                                <p>Birleşme kârının hesaplanması sırasında, birleşen kurumların ortaklarına birleşilen kurum tarafından verilen değerlerin, transfer fiyatlandırması yoluyla örtülü kazanç dağıtımı hükümlerine göre belirlenmesi gerekecektir.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 19. DEVİR -->
+                    <div id="t-19-1" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-warning text-dark py-3"><h4 class="mb-0 fw-bold">19.1. Devir (Vergisiz Birleşme)</h4></div>
+                            <div class="card-body p-4">
+                                <p>Aşağıdaki şartlar dahilinde gerçekleşen birleşmeler devir hükmündedir:</p>
+                                <ul>
+                                    <li>Birleşme sonucunda infisah eden kurum ile birleşilen kurumun kanuni veya iş merkezlerinin Türkiye’de bulunması.</li>
+                                    <li>Münfesih kurumun devir tarihindeki bilanço değerlerinin, birleşilen kurum tarafından bir bütün halinde devralınması ve aynen bilançosuna geçirilmesi.</li>
+                                </ul>
+                                <p class="small text-muted">Devir tarihi, şirket yetkili kurulunun devre ilişkin kararının Ticaret Sicilinde tescil edildiği tarihtir.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 19.2. BÖLÜNME -->
+                    <div id="t-19-2" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-info text-white py-3"><h4 class="mb-0 fw-bold">19.2. Bölünme</h4></div>
+                            <div class="card-body p-4">
+                                <div id="t-19-2-1" class="mb-4">
+                                    <h5 class="fw-bold text-dark">19.2.1. Tam Bölünme</h5>
+                                    <p>Tam mükellef bir sermaye şirketinin tasfiyesiz olarak infisah etmek suretiyle bütün mal varlığını, alacaklarını ve borçlarını kayıtlı değerleri üzerinden mevcut veya yeni kurulacak iki veya daha fazla tam mükellef sermaye şirketine devretmesidir.</p>
+                                    <p class="small mb-0">Bölünen şirketin varlıkları, kayıtlı değer üzerinden devralan şirketlere aktarılacaktır. Bu işlemle vergi ertelemesi sağlanır.</p>
+                                </div>
+                                <hr>
+                                <div id="t-19-2-2" class="mb-4">
+                                    <h5 class="fw-bold text-dark">19.2.2. Kısmi Bölünme</h5>
+                                    <p>Tam mükellef bir sermaye şirketinin bilançosunda yer alan ve <strong>en az iki tam yıl süreyle</strong> elde tutulan iştirak hisseleri ya da üretim veya hizmet işletmelerinin ayni sermaye olarak konulmasıdır.</p>
+                                    <div class="p-3 bg-light rounded border small">
+                                        <strong>Önemli:</strong> Kısmi bölünmede, bölünen kurumdan devralan kuruma zarar intikali öngörülmediğinden, geçmiş yıl zararlarının devredilmesi mümkün değildir.
+                                    </div>
+                                    <h6 class="fw-bold mt-3">Üretim İşletmeleri</h6>
+                                    <p class="small">Üretim veya hizmet işletmelerinin devrinde, işletme bütünlüğü korunacak şekilde aktif ve pasif kalemlerin tümünün devredilmesi zorunludur. Nakit, alacak ve borçlar da devredilmelidir.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 19.3. ORTAK HUSUSLAR -->
+                    <div id="t-19-3" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-secondary text-white py-3"><h4 class="mb-0 fw-bold">19.3. Ortak Hususlar</h4></div>
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-dark">Amortisman</h6>
+                                <p>Devir ve bölünme işleminde devrolan amortismana tabi iktisadi kıymetlerin bakiye değerleri üzerinden kalan amortisman süreleri dikkate alınarak amortisman ayrılmaya devam edilir.</p>
+                                <h6 class="fw-bold text-dark">İktisap Tarihi</h6>
+                                <p>Devir veya bölünen şirketin ortaklarına verilen yeni hisselerin iktisap tarihi olarak, eski şirketin hisselerinin iktisap edildiği tarih esas alınır.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 19.4. HİSSE DEĞİŞİMİ -->
+                    <div id="t-19-4" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-dark text-white py-3"><h4 class="mb-0 fw-bold">19.4. Hisse Değişimi</h4></div>
+                            <div class="card-body p-4">
+                                <p>Tam mükellef bir sermaye şirketinin, diğer bir sermaye şirketinin hisselerini, bu şirketin yönetimini ve hisse çoğunluğunu elde edecek şekilde devralması ve karşılığında kendi hissesini vermesidir.</p>
+                                <p>İşlemin vergisiz olması için devralan ve devredilen kurumların sermaye şirketi olması ve devralanın tam mükellef olması gerekir.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 20. VERGİLENDİRME -->
+                    <div id="t-20" class="mb-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-danger text-white py-3"><h4 class="mb-0 fw-bold">20. Vergilendirme</h4></div>
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-dark">20.1. Devir Halinde</h6>
+                                <p>Sadece devir tarihine kadar elde edilen kazançlar vergilendirilir. Beyanname, tescil tarihinden itibaren 30 gün içinde verilir.</p>
+                                <h6 class="fw-bold text-dark">20.2. Tam Bölünme</h6>
+                                <p>Sadece bölünme tarihine kadar elde edilen kazançlar vergilendirilir. Bölünme kârı hesaplanmaz.</p>
+                                <h6 class="fw-bold text-dark">20.3. Kısmi Bölünme ve Hisse Değişimi</h6>
+                                <p>Bu işlemlerden doğan kârlar (değer artış kazançları) hesaplanmaz ve vergilendirilmez.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📊 3. UYGULAMA ÖRNEKLERİ BÖLÜMÜ -->
+<section id="ornekSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="ornekNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3 small">ÖRNEKLER</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-1" href="#ex-1">1. Tasfiye Takvimi</a>
+                            <a class="nav-link mb-1" href="#ex-2">2. Uzun Tasfiye</a>
+                            <a class="nav-link mb-1" href="#ex-3">3. Zarar ve İade</a>
+                            <a class="nav-link mb-1" href="#ex-4">4. Zamanaşımı</a>
+                            <a class="nav-link mb-1" href="#ex-5">5. Tasfiyeden Vazgeçme</a>
+                            <a class="nav-link mb-1" href="#ex-6">6. Beyan Süreleri</a>
+                            <a class="nav-link mb-1" href="#ex-7">7. Kısmi Böl (İşletme)</a>
+                            <a class="nav-link mb-1" href="#ex-8">8. Negatif Net Değer</a>
+                            <a class="nav-link mb-1" href="#ex-9">9. Zarar Mahsubu</a>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
+            
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#ornekNavbar" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                    
+                    <!-- EX 1: Tasfiye -->
+                    <div id="ex-1" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-secondary text-white"><h5 class="mb-0">Örnek 1: Tasfiyenin Aynı Yıl İçinde Sonuçlanması</h5></div>
+                        <div class="card-body">
+                            <p class="small"><strong>Kurumun tasfiyeye giriş tarihi:</strong> 18.01.2006</p>
+                            <p class="small"><strong>Tasfiyenin bitiş tarihi:</strong> 12.12.2006</p>
+                            <div class="alert alert-light border"><strong>Tasfiye Dönemi:</strong> 18.01.2006 - 12.12.2006</div>
+                        </div>
+                    </div>
+
+                    <!-- EX 2: Uzun Tasfiye -->
+                    <div id="ex-2" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-secondary text-white"><h5 class="mb-0">Örnek 2: Tasfiyenin Bir Yıldan Fazla Sürmesi</h5></div>
+                        <div class="card-body">
+                            <p class="small">Giriş: 15.04.2006 | Bitiş: 04.06.2008</p>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item"><strong>I. Dönem:</strong> 15.04.2006 - 31.12.2006</li>
+                                <li class="list-group-item"><strong>II. Dönem:</strong> 01.01.2007 - 31.12.2007</li>
+                                <li class="list-group-item"><strong>III. Dönem:</strong> 01.01.2008 - 04.06.2008</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- EX 3: Zarar Düzeltme -->
+                    <div id="ex-3" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-warning text-dark"><h5 class="mb-0">Örnek 3: Zararla Kapanma ve İade</h5></div>
+                        <div class="card-body">
+                            <div class="table-responsive small">
+                                <table class="table table-bordered mb-0">
+                                    <thead class="table-light"><tr><th>Dönem</th><th class="text-end">Beyan</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>I. Dönem</td><td class="text-end text-success">+ 20.000 (Kâr)</td></tr>
+                                        <tr><td>II. Dönem</td><td class="text-end text-success">+ 150.000 (Kâr)</td></tr>
+                                        <tr><td>III. Dönem</td><td class="text-end text-danger">- 50.000 (Zarar)</td></tr>
+                                        <tr><td>Son Dönem</td><td class="text-end text-danger">- 25.000 (Zarar)</td></tr>
+                                        <tr class="fw-bold"><td>Nihai Matrah</td><td class="text-end">95.000</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="mt-3 small">Ödenen Vergi (İlk 2 yıl): 34.000 TL<br>Gereken Vergi (Nihai): 19.000 TL<br><strong>İade: 15.000 TL</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- EX 4: Zamanaşımı -->
+                    <div id="ex-4" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-danger text-white"><h5 class="mb-0">Örnek 4: Tasfiyede Zamanaşımı</h5></div>
+                        <div class="card-body">
+                            <p class="small">Bir yıldan fazla süren tasfiyelerde tarh zamanaşımı, tasfiyenin sona erdiği dönemi izleyen yıldan başlar.</p>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item"><strong>Giriş:</strong> 11.02.2002 | <strong>Bitiş:</strong> 04.06.2006</li>
+                                <li class="list-group-item list-group-item-warning"><strong>Zamanaşımı Başlangıcı:</strong> 01.01.2007</li>
+                                <li class="list-group-item list-group-item-warning"><strong>Zamanaşımı Sonu:</strong> 31.12.2011</li>
+                            </ul>
+                            <p class="small text-muted mt-2 mb-0">Bu süre zarfında tüm tasfiye dönemleri için tarhiyat yapılabilir.</p>
+                        </div>
+
+                    </div>
+                    <!-- EX 5: Vazgeçme -->
+                    <div id="ex-5" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-info text-white"><h5 class="mb-0">Örnek 5: Tasfiyeden Vazgeçilmesi</h5></div>
+                        <div class="card-body small">
+                            <p><strong>Giriş:</strong> 14.02.2006 | <strong>Vazgeçme:</strong> 15.04.2008</p>
+                            <ul>
+                                <li>I. Tasfiye Dönemi: 14.02.2006 - 31.12.2006</li>
+                                <li>II. Tasfiye Dönemi: 01.01.2007 - 31.12.2007</li>
+                                <li><strong>Normal Beyan Dönemi:</strong> 01.01.2008 - 31.12.2008 (Vazgeçilen yıl başından itibaren)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- EX 6: Beyan Süreleri -->
+                    <div id="ex-6" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white"><h5 class="mb-0">Örnek 6: Tasfiye Beyan Süreleri</h5></div>
+                        <div class="card-body">
+                            <p class="small"><strong>Giriş:</strong> 04.06.2006 | <strong>Sonuç:</strong> 15.04.2008</p>
+                            <div class="table-responsive small">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light"><tr><th>Dönem</th><th>Süre</th><th>Beyan Tarihi</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Kıst Dönem</td><td>01.01.06 - 03.06.06</td><td>1-25.10.2006 (4. ayın 25'i)</td></tr>
+                                        <tr><td>I. Tasfiye</td><td>04.06.06 - 31.12.06</td><td>1-25.04.2007</td></tr>
+                                        <tr><td>II. Tasfiye</td><td>01.01.07 - 31.12.07</td><td>1-25.04.2008</td></tr>
+                                        <tr><td>III. Tasfiye</td><td>01.01.08 - 15.04.08</td><td>15.05.2008 (30 gün içinde)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- EX 7: Kısmi Bölünme -->
+                    <div id="ex-7" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-success text-white"><h5 class="mb-0">Örnek 7: Cam İşletmesi Dağıtım Anahtarı</h5></div>
+                        <div class="card-body">
+                            <p class="small">Cam İşletmesi (500 birim) toplam aktifin (2000 birim) %25'ini oluşturuyor.</p>
+                            <p class="small">Doğrudan tespit yapılamazsa, nakit, alacak ve borçların <strong>%25'i</strong> devre konu edilir.</p>
+                        </div>
+                    </div>
+
+                     <!-- EX 8: Negatif Net Değer -->
+                     <div id="ex-8" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-danger text-white"><h5 class="mb-0">Örnek 8: Net Değerin Negatif Olması</h5></div>
+                        <div class="card-body">
+                            <p class="small">Devre konu üretim işletmesinin kayıtlı değeri 100, borcu 100, net değer 0 olsun. Karşılığında alınan iştirak hisseleri <strong>iz bedeli</strong> ile takip edilir.</p>
+                            <p class="small">Negatif değer varsa, geçici hesapta izlenir ve hisseler satılınca kâr hesabına aktarılır.</p>
+                        </div>
+                    </div>
+
+                    <!-- EX 9: Zarar Mahsubu -->
+                    <div id="ex-9" class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-dark text-white"><h5 class="mb-0">Örnek 9: Zarar Mahsubu Sınırı</h5></div>
+                        <div class="card-body">
+                            <p class="text-dark small">TAU'nun geçmiş yıl zararı: 800.000 TL<br>Devir tarihindeki öz sermayesi: 600.000 TL</p>
+                            <div class="alert alert-danger mb-0"><strong>Mahsup Edilebilir Tutar: 600.000 TL</strong> (Öz sermaye ile sınırlıdır). Kalan 200.000 TL zarar mahsup edilemez.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer Scripts -->
+<script>
+    function showSection(sectionId, btn) {
+        document.querySelectorAll(".section-content").forEach(el => el.classList.add("d-none"));
+        const target = document.getElementById(sectionId);
+        target.classList.remove("d-none");
+        target.classList.add("fade-in-up");
+
+        document.querySelectorAll(".rounded-pill.border button").forEach(b => {
+             b.classList.remove("active", "bg-dark", "text-white");
+             b.classList.add("text-muted");
+        });
+        
+        btn.classList.remove("text-muted");
+        btn.classList.add("active", "bg-dark", "text-white");
+    }
+</script>
+
+<style>
+    .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .sidebar-modern-nav .nav-link { color: #555; border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 8px 12px; }
+    .sidebar-modern-nav .nav-link:hover { background: #f8f9fa; color: #000; }
+    .sidebar-modern-nav .nav-link.active { background: #343a40; color: #fff !important; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+</style>
+
+{% endblock %}

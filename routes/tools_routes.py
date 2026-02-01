@@ -105,7 +105,6 @@ def sermaye():
     return render_template("calculators/sermaye.html")
 
 @bp.route("/serbest-meslek")
-@login_required
 def serbest_meslek():
     return render_template("calculators/serbest_meslek.html")
 

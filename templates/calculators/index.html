@@ -20,25 +20,61 @@ Vergi Hesaplama Araçları | İSFA YMM
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">
-                        İthalatta Ödenen KDV’nin İndirimi
-                    </h5>
+                    <h5 class="card-title fw-bold">İthalatta KDV İndirimi</h5>
                     <p class="card-text text-muted small">
-                        KDV GUT (III/C-2.6) kapsamında gözetim, korunma önlemleri
-                        ve benzeri uygulamalara bağlı indirilebilir /
-                        indirilemez KDV hesaplaması.
+                        İthalatta gözetim ve korunma maliyetlerine ait KDV'nin indirilebilir / indirilemez ayrımı.
                     </p>
                 </div>
                 <div class="card-footer bg-white border-0 text-end">
-                    <a href="{{ url_for('calculators.ithalat_kdv') }}"
-                       class="btn btn-outline-primary btn-sm">
-                        Hesaplama Aracına Git →
-                    </a>
+                    <a href="{{ url_for('calculators.ithalat_kdv') }}" class="btn btn-outline-primary btn-sm">Git →</a>
                 </div>
             </div>
         </div>
 
-        <!-- ileride buraya yeni hesaplamalar eklenecek -->
+        <!-- Gelir Vergisi -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Gelir Vergisi Hesaplama</h5>
+                    <p class="card-text text-muted small">
+                        Yıllık beyanname veya ücret gelirleri için güncel tarifeye göre vergi hesaplaması.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 text-end">
+                    <a href="{{ url_for('calculators.gelir_vergisi') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gecikme Zammı -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Gecikme Zammı Hesaplama</h5>
+                    <p class="card-text text-muted small">
+                        Vadesi geçmiş vergi borçları için güncel oranlarla gecikme zammı hesaplaması.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 text-end">
+                    <a href="{{ url_for('calculators.gecikme_zammi') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tek Düzen Hesap Planı -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-dark">📚 Tek Düzen Hesap Planı ve Açıklamaları</h5>
+                    <p class="card-text text-muted small">
+                        Muhasebe sisteminde kullanılan tüm hesap kodları, açıklamalar ve sınıflandırmalar.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-end">
+                    <a href="{{ url_for('calculators.tdhp') }}" class="btn btn-dark btn-sm rounded-pill px-3">İncele →</a>
+                </div>
+            </div>
+        </div>
 
     </div>
 
