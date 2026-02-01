@@ -113,7 +113,7 @@
     <div class="register-box">
         <h4>Yeni Hesap Oluştur</h4>
 
-        <form method="POST" action="{{ url_for('register') }}"> {# action niteliği eklendi #}
+        <form method="POST" action="{{ url_for('auth.register') }}"> {# action niteliği eklendi #}
             <div class="mb-3">
                 <label class="form-label">Kullanıcı Adı</label>
                 <input type="text" class="form-control" name="username" required>
@@ -123,7 +123,7 @@
                 <input type="password" class="form-control" name="password" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Kayıt Ol</button>
-            <a href="{{ url_for('login') }}" class="btn-link mt-3">Zaten hesabınız var mı? Giriş yapın</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-link mt-3">Zaten hesabınız var mı? Giriş yapın</a>
         </form>
     </div>
 

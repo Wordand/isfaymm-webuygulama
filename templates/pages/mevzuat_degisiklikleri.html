@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block title %}Mevzuat Değişiklikleri | İSFA YMM{% endblock %}
+
+{% block content %}
+<style>
+    .legislation-hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        padding: 60px 0;
+        margin-bottom: 40px;
+        border-radius: 0 0 40px 40px;
+    }
+    .timeline-card {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #ffffff;
+        border-left: 5px solid #ef4444;
+    }
+    .timeline-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+    .date-badge {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        min-width: 80px;
+        padding: 10px;
+    }
+    .badge-custom {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+    .summary-list li {
+        margin-bottom: 12px;
+        padding-left: 5px;
+    }
+    .summary-list li strong {
+        color: #1e3a8a;
+    }
+</style>
+
+<section class="legislation-hero text-center text-white shadow-sm">
+    <div class="container" data-aos="fade-down">
+        <h1 class="fw-bold display-5 mb-3">📢 Mevzuat Değişiklikleri</h1>
+        <p class="lead opacity-75 mx-auto" style="max-width: 700px;">
+            Vergi dünyasındaki son dakika gelişmelerini, Resmî Gazete özetlerini ve kritik yasal değişiklikleri buradan takip edebilirsiniz.
+        </p>
+    </div>
+</section>
+
+<section class="pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                
+                <!-- Timeline Item 1 (31 Jan 2026) -->
+                <div class="card timeline-card shadow-sm mb-5" data-aos="fade-up">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex flex-column flex-md-row align-items-md-start">
+                            <div class="date-badge text-center me-md-4 mb-3 mb-md-0 shadow-sm">
+                                <span class="d-block h3 mb-0 fw-bold text-danger">31</span>
+                                <span class="d-block text-uppercase fw-bold text-muted small">Ocak</span>
+                                <span class="text-muted small">2026</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="mb-2">
+                                    <span class="badge bg-danger shadow-sm mb-2">YENİ TEBLİĞ</span>
+                                </div>
+                                <h2 class="h3 fw-bold text-dark mb-4">KDV Genel Uygulama Tebliğinde Değişiklik <span class="text-muted">(Seri No: 57)</span></h2>
+                                
+                                <div class="bg-light rounded-4 p-4 mb-4">
+                                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Değişiklik Özeti</h5>
+                                    <ul class="summary-list list-unstyled mb-0">
+                                        <li>
+                                            <i class="bi bi-check2-circle text-danger me-2"></i>
+                                            <strong>İthalatta KDV İndirimi Kısıtlaması:</strong> 7846 sayılı Cumhurbaşkanı Kararı uyarınca; gözetim uygulaması, korunma önlemleri, dampinge karşı vergi ve telafi edici vergiler kapsamında ödenen KDV'nin indirim hakkı kaldırılmıştır. 
+                                            <div class="alert alert-warning py-2 px-3 mt-2 small border-0 shadow-sm">
+                                                <strong>Önemli:</strong> Sadece gözetim farkına isabet eden KDV indirilemez; gerçek CIF bedeli üzerinden ödenen KDV'nin indirimi mümkündür.
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-check2-circle text-danger me-2"></i>
+                                            <strong>KDV İade Süreçleri ve Limitler:</strong> 50.000 TL'yi aşmayan nakden iade taleplerinde teminat ve rapor şartı esnetildi. Tam tasdik sözleşmesi olan mükellefler için <strong>%5 hata payı (marj)</strong> uygulaması ile süreçler hızlandırıldı.
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-check2-circle text-danger me-2"></i>
+                                            <strong>UEFA Organizasyonları:</strong> 2026, 2027 ve 2032 yıllarındaki UEFA finalleri kapsamındaki işlemler tam istisna kapsamına alındı.
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-check2-circle text-danger me-2"></i>
+                                            <strong>Belediye Taşınmaz Satışları:</strong> Belediyelere ait iktisadi işletmelerin taşınmaz satışları 1 Ocak 2026 itibarıyla KDV istisnası (17/4-p) dışına çıkarıldı.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge badge-custom bg-secondary text-white shadow-sm"><i class="bi bi-tag me-1"></i>KDV</span>
+                                    <span class="badge badge-custom bg-secondary text-white shadow-sm"><i class="bi bi-briefcase me-1"></i>İthalat</span>
+                                    <span class="badge badge-custom bg-secondary text-white shadow-sm"><i class="bi bi-file-earmark-text me-1"></i>Resmi Gazete</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 2 (30 Dec 2025) -->
+                <div class="card timeline-card shadow-sm mb-5" style="border-left-color: #1e3a8a;" data-aos="fade-up">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex flex-column flex-md-row align-items-md-start">
+                            <div class="date-badge text-center me-md-4 mb-3 mb-md-0 shadow-sm">
+                                <span class="d-block h3 mb-0 fw-bold text-primary">30</span>
+                                <span class="d-block text-uppercase fw-bold text-muted small">Aralık</span>
+                                <span class="text-muted small">2025</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="mb-2">
+                                    <span class="badge bg-primary shadow-sm mb-2">YENİ TASDİK SINIRLARI</span>
+                                </div>
+                                <h2 class="h3 fw-bold text-dark mb-4">SMMM ve YMM Kanunu Genel Tebliği <span class="text-muted">(Sıra No: 49)</span></h2>
+                                
+                                <div class="bg-light rounded-4 p-4 mb-4">
+                                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-shield-check me-2"></i>Tasdik Raporu Zorunluluğu</h5>
+                                    <p class="text-muted small mb-3">2025 ve izleyen dönemlerde beyannamelerdeki istisna ve indirimlerden yararlanabilmek için belirlenen sınırları aşan işlemler için YMM Tasdik Raporu ibrazı zorunlu hale getirilmiştir.</p>
+                                    <ul class="summary-list list-unstyled mb-0">
+                                        <li>
+                                            <i class="bi bi-dot text-primary fs-4"></i>
+                                            <strong>Gelir ve Kurumlar Vergisi Sınırı:</strong> Tek bir indirim/istisna kalemi için <strong>500.000 TL</strong>, toplamda ise <strong>1.000.000 TL</strong>'yi aşan tutarlar tasdik raporuna tabidir.
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-dot text-primary fs-4"></i>
+                                            <strong>İndirimli Kurumlar Vergisi (32/A):</strong> Yatırım teşvik kapsamındaki indirimli vergi uygulamaları tutar sınırlaması olmaksızın <strong>tamamen tasdik kapsamına</strong> alınmıştır.
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-dot text-primary fs-4"></i>
+                                            <strong>Asgari Kurumlar Vergisi:</strong> Yeni yürürlüğe giren yerel ve küresel asgari tamamlayıcı kurumlar vergisi uygulamaları da tasdik zorunluluğu kapsamındadır.
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-dot text-primary fs-4"></i>
+                                            <strong>Rapor İbraz Süresi:</strong> Tasdik raporlarının beyanname verme süresini takip eden <strong>iki ay içinde</strong> (Haziran sonu) elektronik ortamda gönderilmesi gerekmektedir.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="alert alert-info py-2 px-3 small border-0 shadow-sm mb-4">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    Tam tasdik sözleşmesi olan mükellefler için rapor dispozisyonunda belirtilen hususlara tam tasdik raporu içinde yer verilmesi yeterlidir.
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge badge-custom bg-primary text-white shadow-sm"><i class="bi bi-person-check me-1"></i>YMM Tasdik</span>
+                                    <span class="badge badge-custom bg-secondary text-white shadow-sm"><i class="bi bi-graph-down me-1"></i>Vergi İstisnaları</span>
+                                    <span class="badge badge-custom bg-secondary text-white shadow-sm"><i class="bi bi-calendar-event me-1"></i>2025/2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

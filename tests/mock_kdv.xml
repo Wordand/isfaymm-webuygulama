@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-9"?>
+<beyanname xsi:noNamespaceSchemaLocation="kdv1_30.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <genelBilgiler>
+        <idari>
+            <vergiDairesi>034251</vergiDairesi>
+            <donemTip>Aylık</donemTip>
+            <ay>Ocak</ay>
+            <yil>2025</yil>
+        </idari>
+        <mukellef>
+            <vergiNo>1234567890</vergiNo>
+            <soyad>YILMAZ</soyad>
+            <ad>AHMET</ad>
+            <ticaretUnvani>AHMET YILMAZ İNŞAAT</ticaretUnvani>
+            <tcKimlikNo>11111111111</tcKimlikNo>
+            <eposta>ahmet@example.com</eposta>
+            <alanKod>212</alanKod>
+            <telNo>5551234</telNo>
+        </mukellef>
+        <duzenleyen>
+            <vergiNo>9876543210</vergiNo>
+            <soyad>DEMİR</soyad>
+            <ad>MEHMET</ad>
+            <ticaretUnvani>MEHMET DEMİR SMMM</ticaretUnvani>
+            <tcKimlikNo>22222222222</tcKimlikNo>
+        </duzenleyen>
+    </genelBilgiler>
+    <kdv1>
+        <matrah>
+            <tevkifatUygulanmayanIslemler>
+                <islem>
+                    <tur>Tevkifat Uygulanmayan İşlemler</tur>
+                    <matrah>10000.00</matrah>
+                    <oran>20</oran>
+                    <vergi>2000.00</vergi>
+                </islem>
+                <islem>
+                    <tur>Tevkifat Uygulanmayan İşlemler</tur>
+                    <matrah>5000.00</matrah>
+                    <oran>10</oran>
+                    <vergi>500.00</vergi>
+                </islem>
+            </tevkifatUygulanmayanIslemler>
+            <kismiTevkifatUygulananIslemler>
+                <islem>
+                    <kod>601</kod>
+                    <tur>Yapım İşleri ile Bu İşlerle Birlikte İfa Edilen Mühendislik-Mimarlık ve Etüt-Proje Hizmetleri</tur>
+                    <matrah>20000.00</matrah>
+                    <kdvOrani>20</kdvOrani>
+                    <tevkifatOrani>4/10</tevkifatOrani>
+                    <vergi>1600.00</vergi>
+                </islem>
+            </kismiTevkifatUygulananIslemler>
+            <digerIslemler>
+                <islem>
+                    <kod>503</kod>
+                    <tur>Amortismana Tabi İktisadi Kıymet Satışları</tur>
+                    <matrah>1000.00</matrah>
+                    <vergi>200.00</vergi>
+                </islem>
+            </digerIslemler>
+            <toplamMatrah>36000.00</toplamMatrah>
+            <hesaplananKDV>4300.00</hesaplananKDV>
+            <ilaveEdilecekKDV>0.00</ilaveEdilecekKDV>
+            <toplamKDV>4300.00</toplamKDV>
+        </matrah>
+        <indirimler>
+            <indirim>
+                <tur>Bu Döneme Ait İndirilecek KDV</tur>
+                <tutar>1500.00</tutar>
+            </indirim>
+            <indirim>
+                <tur>Önceki Dönemden Devreden KDV</tur>
+                <tutar>500.00</tutar>
+            </indirim>
+            <toplamIndirim>2000.00</toplamIndirim>
+        </indirimler>
+        <sonuc>
+            <odenmesiGerekenKDV>2300.00</odenmesiGerekenKDV>
+            <sonrakiDonemeDevredenKDV>0.00</sonrakiDonemeDevredenKDV>
+            <iadeEdilmesiGerekenKDV>0.00</iadeEdilmesiGerekenKDV>
+        </sonuc>
+    </kdv1>
+</beyanname>

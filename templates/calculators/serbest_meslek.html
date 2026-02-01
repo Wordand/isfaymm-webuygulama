@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+{% block title %}Serbest Meslek Makbuzu Hesaplama{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-calculator me-2"></i>Serbest Meslek Makbuzu Hesaplama</h4>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <form id="smmForm">
+                        <!-- Hesaplama Türü -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Hesaplama Yöntemi</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="yontem" id="brutten" value="brutten" checked onchange="hesapla()">
+                                <label class="btn btn-outline-primary" for="brutten">Brütten Nete</label>
+
+                                <input type="radio" class="btn-check" name="yontem" id="netten" value="netten" onchange="hesapla()">
+                                <label class="btn btn-outline-primary" for="netten">Netten Brüte</label>
+
+                                <input type="radio" class="btn-check" name="yontem" id="tahsilden" value="tahsilden" onchange="hesapla()">
+                                <label class="btn btn-outline-primary" for="tahsilden">Tahsil Edilenden (Elde Geçen)</label>
+                            </div>
+                        </div>
+
+                        <!-- Girdi Alanları -->
+                        <div class="row g-3 align-items-end mb-4">
+                            <div class="col-md-6">
+                                <label for="tutar" class="form-label fw-bold">Tutar (TL)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" id="tutar" placeholder="0.00" oninput="hesapla()">
+                                    <span class="input-group-text">₺</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="stopajOrani" class="form-label">Stopaj Oranı (%)</label>
+                                <input type="number" class="form-control" id="stopajOrani" value="20" oninput="hesapla()">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="kdvOrani" class="form-label">KDV Oranı (%)</label>
+                                <select class="form-select" id="kdvOrani" onchange="hesapla()">
+                                    <option value="20" selected>%20 (Genel)</option>
+                                    <option value="10">%10</option>
+                                    <option value="1">%1</option>
+                                    <option value="0">%0</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Sonuç Tablosu -->
+                        <h5 class="fw-bold text-primary mb-3">Hesaplama Sonucu</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th class="w-50">Brüt Ücret</th>
+                                        <td class="text-end fw-bold" id="resBrut">0.00 ₺</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Stopaj Kesintisi</th>
+                                        <td class="text-end text-danger" id="resStopaj">0.00 ₺</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Net Ücret (Ele Geçen - KDV'siz)</th>
+                                        <td class="text-end fw-bold text-success" id="resNet">0.00 ₺</td>
+                                    </tr>
+                                    <tr>
+                                        <th>KDV Tutarı</th>
+                                        <td class="text-end text-primary" id="resKdv">0.00 ₺</td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <th>Toplam Tahsil Edilen (Net + KDV)</th>
+                                        <td class="text-end fw-bold fs-5" id="resTahsil">0.00 ₺</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </form>
+
+                    <div class="mt-3">
+                        <div class="alert alert-light border small text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Not:</strong> Stopaj (Gelir Vergisi) oranı genellikle %20'dir. KDV oranı işlemin türüne göre değişebilir.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        {% include "partials/tax_disclaimer.html" %}
+    </div>
+</div>
+
+<script>
+    function formatMoney(amount) {
+        return amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+    }
+
+    function hesapla() {
+        // Girdileri al
+        const tutar = parseFloat(document.getElementById('tutar').value) || 0;
+        const stopajOrani = parseFloat(document.getElementById('stopajOrani').value) || 0;
+        const kdvOrani = parseFloat(document.getElementById('kdvOrani').value) || 0;
+        
+        let yontem = document.querySelector('input[name="yontem"]:checked').value;
+
+        // Hesaplama değişkenleri
+        let brut = 0;
+        
+        if (tutar > 0) {
+            if (yontem === 'brutten') {
+                // Tutar = Brüt
+                brut = tutar;
+            } else if (yontem === 'netten') {
+                // Tutar = Net
+                // Net = Brüt - (Brüt * Stopaj) => Net = Brüt * (1 - Stopaj)
+                // Brüt = Net / (1 - Stopaj)
+                const payda = 1 - (stopajOrani / 100);
+                if (payda !== 0) {
+                    brut = tutar / payda;
+                }
+            } else if (yontem === 'tahsilden') {
+                // Tutar = Tahsil Edilen (Net + KDV)
+                // Tahsil = Net + KDV
+                // Tahsil = (Brüt - Stopaj) + (Brüt * KDV)
+                // Tahsil = Brüt * (1 - Stopaj + KDV)
+                // Brüt = Tahsil / (1 - Stopaj + KDV)
+                const payda = 1 - (stopajOrani / 100) + (kdvOrani / 100);
+                if (payda !== 0) {
+                    brut = tutar / payda;
+                }
+            }
+        }
+
+        // Sonuçları hesapla
+        const stopaj = brut * (stopajOrani / 100);
+        const net = brut - stopaj;
+        const kdv = brut * (kdvOrani / 100);
+        const tahsil = net + kdv; // veya brut - stopaj + kdv
+
+        // Ekrana yaz
+        document.getElementById('resBrut').textContent = formatMoney(brut);
+        document.getElementById('resStopaj').textContent = formatMoney(stopaj);
+        document.getElementById('resNet').textContent = formatMoney(net);
+        document.getElementById('resKdv').textContent = formatMoney(kdv);
+        document.getElementById('resTahsil').textContent = formatMoney(tahsil);
+    }
+</script>
+{% endblock %}

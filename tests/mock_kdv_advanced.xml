@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beyanname xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kdv1_35.xsd">
+    <genelBilgiler>
+        <idari>
+            <vergiDairesiKodu>034251</vergiDairesiKodu>
+            <vergiDairesiAdi>Zincirlikuyu</vergiDairesiAdi>
+            <donemTip>Aylık</donemTip>
+            <ay>Ocak</ay>
+            <yil>2025</yil>
+        </idari>
+        <mukellef>
+            <vergiKimlikNo>1234567890</vergiKimlikNo>
+            <tcKimlikNo>11111111111</tcKimlikNo>
+            <soyad>YILMAZ</soyad>
+            <ad>AHMET</ad>
+            <unvan>AHMET YILMAZ İNŞAAT TAAHHÜT LTD. ŞTİ.</unvan>
+            <adres>
+                <mahalle>KÜLTÜR MAH.</mahalle>
+                <cadde>ATATÜRK CAD.</cadde>
+                <kapiNo>10</kapiNo>
+                <daireNo>2</daireNo>
+                <ilKodu>34</ilKodu>
+                <ilAdi>İSTANBUL</ilAdi>
+            </adres>
+            <email>muhasebe@example.com</email>
+            <telefon>02121234567</telefon>
+        </mukellef>
+        <duzenleyen>
+            <vergiKimlikNo>9876543210</vergiKimlikNo>
+            <soyad>KAYA</soyad>
+            <ad>MEHMET</ad>
+            <unvan>SERBEST MUHASEBECİ MALİ MÜŞAVİR</unvan>
+        </duzenleyen>
+    </genelBilgiler>
+    <kdv1>
+        <matrah>
+            <tevkifatUygulanmayanIslemler>
+                <satir>
+                    <turKod>001</turKod>
+                    <turAd>Tevkifat Uygulanmayan İşlemler (%1)</turAd>
+                    <matrah>10000.00</matrah>
+                    <vergiOrani>1</vergiOrani>
+                    <vergi>100.00</vergi>
+                </satir>
+                <satir>
+                    <turKod>010</turKod>
+                    <turAd>Tevkifat Uygulanmayan İşlemler (%10)</turAd>
+                    <matrah>50000.00</matrah>
+                    <vergiOrani>10</vergiOrani>
+                    <vergi>5000.00</vergi>
+                </satir>
+                <satir>
+                    <turKod>020</turKod>
+                    <turAd>Tevkifat Uygulanmayan İşlemler (%20)</turAd>
+                    <matrah>100000.00</matrah>
+                    <vergiOrani>20</vergiOrani>
+                    <vergi>20000.00</vergi>
+                </satir>
+            </tevkifatUygulanmayanIslemler>
+            <kismiTevkifatUygulananIslemler>
+                <satir>
+                    <turKod>601</turKod>
+                    <turAd>Yapım İşleri ve bunlarla birlikte ifa edilen mühendislik-mimarlık ve etüt-proje hizmetleri</turAd>
+                    <matrah>20000.00</matrah>
+                    <kdvOrani>20</kdvOrani>
+                    <tevkifatOrani>4/10</tevkifatOrani>
+                    <vergi>1600.00</vergi>
+                </satir>
+            </kismiTevkifatUygulananIslemler>
+            <digerIslemler>
+                 <satir>
+                    <turKod>503</turKod>
+                    <turAd>Amortismana tabi iktisadi kıymet satışları</turAd>
+                    <matrah>5000.00</matrah>
+                    <vergi>500.00</vergi> 
+                 </satir>
+            </digerIslemler>
+            <toplamMatrah>185000.00</toplamMatrah>
+            <toplamHesaplananKDV>27200.00</toplamHesaplananKDV>
+        </matrah>
+        <indirimler>
+            <satir>
+                <turKod>101</turKod>
+                <turAd>Bu Döneme Ait İndirilecek KDV</turAd>
+                <tutar>15000.00</tutar>
+            </satir>
+            <satir>
+                <turKod>102</turKod>
+                <turAd>Önceki Dönemden Devreden KDV</turAd>
+                <tutar>2000.00</tutar>
+            </satir>
+            <toplamIndirim>17000.00</toplamIndirim>
+        </indirimler>
+        <sonuc>
+            <odenmesiGerekenKDV>10200.00</odenmesiGerekenKDV>
+            <sonrakiDonemeDevredenKDV>0.00</sonrakiDonemeDevredenKDV>
+            <iadeEdilmesiGerekenKDV>0.00</iadeEdilmesiGerekenKDV>
+            <kümülatifToplam>1500000.00</kümülatifToplam>
+            <krediKartiTahsilat>1000.00</krediKartiTahsilat>
+        </sonuc>
+    </kdv1>
+</beyanname>

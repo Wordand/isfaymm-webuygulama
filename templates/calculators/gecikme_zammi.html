@@ -1,83 +1,187 @@
 {% extends "layout.html" %}
-
-{% block title %}
-Gecikme Zammı Hesaplama | İSFA YMM
-{% endblock %}
+{% block title %}Gecikme Zammı Hesaplama{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Gecikme Zammı Hesaplama</h4>
+                </div>
+                <div class="card-body p-4">
 
-    <h2 class="mb-3">Gecikme Zammı Hesaplama</h2>
+                    <form id="gecikmeForm">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="borcTuru" class="form-label fw-bold">Borç Türü</label>
+                                <select id="borcTuru" class="form-select" required>
+                                    <option value="vergi_asli" selected>Vergi Aslı</option>
+                                    <option value="vergi_ziyasi">Vergi Ziyaı Cezası</option>
+                                    <option value="mahkeme_cezasi">Mahkeme Cezası</option>
+                                    <option value="usulsuzluk">Usulsüzlük Cezası</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="borc" class="form-label fw-bold">Borç Tutarı (TL)</label>
+                                <div class="input-group">
+                                    <input type="number" id="borc" class="form-control" placeholder="0.00" step="0.01" required>
+                                    <span class="input-group-text">₺</span>
+                                </div>
+                            </div>
+                        </div>
 
-    <p class="text-muted">
-        6183 sayılı Kanun md.51 kapsamında vergi, ceza ve diğer amme alacakları için
-        gecikme zammı hesaplama aracıdır.
-    </p>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="vade" class="form-label fw-bold">Vade Tarihi</label>
+                                <input type="date" id="vade" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="odeme" class="form-label fw-bold">Ödeme Tarihi</label>
+                                <input type="date" id="odeme" class="form-control" required>
+                            </div>
+                        </div>
 
-    <div class="card p-4 shadow-sm mb-4">
+                        <button type="submit" class="btn btn-danger w-100 btn-lg" id="hesaplaBtn">
+                            <i class="bi bi-calculator me-2"></i> Gecikme Zammını Hesapla
+                        </button>
 
-        <div class="mb-3">
-            <label class="form-label">Borç Türü</label>
-            <select id="borcTuru" class="form-select">
-                <option value="vergi_asli">Vergi Aslı</option>
-                <option value="vergi_ziyasi">Vergi Ziyaı Cezası</option>
-                <option value="mahkeme_cezasi">Mahkeme Cezası</option>
-                <option value="usulsuzluk">Usulsüzlük Cezası</option>
-            </select>
-        </div>
+                        <hr class="my-4">
 
-        <div class="mb-3">
-            <label class="form-label">Borç Tutarı (TL)</label>
-            <input type="number" id="borc" class="form-control" placeholder="Örn: 100000">
-        </div>
+                        <!-- Sonuç Alanı -->
+                        <div id="sonucAlani" style="display:none;">
+                            <h5 class="fw-bold text-danger mb-3">Hesaplama Sonucu</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th class="w-50">Hesaplanan Gecikme Zammı</th>
+                                            <td class="text-end text-danger fw-bold fs-5" id="resGecikme">0,00 ₺</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Toplam Ödenecek Tutar (Borç + Zam)</th>
+                                            <td class="text-end fw-bold fs-4 text-dark" id="resToplam">0,00 ₺</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Vade Tarihi</label>
-                <input type="date" id="vade" class="form-control">
+                    </form>
+
+                    <div class="mt-3">
+                        <div class="alert alert-light border small text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Bilgi:</strong> Hesaplama 6183 sayılı Kanun md.51 kapsamında yapılır. Usulsüzlük (md. 352) ve Özel Usulsüzlük (md. 353) cezalarına gecikme zammı uygulanmaz.
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Ödeme Tarihi</label>
-                <input type="date" id="odeme" class="form-control">
+
+            <!-- Geçmiş Hesaplamalar -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">📋 Son Hesaplamalar</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0" id="logTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Borç Türü</th>
+                                    <th>Tutar</th>
+                                    <th>Vade / Ödeme</th>
+                                    <th>Gecikme Zammı</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
         </div>
-
-        <button class="btn btn-danger" id="hesaplaBtn">
-            Gecikme Zammını Hesapla
-        </button>
     </div>
-
-    <hr class="my-4">
-
-    <h5>📋 Yapılan Hesaplamalar</h5>
-
-    <div class="table-responsive">
-        <table class="table table-sm table-bordered align-middle" id="gecikmeLogTable">
-            <thead class="table-light">
-                <tr>
-                    <th>Borç Türü</th>
-                    <th>Borç Tutarı</th>
-                    <th>Vade</th>
-                    <th>Ödeme</th>
-                    <th>Gecikme Zammı</th>
-                    <th>Toplam Borç</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <div class="mt-4">
+        {% include "partials/tax_disclaimer.html" %}
     </div>
-
-    <div class="alert alert-secondary mt-4 small">
-        ⚖️ Bu hesaplama aracı bilgilendirme amaçlıdır.
-        Gecikme zammı oranları Cumhurbaşkanı kararlarıyla değişebilmektedir.
-        Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
-    </div>
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ url_for('static', filename='js/calculators/gecikme.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const borcTuruSelect = document.getElementById("borcTuru");
+    
+    // Varsayılan tarihleri ayarla
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("odeme").value = today;
+
+    document.getElementById("gecikmeForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const borc = parseFloat(document.getElementById("borc").value);
+        const borcTuru = borcTuruSelect.value;
+        const vade = document.getElementById("vade").value;
+        const odeme = document.getElementById("odeme").value;
+        const logTableBody = document.querySelector("#logTable tbody");
+        const sonucAlani = document.getElementById("sonucAlani");
+
+        if (borc <= 0) {
+            Swal.fire("Uyarı", "Borç tutarı 0'dan büyük olmalıdır.", "warning");
+            return;
+        }
+
+        if (borcTuru === "usulsuzluk") {
+            Swal.fire("Bilgi", "Usulsüzlük cezalarına gecikme zammı uygulanmaz.", "info");
+            return;
+        }
+
+        try {
+            const response = await fetch("/gecikme-zammi-hesapla", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ borc, vade, odeme, borc_turu: borcTuru })
+            });
+
+            if (!response.ok) throw new Error("Sunucu hatası");
+            const data = await response.json();
+
+            // Sonuçları göster
+            sonucAlani.style.display = "block";
+            const gecikme = parseFloat(data.gecikme_zammi);
+            const toplam = parseFloat(data.toplam_borc);
+
+            document.getElementById("resGecikme").textContent = gecikme.toLocaleString("tr-TR", {minimumFractionDigits:2}) + " ₺";
+            document.getElementById("resToplam").textContent = toplam.toLocaleString("tr-TR", {minimumFractionDigits:2}) + " ₺";
+
+            // Tabloya ekle (Log)
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="ps-3">${borcTuruSelect.options[borcTuruSelect.selectedIndex].text}</td>
+                <td>${borc.toLocaleString("tr-TR", {minimumFractionDigits:2})} ₺</td>
+                <td class="small">${vade} <br> ${odeme}</td>
+                <td class="fw-bold text-danger">${gecikme.toLocaleString("tr-TR", {minimumFractionDigits:2})} ₺</td>
+                <td><button class="btn btn-sm btn-outline-secondary py-0" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+            `;
+            logTableBody.prepend(tr);
+
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Hata", "Hesaplama yapılamadı. Lütfen tarihleri kontrol ediniz (Vade > Ödeme olamaz).", "error");
+        }
+    });
+
+    // Borç türü değişince uyarı
+    borcTuruSelect.addEventListener("change", function() {
+        if (this.value === "usulsuzluk") {
+            Swal.fire("Bilgi", "Usulsüzlük cezaları için gecikme zammı hesaplanmaz, ancak tarh tarihinden itibaren indirim süresi geçtikten sonra tahsil edilirse Gecikme Faizi uygulanabilir. Bu araç sadece Gecikme Zammı hesaplar.", "info");
+        }
+    });
+});
+</script>
 {% endblock %}

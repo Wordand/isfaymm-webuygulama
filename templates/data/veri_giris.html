@@ -20,8 +20,8 @@
             <form id="multiUploadForm" enctype="multipart/form-data">
                 <div id="drop-area" class="border border-primary border-2 rounded p-4 text-center mb-3"
                      ondrop="handleDrop(event)" ondragover="event.preventDefault()">
-                    <p class="mb-2">📎 PDF veya Mizan Excel dosyalarınızı (.pdf, .xlsx, .xls) buraya sürükleyin ya da seçin</p>
-                    <input type="file" id="fileElem" name="belgeler" accept=".pdf,.xlsx,.xls"
+                    <p class="mb-2">📎 PDF, XML veya Mizan dosyalarınızı (.pdf, .xml, .xlsx, .xls) buraya sürükleyin ya da seçin</p>
+                    <input type="file" id="fileElem" name="files[]" accept=".pdf,.xml,.xlsx,.xls"
                            class="form-control d-none" multiple required>
                     <button type="button" class="btn btn-outline-primary"
                             onclick="document.getElementById('fileElem').click()">Dosya Seç</button>
@@ -42,7 +42,7 @@
 
             <!-- Önceden Yüklenen Veriler -->
             <h4 class="text-center mb-3">🔍 Önceden Yüklenen Veriler</h4>
-            <form method="GET" action="{{ url_for('veri_giris') }}">
+            <form method="GET" action="{{ url_for('data.veri_giris') }}">
                 <div class="row mb-3">
                     <div class="col">
                         <select name="vkn" id="mukellefSelect" class="form-select" onchange="this.form.submit()" required>
@@ -227,9 +227,9 @@
 
 {% block extra_scripts %}
 <script>
-const mukellefSilUrl = "{{ url_for('mukellef_sil') }}";
-const donemSilUrl = "{{ url_for('donem_sil') }}";
-const kaydetMizanMetaUrl = "{{ url_for('kaydet_mizan_meta') }}";
+const mukellefSilUrl = "{{ url_for('data.mukellef_sil') }}";
+const donemSilUrl = "{{ url_for('data.donem_sil') }}";
+const kaydetMizanMetaUrl = "{{ url_for('data.kaydet_mizan_meta') }}";
 let currentMizanFilename = '';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function uploadFiles(files) {
     const formData = new FormData();
-    [...files].forEach(f => formData.append("belgeler", f));
+    [...files].forEach(f => formData.append("files[]", f));
     const xhr = new XMLHttpRequest();
     const progressBar = document.getElementById('uploadProgressBar');
     const progressContainer = document.getElementById('uploadProgressContainer');

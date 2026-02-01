@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-9"?>
+<beyanname xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kurum_10.xsd">
+    <genelBilgiler>
+        <idari>
+            <vergiDairesiKodu>034251</vergiDairesiKodu>
+            <donemTip>Yıllık</donemTip>
+            <yil>2024</yil>
+        </idari>
+        <mukellef>
+            <vergiKimlikNo>1234567890</vergiKimlikNo>
+            <unvan>TEST İNŞAAT A.Ş.</unvan>
+            <adres>ANKARA</adres>
+        </mukellef>
+    </genelBilgiler>
+    <kurumlar>
+        <kazanc>
+             <ticariBilancoKari>250000.00</ticariBilancoKari>
+             <kkeg>5000.00</kkeg>
+             <istisnalar>
+                 <satir>
+                     <kod>301</kod>
+                     <ad>İştirak Kazançları</ad>
+                     <tutar>10000.00</tutar>
+                 </satir>
+             </istisnalar>
+             <zarar>0.00</zarar>
+             <safiKazanc>245000.00</safiKazanc>
+             <hesaplananVergi>61250.00</hesaplananVergi>
+             <odenmesiGerekenVergi>60000.00</odenmesiGerekenVergi>
+        </kazanc>
+        <maliTablolar>
+             <bilanco>
+                 <aktif>
+                     <kalem kod="100">5000.00</kalem>
+                     <kalem kod="102">100000.00</kalem>
+                     <kalem kod="120">50000.00</kalem>
+                     <toplam kod="1" ad="DÖNEN VARLIKLAR">155000.00</toplam>
+                     <kalem kod="255">50000.00</kalem>
+                     <toplam kod="2">50000.00</toplam>
+                     <genelToplam ad="AKTİF TOPLAMI">205000.00</genelToplam>
+                 </aktif>
+                 <pasif>
+                     <kalem kod="320">40000.00</kalem>
+                     <toplam kod="3">40000.00</toplam>
+                     <kalem kod="500">100000.00</kalem>
+                     <kalem kod="590">65000.00</kalem>
+                     <toplam kod="5">165000.00</toplam>
+                     <genelToplam ad="PASİF TOPLAMI">205000.00</genelToplam>
+                 </pasif>
+             </bilanco>
+             <gelirTablosu>
+                 <kalem kod="600" ad="Yurt İçi Satışlar">
+                     <onceki>200000.00</onceki>
+                     <cari>500000.00</cari>
+                 </kalem>
+                 <kalem kod="602" ad="Diğer Gelirler">
+                     <onceki>0.00</onceki>
+                     <cari>10000.00</cari>
+                 </kalem>
+                 <kalem kod="621" ad="Satılan Ticari Mallar Maliyeti (-)">
+                     <onceki>-150000.00</onceki>
+                     <cari>-300000.00</cari>
+                 </kalem>
+                 <kalem kod="632" ad="Genel Yönetim Giderleri (-)">
+                     <onceki>-20000.00</onceki>
+                     <cari>-50000.00</cari>
+                 </kalem>
+                 <toplam kod="690" ad="Dönem Net Karı veya Zararı">
+                     <onceki>30000.00</onceki>
+                     <cari>160000.00</cari>
+                 </toplam>
+             </gelirTablosu>
+        </maliTablolar>
+    </kurumlar>
+</beyanname>

@@ -370,7 +370,7 @@ def ayrintili_kazanc():
         }
 
         return render_template(
-            'indirimlikurumlar.html',
+            'calculators/indirimlikurumlar.html',
             sekme='ayrintili',
             rows=formatted_data_for_html,
             iller=ILLER,
@@ -415,7 +415,7 @@ def mukellef_bilgi():
         c = conn.cursor()
         c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s", (user_id,))
         data = c.fetchall()
-    return render_template("mukellef_bilgi.html", mukellefler=data)
+    return render_template("reports/mukellef_bilgi.html", mukellefler=data)
 
 
 @bp.route("/mukellef-sec", methods=["POST"])
@@ -676,8 +676,8 @@ def index():
     )
 
     if sekme == "mukellef":
-        return render_template("mukellef_bilgi.html", **ctx)
-    return render_template("indirimlikurumlar.html", **ctx)
+        return render_template("reports/mukellef_bilgi.html", **ctx)
+    return render_template("calculators/indirimlikurumlar.html", **ctx)
 
 
 @bp.route("/form", methods=["POST"])

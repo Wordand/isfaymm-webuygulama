@@ -112,7 +112,7 @@
     <div class="login-container">
         <h2>Vergi Paneli Giriş</h2>
 
-        <form method="POST" action="{{ url_for('login') }}"> {# action niteliği eklendi #}
+        <form method="POST" action="{{ url_for('auth.login') }}"> {# action niteliği eklendi #}
             <div class="mb-3">
                 <label class="form-label">Kullanıcı Adı</label>
                 <input type="text" name="username" class="form-control" required>
@@ -132,7 +132,7 @@
         </form>
 
         <div class="text-center mt-3">
-            <a href="{{ url_for('register') }}" class="text-decoration-none">Hesabınız yok mu? Kayıt olun</a>
+            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Hesabınız yok mu? Kayıt olun</a>
         </div>
     </div>
 

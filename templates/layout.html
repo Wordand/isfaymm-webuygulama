@@ -153,202 +153,13 @@
 {# BODY ETİKETİNE KOŞULLU SINIF EKLENDİ #}
 
 <body
-    class="{% if not is_logged_in and (request.endpoint=='home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='contact' or request.endpoint=='mevzuat' or request.endpoint=='indirim' or request.endpoint=='ceza' or request.endpoint=='vergi_hesaplamalari') %}no-sidebar-layout{% endif %}">
+    class="{% if not is_logged_in and (request.endpoint=='main.home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='main.contact' or request.endpoint=='main.mevzuat' or request.endpoint=='main.indirim' or request.endpoint=='main.ceza' or request.endpoint=='calculators.index') %}no-sidebar-layout{% endif %}">
 
-    <!-- 🟦 YÜKLENİYOR EKRANI (İSFA) -->
-    <div id="loading-screen">
-        <div class="spinner-container">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="İSFA Logo" class="loading-logo">
-            <div class="spinner"></div>
-        </div>
-        <h3 id="loading-text" class="loading-text">Bilgi</h3>
-    </div>
+    {% include 'partials/loader.html' %}
 
-    <!-- 🟩 SIDEBAR -->
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header d-flex justify-content-between align-items-center px-3 py-2">
-            <a href="{{ url_for('home') }}" class="sidebar-brand text-white fw-bold text-decoration-none">
-                <i class="bi bi-calculator-fill me-2"></i> İSFA YMM
-            </a>
-            <!-- ✕ butonu sadece mobilde görünür -->
-            <button id="sidebarClose" class="btn btn-sm text-white d-lg-none">✕</button>
-        </div>
+    {% include 'partials/sidebar.html' %}
 
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('home') }}"
-                class="sidebar-link {% if request.path == url_for('home') %}active{% endif %}">
-                <i class="bi bi-house-door sidebar-icon"></i>
-                <span class="sidebar-text">Ana Sayfa</span>
-            </a>
-            <a href="{{ url_for('veri_giris') }}"
-                class="sidebar-link {% if request.path.startswith('/veri-giris') or request.path.startswith('/finansal-analiz') or request.path.startswith('/raporlama') %}active{% endif %}">
-                <i class="bi bi-pencil-square sidebar-icon"></i> Finansal Analiz ve Raporlama
-            </a>
-            <a href="{{ url_for('indirimlikurumlar.index') }}"
-                class="sidebar-link {% if request.path.startswith('/indirimlikurumlar') %}active{% endif %}">
-                <i class="bi bi-building sidebar-icon"></i> İndirimli Kurumlar Vergisi
-            </a>
-
-
-            <a href="{{ url_for('asgari') }}"
-                class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
-                <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi
-            </a>
-            <a href="{{ url_for('sermaye') }}"
-                class="sidebar-link {% if request.path.startswith('/sermaye') %}active{% endif %}">
-                <i class="bi bi-cash-stack sidebar-icon"></i> Nakdi Sermaye Artırım İndirimi
-            </a>
-            <a href="{{ url_for('finansman') }}"
-                class="sidebar-link {% if request.path.startswith('/finansman') %}active{% endif %}">
-                <i class="bi bi-currency-dollar sidebar-icon"></i> Finansman Gider Kısıtlaması
-            </a>
-        </nav>
-    </div>
-
-    <!-- 🟦 NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNavbar">
-        <div class="container-fluid px-4 px-lg-5 d-flex align-items-center justify-content-between">
-
-            <!-- 🔹 Sol tarafta: Sidebar toggler -->
-            {% if is_logged_in %}
-            <button id="sidebarToggle" class="btn btn-outline-primary d-lg-none me-2" type="button">
-                <i class="bi bi-list" style="font-size:1.6rem;"></i>
-            </button>
-            {% endif %}
-
-            <!-- 🔸 Ortada: Logo veya marka -->
-            <a class="navbar-brand fw-bold text-isfa" href="{{ url_for('home') }}">
-                <i class="bi bi-calculator-fill me-1"></i> İSFA YMM
-            </a>
-
-            <!-- 🔹 Sağ tarafta: Navbar menü toggler -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
-                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Menüyü Aç/Kapat">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- 🟢 Menü -->
-            <div class="collapse navbar-collapse justify-content-end" id="navbarResponsive">
-                <ul class="navbar-nav my-2 my-lg-0 navbar-nav-scroll text-center">
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Anasayfa</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#services">Hizmetlerimiz</a>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#about">Hakkımızda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}#team">Ekibimiz</a></li>
-
-
-                    <li class="nav-item">
-                        {% if not is_logged_in %}
-                        <a class="nav-link" href="{{ url_for('home') }}#blog">Vergisel Haberler</a>
-                        {% else %}
-                        <a class="nav-link" href="{{ url_for('blog.index') }}">Vergisel Haberler</a>
-                        {% endif %}
-                    </li>
-
-                    <li class="nav-item">
-                        {% if not is_logged_in %}
-                        <a class="nav-link" href="{{ url_for('home') }}#contact">İletişim</a>
-                        {% else %}
-                        <a class="nav-link" href="{{ url_for('contact') }}">İletişim</a>
-                        {% endif %}
-                    </li>
-
-                    <li class="nav-item dropdown ms-2">
-
-                        <a class="nav-link dropdown-toggle fw-semibold px-3 py-1 rounded-pill border border-primary text-primary hover-vergi"
-                            href="#" id="vergiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-cash-coin me-1"></i> Vergi Hesaplamaları
-                        </a>
-
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="vergiDropdown">
-
-                            <!-- 📄 GELİR VERGİSİ -->
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('calculators.gelir_vergisi') }}">
-                                    📄 Gelir Vergisi Hesapla
-                                </a>
-                            </li>
-
-                            <!-- 🚢 İTHALATTA KDV -->
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('calculators.ithalat_kdv') }}">
-                                    🚢 İthalatta KDV Hesapla
-                                </a>
-                            </li>
-
-                            <!-- ⏱️ GECİKME ZAMMI -->
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('calculators.gecikme_zammi') }}">
-                                    ⏱️ Gecikme Zammı Hesapla
-                                </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <!-- 🧾 DAMGA VERGİSİ -->
-                            <li>
-                                <a class="dropdown-item disabled">
-                                    🧾 Damga Vergisi (yakında)
-                                </a>
-                            </li>
-
-                            <!-- 💸 STOPAJ -->
-                            <li>
-                                <a class="dropdown-item disabled">
-                                    💸 Stopaj Vergisi (yakında)
-                                </a>
-                            </li>
-
-                            <!-- 🚗 MTV -->
-                            <li>
-                                <a class="dropdown-item disabled">
-                                    🚗 Motorlu Taşıtlar Vergisi (yakında)
-                                </a>
-                            </li>
-
-                            <!-- 📅 VERGİ TAKVİMİ -->
-                            <li>
-                                <a class="dropdown-item disabled">
-                                    📅 Vergi Takvimi (yakında)
-                                </a>
-                            </li>
-
-                        </ul>
-                    </li>
-
-
-
-                    <li class="nav-item ms-2">
-                        <a class="nav-link fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat"
-                            href="{{ url_for('mevzuat') }}">
-                            <i class="bi bi-book-half me-1"></i> Mevzuat
-                        </a>
-                    </li>
-
-                    {% if session.get('username', '').lower() == 'admin' %}
-                    <li class="nav-item">
-                        <a class="nav-link text-danger fw-semibold" href="{{ url_for('admin_users') }}">
-                            👤 Kullanıcı Onayları
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    {% if is_logged_in %}
-                    <li class="nav-item"><a class="nav-link text-primary fw-semibold"
-                            href="{{ url_for('change_password') }}">🔒 Şifre Değiştir</a></li>
-                    <li class="nav-item"><a class="btn btn-danger btn-sm ms-lg-3 btn-gradient-hover-small"
-                            href="{{ url_for('logout') }}">Çıkış Yap</a></li>
-                    {% else %}
-                    <li class="nav-item"><a class="btn btn-primary btn-sm ms-lg-3 btn-gradient-hover-small"
-                            href="{{ url_for('login') }}">Giriş Yap</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-
-        </div>
-    </nav>
+    {% include 'partials/navbar.html' %}
 
 
     <!-- 🧱 Ana içerik -->
@@ -363,16 +174,16 @@
                 <ul class="nav nav-tabs justify-content-center w-100">
                     <li class="nav-item">
                         <a class="nav-link {% if request.path.startswith('/veri-giris') %}active{% endif %}"
-                            href="{{ url_for('veri_giris') }}">📝 Veri Giriş</a>
+                            href="{{ url_for('data.veri_giris') }}">📝 Veri Giriş</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path.startswith('/finansal-analiz') %}active{% endif %}"
-                            href="{{ url_for('finansal_analiz', unvan=secili_unvan, donem=secili_donem) }}">📊 Finansal
+                            href="{{ url_for('report.finansal_analiz', unvan=secili_unvan, donem=secili_donem) }}">📊 Finansal
                             Analiz</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path.startswith('/raporlama') %}active{% endif %}"
-                            href="{{ url_for('raporlama') }}">📑 Raporlama</a>
+                            href="{{ url_for('report.raporlama') }}">📑 Raporlama</a>
                     </li>
                 </ul>
             </nav>

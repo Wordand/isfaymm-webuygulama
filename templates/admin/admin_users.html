@@ -13,8 +13,8 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold mb-0">👤 Kullanıcı Yönetim Paneli</h3>
             <div class="d-flex gap-2">
-                <a href="{{ url_for('login_logs') }}" class="btn btn-outline-info btn-sm">📜 Giriş Logları</a>
-                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-sm">← Geri Dön</a>
+                <a href="{{ url_for('admin.login_logs') }}" class="btn btn-outline-info btn-sm">📜 Giriş Logları</a>
+                <a href="{{ url_for('main.home') }}" class="btn btn-secondary btn-sm">← Geri Dön</a>
             </div>
         </div>
 
@@ -90,7 +90,7 @@
 
                         <!-- Rol -->
                         <td class="text-center">
-                            <form method="POST" action="{{ url_for('change_role', user_id=u.id) }}" class="d-inline">
+                            <form method="POST" action="{{ url_for('admin.change_role', user_id=u.id) }}" class="d-inline">
                                 <select name="role" onchange="this.form.submit()" class="form-select form-select-sm">
                                     <option value="user" {{ 'selected' if u.role=='user' else '' }}>Kullanıcı</option>
                                     <option value="editor" {{ 'selected' if u.role=='editor' else '' }}>Editör</option>
@@ -114,12 +114,12 @@
                         <!-- İşlemler -->
                         <td class="text-center">
                             {% if not u.is_approved %}
-                            <a href="{{ url_for('approve_user', user_id=u.id) }}"
+                            <a href="{{ url_for('admin.approve_user', user_id=u.id) }}"
                                 class="btn btn-success btn-sm">Onayla</a>
                             {% endif %}
 
                             {% if u.username != 'admin' %}
-                            <a href="{{ url_for('suspend_user', user_id=u.id) }}"
+                            <a href="{{ url_for('admin.suspend_user', user_id=u.id) }}"
                                 class="btn btn-sm {{ 'btn-outline-secondary' if u.is_suspended else 'btn-dark' }}">
                                 {{ 'Askıdan Çıkar' if u.is_suspended else 'Askıya Al' }}
                             </a>
@@ -127,10 +127,10 @@
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#editModal{{ u.id }}">Düzenle</button>
 
-                            <a href="{{ url_for('admin_reset_password', user_id=u.id) }}"
+                            <a href="{{ url_for('admin.admin_reset_password', user_id=u.id) }}"
                                 class="btn btn-sm btn-warning">Şifre Sıfırla</a>
 
-                            <a href="{{ url_for('reject_user', user_id=u.id) }}" class="btn btn-sm btn-danger"
+                            <a href="{{ url_for('admin.reject_user', user_id=u.id) }}" class="btn btn-sm btn-danger"
                                 onclick="return confirm('Bu kullanıcıyı kalıcı olarak silmek istediğinize emin misiniz?')">
                                 Sil
                             </a>
@@ -141,7 +141,7 @@
                     <!-- Kullanıcı Adı Düzenleme Modalı -->
                     <div class="modal fade" id="editModal{{u.id}}" tabindex="-1">
                         <div class="modal-dialog">
-                            <form method="POST" action="{{ url_for('update_username', user_id=u.id) }}">
+                            <form method="POST" action="{{ url_for('admin.update_username', user_id=u.id) }}">
                                 <div class="modal-content">
                                     <div class="modal-header bg-primary text-white">
                                         <h5 class="modal-title">Kullanıcı Adını Düzenle</h5>

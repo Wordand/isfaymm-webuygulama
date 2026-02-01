@@ -1,0 +1,40 @@
+    <!-- 🟩 SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header d-flex justify-content-between align-items-center px-3 py-2">
+            <a href="{{ url_for('main.home') }}" class="sidebar-brand text-white fw-bold text-decoration-none">
+                <i class="bi bi-calculator-fill me-2"></i> İSFA YMM
+            </a>
+            <!-- ✕ butonu sadece mobilde görünür -->
+            <button id="sidebarClose" class="btn btn-sm text-white d-lg-none">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('main.home') }}"
+                class="sidebar-link {% if request.path == url_for('main.home') %}active{% endif %}">
+                <i class="bi bi-house-door sidebar-icon"></i>
+                <span class="sidebar-text">Ana Sayfa</span>
+            </a>
+            <a href="{{ url_for('data.veri_giris') }}"
+                class="sidebar-link {% if request.path.startswith('/veri-giris') or request.path.startswith('/finansal-analiz') or request.path.startswith('/raporlama') %}active{% endif %}">
+                <i class="bi bi-pencil-square sidebar-icon"></i> Finansal Analiz ve Raporlama
+            </a>
+            <a href="{{ url_for('indirimlikurumlar.index') }}"
+                class="sidebar-link {% if request.path.startswith('/indirimlikurumlar') %}active{% endif %}">
+                <i class="bi bi-building sidebar-icon"></i> İndirimli Kurumlar Vergisi
+            </a>
+
+
+            <a href="{{ url_for('tools.asgari') }}"
+                class="sidebar-link {% if request.path.startswith('/asgari') %}active{% endif %}">
+                <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi
+            </a>
+            <a href="{{ url_for('tools.sermaye') }}"
+                class="sidebar-link {% if request.path.startswith('/sermaye') %}active{% endif %}">
+                <i class="bi bi-cash-stack sidebar-icon"></i> Nakdi Sermaye Artırım İndirimi
+            </a>
+            <a href="{{ url_for('tools.finansman') }}"
+                class="sidebar-link {% if request.path.startswith('/finansman') %}active{% endif %}">
+                <i class="bi bi-currency-dollar sidebar-icon"></i> Finansman Gider Kısıtlaması
+            </a>
+        </nav>
+    </div>

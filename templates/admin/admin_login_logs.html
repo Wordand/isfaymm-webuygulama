@@ -15,10 +15,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h3 class="fw-bold mb-0">🔐 Giriş Logları</h3>
       <div>
-        <a href="{{ url_for('admin_users') }}" class="btn btn-secondary btn-sm">← Geri Dön</a>
+        <a href="{{ url_for('admin.admin_users') }}" class="btn btn-secondary btn-sm">← Geri Dön</a>
 
         <!-- 🔴 SweetAlert ile Tüm Logları Sil Butonu -->
-        <form id="deleteAllForm" method="POST" action="{{ url_for('delete_all_logs') }}" style="display:inline;">
+        <form id="deleteAllForm" method="POST" action="{{ url_for('admin.delete_all_logs') }}" style="display:inline;">
           <button type="button" id="deleteAllBtn" class="btn btn-danger btn-sm ms-2">
             Tüm Logları Sil
           </button>

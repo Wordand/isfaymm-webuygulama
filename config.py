@@ -9,7 +9,7 @@ FERNET_KEY = os.getenv("FERNET_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # İzin verilen dosya uzantıları
-ALLOWED_EXTENSIONS = {"pdf", "docx", "xlsx", "xls"}
+ALLOWED_EXTENSIONS = {"pdf", "docx", "xlsx", "xls", "xml"}
 
 # wkhtmltopdf çalıştırılabilir yolu (PDF oluşturma)
 WKHTMLTOPDF_PATH = os.getenv("WKHTMLTOPDF_PATH") or "/usr/local/bin/wkhtmltopdf"

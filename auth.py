@@ -6,6 +6,6 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if not session.get("logged_in") or "user_id" not in session:
             flash("Bu sayfaya erişmek için giriş yapmalısınız.", "warning")
-            return redirect(url_for("login"))
+            return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
     return decorated_function

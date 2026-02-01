@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block title %}Ekibimiz - İSFA YMM & Denetim{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" data-aos="fade-up">
+
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">Ekibimiz</h1>
+            <p class="lead text-muted">Bilgi, güven ve tecrübeyi bir araya getiren uzman kadromuzla tanışın.</p>
+        </div>
+
+        <!-- 🟦 Ortak YMM'ler -->
+        <div class="row justify-content-center mb-5">
+
+            <!-- 1️⃣ YMM -->
+            <div class="col-md-6 col-lg-5 mb-4">
+                <div class="team-card position-relative bg-white rounded-4 shadow-sm p-4 h-100">
+                    <div class="d-flex align-items-center bg-light rounded-4 p-4 shadow-sm team-inner mb-3">
+                        <img src="{{ url_for('static', filename='images/ymm1.jpg') }}"
+                            class="rounded-circle me-4 shadow-sm team-photo" alt="İsmet Ali Aktay" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h5 class="fw-bold mb-1">İsmet Ali AKTAY</h5>
+                            <p class="text-muted mb-0 small">
+                                Yeminli Mali Müşavir, Kurucu Ortak<br>Bağımsız Denetçi<br>Sürdürülebilir Bağımsız Denetçi
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="team-details small text-secondary">
+                        <p>1987 yılında Balıkesir Sındırgı'da doğdu. 2009 yılında Ankara Üniversitesi SBF Kamu Yönetimi bölümünden mezun oldu.</p>
+                        <p>2009-2022 yılları arasında Gelirler Kontrolörü, Vergi Müfettişi ve Daire Başkanı olarak görev yaptı.</p>
+                        <p>İstanbul Büyük Ölçekli Mükellefler Grup Başkanlığı ve Sektörel Denetim Daire Başkanlığı gibi kritik görevlerde bulundu.</p>
+                        <p>İyi derecede İngilizce bilmektedir.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2️⃣ YMM -->
+            <div class="col-md-6 col-lg-5 mb-4">
+                <div class="team-card position-relative bg-white rounded-4 shadow-sm p-4 h-100">
+                    <div class="d-flex align-items-center bg-light rounded-4 p-4 shadow-sm team-inner mb-3">
+                        <img src="{{ url_for('static', filename='images/ymm2.jpg') }}"
+                            class="rounded-circle me-4 shadow-sm team-photo" alt="Fatih Akın" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h5 class="fw-bold mb-1">Fatih AKIN</h5>
+                            <p class="text-muted mb-0 small">
+                                Yeminli Mali Müşavir, Kurucu Ortak<br>Bağımsız Denetçi
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="team-details small text-secondary">
+                        <p>1987 yılında Karaman Ermenek'te doğdu. 2009 yılında Ankara Üniversitesi SBF İktisat bölümünden mezun oldu.</p>
+                        <p>2009-2022 yılları arasında Gelirler Kontrolörü ve Vergi Müfettişi olarak görev yaptı.</p>
+                        <p>Transfer Fiyatlandırması ve Büyük Ölçekli Mükellefler Grup Başkanlığı'nda görev aldı.</p>
+                        <p>Çokuluslu şirketler ve Türkiye'nin ilk 500 firması nezdinde incelemeler yürüttü.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 🟩 Ekip Üyeleri -->
+        <h3 class="text-center mb-4">Uzman Kadromuz</h3>
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card text-center border-0 shadow-sm team-card h-100">
+                    <img src="{{ url_for('static', filename='images/team1.jpg') }}"
+                        class="card-img-top rounded-circle mx-auto mt-3 team-img" alt="Osman Aytekin" style="width: 120px; height: 120px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-1">Osman AYTEKİN</h6>
+                        <p class="card-text text-muted small mb-2">KDV İade Uzmanı</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card text-center border-0 shadow-sm team-card h-100">
+                    <img src="{{ url_for('static', filename='images/team2.jpg') }}"
+                        class="card-img-top rounded-circle mx-auto mt-3 team-img" alt="Talha Öner" style="width: 120px; height: 120px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-1">M. Talha ÖNER</h6>
+                        <p class="card-text text-muted small mb-2">KDV İade ve Denetim Müdürü</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card text-center border-0 shadow-sm team-card h-100">
+                    <img src="{{ url_for('static', filename='images/team3.jpg') }}"
+                        class="card-img-top rounded-circle mx-auto mt-3 team-img" alt="Serhat Kaplanlı" style="width: 120px; height: 120px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold mb-1">Serhat KAPLANLI</h6>
+                        <p class="card-text text-muted small mb-2">KDV İade Uzmanı</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+{% endblock %}
