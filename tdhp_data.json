@@ -71,11 +71,11 @@
         "name": "ALACAK SENETLERİ REESKONTU (-)",
         "description": "Bilanço gününde, senetli alacakların tasarruf değeri ile değerlenmesini sağlamak üzere alacak senetleri için ayrılan reeskont tutarlarının izlenmesinde kullanılır. İşleyişi : Hesaplanan reeskont tutarları bu hesaba alacak, \"65. Diğer Faaliyetlerden Olağan Gider ve Zararlar\" grubundaki \"652. Reeskont Faiz Giderleri Hesabı\"na gider yazılır. İzleyen dönemde bu hesap \"65. Diğer Faaliyetlerden Olağan Gelir ve Kârlar\" grubundaki \"642. Faiz Gelirleri Hesabı\"na aktarılarak kapatılır."
     },
-    "123": {
+    "124": {
         "name": "124. KAZANILMAMIŞ FİNANSAL KİRALAMA FAİZ GELİRLERİ (-)",
         "description": "Bu hesap finansal kiralamanın yapıldığı tarihte kiralama işlemlerinden doğan alacaklar ile kira ödemelerinin bugünkü değeri arasındaki farkı gösteren henüz kazanılmamış finansal kiralama faiz gelirlerinin izlendiği hesaptır. Bu gelirlerin hesaplanmasına ilişkin bilgiler bilanço dipnotlarında yer alır. 17 İşleyişi: Finansal kiralama sözleşme tutarı ile finansal kiralamayla ilgili kira ödemelerinin bugünkü değeri arasındaki fark “Kazanılmamış Finansal Kiralama Faiz Gelirleri” olarak bu hesaba alacak kaydedilir. Her dönem sonunda gerçekleşmiş olan faiz gelirleri tutarları bu hesaba borç “60- Brüt Satışlar” hesap grubunda ilgili satış geliri hesabına alacak olarak kaydedilir. Ancak, esas faaliyet konusu finansal kiralama olamayan işletmelerce yapılan finansal kiralama işlemiyle ilgili gerçekleşmiş faiz gelirleri, “64- Diğer Faaliyetlerden Olağan Gelir ve Karlar” hesap grubunda faiz geliri hesabına alacak olarak kaydedilir."
     },
-    "125": {
+    "126": {
         "name": "126. VERİLEN DEPOZİTO VE TEMİNATLAR",
         "description": "İşletmece üçüncü kişilere karşı bir işin yapılmasının üstlenilmesi veya bir sözleşmenin ya da diğer işlemlerin karşılığı olarak geri alınmak üzere verilen depozito ve teminat niteliğindeki değerlerin izlendiği hesaptır. İşleyişi : Verilen depozito ve teminatlar bu hesabın borcuna, geri alınanlar veya hesaba sayılanlar alacağına kaydedilir. 127- DİĞER TİCARİ ALACAKLAR İşletmenin ticari faaliyetleri sonucu ortaya çıkan ve yukarıdaki hesapların kapsamına girmeyen tahsili gecikmiş alacaklar (henüz şüpheli alacak niteliğini kazanmayanlar) ve diğer çeşitli senetsiz ticari alacaklar bu hesapta izlenir. İşleyişi : Yukarıda belirtilen alacaklar bu hesaba borç; tahsil veya mahsup işlemi yapıldığında ilgili hesaplara karşılık, bu hesaba alacak kaydedilir.\""
     },
@@ -87,7 +87,7 @@
         "name": "ŞÜPHELİ TİCARİ ALACAKLAR KARŞILIĞI (-)",
         "description": "\"128. Şüpheli Ticari Alacaklar\" için ayrılacak karşılıklarla, perakende satış yöntemi kullanarak bilanço gününden önceki iki hesap döneminde vadesinde tahsil edilemeyen alacakların ilgili dönemlerdeki toplam vadeli satışlara oranlarının ortalamasının değerleme dönemindeki vadeli satışlara uygulanması suretiyle bulunacak şüpheli alacaklar için ayrılan karşılıkları kapsar. Teminatlı alacaklarda karşılık teminatı aşan kısım için ayrılır. Bu hesap amaca uygun olarak bölümlenebilir. İşleyişi : Hesaplanan karşılık tutarı bu hesaba alacak, \"654. Karşılık Giderleri\" hesabına borç kaydedilir. Şüpheli alacağın tahsiline bağlı olarak, tahmin olunan zararın kısmen ya da tamamen gerçekleşmemesi halinde, gerçekleşmeyen kısım \"644. Konusu Kalmayan Karşılıklar Hesabı\" alacağına devredilerek bu hesaba borç kaydedilir. Şüpheli alacağın tahsilinin imkansız olduğu kesinleştiği takdirde bu hesaba borç, ilgili hesaba da alacak kaydedilir. Gerçekleşen zararın ayrılan karşılıklardan fazla olması halinde, ayrılan karşılık kadar bu hesaba borç, zarar fazlası ise \"681. Önceki Dönem Gider ve Zararları\" hesabına borç, tahsil edilemeyen tutar, ilgili alacak hesabına alacak kaydolunur. Perakende satış yönteminin uygulanması sonucunda bulunan, dönemin karşılık tutarının o tarihteki şüpheli alacaklar karşılığı tutarından az olması durumunda, aradaki fark \"644. Konusu Kalmayan Karşılıklar Hesabı\"na aktarılmak üzere bu hesaba borç yazılır. Daha önce alacaklardan düşülen ve bu hesaba borç kaydedilen alacakların tahsili söz konusu olduğu takdirde, oluşlarına göre \"671. Önceki Dönem Gelir ve Kârlar\" hesabına alınır. 13. DİĞER ALACAKLAR Bu hesap grubu; herhangi bir ticari nedene dayanmadan meydana gelmiş ve en çok bir yıl içinde tahsil edilmesi düşünülen senetli, senetsiz alacaklar ile bu gruba ait şüpheli alacak ve şüpheli alacak karşılığının izlenmesini sağlar. Bu grup aşağıdaki hesaplardan oluşur."
     },
-    "130": {
+    "131": {
         "name": "131. ORTAKLARDAN ALACAKLAR",
         "description": "İşletmenin esas faaliyet konusu dışındaki işlemleri dolayısı ile (ödünç verme ve benzer nedenlerle ortaya çıkan) ortaklarından alacaklı bulunduğu tutarların izlendiği hesaptır. İşleyişi : Alacağın doğması halinde hesaba borç, tahsili halinde ise alacak kaydedilir. 19"
     },
@@ -99,7 +99,7 @@
         "name": "BAĞLI ORTAKLIKLARDAN ALACAKLAR",
         "description": "İşletmenin esas faaliyet konusu dışındaki işlemleri dolayısı ile (ödünç verme ve benzer nedenlerle ortaya çıkan) bağlı ortaklıklardan olan alacaklarını içerir. İşleyişi : Bu hesaba; alacağın doğması halinde borç, tahsili halinde ise alacak kaydedilir."
     },
-    "134": {
+    "135": {
         "name": "135. PERSONELDEN ALACAKLAR",
         "description": "İşletmeye dahil personel ve işçinin işletmeye olan çeşitli borçlarını kapsar. İşleyişi : Bu hesaba, alacağın doğması halinde borç; tahsili halinde ise alacak kaydedilir."
     },

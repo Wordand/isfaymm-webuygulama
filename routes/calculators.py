@@ -51,16 +51,49 @@ def tdhp():
 
     # Maliyet Hesapları (Basitleştirilmiş)
     maliyet_hesaplari = {
-        "7. MALİYET HESAPLARI": {
-            "70": "Maliyet Muhasebesi Bağlantı Hesapları",
+        "7/A SEÇENEĞİ (FONKSİYON ESASI)": {
+            "700": "Maliyet Muhasebesi Bağlantı Hesabı",
+            "701": "Maliyet Muhasebesi Yansıtma Hesabı",
             "710": "Direkt İlk Madde ve Malzeme Giderleri",
+            "711": "Direkt İlk Madde ve Malzeme Yansıtma Hesabı",
+            "712": "Direkt İlk Madde ve Malzeme Fiyat Farkı",
+            "713": "Direkt İlk Madde ve Malzeme Miktar Farkı",
             "720": "Direkt İşçilik Giderleri",
+            "721": "Direkt İşçilik Giderleri Yansıtma Hesabı",
+            "722": "Direkt İşçilik Ücret Farkları",
+            "723": "Direkt İşçilik Süre (Zaman) Farkları",
             "730": "Genel Üretim Giderleri",
+            "731": "Genel Üretim Giderleri Yansıtma Hesabı",
+            "732": "Genel Üretim Giderleri Bütçe Farkları",
+            "733": "Genel Üretim Giderleri Verimlilik Farkları",
+            "734": "Genel Üretim Giderleri Kapasite Farkları",
             "740": "Hizmet Üretim Maliyeti",
+            "741": "Hizmet Üretim Maliyeti Yansıtma Hesabı",
+            "742": "Hizmet Üretim Maliyeti Fark Hesapları",
             "750": "Araştırma ve Geliştirme Giderleri",
+            "751": "Araştırma ve Geliştirme Giderleri Yansıtma Hesabı",
+            "752": "Araştırma ve Geliştirme Gider Farkları",
             "760": "Pazarlama Satış ve Dağıtım Giderleri",
+            "761": "Pazarlama Satış ve Dağıtım Giderleri Yansıtma Hesabı",
+            "762": "Pazarlama Satış ve Dağıtım Gider Farkları",
             "770": "Genel Yönetim Giderleri",
-            "780": "Finansman Giderleri"
+            "771": "Genel Yönetim Giderleri Yansıtma Hesabı",
+            "772": "Genel Yönetim Gider Farkları",
+            "780": "Finansman Giderleri",
+            "781": "Finansman Giderleri Yansıtma Hesabı",
+            "782": "Finansman Giderleri Fark Hesabı",
+        },
+        "7/B SEÇENEĞİ (ÇEŞİT ESASI)": {
+            "790": "İlk Madde ve Malzeme Giderleri",
+            "791": "İşçi Ücret ve Giderleri",
+            "792": "Memur Ücret ve Giderleri",
+            "793": "Dışarıdan Sağlanan Fayda ve Hizmetler",
+            "794": "Çeşitli Giderler",
+            "795": "Vergi, Resim ve Harçlar",
+            "796": "Amortismanlar ve Tükenme Payları",
+            "797": "Finansman Giderleri",
+            "798": "Gider Çeşitleri Yansıtma Hesapları",
+            "799": "Üretim Maliyet Hesabı",
         }
     }
     

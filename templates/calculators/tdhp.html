@@ -53,50 +53,80 @@
         
         <!-- BİLANÇO -->
         <div class="account-section" data-category="bilanco">
-            <div class="d-flex align-items-center mb-3 mt-4">
-                <span class="badge bg-primary rounded-pill me-2">1-5</span>
-
-            </div>
             
-            <div class="accordion accordion-flush bg-white rounded-4 shadow-sm border" id="accBilanco">
-                {% macro render_item(key, value, parent_id, loop_index) %}
-                    {% set clean_id = parent_id + '-' + loop_index|string %}
-                    {% if value is mapping %}
-                        <!-- Grup Başlığı (Accordion) -->
-                        <div class="accordion-item bg-transparent border-bottom search-item group-item">
-                            <h2 class="accordion-header" id="head-{{ clean_id }}">
-                                <button class="accordion-button collapsed fw-semibold py-3" type="button" 
-                                        data-bs-toggle="collapse" data-bs-target="#collapse-{{ clean_id }}" 
-                                        aria-expanded="false">
-                                    <span class="text-muted me-2 font-monospace">{{ key.split(' ')[0] }}</span>
-                                    <span class="text-dark">{{ key.split(' ', 1)[1] if ' ' in key else key }}</span>
-                                </button>
-                            </h2>
-                            <div id="collapse-{{ clean_id }}" class="accordion-collapse collapse" data-bs-parent="#{{ parent_id }}">
-                                <div class="accordion-body py-2 ps-4 bg-light-subtle">
-                                    <div class="accordion accordion-flush" id="sub-{{ clean_id }}">
-                                        {% for k, v in value.items() %}
-                                            {{ render_item(k, v, 'sub-' + clean_id, loop.index) }}
-                                        {% endfor %}
-                                    </div>
+            {% macro render_item(key, value, parent_id, loop_index, badge_class='badge-code') %}
+                {% set clean_id = parent_id + '-' + loop_index|string %}
+                {% if value is mapping %}
+                    <!-- Grup Başlığı (Accordion) -->
+                    <div class="accordion-item bg-transparent border-bottom search-item group-item">
+                        <h2 class="accordion-header" id="head-{{ clean_id }}">
+                            <button class="accordion-button collapsed fw-semibold py-3" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapse-{{ clean_id }}" 
+                                    aria-expanded="false" style="font-size: 0.95rem;">
+                                <span class="text-muted me-2 font-monospace opacity-75">{{ key.split(' ')[0] }}</span>
+                                <span class="text-dark">{{ key.split(' ', 1)[1] if ' ' in key else key }}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ clean_id }}" class="accordion-collapse collapse" data-bs-parent="#{{ parent_id }}">
+                            <div class="accordion-body py-2 ps-3 bg-white">
+                                <div class="accordion accordion-flush" id="sub-{{ clean_id }}">
+                                    {% for k, v in value.items() %}
+                                        {{ render_item(k, v, 'sub-' + clean_id, loop.index, badge_class) }}
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
-                    {% else %}
-                        <!-- Hesap Satırı (Tekil) -->
-                        <div class="list-group-item border-0 border-bottom py-2 px-3 search-item leaf-item d-flex align-items-center"
-                             data-code="{{ key }}" data-name="{{ value }}" onclick="handleAccountClick(this)">
-                            <div class="d-flex align-items-center text-truncate">
-                                <span class="badge bg-white text-black border border-secondary me-3 font-monospace rounded-2 px-2 py-1 fs-6 shadow-sm" style="min-width: 60px;">{{ key }}</span>
-                                <span class="text-dark fw-medium search-text">{{ value }}</span>
+                    </div>
+                {% else %}
+                    <!-- Hesap Satırı (Tekil) -->
+                    <div class="list-group-item border-0 border-bottom py-2 px-3 search-item leaf-item d-flex align-items-center"
+                         data-code="{{ key }}" data-name="{{ value }}" onclick="handleAccountClick(this)">
+                        <div class="d-flex align-items-center w-100">
+                            <span class="badge {{ badge_class }} me-3">{{ key }}</span>
+                            <span class="text-dark search-text small text-wrap" style="line-height: 1.4;">{{ value }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endmacro %}
+
+            <div class="row g-4 mt-2">
+                <!-- AKTİF Sütunu -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-success bg-opacity-10 text-success fw-bold py-3 px-4 border-bottom-0 d-flex align-items-center">
+                            <i class="bi bi-graph-up-arrow me-2 fs-5"></i>
+                            <span class="fs-5">AKTİF (VARLIKLAR)</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="accordion accordion-flush" id="accAktif">
+                                {% if bilanco['AKTİF'] is defined %}
+                                    {% for key, val in bilanco['AKTİF'].items() %}
+                                        {{ render_item(key, val, 'accAktif', loop.index, 'badge-code-success') }}
+                                    {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
-                    {% endif %}
-                {% endmacro %}
+                    </div>
+                </div>
 
-                {% for key, val in bilanco.items() %}
-                    {{ render_item(key, val, 'accBilanco', loop.index) }}
-                {% endfor %}
+                <!-- PASİF Sütunu -->
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-warning bg-opacity-10 text-warning-emphasis fw-bold py-3 px-4 border-bottom-0 d-flex align-items-center">
+                            <i class="bi bi-pie-chart me-2 fs-5"></i>
+                            <span class="fs-5">PASİF (KAYNAKLAR)</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="accordion accordion-flush" id="accPasif">
+                                {% if bilanco['PASİF'] is defined %}
+                                    {% for key, val in bilanco['PASİF'].items() %}
+                                        {{ render_item(key, val, 'accPasif', loop.index, 'badge-code-warning') }}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -116,7 +146,7 @@
                         <div class="list-group-item border-0 border-bottom py-2 px-3 search-item leaf-item d-flex align-items-center"
                              data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
                             <div class="d-flex align-items-center text-truncate">
-                                <span class="badge bg-white text-black border border-danger me-3 font-monospace rounded-2 px-2 py-1 fs-6 shadow-sm" style="min-width: 60px;">{{ code }}</span>
+                                <span class="badge badge-code-danger me-3">{{ code }}</span>
                                 <span class="text-dark fw-medium search-text">{{ name }}</span>
                             </div>
                         </div>
@@ -136,15 +166,20 @@
                 <div class="col-md-6">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
                         <div class="card-header bg-white fw-bold py-3 text-secondary border-bottom-0">7. Maliyet Hesapları</div>
-                        <div class="list-group list-group-flush">
+                        <div class="card-body p-0">
                             {% for group, accounts in maliyet.items() %}
-                                {% for code, name in accounts.items() %}
-                                <div class="list-group-item border-0 border-bottom py-2 px-3 d-flex align-items-center search-item leaf-item"
-                                     data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
-                                    <span class="badge bg-white text-black border border-secondary me-3 font-monospace fs-6 shadow-sm" style="min-width: 50px;">{{ code }}</span>
-                                    <span class="small search-text text-dark fw-medium">{{ name }}</span>
+                                <div class="p-2 bg-light border-top border-bottom">
+                                    <small class="fw-bold text-secondary text-uppercase">{{ group }}</small>
                                 </div>
-                                {% endfor %}
+                                <div class="list-group list-group-flush mb-0">
+                                    {% for code, name in accounts.items() %}
+                                    <div class="list-group-item border-0 border-bottom py-2 px-3 d-flex align-items-center search-item leaf-item"
+                                         data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
+                                        <span class="badge badge-code-secondary me-3">{{ code }}</span>
+                                        <span class="small search-text text-dark fw-medium">{{ name }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             {% endfor %}
                         </div>
                     </div>
@@ -157,7 +192,7 @@
                                 {% for code, name in accounts.items() %}
                                 <div class="list-group-item border-0 border-bottom py-2 px-3 d-flex align-items-center search-item leaf-item"
                                      data-code="{{ code }}" data-name="{{ name }}" onclick="handleAccountClick(this)">
-                                    <span class="badge bg-white text-black border border-dark me-3 font-monospace fs-6 shadow-sm" style="min-width: 50px;">{{ code }}</span>
+                                    <span class="badge badge-code-dark me-3">{{ code }}</span>
                                     <span class="small search-text text-dark fw-medium">{{ name }}</span>
                                 </div>
                                 {% endfor %}
@@ -176,10 +211,16 @@
     </div>
 
     <!-- 📖 Offcanvas (Yan Panel) - Açıklama İçin -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="accountOffcanvas" aria-labelledby="offcanvasLabel" style="width: 500px;">
-        <div class="offcanvas-header bg-primary text-white">
-            <h5 class="offcanvas-title fw-bold" id="offcanvasLabel">Hesap Detayı</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="accountOffcanvas" aria-labelledby="offcanvasLabel" style="width: 500px; max-width: 100%; z-index: 2100 !important;">
+        <div class="offcanvas-header bg-primary text-white position-relative">
+            <h5 class="offcanvas-title fw-bold pe-5" id="offcanvasLabel">Hesap Detayı</h5>
+            
+             <!-- Kesin Pozisyonlanmış Kapatma Butonu -->
+            <button type="button" class="btn p-0 border-0 position-absolute top-0 end-0 m-3" 
+                    data-bs-dismiss="offcanvas" aria-label="Kapat"
+                    style="z-index: 1055; color: white !important;">
+                <i class="bi bi-x-lg" style="font-size: 1.5rem; text-shadow: 0 0 3px rgba(0,0,0,0.3);"></i>
+            </button>
         </div>
         <div class="offcanvas-body">
             <div id="offcanvasContent">
@@ -206,16 +247,160 @@
     /* Clickable row */
     .leaf-item { cursor: pointer; transition: background-color 0.1s; }
     .leaf-item:hover { background-color: #f1f5f9; }
+    /* Custom Code Badges */
+    .badge-code {
+        background-color: #e2e8f0; /* Slate-200 */
+        color: #1e293b !important; /* Slate-800 */
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+    
+    .badge-code-danger {
+        background-color: #fee2e2; /* Red-100 */
+        color: #991b1b !important; /* Red-800 */
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+    
+    .badge-code-secondary {
+        background-color: #f1f5f9; /* Slate-100 */
+        color: #475569 !important; /* Slate-600 */
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+
+    .badge-code-dark {
+        background-color: #e2e8f0; 
+        color: #0f172a !important; 
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+
+    .badge-code-success {
+        background-color: #dcfce7; /* Green-100 */
+        color: #166534 !important; /* Green-800 */
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+
+    .badge-code-warning {
+        background-color: #ffedd5; /* Orange-100 */
+        color: #9a3412 !important; /* Orange-800 */
+        font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-weight: 700;
+        min-width: 55px;
+        padding: 0.4em 0.6em;
+        font-size: 0.95em;
+        border-radius: 6px;
+    }
+
+    /* Clickable row refined */
+    .leaf-item { cursor: pointer; transition: all 0.2s ease; border-left: 3px solid transparent; }
+    .leaf-item:hover { background-color: #f8fafc; border-left-color: var(--bs-primary); padding-left: 1.2rem !important; }
 </style>
 
 <script>
     // 📦 Tüm Açıklama Verisi (Backend'den geliyor)
     const tdhpData = {{ descriptions|tojson|safe }};
+    // � Örnek Muhasebe Kayıtları Veritabanı
+    const accountExamples = {
+        "100": [
+            {
+                "desc": "Nakit tahsilat yapılması durumunda:",
+                "debit": [{ code: "100", name: "KASA HESABI", amount: "10.000 TL" }],
+                "credit": [{ code: "120", name: "ALICILAR HESABI", amount: "10.000 TL" }]
+            }
+        ],
+        "102": [
+             {
+                "desc": "Bankaya para yatırılması:",
+                "debit": [{ code: "102", name: "BANKALAR HESABI", amount: "5.000 TL" }],
+                "credit": [{ code: "100", name: "KASA HESABI", amount: "5.000 TL" }]
+             }
+        ],
+        "120": [
+            {
+                "desc": "Vadeli mal satışı yapılması:",
+                "debit": [{ code: "120", name: "ALICILAR HESABI", amount: "12.000 TL" }],
+                "credit": [
+                    { code: "600", name: "YURT İÇİ SATIŞLAR", amount: "10.000 TL" },
+                    { code: "391", name: "HESAPLANAN KDV", amount: "2.000 TL" }
+                ]
+            }
+        ],
+        "320": [
+            {
+                "desc": "Vadeli mal alımı yapılması:",
+                "debit": [
+                    { code: "153", name: "TİCARİ MALLAR", amount: "20.000 TL" },
+                    { code: "191", name: "İNDİRİLECEK KDV", amount: "4.000 TL" }
+                ],
+                "credit": [{ code: "320", name: "SATICILAR HESABI", amount: "24.000 TL" }]
+            }
+        ],
+        "600": [
+            {
+                "desc": "Kredili Mal Satışı:",
+                "debit": [ { code: "120", name: "ALICILAR", amount: "11.800 TL" } ],
+                "credit": [
+                    { code: "600", name: "YURT İÇİ SATIŞLAR", amount: "10.000 TL" },
+                    { code: "391", name: "HESAPLANAN KDV", amount: "1.800 TL" }
+                ]
+            }
+        ],
+        "610": [
+            {
+                "desc": "Satılan malın müşteri tarafından iade edilmesi:",
+                "debit": [
+                    { code: "610", name: "SATIŞTAN İADELER (-)", amount: "5.000 TL" },
+                    { code: "191", name: "İNDİRİLECEK KDV", amount: "1.000 TL" }
+                ],
+                "credit": [
+                    { code: "120", name: "ALICILAR HESABI", amount: "6.000 TL" }
+                ]
+            }
+        ],
+        "611": [
+            {
+                "desc": "Müşteriye erken ödeme nedeniyle iskonto yapılması:",
+                "debit": [
+                    { code: "611", name: "SATIŞ İSKONTOLARI (-)", amount: "1.000 TL" },
+                    { code: "191", name: "İNDİRİLECEK KDV", amount: "200 TL" }
+                ],
+                "credit": [
+                    { code: "120", name: "ALICILAR HESABI", amount: "1.200 TL" }
+                ]
+            }
+        ]
+    };
 
     function handleAccountClick(el) {
         // Dataset'ten bilgileri al
         const code = el.dataset.code;
-        const name = el.dataset.name;
+        let name = el.dataset.name;
+        
+        // Başındaki "1. ", "2. " gibi numaraları kaldır
+        name = name.replace(/^\d+\.\s*/, '');
         
         const offcanvasEl = document.getElementById('accountOffcanvas');
         const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
@@ -232,12 +417,47 @@
         }
 
         // Formatla (Yeni satırları paragraf yap)
-        let formattedDesc = desc.replace(/\n\n/g, '<br><br>').replace(/\n/g, ' ');
+        let formattedDesc = desc.replace(/\n\n/g, '<br><br>')
+                                .replace(/\n/g, ' ')
+                                .replace(/(İşleyişi\s*:)/gi, '<br><br><strong>İşleyişi:</strong>');
         
+        // Örnek Kayıt Var mı Kontrol Et
+        let exampleHtml = '';
+        if (accountExamples[code]) {
+            accountExamples[code].forEach(ex => {
+                let debtRows = ex.debit.map(d => `<div class="d-flex justify-content-between align-items-center mb-1"><div><span class="badge bg-light text-dark border me-1" style="color: #212529 !important;">${d.code}</span> ${d.name}</div> <div class="text-success fw-bold text-nowrap ms-2">${d.amount}</div></div>`).join('');
+                let creditRows = ex.credit.map(c => `<div class="d-flex justify-content-between align-items-center mb-1"><div><span class="badge bg-light text-dark border me-1" style="color: #212529 !important;">${c.code}</span> ${c.name}</div> <div class="text-danger fw-bold text-nowrap ms-2">${c.amount}</div></div>`).join('');
+
+                exampleHtml += `
+                    <div class="mt-4">
+                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-journal-bookmark-fill me-2"></i>Örnek Muhasebe Kaydı</h6>
+                        <p class="small text-muted mb-2 fst-italic">${ex.desc}</p>
+                        <div class="table-responsive border rounded-3 bg-white">
+                            <table class="table table-bordered mb-0 small">
+                                <thead class="table-light text-center text-secondary">
+                                    <tr>
+                                        <th style="width: 50%;">BORÇ (Debit)</th>
+                                        <th style="width: 50%;">ALACAK (Credit)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="align-top border-end">${debtRows}</td>
+                                        <td class="align-top">${creditRows}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         contentDiv.innerHTML = `
             <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3 border">
-                <span class="display-6 fw-bold text-primary me-3">${code}</span>
-                <span class="fs-5 fw-semibold text-dark lh-sm">${name}</span>
+                <span class="display-6 fw-bold text-primary">${code}</span>
+                <span class="fs-3 text-secondary mx-2">-</span>
+                <span class="fs-4 fw-bold text-dark lh-sm">${name}</span>
             </div>
             
             <div class="description-text text-dark" style="text-align: justify; line-height: 1.6;">
@@ -251,6 +471,8 @@
                     Bu açıklamalar <strong>Tek Düzen Hesap Planı</strong> tebliğlerinden otomatik olarak derlenmiştir.
                 </div>
             </div>
+            
+            ${exampleHtml}
         `;
 
         bsOffcanvas.show();
