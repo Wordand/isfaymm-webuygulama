@@ -16,7 +16,7 @@
 {% else %}
 <div id="aktifMukellefBox" class="alert alert-warning mb-3 shadow-sm border-start border-3 border-warning">
   Henüz bir mükellef seçilmedi.
-  <a href="{{ url_for('indirimlikurumlar.mukellef_bilgi') }}" class="alert-link">Mükellef Seç</a>
+  <a href="{{ url_for('mukellef.index') }}" class="alert-link">Mükellef Seç</a>
 </div>
 {% endif %}
 
@@ -82,8 +82,8 @@
       <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
         🗑️ Verileri Temizle
       </button>
-      <a href="{{ url_for('indirimlikurumlar.mukellef_bilgi') }}" class="btn btn-outline-secondary ms-2">
-        ↩️ Mükellef Seçimine Dön
+      <a href="{{ url_for('mukellef.index') }}" class="btn btn-outline-secondary ms-2">
+        ↩️ Mükellef Yönetimine Dön
       </a>
     </div>
 
@@ -122,8 +122,7 @@
     <input id="kvUploadInput" type="file" accept="application/pdf" style="display: none">
 
     <!-- Step 1 -->
-    <div id="step1" class="hidden-step corporate-card" {% if session.get('aktif_mukellef_unvan') %} style="display:block;" {% else %}
-      style="display:none;" {% endif %}>
+    <div id="step1" class="corporate-card">
 
       <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-info-circle me-2"></i>Aşama 1 - Temel Bilgiler</h5>
 
@@ -715,9 +714,9 @@
   }
 
   .hidden-step {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     position: absolute;
   }

@@ -1,0 +1,214 @@
+{% extends "kdv/layout.html" %}
+
+{% block title %}KDV İade Arşivi - İSFA YMM{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='kdv-style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="h3 fw-bold mb-1">İade Dosyası Arşivi</h1>
+            <p class="text-secondary small mb-0">Tüm geçmiş ve tamamlanmış iade dosyalarının detaylı listesi.</p>
+        </div>
+        <a href="{{ url_for('kdv.index') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-bold shadow-sm hover-scale text-decoration-none">
+            <i class="fa-solid fa-arrow-left me-2"></i> Genel Bakışa Dön
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white p-3 border-bottom-0">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="input-group border rounded-3 bg-light">
+                        <span class="input-group-text bg-transparent border-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="archiveSearch" class="form-control border-0 bg-transparent" placeholder="Mükellef, VKN veya dönem..." oninput="fetchArchive()">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterActive" class="form-select border-0 bg-light rounded-3" onchange="fetchArchive()">
+                        <option value="1">Aktif Dosyalar</option>
+                        <option value="0">Arşivlenmiş / Tamamlanmış</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary small fw-bold text-uppercase">
+                        <tr>
+                            <th class="ps-4">Mükellef</th>
+                            <th>Dönem</th>
+                            <th>Konu</th>
+                            <th>Talep Tutarı</th>
+                            <th>Durum</th>
+                            <th class="text-end pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveTableBody">
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='kdv-logic.js') }}"></script>
+<script>
+    async function fetchArchive() {
+        const active = document.getElementById('filterActive').value;
+        const search = document.getElementById('archiveSearch').value.toLowerCase();
+        
+        try {
+            const response = await fetch(`/api/kdv/files?active=${active}`);
+            let files = await response.json();
+            
+            if (search) {
+                files = files.filter(f => 
+                    (f.client_name && f.client_name.toLowerCase().includes(search)) || 
+                    (f.period && f.period.toLowerCase().includes(search)) ||
+                    (f.subject && f.subject.toLowerCase().includes(search))
+                );
+            }
+            
+            renderArchiveTable(files);
+        } catch (error) {
+            console.error('Error fetching archive:', error);
+            document.getElementById('archiveTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Veri yüklenemedi.</td></tr>`;
+        }
+    }
+
+    function renderArchiveTable(files) {
+        const activeFilter = document.getElementById('filterActive').value;
+        const body = document.getElementById('archiveTableBody');
+        
+        if (!files || files.length === 0) {
+            let emptyMsg = "Kayıt bulunamadı.";
+            if(activeFilter == '1') emptyMsg = "Aktif iade dosyası bulunmamaktadır.";
+            else emptyMsg = "Arşivlenmiş dosya bulunmamaktadır.";
+            
+            body.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-secondary">
+                <i class="fa-solid fa-folder-open fs-1 mb-3 text-muted opacity-25"></i><br>
+                ${emptyMsg}
+            </td></tr>`;
+            return;
+        }
+
+        body.innerHTML = files.map(f => {
+            // Active Filter 1 -> Dosyalar Aktif -> Buton Arşivle (0 yap)
+            // Active Filter 0 -> Dosyalar Pasif -> Buton Aktifleştir (1 yap)
+            const isCurrentlyActive = (activeFilter == '1');
+            
+            const toggleIcon = isCurrentlyActive ? 'fa-box-archive' : 'fa-box-open';
+            const toggleTitle = isCurrentlyActive ? 'Arşive Kaldır' : 'Tekrar Aktifleştir';
+            const toggleClass = isCurrentlyActive ? 'text-warning' : 'text-success';
+            const targetStatus = isCurrentlyActive ? 0 : 1;
+            
+            // Format period safely
+            const periodStr = (f.period_year && f.period_month) ? `${f.period_year}-${f.period_month}` : (f.period || '-');
+
+            return `
+            <tr>
+                <td class="ps-4">
+                    <div class="fw-bold text-dark">${f.client_name || 'Bilinmeyen Mükellef'}</div>
+                    <div class="small text-muted">${f.type || '-'}</div>
+                </td>
+                <td><span class="badge bg-light text-dark border">${periodStr}</span></td>
+                <td class="small text-secondary fw-medium">${f.subject || '-'}</td>
+                <td class="fw-bold text-dark">₺ ${formatMoney(f.amount_request)}</td>
+                <td><span class="badge bg-opacity-10 bg-info text-info border border-info border-opacity-25 rounded-pill px-3">${f.status || 'İşlem Yok'}</span></td>
+                <td class="text-end pe-4">
+                    <div class="btn-group shadow-sm rounded-3">
+                        <button class="btn btn-sm btn-white border border-end-0" onclick="window.location.href='/kdv-detay/${f.id}'" title="Dosya Detayı">
+                            <i class="fa-regular fa-eye text-primary"></i>
+                        </button>
+                        <button class="btn btn-sm btn-white border border-end-0 ${toggleClass}" onclick="handleToggleActive(${f.id}, ${targetStatus})" title="${toggleTitle}">
+                            <i class="fa-solid ${toggleIcon}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-white border text-danger" onclick="handleDelete(${f.id})" title="Sil">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `}).join('');
+    }
+
+    async function handleToggleActive(id, newStatus) {
+        const action = newStatus ? 'aktifleştirmek' : 'arşivlemek';
+        
+        const result = await Swal.fire({
+            title: 'Emin misiniz?',
+            text: `Bu dosyayı ${action} istediğinize emin misiniz?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Evet, onayla',
+            cancelButtonText: 'İptal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch('/api/kdv/toggle-active', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id, is_active: newStatus })
+                });
+                
+                const res = await response.json();
+                
+                if (res.status === 'success') {
+                    const successMsg = newStatus ? 'Dosya tekrar aktif hale getirildi.' : 'Dosya arşive kaldırıldı.';
+                    Swal.fire('Başarılı!', successMsg, 'success');
+                    fetchArchive(); // Re-fetch list
+                } else {
+                    Swal.fire('Hata!', res.message || 'İşlem başarısız.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Hata!', 'Sunucu hatası.', 'error');
+            }
+        }
+    }
+
+    async function handleDelete(id) {
+        const result = await Swal.fire({
+            title: 'Emin misiniz?',
+            text: "Bu işlem geri alınamaz! Dosya tamamen silinecektir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Evet, sil!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch('/api/kdv/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    Swal.fire('Silindi!', 'Dosya başarıyla silindi.', 'success');
+                    fetchArchive();
+                } else {
+                    Swal.fire('Hata!', res.message || 'Silme işlemi başarısız.', 'error');
+                }
+            } catch (e) {
+                 Swal.fire('Hata!', 'Sunucu hatası.', 'error');
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchArchive);
+</script>
+{% endblock %}

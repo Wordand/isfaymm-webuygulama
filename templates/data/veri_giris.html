@@ -1,52 +1,184 @@
 {% extends "layout.html" %}
-{% block title %}Veri Girişi{% endblock %}
+{% block title %}Veri Yönetimi{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            <h2 class="mb-4 text-center">📁 Dosya Yükle ve Yönet</h2>
+<style>
+    /* --- Premium Veri Giriş UI --- */
+    :root {
+        --premium-blue: #4e54c8;
+        --premium-gradient: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+        --glass-bg: rgba(255, 255, 255, 0.85);
+    }
 
-            <!-- Mizan Şablonu İndirme Butonu -->
-            <div class="text-center mb-4">
-                <p>Mizan verilerinizi yüklemeden önce lütfen örnek şablonu indirin:</p>
-                <a href="{{ url_for('static', filename='templates/mizan_sablonu.xlsx') }}" download="mizan_sablonu.xlsx"
-                   class="btn btn-info">
-                    <i class="bi bi-download me-2"></i>Mizan Şablonunu İndir
-                </a>
+    h3.page-title {
+        font-weight: 800;
+        font-size: 2.2rem;
+        background: var(--premium-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+    }
+
+    .upload-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        margin-bottom: 3rem;
+    }
+
+    /* Modern Drop Area */
+    #drop-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        background: #f8fafc;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #drop-area:hover, #drop-area.highlight {
+        border-color: var(--premium-blue);
+        background: #f1f5f9;
+        transform: scale(1.01);
+    }
+
+    #drop-area i {
+        font-size: 3.5rem;
+        background: var(--premium-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Progress Bar */
+    .progress {
+        height: 10px;
+        border-radius: 10px;
+        background-color: #e2e8f0;
+        overflow: hidden;
+        margin-top: 1.5rem;
+    }
+
+    .progress-bar {
+        background: var(--premium-gradient);
+        border-radius: 10px;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        border-radius: 14px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+    }
+
+    .btn-template {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-template:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Filter Panel */
+    .filter-section {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        margin-bottom: 2rem;
+    }
+
+    .table-premium {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .table-premium thead th {
+        background: #f8fafc;
+        padding: 1.2rem 1rem;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        border: none;
+    }
+
+    .table-premium td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #f1f5f9;
+    }
+
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h3 class="page-title">Dosya ve Veri Yönetimi</h3>
+        <p class="text-muted lead">Mizan, Bilanço ve KDV beyannamelerinizi yükleyin ve sistemde organize edin.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-9">
+            <!-- Dosya Yükleme Kartı -->
+            <div class="upload-card text-center">
+                <div class="mb-4">
+                    <p class="text-secondary fw-semibold">Analizlere başlamak için mizan dosyalarınızı şablona uygun yükleyin.</p>
+                    <a href="{{ url_for('static', filename='templates/mizan_sablonu.xlsx') }}" download="mizan_sablonu.xlsx"
+                       class="btn btn-action btn-template">
+                        <i class="bi bi-download"></i> Mizan Şablonunu İndir
+                    </a>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button class="btn btn-action btn-template" onclick="document.getElementById('mizan_file').click()">
+                        <i class="bi bi-file-earmark-spreadsheet text-success"></i> Mizan Şablonu (Excel)
+                    </button>
+                    <a href="{{ url_for('mukellef.index') }}" class="btn btn-action btn-template">
+                        <i class="bi bi-people text-primary"></i> Mükellef Yönetimi
+                    </a>
+                </div>
+
+                <form id="multiUploadForm" enctype="multipart/form-data">
+                    <div id="drop-area" onclick="document.getElementById('fileElem').click()">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        <h5 class="fw-bold text-dark">Dosyaları Sürükleyin veya Seçin</h5>
+                        <p class="text-muted small">PDF, XML, XLSX veya XLS formatları (Max 20MB)</p>
+                        <input type="file" id="fileElem" name="files[]" accept=".pdf,.xml,.xlsx,.xls" class="d-none" multiple required>
+                        <button type="button" class="btn btn-primary px-4 py-2 mt-2" style="border-radius: 12px;">Dosya Gözat</button>
+                    </div>
+
+                    <div id="uploadProgressContainer" style="display:none;">
+                        <div class="progress">
+                            <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p id="uploadFileName" class="text-primary small fw-bold mt-2"></p>
+                    </div>
+                </form>
             </div>
 
-            <!-- Dosya Yükleme Alanı -->
-            <form id="multiUploadForm" enctype="multipart/form-data">
-                <div id="drop-area" class="border border-primary border-2 rounded p-4 text-center mb-3"
-                     ondrop="handleDrop(event)" ondragover="event.preventDefault()">
-                    <p class="mb-2">📎 PDF, XML veya Mizan dosyalarınızı (.pdf, .xml, .xlsx, .xls) buraya sürükleyin ya da seçin</p>
-                    <input type="file" id="fileElem" name="files[]" accept=".pdf,.xml,.xlsx,.xls"
-                           class="form-control d-none" multiple required>
-                    <button type="button" class="btn btn-outline-primary"
-                            onclick="document.getElementById('fileElem').click()">Dosya Seç</button>
-                </div>
-
-                <!-- Yükleme İlerlemesi -->
-                <div id="uploadProgressContainer" class="mt-3" style="display:none;">
-                    <div class="progress">
-                        <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                             aria-valuemax="100">0%</div>
-                    </div>
-                    <p id="uploadFileName" class="text-muted mt-2"></p>
-                </div>
-            </form>
-
-            <hr class="my-4">
-
-            <!-- Önceden Yüklenen Veriler -->
-            <h4 class="text-center mb-3">🔍 Önceden Yüklenen Veriler</h4>
-            <form method="GET" action="{{ url_for('data.veri_giris') }}">
-                <div class="row mb-3">
-                    <div class="col">
-                        <select name="vkn" id="mukellefSelect" class="form-select" onchange="this.form.submit()" required>
-                            <option value="">-- Mükellef Seçin --</option>
+            <!-- Filtreleme ve Yönetim -->
+            <div class="filter-section animate__animated animate__fadeIn">
+                <form method="GET" action="{{ url_for('data.veri_giris') }}" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">MÜKELLEF</label>
+                        <select name="vkn" id="mukellefSelect" class="form-select border-0 bg-light shadow-none" onchange="this.form.submit()" style="border-radius: 12px; height: 50px;">
+                            <option value="">{% if not mukellefler %}Henüz mükellef yok - Dosya yükleyin{% else %}Lütfen seçim yapınız...{% endif %}</option>
                             {% for m in mukellefler %}
                                 <option value="{{ m.vergi_kimlik_no }}" {% if secili_vkn==m.vergi_kimlik_no %}selected{% endif %}>
                                     {{ m.vergi_kimlik_no }} - {{ m.unvan }}
@@ -54,171 +186,122 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col">
-                        <select name="donem" id="donemSelect" class="form-select" onchange="this.form.submit()"
-                                {% if not secili_vkn %}disabled{% endif %}>
-                            <option value="">-- Dönem Seçin --</option>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">DÖNEM</label>
+                        <select name="donem" id="donemSelect" class="form-select border-0 bg-light shadow-none" onchange="this.form.submit()" {% if not secili_vkn %}disabled{% endif %} style="border-radius: 12px; height: 50px;">
+                            <option value="">Lütfen seçim yapınız...</option>
                             {% for d in donemler %}
                                 <option value="{{ d }}" {% if secili_donem==d %}selected{% endif %}>{{ d }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                {% if secili_vkn and not secili_donem %}
-                <button type="button" class="btn btn-outline-danger w-100 mb-3"
-                        onclick="confirmDelete('mukellef', '{{ secili_vkn }}', null)">
-                    🗑 Mükellefi ve Tüm Dönemleri Sil
+            {% if secili_vkn %}
+            <div class="d-flex gap-2 mb-4">
+                {% if not secili_donem %}
+                <button type="button" class="btn btn-outline-danger btn-sm w-100 py-2 rounded-3" onclick="confirmDelete('mukellef', '{{ secili_vkn }}', null)">
+                    <i class="bi bi-trash3 me-1"></i> Mükellefi ve Tüm Verilerini Sil
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-outline-danger btn-sm w-100 py-2 rounded-3" onclick="confirmDelete('donem', '{{ secili_vkn }}', '{{ secili_donem }}', 'all')">
+                    <i class="bi bi-trash3 me-1"></i> Seçili Dönemin Tüm Verilerini Sil
                 </button>
                 {% endif %}
-
-                {% if secili_vkn and secili_donem %}
-                <button type="button" class="btn btn-outline-danger w-100 mb-3"
-                        onclick="confirmDelete('donem', '{{ secili_vkn }}', '{{ secili_donem }}', 'all')">
-                    🗑 Seçili Döneme Ait Tüm Belgeleri Sil
-                </button>
-                {% endif %}
-            </form>
-
-            <!-- Bilanço, Gelir, KDV Göster Butonları -->
-            {% if secili_vkn and secili_donem %}
-            {% set is_aylik = '/' in secili_donem %}
-            {% set is_yillik = secili_donem | length == 4 and secili_donem.isdigit() %}
-            <div class="d-flex justify-content-center flex-wrap gap-3 mt-2 mb-3">
-
-                <!-- KDV -->
-                <div>
-                    {% if is_aylik %}
-                    <a href="{{ url_for('pdf_belgeler_tablo', tur='kdv', vkn=secili_vkn, donem=secili_donem) }}"
-                       class="btn btn-info">📄 KDV Beyannamesi Göster</a>
-                    {% else %}
-                    <button class="btn btn-info" disabled>📄 KDV Beyannamesi Göster</button>
-                    {% endif %}
-                </div>
-                
-                <!-- Bilanço -->
-                <div class="d-flex flex-column gap-2">
-                    {% if is_yillik and not has_mizan_for_selected_period %}
-                    <a href="{{ url_for('pdf_belgeler_tablo',
-                        tur='bilanco',
-                        vkn=secili_vkn,
-                        unvan=((yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first).unvan if (yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first) else ''),
-                        donem=secili_donem) }}"
-                    class="btn btn-success">📊 Bilanço Göster (PDF)</a>
-                    {% else %}
-                    <button class="btn btn-success" disabled>📊 Bilanço Göster (PDF)</button>
-                    {% endif %}
-
-                    {% if is_yillik and has_mizan_for_selected_period %}
-                    <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=secili_vkn, donem=secili_donem) }}"
-                    class="btn btn-outline-success">📊 Mizan Bilanço</a>
-                    {% else %}
-                    <button class="btn btn-outline-success" disabled>📊 Mizan Bilanço</button>
-                    {% endif %}
-                </div>
-
-                <!-- Gelir -->
-                <div class="d-flex flex-column gap-2">
-                    {% if is_yillik and not has_mizan_for_selected_period %}
-                    <a href="{{ url_for('pdf_belgeler_tablo',
-                        tur='gelir',
-                        vkn=secili_vkn,
-                        unvan=((yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first).unvan if (yuklenen_tum_belgeler | selectattr('vkn','equalto',secili_vkn) | first) else ''),
-                        donem=secili_donem) }}"
-                    class="btn btn-warning">📈 Gelir Tablosu Göster (PDF)</a>
-                    {% else %}
-                    <button class="btn btn-warning" disabled>📈 Gelir Tablosu Göster (PDF)</button>
-                    {% endif %}
-
-                    {% if is_yillik and has_mizan_for_selected_period %}
-                    <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=secili_vkn, donem=secili_donem) }}"
-                    class="btn btn-outline-warning">📈 Mizan Gelir</a>
-                    {% else %}
-                    <button class="btn btn-outline-warning" disabled>📈 Mizan Gelir</button>
-                    {% endif %}
-                </div>
-
             </div>
             {% endif %}
 
-            <!-- Yüklenen Tüm Belgeler Tablosu -->
-            {% if yuklenen_tum_belgeler %}
-            <div class="table-responsive mt-4">
-                <table class="table table-bordered table-hover table-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th>VKN / TC Kimlik No</th>
-                            <th>Dönem</th>
-                            <th>Tür</th>
-                            <th>Yükleme Tarihi</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for belge in yuklenen_tum_belgeler %}
-                        <tr>
-                            <td>{{ belge.vkn }}</td>
-                            <td>{{ belge.donem }}</td>
-                            <td><span class="badge bg-secondary">{{ belge.belge_turu | upper }}</span></td>
-                            <td>{{ belge.yuklenme_tarihi }}</td>
-                            <td>
-                                {% if belge.belge_turu in ['bilanco','gelir','kdv'] %}
-                                <a href="{{ url_for('pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
-                                   class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                                {% elif belge.belge_turu == 'mizan' %}
-                                <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=belge.vkn, donem=belge.donem) }}"
-                                   class="btn btn-sm btn-outline-success"><i class="bi bi-bar-chart-fill"></i> B</a>
-                                <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=belge.vkn, donem=belge.donem) }}"
-                                   class="btn btn-sm btn-outline-warning"><i class="bi bi-graph-up-arrow"></i> G</a>
-                                {% endif %}
-                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                        onclick="confirmDelete('belge', '{{ belge.vkn }}', '{{ belge.donem }}', '{{ belge.belge_turu }}')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <!-- Tablo -->
+            <div class="table-premium animate__animated animate__fadeInUp">
+                {% if yuklenen_tum_belgeler %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>VKN / UNVAN</th>
+                                <th>DÖNEM</th>
+                                <th>BELGE TÜRÜ</th>
+                                <th>YÜKLEME TARİHİ</th>
+                                <th class="text-end">İŞLEMLER</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for belge in yuklenen_tum_belgeler %}
+                            <tr>
+                                <td class="fw-semibold">{{ belge.vkn }}</td>
+                                <td>{{ belge.donem }}</td>
+                                <td>
+                                    <span class="badge {% if belge.belge_turu == 'mizan' %}bg-info{% else %}bg-secondary{% endif %} rounded-pill px-3">
+                                        {{ belge.belge_turu | upper }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">{{ belge.yuklenme_tarihi }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                        {% if belge.belge_turu in ['bilanco','gelir','kdv'] %}
+                                        <a href="{{ url_for('report.pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
+                                           class="btn btn-sm btn-white border" title="Görüntüle"><i class="bi bi-eye"></i></a>
+                                        {% elif belge.belge_turu == 'mizan' %}
+                                        <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=belge.vkn, donem=belge.donem) }}"
+                                           class="btn btn-sm btn-white border" title="Bilanço"><i class="bi bi-layout-sidebar"></i></a>
+                                        <a href="{{ url_for('tablo_mizan', tur='gelir', vkn=belge.vkn, donem=belge.donem) }}"
+                                           class="btn btn-sm btn-white border" title="Gelir"><i class="bi bi-graph-up"></i></a>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-sm btn-white border text-danger"
+                                                onclick="confirmDelete('belge', '{{ belge.vkn }}', '{{ belge.donem }}', '{{ belge.belge_turu }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-5 text-center">
+                    <i class="bi bi-inbox text-light mb-3" style="font-size: 3rem;"></i>
+                    <p class="text-muted">Seçilen kriterlere göre yüklenmiş belge bulunmamaktadır.</p>
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <p class="text-muted text-center">Seçilen kriterlere göre yüklenmiş belge bulunmamaktadır.</p>
-            {% endif %}
         </div>
     </div>
+</div>
 
-    <!-- Mizan Bilgileri Modal -->
-    <div class="modal fade" id="mizanInfoModal" tabindex="-1" aria-labelledby="mizanInfoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="mizanInfoModalLabel">Mizan Bilgileri</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Mizan Bilgileri Modal (Premium) -->
+<div class="modal fade" id="mizanInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0" style="border-radius: 28px;">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-gear-fill me-2"></i>Mizan Verisi Tanımla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p id="mizanModalFilename" class="badge bg-light text-dark mb-4 py-2 px-3 fw-normal" style="border-radius: 10px;"></p>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">MÜKELLEF SEÇİMİ</label>
+                    <select id="modalUnvanSelect" class="form-select bg-light border-0" onchange="toggleNewUnvanInput()" style="border-radius: 12px; height: 48px;">
+                        <option value="">-- Mevcut Mükellef Seçin --</option>
+                        {% for m in mukellefler %}
+                            <option value="{{ m.vergi_kimlik_no }}">{{ m.vergi_kimlik_no }} - {{ m.unvan }}</option>
+                        {% endfor %}
+                        <option value="yeni">-- Yeni Mükellef Ekle --</option>
+                    </select>
                 </div>
-                <div class="modal-body">
-                    <p id="mizanModalFilename" class="fw-bold"></p>
-                    <div class="mb-3">
-                        <label for="modalUnvanSelect" class="form-label">Mükellef Seçin</label>
-                        <select id="modalUnvanSelect" class="form-select" onchange="toggleNewUnvanInput()">
-                            <option value="">-- Mevcut Mükellef Seçin --</option>
-                            {% for m in mukellefler %}
-                                <option value="{{ m.vergi_kimlik_no }}">{{ m.vergi_kimlik_no }} - {{ m.unvan }}</option>
-                            {% endfor %}
-                            <option value="yeni">-- Yeni Mükellef Ekle --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="newUnvanInputGroup" style="display: none;">
-                        <input type="text" id="newUnvanInput" class="form-control"
-                               placeholder="Yeni mükellef unvanı girin">
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" id="modalDonemInput" class="form-control" placeholder="Örn: 2023" required>
-                    </div>
+                <div class="mb-4" id="newUnvanInputGroup" style="display: none;">
+                    <label class="form-label small fw-bold text-muted">YENİ UNVAN</label>
+                    <input type="text" id="newUnvanInput" class="form-control bg-light border-0" placeholder="Yeni şirket ünvanı" style="border-radius: 12px; height: 48px;">
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button class="btn btn-primary" onclick="saveMizanInfo()">Kaydet</button>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">DÖNEM (YIL)</label>
+                    <input type="text" id="modalDonemInput" class="form-control bg-light border-0" placeholder="Örn: 2024" style="border-radius: 12px; height: 48px;">
                 </div>
+            </div>
+            <div class="modal-footer border-0 p-4">
+                <button class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">Vazgeç</button>
+                <button class="btn btn-primary px-4" onclick="saveMizanInfo()" style="border-radius: 12px; background: var(--premium-gradient); border: none;">Verileri Kaydet</button>
             </div>
         </div>
     </div>
@@ -233,12 +316,31 @@ const kaydetMizanMetaUrl = "{{ url_for('data.kaydet_mizan_meta') }}";
 let currentMizanFilename = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("fileElem").addEventListener("change", function () {
+    const fileElem = document.getElementById("fileElem");
+    const dropArea = document.getElementById('drop-area');
+
+    fileElem.addEventListener("change", function () {
         if (this.files.length > 0) uploadFiles(this.files);
     });
-    const dropArea = document.getElementById('drop-area');
-    dropArea.addEventListener('drop', handleDrop);
-    dropArea.addEventListener('dragover', e => e.preventDefault());
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt.files.length > 0) uploadFiles(dt.files);
+    }, false);
 });
 
 function uploadFiles(files) {
@@ -248,79 +350,157 @@ function uploadFiles(files) {
     const progressBar = document.getElementById('uploadProgressBar');
     const progressContainer = document.getElementById('uploadProgressContainer');
     const fileNameDisplay = document.getElementById('uploadFileName');
+
     progressContainer.style.display = 'block';
-    progressBar.style.width = '0%'; progressBar.textContent = '0%';
-    fileNameDisplay.textContent = 'Yükleniyor...';
+    progressBar.style.width = '0%';
+    fileNameDisplay.textContent = 'Dosyalar yükleniyor ve ayrıştırılıyor...';
+
+    // Loading Swal
+    Swal.fire({
+        title: 'Dosyalar İşleniyor',
+        html: 'Lütfen bekleyin, beyannameler analiz ediliyor...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading()
+        }
+    });
+
     xhr.upload.addEventListener('progress', e => {
         if (e.lengthComputable) {
             const percent = (e.loaded / e.total) * 100;
             progressBar.style.width = percent.toFixed(0) + '%';
-            progressBar.textContent = percent.toFixed(0) + '%';
+            if (percent === 100) {
+                 fileNameDisplay.textContent = 'Analiz ediliyor, lütfen pencereyi kapatmayın...';
+            }
         }
     });
+
     xhr.onload = () => {
         progressContainer.style.display = 'none';
-        if (xhr.status === 200) handleUploadMessages(JSON.parse(xhr.responseText));
-        else Swal.fire("Sunucu Hatası", `HTTP Kodu: ${xhr.status}`, "error");
+        Swal.close();
+        if (xhr.status === 200) {
+            try {
+                const resp = JSON.parse(xhr.responseText);
+                handleUploadMessages(resp);
+            } catch(e) {
+                Swal.fire("Hata", "Sunucudan geçersiz yanıt alındı.", "error");
+            }
+        } else {
+            Swal.fire("Sunucu Hatası", `Dosya yüklenemedi. Kod: ${xhr.status}`, "error");
+        }
     };
-    xhr.onerror = () => Swal.fire("Bağlantı Hatası", "Sunucuya ulaşılamadı.", "error");
+
+    xhr.onerror = () => {
+        progressContainer.style.display = 'none';
+        Swal.close();
+        Swal.fire("Bağlantı Hatası", "Sunucuya ulaşılamadı.", "error");
+    };
+
     xhr.open('POST', '/yukle-coklu');
     xhr.send(formData);
 }
-function handleDrop(e) {
-    e.preventDefault();
-    if (e.dataTransfer.files.length > 0) uploadFiles(e.dataTransfer.files);
-}
+
 function handleUploadMessages(messages) {
     let needsReload = false;
-    messages.forEach(msg => {
+    let successCount = 0;
+    
+    // İşlem bitince reload kararını en etkili şekilde vermek için
+    const checkReload = () => {
+        if (needsReload) {
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    };
+
+    messages.forEach((msg, index) => {
         if (msg.type === "mizan_input_required") {
             currentMizanFilename = msg.filename;
             new bootstrap.Modal('#mizanInfoModal').show();
             document.getElementById('mizanModalFilename').textContent = `Dosya: ${msg.filename}`;
+        } else if (msg.type === "success") {
+            successCount++;
+            needsReload = true;
+            Swal.fire({
+                icon: 'success',
+                title: msg.title || 'Başarılı',
+                text: msg.text,
+                showConfirmButton: false,
+                timer: 4000,
+                toast: messages.length > 1,
+                position: messages.length > 1 ? 'top-end' : 'center'
+            });
         } else {
-            showSwalMessage(msg.type, msg.title, msg.text);
-            if (msg.type === "success") needsReload = true;
+            Swal.fire({
+                icon: 'error',
+                title: 'Hata',
+                text: `${msg.filename}: ${msg.message || 'Bir hata oluştu'}`,
+                confirmButtonText: 'Tamam'
+            });
         }
     });
-    if (needsReload) setTimeout(() => location.reload(), 1500);
+
+    if (needsReload) checkReload();
 }
+
 function toggleNewUnvanInput() {
     document.getElementById('newUnvanInputGroup').style.display =
         document.getElementById('modalUnvanSelect').value === 'yeni' ? 'block' : 'none';
 }
+
 function saveMizanInfo() {
     let finalUnvan = document.getElementById('modalUnvanSelect').value;
     if (finalUnvan === 'yeni') finalUnvan = document.getElementById('newUnvanInput').value;
     const donem = document.getElementById('modalDonemInput').value;
+
     if (!finalUnvan || !donem) return Swal.fire('Hata', 'Unvan ve dönem boş olamaz.', 'error');
     if (!/^\d{4}$/.test(donem)) return Swal.fire('Hata', 'Dönem 4 haneli yıl olmalı.', 'error');
+
     const formData = new FormData();
     formData.append('vkn', finalUnvan);
     formData.append('donem', donem);
     formData.append('filename', currentMizanFilename);
+
     fetch(kaydetMizanMetaUrl, { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {
-            showSwalMessage(data.status, data.title, data.message);
             if (data.status === 'success') {
                 bootstrap.Modal.getInstance(document.getElementById('mizanInfoModal')).hide();
+                Swal.fire({ icon: 'success', title: 'Başarılı', text: data.message, timer: 1500, showConfirmButton: false });
                 setTimeout(() => location.reload(), 1500);
+            } else {
+                Swal.fire('Hata!', data.message, 'error');
             }
-        })
-        .catch(err => Swal.fire('Hata!', err.message, 'error'));
+        });
 }
+
 function confirmDelete(type, vkn, donem, belgeTuru) {
     let actionUrl, formData = new FormData();
     if (type === 'mukellef') { actionUrl = mukellefSilUrl; formData.append('vkn', vkn); }
     else { actionUrl = donemSilUrl; formData.append('vkn', vkn); formData.append('donem', donem); formData.append('belge_turu', belgeTuru); }
-    Swal.fire({title:'Emin misiniz?', text:'Silme işlemi geri alınamaz.', icon:'warning',
-        showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'Evet, Sil!'}).then(res=>{
-        if(res.isConfirmed) fetch(actionUrl,{method:'POST',body:formData})
-            .then(r=>r.json()).then(data=>{
-                showSwalMessage(data.status,data.title,data.message);
-                if(data.status==="success") setTimeout(()=>location.reload(),1500);
-            });
+
+    Swal.fire({
+        title: 'Emin misiniz?',
+        text: 'Bu işlem geri alınamaz ve ilgili tüm veriler silinecektir.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Evet, Sil!',
+        cancelButtonText: 'Vazgeç',
+        borderRadius: '16px'
+    }).then(res => {
+        if(res.isConfirmed) {
+            fetch(actionUrl, { method: 'POST', body: formData })
+                .then(r => r.json()).then(data => {
+                    if(data.status === "success") {
+                        Swal.fire({ icon: 'success', title: 'Silindi', text: data.message, timer: 1500, showConfirmButton: false });
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        Swal.fire('Hata', data.message, 'error');
+                    }
+                });
+        }
     });
 }
 </script>

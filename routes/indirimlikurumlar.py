@@ -410,85 +410,14 @@ def mukellef_listesi():
 @bp.route("/mukellef-bilgi")
 @login_required
 def mukellef_bilgi():
-    user_id = session.get("user_id")
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s", (user_id,))
-        data = c.fetchall()
-    return render_template("reports/mukellef_bilgi.html", mukellefler=data)
+    from flask import redirect, url_for
+    return redirect(url_for('mukellef.index'))
 
 
-@bp.route("/mukellef-sec", methods=["POST"])
-@login_required
-def mukellef_sec():
-    try:
-        data = request.get_json()
-        mukellef_id = data.get("id")
-
-        with get_conn() as conn:
-            c = conn.cursor()
-            c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s", (mukellef_id,))
-            row = c.fetchone()
-
-        if not row:
-            return jsonify({"status": "error", "message": "Mükellef bulunamadı."}), 404
-
-        # 🟢 Burada artık dict olarak erişiyoruz:
-        session["aktif_mukellef_id"] = mukellef_id
-        session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
-        session["aktif_mukellef_unvan"] = row["unvan"]
-
-        print(f"✅ Mükellef seçildi: {row['unvan']} ({row['vergi_kimlik_no']})")
-
-        return jsonify({"status": "success"})
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        print("❌ mukellef-sec hatası:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
+# Not: mukellef-sec rotası mukellef_routes blueprintine taşındı.
 
 
-@bp.route("/mukellef-ekle", methods=["POST"])
-@login_required
-def mukellef_ekle():
-    data = request.get_json()
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (%s, %s, %s)",
-            (session["user_id"], data["vergi_kimlik_no"], data["unvan"])
-        )
-        conn.commit()
-    return jsonify({"status": "success"})
-
-
-@bp.route("/mukellef-guncelle", methods=["POST"])
-@login_required
-def mukellef_guncelle():
-    data = request.get_json()
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            "UPDATE mukellef SET vergi_kimlik_no=%s, unvan=%s WHERE id=%s AND user_id=%s",
-            (data["vergi_kimlik_no"], data["unvan"], data["id"], session["user_id"])
-        )
-        conn.commit()
-    return jsonify({"status": "success"})
-
-
-@bp.route("/mukellef-sil", methods=["POST"])
-@login_required
-def mukellef_sil():
-    data = request.get_json()
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            "DELETE FROM mukellef WHERE id=%s AND user_id=%s",
-            (data["id"], session["user_id"])
-        )
-        conn.commit()
-    return jsonify({"status": "success"})
+# Not: mukellef-ekle, guncelle, sil ve sec rotaları mukellef_routes blueprintine taşındı.
 
 
 
@@ -575,12 +504,27 @@ def new_tesvik():
 @login_required
 def index():
     print("🔥 indirimlikurumlar.index çalıştı")
-    sekme = request.args.get("sekme", "mukellef")
+    sekme = request.args.get("sekme", "form")
     user_id = session["user_id"]
     aktif_mukellef_id = session.get("aktif_mukellef_id")
 
-    if not aktif_mukellef_id and sekme != "mukellef":
-        return redirect(url_for("indirimlikurumlar.index", sekme="mukellef"))
+    if not aktif_mukellef_id:
+        from flask import url_for
+        return redirect(url_for("mukellef.index", next=url_for("indirimlikurumlar.index")))
+    
+    # 🔍 Eğer unvan oturumda yoksa veritabanından çek (Formun görünmesi için kritik)
+    if not session.get("aktif_mukellef_unvan"):
+        try:
+            with get_conn() as conn:
+                c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s AND user_id = %s", (aktif_mukellef_id, user_id))
+                row = c.fetchone()
+                if row:
+                    session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
+                    session["aktif_mukellef_unvan"] = row["unvan"]
+                    print(f"✅ Oturum verisi tazelendi: {row['unvan']}")
+        except Exception as e:
+            print(f"⚠️ Oturum verisi tazelenirken hata: {e}")
 
     with get_conn() as conn:
         c = conn.cursor()
@@ -694,7 +638,7 @@ def index():
     )
 
     if sekme == "mukellef":
-        return render_template("reports/mukellef_bilgi.html", **ctx)
+        return redirect(url_for("mukellef.index"))
     return render_template("calculators/indirimlikurumlar.html", **ctx)
 
 

@@ -182,6 +182,100 @@ def rapor_kdv():
     
     return render_template("reports/rapor_kdv.html", secili_unvan=unvan, secili_vkn=vkn, secili_donemler=donemler, kdv_data=kdv_data, kdv_months=kdv_months)
 
+@bp.route("/rapor-kdv-excel")
+@login_required
+def rapor_kdv_excel():
+    vkn = request.args.get("vkn")
+    unvan = request.args.get("unvan", "M\u00FCkellef")
+    donemler_str = request.args.get("donemler", "")
+    donemler = [d for d in donemler_str.split(",") if d]
+
+    if not vkn or not donemler:
+        flash("M\u00FCkellef ve d\u00F6nem bilgisi eksik.", "warning")
+        return redirect(url_for("report.raporlama"))
+
+    kdv_data, kdv_months = {}, []
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        for donem in donemler:
+            c.execute("""
+                SELECT b.veriler, b.donem 
+                FROM beyanname b 
+                JOIN mukellef m ON m.id = b.mukellef_id 
+                WHERE m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='kdv' AND b.user_id=%s
+            """, (vkn, donem, session["user_id"]))
+            rows = c.fetchall()
+            for row in rows:
+                try:
+                    data_bytes = row["veriler"].tobytes() if isinstance(row["veriler"], memoryview) else row["veriler"]
+                    parsed = json.loads(fernet.decrypt(data_bytes).decode("utf-8"))
+                    raw_donem = parsed.get("donem") or row["donem"]
+                    # '01/2024' -> parts=['01','2024']
+                    parts = [p.strip() for p in raw_donem.split("/") if p.strip()]
+                    if len(parts) == 2:
+                        # Normalize to 'YEAR/MONTH' for column sorting
+                        if parts[1].isdigit() and len(parts[1]) == 4:
+                            ay, yil = parts[0], parts[1]
+                        else:
+                            yil, ay = parts[0], parts[1]
+                        col = f"{yil}/{ay.upper()}"
+                    else:
+                        col = raw_donem
+                        
+                    if col not in kdv_months: kdv_months.append(col)
+                    for rec in parsed.get("veriler", []):
+                        kdv_data.setdefault(rec["alan"], {})[col] = rec.get("deger")
+                except Exception as e:
+                    print(f"Excel Export Error: {e}")
+
+    kdv_months = sorted(set(kdv_months), key=month_key)
+    final_data = reorder_by_section(consolidate_kdv_rows(kdv_data))
+
+    rows = []
+    for alan, values in final_data.items():
+        row = {"A\u00C7IKLAMA": alan}
+        for m in kdv_months:
+            v = values.get(m)
+            # Veri temizleme
+            if v is None or str(v).lower() in ['nan', 'none', '-']:
+                row[m] = ""
+            else:
+                row[m] = v
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+    output = io.BytesIO()
+    
+    # xlsxwriter genellikle pandas ile gelir, gelmezse openpyxl dener
+    engine = 'xlsxwriter'
+    try:
+        import xlsxwriter
+    except ImportError:
+        engine = 'openpyxl'
+
+    with pd.ExcelWriter(output, engine=engine) as writer:
+        df.to_excel(writer, index=False, sheet_name='KDV Ozeti')
+        if engine == 'xlsxwriter':
+            workbook = writer.book
+            worksheet = writer.sheets['KDV Ozeti']
+            header_format = workbook.add_format({'bold': True, 'bg_color': '#4e54c8', 'font_color': 'white', 'border': 1})
+            section_format = workbook.add_format({'bold': True, 'bg_color': '#f1f5f9', 'font_color': '#4e54c8'})
+            
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+            
+            for row_num, row_data in enumerate(rows):
+                if row_data["A\u00C7IKLAMA"].startswith("\u00A7 "):
+                    worksheet.set_row(row_num + 1, None, section_format)
+            
+            worksheet.set_column(0, 0, 50)
+            worksheet.freeze_panes(1, 1)
+
+    output.seek(0)
+    safe_unvan = "".join([c for c in unvan if c.isalnum() or c in (' ', '_')]).strip().replace(' ', '_')
+    filename = f"KDV_Ozeti_{safe_unvan}_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 @bp.route("/tablo-mizan/<string:tur>")
 @login_required
 def tablo_mizan(tur):
@@ -214,9 +308,9 @@ def tablo_mizan(tur):
         return redirect(url_for("data.veri_giris", vkn=vkn, donem=donem))
 
     if tur == "bilanco":
-         return render_template("tables/tablo_bilanco.html", unvan=unvan, donem=donem, aktif_list=mizan_data.get("aktif",[]), pasif_list=mizan_data.get("pasif",[]), toplamlar={}, secilen_donem="cari", donem_mapping={"cari": donem}, has_inflation=False, aktif_alt_toplamlar={}, pasif_alt_toplamlar={})
+         return render_template("tables/tablo_bilanco.html", unvan=unvan, donem=donem, vkn=vkn, aktif_list=mizan_data.get("aktif",[]), pasif_list=mizan_data.get("pasif",[]), toplamlar={}, secilen_donem="cari", donem_mapping={"cari": donem}, has_inflation=False, gorunen_kolon="cari_donem", aktif_alt_toplamlar={}, pasif_alt_toplamlar={})
     elif tur == "gelir":
-         return render_template("tables/tablo_gelir.html", tablo=mizan_data.get("gelir",[]), unvan=unvan, donem=donem, donem_mapping={"cari": donem}, secilen_donem="cari")
+         return render_template("tables/tablo_gelir.html", tablo=mizan_data.get("gelir",[]), unvan=unvan, donem=donem, vkn=vkn, donem_mapping={"cari": donem}, secilen_donem="cari", gorunen_kolon="cari_donem")
     
     return redirect(url_for("data.veri_giris"))
 
@@ -231,17 +325,33 @@ def finansal_analiz():
     uid = session.get("user_id")
     unvanlar, mevcut_yillar, trend_data = [], [], {}
     
+    uyarilar = []
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
         unvanlar = [{"vkn": r["vergi_kimlik_no"], "unvan": r["unvan"]} for r in c.fetchall()]
         
         if secili_vkn:
+            # Önce bu mükellefe ait tüm yüklenen belge türlerini çek (Hangi yıllarda ne eksik görmek için)
+            c.execute("SELECT donem, tur FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.tur IN ('bilanco', 'gelir')", (uid, secili_vkn))
+            existing_docs = c.fetchall()
+            docs_by_year = {}
+            for row in existing_docs:
+                docs_by_year.setdefault(row['donem'], set()).add(row['tur'])
+
             c.execute("SELECT DISTINCT donem FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.tur='bilanco'", (uid, secili_vkn))
             mevcut_yillar = sorted([r["donem"] for r in c.fetchall()], reverse=True)
             if not secili_yillar: secili_yillar = mevcut_yillar
 
             for yil in secili_yillar:
+                doc_types = docs_by_year.get(yil, set())
+                if 'bilanco' not in doc_types or 'gelir' not in doc_types:
+                    missing = []
+                    if 'bilanco' not in doc_types: missing.append("Bilanço")
+                    if 'gelir' not in doc_types: missing.append("Gelir Tablosu")
+                    uyarilar.append(f"{yil} yılı için {' ve '.join(missing)} eksik olduğu için analiz hesaplanamadı.")
+                    continue
+
                 try:
                     c.execute("SELECT b.veriler FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='bilanco' LIMIT 1", (uid, secili_vkn, yil))
                     rb = c.fetchone()
@@ -260,7 +370,52 @@ def finansal_analiz():
                     for k, v in oranlar.items():
                         trend_data.setdefault(k, {})[yil] = float(v.get("deger", 0)) if isinstance(v, dict) else float(v or 0)
                 except Exception as e:
-                    print(e)
+                    print(f"Hata ({yil}): {e}")
+                    uyarilar.append(f"{yil} yılı analizi sırasında hata oluştu: {str(e)}")
                     
-    return render_template("reports/finansal_analiz.html", unvanlar=unvanlar, secili_vkn=secili_vkn, kategori=kategori, mevcut_yillar=mevcut_yillar, secili_yillar=secili_yillar, inflation_mode=inflation_mode, trend_data=trend_data, uyarilar=[])
+    return render_template("reports/finansal_analiz.html", unvanlar=unvanlar, secili_vkn=secili_vkn, kategori=kategori, mevcut_yillar=mevcut_yillar, secili_yillar=secili_yillar, inflation_mode=inflation_mode, trend_data=trend_data, uyarilar=uyarilar)
 
+@bp.route("/pdf-belgeler-tablo")
+@login_required
+def pdf_belgeler_tablo():
+    vkn = request.args.get("vkn")
+    donem = request.args.get("donem")
+    tur = request.args.get("tur")
+    
+    if not (vkn and donem and tur):
+        flash("Eksik parametre.")
+        return redirect(url_for("data.veri_giris"))
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s", (vkn, session["user_id"]))
+        row = c.fetchone()
+        if not row:
+             flash("Mükellef bulunamadı.")
+             return redirect(url_for("data.veri_giris"))
+        mid, unvan = row["id"], row["unvan"]
+        c.execute("SELECT veriler FROM beyanname WHERE user_id=%s AND mukellef_id=%s AND donem=%s AND tur=%s", (session["user_id"], mid, donem, tur))
+        row = c.fetchone()
+
+    if not row:
+        flash(f"{tur.upper()} verisi bulunamadı.")
+        return redirect(url_for("data.veri_giris", vkn=vkn, donem=donem))
+
+    try:
+        data_bytes = row["veriler"].tobytes() if isinstance(row["veriler"], memoryview) else row["veriler"]
+        parsed = json.loads(fernet.decrypt(data_bytes).decode("utf-8"))
+    except Exception as e:
+        flash(f"Veri okuma hatası: {str(e)}")
+        return redirect(url_for("data.veri_giris", vkn=vkn, donem=donem))
+
+    donem_turu = request.args.get("donem_turu", "cari")
+
+    if tur == "bilanco":
+         return render_template("tables/tablo_bilanco.html", unvan=unvan, donem=donem, vkn=vkn, aktif_list=parsed.get("aktif",[]), pasif_list=parsed.get("pasif",[]), toplamlar=parsed.get("toplamlar", {}), secilen_donem=donem_turu, donem_mapping={"cari": donem, "onceki": "Önceki Dönem"}, has_inflation=parsed.get("has_inflation", False), gorunen_kolon="cari_donem" if donem_turu=="cari" else "onceki_donem")
+    elif tur == "gelir":
+         gelir_list = parsed.get("tablo") or parsed.get("veriler", [])
+         return render_template("tables/tablo_gelir.html", tablo=gelir_list, unvan=unvan, donem=donem, vkn=vkn, donem_mapping={"cari": donem, "onceki": "Önceki Dönem"}, secilen_donem=donem_turu, gorunen_kolon="cari_donem" if donem_turu=="cari" else "onceki_donem")
+    elif tur == "kdv":
+         return render_template("reports/rapor_kdv.html", secili_unvan=unvan, secili_vkn=vkn, secili_donemler=[donem], kdv_data=reorder_by_section(consolidate_kdv_rows({r["alan"]: {"Cari": r["deger"]} for r in parsed.get("veriler", [])})), kdv_months=["Cari"])
+    
+    return redirect(url_for("data.veri_giris"))

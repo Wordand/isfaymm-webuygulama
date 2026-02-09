@@ -1,0 +1,416 @@
+{% extends "kdv/layout.html" %}
+
+{% block title %}KDV Mükellef Yönetimi - İsfa Teknoloji{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --kdv-primary: #3b82f6;
+        --kdv-secondary: #6366f1;
+        --kdv-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        --glass-white: rgba(255, 255, 255, 0.95);
+    }
+
+    .premium-card {
+        background: var(--glass-white);
+        border-radius: 24px;
+        border: 1px solid #eef2f6;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .card-top-accent {
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        background: var(--kdv-gradient);
+    }
+
+    .mukellef-badge {
+        width: 64px; height: 64px;
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        background: #f0f7ff;
+        color: #3b82f6;
+        font-size: 1.5rem; font-weight: 800;
+        border: 2px solid #fff;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.1);
+    }
+
+    .stat-pill {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 0.6rem 1rem;
+        border: 1px solid #edf2f7;
+    }
+
+    .btn-action-circle {
+        width: 42px; height: 42px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        background: white;
+        border: 1px solid #edf2f7;
+        color: #64748b;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-action-circle:hover {
+        background: var(--kdv-primary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .add-button-float {
+        padding: 0.8rem 1.8rem;
+        border-radius: 16px;
+        background: var(--kdv-gradient);
+        color: white; border: none;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s;
+    }
+
+    .add-button-float:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(59, 130, 246, 0.4);
+        color: white;
+    }
+
+    .vkn-tag {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 0.2rem 0.6rem;
+        border-radius: 8px;
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-5 animate__animated animate__fadeIn">
+    <div class="col">
+        <h1 class="h2 fw-bold text-dark mb-1">Mükellef Yönetimi</h1>
+        <p class="text-secondary mb-0">İade süreçlerini yönettiğiniz stratejik mükellef portföyü.</p>
+    </div>
+    {% if session.role in ('admin', 'ymm', 'uzman') %}
+    <div class="col-auto">
+        <button class="add-button-float" data-bs-toggle="modal" data-bs-target="#mukellefModal">
+            <i class="fa-solid fa-plus me-2"></i> Yeni Mükellef Tanımla
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-4" id="mukellefGrid">
+    {% for m in mukellefler %}
+    <div class="col-xl-4 col-md-6 animate__animated animate__fadeInUp">
+        <div class="premium-card h-100 p-4">
+            <div class="card-top-accent"></div>
+            
+            <div class="d-flex align-items-start gap-3 mb-4">
+                <div class="mukellef-badge">
+                    {{ m.unvan[:2].upper() }}
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <h5 class="fw-bold text-dark mb-1 text-truncate" title="{{ m.unvan }}">{{ m.unvan }}</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="vkn-tag">{{ m.vkn }}</span>
+                        {% if m.sektor %}
+                        <span class="badge bg-light text-secondary border rounded-pill fw-normal">{{ m.sektor }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <div class="stat-pill text-center">
+                        <div class="text-secondary small fw-bold mb-1">Aktif Dosya</div>
+                        <div class="h5 mb-0 fw-bold text-primary">{{ m.active_files }}</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="stat-pill text-center">
+                        <div class="text-secondary small fw-bold mb-1">Toplam İade</div>
+                        <div class="h5 mb-0 fw-bold text-success">₺ {{ m.total_request|tlformat }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center mb-4 text-secondary small">
+                <div class="me-3">
+                    <i class="fa-solid fa-building-flag me-1"></i> {{ m.vergi_dairesi or '---' }}
+                </div>
+                <div>
+                    <i class="fa-solid fa-user-tie me-1"></i> {{ m.ilgili_memur or 'Memur Atanmamış' }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <a href="{{ url_for('kdv.index') }}?mukellef={{ m.id }}" class="btn btn-primary btn-sm px-4 rounded-pill fw-bold">
+                    Dosyaları Gör <i class="fa-solid fa-arrow-right ms-2 scale-75"></i>
+                </a>
+                <div class="d-flex gap-2">
+                    {% if session.role in ('admin', 'ymm', 'uzman') %}
+                    <button class="btn-action-circle edit-mukellef-btn" 
+                            data-mukellef='{{ m|tojson|safe }}' 
+                            title="Bilgileri Düzenle">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="btn-action-circle text-danger delete-mukellef-btn" 
+                            data-id="{{ m.id }}" 
+                            data-unvan="{{ m.unvan }}"
+                            title="Mükellefi Sil">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="p-5 bg-white rounded-4 border border-dashed">
+            <i class="fa-solid fa-building-circle-exclamation opacity-25 h1 d-block mb-3"></i>
+            <h5 class="text-secondary">Kayıtlı KDV Mükellefi Bulunamadı</h5>
+            <p class="text-muted small">Henüz iade süreci takip edilen bir mükellef tanımlanmamış.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Mükellef Form Modal -->
+<div class="modal fade" id="mukellefModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 28px;">
+            <div class="modal-header p-4 border-0">
+                <h5 class="fw-bold mb-0">Mükellef Portföy Kaydı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <form id="mukellefForm">
+                    <input type="hidden" id="mukId">
+                    <div class="row g-4">
+                        <!-- VKN ve Vergi Dairesi Yan Yana -->
+                        <div class="col-md-7">
+                            <label class="form-label small fw-bold text-secondary">
+                                Vergi Kimlik No / TCKN <i class="fa-solid fa-circle-info ms-1 opacity-50" title="10 veya 11 haneli numara"></i>
+                            </label>
+                            <div class="d-flex gap-2">
+                                <input type="text" id="vkn" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                       required maxlength="11" placeholder="Numarayı giriniz...">
+                                <button type="button" class="btn btn-light px-3 rounded-4 fw-bold border" onclick="mockFetchVkn()">
+                                    <i class="fa-solid fa-bolt text-primary me-1"></i> Getir
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold text-secondary">Vergi Dairesi</label>
+                            <input type="text" id="vergi_dairesi" list="taxOfficesList" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                   placeholder="Seçiniz veya yazınız...">
+                            <datalist id="taxOfficesList">
+                                <!-- JS ile dolacak -->
+                            </datalist>
+                        </div>
+
+                        <!-- Ticari Unvan (Tam Genişlik) -->
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Ticari Unvan</label>
+                            <input type="text" id="unvan" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                   required placeholder="Tam şirket veya şahıs unvanı...">
+                        </div>
+
+                        <!-- İlgili Memur -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Vergi Dairesindeki İlgili Memur</label>
+                            <input type="text" id="ilgili_memur" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                   placeholder="Ad Soyad...">
+                        </div>
+
+                        <!-- Sektör ve Adres (Opsiyonel) -->
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Sektör</label>
+                            <input type="text" id="sektor" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                   placeholder="Örn: Tekstil, İnşaat...">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Adres</label>
+                            <input type="text" id="adres" class="form-control border-light shadow-none bg-light p-3 rounded-4" 
+                                   placeholder="Resmi merkez adresi...">
+                        </div>
+
+                        <!-- Firma Yetkilisi (Ayrıştırılmış) -->
+                        <div class="col-12"><hr class="opacity-10 border-dark"></div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Firma Yetkilisi</label>
+                            <input type="text" id="yetkili_ad_soyad" class="form-control border-light shadow-none bg-light p-3 rounded-4">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Yetkili Telefon</label>
+                            <input type="tel" id="yetkili_tel" class="form-control border-light shadow-none bg-light p-3 rounded-4">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Yetkili E-Posta</label>
+                            <input type="email" id="yetkili_eposta" class="form-control border-light shadow-none bg-light p-3 rounded-4">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer p-4 border-0">
+                <button class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">İptal</button>
+                <button class="btn btn-primary px-5 py-2 rounded-pill fw-bold" id="saveBtn" style="background: var(--kdv-gradient); border: none;">Kaydet ve Listeye Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const modal = new bootstrap.Modal(document.getElementById('mukellefModal'));
+
+    // Event Listeners for Edit and Delete
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.edit-mukellef-btn')) {
+            const btn = e.target.closest('.edit-mukellef-btn');
+            const m = JSON.parse(btn.dataset.mukellef);
+            editMukellef(m);
+        }
+        if (e.target.closest('.delete-mukellef-btn')) {
+            const btn = e.target.closest('.delete-mukellef-btn');
+            deleteMukellef(btn.dataset.id, btn.dataset.unvan);
+        }
+    });
+
+    function editMukellef(m) {
+        document.getElementById('mukId').value = m.id;
+        document.getElementById('unvan').value = m.unvan;
+        document.getElementById('vkn').value = m.vkn;
+        document.getElementById('vergi_dairesi').value = m.vergi_dairesi || '';
+        document.getElementById('ilgili_memur').value = m.ilgili_memur || '';
+        document.getElementById('sektor').value = m.sektor || '';
+        document.getElementById('adres').value = m.adres || '';
+        document.getElementById('yetkili_ad_soyad').value = m.yetkili_ad_soyad || '';
+        document.getElementById('yetkili_tel').value = m.yetkili_tel || '';
+        document.getElementById('yetkili_eposta').value = m.yetkili_eposta || '';
+        modal.show();
+    }
+
+    // Dynamic Tax Offices
+    async function loadTaxOffices() {
+        try {
+            const res = await fetch('/api/kdv/tax-offices');
+            const offices = await res.json();
+            const dl = document.getElementById('taxOfficesList');
+            dl.innerHTML = offices.map(o => `<option value="${o}">`).join('');
+        } catch (e) { console.error("Tax offices load error", e); }
+    }
+
+    // Mock VKN Fetch
+    function mockFetchVkn() {
+        const vkn = document.getElementById('vkn').value;
+        if (vkn.length < 10) {
+            Swal.fire('Hata', 'Lütfen geçerli bir VKN/TCKN giriniz.', 'error');
+            return;
+        }
+        
+        // Simulating fetch
+        Swal.fire({
+            title: 'Vergi Verileri Sorgulanıyor',
+            text: 'Mükellef bilgileri getiriliyor...',
+            timer: 1000,
+            didOpen: () => Swal.showLoading()
+        }).then(() => {
+            // Mock data
+            document.getElementById('unvan').value = "İSFA TEST A.Ş. (Mock Veri)";
+            document.getElementById('vergi_dairesi').value = "Konya İhtisas Vergi Dairesi";
+            Swal.fire({ icon: 'success', title: 'Tamamlandı', text: 'Bilgiler başarıyla getirildi.', timer: 1000, showConfirmButton: false });
+        });
+    }
+
+    // Initialize tax offices on modal show
+    document.getElementById('mukellefModal').addEventListener('show.bs.modal', loadTaxOffices);
+
+    function deleteMukellef(id, unvan) {
+        Swal.fire({
+            title: 'Mükellef Silinecek',
+            text: `"${unvan}" mükellefini ve bağlı tüm dosyalarını silmek istediğinize emin misiniz?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Evet, Sil',
+            cancelButtonText: 'Vazgeç',
+            borderRadius: '20px'
+        }).then(res => {
+            if (res.isConfirmed) {
+                fetch('/api/kdv/delete-mukellef', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id })
+                }).then(() => location.reload());
+            }
+        });
+    }
+
+    document.getElementById('saveBtn').onclick = async () => {
+        const id = document.getElementById('mukId').value;
+        const data = {
+            id: id || null,
+            unvan: document.getElementById('unvan').value,
+            vkn: document.getElementById('vkn').value,
+            vergi_dairesi: document.getElementById('vergi_dairesi').value,
+            ilgili_memur: document.getElementById('ilgili_memur').value,
+            sektor: document.getElementById('sektor').value,
+            adres: document.getElementById('adres').value,
+            yetkili_ad_soyad: document.getElementById('yetkili_ad_soyad').value,
+            yetkili_tel: document.getElementById('yetkili_tel').value,
+            yetkili_eposta: document.getElementById('yetkili_eposta').value
+        };
+
+        const endpoint = id ? '/api/kdv/update-mukellef' : '/api/kdv/add-mukellef';
+        
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(result.status === 'success') {
+                modal.hide();
+                Swal.fire({ icon: 'success', title: 'Başarılı', text: result.message, showConfirmButton: false, timer: 1500 })
+                .then(() => location.reload());
+            } else {
+                Swal.fire('Hata', result.message, 'error');
+            }
+        } catch (e) {
+            Swal.fire('Hata', 'İşlem başarısız.', 'error');
+        }
+    };
+
+    // Modal reset when opened for new
+    document.getElementById('mukellefModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('mukellefForm').reset();
+        document.getElementById('mukId').value = '';
+    });
+
+    // Dashboard'dan yönlendirilirse otomatik modal aç
+    window.addEventListener('load', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('add') === '1') {
+            modal.show();
+        }
+    });
+</script>
+{% endblock %}

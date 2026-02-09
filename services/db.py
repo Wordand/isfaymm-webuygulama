@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ============================================================
-# 🌍 Ortam Algılama
+# Ortam Algilama
 # ============================================================
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 FLASK_ENV = os.getenv("FLASK_ENV", "development").lower()
@@ -19,9 +19,9 @@ USE_SQLITE = DATABASE_URL.startswith("sqlite:///") or (
 
 if USE_SQLITE:
     DB_PATH = DATABASE_URL.replace("sqlite:///", "") or "instance/database.db"
-    print(f"🧩 Yerel ortam algılandı — SQLite kullanılacak ({DB_PATH})")
+    print(f"Yerel ortam algılandı - SQLite kullanılacak ({DB_PATH})")
 else:
-    print("☁️ Production ortam algılandı — Supabase PostgreSQL kullanılacak")
+    print("Production ortamı algılandı - PostgreSQL kullanılacak")
 
 _db_pool = None
 
@@ -40,12 +40,12 @@ def get_pool():
             keepalives_count=5,
             cursor_factory=extras.RealDictCursor
         )
-        print("🔗 PostgreSQL bağlantı havuzu keepalive ile başlatıldı.")
+        print("PostgreSQL baglanti havuzu baslatildi.")
     return _db_pool
 
 
 # ============================================================
-# 🧩 PostgreSQL-benzeri SQLite Wrapper
+# PostgreSQL-benzeri SQLite Wrapper
 # ============================================================
 class FakeCursor:
     def __init__(self, sqlite_cursor):
@@ -55,8 +55,8 @@ class FakeCursor:
         # PostgreSQL sözdizimini SQLite uyumlu hale getir
         q = query.replace("%s", "?")
 
-        # 🔧 Ek düzeltmeler (SQLite ile tam uyumluluk)
-        q = q.replace("NOW()", "CURRENT_TIMESTAMP")  # <-- HATAYI GİDERİR
+        # Ek duzeltmeler (SQLite ile tam uyumluluk)
+        q = q.replace("NOW()", "CURRENT_TIMESTAMP")
         q = q.replace("ILIKE", "LIKE")               # case-insensitive aramalarda sorun çıkmasın
         q = q.replace("TRUE", "1").replace("FALSE", "0")
 
@@ -110,7 +110,7 @@ class FakeConnection:
 
 
 # ============================================================
-# 🔒 get_conn() — Ortama Göre Bağlantı
+# get_conn() - Ortama Gore Baglanti
 # ============================================================
 @contextmanager
 def get_conn():
@@ -144,7 +144,7 @@ def get_conn():
 
 
 # ============================================================
-# 📚 Yardımcı Fonksiyonlar
+# Yardimci Fonksiyonlar
 # ============================================================
 def fetch_all(query, params=None):
     with get_conn() as conn:
@@ -161,7 +161,7 @@ def execute(query, params=None):
 
 
 # ============================================================
-# 🧱 migrate_* Fonksiyonları
+# migrate_* Fonksiyonlari
 # ============================================================
 def migrate_users_table():
     """
@@ -195,6 +195,8 @@ def migrate_users_table():
             ("created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
             ("last_login", "TIMESTAMP NULL"),
             ("admin_notes", "TEXT NULL"),
+            ("has_kdv_access", "INTEGER DEFAULT 0"),
+            ("kdv_pin", "TEXT DEFAULT '1234'"),
         ]
 
         # Sütunları sırayla kontrol et ve ekle
@@ -202,13 +204,46 @@ def migrate_users_table():
             if name not in existing:
                 try:
                     cur.execute(f"ALTER TABLE users ADD COLUMN {name} {definition};")
-                    print(f"🆕 '{name}' sütunu eklendi.")
+                    print(f"'{name}' sutunu eklendi.")
                 except Exception as e:
-                    # Eğer zaten varsa ya da ALTER TABLE kısıtı varsa sessiz geç
-                    print(f"⚠️ '{name}' sütunu eklenemedi veya zaten mevcut: {e}")
+                    # Eger zaten varsa sessiz gec
+                    print(f"'{name}' sutunu eklenemedi: {e}")
 
         conn.commit()
-        print("✅ users tablosu kontrol edildi / güncellendi.")
+    print("Users tablosu kontrol edildi.")
+
+# Removed redundant migrate_kdv_assignments_table
+
+def migrate_mukellef_table():
+    """mukellef tablosuna yeni kolonlari ekler."""
+    from services.db import get_conn
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            # PostgreSQL
+            cur.execute("SELECT column_name FROM information_schema.columns WHERE LOWER(table_name) = 'mukellef';")
+            rows = cur.fetchall()
+            existing = {r["column_name"] if isinstance(r, dict) else r[0] for r in rows}
+        except Exception:
+            # SQLite
+            cur.execute("PRAGMA table_info(mukellef);")
+            rows = cur.fetchall()
+            existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
+
+        columns = [
+            ("vergi_dairesi", "TEXT NULL"),
+            ("ilgili_memur", "TEXT NULL")
+        ]
+
+        for name, definition in columns:
+            if name not in existing:
+                try:
+                    cur.execute(f"ALTER TABLE mukellef ADD COLUMN {name} {definition};")
+                    print(f"'{name}' sutunu eklendi.")
+                except Exception as e:
+                    print(f"'{name}' sutunu eklenemedi: {e}")
+        conn.commit()
+    print("Mukellef tablosu kontrol edildi.")
 
 
 
@@ -241,7 +276,7 @@ def migrate_login_logs_table():
             );
             """)
         conn.commit()
-        print("✅ login_logs tablosu kontrol edildi / oluşturuldu.")
+        print("Login_logs tablosu kontrol edildi.")
 
 
 def migrate_tesvik_columns():
@@ -297,11 +332,11 @@ def migrate_tesvik_columns():
 
         for col, col_type in to_add.items():
             if col not in existing:
-                print(f"🆕 '{col}' sütunu ekleniyor...")
+                print(f"'{col}' sutunu ekleniyor...")
                 cur.execute(f'ALTER TABLE tesvik_belgeleri ADD COLUMN "{col}" {col_type}')
 
         conn.commit()
-        print("✅ tesvik_belgeleri tablosu güncel.")
+        print("Tesvik_belgeleri tablosu guncel.")
 
 def migrate_tesvik_kullanim_table():
     """
@@ -313,7 +348,7 @@ def migrate_tesvik_kullanim_table():
         cur = conn.cursor()
 
         # ===========================
-        # 🔹 TABLO OLUŞTURMA BLOĞU
+        # Tablo Olusturma Blogu
         # ===========================
         if USE_SQLITE:
             cur.execute("""
@@ -373,7 +408,7 @@ def migrate_tesvik_kullanim_table():
             """)
 
         # ===========================
-        # 🔍 EKSİK SÜTUN KONTROLÜ
+        # Eksik Sutun Kontrolu
         # ===========================
         try:
             if USE_SQLITE:
@@ -397,13 +432,13 @@ def migrate_tesvik_kullanim_table():
                 if col not in existing_cols:
                     col_type = "REAL" if USE_SQLITE else "DOUBLE PRECISION"
                     cur.execute(f"ALTER TABLE tesvik_kullanim ADD COLUMN {col} {col_type} DEFAULT 0.0;")
-                    print(f"🆕 '{col}' sütunu eklendi.")
+                    print(f"'{col}' sutunu eklendi.")
 
         except Exception as e:
-            print(f"⚠️ Eksik sütun kontrolü sırasında hata: {e}")
+            print(f"Eksik sutun kontrolu hatasi: {e}")
 
         # ===========================
-        # 🔒 UNIQUE CONSTRAINT (PostgreSQL)
+        # Unique Constraint
         # ===========================
         if not USE_SQLITE:
             try:
@@ -419,12 +454,12 @@ def migrate_tesvik_kullanim_table():
                     END IF;
                 END $$;
                 """)
-                print("✅ UNIQUE constraint kontrol edildi / eklendi (PostgreSQL).")
+                print("UNIQUE constraint kontrol edildi.")
             except Exception as e:
-                print(f"⚠️ UNIQUE constraint kontrolü sırasında hata: {e}")
+                print(f"UNIQUE constraint hatasi: {e}")
 
         conn.commit()
-        print("✅ tesvik_kullanim tablosu kontrol edildi / güncellendi.")
+        print("Tesvik_kullanim tablosu kontrol edildi.")
 
 
 
@@ -443,7 +478,7 @@ def migrate_profit_data_table():
 
                 # Eğer tablo yoksa oluştur
                 if not existing_cols:
-                    print("🆕 profit_data tablosu oluşturuluyor (SQLite)...")
+                    print("Profit_data tablosu olusturuluyor...")
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS profit_data (
                             user_id INTEGER NOT NULL,
@@ -455,7 +490,7 @@ def migrate_profit_data_table():
                             PRIMARY KEY (user_id, aciklama_index)
                         );
                     """)
-                    print("✅ profit_data tablosu oluşturuldu.")
+                    print("Profit_data tablosu olusturuldu.")
                 else:
                     # Tablo varsa, PRIMARY KEY yoksa yeniden oluştur
                     cur.execute("""
@@ -464,7 +499,7 @@ def migrate_profit_data_table():
                     """)
                     table_sql = cur.fetchone()
                     if table_sql and "PRIMARY KEY" not in str(table_sql["sql"]).upper():
-                        print("🛠️ SQLite: PRIMARY KEY ekleniyor (profit_data)...")
+                        print("SQLite: PRIMARY KEY ekleniyor...")
                         cur.execute("PRAGMA foreign_keys=off;")
                         cur.execute("""
                             CREATE TABLE profit_data_new (
@@ -485,9 +520,9 @@ def migrate_profit_data_table():
                         cur.execute("DROP TABLE profit_data;")
                         cur.execute("ALTER TABLE profit_data_new RENAME TO profit_data;")
                         cur.execute("PRAGMA foreign_keys=on;")
-                        print("✅ SQLite: PRIMARY KEY (user_id, aciklama_index) eklendi.")
+                        print("SQLite: PRIMARY KEY (user_id, aciklama_index) eklendi.")
                     else:
-                        print("✅ profit_data tablosu zaten güncel (SQLite).")
+                        print("Profit_data tablosu zaten guncel.")
 
             else:
                 # PostgreSQL ortamı
@@ -504,8 +539,245 @@ def migrate_profit_data_table():
                         END IF;
                     END$$;
                 """)
-                print("✅ PostgreSQL: UNIQUE constraint kontrol edildi / eklendi.")
+                print("PostgreSQL: UNIQUE constraint kontrol edildi.")
 
             conn.commit()
         except Exception as e:
-            print(f"⚠️ migrate_profit_data_table hatası: {e}")
+            print(f"Migrate_profit_data_table hatasi: {e}")
+
+def migrate_kdv_mukellef_table():
+    """KDV Portalı için ayrıştırılmış mükellef tablosu."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_mukellef (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vkn TEXT UNIQUE NOT NULL,
+                unvan TEXT NOT NULL,
+                vergi_dairesi TEXT,
+                ilgili_memur TEXT,
+                sektor TEXT,
+                adres TEXT,
+                yetkili_ad_soyad TEXT,
+                yetkili_tel TEXT,
+                yetkili_eposta TEXT,
+                kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_mukellef (
+                id SERIAL PRIMARY KEY,
+                vkn TEXT UNIQUE NOT NULL,
+                unvan TEXT NOT NULL,
+                vergi_dairesi TEXT,
+                ilgili_memur TEXT,
+                sektor TEXT,
+                adres TEXT,
+                yetkili_ad_soyad TEXT,
+                yetkili_tel TEXT,
+                yetkili_eposta TEXT,
+                kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            """)
+        conn.commit()
+    print("kdv_mukellef tablosu kontrol edildi.")
+
+def seed_fixed_users():
+    """Sistem için önerilen sabit kullanıcı hesaplarını oluşturur."""
+    from werkzeug.security import generate_password_hash
+    fixed_users = [
+        {"username": "admin", "role": "admin", "has_kdv": 1},
+        {"username": "uzman", "role": "uzman", "has_kdv": 1},
+        {"username": "ymm", "role": "ymm", "has_kdv": 1},
+        {"username": "denetci", "role": "denetci", "has_kdv": 1}
+    ]
+    
+    with get_conn() as conn:
+        cur = conn.cursor()
+        for u in fixed_users:
+            cur.execute("SELECT id FROM users WHERE username = %s", (u["username"],))
+            if not cur.fetchone():
+                hashed_pw = generate_password_hash("123456")
+                cur.execute("""
+                    INSERT INTO users (username, password, role, is_approved, has_kdv_access)
+                    VALUES (%s, %s, %s, 1, %s)
+                """, (u["username"], hashed_pw, u["role"], u["has_kdv"]))
+                print(f"Sabit kullanıcı oluşturuldu: {u['username']}")
+        conn.commit()
+
+def migrate_kdv_tables():
+    """KDV takip sistemi için gerekli tabloları oluşturur."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+
+        if not USE_SQLITE:
+            # PostgreSQL Foreign Key Duzeltmesi (Eski mükellef tablosuna referans varsa kdv_mukellef'e çevir)
+            try:
+                # kdv_files fix
+                cur.execute("ALTER TABLE kdv_files DROP CONSTRAINT IF EXISTS kdv_files_mukellef_id_fkey;")
+                cur.execute("ALTER TABLE kdv_files ADD CONSTRAINT kdv_files_mukellef_id_fkey FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE;")
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                print(f"kdv_files FK fix skip: {e}")
+
+            try:
+                # kdv_bank_guarantees fix
+                cur.execute("ALTER TABLE kdv_bank_guarantees DROP CONSTRAINT IF EXISTS kdv_bank_guarantees_mukellef_id_fkey;")
+                cur.execute("ALTER TABLE kdv_bank_guarantees ADD CONSTRAINT kdv_bank_guarantees_mukellef_id_fkey FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE;")
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                print(f"kdv_bank_guarantees FK fix skip: {e}")
+
+        if USE_SQLITE:
+            # KDV Dosyaları
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_files (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mukellef_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                period TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount_request REAL DEFAULT 0,
+                amount_tenzil REAL DEFAULT 0,
+                amount_bloke REAL DEFAULT 0,
+                amount_resolved REAL DEFAULT 0,
+                status TEXT NOT NULL,
+                location TEXT,
+                date TEXT NOT NULL,
+                is_active INTEGER DEFAULT 1,
+                is_guaranteed INTEGER DEFAULT 0,
+                guarantee_date TEXT,
+                FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            """)
+
+            # Dosya İşlem Geçmişi (Timeline)
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                text TEXT NOT NULL,
+                description TEXT,
+                file_name TEXT,
+                FOREIGN KEY (file_id) REFERENCES kdv_files(id) ON DELETE CASCADE
+            );
+            """)
+
+            # Banka Teminat Mektupları
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_bank_guarantees (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mukellef_id INTEGER NOT NULL,
+                file_id INTEGER,
+                bank TEXT NOT NULL,
+                amount REAL NOT NULL,
+                expiry_date TEXT NOT NULL,
+                status TEXT DEFAULT 'Aktif',
+                FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
+                FOREIGN KEY (file_id) REFERENCES kdv_files(id) ON DELETE SET NULL
+            );
+            """)
+
+            # KDV Belgeleri (Versiyonlama için)
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_documents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_id INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                parent_id INTEGER,
+                version INTEGER DEFAULT 1,
+                FOREIGN KEY (file_id) REFERENCES kdv_files(id) ON DELETE CASCADE
+            );
+            """)
+
+            # KDV Atamaları (User <-> KDV Mukellef)
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_user_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                mukellef_id INTEGER NOT NULL,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, mukellef_id),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE
+            );
+            """)
+        else:
+            # PostgreSQL
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_files (
+                id SERIAL PRIMARY KEY,
+                mukellef_id INTEGER NOT NULL REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                period TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount_request DOUBLE PRECISION DEFAULT 0,
+                amount_tenzil DOUBLE PRECISION DEFAULT 0,
+                amount_bloke DOUBLE PRECISION DEFAULT 0,
+                amount_resolved DOUBLE PRECISION DEFAULT 0,
+                status TEXT NOT NULL,
+                location TEXT,
+                date TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                is_guaranteed BOOLEAN DEFAULT FALSE,
+                guarantee_date TEXT
+            );
+            """)
+
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_history (
+                id SERIAL PRIMARY KEY,
+                file_id INTEGER NOT NULL REFERENCES kdv_files(id) ON DELETE CASCADE,
+                date TEXT NOT NULL,
+                text TEXT NOT NULL,
+                description TEXT,
+                file_name TEXT
+            );
+            """)
+
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_bank_guarantees (
+                id SERIAL PRIMARY KEY,
+                mukellef_id INTEGER NOT NULL REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
+                file_id INTEGER REFERENCES kdv_files(id) ON DELETE SET NULL,
+                bank TEXT NOT NULL,
+                amount DOUBLE PRECISION NOT NULL,
+                expiry_date TEXT NOT NULL,
+                status TEXT DEFAULT 'Aktif'
+            );
+            """)
+
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_documents (
+                id SERIAL PRIMARY KEY,
+                file_id INTEGER NOT NULL REFERENCES kdv_files(id) ON DELETE CASCADE,
+                type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                date TEXT NOT NULL,
+                parent_id INTEGER,
+                version INTEGER DEFAULT 1
+            );
+            """)
+
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_user_assignments (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                mukellef_id INTEGER NOT NULL REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, mukellef_id)
+            );
+            """)
+
+        conn.commit()
+    print("KDV tablolari kontrol edildi.")

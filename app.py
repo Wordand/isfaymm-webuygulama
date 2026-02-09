@@ -12,12 +12,10 @@ from datetime import timedelta
 import config
 from extensions import limiter, fernet
 from services.db import (
-    get_conn,
-    migrate_tesvik_columns,
-    migrate_users_table,
-    migrate_tesvik_kullanim_table,
-    migrate_login_logs_table,
-    migrate_profit_data_table
+    migrate_users_table, migrate_login_logs_table, migrate_tesvik_columns, 
+    migrate_tesvik_kullanim_table, migrate_profit_data_table, migrate_kdv_tables,
+    migrate_mukellef_table, migrate_kdv_mukellef_table,
+    seed_fixed_users, get_conn
 )
 from services.utils import safe_date, currency_filter, tlformat
 
@@ -31,6 +29,8 @@ from routes.tools_routes import bp as tools_bp
 from routes.indirimlikurumlar import bp as indirim_bp
 from routes.blog import blog_bp
 from routes.calculators import calculators_bp
+from routes.mukellef_routes import bp as mukellef_bp
+from routes.kdv_routes import bp as kdv_bp
 
 try:
     from flask.json.provider import DefaultJSONProvider
@@ -97,11 +97,12 @@ def bootstrap_admin_from_env():
             c.execute("SELECT password FROM users WHERE username = %s", (username,))
             row = c.fetchone()
             if not row:
-                c.execute("INSERT INTO users (username, password, is_approved) VALUES (%s, %s, 1)", (username, hashed_pw))
-                print(f"✅ Admin oluşturuldu: {username}")
+                c.execute("INSERT INTO users (username, password, is_approved, role, has_kdv_access) VALUES (%s, %s, 1, 'admin', 1)", (username, hashed_pw))
+                print(f"Admin hesabı oluşturuldu: {username}")
             else:
-                c.execute("UPDATE users SET password = %s WHERE username = %s", (hashed_pw, username))
-                print(f"🔄 Admin şifresi güncellendi: {username}")
+                # Eger kullanıcı varsa bilgilerini guncelle
+                c.execute("UPDATE users SET password = %s, role = 'admin', has_kdv_access = 1 WHERE username = %s", (hashed_pw, username))
+                print(f"Admin hesabı güncellendi: {username}")
         conn.commit()
 
 # --- Initialization ---
@@ -112,10 +113,14 @@ with app.app_context():
         migrate_tesvik_columns()
         migrate_tesvik_kullanim_table()
         migrate_profit_data_table()
+        migrate_kdv_mukellef_table() # Önce mukellef tablosu
+        migrate_kdv_tables()        # Sonra bağımlı tablolar
+        migrate_mukellef_table()
         bootstrap_admin_from_env()
-        print("✅ Başlangıç kontrolleri tamamlandı.")
+        seed_fixed_users()          # Sabit kullanıcıları oluştur
+        print("Baslangic kontrolleri tamamlandi.")
     except Exception as e:
-        print(f"⚠️ Başlangıç hatası: {e}")
+        print(f"Baslangic hatasi: {e}")
 
 # --- Blueprints Registration ---
 app.register_blueprint(main_bp)
@@ -127,6 +132,8 @@ app.register_blueprint(tools_bp)
 app.register_blueprint(indirim_bp)
 app.register_blueprint(blog_bp, url_prefix='/blog')
 app.register_blueprint(calculators_bp) 
+app.register_blueprint(mukellef_bp)
+app.register_blueprint(kdv_bp)
 
 # --- Supabase Check ---
 try:

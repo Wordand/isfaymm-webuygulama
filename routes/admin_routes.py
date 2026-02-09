@@ -18,7 +18,7 @@ def admin_users():
     status = request.args.get("status")
     role = request.args.get("role")
 
-    query = "SELECT id, username, is_approved, is_suspended, role, created_at, last_login, admin_notes FROM users WHERE 1=1"
+    query = "SELECT id, username, is_approved, is_suspended, role, has_kdv_access, created_at, last_login, admin_notes FROM users WHERE 1=1"
     params = []
 
     if q:
@@ -128,8 +128,8 @@ def change_role(user_id):
         return redirect(url_for("main.home"))
 
     new_role = request.form.get('role')
-    if new_role not in ['editor', 'user']:
-        flash("Sadece 'Kullanıcı' veya 'Editör' rolü atanabilir.", "warning")
+    if new_role not in ['admin', 'editor', 'user']:
+        flash("Geçersiz rol seçimi.", "warning")
         return redirect(url_for('admin.admin_users'))
 
     with get_conn() as conn:
@@ -215,3 +215,21 @@ def delete_all_logs():
 
     flash("Tüm log kayıtları başarıyla silindi.", "success")
     return redirect(url_for("admin.login_logs"))
+@bp.route('/toggle_kdv_access/<int:user_id>')
+@login_required
+def toggle_kdv_access(user_id):
+    if session.get("username", "").lower() != "admin":
+        flash("Bu işlemi yapma yetkiniz yok.", "danger")
+        return redirect(url_for("main.home"))
+
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("""
+            UPDATE users
+            SET has_kdv_access = CASE WHEN has_kdv_access = 1 THEN 0 ELSE 1 END
+            WHERE id = %s
+        """, (user_id,))
+        conn.commit()
+
+    flash("Kullanıcının KDV Portalı erişim yetkisi güncellendi.", "info")
+    return redirect(url_for('admin.admin_users'))

@@ -46,6 +46,8 @@ if DATABASE_URL.startswith("sqlite:///"):
         user_id INTEGER NOT NULL,
         vergi_kimlik_no TEXT NOT NULL,
         unvan TEXT NOT NULL,
+        vergi_dairesi TEXT,
+        ilgili_memur TEXT,
         UNIQUE(user_id, vergi_kimlik_no)
     );
     """)
@@ -222,6 +224,8 @@ CREATE TABLE IF NOT EXISTS mukellef (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     vergi_kimlik_no TEXT NOT NULL,
     unvan TEXT NOT NULL,
+    vergi_dairesi TEXT,
+    ilgili_memur TEXT,
     UNIQUE(user_id, vergi_kimlik_no)
 );
 """)

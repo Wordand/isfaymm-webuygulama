@@ -60,45 +60,67 @@ def extract_mukellef_bilgileri(text: str):
     vkn   = "Bilinmiyor"
     tur   = "Bilinmiyor"
 
-    # --- Unvan ---
-    match1 = re.search(r"Soyadı \(Unvanı\)\s+([^\n]+)", text)
-    match2 = re.search(r"Adı \(Unvanın Devamı\)\s+([^\n]+)", text)
-    if match1 and match2:
-        unvan = f"{match1.group(1).strip()} {match2.group(1).strip()}".upper()
-    elif match1:
-        unvan = match1.group(1).strip().upper()
-
-    # --- VKN ---
-    m_vkn = re.search(r"Vergi Kimlik (?:No|Numarası)(?:\s*\(TC Kimlik No\))?\s+(\d{10,11})", text)
-    if m_vkn:
-        vkn = m_vkn.group(1).strip()
-
     # --- Tür ---
-    if "KURUMLAR VERGİSİ BEYANNAMESİ" in text.upper():
+    text_upper = text.upper()
+    if "KURUMLAR VERGİSİ BEYANNAMESİ" in text_upper:
         tur = "Kurumlar"
         if "Bilanço" in text or "Kazancın Tespit Yöntemi Bilanço" in text:
             tur = "Bilanço"
         elif "GELİR TABLOSU" in text:
             tur = "Gelir Tablosu"
-    elif "KATMA DEĞER VERGİSİ BEYANNAMESİ" in text.upper():
+    elif "KATMA DEĞER VERGİSİ BEYANNAMESİ" in text_upper:
         tur = "KDV"
+
+    # --- VKN ---
+    m_vkn = re.search(r"Vergi Kimlik (?:No|Numaras\u0131)(?:\s*\(TC Kimlik No\))?\s+(\d{10,11})", text, re.I)
+    if m_vkn:
+        vkn = m_vkn.group(1).strip()
+    else:
+        # Alternatif VKN arama
+        m_vkn2 = re.search(r"Kimlik\s+Numaras\u0131\s+(\d{10,11})", text, re.I)
+        if m_vkn2: vkn = m_vkn2.group(1).strip()
+
+    # --- Unvan ---
+    # Kurumlar beyannamesinde unvan genelde "Soyad\u0131, Ad\u0131 (Unvan\u0131)" veya "Soyad\u0131 (Unvan\u0131)" alt\u0131nda olur
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if re.search(r"Soyad\u0131,? Ad\u0131 \(Unvan\u0131\)|Soyad\u0131 \(Unvan\u0131\)", line, re.I):
+            # Hemen yan\u0131ndaysa
+            match = re.search(r"(?:Unvan\u0131\))\s+([^\n]+)", line, re.I)
+            if match and len(match.group(1).strip()) > 3:
+                unvan = match.group(1).strip().upper()
+                break
+            # Bir sonraki sat\u0131rdaysa
+            if i + 1 < len(lines):
+                next_line = lines[i+1].strip()
+                if len(next_line) > 3:
+                    unvan = next_line.upper()
+                    # E\u011fer devam\u0131 da varsa (Ad\u0131 (Unvan\u0131n Devam\u0131))
+                    if i + 2 < len(lines) and "ADININ DEVAMI" not in lines[i+2].upper():
+                         unvan += " " + lines[i+2].strip().upper()
+                    break
 
     # --- Dönem ---
     if tur == "KDV":
-        m1 = re.search(r"Yıl\s+(\d{4}).*?Ay\s+([A-Za-zÇÖŞİÜĞçöşıüğ]+)", text, re.IGNORECASE | re.DOTALL)
-        m2 = re.search(r"Ay\s+([A-Za-zÇÖŞİÜĞçöşıüğ]+).*?Yıl\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
+        m1 = re.search(r"Y\u0131l\s+(\d{4}).*?Ay\s+([A-Za-z\u00C7\u00D6\u015E\u0130\u00DC\u011E\u00E7\u00F6\u015F\u0131\u00FC\u011F]+)", text, re.IGNORECASE | re.DOTALL)
+        m2 = re.search(r"Ay\s+([A-Za-z\u00C7\u00D6\u015E\u0130\u00DC\u011E\u00E7\u00F6\u015F\u0131\u00FC\u011F]+).*?Y\u0131l\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
         if m1:
             donem = f"{m1.group(2).capitalize()} / {m1.group(1)}"
         elif m2:
             donem = f"{m2.group(1).capitalize()} / {m2.group(2)}"
     else:
-        m3 = re.search(r"DÖNEM TİPİ.*?Yıl\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
-        if m3:
-            donem = m3.group(1)
+        # Kurumlar i\u00E7in tablo ba\u015Fl\u0131klar\u0131ndaki y\u0131llar\u0131 yakala: (2024)
+        m_yil = re.search(r"Cari D\u00F6nem\s*\n\s*\((\d{4})\)", text, re.I)
+        if m_yil:
+            donem = m_yil.group(1)
         else:
-            m4 = re.search(r"DÖNEM[:\s]+(\d{4})", text)
-            if m4:
-                donem = m4.group(1)
+            m3 = re.search(r"D\u00D6NEM T\u0130P\u0130.*?Y\u0131l\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
+            if m3:
+                donem = m3.group(1)
+            else:
+                m4 = re.search(r"D\u00D6NEM[:\s]+(\d{4})", text)
+                if m4:
+                    donem = m4.group(1)
 
     return {
         "unvan": unvan,
@@ -370,65 +392,49 @@ def parse_gelir_from_pdf(pdf_path: str) -> dict:
     lines = full_text.splitlines()
     collecting = False
     tablo = []
+    has_inflation = False
 
-    skip_patterns = [
-        r"(?i)^TEK DÜZEN.*",
-        r"^\s*AKTİF\s*$", r"^\s*PASİF\s*$",
-        r"^\s*Açıklama\s+Önceki Dönem\s+Cari Dönem.*",
-        r"^\s*\(?\d{4}\)?(?:\s*\(?\d{4}\)?)*\s*$",
-        r"^\s*Cari Dönem\s*$",
-        r"^\s*HESAP KODU\s+HESAP ADI.*",
-        r"^\s*Enflasyon Düzeltmesi Sonrası\s*$"
-    ]
-
-    for raw in lines:
-        line = raw.strip()
-        if not line:
-            continue
-        if not collecting:
-            if line.upper().startswith("GELİR TABLOSU"):
-                collecting = True
-            continue
-        if any(re.match(pat, line) for pat in skip_patterns):
+    # Ba\u015Fl\u0131ktan enflasyon kolonunu kontrol et
+    header_idx = -1
+    for i, line in enumerate(lines):
+        if "GEL\u0130R TABLOSU" in line.upper():
+            collecting = True
+            header_idx = i
+            # Gelecek 5 sat\u0131rda 'enflasyon' ge\u00E7iyor mu?
+            hdr_context = " ".join(lines[i:i+6]).lower()
+            if "enflasyon" in hdr_context:
+                has_inflation = True
             continue
 
-        end_found = "Dönem Net Karı veya Zararı" in line
+        if not collecting: continue
+
+        # Say\u0131sal sat\u0131r m\u0131?
         nums = FIND_NUM.findall(line)
-        if not nums:
-            if end_found:
-                break
+        if not nums and "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" not in line:
+            continue
+            
+        desc, onceki, cari, cari_enf = parse_numeric_columns(line)
+        if onceki is None and cari is None and "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" not in line:
             continue
 
-        onceki = cari = None
-        if len(nums) >= 2:
-            onceki = to_float_turkish(nums[-2])
-            cari   = to_float_turkish(nums[-1])
-        elif len(nums) == 1:
-            cari   = to_float_turkish(nums[-1])
-
-        if len(nums) >= 2:
-            line_cleaned = re.sub(rf"{re.escape(nums[-2])}\s*{re.escape(nums[-1])}\s*$", "", line).strip()
-        elif len(nums) == 1:
-            line_cleaned = re.sub(rf"{re.escape(nums[-1])}\s*$", "", line).strip()
-        else:
-            line_cleaned = line.strip()
-
-        aciklama = line_cleaned.strip(" .:-")
-        kod  = find_gelir_kodu(aciklama)
+        kod  = find_gelir_kodu(desc)
         grup = koddan_grup_bul(kod)
 
-        if "(-)" in aciklama or kod in NEGATIVE_GELIR_CODES:
+        if "(-)" in desc or kod in NEGATIVE_GELIR_CODES:
             if onceki is not None: onceki = -abs(onceki)
             if cari is not None: cari = -abs(cari)
+            if cari_enf is not None: cari_enf = -abs(cari_enf)
 
         tablo.append({
             "kod": kod,
-            "aciklama": aciklama,
+            "aciklama": desc,
             "grup": grup,
             "onceki_donem": onceki,
-            "cari_donem": cari
+            "cari_donem": cari,
+            "cari_donem_enflasyonlu": cari_enf if has_inflation else None
         })
-        if end_found:
+        
+        if "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" in line:
             break
 
     return {
@@ -438,6 +444,7 @@ def parse_gelir_from_pdf(pdf_path: str) -> dict:
         "donem": donem,
         "tablo": tablo,
         "veriler": tablo,
+        "has_inflation": has_inflation
     }
 
 def _stripped_canon(s: str) -> str:

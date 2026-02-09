@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 <html lang="tr">
-
-
-
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}İSFA YMM - Vergi, Teşvik ve Mali Danışmanlık{% endblock %}</title>
@@ -39,220 +36,423 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
 
-
-    <!-- 🟦 Yükleniyor Ekranı Stilleri -->
+    <!-- 🟦 Modern Loader Styles (İSFA) -->
     <style>
-        #loading-screen {
+        #intro-loader {
             position: fixed;
             inset: 0;
             background: #ffffff;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            opacity: 1;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
         }
 
-        .spinner-container {
+        .loader-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        /* --- Logo Animations --- */
+        .logo-container { position: relative; width: 100px; height: 100px; margin-bottom: 1rem; }
+        
+        .logo-hexagon {
+            width: 80px; height: 80px;
+            background: #ffffff;
+            border: 2px solid #ef4444; /* Branding Red */
+            border-radius: 20px;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center; justify-content: center;
+            position: absolute; top: 10px; left: 10px;
+            z-index: 2;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2);
+            animation: hexagon-pulse 2s ease-in-out infinite;
+        }
+        
+        .logo-hexagon i {
+            transform: rotate(-45deg);
+            font-size: 2rem;
+            color: #ef4444;
+        }
+
+        .logo-pulse {
+            position: absolute; inset: 0;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 25px;
+            transform: rotate(45deg);
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes hexagon-pulse {
+            0%, 100% { transform: rotate(45deg) scale(1); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.2); }
+            50% { transform: rotate(45deg) scale(1.05); box-shadow: 0 15px 40px rgba(239, 68, 68, 0.35); }
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: rotate(45deg) scale(0.8); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: rotate(45deg) scale(1.5); opacity: 0; }
+        }
+
+        /* --- Brand Text --- */
+        .brand-main {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -1px;
+            margin: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards 0.3s;
+        }
+        
+        .brand-highlight { color: #ef4444; }
+        
+        .brand-divider {
+            width: 40px; height: 4px;
+            background: #e2e8f0;
+            margin: 1rem auto;
+            border-radius: 2px;
+            opacity: 0;
+            animation: expandWidth 0.8s ease forwards 0.6s;
+        }
+
+        .brand-slogan-slider {
             position: relative;
-            width: 120px;
-            height: 120px;
-            margin-bottom: 20px;
+            height: 1.5rem;
+            overflow: hidden;
+            display: flex; justify-content: center;
         }
 
-        .loading-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 70px;
-            height: 70px;
-            transform: translate(-50%, -50%);
-            animation: fadeInLogo 1.5s ease forwards;
-        }
-
-        .spinner {
-            width: 120px;
-            height: 120px;
-            border: 6px solid #e0e0e0;
-            border-top-color: #c62828;
-            border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-        }
-
-        .loading-text {
-            font-size: 1.3rem;
-            color: #333;
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
+        .slogan-item {
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            animation: fadeText 1s ease-in-out infinite alternate;
+            color: #64748b;
+            position: absolute;
+            top: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .slogan-item.active { opacity: 1; transform: translateY(0); }
+        .slogan-item.exit { opacity: 0; transform: translateY(-20px); }
+
+        /* --- Progress Bar --- */
+        .loader-progress-area {
+            width: 240px;
+            margin-top: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards 1s;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .progress-line-bg {
+            width: 100%; height: 4px;
+            background: #f1f5f9;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
         }
 
-        @keyframes fadeInLogo {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
-            }
-
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
+        .progress-line-fill {
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 0%;
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            border-radius: 2px;
+            transition: width 0.2s linear;
         }
 
-        @keyframes fadeText {
-            from {
-                opacity: 0.4;
-            }
-
-            to {
-                opacity: 1;
-            }
+        .loading-status {
+            margin-top: 0.75rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 500;
         }
 
-        #loading-screen.fade-out {
+        /* --- Generic Animations --- */
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes expandWidth { 0% { width: 0; opacity: 0; } 100% { width: 40px; opacity: 1; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        /* CSS Fallback: Auto-hide after 5s if JS fails */
+        @keyframes safeAutoRemove {
+            0% { opacity: 1; visibility: visible; }
+            90% { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; pointer-events: none; }
+        }
+
+        #intro-loader {
+            animation: safeAutoRemove 5s forwards; /* Failsafe */
+        }
+        
+        #intro-loader.fade-out {
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
         }
     </style>
-
-
-    {# --- Schema.org (Yapılandırılmış Veri) --- #}
-    <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "İSFA Yeminli Mali Müşavirlik",
-    "url": "https://www.isfaymm.com",
-    "logo": "https://www.isfaymm.com/static/images/logo.png",
-    "description": "Yatırım teşvik, indirimli kurumlar vergisi ve mali danışmanlık alanında profesyonel çözümler.",
-    "sameAs": [
-      "https://www.linkedin.com/company/isfaymm",
-      "https://www.instagram.com/isfaymm"
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+90-312-000-0000",
-      "contactType": "Müşteri Hizmetleri",
-      "areaServed": "TR"
-    }
-  }
-  </script>
 </head>
+{% set no_sidebar_endpoints = ['main.home', 'auth.login', 'auth.register', 'main.contact', 'main.about', 'main.team', 'blog.index', 'blog.detail', 'main.contact_post'] %}
+{% set show_sidebar = request.endpoint not in no_sidebar_endpoints %}
 
-
-{# BODY ETİKETİNE KOŞULLU SINIF EKLENDİ #}
-
-<body
-    class="{% if not is_logged_in and (request.endpoint=='main.home' or request.endpoint=='blog.index' or request.endpoint=='blog.detail' or request.endpoint=='main.contact' or request.endpoint=='main.mevzuat' or request.endpoint=='main.indirim' or request.endpoint=='main.ceza' or request.endpoint=='calculators.index') %}no-sidebar-layout{% endif %}">
-
+<body class="{{ 'no-sidebar-layout' if not show_sidebar else '' }}">
+    <!-- 🟦 LOADER HTML -->
     {% include 'partials/loader.html' %}
 
-    {% include 'partials/sidebar.html' %}
-
+    <!-- 🟦 NAVBAR -->
     {% include 'partials/navbar.html' %}
 
-
-    <!-- 🧱 Ana içerik -->
-    <div id="main" class="main-content">
+    <!-- 🟦 SIDEBAR (Conditional) -->
+    {% if show_sidebar %}
+        {% include 'partials/sidebar.html' %}
+        <!-- Mobile Overlay for Sidebar -->
         <div id="mobile-overlay" class="mobile-overlay"></div>
+    {% endif %}
 
-        {% if request.path.startswith('/veri-giris')
-        or request.path.startswith('/finansal-analiz')
-        or request.path.startswith('/raporlama') %}
-        <div class="container mt-5">
-            <nav class="navbar navbar-light bg-light mb-3 border-bottom rounded page-tabs-nav px-0">
-                <ul class="nav nav-tabs justify-content-center w-100">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/veri-giris') %}active{% endif %}"
-                            href="{{ url_for('data.veri_giris') }}">📝 Veri Giriş</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/finansal-analiz') %}active{% endif %}"
-                            href="{{ url_for('report.finansal_analiz', unvan=secili_unvan, donem=secili_donem) }}">📊 Finansal
-                            Analiz</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path.startswith('/raporlama') %}active{% endif %}"
-                            href="{{ url_for('report.raporlama') }}">📑 Raporlama</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
-
+    <!-- 🟦 CONTENT -->
+    <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important; padding-top: 80px !important;' if not show_sidebar else '' }}">
+        <!-- Endpoint: {{ request.endpoint }} -->
         {% block content %}{% endblock %}
+    </main>
+
+    <!-- 🟦 FOOTER (Simple Copyright) -->
+    <!-- 🟦 FOOTER (Premium) -->
+    <footer class="text-white pt-5 pb-4 mt-auto" style="background-color: #263238;">
+        <div class="container">
+            <div class="row">
+                <!-- Brand -->
+                <div class="col-lg-4 mb-4">
+                    <a href="{{ url_for('main.home') }}" class="text-decoration-none d-flex align-items-center gap-3 mb-3">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="İSFA Logo" width="56" height="56" class="rounded-3 shadow-sm bg-white p-1">
+                        <span class="fs-4 fw-bold text-white">İSFA <span class="fw-light">YMM</span></span>
+                    </a>
+                    <p class="text-secondary small">
+                        İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi ve vergi danışmanlığında uzman çözüm ortağınız.
+                    </p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-secondary hover-text-white transition-colors"><i class="fa-brands fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="text-secondary hover-text-white transition-colors"><i class="fa-brands fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-secondary hover-text-white transition-colors"><i class="fa-brands fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-3 fs-6 text-uppercase text-light">Kurumsal</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{{ url_for('main.about') }}" class="text-secondary text-decoration-none hover-text-white transition-colors small">Hakkımızda</a></li>
+                        <li><a href="{{ url_for('main.team') }}" class="text-secondary text-decoration-none hover-text-white transition-colors small">Ekibimiz</a></li>
+                        <li><a href="{{ url_for('main.contact') }}" class="text-secondary text-decoration-none hover-text-white transition-colors small">İletişim</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-3 fs-6 text-uppercase text-light">Yasal</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#kvkkModal" class="text-secondary text-decoration-none hover-text-white transition-colors small">KVKK Aydınlatma Metni</a></li>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal" class="text-secondary text-decoration-none hover-text-white transition-colors small">Çerez Politikası</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-3 fs-6 text-uppercase text-light">Bize Ulaşın</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-3">
+                        <li class="d-flex gap-3">
+                            <i class="fa-solid fa-location-dot text-danger mt-1"></i>
+                            <span class="text-secondary small">Feritpaşa Mah. Sultanşah Cd 46/1 Selçuklu / KONYA</span>
+                        </li>
+                        <li class="d-flex gap-3">
+                            <i class="fa-solid fa-phone text-danger mt-1"></i>
+                            <span class="text-secondary small">+90 505 364 97 17</span>
+                        </li>
+                        <li class="d-flex gap-3">
+                            <i class="fa-solid fa-envelope text-danger mt-1"></i>
+                            <span class="text-secondary small">bilgi@isfaymm.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="border-secondary opacity-25 my-4">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                    <span class="text-secondary small opacity-75">&copy; 2025 İSFA Yeminli Mali Müşavirlik A.Ş. Tüm hakları saklıdır.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 🍪 Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed-bottom bg-dark text-white p-4 shadow-lg border-top border-secondary" style="z-index: 9999; display: none;">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="fa-solid fa-cookie-bite text-warning fs-2 mt-1"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Çerez Politikası</h6>
+                        <p class="mb-0 small text-secondary">
+                            Web sitemizin düzgün çalışmasını sağlamak, içerik ve reklamları kişiselleştirmek, sosyal medya özellikleri sağlamak ve trafiğimizi analiz etmek için çerezleri kullanıyoruz. Ayrıca sosyal medya, reklam ve analiz ortaklarımızı web sitemizi kullanımınız hakkında bilgilendiriyoruz. Çerezlerimiz hakkında bilgi içeren <a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal" class="text-decoration-underline text-light">Çerez politikamızı</a> lütfen okuyunuz.
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button id="cookie-reject-btn" class="btn btn-outline-light btn-sm px-4 rounded-pill">Reddet</button>
+                    <button id="cookie-accept-btn" class="btn btn-light text-dark btn-sm px-4 fw-bold rounded-pill">Kabul Et</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 🟦 SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/imask"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-
+    
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
-            {% with messages = get_flashed_messages(with_categories = true) %}
+            // Flash Messages
+            {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
             Swal.fire({
-                icon: "{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'error' }}",
-                title: {{ message| tojson }},
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true
-        });
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+                icon: '{{ "success" if category == "success" else "warning" if category == "warning" else "error" }}',
+                title: {{ message|tojson|safe }},
+                showConfirmButton: false, timer: 2500, timerProgressBar: true
+            });
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-        // 🟦 Tek seferlik gösterim
-        const screen = document.getElementById("loading-screen");
-        if (sessionStorage.getItem("isfa_intro_shown")) {
-            if (screen) screen.remove();
-        } else {
-            sessionStorage.setItem("isfa_intro_shown", "1");
-        }
+            // 🍪 COOKIE CONSENT LOGIC
+            const cookieBanner = document.getElementById('cookie-consent-banner');
+            const acceptBtn = document.getElementById('cookie-accept-btn');
+            const rejectBtn = document.getElementById('cookie-reject-btn');
+            
+            // Check if user already acted
+            const consentStatus = localStorage.getItem('isfa_cookie_consent'); 
+            
+            if (!consentStatus && cookieBanner) {
+                // Show banner after short delay
+                setTimeout(() => {
+                    cookieBanner.style.display = 'block';
+                    // Simple fade-in animation
+                    cookieBanner.style.opacity = '0';
+                    cookieBanner.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => cookieBanner.style.opacity = '1', 10);
+                }, 1500);
+            }
 
-        // 🟩 Kelime geçişi animasyonu
-        const texts = ["Bilgi", "Güven", "Hız"];
-        let i = 0;
-        const textEl = document.getElementById("loading-text");
-        if (textEl) {
-            setInterval(() => {
-                textEl.textContent = texts[i++ % texts.length];
-            }, 2000);
-        }
+            if(acceptBtn) {
+                acceptBtn.addEventListener('click', () => {
+                    localStorage.setItem('isfa_cookie_consent', 'accepted');
+                    // Fade out effect
+                    cookieBanner.style.opacity = '0';
+                    setTimeout(() => cookieBanner.style.display = 'none', 500);
+                });
+            }
 
-        // 🟨 Sayfa yüklenince 7 sn sonra gizle
-        window.addEventListener("load", () => {
-            setTimeout(() => {
-                if (screen) {
-                    screen.classList.add("fade-out");
-                    setTimeout(() => screen.remove(), 800);
+            if(rejectBtn) {
+                rejectBtn.addEventListener('click', () => {
+                     localStorage.setItem('isfa_cookie_consent', 'rejected');
+                     cookieBanner.style.opacity = '0';
+                     setTimeout(() => cookieBanner.style.display = 'none', 500);
+                });
+            }
+
+            // 🟦 ROBUST LOADER LOGIC
+            const loader = document.getElementById("intro-loader");
+            
+            if (loader) {
+                // Safety Timeout: Force remove after 4 seconds max
+                setTimeout(() => {
+                    if(document.body.contains(loader)) {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.remove(), 500);
+                    }
+                }, 4000);
+
+                // Normal Flow
+                const hasSeenIntro = sessionStorage.getItem("isfa_intro_v3");
+                
+                // Show intro only once per session (or force if debugging)
+                if (hasSeenIntro) {
+                    loader.style.display = 'none';
+                } else {
+                    const progressBar = document.querySelector(".progress-line-fill");
+                    const statusText = document.querySelector(".loading-status");
+                    const slogans = document.querySelectorAll(".slogan-item");
+                    
+                    let progress = 0;
+                    const duration = 2000; 
+                    const intervalTime = 30;
+                    const steps = duration / intervalTime;
+                    const increment = 100 / steps;
+
+                    // Slogans
+                    let sloganIndex = 0;
+                    const sloganInterval = setInterval(() => {
+                        if(slogans.length > 0) {
+                            slogans[sloganIndex].classList.remove('active');
+                            slogans[sloganIndex].classList.add('exit');
+                            sloganIndex = (sloganIndex + 1) % slogans.length;
+                            slogans[sloganIndex].classList.remove('exit');
+                            slogans[sloganIndex].classList.add('active');
+                        }
+                    }, 800);
+
+                    // Progress
+                    const loadingInterval = setInterval(() => {
+                        progress += increment;
+                        if (progressBar) progressBar.style.width = Math.min(progress, 100) + "%";
+                        
+                        if (statusText) {
+                            if (progress > 30 && progress < 60) statusText.innerText = "Veri güvenliği doğrulanıyor...";
+                            else if (progress > 60 && progress < 90) statusText.innerText = "Kullanıcı paneli hazırlanıyor...";
+                            else if (progress >= 95) statusText.innerText = "Hazır!";
+                        }
+
+                        if (progress >= 100) {
+                            clearInterval(loadingInterval);
+                            clearInterval(sloganInterval);
+                            
+                            loader.classList.add("fade-out");
+                            sessionStorage.setItem("isfa_intro_v3", "true");
+                            setTimeout(() => {
+                                if(document.body.contains(loader)) loader.remove();
+                            }, 800);
+                        }
+                    }, intervalTime);
                 }
-            }, 7000);
+            }
         });
+        
+        // Final Safety: Remove loader if window load event fires and it's still there
+        window.addEventListener('load', () => {
+             const loader = document.getElementById("intro-loader");
+             if(loader && sessionStorage.getItem("isfa_intro_v3")) {
+                 loader.style.display = 'none';
+             }
         });
     </script>
 
-
     {% block extra_scripts %}{% endblock %}
 
-
-
 </body>
-
 </html>

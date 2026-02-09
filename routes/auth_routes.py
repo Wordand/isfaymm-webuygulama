@@ -22,36 +22,8 @@ def log_login_attempt(username, success, user_id=None):
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        
-        if not username or not password:
-            flash("Kullanıcı adı ve şifre boş olamaz.", "warning")
-            return render_template("auth/register.html")
-        if len(password) < 6:
-            flash("Şifre en az 6 karakter olmalı.", "warning")
-            return render_template("auth/register.html")
-        
-        hashed_password = generate_password_hash(password)
-
-        try:
-            with get_conn() as conn:
-                c = conn.cursor()
-                c.execute(
-                    "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)",
-                    (username, hashed_password, 'user')
-                )
-                conn.commit()
-            flash("Kayıt başarılı! Giriş yapabilirsiniz.", "success")
-            return redirect(url_for("auth.login"))
-
-        except Exception as e:
-            # Integrity error usually
-            flash("Bu kullanıcı adı zaten var. Lütfen farklı bir kullanıcı adı seçin.", "danger")
-            return render_template("auth/register.html")
-        
-    return render_template("auth/register.html")
+    flash("Yeni üye kaydı sistemi kapalıdır. Lütfen yönetici ile iletişime geçiniz.", "info")
+    return redirect(url_for("auth.login"))
 
 @bp.route("/login", methods=["GET", "POST"])
 @limiter.limit("50 per 10 minutes")
@@ -66,7 +38,7 @@ def login():
         with get_conn() as conn:
             c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute(
-                "SELECT id, password, is_approved, is_suspended, role FROM users WHERE username = %s",
+                "SELECT id, password, is_approved, is_suspended, role, has_kdv_access FROM users WHERE username = %s",
                 (username,)
             )
             result = c.fetchone()
@@ -76,6 +48,7 @@ def login():
             log_login_attempt(username, success=True, user_id=user_id)
             is_approved = result["is_approved"]
             is_suspended = result.get("is_suspended", 0)
+            has_kdv_access = result.get("has_kdv_access", 0)
             
             if result.get("role") == "admin" and username.lower() != "admin":
                 flash("Admin rolü yalnızca sistem yöneticisine ayrılmıştır.", "danger")
@@ -92,6 +65,8 @@ def login():
             session.clear()
             session["user_id"] = user_id
             session["username"] = username
+            session["role"] = result["role"]
+            session["has_kdv_access"] = bool(has_kdv_access)
             session["logged_in"] = True
 
             remember = request.form.get("remember")

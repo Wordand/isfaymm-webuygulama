@@ -1,0 +1,318 @@
+{% extends "layout.html" %}
+{% block title %}Mükellef Yönetimi{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --premium-blue: #4e54c8;
+        --premium-gradient: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+    }
+
+    h3.page-title {
+        font-weight: 800;
+        font-size: 2.2rem;
+        background: var(--premium-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+    }
+
+    .management-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    .table-premium {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .table-premium thead th {
+        background: #f8fafc;
+        padding: 1.2rem 1rem;
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        border: none;
+    }
+
+    .table-premium td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        border-color: #f1f5f9;
+        font-size: 0.95rem;
+    }
+
+    .btn-premium-sm {
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-add {
+        background: var(--premium-gradient);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(78, 84, 200, 0.2);
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 84, 200, 0.3);
+        color: white;
+    }
+
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5 animate__animated animate__fadeIn">
+        <h3 class="page-title">Mükellef Yönetimi</h3>
+        {% if request.args.get('next') %}
+            <div class="alert alert-primary border-0 shadow-sm mx-auto" style="max-width: 600px; border-radius: 15px;">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Seçim Gerekli:</strong> Devam etmek için lütfen işlem yapmak istediğiniz mükellefi seçin.
+            </div>
+        {% else %}
+            <p class="text-muted lead">Tüm analizleriniz için mükellef portföyünüzü buradan yönetebilirsiniz.</p>
+        {% endif %}
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="management-card animate__animated animate__fadeInUp">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold text-dark mb-0">Kayıtlı Mükellefler</h5>
+                    <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#mukellefModal">
+                        <i class="bi bi-person-plus-fill"></i> Yeni Mükellef Ekle
+                    </button>
+                </div>
+
+                <div class="table-premium">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 200px;">VKN / TCKN</th>
+                                    <th>MÜKELLEF UNVANI</th>
+                                    <th class="text-end" style="width: 280px;">İŞLEMLER</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in mukellefler %}
+                                <tr>
+                                    <td class="fw-bold text-primary">{{ m.vergi_kimlik_no }}</td>
+                                    <td class="fw-semibold">{{ m.unvan }}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-success btn-premium-sm px-3" onclick='selectMukellef({{ m.id }}, "{{ m.unvan|replace('"', '\"') }}")'>
+                                                <i class="bi bi-check-circle-fill"></i> Seç
+                                            </button>
+                                            <div class="btn-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                                                <button class="btn btn-sm btn-white border" onclick='editMukellef({{ m.id }}, "{{ m.vergi_kimlik_no }}", "{{ m.unvan|replace('"', '\"') }}")' title="Düzenle">
+                                                    <i class="bi bi-pencil-square text-warning"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-white border" onclick='deleteMukellef({{ m.id }}, "{{ m.unvan|replace('"', '\"') }}")' title="Sil">
+                                                    <i class="bi bi-trash3 text-danger"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-5 text-muted">
+                                        <i class="bi bi-people text-light d-block mb-3" style="font-size: 3rem;"></i>
+                                        Henüz mükellef kaydı bulunmamaktadır.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mükellef Modal -->
+<div class="modal fade" id="mukellefModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold" id="modalTitle">Yeni Mükellef Kaydı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <form id="mukellefForm">
+                    <input type="hidden" id="mukellef_id">
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">VERGİ KİMLİK NO / TCKN</label>
+                        <input type="text" id="vkn" class="form-control bg-light border-0 shadow-none" maxlength="11" required 
+                               placeholder="10 veya 11 haneli numara" style="height: 50px; border-radius: 12px;">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">MÜKELLEF UNVANI / AD SOYAD</label>
+                        <input type="text" id="unvan" class="form-control bg-light border-0 shadow-none" required 
+                               placeholder="Resmi unvanı giriniz" style="height: 50px; border-radius: 12px;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button class="btn btn-light px-4 py-2" data-bs-dismiss="modal" style="border-radius: 12px;">Vazgeç</button>
+                <button class="btn btn-primary px-4 py-2" id="saveMukellef" style="border-radius: 12px; background: var(--premium-gradient); border: none;">Değişiklikleri Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const nextUrl = urlParams.get('next');
+
+    // Mükellef Seçme Fonksiyonu
+    function selectMukellef(id, unvan) {
+        Swal.fire({
+            title: 'Mükellef Seçiliyor',
+            text: `"${unvan}" mükellefi ile devam etmek istiyor musunuz?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Evet, Seç',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#4e54c8',
+            borderRadius: '16px'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/api/mukellef-sec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'Mükellef Seçildi', 
+                            text: `${unvan} başarıyla aktif hale getirildi.`, 
+                            timer: 1500, 
+                            showConfirmButton: false 
+                        });
+                        
+                        setTimeout(() => {
+                            if (nextUrl) {
+                                window.location.href = nextUrl;
+                            } else {
+                                location.reload();
+                            }
+                        }, 1500);
+                    } else {
+                        Swal.fire('Hata', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    // Düzenleme Fonksiyonu
+    function editMukellef(id, vkn, unvan) {
+        document.getElementById('modalTitle').innerText = 'Mükellef Bilgilerini Güncelle';
+        document.getElementById('mukellef_id').value = id;
+        document.getElementById('vkn').value = vkn;
+        document.getElementById('unvan').value = unvan;
+        new bootstrap.Modal(document.getElementById('mukellefModal')).show();
+    }
+
+    // Silme Fonksiyonu
+    function deleteMukellef(id, unvan) {
+        Swal.fire({
+            title: 'Emin misiniz?',
+            text: `"${unvan}" isimli mükellef ve tüm analiz verileri kalıcı olarak silinecektir!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Evet, Sil!',
+            cancelButtonText: 'Vazgeç',
+            borderRadius: '16px'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/api/mukellef-sil', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({ icon: 'success', title: 'Silindi', text: data.message, timer: 1500, showConfirmButton: false });
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        Swal.fire('Hata', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    // Kaydetme Fonksiyonu
+    document.getElementById('saveMukellef').addEventListener('click', () => {
+        const id = document.getElementById('mukellef_id').value;
+        const vkn = document.getElementById('vkn').value.trim();
+        const unvan = document.getElementById('unvan').value.trim();
+
+        if (!vkn || !unvan) {
+            return Swal.fire('Uyarı', 'Lütfen tüm alanları doldurun.', 'warning');
+        }
+
+        const url = id ? '/api/mukellef-guncelle' : '/api/mukellef-ekle';
+        const payload = { id: id || null, vergi_kimlik_no: vkn, unvan: unvan };
+
+        Swal.fire({ title: 'İşleniyor...', didOpen: () => Swal.showLoading() });
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'Başarılı', text: data.message, timer: 1500, showConfirmButton: false });
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                Swal.fire('Hata', data.message, 'error');
+            }
+        })
+        .catch(err => Swal.fire('Hata', 'Sunucu iletişimi başarısız.', 'error'));
+    });
+
+    // Modal sıfırlama (Yeni ekleme için)
+    document.getElementById('mukellefModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('modalTitle').innerText = 'Yeni Mükellef Kaydı';
+        document.getElementById('mukellef_id').value = '';
+        document.getElementById('vkn').value = '';
+        document.getElementById('unvan').value = '';
+    });
+</script>
+{% endblock %}

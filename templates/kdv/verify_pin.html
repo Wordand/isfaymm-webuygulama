@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}Güvenlik Doğrulaması - KDV Portalı{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card border-0 shadow-lg rounded-4 p-4 text-center" style="max-width: 400px; width: 100%; background: #fff;">
+        <div class="mb-4">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                <i class="bi bi-shield-lock-fill fs-1"></i>
+            </div>
+            <h2 class="h4 fw-bold">Portal Güvenlik Kilidi</h2>
+            <p class="text-secondary small">KDV Yönetim Portalı'na erişmek için size özel geçiş PIN kodunu giriniz.</p>
+        </div>
+
+        <form action="{{ url_for('kdv.verify_pin') }}" method="POST">
+            <div class="mb-4">
+                <input type="password" name="pin" class="form-control form-control-lg text-center fw-bold fs-2 rounded-3" 
+                       placeholder="••••" maxlength="6" autofocus required
+                       style="letter-spacing: 12px; border: 2px solid #e2e8f0; background: #f8fafc;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 py-3 fw-bold shadow-sm">
+                KİLİDİ AÇ <i class="bi bi-unlock-fill ms-2"></i>
+            </button>
+        </form>
+
+        <div class="mt-4 pt-3 border-top">
+            <a href="{{ url_for('main.home') }}" class="text-decoration-none text-secondary small">
+                <i class="bi bi-arrow-left"></i> Ana Uygulamaya Dön
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

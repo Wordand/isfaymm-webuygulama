@@ -159,6 +159,16 @@
                 </li>
                 {% endif %}
 
+                {% if session.get('has_kdv_access') or session.get('username') == 'admin' %}
+                <li class="nav-item">
+                    <a class="btn btn-warning btn-sm ms-lg-3 fw-bold px-3 shadow-sm border-0 d-flex align-items-center gap-2" 
+                       href="{{ url_for('kdv.index') }}" 
+                       style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:white;">
+                        <i class="bi bi-shield-lock-fill"></i> KDV PORTALI
+                    </a>
+                </li>
+                {% endif %}
+
                 {% if is_logged_in %}
                 <li class="nav-item"><a class="nav-link text-primary fw-semibold"
                         href="{{ url_for('auth.change_password') }}">🔒 Şifre Değiştir</a></li>

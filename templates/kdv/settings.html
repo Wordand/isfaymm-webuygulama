@@ -1,0 +1,411 @@
+{% extends "kdv/layout.html" %}
+
+{% block title %}Sistem Ayarları - İsfa Teknoloji{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Sistem Ayarları</h1>
+        <p class="text-secondary small mb-0">Portal genelindeki parametreleri ve yetkilendirmeleri buradan yönetebilirsiniz.</p>
+    </div>
+    <button class="btn btn-primary px-4 py-2 rounded-3 fw-bold shadow-sm" onclick="saveGlobalSettings()">
+        <i class="fa-solid fa-floppy-disk me-2"></i> Değişiklikleri Kaydet
+    </button>
+</div>
+
+<!-- Kullanıcılar & Yetkiler -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h5 class="fw-bold mb-1">Kullanıcılar & Yetkiler</h5>
+            <p class="text-secondary small mb-0">Sisteme erişimi olan personel listesi.</p>
+        </div>
+    </div>
+
+    <style>
+        .person-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .person-card:hover { 
+            border-color: #3b82f6; 
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1); 
+            transform: translateY(-2px);
+        }
+        .person-avatar {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .role-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .atama-status {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-ata-modal {
+            background: #00BA88;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .btn-kaldir-modal {
+            background: #FF4D4D;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .btn-ata {
+            background: #eff6ff;
+            color: #2563eb;
+            border: none;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-ata:hover { background: #3b82f6; color: white; }
+        .action-btn-circle {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            border: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .action-btn-circle:hover { transform: scale(1.1); }
+        .modal-content-rounded { border-radius: 24px; border: none; }
+        .modal-header-clean { border-bottom: none; padding: 1.5rem 1.5rem 0; }
+        
+        .assignment-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .assignment-item:last-child { border-bottom: none; }
+    </style>
+
+    <div class="personnel-list" id="personnelList">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MÜKELLEF ATAMASI MODAL (NEW) -->
+<div class="row g-4 mb-5">
+    {% if session.get('role') == 'admin' %}
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-shield-halved text-primary me-2"></i> Portal Güvenlik PIN'i</h5>
+            <p class="text-secondary small mb-4">Portal girişinde istenen güvenlik kilidi şifresini buradan güncelleyebilirsiniz.</p>
+            
+            <div class="d-flex gap-2">
+                <input type="password" id="newKdvPin" class="form-control rounded-3 border-light bg-light" 
+                       placeholder="Yeni PIN (Min 4 hane)" maxlength="6">
+                <button class="btn btn-primary px-4 rounded-3 fw-bold" onclick="updateKdvPin()">Güncelle</button>
+            </div>
+            <div id="pinStatus" class="mt-2 small"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if session.get('role') == 'admin' %}
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">Sistem Log Kayıtları</h5>
+                    <p class="text-secondary small mb-0">Kullanıcıların gerçekleştirdiği son işlemler.</p>
+                </div>
+                <button class="btn btn-outline-danger px-4 py-2 rounded-3 fw-bold btn-sm shadow-sm hover-scale" onclick="deleteLogs()">
+                    Tümünü Sil
+                </button>
+            </div>
+            <div id="systemLogsContent" style="max-height: 400px; overflow-y: auto;">
+                <div class="text-center py-4"><div class="spinner-border text-primary small"></div></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="assignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-rounded shadow-lg">
+            <div class="modal-header">
+                <h4 class="modal-title fw-bold text-center w-100" style="color: #475569;">Mükellef Ataması</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <input type="hidden" id="activeAssignUserId">
+                <div id="assignmentListContent">
+                    <!-- JS ile dolacak -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const CURRENT_USER_ID = {{ session.get('user_id', 0) }};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchKdvPersonnel();
+    });
+
+    // Global modal instances
+    let assignmentModalInstance = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchKdvPersonnel();
+        fetchLogs();
+    });
+    
+    // --- USER MANAGEMENT ---
+    async function fetchKdvPersonnel() {
+        const container = document.getElementById('personnelList');
+        try {
+            const response = await fetch('/api/kdv/users');
+            if(!response.ok) throw new Error('Network response was not ok');
+            
+            const users = await response.json();
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 text-secondary">Erişimi olan kullanıcı bulunamadı.</div>';
+                return;
+            }
+
+            // Filter out unwanted generic users and map
+            const filteredUsers = users.filter(u => !['uzman', 'ymm', 'denetci'].includes(u.username.toLowerCase()));
+
+            if (filteredUsers.length === 0) {
+                 container.innerHTML = '<div class="text-center py-5 text-secondary">Listelenecek kullanıcı bulunamadı.</div>';
+                 return;
+            }
+
+            container.innerHTML = filteredUsers.map(u => {
+                const initials = (u.username.substring(0, 2)).toUpperCase();
+                let avatarColor = u.role === 'ymm' ? '#8b5cf6' : (u.role === 'admin' ? '#3b82f6' : '#475569');
+                let roleLabel = u.role === 'ymm' ? 'YMM' : (u.role === 'yonetici' ? 'Yönetici' : 'Uzman');
+                const count = u.assigned_count || 0;
+
+                return `
+                <div class="person-card">
+                    <div class="person-avatar" style="background: ${avatarColor}; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${initials}</div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="fw-bold text-dark fs-5">${u.username.toUpperCase()}</span>
+                            <span class="role-badge">${roleLabel}</span>
+                        </div>
+                        
+                        <div class="d-flex align-items-center gap-3 mt-2">
+                            <div class="atama-status">
+                                <i class="fa-solid fa-building"></i> ${count} Mükellef Atanmış
+                            </div>
+                            <button class="btn-ata" onclick="openAssignmentModal(${u.id})">
+                                <i class="fa-solid fa-circle-plus"></i> Mükellef Ata
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch (e) {
+            console.error("Fetch error:", e);
+            container.innerHTML = '<div class="alert alert-danger">Kullanıcı listesi yüklenemedi.</div>';
+        }
+    }
+
+    async function openAssignmentModal(userId) {
+        document.getElementById('activeAssignUserId').value = userId;
+        const listContainer = document.getElementById('assignmentListContent');
+        listContainer.innerHTML = '<div class="p-5 text-center"><div class="spinner-border text-primary"></div></div>';
+        
+        // Robust Modal Opening
+        const modalEl = document.getElementById('assignmentModal');
+        assignmentModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        assignmentModalInstance.show();
+
+        try {
+            // Fetch all mukellefs
+            const res1 = await fetch('/api/kdv/all-mukellefs');
+            const allMukellefs = await res1.json();
+
+            // Fetch user assignments
+            const res2 = await fetch(`/api/kdv/user-assignments/${userId}`);
+            const assigned = await res2.json();
+            const assignedIds = assigned.map(a => a.id);
+
+            listContainer.innerHTML = allMukellefs.map(m => {
+                const isAssigned = assignedIds.includes(m.id);
+                return `
+                <div class="assignment-item">
+                    <div class="fw-bold" style="color: #334155; font-size: 0.95rem;">${m.unvan}</div>
+                    <button class="${isAssigned ? 'btn-kaldir-modal' : 'btn-ata-modal'}" onclick="toggleAssignment(${userId}, ${m.id}, ${isAssigned})">
+                        ${isAssigned ? 'Kaldır' : 'Ata'}
+                    </button>
+                </div>`;
+            }).join('');
+
+        } catch (e) {
+            listContainer.innerHTML = '<div class="p-3 text-danger">Mükellefler yüklenemedi.</div>';
+        }
+    }
+
+    async function toggleAssignment(userId, mukellefId, isAssigned) {
+        const url = isAssigned ? '/api/kdv/remove-assignment' : '/api/kdv/assign-mukellef';
+        
+        // Optimistic UI Update (immediate feedback)
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = '...';
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId, mukellef_id: mukellefId })
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                // Refresh just the assignments, keep modal open
+                openAssignmentModal(userId); 
+                fetchKdvPersonnel(); // Sync background list
+                fetchLogs(); // Refresh logs
+            } else {
+                Swal.fire('Hata', data.message || 'İşlem başarısız.', 'error');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch(e) { 
+            console.error(e);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    async function updateKdvPin() {
+        const pin = document.getElementById('newKdvPin').value;
+        const status = document.getElementById('pinStatus');
+        if(!pin || pin.length < 4) {
+            status.innerHTML = '<span class="text-danger">En az 4 hane girmelisiniz.</span>';
+            return;
+        }
+        try {
+            const res = await fetch('/api/kdv/update-pin', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ pin })
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+                status.innerHTML = '<span class="text-success">PIN Başarıyla güncellendi!</span>';
+                document.getElementById('newKdvPin').value = '';
+                setTimeout(() => status.innerHTML = '', 3000);
+            } else {
+                status.innerHTML = `<span class="text-danger">${data.message}</span>`;
+            }
+        } catch(e) { status.innerHTML = '<span class="text-danger">İşlem başarısız.</span>'; }
+    }
+
+    function saveGlobalSettings() {
+        Swal.fire({ icon: 'success', title: 'Ayarlar Kaydedildi', timer: 1500, showConfirmButton: false });
+    }
+
+    async function fetchLogs() {
+        const container = document.getElementById('systemLogsContent');
+        if(!container) return; // Not admin
+        
+        try {
+            const res = await fetch('/api/kdv/logs');
+            const logs = await res.json();
+            
+            if(logs.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">Kayıt bulunamadı.</div>';
+                return;
+            }
+            
+            // Generate description
+            container.innerHTML = logs.map(log => {
+                // Formatting based on screenshot style
+                // Bold user name?
+                // The API sends "user_name"
+                // Description: "Ahmet kullanıcısına X yetkisi atandı"
+                return `
+                <div class="bg-light p-3 rounded-3 mb-2 border-start border-4 border-success d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold text-dark mb-1">
+                            <span class="text-primary">${log.user_name}</span> <span class="fw-normal text-secondary">${log.action} yaptı:</span>
+                        </div>
+                        <div class="text-dark small mb-1">${log.description}</div>
+                    </div>
+                    <div class="small text-secondary fw-bold" style="min-width: 100px; text-align: right;">${log.date}</div>
+                </div>
+            `}).join('');
+            
+        } catch(e) {
+            container.innerHTML = '<div class="text-danger small text-center">Loglar yüklenemedi.</div>';
+        }
+    }
+
+    async function deleteLogs() {
+        const result = await Swal.fire({
+            title: 'Tüm logları sil?',
+            text: "Bu işlem geri alınamaz!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Evet, Sil'
+        });
+        
+        if(result.isConfirmed) {
+            await fetch('/api/kdv/logs/delete', { method: 'POST' });
+            fetchLogs();
+            Swal.fire('Silindi', 'Loglar temizlendi.', 'success');
+        }
+    }
+</script>
+{% endblock %}

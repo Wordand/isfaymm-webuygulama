@@ -130,6 +130,7 @@ table.kdv-table > tbody > tr.kdv-section-row > td.kdv-section-cell {
 body {
     margin: 0;
     display: flex; /* Flexbox ile ana layoutu yönetir */
+    flex-direction: column; /* İçerik ve footer alt alta gelsin */
     min-height: 100vh; /* Minimum tam ekran yüksekliği */
     font-family: "Segoe UI", sans-serif; /* Okunabilir font */
     color: var(--dark-text); /* Varsayılan metin rengi */
@@ -798,12 +799,23 @@ thead th {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; /* İçeriğin altında kalmasını sağlar */
-    display: flex; /* Videoyu ortalamak için */
+    z-index: 0; 
+    display: flex; 
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Videonun taşmasını engelle */
-    /* background: url('../images/hero-bg.jpg') no-repeat center center / cover;  Artık videoyu kullanacağımız için bu satırı kaldırabilir veya bir fallback görseli olarak kullanabiliriz */
+    overflow: hidden; 
+}
+
+/* ⬛ DARK OVERLAY for better text contrast */
+.hero-background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* 60% Dark Overlay */
+    z-index: 1; /* Above video/image, below content */
 }
 
 /* --- Hero Section'daki Video Stili --- */
@@ -837,32 +849,41 @@ thead th {
 
 .hero-content {
     position: relative;
-    z-index: 1; /* Metin ve butonların videonun üzerinde kalmasını sağlar */
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Metin okunurluğunu artırmak için gölge */
+    z-index: 2 !important; /* Above overlay */
+    text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    max-width: 900px; /* Prevent text from spreading too wide */
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* Hero Section Başlık Özelleştirmeleri */
 .hero-content h1 {
-    line-height: 1.2; /* Satır yüksekliğini ayarla, metinler birbirine çok yapışmasın */
-    margin-bottom: 20px; /* Başlık ile altındaki paragraf arası boşluk */
+    line-height: 1.1; 
+    margin-bottom: 1.5rem;
+    font-weight: 800;
 }
 
 .hero-content h1 .text-isfa {
-    color: var(--isfa-red); /* İSFA kısmını kırmızı yapar */
-    /* isteğe bağlı: hafif bir gölge veya daha kalın font */
-    /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); */
-    /* font-weight: 900; */
+    color: var(--isfa-red); 
+    display: block;
+    font-size: 1.4em; /* Make İSFA slightly bigger */
+    margin-bottom: 0.2em;
 }
 
 /* Hero bölümündeki dış hatlı beyaz buton */
 .hero .btn-outline-light {
-    border-color: var(--white);
+    border-color: rgba(255,255,255,0.8);
     color: var(--white);
+    padding: 0.75rem 2rem;
+    border-width: 2px;
+    font-weight: 600;
 }
 .hero .btn-outline-light:hover {
     background-color: var(--primary-blue);
     border-color: var(--primary-blue);
     color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
 }
 
 
@@ -2107,6 +2128,40 @@ th {
     gap: 0.6rem;
     border: none;
     transition: all 0.2s;
+}
+
+/* --- Service & Feature Cards Optimization --- */
+.service-card, .feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    height: 100%; /* Ensure full height */
+    background: #fff;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.service-card:hover, .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12) !important;
+}
+
+.service-icon, .feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover .service-icon, 
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+/* Limit max-width on ultra-wide screens to prevent 'stretched' look */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1400px; /* Constrain container width */
+    }
 }
 
 .btn-ledger-inspect:hover {

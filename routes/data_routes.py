@@ -70,9 +70,7 @@ def yukle_coklu():
         flash("Dosya seçilmedi.", "warning")
         return redirect(url_for("data.veri_giris"))
 
-    basarili = 0
-    hatali = 0
-    hatalar = []
+    sonuclar = []
 
     for file in files:
         if file and allowed_file(file.filename):
@@ -83,8 +81,11 @@ def yukle_coklu():
             try:
                 import pdfplumber
                 full_text = ""
-                with pdfplumber.open(temp_path) as pdf:
-                    full_text = "\n".join([p.extract_text() or "" for p in pdf.pages])
+                # Mizan dosyaları için (xlsx) pdfplumber hata verebilir, o yüzden check ekliyoruz
+                is_pdf = file.filename.lower().endswith(".pdf")
+                if is_pdf:
+                    with pdfplumber.open(temp_path) as pdf:
+                        full_text = "\n".join([p.extract_text() or "" for p in pdf.pages])
 
                 parsed_data = None
                 tur = "bilinmiyor"
@@ -96,40 +97,50 @@ def yukle_coklu():
                             parsed_data = res
                             tur = res.get("tur", "xml_beyanname")
                         else:
-                            # XML hatası varsa
-                            hatali += 1
-                            hatalar.append(f"{filename}: {res['hata']}")
+                            sonuclar.append({"filename": filename, "type": "error", "message": res['hata']})
                             continue
                             
                     except Exception as e:
-                         hatali += 1
-                         hatalar.append(f"{filename} (XML): {str(e)}")
+                         sonuclar.append({"filename": filename, "type": "error", "message": f"(XML): {str(e)}"})
                          continue
 
-                elif "Bilanço" in full_text or "GELİR TABLOSU" in full_text: 
-                     res = parse_bilanco_from_pdf(temp_path)
-                     if res.get("aktif") or res.get("pasif") or (res.get("tur")=="gelir" and res.get("tablo")):
-                         parsed_data = res
-                         tur = res["tur"]
-                     elif "GELİR TABLOSU" in full_text:
-                         res = parse_gelir_from_pdf(temp_path)
-                         if res.get("tablo"):
-                             parsed_data = res
-                             tur = "gelir"
-                elif "KATMA DEĞER VERGİSİ" in full_text:
+                elif is_pdf and ("Bilan\u00C7O" in full_text.upper() or "GEL\u0130R TABLOSU" in full_text.upper()): 
+                     # Hem Bilan\u00E7o hem Gelir Tablosu aramas\u0131 yap
+                     found_any = False
+                     best_meta = None
+                     
+                     res_b = parse_bilanco_from_pdf(temp_path)
+                     if res_b.get("aktif") or res_b.get("pasif"):
+                         kaydet_beyanname(res_b, "bilanco")
+                         if res_b.get("vergi_kimlik_no") != "Bilinmiyor": best_meta = res_b
+                         found_any = True
+                         
+                     res_g = parse_gelir_from_pdf(temp_path)
+                     if res_g.get("tablo"):
+                         kaydet_beyanname(res_g, "gelir")
+                         if not best_meta or (res_g.get("vergi_kimlik_no") != "Bilinmiyor"): best_meta = res_g
+                         found_any = True
+                         
+                     if found_any:
+                         parsed_data = best_meta or res_b
+                         tur = "bilanco/gelir"
+                     
+                elif is_pdf and "KATMA DE\u011EER VERG\u0130S\u0130" in full_text.upper():
                      res = parse_kdv_from_pdf(temp_path)
                      if not res.get("hata"):
                          parsed_data = res
                          tur = "kdv"
+                         save_success = kaydet_beyanname(parsed_data, tur)
                 
-                if not parsed_data:
+                if not parsed_data and is_pdf:
+                     # Yukar\u0131dakiler yakalayamad\u0131ysa tek tek dene
                      res_g = parse_gelir_from_pdf(temp_path)
                      if res_g.get("tablo"):
                          parsed_data = res_g
                          tur = "gelir"
                      else:
                          res_b = parse_bilanco_from_pdf(temp_path)
-                         if res_b.get("aktif"):
+                         if res_b.get("aktif") or res_b.get("pasif"):
                              parsed_data = res_b
                              tur = "bilanco"
                          else:
@@ -138,26 +149,52 @@ def yukle_coklu():
                                  parsed_data = res_k
                                  tur = "kdv"
 
-                if parsed_data and not parsed_data.get("hata"):
-                    kaydet_beyanname(parsed_data, tur)
-                    basarili += 1
+                # Mizan (Excel) kontrol\u00FC
+                if not parsed_data and file.filename.lower().endswith((".xlsx", ".xls")):
+                    sonuclar.append({
+                        "filename": filename,
+                        "type": "mizan_input_required",
+                        "text": "Excel mizan dosyas\u0131 i\u00E7in m\u00FCkellef ve d\u00F6nem bilgisi gerekli."
+                    })
+                    continue
+
+                if tur == "bilanco/gelir":
+                    sonuclar.append({
+                        "filename": filename,
+                        "type": "success",
+                        "title": "Tam Analiz Verisi",
+                        "text": f"{parsed_data.get('unvan', 'Bilinmiyor')} m\u00FCkellefi {parsed_data.get('donem', 'Bilinmiyor')} d\u00F6nemi Bilan\u00E7o ve Gelir Tablosu ba\u015Far\u0131yla y\u00FCklendi.",
+                        "vkn": parsed_data.get("vergi_kimlik_no"),
+                        "donem": parsed_data.get("donem"),
+                        "tur": "bilanco+gelir"
+                    })
+                elif parsed_data and not parsed_data.get("hata"):
+                    if tur != "kdv" or not locals().get('save_success'):
+                        save_success = kaydet_beyanname(parsed_data, tur)
+                        
+                    if save_success:
+                        sonuclar.append({
+                            "filename": filename,
+                            "type": "success",
+                            "title": "Ba\u015Far\u0131yla Y\u00FCklendi",
+                            "text": f"{parsed_data.get('unvan', 'Bilinmiyor')} m\u00FCkellefi {parsed_data.get('donem', 'Bilinmiyor')} d\u00F6nemi {tur.upper()} y\u00FCklendi.",
+                            "vkn": parsed_data.get("vergi_kimlik_no"),
+                            "donem": parsed_data.get("donem"),
+                            "tur": tur
+                        })
+                    else:
+                        sonuclar.append({"filename": filename, "type": "error", "message": "Veritaban\u0131na kaydedilirken hata olu\u015Ftu."})
                 else:
-                    hatali += 1
-                    hatalar.append(f"{filename}: Tanınamayan format.")
+                    sonuclar.append({"filename": filename, "type": "error", "message": "Dosya içeriği tanınamadı veya desteklenmeyen format."})
 
             except Exception as e:
-                hatali += 1
-                hatalar.append(f"{filename}: {str(e)}")
+                sonuclar.append({"filename": filename, "type": "error", "message": str(e)})
             finally:
                 if os.path.exists(temp_path): os.remove(temp_path)
         else:
-            hatali += 1
-            hatalar.append(f"{file.filename}: Desteklenmeyen uzantı.")
+            sonuclar.append({"filename": file.filename, "type": "error", "message": "Desteklenmeyen dosya uzantısı."})
 
-    if basarili > 0: flash(f"{basarili} dosya başarıyla yüklendi.", "success")
-    if hatali > 0: flash(f"{hatali} dosya yüklenemedi. Detaylar: {'; '.join(hatalar)}", "danger")
-
-    return redirect(url_for("data.veri_giris"))
+    return jsonify(sonuclar)
 
 @bp.route("/kaydet-mizan-meta", methods=["POST"])
 @login_required
@@ -196,7 +233,63 @@ def kaydet_mizan_meta():
 @bp.route("/veri-giris")
 @login_required
 def veri_giris():
-    return render_template("data/veri_giris.html")
+    secili_vkn = request.args.get("vkn")
+    secili_donem = request.args.get("donem")
+    uid = session.get("user_id")
+
+    mukellefler = []
+    donemler = []
+    yuklenen_tum_belgeler = []
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # M\u00FCkellefleri getir
+        c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
+        mukellefler = [dict(r) for r in c.fetchall()]
+
+        if secili_vkn:
+            # Se\u00E7ili m\u00FCkellefin d\u00F6nemlerini getir
+            c.execute("""
+                SELECT DISTINCT donem FROM beyanname b 
+                JOIN mukellef m ON b.mukellef_id=m.id 
+                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
+                ORDER BY donem DESC
+            """, (uid, secili_vkn))
+            donemler = [r["donem"] for r in c.fetchall()]
+
+            # Belgeleri getir
+            query = """
+                SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn 
+                FROM beyanname b 
+                JOIN mukellef m ON b.mukellef_id=m.id 
+                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s
+            """
+            params = [uid, secili_vkn]
+            if secili_donem:
+                query += " AND b.donem=%s"
+                params.append(secili_donem)
+            
+            query += " ORDER BY b.yuklenme_tarihi DESC"
+            c.execute(query, params)
+            yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+        else:
+            # M\u00FCkellef se\u00E7ilmemi\u015Fse son 50 belgeyi g\u00F6ster
+            c.execute("""
+                SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn 
+                FROM beyanname b 
+                JOIN mukellef m ON b.mukellef_id=m.id 
+                WHERE m.user_id=%s 
+                ORDER BY b.yuklenme_tarihi DESC LIMIT 50
+            """, (uid,))
+            yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+
+    return render_template("data/veri_giris.html", 
+                           mukellefler=mukellefler, 
+                           donemler=donemler,
+                           secili_vkn=secili_vkn,
+                           secili_donem=secili_donem,
+                           yuklenen_tum_belgeler=yuklenen_tum_belgeler)
 
 @bp.route("/mukellef-sil", methods=["POST"])
 @login_required

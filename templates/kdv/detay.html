@@ -1,0 +1,597 @@
+{% extends "kdv/layout.html" %}
+
+{% block title %}Dosya Detayı - KDV İade Takibi{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='kdv-style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    /* New Premium Styles from User Request */
+    .metric-card-sm {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }
+    .metric-card-sm label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    .metric-card-sm span {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    /* Layout Overrides */
+    .top-header {
+        background: white;
+        border-radius: 1.25rem;
+        margin-bottom: 2rem;
+        padding: 2.5rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+    
+    .tabs-header {
+        display: flex;
+        gap: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+    .tab-item {
+        padding-bottom: 1rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+    }
+    .tab-item.active {
+        color: #3b82f6;
+        border-bottom-color: #3b82f6;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .tab-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .content-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .timeline {
+        border-left: 2px solid #e2e8f0;
+        padding-left: 2rem;
+        position: relative;
+    }
+    .timeline-item { position: relative; margin-bottom: 2rem; }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.4rem;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px #e2e8f0;
+    }
+    
+    .table-action-btn:hover { transform: scale(1.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- EXECUTIVE HEADER -->
+<header class="top-header animate__animated animate__fadeInDown">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <span id="fileBadge" style="background: #eff6ff; color: #3b82f6; padding: 0.35rem 0.85rem; border-radius: 6px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; border: 1px solid #dbeafe;">YÜKLENİYOR...</span>
+            </div>
+            <h1 id="fileDetailTitle" style="font-size: 2.25rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin-bottom: 0.5rem;">...</h1>
+            <div id="fileHeaderLinks" style="display: flex; gap: 1.5rem; color: #64748b; font-size: 0.95rem; font-weight: 500;">
+                <span><i class="fa-regular fa-calendar me-2"></i> <span id="headerPeriod">...</span></span>
+                <span><i class="fa-solid fa-tag me-2"></i> <span id="headerSubject">...</span></span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 2rem; align-items: center;">
+            <div style="display: flex; gap: 3rem; align-items: center; background: #f8fafc; padding: 1.5rem 2.5rem; border-radius: 1rem; border: 1px solid #f1f5f9;">
+                <div style="text-align: right;">
+                    <small style="display: block; color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">TALEP TUTARI</small>
+                    <div id="fileTotalRequested" style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">₺ 0</div>
+                </div>
+                <!-- Optional: Resolved amount placeholder if backend supported it -->
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-container animate__animated animate__fadeInUp">
+    <div class="tabs-header">
+        <div class="tab-item active" onclick="switchTab('timeline')">Süreç Zaman Çizelgesi</div>
+        <div class="tab-item" onclick="switchTab('documents')">Dosya ve Yazışmalar</div>
+    </div>
+
+    <!-- TIMELINE TAB -->
+    <div class="tab-content active" id="tab-timeline">
+        <div class="tab-metrics-grid">
+            <div class="metric-card-sm position-relative">
+                <label>İşlem Durumu</label>
+                <span id="metricStatus" class="d-block mb-1 text-truncate fw-bold text-dark">-</span>
+                <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('status')">
+                    <i class="fa-solid fa-pen me-1"></i> Değiştir
+                </button>
+            </div>
+            <div class="metric-card-sm position-relative">
+                <label>Dosya Makamı</label>
+                <span id="metricLocation" class="d-block mb-1 text-truncate fw-bold text-dark">-</span>
+                <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('location')">
+                    <i class="fa-solid fa-pen me-1"></i> Değiştir
+                </button>
+            </div>
+            <div class="metric-card-sm">
+                <label>Ekleme Tarihi</label>
+                <span id="metricDate" class="d-block mt-2">-</span>
+            </div>
+        </div>
+
+        <div class="content-row">
+            <div class="main-timeline-area">
+                <div class="row g-4">
+                    <!-- Column 1: Süreç Akışı -->
+                    <div class="col-md-6 border-end">
+                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                            <i class="fa-solid fa-code-branch me-2 text-primary"></i>
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0;">Süreç Akışı</h2>
+                        </div>
+                        <div class="timeline" id="timelineContainerStatus"></div>
+                    </div>
+                    
+                    <!-- Column 2: Dosya Makamı -->
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                            <i class="fa-solid fa-building-columns me-2 text-danger"></i>
+                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0;">Makamsal Akış</h2>
+                        </div>
+                        <div class="timeline" id="timelineContainerMakam"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <div class="content-section" style="background: white; padding: 1.5rem; border-radius: 1.25rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #1e293b;">
+                        <i class="fa-solid fa-circle-info me-2 text-primary"></i> Hızlı Bilgi
+                    </h3>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.6;">
+                        Bu dosya <span id="quickYear"></span> yılına ait iade taleplerini içermektedir. Tüm yazışmalar "Dosya ve Yazışmalar" sekmesinden takip edilebilir.
+                    </p>
+                </div>
+                
+                <div id="guaranteeInfoCard" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOCUMENTS TAB -->
+    <div id="tab-documents" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">Belge Havuzu</h2>
+                <p class="text-secondary small">Kontrol raporları ve resmi yazışmalar</p>
+            </div>
+        </div>
+        <div class="document-integration-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+            
+            <!-- 1. İade Dilekçeleri -->
+            <div class="doc-section-card" style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;"><i class="fa-solid fa-file-signature me-2" style="color: #6366f1;"></i> İade Dilekçeleri</h3>
+                <button class="btn btn-sm btn-light border w-100 mb-3 dashed-btn" onclick="uploadGeneric('İade Dilekçesi')">Belge Yükle</button>
+                <div class="mini-doc-list" id="list-petitions"></div>
+            </div>
+
+            <!-- 2. Kontrol Raporları -->
+            <div class="doc-section-card" style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;"><i class="fa-solid fa-file-pdf me-2" style="color: #ef4444;"></i> Kontrol Raporları</h3>
+                <button type="button" class="btn btn-sm btn-light border w-100 mb-3 dashed-btn" onclick="uploadGeneric('Kontrol Raporu')">Belge Yükle</button>
+                <div class="mini-doc-list" id="list-reports"></div>
+            </div>
+
+            <!-- 3. Eksiklik Yazıları -->
+            <div class="doc-section-card" style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;"><i class="fa-solid fa-envelope-open-text me-2" style="color: #3b82f6;"></i> Eksiklik Yazıları</h3>
+                <button type="button" class="btn btn-sm btn-light border w-100 mb-3 dashed-btn" onclick="uploadGeneric('Eksiklik Yazısı')">Belge Yükle</button>
+                <div class="mini-doc-list" id="list-notices"></div>
+            </div>
+            
+            <!-- 4. İzahatlar -->
+            <div class="doc-section-card" style="background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;"><i class="fa-solid fa-file-lines me-2" style="color: #10b981;"></i> İzahatlar</h3>
+                <button type="button" class="btn btn-sm btn-light border w-100 mb-3 dashed-btn" onclick="uploadGeneric('İzahat')">Belge Yükle</button>
+                <div class="mini-doc-list" id="list-explanations"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- STATUS MODAL (Kept same logic) -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="modalTitle">Durum Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="status-picker-grid" id="statusPickerContainer">
+                    <!-- Dynamic Content -->
+                </div>
+                <div class="mt-4">
+                    <label class="form-label fw-bold">İşlem Açıklaması (Opsiyonel)</label>
+                    <textarea id="updateDescription" class="form-control rounded-3" rows="2" placeholder="Örn: Evraklar teslim edildi..."></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">İptal</button>
+                    <button class="btn btn-primary px-4 rounded-3" onclick="submitStatusUpdate()">Değişiklikleri Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='kdv-logic.js') }}"></script>
+<script>
+    const FILE_ID = Number("{{ file_id }}");
+    const CURRENT_USER = "{{ session.get('username')|title }}";
+    let selectedStatus = '';
+    let currentUpdateType = 'status'; 
+    const STAGES_FLAT = JSON.parse('{{ STATUS_STAGES|tojson|safe }}');
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        const clickedTab = document.querySelector(`.tab-item[onclick="switchTab('${tabName}')"]`);
+        if (clickedTab) clickedTab.classList.add('active');
+        
+        const targetContent = document.getElementById(`tab-${tabName}`);
+        if (targetContent) targetContent.classList.add('active');
+    }
+
+    async function initDetailPage() {
+        const response = await fetch(`/api/kdv/file/${FILE_ID}`);
+        const file = await response.json();
+        
+        if (file.status === 'error') {
+            Swal.fire('Hata', file.message, 'error').then(() => history.back());
+            return;
+        }
+
+        // Header Data
+        document.getElementById('fileDetailTitle').innerText = file.client_name;
+        document.getElementById('headerPeriod').innerText = file.period;
+        document.getElementById('headerSubject').innerText = file.subject;
+        document.getElementById('fileTotalRequested').innerText = '₺ ' + formatMoney(file.amount_request);
+        document.getElementById('fileBadge').innerText = file.status.toUpperCase();
+        
+        // Quick Info Year
+        if (file.period) {
+            document.getElementById('quickYear').innerText = file.period.split('.')[1] || '2025';
+        }
+
+        // Metrics
+        document.getElementById('metricStatus').innerText = file.status;
+        document.getElementById('metricLocation').innerText = file.location || '---';
+        document.getElementById('metricDate').innerText = file.date;
+
+        renderTimeline(file.history);
+        renderGuaranteeCard(file);
+    }
+    
+    function renderTimeline(history) {
+        const containerStatus = document.getElementById('timelineContainerStatus');
+        const containerMakam = document.getElementById('timelineContainerMakam');
+        
+        const makamItems = STAGES_FLAT['Vergi Dairesi (Makam)'] || [];
+        
+        // Filter History
+        const statusHistory = history.filter(h => !makamItems.includes(h.text));
+        const makamHistory = history.filter(h => makamItems.includes(h.text));
+        
+        const renderItem = (h, colorClass) => `
+            <div class="timeline-item">
+                <h3 class="h6 fw-bold mb-1 text-dark" style="font-size: 0.95rem;">${h.text}</h3>
+                <span class="d-block text-secondary small fw-bold mb-2" style="font-size: 0.75rem;">${h.date}</span>
+                ${h.description ? `<p class="small text-muted mb-0 bg-light p-2 rounded-3 border-start border-3 border-${colorClass}">${h.description}</p>` : ''}
+            </div>`;
+            
+        containerStatus.innerHTML = statusHistory.length ? statusHistory.map(h => renderItem(h, 'primary')).join('') : '<div class="text-muted small fst-italic py-3">Henüz işlem kaydı yok.</div>';
+        containerMakam.innerHTML = makamHistory.length ? makamHistory.map(h => renderItem(h, 'danger')).join('') : '<div class="text-muted small fst-italic py-3">Henüz makam hareketi yok.</div>';
+    }
+
+    // --- Document & Status Logic Refactored ---
+    const DOC_CATEGORIES = {
+        'İade Dilekçesi': 'list-petitions',
+        'Kontrol Raporu': 'list-reports',
+        'Eksiklik Yazısı': 'list-notices',
+        'İzahat': 'list-explanations'
+    };
+
+    function renderDocuments(documents) {
+        // Clear all lists first
+        Object.values(DOC_CATEGORIES).forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.innerHTML = '<div class="text-muted small text-center py-2">Henüz belge yok.</div>';
+        });
+
+        if (!documents || documents.length === 0) return;
+
+        documents.forEach(doc => {
+            const listId = DOC_CATEGORIES[doc.type];
+            if (!listId) return;
+
+            const listEl = document.getElementById(listId);
+            // safe check if it was cleared and has the empty message
+            if (listEl.innerHTML.includes('Henüz belge yok')) listEl.innerHTML = '';
+
+            const itemHtml = `
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 border rounded bg-light hover-shadow transition-all">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <i class="fa-regular fa-file-lines text-secondary"></i>
+                        <div class="text-truncate">
+                            <span class="d-block text-dark fw-bold small text-truncate" style="max-width: 150px;" title="${doc.name}">${doc.name}</span>
+                            <span class="d-block text-muted" style="font-size: 0.65rem;">${doc.date}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <a href="/static/${doc.file_path}" target="_blank" class="btn btn-sm btn-icon btn-white border text-primary" title="İndir/Görüntüle">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
+                        <button onclick="deleteDocument(${doc.id})" class="btn btn-sm btn-icon btn-white border text-danger" title="Sil">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            listEl.insertAdjacentHTML('beforeend', itemHtml);
+        });
+    }
+
+    // Dynamic File Upload
+    function uploadGeneric(docType) {
+        // Create a hidden file input dynamically
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.zip,.rar';
+        
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('file_id', FILE_ID);
+            formData.append('doc_type', docType);
+
+            // Show loading
+            Swal.fire({title: 'Yükleniyor...', didOpen: () => Swal.showLoading()});
+
+            try {
+                const res = await fetch('/api/kdv/upload-doc', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    Swal.fire({
+                        icon: 'success', 
+                        title: 'Başarılı', 
+                        padding: '2em',
+                        background: '#fff',
+                        timer: 1500, 
+                        showConfirmButton: false
+                    });
+                    // Refresh details to re-render documents
+                    initDetailPage();
+                } else {
+                    Swal.fire('Hata', result.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Hata', 'Yükleme sırasında bir sorun oluştu.', 'error');
+            }
+        };
+        
+        input.click();
+    }
+
+    async function deleteDocument(docId) {
+        const result = await Swal.fire({
+            title: 'Emin misiniz?',
+            text: "Bu belge kalıcı olarak silinecektir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Evet, Sil',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/api/kdv/document/delete/${docId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    Swal.fire('Silindi', 'Belge başarıyla silindi.', 'success');
+                    initDetailPage();
+                } else {
+                    Swal.fire('Hata', data.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Hata', 'Silme işlemi başarısız.', 'error');
+            }
+        }
+    }
+
+    // Modal Helpers
+    function openStatusUpdateModal(type) {
+        currentUpdateType = type;
+        selectedStatus = '';
+        
+        const modalTitle = document.getElementById('modalTitle');
+        const container = document.getElementById('statusPickerContainer');
+        const descInput = document.getElementById('updateDescription');
+        
+        descInput.value = ''; // Reset description
+        container.innerHTML = ''; // Clear previous
+
+        let categoriesToShow = {};
+        
+        if (type === 'location') {
+            modalTitle.innerText = 'Dosya Makamını Güncelle';
+            categoriesToShow['Vergi Dairesi (Makam)'] = STAGES_FLAT['Vergi Dairesi (Makam)'];
+        } else {
+            modalTitle.innerText = 'İşlem Durumunu Güncelle';
+            // All except Makam
+            for (const [cat, items] of Object.entries(STAGES_FLAT)) {
+                if (cat !== 'Vergi Dairesi (Makam)') {
+                    categoriesToShow[cat] = items;
+                }
+            }
+        }
+        
+        // Render
+        let html = '';
+        for (const [cat, items] of Object.entries(categoriesToShow)) {
+            html += `<div class="status-picker-category"><h4>${cat}</h4><div class="status-picker-items">`;
+            items.forEach(item => {
+                html += `<button type="button" class="status-btn-choice" onclick="selectStatus('${item}', this)">${item}</button>`;
+            });
+            html += `</div></div>`;
+        }
+        container.innerHTML = html;
+        
+        new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();
+    }
+    
+    function selectStatus(status, btn) {
+        document.querySelectorAll('.status-btn-choice').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedStatus = status;
+    }
+
+    async function submitStatusUpdate() {
+        if (!selectedStatus) { Swal.fire('Uyarı', 'Lütfen bir seçim yapınız.', 'warning'); return; }
+        
+        const data = {
+            file_id: FILE_ID,
+            description: document.getElementById('updateDescription').value
+        };
+        
+        // Use different payload depending on update type
+        if (currentUpdateType === 'location') {
+            data.location = selectedStatus;
+            // Don't send 'status' key if we only update location, backend must handle partial update?
+            // Existing backend `update_status` expects `status` AND `location` usually.
+            // Let's check backend logic implies. 
+            // Step 1119 view showed:
+            // `new_status = data.get('status')`
+            // `new_location = data.get('location')`
+            // It updates whatever is present.
+            // If I send just location, status remains?
+            // Actually let's just send what is changed.
+            data.location = selectedStatus;
+        } else {
+            data.status = selectedStatus;
+        }
+
+        try {
+            const res = await fetch('/api/kdv/update-status', {
+                method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal')).hide();
+                initDetailPage(); // Reloads page data
+                Swal.fire('Başarılı', 'Güncelleme yapıldı.', 'success');
+            } else {
+                Swal.fire('Hata', result.message || 'Güncelleme başarısız.', 'error');
+            }
+        } catch(e) {
+            Swal.fire('Hata', 'Sunucu hatası.', 'error');
+        }
+    }
+
+    // ... Guarantee Card logic same as before ...
+    function renderGuaranteeCard(file) {
+        // ... (reuse existing logic from previous file)
+        const div = document.getElementById('guaranteeInfoCard');
+        const remaining = getReportRemainingDays(file);
+        if (remaining !== null) {
+            div.style.display = 'block';
+            div.innerHTML = `
+                <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 text-center bg-white border-start border-primary border-5">
+                    <small class="text-uppercase fw-bold text-secondary">Rapor Teslimine Kalan</small>
+                    <div class="display-5 fw-bold my-2 ${remaining < 5 ? 'text-danger' : 'text-primary'}">${remaining} Gün</div>
+                </div>`;
+        }
+    }
+
+    // Override initDetailPage to call renderDocuments
+    const oldInit = initDetailPage;
+    initDetailPage = async function() {
+        const response = await fetch(`/api/kdv/file/${FILE_ID}`);
+        const file = await response.json();
+        
+        if (file.status === 'error') {
+            Swal.fire('Hata', file.message, 'error').then(() => history.back());
+            return;
+        }
+
+        // Header Data
+        document.getElementById('fileDetailTitle').innerText = file.client_name;
+        document.getElementById('headerPeriod').innerText = file.period;
+        document.getElementById('headerSubject').innerText = file.subject;
+        document.getElementById('fileTotalRequested').innerText = '₺ ' + formatMoney(file.amount_request);
+        document.getElementById('fileBadge').innerText = file.status.toUpperCase();
+        
+        // Quick Info Year
+        if (file.period) {
+            document.getElementById('quickYear').innerText = file.period.split('.')[1] || new Date().getFullYear();
+        }
+
+        // Metrics
+        document.getElementById('metricStatus').innerText = file.status;
+        document.getElementById('metricLocation').innerText = file.location || '---';
+        document.getElementById('metricDate').innerText = file.date;
+
+        renderTimeline(file.history);
+        renderDocuments(file.documents); // NEW
+        renderGuaranteeCard(file);
+    };
+
+    document.addEventListener('DOMContentLoaded', initDetailPage);
+</script>
+{% endblock %}

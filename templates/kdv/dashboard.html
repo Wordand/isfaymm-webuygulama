@@ -1,0 +1,499 @@
+{% extends "kdv/layout.html" %}
+
+{% block title %}KDV İade Takip Paneli - İsfa Teknoloji{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Premium Dashboard Styles from kdv-yonetim.html */
+    .dashboard-header { margin-bottom: 2.5rem; }
+    
+    /* Stats Grid */
+    .stat-card-premium {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        cursor: pointer;
+        height: 100%;
+    }
+    .stat-card-premium:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+        border-color: #3b82f633;
+    }
+    .stat-icon {
+        width: 56px; height: 56px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem;
+    }
+    .icon-blue { background: #eff6ff; color: #3b82f6; }
+    .icon-green { background: #ecfdf5; color: #10b981; }
+    .icon-amber { background: #fff7ed; color: #f59e0b; }
+    .icon-purple { background: #f5f3ff; color: #8b5cf6; }
+
+    .stat-meta { flex-grow: 1; }
+    .stat-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin: 4px 0; }
+    .stat-trend { font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .trend-up { color: #10b981; }
+    .trend-warning { color: #f59e0b; }
+
+    /* Charts Section */
+    .chart-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 24px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        height: 100%;
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .chart-header h3 { font-size: 1rem; font-weight: 800; color: #1e293b; margin: 0; }
+    .chart-container { position: relative; height: 300px; width: 100%; }
+
+    /* Pipeline Cards */
+    .file-card-premium {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        border: 1px solid #f1f5f9;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .file-card-premium::before { content: ''; position: absolute; top:0; left:0; right:0; height:4px; background: #e2e8f0; }
+    .card-status-info::before { background: linear-gradient(to right, #3b82f6, #60a5fa); }
+    .card-status-success::before { background: linear-gradient(to right, #10b981, #34d399); }
+    .card-status-warning::before { background: linear-gradient(to right, #f59e0b, #fbbf24); }
+
+    .progress-pill-container { background: #f1f5f9; height: 6px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+    .progress-pill-fill { height: 100%; background: #3b82f6; transition: width 1s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 fw-bold mb-1">KDV İade Takip Paneli</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary px-4 py-2 rounded-3 fw-bold add-mukellef-redirect">
+            <i class="fa-solid fa-user-plus me-2"></i> Yeni Mükellef Ekle
+        </button>
+        <button class="btn btn-primary px-4 py-2 rounded-3 fw-bold" onclick="openNewFileModal()">
+            <i class="fa-solid fa-plus me-2"></i> Yeni İade Dosyası
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const redirectBtn = document.querySelector('.add-mukellef-redirect');
+        if (redirectBtn) {
+            redirectBtn.addEventListener('click', function() {
+                window.location.href = "{{ url_for('kdv.mukellefler') }}?add=1";
+            });
+        }
+    });
+</script>
+
+<!-- Stats Grid -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-premium">
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-meta">
+                <span class="stat-label">Toplam Bekleyen İade</span>
+                <div class="stat-value" id="stat-pending-amount">₺ 0</div>
+                <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> Geçen aya göre +12%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-premium">
+            <div class="stat-icon icon-green"><i class="fa-solid fa-check-double"></i></div>
+            <div class="stat-meta">
+                <span class="stat-label">Bu Ay Tamamlanan İade</span>
+                <div class="stat-value" id="stat-completed-amount">₺ 0</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-premium" onclick="loadModalData('deficiency')" style="cursor: pointer;">
+            <div class="stat-icon icon-amber"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="stat-meta">
+                <span class="stat-label">Açık Eksiklik Yazıları</span>
+                <div class="stat-value" id="stat-missing-count">0 Adet</div>
+                <div class="stat-trend trend-warning">İşlem Bekleyen</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-premium" onclick="loadModalData('guarantee')" style="cursor: pointer;">
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-file-contract"></i></div>
+            <div class="stat-meta">
+                <span class="stat-label">Teminat Mektubu</span>
+                <div class="stat-value" id="stat-guarantee-amount">₺ 0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-8">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Aylık İade / Tahsilat Trendi</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="refundTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Dosya Durum Dağılımı</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="statusDistChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Operations Section -->
+<div class="section-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 fw-bold mb-1"><i class="fa-solid fa-bolt-lightning text-warning me-2"></i> Aktif Operasyon Takibi</h2>
+        <p class="text-secondary small mb-0">Devam eden iade süreçlerinin güncel durum ve öncelik sıralaması.</p>
+    </div>
+    <a href="{{ url_for('kdv.archive') }}" class="btn btn-outline-secondary rounded-3 fw-semibold">
+        <i class="fa-solid fa-list-check me-2"></i> Tüm Arşivi Yönet
+    </a>
+</div>
+
+<div id="filesListContainer" class="pb-5">
+    <!-- Loading Spinner -->
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+</div>
+
+<!-- Modal etc. (kept from previous implementation) -->
+<div class="modal fade" id="newFileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-bottom-0 p-4">
+                <h5 class="modal-title fw-bold">Yeni İade Dosyası Tanımla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                <form id="newFileForm" onsubmit="handleFileFormSubmit(event)">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Mükellef Seçimi</label>
+                            <select id="modalClientId" class="form-select border-light bg-light rounded-3" required></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">Dönem</label>
+                            <input type="month" id="modalPeriod" class="form-control border-light bg-light rounded-3" required>
+                        </div>
+                    </div>
+                    <!-- ... other fields ... -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">İade Konusu</label>
+                            <select id="modalSubject" class="form-select border-light bg-light rounded-3" required>
+                                <option>İhracat İstisnası</option>
+                                <option>İndirimli Oran</option>
+                                <option>Tevkifat İadesi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">İade Türü</label>
+                            <select id="modalType" class="form-select border-light bg-light rounded-3" required></select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">Talep Tutarı (₺)</label>
+                        <input type="number" id="modalAmount" class="form-control border-light bg-light rounded-3" placeholder="0.00" step="0.01" required>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-primary px-4">Kaydet ve Başlat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Deficiency Modal -->
+<div class="modal fade" id="deficiencyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-warning bg-opacity-10 p-2 rounded-3 text-warning">
+                        <i class="fa-solid fa-clock-rotate-left fs-4"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark">Açık Eksiklik Yazıları</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3 text-secondary fw-semibold small ps-3">Mükellef</th>
+                                <th class="border-0 text-secondary fw-semibold small">Konu / Dönem</th>
+                                <th class="border-0 text-secondary fw-semibold small">Tutar</th>
+                                <th class="border-0 text-secondary fw-semibold small">Durum</th>
+                                <th class="border-0 rounded-end-3 text-secondary fw-semibold small text-end pe-3">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deficiencyTableBody">
+                            <!-- JS will populate -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-warning border-0 rounded-3 mt-3 d-flex align-items-center gap-3" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+                    <div class="small">Uyarı: Eksiklik yazılarına 30 gün içinde cevap verilmesi yasal zorunluluktur.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Guarantee Modal -->
+<div class="modal fade" id="guaranteeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-purple bg-opacity-10 p-2 rounded-3 text-purple" style="color: #8b5cf6;">
+                        <i class="fa-solid fa-file-shield fs-4"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark">Teminat Mektupları Detayı</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 rounded-start-3 text-secondary fw-semibold small ps-3">Mükellef</th>
+                                <th class="border-0 text-secondary fw-semibold small">Banka / Konu</th>
+                                <th class="border-0 text-secondary fw-semibold small">Teminat Tutarı</th>
+                                <th class="border-0 text-secondary fw-semibold small">Tarih</th>
+                                <th class="border-0 rounded-end-3 text-secondary fw-semibold small text-end pe-3">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guaranteeTableBody">
+                            <!-- JS will populate -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-light border rounded-3 mt-3 d-flex align-items-center gap-3" role="alert">
+                    <i class="fa-solid fa-circle-info text-primary fs-5"></i>
+                    <div class="small text-secondary">Not: YMM raporu 6 ay içinde verilmelidir. Süre dolmadan rapor hazırlığını başlatınız.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='kdv-logic.js') }}"></script>
+<script>
+    // Overriding updateStats from kdv-logic.js to handle premium dashboard fields
+    async function loadModalData(type) {
+        let apiUrl = '/api/kdv/files?active=1';
+        const urlParams = new URLSearchParams(window.location.search);
+        const mukellefId = urlParams.get('mukellef') || urlParams.get('mukellef_id');
+        
+        if (mukellefId) apiUrl += `&mukellef_id=${mukellefId}`;
+        
+        let containerId = '';
+        let modalId = '';
+        
+        if (type === 'deficiency') {
+            apiUrl += `&status=Eksiklik yazısı geldi`;
+            containerId = 'deficiencyTableBody';
+            modalId = 'deficiencyModal';
+        } else if (type === 'guarantee') {
+            apiUrl += `&filter_type=guarantee`;
+            containerId = 'guaranteeTableBody';
+            modalId = 'guaranteeModal';
+        }
+        
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></td></tr>`;
+        
+        const modal = new bootstrap.Modal(document.getElementById(modalId));
+        modal.show();
+        
+        try {
+            const response = await fetch(apiUrl);
+            const files = await response.json();
+            
+            container.innerHTML = '';
+            
+            if (files.length === 0) {
+                container.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Kayıt bulunamadı.</td></tr>`;
+                return;
+            }
+            
+            files.forEach(file => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="ps-3"><span class="fw-bold text-dark">${file.client_name}</span></td>
+                    <td><div class="d-flex flex-column"><span class="fw-medium">${file.subject}</span><span class="small text-muted">${file.period_year}-${file.period_month}</span></div></td>
+                    <td><span class="fw-bold text-dark">₺ ${formatMoney(file.amount_request)}</span></td>
+                    <td><span class="badge bg-light text-dark border">${file.status || '-'}</span></td>
+                    <td class="text-end pe-3">
+                        <a href="/kdv-detay/${file.id}" class="btn btn-sm btn-primary rounded-pill px-3">Detay</a>
+                    </td>
+                `;
+                container.appendChild(tr);
+            });
+            
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Veri yüklenirken hata oluştu.</td></tr>`;
+        }
+    }
+
+    async function updateStats() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mukellefId = urlParams.get('mukellef') || urlParams.get('mukellef_id');
+            let apiUrl = '/api/kdv/stats';
+            if (mukellefId) {
+                apiUrl += `?mukellef_id=${mukellefId}`;
+            }
+
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Stats fetch status: ' + response.status);
+            const data = await response.json();
+            
+            // Update Stats Metrix
+            if(document.getElementById('stat-pending-amount'))
+                document.getElementById('stat-pending-amount').textContent = `₺ ${formatMoney(data.pending_amount)}`;
+            
+            if(document.getElementById('stat-completed-amount'))
+                document.getElementById('stat-completed-amount').textContent = `₺ ${formatMoney(data.completed_amount)}`;
+            
+            if(document.getElementById('stat-missing-count'))
+                document.getElementById('stat-missing-count').textContent = `${data.missing_docs_count} Adet`;
+            
+            if(document.getElementById('stat-guarantee-amount'))
+                document.getElementById('stat-guarantee-amount').textContent = `₺ ${formatMoney(data.guarantee_amount)}`;
+                
+            // Update Charts
+            updateChartsWithData(data);
+
+        } catch (e) {
+            console.error('Stats fetch error:', e);
+        }
+    }
+
+    function updateChartsWithData(data) {
+        // Status Distribution Chart
+        let labels = [];
+        let counts = [];
+        if (data.status_dist && data.status_dist.length > 0) {
+            labels = data.status_dist.map(d => d.status);
+            counts = data.status_dist.map(d => d.count);
+        } else {
+            labels = ['Veri Yok'];
+            counts = [1];
+        }
+
+        const distCtx = document.getElementById('statusDistChart').getContext('2d');
+        if(window.statusChartInstance) window.statusChartInstance.destroy();
+        
+        window.statusChartInstance = new Chart(distCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#64748b'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                }
+            }
+        });
+
+        // Trend Chart
+        const trendCtx = document.getElementById('refundTrendChart').getContext('2d');
+        if(window.trendChartInstance) window.trendChartInstance.destroy();
+        
+        const trendLabels = (data.trend_labels && data.trend_labels.length) ? data.trend_labels : ['Veri Yok'];
+        const trendValues = (data.trend_data && data.trend_data.length) ? data.trend_data : [0];
+        
+        window.trendChartInstance = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'İade Tutarı (TL)',
+                    data: trendValues,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#3b82f6',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // initDashboard is defined in kdv-logic.js
+        if (typeof initDashboard === 'function') {
+            initDashboard();
+        } else {
+            console.error("initDashboard function not found in kdv-logic.js");
+            // Fallback
+            updateStats();
+        }
+    });
+</script>
+{% endblock %}
