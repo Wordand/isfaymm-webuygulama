@@ -6,29 +6,31 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='kdv-style.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-    /* New Premium Styles from User Request */
+    /* Premium Tasarım Güncellemeleri */
     .metric-card-sm {
-        background: #f8fafc;
-        border: 1px solid #f1f5f9;
+        background: white;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 1rem;
+        padding: 1.25rem;
         text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        height: 100%;
     }
     .metric-card-sm label {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
         margin-bottom: 0.5rem;
+        letter-spacing: 0.05em;
     }
     .metric-card-sm span {
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 700;
         color: #1e293b;
     }
     
-    /* Layout Overrides */
     .top-header {
         background: white;
         border-radius: 1.25rem;
@@ -53,26 +55,13 @@
         transition: all 0.2s;
     }
     .tab-item.active {
-        color: #3b82f6;
-        border-bottom-color: #3b82f6;
+        color: #2563eb;
+        border-bottom-color: #2563eb;
     }
     
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    
-    .tab-metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .content-row {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 2rem;
-    }
-    
+
     .timeline {
         border-left: 2px solid #e2e8f0;
         padding-left: 2rem;
@@ -92,39 +81,55 @@
         box-shadow: 0 0 0 2px #e2e8f0;
     }
     
-    .table-action-btn:hover { transform: scale(1.1); }
+    .quick-note-item { 
+        border-left: 4px solid #3b82f6 !important; 
+        position: relative; 
+        background-color: #f8fafc;
+    }
+    .btn-light-primary { background: #e0e7ff; color: #4338ca; }
+    .btn-light-primary:hover { background: #c7d2fe; }
+
+    .side-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1.25rem;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .transition-all { transition: all 0.2s ease-in-out; }
+    .group-hover:hover .group-hover-visible { opacity: 1 !important; visibility: visible !important; }
+    .group-hover-visible { opacity: 0; visibility: hidden; }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- EXECUTIVE HEADER -->
-<header class="top-header animate__animated animate__fadeInDown">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
+<header class="top-header">
+    <div class="d-flex justify-content-between align-items-center">
         <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="d-flex align-items-center gap-2 mb-3">
                 <span id="fileBadge" style="background: #eff6ff; color: #3b82f6; padding: 0.35rem 0.85rem; border-radius: 6px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em; border: 1px solid #dbeafe;">YÜKLENİYOR...</span>
             </div>
             <h1 id="fileDetailTitle" style="font-size: 2.25rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin-bottom: 0.5rem;">...</h1>
-            <div id="fileHeaderLinks" style="display: flex; gap: 1.5rem; color: #64748b; font-size: 0.95rem; font-weight: 500;">
+            <div class="d-flex gap-4 text-secondary small fw-medium">
                 <span><i class="fa-regular fa-calendar me-2"></i> <span id="headerPeriod">...</span></span>
                 <span><i class="fa-solid fa-tag me-2"></i> <span id="headerSubject">...</span></span>
             </div>
         </div>
 
-        <div style="display: flex; gap: 2rem; align-items: center;">
-            <div style="display: flex; gap: 3rem; align-items: center; background: #f8fafc; padding: 1.5rem 2.5rem; border-radius: 1rem; border: 1px solid #f1f5f9;">
-                <div style="text-align: right;">
-                    <small style="display: block; color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">TALEP TUTARI</small>
-                    <div id="fileTotalRequested" style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">₺ 0</div>
-                </div>
-                <!-- Optional: Resolved amount placeholder if backend supported it -->
+        <div class="d-flex gap-3 align-items-center">
+            <div class="bg-light border p-4 rounded-4 text-end" style="min-width: 200px;">
+                <small class="d-block text-secondary fw-bold text-uppercase mb-1" style="font-size: 0.65rem;">TALEP TUTARI</small>
+                <div id="fileTotalRequested" class="h3 fw-bold text-dark m-0">₺ 0</div>
             </div>
         </div>
     </div>
 </header>
 
 <!-- TABS -->
-<div class="tabs-container animate__animated animate__fadeInUp">
+<div class="tabs-container">
     <div class="tabs-header">
         <div class="tab-item active" onclick="switchTab('timeline')">Süreç Zaman Çizelgesi</div>
         <div class="tab-item" onclick="switchTab('documents')">Dosya ve Yazışmalar</div>
@@ -132,58 +137,82 @@
 
     <!-- TIMELINE TAB -->
     <div class="tab-content active" id="tab-timeline">
-        <div class="tab-metrics-grid">
-            <div class="metric-card-sm position-relative">
-                <label>İşlem Durumu</label>
-                <span id="metricStatus" class="d-block mb-1 text-truncate fw-bold text-dark">-</span>
-                <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('status')">
-                    <i class="fa-solid fa-pen me-1"></i> Değiştir
-                </button>
+        <!-- Metrics Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="metric-card-sm position-relative">
+                    <label>İşlem Durumu</label>
+                    <span id="metricStatus" class="d-block mb-2">-</span>
+                    <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('status')">
+                        <i class="fa-solid fa-pen me-1"></i> Değiştir
+                    </button>
+                </div>
             </div>
-            <div class="metric-card-sm position-relative">
-                <label>Dosya Makamı</label>
-                <span id="metricLocation" class="d-block mb-1 text-truncate fw-bold text-dark">-</span>
-                <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('location')">
-                    <i class="fa-solid fa-pen me-1"></i> Değiştir
-                </button>
+            <div class="col-md-4">
+                <div class="metric-card-sm position-relative">
+                    <label>Dosya Makamı</label>
+                    <span id="metricLocation" class="d-block mb-2">-</span>
+                    <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="openStatusUpdateModal('location')">
+                        <i class="fa-solid fa-pen me-1"></i> Değiştir
+                    </button>
+                </div>
             </div>
-            <div class="metric-card-sm">
-                <label>Ekleme Tarihi</label>
-                <span id="metricDate" class="d-block mt-2">-</span>
+            <div class="col-md-4">
+                <div class="metric-card-sm">
+                    <label>Ekleme Tarihi</label>
+                    <span id="metricDate" class="d-block mt-2">-</span>
+                </div>
             </div>
         </div>
 
-        <div class="content-row">
-            <div class="main-timeline-area">
-                <div class="row g-4">
-                    <!-- Column 1: Süreç Akışı -->
-                    <div class="col-md-6 border-end">
-                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                            <i class="fa-solid fa-code-branch me-2 text-primary"></i>
-                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0;">Süreç Akışı</h2>
+        <!-- Main Content Area (Bootstrap Grid) -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="bg-white p-4 rounded-4 border">
+                    <div class="row g-4">
+                        <!-- Column 1: Süreç Akışı -->
+                        <div class="col-md-6 border-end">
+                            <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                                <i class="fa-solid fa-code-branch me-2 text-primary"></i>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0;">Süreç Akışı</h2>
+                            </div>
+                            <div class="timeline" id="timelineContainerStatus"></div>
                         </div>
-                        <div class="timeline" id="timelineContainerStatus"></div>
-                    </div>
-                    
-                    <!-- Column 2: Dosya Makamı -->
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                            <i class="fa-solid fa-building-columns me-2 text-danger"></i>
-                            <h2 style="font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0;">Makamsal Akış</h2>
+                        
+                        <!-- Column 2: Dosya Makamı -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                                <i class="fa-solid fa-building-columns me-2 text-danger"></i>
+                                <h2 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0;">Makamsal Akış</h2>
+                            </div>
+                            <div class="timeline" id="timelineContainerMakam"></div>
                         </div>
-                        <div class="timeline" id="timelineContainerMakam"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="side-panel">
-                <div class="content-section" style="background: white; padding: 1.5rem; border-radius: 1.25rem; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #1e293b;">
-                        <i class="fa-solid fa-circle-info me-2 text-primary"></i> Hızlı Bilgi
-                    </h3>
-                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.6;">
-                        Bu dosya <span id="quickYear"></span> yılına ait iade taleplerini içermektedir. Tüm yazışmalar "Dosya ve Yazışmalar" sekmesinden takip edilebilir.
-                    </p>
+            <div class="col-lg-4">
+                <!-- Hızlı Bilgi Card -->
+                <div class="side-card">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h3 class="m-0 fw-bold" style="font-size: 1.1rem; color: #1e293b;">
+                            <i class="fa-solid fa-circle-info me-2 text-primary"></i> Hızlı Bilgi
+                        </h3>
+                        <button onclick="addQuickNote()" class="btn btn-sm btn-primary rounded-circle" style="width: 28px; height: 28px; padding: 0;">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="quickNotesList" style="max-height: 500px; overflow-y: auto;">
+                        <div class="text-center py-3 text-muted small">Yükleniyor...</div>
+                    </div>
+
+                    <div id="quickInfoDefault" style="display: none;">
+                        <hr class="my-3 opacity-50">
+                        <p class="small text-secondary m-0">
+                            Bu dosya <span id="quickYear" class="fw-bold"></span> yılına ait iade taleplerini içermektedir.
+                        </p>
+                    </div>
                 </div>
                 
                 <div id="guaranteeInfoCard" style="display:none;"></div>
@@ -280,42 +309,60 @@
     }
 
     async function initDetailPage() {
-        const response = await fetch(`/api/kdv/file/${FILE_ID}`);
-        const file = await response.json();
-        
-        if (file.status === 'error') {
-            Swal.fire('Hata', file.message, 'error').then(() => history.back());
-            return;
+        try {
+            console.log("KDV Detay sayfası başlatılıyor...");
+            const response = await fetch(`/api/kdv/file/${FILE_ID}`);
+            const file = await response.json();
+            
+            if (file.status === 'error') {
+                Swal.fire('Hata', file.message, 'error').then(() => history.back());
+                return;
+            }
+
+            // --- Header & Global Data ---
+            const fields = {
+                'fileDetailTitle': file.client_name,
+                'headerPeriod': file.period,
+                'headerSubject': file.subject,
+                'fileTotalRequested': '₺ ' + formatMoney(file.amount_request),
+                'fileBadge': file.status.toUpperCase(),
+                'metricStatus': file.status,
+                'metricLocation': file.location || '---',
+                'metricDate': file.date
+            };
+
+            for (const [id, value] of Object.entries(fields)) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = value;
+            }
+            
+            if (file.period && document.getElementById('quickYear')) {
+                document.getElementById('quickYear').innerText = file.period.split('.')[1] || '2026';
+            }
+
+            // --- Render Components ---
+            renderTimeline(file.history || []);
+            renderDocuments(file.documents || []);
+            renderNotes(file.notes || []);
+            renderGuaranteeCard(file);
+            
+            // Default Info Visibility (if no notes)
+            const defaultInfo = document.getElementById('quickInfoDefault');
+            if (defaultInfo) {
+                defaultInfo.style.display = (!file.notes || file.notes.length === 0) ? 'block' : 'none';
+            }
+
+        } catch (e) {
+            console.error("initDetailPage Hatası:", e);
         }
-
-        // Header Data
-        document.getElementById('fileDetailTitle').innerText = file.client_name;
-        document.getElementById('headerPeriod').innerText = file.period;
-        document.getElementById('headerSubject').innerText = file.subject;
-        document.getElementById('fileTotalRequested').innerText = '₺ ' + formatMoney(file.amount_request);
-        document.getElementById('fileBadge').innerText = file.status.toUpperCase();
-        
-        // Quick Info Year
-        if (file.period) {
-            document.getElementById('quickYear').innerText = file.period.split('.')[1] || '2025';
-        }
-
-        // Metrics
-        document.getElementById('metricStatus').innerText = file.status;
-        document.getElementById('metricLocation').innerText = file.location || '---';
-        document.getElementById('metricDate').innerText = file.date;
-
-        renderTimeline(file.history);
-        renderGuaranteeCard(file);
     }
-    
+
     function renderTimeline(history) {
         const containerStatus = document.getElementById('timelineContainerStatus');
         const containerMakam = document.getElementById('timelineContainerMakam');
-        
+        if (!containerStatus || !containerMakam) return;
+
         const makamItems = STAGES_FLAT['Vergi Dairesi (Makam)'] || [];
-        
-        // Filter History
         const statusHistory = history.filter(h => !makamItems.includes(h.text));
         const makamHistory = history.filter(h => makamItems.includes(h.text));
         
@@ -330,7 +377,6 @@
         containerMakam.innerHTML = makamHistory.length ? makamHistory.map(h => renderItem(h, 'danger')).join('') : '<div class="text-muted small fst-italic py-3">Henüz makam hareketi yok.</div>';
     }
 
-    // --- Document & Status Logic Refactored ---
     const DOC_CATEGORIES = {
         'İade Dilekçesi': 'list-petitions',
         'Kontrol Raporu': 'list-reports',
@@ -339,20 +385,16 @@
     };
 
     function renderDocuments(documents) {
-        // Clear all lists first
         Object.values(DOC_CATEGORIES).forEach(id => {
             const el = document.getElementById(id);
             if(el) el.innerHTML = '<div class="text-muted small text-center py-2">Henüz belge yok.</div>';
         });
 
-        if (!documents || documents.length === 0) return;
-
+        if (!documents) return;
         documents.forEach(doc => {
             const listId = DOC_CATEGORIES[doc.type];
             if (!listId) return;
-
             const listEl = document.getElementById(listId);
-            // safe check if it was cleared and has the empty message
             if (listEl.innerHTML.includes('Henüz belge yok')) listEl.innerHTML = '';
 
             const itemHtml = `
@@ -365,26 +407,22 @@
                         </div>
                     </div>
                     <div class="d-flex gap-1">
-                        <a href="/static/${doc.file_path}" target="_blank" class="btn btn-sm btn-icon btn-white border text-primary" title="İndir/Görüntüle">
+                        <a href="/static/${doc.file_path}" download="${doc.name}" class="btn btn-sm btn-icon btn-white border text-primary" title="İndir">
                             <i class="fa-solid fa-download"></i>
                         </a>
                         <button onclick="deleteDocument(${doc.id})" class="btn btn-sm btn-icon btn-white border text-danger" title="Sil">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
-                </div>
-            `;
+                </div>`;
             listEl.insertAdjacentHTML('beforeend', itemHtml);
         });
     }
 
-    // Dynamic File Upload
     function uploadGeneric(docType) {
-        // Create a hidden file input dynamically
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.zip,.rar';
-        
         input.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -394,36 +432,21 @@
             formData.append('file_id', FILE_ID);
             formData.append('doc_type', docType);
 
-            // Show loading
             Swal.fire({title: 'Yükleniyor...', didOpen: () => Swal.showLoading()});
 
             try {
-                const res = await fetch('/api/kdv/upload-doc', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/kdv/upload-doc', { method: 'POST', body: formData });
                 const result = await res.json();
-                
                 if (result.status === 'success') {
-                    Swal.fire({
-                        icon: 'success', 
-                        title: 'Başarılı', 
-                        padding: '2em',
-                        background: '#fff',
-                        timer: 1500, 
-                        showConfirmButton: false
-                    });
-                    // Refresh details to re-render documents
+                    Swal.fire({ icon: 'success', title: 'Başarılı', timer: 1500, showConfirmButton: false });
                     initDetailPage();
                 } else {
                     Swal.fire('Hata', result.message, 'error');
                 }
             } catch (err) {
-                console.error(err);
-                Swal.fire('Hata', 'Yükleme sırasında bir sorun oluştu.', 'error');
+                Swal.fire('Hata', 'Yükleme sırasında bir hata oluştu.', 'error');
             }
         };
-        
         input.click();
     }
 
@@ -433,9 +456,8 @@
             text: "Bu belge kalıcı olarak silinecektir.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Evet, Sil',
-            cancelButtonText: 'İptal',
-            confirmButtonColor: '#ef4444'
+            confirmButtonText: 'Sil',
+            cancelButtonText: 'İptal'
         });
 
         if (result.isConfirmed) {
@@ -443,45 +465,137 @@
                 const res = await fetch(`/api/kdv/document/delete/${docId}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    Swal.fire('Silindi', 'Belge başarıyla silindi.', 'success');
+                    Swal.fire('Silindi', 'Belge silindi.', 'success');
+                    initDetailPage();
+                }
+            } catch (err) { Swal.fire('Hata', 'Silme işlemi başarısız.', 'error'); }
+        }
+    }
+
+    function renderNotes(notes) {
+        const container = document.getElementById('quickNotesList');
+        if (!container) return;
+
+        if (!notes || notes.length === 0) {
+            container.innerHTML = '<div class="text-muted small text-center py-2">Bilgi bulunmuyor. <br>"+" butonuyla ekleyebilirsiniz.</div>';
+            return;
+        }
+
+        container.innerHTML = notes.map(note => `
+            <div class="quick-note-item p-3 mb-2 rounded-3 bg-light transition-all group-hover">
+                <div class="note-content small text-dark mb-1" style="line-height: 1.4; white-space: pre-wrap;">${note.note_text}</div>
+                <div class="note-meta d-flex gap-2 text-muted" style="font-size: 0.65rem;">
+                    <span><i class="fa-regular fa-clock me-1"></i>${note.created_at}</span>
+                    ${note.updated_at ? `<span class="text-primary fw-bold" title="Son Güncelleme: ${note.updated_at}"><i class="fa-solid fa-pen-nib me-1"></i>Güncellendi</span>` : ''}
+                </div>
+                <div class="note-actions position-absolute top-0 end-0 p-2 group-hover-visible transition-all">
+                    <button onclick="editQuickNote(${note.id}, \`${note.note_text.replace(/`/g, '\\`').replace(/'/g, "\\'").replace(/"/g, '\\"')}\`)" class="btn btn-sm btn-link text-primary p-0 h-auto border-0 shadow-none">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deleteQuickNote(${note.id})" class="btn btn-sm btn-link text-danger p-0 h-auto border-0 ms-1 shadow-none">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>`).join('');
+    }
+
+    async function addQuickNote() {
+        const { value: text } = await Swal.fire({
+            title: 'Hızlı Bilgi Ekle',
+            input: 'textarea',
+            inputPlaceholder: 'Buraya notunuzu yazın...',
+            showCancelButton: true,
+            confirmButtonText: 'Ekle',
+            cancelButtonText: 'İptal',
+            inputAttributes: { 'maxlength': 500 }
+        });
+
+        if (text && text.trim()) {
+            try {
+                const res = await fetch('/api/kdv/note/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_id: FILE_ID, text: text.trim() })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
                     initDetailPage();
                 } else {
                     Swal.fire('Hata', data.message, 'error');
                 }
-            } catch (err) {
-                Swal.fire('Hata', 'Silme işlemi başarısız.', 'error');
-            }
+            } catch (err) { console.error(err); }
         }
     }
 
-    // Modal Helpers
+    async function editQuickNote(noteId, currentText) {
+        const { value: text } = await Swal.fire({
+            title: 'Bilgiyi Güncelle',
+            input: 'textarea',
+            inputValue: currentText,
+            showCancelButton: true,
+            confirmButtonText: 'Güncelle',
+            cancelButtonText: 'İptal'
+        });
+
+        if (text !== undefined && text.trim() && text.trim() !== currentText) {
+            try {
+                const res = await fetch('/api/kdv/note/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: noteId, text: text.trim() })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    initDetailPage();
+                } else {
+                    Swal.fire('Hata', data.message, 'error');
+                }
+            } catch (err) { console.error(err); }
+        }
+    }
+
+    async function deleteQuickNote(noteId) {
+        const result = await Swal.fire({
+            title: 'Silinsin mi?',
+            text: "Bu bilgi kalıcı olarak kaldırılacaktır.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sil',
+            cancelButtonText: 'İptal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/api/kdv/note/delete/${noteId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    initDetailPage();
+                }
+            } catch (err) { console.error(err); }
+        }
+    }
+
     function openStatusUpdateModal(type) {
         currentUpdateType = type;
         selectedStatus = '';
-        
         const modalTitle = document.getElementById('modalTitle');
         const container = document.getElementById('statusPickerContainer');
         const descInput = document.getElementById('updateDescription');
         
-        descInput.value = ''; // Reset description
-        container.innerHTML = ''; // Clear previous
+        descInput.value = '';
+        container.innerHTML = '';
 
         let categoriesToShow = {};
-        
         if (type === 'location') {
             modalTitle.innerText = 'Dosya Makamını Güncelle';
             categoriesToShow['Vergi Dairesi (Makam)'] = STAGES_FLAT['Vergi Dairesi (Makam)'];
         } else {
             modalTitle.innerText = 'İşlem Durumunu Güncelle';
-            // All except Makam
             for (const [cat, items] of Object.entries(STAGES_FLAT)) {
-                if (cat !== 'Vergi Dairesi (Makam)') {
-                    categoriesToShow[cat] = items;
-                }
+                if (cat !== 'Vergi Dairesi (Makam)') categoriesToShow[cat] = items;
             }
         }
         
-        // Render
         let html = '';
         for (const [cat, items] of Object.entries(categoriesToShow)) {
             html += `<div class="status-picker-category"><h4>${cat}</h4><div class="status-picker-items">`;
@@ -491,7 +605,6 @@
             html += `</div></div>`;
         }
         container.innerHTML = html;
-        
         new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();
     }
     
@@ -503,51 +616,28 @@
 
     async function submitStatusUpdate() {
         if (!selectedStatus) { Swal.fire('Uyarı', 'Lütfen bir seçim yapınız.', 'warning'); return; }
-        
-        const data = {
-            file_id: FILE_ID,
-            description: document.getElementById('updateDescription').value
-        };
-        
-        // Use different payload depending on update type
-        if (currentUpdateType === 'location') {
-            data.location = selectedStatus;
-            // Don't send 'status' key if we only update location, backend must handle partial update?
-            // Existing backend `update_status` expects `status` AND `location` usually.
-            // Let's check backend logic implies. 
-            // Step 1119 view showed:
-            // `new_status = data.get('status')`
-            // `new_location = data.get('location')`
-            // It updates whatever is present.
-            // If I send just location, status remains?
-            // Actually let's just send what is changed.
-            data.location = selectedStatus;
-        } else {
-            data.status = selectedStatus;
-        }
+        const data = { file_id: FILE_ID, description: document.getElementById('updateDescription').value };
+        if (currentUpdateType === 'location') data.location = selectedStatus;
+        else data.status = selectedStatus;
 
         try {
             const res = await fetch('/api/kdv/update-status', {
                 method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
             });
             const result = await res.json();
-            
             if(result.status === 'success') {
                 bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal')).hide();
-                initDetailPage(); // Reloads page data
+                initDetailPage();
                 Swal.fire('Başarılı', 'Güncelleme yapıldı.', 'success');
             } else {
                 Swal.fire('Hata', result.message || 'Güncelleme başarısız.', 'error');
             }
-        } catch(e) {
-            Swal.fire('Hata', 'Sunucu hatası.', 'error');
-        }
+        } catch(e) { Swal.fire('Hata', 'Sunucu hatası.', 'error'); }
     }
 
-    // ... Guarantee Card logic same as before ...
     function renderGuaranteeCard(file) {
-        // ... (reuse existing logic from previous file)
         const div = document.getElementById('guaranteeInfoCard');
+        if (!div) return;
         const remaining = getReportRemainingDays(file);
         if (remaining !== null) {
             div.style.display = 'block';
@@ -556,41 +646,10 @@
                     <small class="text-uppercase fw-bold text-secondary">Rapor Teslimine Kalan</small>
                     <div class="display-5 fw-bold my-2 ${remaining < 5 ? 'text-danger' : 'text-primary'}">${remaining} Gün</div>
                 </div>`;
+        } else {
+            div.style.display = 'none';
         }
     }
-
-    // Override initDetailPage to call renderDocuments
-    const oldInit = initDetailPage;
-    initDetailPage = async function() {
-        const response = await fetch(`/api/kdv/file/${FILE_ID}`);
-        const file = await response.json();
-        
-        if (file.status === 'error') {
-            Swal.fire('Hata', file.message, 'error').then(() => history.back());
-            return;
-        }
-
-        // Header Data
-        document.getElementById('fileDetailTitle').innerText = file.client_name;
-        document.getElementById('headerPeriod').innerText = file.period;
-        document.getElementById('headerSubject').innerText = file.subject;
-        document.getElementById('fileTotalRequested').innerText = '₺ ' + formatMoney(file.amount_request);
-        document.getElementById('fileBadge').innerText = file.status.toUpperCase();
-        
-        // Quick Info Year
-        if (file.period) {
-            document.getElementById('quickYear').innerText = file.period.split('.')[1] || new Date().getFullYear();
-        }
-
-        // Metrics
-        document.getElementById('metricStatus').innerText = file.status;
-        document.getElementById('metricLocation').innerText = file.location || '---';
-        document.getElementById('metricDate').innerText = file.date;
-
-        renderTimeline(file.history);
-        renderDocuments(file.documents); // NEW
-        renderGuaranteeCard(file);
-    };
 
     document.addEventListener('DOMContentLoaded', initDetailPage);
 </script>

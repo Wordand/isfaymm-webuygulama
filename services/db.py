@@ -215,8 +215,6 @@ def migrate_users_table():
 # Removed redundant migrate_kdv_assignments_table
 
 def migrate_mukellef_table():
-    """mukellef tablosuna yeni kolonlari ekler."""
-    from services.db import get_conn
     with get_conn() as conn:
         cur = conn.cursor()
         try:
@@ -584,28 +582,7 @@ def migrate_kdv_mukellef_table():
         conn.commit()
     print("kdv_mukellef tablosu kontrol edildi.")
 
-def seed_fixed_users():
-    """Sistem için önerilen sabit kullanıcı hesaplarını oluşturur."""
-    from werkzeug.security import generate_password_hash
-    fixed_users = [
-        {"username": "admin", "role": "admin", "has_kdv": 1},
-        {"username": "uzman", "role": "uzman", "has_kdv": 1},
-        {"username": "ymm", "role": "ymm", "has_kdv": 1},
-        {"username": "denetci", "role": "denetci", "has_kdv": 1}
-    ]
-    
-    with get_conn() as conn:
-        cur = conn.cursor()
-        for u in fixed_users:
-            cur.execute("SELECT id FROM users WHERE username = %s", (u["username"],))
-            if not cur.fetchone():
-                hashed_pw = generate_password_hash("123456")
-                cur.execute("""
-                    INSERT INTO users (username, password, role, is_approved, has_kdv_access)
-                    VALUES (%s, %s, %s, 1, %s)
-                """, (u["username"], hashed_pw, u["role"], u["has_kdv"]))
-                print(f"Sabit kullanıcı oluşturuldu: {u['username']}")
-        conn.commit()
+
 
 def migrate_kdv_tables():
     """KDV takip sistemi için gerekli tabloları oluşturur."""
@@ -693,6 +670,7 @@ def migrate_kdv_tables():
                 type TEXT NOT NULL,
                 name TEXT NOT NULL,
                 date TEXT NOT NULL,
+                file_path TEXT,
                 parent_id INTEGER,
                 version INTEGER DEFAULT 1,
                 FOREIGN KEY (file_id) REFERENCES kdv_files(id) ON DELETE CASCADE
@@ -764,6 +742,7 @@ def migrate_kdv_tables():
                 type TEXT NOT NULL,
                 name TEXT NOT NULL,
                 date TEXT NOT NULL,
+                file_path TEXT,
                 parent_id INTEGER,
                 version INTEGER DEFAULT 1
             );
@@ -781,3 +760,50 @@ def migrate_kdv_tables():
 
         conn.commit()
     print("KDV tablolari kontrol edildi.")
+
+def migrate_kdv_documents_table():
+    """kdv_documents tablosuna eksik sütunları ekler."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            if USE_SQLITE:
+                cur.execute("PRAGMA table_info(kdv_documents)")
+                existing = {r["name"] for r in cur.fetchall()}
+            else:
+                cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='kdv_documents'")
+                existing = {r["column_name"] for r in cur.fetchall()}
+
+            if "file_path" not in existing:
+                print("'file_path' sutunu kdv_documents tablosuna ekleniyor...")
+                cur.execute('ALTER TABLE kdv_documents ADD COLUMN file_path TEXT')
+                conn.commit()
+        except Exception as e:
+            print(f"migrate_kdv_documents_table hatasi: {e}")
+
+def migrate_kdv_notes_table():
+    """KDV dosyaları için hızlı bilgi/notlar tablosunu oluşturur."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_id INTEGER NOT NULL,
+                note_text TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT,
+                FOREIGN KEY (file_id) REFERENCES kdv_files(id) ON DELETE CASCADE
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_notes (
+                id SERIAL PRIMARY KEY,
+                file_id INTEGER NOT NULL REFERENCES kdv_files(id) ON DELETE CASCADE,
+                note_text TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT
+            );
+            """)
+        conn.commit()
+    print("kdv_notes tablosu kontrol edildi.")

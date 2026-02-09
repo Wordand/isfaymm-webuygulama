@@ -102,7 +102,7 @@
         <h1 class="h2 fw-bold text-dark mb-1">Mükellef Yönetimi</h1>
         <p class="text-secondary mb-0">İade süreçlerini yönettiğiniz stratejik mükellef portföyü.</p>
     </div>
-    {% if session.role in ('admin', 'ymm', 'uzman') %}
+    {% if session.role in ('admin', 'ymm', 'uzman', 'yonetici') %}
     <div class="col-auto">
         <button class="add-button-float" data-bs-toggle="modal" data-bs-target="#mukellefModal">
             <i class="fa-solid fa-plus me-2"></i> Yeni Mükellef Tanımla
@@ -161,7 +161,7 @@
                     Dosyaları Gör <i class="fa-solid fa-arrow-right ms-2 scale-75"></i>
                 </a>
                 <div class="d-flex gap-2">
-                    {% if session.role in ('admin', 'ymm', 'uzman') %}
+                    {% if session.role in ('admin', 'ymm', 'uzman', 'yonetici') %}
                     <button class="btn-action-circle edit-mukellef-btn" 
                             data-mukellef='{{ m|tojson|safe }}' 
                             title="Bilgileri Düzenle">

@@ -14,8 +14,8 @@ from extensions import limiter, fernet
 from services.db import (
     migrate_users_table, migrate_login_logs_table, migrate_tesvik_columns, 
     migrate_tesvik_kullanim_table, migrate_profit_data_table, migrate_kdv_tables,
-    migrate_mukellef_table, migrate_kdv_mukellef_table,
-    seed_fixed_users, get_conn
+    migrate_mukellef_table, migrate_kdv_mukellef_table, migrate_kdv_documents_table,
+    migrate_kdv_notes_table, get_conn
 )
 from services.utils import safe_date, currency_filter, tlformat
 
@@ -115,9 +115,11 @@ with app.app_context():
         migrate_profit_data_table()
         migrate_kdv_mukellef_table() # Önce mukellef tablosu
         migrate_kdv_tables()        # Sonra bağımlı tablolar
+        migrate_kdv_documents_table() 
+        migrate_kdv_notes_table()
         migrate_mukellef_table()
         bootstrap_admin_from_env()
-        seed_fixed_users()          # Sabit kullanıcıları oluştur
+        
         print("Baslangic kontrolleri tamamlandi.")
     except Exception as e:
         print(f"Baslangic hatasi: {e}")
