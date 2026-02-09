@@ -207,8 +207,7 @@
         }
     </style>
 </head>
-{% set no_sidebar_endpoints = ['main.home', 'auth.login', 'auth.register', 'main.contact', 'main.about', 'main.team', 'blog.index', 'blog.detail', 'main.contact_post'] %}
-{% set show_sidebar = request.endpoint not in no_sidebar_endpoints %}
+{% set show_sidebar = session.get('user_id') is not none and request.endpoint not in ['auth.login', 'auth.register'] %}
 
 <body class="{{ 'no-sidebar-layout' if not show_sidebar else '' }}">
     <!-- 🟦 LOADER HTML -->

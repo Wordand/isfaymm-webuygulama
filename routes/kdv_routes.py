@@ -106,7 +106,7 @@ def mukellefler():
 
 @bp.route("/kdv-ayarlar")
 @kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin",))
 def settings():
     return render_template("kdv/settings.html")
 
@@ -370,7 +370,7 @@ def list_files():
 
 @bp.route("/api/kdv/users")
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin",))
 def get_kdv_users():
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -465,7 +465,7 @@ def kdv_log_action(user_name, action, description):
 
 @bp.route("/api/kdv/user-assignments/<int:user_id>")
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin",))
 def get_user_assignments(user_id):
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -482,7 +482,7 @@ def get_user_assignments(user_id):
 
 @bp.route("/api/kdv/assign-mukellef", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin",))
 def assign_mukellef():
     data = request.json
     user_id = data.get("user_id")
@@ -535,7 +535,7 @@ def assign_mukellef():
 
 @bp.route("/api/kdv/remove-assignment", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin",))
 def remove_assignment():
     data = request.json
     user_id = data.get("user_id")
@@ -580,7 +580,7 @@ def remove_assignment():
 
 @bp.route("/api/kdv/delete-user/<int:user_id>", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm"))
+@role_required(allow_roles=("admin",))
 def delete_kdv_user(user_id):
     with get_conn() as conn:
         c = conn.cursor()
@@ -824,9 +824,11 @@ def add_file():
 
 @bp.route("/api/kdv/update-status", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm"))
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def update_status():
     data = request.get_json()
+    user_id = session.get("user_id")
+    role = session.get("role")
 
     file_id = data.get("file_id")
     new_status = data.get("status")
@@ -845,12 +847,23 @@ def update_status():
         c = conn.cursor()
 
         # 🔍 Dosya var mı?
-        c.execute("SELECT id FROM kdv_files WHERE id = %s", (file_id,))
-        if not c.fetchone():
+        c.execute("SELECT id, mukellef_id FROM kdv_files WHERE id = %s", (file_id,))
+        file_row = c.fetchone()
+        if not file_row:
             return jsonify({
                 "status": "error",
                 "message": "Dosya bulunamadı."
             }), 404
+
+        # 🔐 UZMAN → SADECE ATANMIŞ MÜKELLEF
+        if role == "uzman":
+            c.execute("""
+                SELECT 1
+                FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (user_id, file_row["mukellef_id"]))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Bu dosya üzerinde işlem yapma yetkiniz yok."}), 403
 
         # 🔄 Statü güncelleme
         if new_status:
@@ -986,23 +999,29 @@ def toggle_active():
 
 @bp.route("/api/kdv/add-mukellef", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def add_kdv_mukellef():
     data = request.json
+    user_id = session.get("user_id")
+    role = session.get("role")
 
     if not data.get("vkn") or not data.get("unvan"):
         return jsonify({"status": "error", "message": "VKN ve Ünvan zorunludur."}), 400
 
     with get_conn() as conn:
         c = conn.cursor()
-        c.execute("""
+        
+        from services.db import USE_SQLITE
+        
+        insert_query = """
             INSERT INTO kdv_mukellef (
                 vkn, unvan, vergi_dairesi, ilgili_memur,
                 sektor, adres, yetkili_ad_soyad,
                 yetkili_tel, yetkili_eposta
             )
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (
+        """
+        params = (
             data["vkn"], data["unvan"],
             data.get("vergi_dairesi"),
             data.get("ilgili_memur"),
@@ -1011,7 +1030,24 @@ def add_kdv_mukellef():
             data.get("yetkili_ad_soyad"),
             data.get("yetkili_tel"),
             data.get("yetkili_eposta"),
-        ))
+        )
+
+        if not USE_SQLITE:
+            insert_query += " RETURNING id"
+            c.execute(insert_query, params)
+            mukellef_id = c.fetchone()["id"]
+        else:
+            c.execute(insert_query, params)
+            mukellef_id = c.lastrowid
+
+        # 🔑 Eğer ekleyen Uzman ise, mükellefi kendisine otomatik ata
+        if role == "uzman":
+            c.execute("""
+                INSERT INTO kdv_user_assignments (user_id, mukellef_id)
+                VALUES (%s, %s)
+                ON CONFLICT (user_id, mukellef_id) DO NOTHING
+            """, (user_id, mukellef_id))
+
         conn.commit()
 
     return jsonify({"status": "success"})
@@ -1068,8 +1104,10 @@ def update_kdv_mukellef():
 
 @bp.route("/api/kdv/delete-mukellef", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def delete_kdv_mukellef():
+    role = session.get("role")
+    user_id = session.get("user_id")
     mid = request.json.get("id")
 
     if not mid:
@@ -1077,6 +1115,17 @@ def delete_kdv_mukellef():
 
     with get_conn() as conn:
         c = conn.cursor()
+
+        # 🔒 UZMAN → SADECE ATANMIŞ MÜKELLEF
+        if role == "uzman":
+            c.execute("""
+                SELECT 1
+                FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (user_id, mid))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Bu mükellefi silme yetkiniz yok."}), 403
+
         c.execute("DELETE FROM kdv_mukellef WHERE id = %s", (mid,))
         conn.commit()
 
@@ -1215,15 +1264,37 @@ def upload_document():
 
 @bp.route("/api/kdv/document/delete/<int:doc_id>", methods=["DELETE"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin", "ymm", "yonetici"))
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def delete_document(doc_id):
+    user_id = session.get("user_id")
+    role = session.get("role")
+
     with get_conn() as conn:
         c = conn.cursor()
 
-        c.execute("SELECT file_path FROM kdv_documents WHERE id = %s", (doc_id,))
+        # 🔒 YETKİ KONTROLÜ
+        c.execute("""
+            SELECT d.file_path, f.mukellef_id 
+            FROM kdv_documents d
+            JOIN kdv_files f ON d.file_id = f.id
+            WHERE d.id = %s
+        """, (doc_id,))
         row = c.fetchone()
 
-        if row and row.get("file_path"):
+        if not row:
+            return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+
+        if role == "uzman":
+            # Uzman → sadece kendine atanmış mükellefin belgesini silebilir
+            c.execute("""
+                SELECT 1
+                FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (user_id, row["mukellef_id"]))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Bu belgeyi silme yetkiniz yok."}), 403
+
+        if row.get("file_path"):
             import os
             try:
                 full_path = os.path.join(current_app.root_path, "static", row["file_path"])
