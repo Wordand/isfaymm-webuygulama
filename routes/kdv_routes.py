@@ -112,7 +112,7 @@ def settings():
 
 @bp.route("/kdv-portal/verify", methods=["GET", "POST"])
 @login_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def verify_pin():
     if request.method == "POST":
         input_pin = request.form.get("pin")
