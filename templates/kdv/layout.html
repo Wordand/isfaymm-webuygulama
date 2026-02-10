@@ -180,7 +180,7 @@
                     <span>İade Arşivi</span>
                 </a>
                 
-                {% if session.get('role') == 'admin' %}
+                {% if session.get('role') in ('admin', 'ymm', 'yonetici') %}
                 <div class="kdv-nav-divider"></div>
                 
                 <a href="{{ url_for('kdv.settings') }}" class="kdv-nav-item {% if request.endpoint == 'kdv.settings' %}active{% endif %}">

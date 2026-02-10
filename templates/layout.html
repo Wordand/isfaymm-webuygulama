@@ -197,7 +197,7 @@
         }
 
         #intro-loader {
-            animation: safeAutoRemove 5s forwards; /* Failsafe */
+            animation: safeAutoRemove 6s forwards; /* Failsafe updated for 4s total flow */
         }
         
         #intro-loader.fade-out {
@@ -379,13 +379,13 @@
             const loader = document.getElementById("intro-loader");
             
             if (loader) {
-                // Safety Timeout: Force remove after 4 seconds max
+                // Safety Timeout: Force remove after 6 seconds max
                 setTimeout(() => {
                     if(document.body.contains(loader)) {
                         loader.style.opacity = '0';
                         setTimeout(() => loader.remove(), 500);
                     }
-                }, 4000);
+                }, 6000);
 
                 // Normal Flow
                 const hasSeenIntro = sessionStorage.getItem("isfa_intro_v3");
@@ -399,7 +399,7 @@
                     const slogans = document.querySelectorAll(".slogan-item");
                     
                     let progress = 0;
-                    const duration = 2000; 
+                    const duration = 3200; // Increased to 3.2s progress + 0.8s fade = 4s total
                     const intervalTime = 30;
                     const steps = duration / intervalTime;
                     const increment = 100 / steps;

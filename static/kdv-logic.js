@@ -81,6 +81,10 @@ async function fetchFiles() {
         if (mukellefId) {
             apiUrl += `&mukellef_id=${mukellefId}`;
         }
+        const personnelFilter = document.getElementById('dashboardPersonnelFilter');
+        if (personnelFilter && personnelFilter.value) {
+            apiUrl += `&user_id=${personnelFilter.value}`;
+        }
 
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Files fetch status: ' + response.status);
@@ -205,7 +209,67 @@ function populateRefundTypes() {
 
 function openNewFileModal() {
     const modal = new bootstrap.Modal(document.getElementById('newFileModal'));
+    initMonthSelector();
     modal.show();
+}
+
+const monthsList = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+let selectedMonths = [];
+
+function initMonthSelector() {
+    const container = document.getElementById('monthSelector');
+    if (!container) return;
+    
+    selectedMonths = [];
+    document.getElementById('modalPeriod').value = "";
+    
+    container.innerHTML = monthsList.map((m, i) => {
+        const val = (i + 1).toString().padStart(2, '0');
+        return `<button type="button" class="btn btn-outline-secondary btn-sm month-btn" data-val="${val}" onclick="toggleMonth(this)">${m}</button>`;
+    }).join('');
+
+    // Year change sync
+    document.getElementById('modalYear').onchange = () => {
+        const year = document.getElementById('modalYear').value;
+        if (selectedMonths.length > 0) {
+            document.getElementById('modalPeriod').value = selectedMonths.join('-') + '/' + year;
+        }
+    };
+}
+
+function toggleMonth(btn) {
+    const val = btn.dataset.val;
+    if (selectedMonths.includes(val)) {
+        selectedMonths = selectedMonths.filter(m => m !== val);
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-secondary');
+    } else {
+        selectedMonths.push(val);
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-primary');
+    }
+    
+    selectedMonths.sort();
+    const year = document.getElementById('modalYear').value;
+    if (selectedMonths.length > 0) {
+        document.getElementById('modalPeriod').value = selectedMonths.join('-') + '/' + year;
+    } else {
+        document.getElementById('modalPeriod').value = "";
+    }
+}
+
+function selectAllMonths() {
+    selectedMonths = monthsList.map((_, i) => (i + 1).toString().padStart(2, '0'));
+    document.querySelectorAll('.month-btn').forEach(btn => {
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-primary');
+    });
+    const year = document.getElementById('modalYear').value;
+    document.getElementById('modalPeriod').value = "01-12/" + year;
+    // Special case for all months: use 01-12 format or actual list? 
+    // User said "02-03-04/2025", so for all it should be "01-02-03-04-05-06-07-08-09-10-11-12/2025" or "01-12/2025".
+    // I'll use the full list for consistency unless it's too long.
+    document.getElementById('modalPeriod').value = selectedMonths.join('-') + '/' + year;
 }
 
 async function handleFileFormSubmit(e) {

@@ -151,10 +151,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.2s;
+        }
+
+        .assignment-item:hover {
+            background: #f8fafc;
         }
 
         .assignment-item:last-child {
             border-bottom: none;
+        }
+
+        .cursor-pointer {
+            cursor: pointer !important;
+        }
+
+        .hover-scale-sm:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .section-divider {
+            background: #f1f5f9;
+            padding: 8px 15px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 
@@ -296,8 +320,8 @@
                         </div>
                         
                         <div class="d-flex align-items-center gap-3 mt-2">
-                            <div class="atama-status">
-                                <i class="fa-solid fa-building"></i> ${count} Mükellef Atanmış
+                            <div class="atama-status cursor-pointer hover-scale-sm" onclick="openAssignmentModal(${u.id})">
+                                <i class="fa-solid fa-building"></i> <strong>${count}</strong> Mükellef Atanmış
                             </div>
                             <button class="btn-ata" onclick="openAssignmentModal(${u.id})">
                                 <i class="fa-solid fa-circle-plus"></i> Mükellef Ata
@@ -332,16 +356,42 @@
             const assigned = await res2.json();
             const assignedIds = assigned.map(a => a.id);
 
-            listContainer.innerHTML = allMukellefs.map(m => {
-                const isAssigned = assignedIds.includes(m.id);
-                return `
-                <div class="assignment-item">
-                    <div class="fw-bold" style="color: #334155; font-size: 0.95rem;">${m.unvan}</div>
-                    <button class="${isAssigned ? 'btn-kaldir-modal' : 'btn-ata-modal'}" onclick="toggleAssignment(${userId}, ${m.id}, ${isAssigned})">
-                        ${isAssigned ? 'Kaldır' : 'Ata'}
-                    </button>
-                </div>`;
-            }).join('');
+            const assignedItems = allMukellefs.filter(m => assignedIds.includes(m.id));
+            const availableItems = allMukellefs.filter(m => !assignedIds.includes(m.id));
+
+            let html = '';
+            
+            if (assignedItems.length > 0) {
+                html += '<div class="section-divider">Atanmış Mükellefler</div>';
+                html += assignedItems.map(m => `
+                    <div class="assignment-item" style="background: #f0fdf4;">
+                        <div class="fw-bold" style="color: #166534; font-size: 0.95rem;">
+                            <i class="fa-solid fa-circle-check me-2"></i>${m.unvan}
+                        </div>
+                        <button class="btn-kaldir-modal" onclick="toggleAssignment(${userId}, ${m.id}, true)">
+                            Kaldır
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            if (availableItems.length > 0) {
+                html += '<div class="section-divider">Atanabilir Mükellefler</div>';
+                html += availableItems.map(m => `
+                    <div class="assignment-item">
+                        <div style="color: #475569; font-size: 0.9rem;">${m.unvan}</div>
+                        <button class="btn-ata-modal" onclick="toggleAssignment(${userId}, ${m.id}, false)">
+                            Ata
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            if (html === '') {
+                html = '<div class="p-5 text-center text-secondary">Mükellef bulunamadı.</div>';
+            }
+
+            listContainer.innerHTML = html;
 
         } catch (e) {
             listContainer.innerHTML = '<div class="p-3 text-danger">Mükellefler yüklenemedi.</div>';

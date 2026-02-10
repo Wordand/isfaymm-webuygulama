@@ -24,17 +24,32 @@ bp = Blueprint('report', __name__)
 
 # --- KDV Helpers ---
 
+# Satır sıralaması için öncelik haritası (Sayfa 1 Sırasına Göre)
+ROW_ORDER_PRIORITY = {
+    # MATRAH
+    "Toplam Matrah": 1, 
+    "Hesaplanan KDV": 2, 
+    "Daha Önce İndirim Konusu Yapılan KDV'nin İlavesi": 3, 
+    "Daha Önce İndirim Konusu Yapılan KDV’nin İlavesi": 3, 
+    "Toplam KDV": 4,
+    # SONUÇ HESAPLARI
+    "Tecil Edilecek KDV": 1, 
+    "Ödenmesi Gereken KDV": 2, 
+    "İade Edilmesi Gereken KDV": 3, 
+    "Sonraki Döneme Devreden KDV": 4,
+    # DİĞER BİLGİLER
+    "Teslim ve Hizmetlerin Karşılığını Teşkil Eden Bedel (Aylık)": 1,
+    "Teslim ve Hizmetlerin Karşılığını Teşkil Eden Bedel (Kümülatif)": 2,
+    "Kredi Kartı İle Tahsil Edilen": 3
+}
+
 CANON_SECTIONS = [
-    "TEVKİFAT UYGULANMAYAN İŞLEMLER",
-    "KISMİ TEVKİFAT UYGULANAN İŞLEMLER",
-    "DİĞER İŞLEMLER",
-    "MATRAH TOPLAMI",
+    "MATRAH",
+    "MATRAH DETAYI",
     "İNDİRİMLER",
-    "BU DÖNEME AİT İNDİRİLECEK KDV",
-    "İHRAÇ KAYDIYLA TESLİMLERE AİT BİLDİRİM",
-    "TAM İSTİSNA KAPSAMINA GİREN İŞLEMLER",
-    "DİĞER İADE HAKKI DOĞURAN İŞLEMLER",
-    "SONUÇ",
+    "İNDİRİMLER DETAYI",
+    "İSTİSNALAR VE İADE",
+    "SONUÇ HESAPLARI",
     "DİĞER BİLGİLER",
 ]
 
@@ -44,32 +59,27 @@ def _u(s):
 def classify_section(key: str) -> str:
     u = _u(key).strip()
     if key.startswith("§ "): return key[2:].strip()
-    if u.startswith("TEVKIFATSIZ"): return "TEVKİFAT UYGULANMAYAN İŞLEMLER"
-    if "KDVGUT" in u or "I/C-" in u or "KDV ORANI" in u or "TEVKIFAT ORANI" in u or "DIGER HIZMETLER" in u:
-        return "KISMİ TEVKİFAT UYGULANAN İŞLEMLER"
-    if u.startswith("MATRAH TOPLAMI") or u in {_u("Hesaplanan KDV"), _u("Toplam KDV")}: return "MATRAH TOPLAMI"
-    if "IADE EDILECEK KDV" in u or "IADE EDILMESI GEREKEN" in u: return "SONUÇ"
-    if "INDIRIMLER TOPLAMI" in u or "ONCEKI DONEMDEN DEVREDEN" in u or "YURTICI ALIM KDV" in u: return "İNDİRİMLER"
-    if re.match(r"^\d{1,2}\s*-\s*(MATR|VERGI)", u) or "BU DONEME AIT INDIRILECEK KDV TOPLAMI" in u: return "BU DÖNEME AİT İNDİRİLECEK KDV"
-    if u.startswith("IHRAC") or "IHRACATIN" in u: return "İHRAÇ KAYDIYLA TESLİMLERE AİT BİLDİRİM"
-    if "TESLIM VE HIZMET TUTARI" in u or "YUKLENILEN KDV" in u: return "TAM İSTİSNA KAPSAMINA GİREN İŞLEMLER"
-    if u.endswith("IADEYE KONU OLAN KDV") or u.endswith("TESLIM BEDELI"): return "DİĞER İADE HAKKI DOĞURAN İŞLEMLER"
-    if "SONRAKI DONEME DEVREDEN" in u or u.startswith("TECIL EDILECEK") or u.startswith("BU DONEMDE ODENMESI"): return "SONUÇ"
-    if u.startswith("TESLIM VE HIZMETLERIN KARSILIGINI"): return "DİĞER BİLGİLER"
-    return "DİĞER İŞLEMLER"
+    
+    # 1. Kodlu Detay Kalemleri (Sayfa 2-3)
+    if re.match(r"^(1100|616|504|113|114|115|116|117|118|119|120)\b", u): return "MATRAH DETAYI"
+    if re.match(r"^(103|108|109|110)\b", u) or "INDIRIM (% " in u or "ONCEKI DONEMDEN DEVREDEN KDV" in u:
+        return "İNDİRİMLER DETAYI"
+    if re.match(r"^(301|302|303|304|338|450)\b", u) or "TESLIM TUTARI" in u or "YUKLENILEN KDV" in u or "IADEYE KONU" in u:
+        return "İSTİSNALAR VE İADE"
+
+    # 2. Özet Başlıklar (Sayfa 1)
+    if any(x in u for x in ["TOPLAM MATRAH", "HESAPLANAN KDV", "ILAVESI", "TOPLAM KDV"]): return "MATRAH"
+    if "INDIRIMLER TOPLAMI" in u: return "İNDİRİMLER"
+    if any(x in u for x in ["SONRAKI DONEME DEVREDEN", "ODENMESI GEREKEN", "IADE EDILMESI GEREKEN", "TECIL EDILECEK"]):
+        return "SONUÇ HESAPLARI"
+    if any(x in u for x in ["BEDEL (AYLIK)", "BEDEL (KUMULATIF)", "KREDI KARTI"]): return "DİĞER BİLGİLER"
+    if "ISTISNA" in u or "IADE EDILEBILIR" in u or "ISTISNALARA ILISKIN BILGILER" in u: return "İSTİSNALAR VE İADE"
+
+    return "MATRAH DETAYI"
 
 def normalize_row_key(key: str) -> str:
     if key.startswith("§ "): return key
-    u = _u(key)
-    if "ALINAN MALLARIN IADESI" in u: return "Alınan Malların İadesi - " + ("Matrah" if "MATR" in u else "Vergi")
-    if ("AMORTIS" in u or "SABIT KIYMET" in u or "MAKINE" in u): return "Amortis mana Tabi Sabit Kıymet - " + ("Matrah" if "MATR" in u else "Vergi")
-    if "DIGER HIZMETLER" in u:
-        suffix = "Matrah"
-        if "KDV ORANI" in u: suffix = "KDV Oranı"
-        elif "TEVKIFAT ORANI" in u: suffix = "Tevkifat Oranı"
-        elif "VERG" in u: suffix = "Vergi"
-        return f"Diğer Hizmetler - {suffix}"
-    return key
+    return re.sub(r"[,\s]+", " ", key).strip()
 
 def consolidate_kdv_rows(kdv_data: dict) -> dict:
     out = {}
@@ -82,20 +92,33 @@ def consolidate_kdv_rows(kdv_data: dict) -> dict:
     return out
 
 def reorder_by_section(kdv_data: dict) -> "OrderedDict[str, dict]":
+    # 1. Consolidate and Classify with Normalization
+    unique_data = OrderedDict()
+    for k, v in kdv_data.items():
+        norm_k = normalize_row_key(k)
+        # If a normalized key already exists, we assume the first one encountered is sufficient
+        # or we could merge values if needed, but for now, just take the first.
+        if norm_k not in unique_data:
+            unique_data[norm_k] = v
+        else:
+            # If the original key is different but normalized key is same,
+            # we might want to merge values if one has more complete data.
+            # For simplicity, we'll just keep the first one for now.
+            pass
+
     buckets = {sec: [] for sec in CANON_SECTIONS}
-    orphans = []
-    for key in kdv_data:
+    for key in unique_data:
         if key.startswith("§ "): continue
         sec = classify_section(key)
         if sec in buckets: buckets[sec].append(key)
-        else: orphans.append(key)
+    
     out = OrderedDict()
     for sec in CANON_SECTIONS:
-        hdr = f"§ {sec}"
-        if buckets.get(sec) or hdr in kdv_data:
-            out[hdr] = kdv_data.get(hdr, {})
-            for r in buckets.get(sec, []): out[r] = kdv_data[r]
-    for r in orphans: out[r] = kdv_data[r]
+        rows = buckets[sec]
+        if rows or sec in ["MATRAH", "İNDİRİMLER", "SONUÇ HESAPLARI"]: # Önemli başlıklar boş olsa da gelsin
+            out[f"§ {sec}"] = {} 
+            for r in sorted(rows): # Satırları kendi içinde sırala
+                out[r] = kdv_data[r]
     return out
 
 # --- Routes ---
@@ -178,9 +201,49 @@ def rapor_kdv():
                 except Exception as e: print(e)
 
     kdv_months = sorted(set(kdv_months), key=month_key)
-    kdv_data = reorder_by_section(consolidate_kdv_rows(kdv_data))
     
-    return render_template("reports/rapor_kdv.html", secili_unvan=unvan, secili_vkn=vkn, secili_donemler=donemler, kdv_data=kdv_data, kdv_months=kdv_months)
+    # --- Summary Metrics & Validation ---
+    kdv_summary = {m: {"matrah": 0, "hesaplanan": 0, "indirim": 0, "devreden": 0, "odenecek": 0, "iade": 0} for m in kdv_months}
+    inconsistencies = []
+    
+    # Track sub-totals for validation
+    calc_checks = {m: {"sub_matrah": 0, "sub_kdv": 0} for m in kdv_months}
+
+    for alan, aylik in kdv_data.items():
+        u_alan = _u(alan)
+        for m, v in aylik.items():
+            val = to_float_turkish(v) or 0
+            # KPI Extraction
+            if "MATRAH TOPLAMI" in u_alan: kdv_summary[m]["matrah"] = val
+            elif "HESAPLANAN KDV" in u_alan or "TOPLAM KDV" in u_alan: kdv_summary[m]["hesaplanan"] = val
+            elif "INDIRIMLER TOPLAMI" in u_alan: kdv_summary[m]["indirim"] = val
+            elif "SONRAKI DONEME DEVREDEN" in u_alan: kdv_summary[m]["devreden"] = val
+            elif "ODENMESI GEREKEN" in u_alan: kdv_summary[m]["odenecek"] = val
+            elif "IADE EDILMESI GEREKEN" in u_alan: kdv_summary[m]["iade"] = val
+            
+            # Validation Logic: Sum up specific items to check against totals
+            if "(%" in u_alan and "- Matrah" in u_alan:
+                calc_checks[m]["sub_matrah"] += val
+            if "(%" in u_alan and "- Vergi" in u_alan:
+                calc_checks[m]["sub_kdv"] += val
+
+    # Perform Cross-Checks
+    for m in kdv_months:
+        if abs(kdv_summary[m]["matrah"] - calc_checks[m]["sub_matrah"]) > 1.0:
+            inconsistencies.append(f"{m} dönemi için Matrah Detayı toplamı ({calc_checks[m]['sub_matrah']:,.2f}) ile Toplam Matrah ({kdv_summary[m]['matrah']:,.2f}) uyumsuz.")
+        if abs(kdv_summary[m]["hesaplanan"] - calc_checks[m]["sub_kdv"]) > 1.0:
+            inconsistencies.append(f"{m} dönemi için KDV Detayı toplamı ({calc_checks[m]['sub_kdv']:,.2f}) ile Toplam KDV ({kdv_summary[m]['hesaplanan']:,.2f}) uyumsuz.")
+
+    processed_data = reorder_by_section(consolidate_kdv_rows(kdv_data))
+    
+    return render_template("reports/rapor_kdv.html", 
+                           secili_unvan=unvan, 
+                           secili_vkn=vkn, 
+                           secili_donemler=donemler, 
+                           kdv_data=processed_data, 
+                           kdv_months=kdv_months,
+                           kdv_summary=kdv_summary,
+                           inconsistencies=inconsistencies)
 
 @bp.route("/rapor-kdv-excel")
 @login_required
@@ -416,6 +479,28 @@ def pdf_belgeler_tablo():
          gelir_list = parsed.get("tablo") or parsed.get("veriler", [])
          return render_template("tables/tablo_gelir.html", tablo=gelir_list, unvan=unvan, donem=donem, vkn=vkn, donem_mapping={"cari": donem, "onceki": "Önceki Dönem"}, secilen_donem=donem_turu, gorunen_kolon="cari_donem" if donem_turu=="cari" else "onceki_donem")
     elif tur == "kdv":
-         return render_template("reports/rapor_kdv.html", secili_unvan=unvan, secili_vkn=vkn, secili_donemler=[donem], kdv_data=reorder_by_section(consolidate_kdv_rows({r["alan"]: {"Cari": r["deger"]} for r in parsed.get("veriler", [])})), kdv_months=["Cari"])
+         kdv_data_raw = {r["alan"]: {"Cari": r["deger"]} for r in parsed.get("veriler", [])}
+         kdv_months = ["Cari"]
+         
+         # --- Minimal Summary for Single View ---
+         kdv_summary = {"Cari": {"matrah": 0, "hesaplanan": 0, "indirim": 0, "devreden": 0, "odenecek": 0, "iade": 0}}
+         for alan, aylik in kdv_data_raw.items():
+            u_alan = _u(alan)
+            val = to_float_turkish(aylik.get("Cari")) or 0
+            if "MATRAH TOPLAMI" in u_alan: kdv_summary["Cari"]["matrah"] = val
+            elif "HESAPLANAN KDV" in u_alan or "TOPLAM KDV" in u_alan: kdv_summary["Cari"]["hesaplanan"] = val
+            elif "INDIRIMLER TOPLAMI" in u_alan: kdv_summary["Cari"]["indirim"] = val
+            elif "SONRAKI DONEME DEVREDEN" in u_alan: kdv_summary["Cari"]["devreden"] = val
+            elif "ODENMESI GEREKEN" in u_alan: kdv_summary["Cari"]["odenecek"] = val
+            elif "IADE EDILMESI GEREKEN" in u_alan: kdv_summary["Cari"]["iade"] = val
+
+         return render_template("reports/rapor_kdv.html", 
+                                secili_unvan=unvan, 
+                                secili_vkn=vkn, 
+                                secili_donemler=[donem], 
+                                kdv_data=reorder_by_section(consolidate_kdv_rows(kdv_data_raw)), 
+                                kdv_months=kdv_months,
+                                kdv_summary=kdv_summary,
+                                inconsistencies=[])
     
     return redirect(url_for("data.veri_giris"))

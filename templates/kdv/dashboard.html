@@ -75,14 +75,82 @@
     .card-status-warning::before { background: linear-gradient(to right, #f59e0b, #fbbf24); }
 
     .progress-pill-container { background: #f1f5f9; height: 6px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
-    .progress-pill-fill { height: 100%; background: #3b82f6; transition: width 1s ease; }
+    .progress-pill-pill-fill { height: 100%; background: #3b82f6; transition: width 1s ease; }
+
+    /* Premium Select Styling */
+    .select-premium {
+        height: auto !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+        cursor: pointer;
+    }
+    .select-premium optgroup {
+        font-weight: 800;
+        color: #1e3a8a;
+        background: #f8fafc;
+        margin-top: 10px;
+        padding: 8px;
+    }
+    .select-premium option {
+        font-weight: 500;
+        color: #475569;
+        padding: 8px;
+        background: white;
+    }
+    .select-premium:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .activity-item {
+        display: flex;
+        gap: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f8fafc;
+    }
+    .activity-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .activity-icon-box {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    .activity-content { flex-grow: 1; min-width: 0; }
+    .activity-title { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .activity-desc { 
+        font-size: 0.75rem; 
+        color: #64748b; 
+        line-height: 1.4;
+        word-wrap: break-word;
+        max-width: 85%;
+    }
+    .activity-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .activity-user { font-size: 0.7rem; font-weight: 600; color: #3b82f6; text-transform: uppercase; }
+    .activity-time { font-size: 0.7rem; color: #94a3b8; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-header d-flex justify-content-between align-items-center">
-    <div>
-        <h1 class="h3 fw-bold mb-1">KDV İade Takip Paneli</h1>
+    <div class="d-flex align-items-center gap-4">
+        <h1 class="h3 fw-bold mb-0">KDV İade Takip Paneli</h1>
+        
+        <div class="d-flex align-items-center bg-white px-3 py-2 rounded-4 border shadow-sm">
+            <span class="small fw-bold text-secondary me-2 text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Personel:</span>
+            <select class="form-select border-0 p-0 shadow-none fw-bold text-primary" id="dashboardPersonnelFilter" onchange="initDashboard()" style="font-size: 0.9rem; background: transparent; width: auto; min-width: 150px;">
+                <option value="">Tüm Ofis (Hepsi)</option>
+                {% for u in users_list %}
+                <option value="{{ u.id }}">{{ u.username|upper }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="d-flex gap-2">
         <button class="btn btn-outline-primary px-4 py-2 rounded-3 fw-bold add-mukellef-redirect">
@@ -149,7 +217,7 @@
 
 <!-- Charts Row -->
 <div class="row g-4 mb-5">
-    <div class="col-lg-8">
+    <div class="col-lg-7">
         <div class="chart-card">
             <div class="chart-header">
                 <h3>Aylık İade / Tahsilat Trendi</h3>
@@ -159,13 +227,13 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-5">
         <div class="chart-card">
             <div class="chart-header">
-                <h3>Dosya Durum Dağılımı</h3>
+                <h3><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i> Son 5 Aktivite</h3>
             </div>
-            <div class="chart-container">
-                <canvas id="statusDistChart"></canvas>
+            <div class="activity-list" id="recentActivitiesList">
+                <div class="text-center py-4 text-muted small">Yükleniyor...</div>
             </div>
         </div>
     </div>
@@ -205,18 +273,143 @@
                             <select id="modalClientId" class="form-select border-light bg-light rounded-3" required></select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small text-secondary">Dönem</label>
-                            <input type="month" id="modalPeriod" class="form-control border-light bg-light rounded-3" required>
+                            <label class="form-label fw-bold small text-secondary">Yıl</label>
+                            <select id="modalYear" class="form-select border-light bg-light rounded-3" required>
+                                <option value="2023">2023</option>
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                                <option value="2026">2026</option>
+                            </select>
                         </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold small text-secondary mb-0">Ay(lar) Seçimi</label>
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-bold" onclick="selectAllMonths()">Tümünü Seç</button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" id="monthSelector">
+                            <!-- JS ile dolacak (1-12) -->
+                        </div>
+                        <input type="hidden" id="modalPeriod" required>
                     </div>
                     <!-- ... other fields ... -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-secondary">İade Konusu</label>
-                            <select id="modalSubject" class="form-select border-light bg-light rounded-3" required>
-                                <option>İhracat İstisnası</option>
-                                <option>İndirimli Oran</option>
-                                <option>Tevkifat İadesi</option>
+                            <select id="modalSubject" class="form-select border-light bg-light rounded-3 shadow-sm select-premium" required>
+                                <option value="" selected disabled>İade kodunu veya konusunu seçiniz...</option>
+                                <optgroup label="Tam İstisna Kapsamına Giren İşlemler (300 Serisi)">
+                                    <option value="301">301 - Mal İhracatı</option>
+                                    <option value="302">302 - Hizmet İhracatı</option>
+                                    <option value="303">303 - Roaming Hizmetleri</option>
+                                    <option value="304">304 - Deniz, Hava ve Demiryolu Taşıma Araçları (13/a)</option>
+                                    <option value="305">305 - Liman/Hava Meydanı Hizmetleri (13/b)</option>
+                                    <option value="306">306 - Petrol Aramaları ve Boru Hatları (13/c)</option>
+                                    <option value="307">307 - Maden Arama, Altın, Gümüş, Platin (13/c)</option>
+                                    <option value="308">308 - Teşvikli Yatırım Malları Teslimi (13/d)</option>
+                                    <option value="309">309 - Limanlara Bağlantı Demiryolu/Hava Meydanı İnşası (13/e)</option>
+                                    <option value="310">310 - Ulusal Güvenlik Amaçlı Teslim/Hizmet (13/f)</option>
+                                    <option value="311">311 - Uluslararası Taşımacılık (14/1)</option>
+                                    <option value="312">312 - Diplomatik Organ ve Misyonlar (15/a)</option>
+                                    <option value="313">313 - Uluslararası Kuruluşlar (15/b)</option>
+                                    <option value="314">314 - Uluslararası Anlaşmalar Kapsamındaki İstisnalar (19/2)</option>
+                                    <option value="315">315 - İhracat Eşyası Taşıyan Kamyonlara Motorin Teslimi (14/3)</option>
+                                    <option value="316">316 - Serbest Bölgelerdeki Müşterilere Fason Hizmetler (11/1-a)</option>
+                                    <option value="317">317 - Engelliler İçin Araç-Gereç ve Program (17/4-s)</option>
+                                    <option value="318">318 - Yap-İşlet-Devret / Sağlık / Eğitim Projeleri (Geçici 29)</option>
+                                    <option value="319">319 - Başbakanlık Merkez Teşkilatına Araç Teslimi (13/g)</option>
+                                    <option value="320">320 - İSMEP Kapsamında Yapılacak Teslim/Hizmet (Geçici 16)</option>
+                                    <option value="321">321 - BM/NATO/OECD'ye Yapılacak Teslim/Hizmet (Geçici 26)</option>
+                                    <option value="322">322 - Özel Fatura ile Yapılan Teslimler (Bavul Ticareti)</option>
+                                    <option value="323">323 - Ürün Senetlerinin İlk Teslimi (13/ğ)</option>
+                                    <option value="324">324 - Türkiye Kızılay Derneğine Teslim ve Hizmetler (13/h)</option>
+                                    <option value="325">325 - Yem Teslimleri (13/ı)</option>
+                                    <option value="326">326 - Gübre Teslimleri (13/ı)</option>
+                                    <option value="327">327 - Gübre Hammaddesi Teslimi (13/ı)</option>
+                                    <option value="328">328 - Konut veya İşyeri Teslimlerinde İstisna (13/i)</option>
+                                    <option value="329">329 - FATİH Projesi Kapsamındaki Teslimler (Geçici 38)</option>
+                                    <option value="330">330 - OSB ve Küçük Sanayi Siteleri İnşası (13/j)</option>
+                                    <option value="331">331 - Ar-Ge ve Tasarım Makine/Teçhizat Teslimi (13/m)</option>
+                                    <option value="332">332 - İmalat Sanayine Makine/Teçhizat Teslimi (Geçici 39)</option>
+                                    <option value="333">333 - Kamu İdarelerine Bağışlanan Tesislerin İnşası (13/k)</option>
+                                    <option value="334">334 - Yabancılara Verilen Sağlık Hizmetleri (13/l)</option>
+                                    <option value="335">335 - Basılı Kitap ve Süreli Yayın Teslimi (13/n)</option>
+                                    <option value="336">336 - UEFA Süper Kupa ve Şampiyonlar Ligi Müsabakaları (Geçici 40)</option>
+                                    <option value="338">338 - İmalatçıların Mal İhracında İade bedeli (32. md)</option>
+                                    <option value="339">339 - İmalat/Turizm Belge Kapsamı İnşaat İşleri (Geçici 37)</option>
+                                    <option value="340">340 - Elektrikli Taşıt Geliştirme Mühendislik Hizmeti (Geçici 42)</option>
+                                    <option value="350">350 - Diğerleri</option>
+                                </optgroup>
+                                <optgroup label="Diğer İade Hakkı Doğuran İşlemler (400 Serisi)">
+                                    <option value="405">405 - İndirimli Orana Tabi İhraç Kayıtlı Teslimler (11/1-c)</option>
+                                    <option value="406">406 - İndirimli Oran - Yılı İçinde (29/2)</option>
+                                    <option value="408">408 - Yolcu Beraberi Eşya İhracatı (11/1-b)</option>
+                                    <option value="409">409 - Hurda ve Atık Teslimi Tevkifatı (9/1)</option>
+                                    <option value="410">410 - Yapım İşleri ve Mühendislik/Mimarlık Tevkifatı (9/1)</option>
+                                    <option value="411">411 - Temizlik Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="412">412 - Çevre ve Bahçe Bakım Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="413">413 - Özel Güvenlik Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="414">414 - Makine/Teçhizat/Taşıt Tadil ve Bakım Tevkifatı (9/1)</option>
+                                    <option value="415">415 - Yemek Servis Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="416">416 - Danışmanlık ve Denetim Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="418">418 - Bakır/Çinko/Alüminyum/Kurşun Külçe Tevkifatı (9/1)</option>
+                                    <option value="419">419 - Bakır/Çinko/Alüminyum Ürünleri Tevkifatı (9/1)</option>
+                                    <option value="420">420 - Yapı Denetim Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="421">421 - İşgücü Temin Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="423">423 - Fason Tekstil ve Konfeksiyon Tevkifatı (9/1)</option>
+                                    <option value="428">428 - Pamuk/Yün/Deri Teslim Tevkifatı (9/1)</option>
+                                    <option value="430">430 - Hurda Metalden Külçe Teslimi Tevkifatı (9/1)</option>
+                                    <option value="431">431 - Turistik Mağaza Müşteri Bulma Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="432">432 - Organizasyon Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="433">433 - Spor Kulüplerinin Yayın/Reklam Gelirleri Tevkifatı (9/1)</option>
+                                    <option value="434">434 - Servis Taşımacılığı Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="435">435 - Baskı ve Basım Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="436">436 - 5018 SK Eki Cetvel İdarelerine Diğer Hizmetler (9/1)</option>
+                                    <option value="437">437 - Atıklardan Elde Edilen Hammadde Tevkifatı (9/1)</option>
+                                    <option value="438">438 - Ağaç ve Orman Ürünleri Teslimi Tevkifatı (9/1)</option>
+                                    <option value="439">439 - İndirimli Oran - Yılık (29/2)</option>
+                                    <option value="440">440 - Stratejik Yatırımlara İlişkin İnşaat (Geçici 30)</option>
+                                    <option value="441">441 - Uluslararası Anlaşmalar Kapsamında İade (19/2)</option>
+                                    <option value="442">442 - İmalat Sanayi Yatırım Teşvik İnşaat İşleri (Geçici 37)</option>
+                                    <option value="443">443 - TürkAkım Projesi Kapsamında Teslim/Hizmet (19/2)</option>
+                                    <option value="444">444 - Kamu İdarelerine Bağışlanan Tesislerin İnşası (13/k)</option>
+                                    <option value="445">445 - Yük Taşımacılığı Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="446">446 - Ticari Reklam Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="447">447 - Diğer Teslimlerde Tevkifata Tabi Tutulan KDV (9/1)</option>
+                                    <option value="448">448 - Demir - Çelik Ürünlerinin Teslimi (9/1)</option>
+                                    <option value="450">450 - Diğerleri</option>
+                                </optgroup>
+                                <optgroup label="Tevkifatlı İşlemler (900 Serisi)">
+                                    <option value="901">901 - Hurda ve Atık Teslimi Tevkifatı (9/1)</option>
+                                    <option value="902">902 - Yapım İşleri Mimarlık/Mühendislik Tevkifatı (9/1)</option>
+                                    <option value="903">903 - Temizlik Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="904">904 - Çevre ve Bahçe Bakım Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="905">905 - Özel Güvenlik Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="906">906 - Makine/Teçhizat/Taşıt Bakım Tevkifatı (9/1)</option>
+                                    <option value="907">907 - Yemek Servis Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="908">908 - Etüt/Proje/Danışmanlık/Denetim Tevkifatı (9/1)</option>
+                                    <option value="909">909 - Bakır/Çinko/D-Çelik/Alüminyum Külçe Teslimi (9/1)</option>
+                                    <option value="910">910 - Bakır/Çinko/Alüminyum Ürünleri Tevkifatı (9/1)</option>
+                                    <option value="911">911 - Yapı Denetim Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="912">912 - İşgücü Temin Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="913">913 - Fason Tekstil ve Konfeksiyon Tevkifatı (9/1)</option>
+                                    <option value="914">914 - Pamuk/Yün/Deri Teslim Tevkifatı (9/1)</option>
+                                    <option value="915">915 - Hurda Metalden Külçe Teslimi Tevkifatı (9/1)</option>
+                                    <option value="916">916 - Turistik Mağaza Müşteri Bulma Tevkifatı (9/1)</option>
+                                    <option value="917">917 - Organizasyon Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="918">918 - Spor Kulüplerinin Yayın/Reklam/İsim Hakkı Tevkifatı (9/1)</option>
+                                    <option value="919">919 - Servis Taşımacılığı Hizmeti Tevkifatı (9/1)</option>
+                                    <option value="920">920 - Baskı ve Basım Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="921">921 - Atıklardan Elde Edilen Hammadde Tevkifatı (9/1)</option>
+                                    <option value="922">922 - Ağaç ve Orman Ürünleri Teslimi Tevkifatı (9/1)</option>
+                                    <option value="923">923 - Yük Taşımacılığı Hizmetleri Tevkifatı (9/1)</option>
+                                    <option value="924">924 - Ticari Reklam Hizmetlerinde Tevkifat (9/1)</option>
+                                    <option value="925">925 - Demir Çelik Ürünlerinin Teslimi (9/1)</option>
+                                </optgroup>
+                                <optgroup label="Tecil - Terkin İşlemleri (700 Serisi)">
+                                    <option value="701">701 - İhracatı Yapılacak Nihai Ürünlerin Teslimi (11/1-c)</option>
+                                    <option value="702">702 - DİİB veya GKİB Kapsamında Yapılan Teslim (Geçici 17)</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -325,8 +518,10 @@
         let apiUrl = '/api/kdv/files?active=1';
         const urlParams = new URLSearchParams(window.location.search);
         const mukellefId = urlParams.get('mukellef') || urlParams.get('mukellef_id');
+        const userId = document.getElementById('dashboardPersonnelFilter').value;
         
         if (mukellefId) apiUrl += `&mukellef_id=${mukellefId}`;
+        if (userId) apiUrl += `&user_id=${userId}`;
         
         let containerId = '';
         let modalId = '';
@@ -382,10 +577,14 @@
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const mukellefId = urlParams.get('mukellef') || urlParams.get('mukellef_id');
+            const userId = document.getElementById('dashboardPersonnelFilter').value;
+            
             let apiUrl = '/api/kdv/stats';
-            if (mukellefId) {
-                apiUrl += `?mukellef_id=${mukellefId}`;
-            }
+            const params = new URLSearchParams();
+            if (mukellefId) params.append('mukellef_id', mukellefId);
+            if (userId) params.append('user_id', userId);
+            
+            if (params.toString()) apiUrl += '?' + params.toString();
 
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error('Stats fetch status: ' + response.status);
@@ -413,40 +612,37 @@
     }
 
     function updateChartsWithData(data) {
-        // Status Distribution Chart
-        let labels = [];
-        let counts = [];
-        if (data.status_dist && data.status_dist.length > 0) {
-            labels = data.status_dist.map(d => d.status);
-            counts = data.status_dist.map(d => d.count);
-        } else {
-            labels = ['Veri Yok'];
-            counts = [1];
-        }
+        // Recent Activities List
+        const activityContainer = document.getElementById('recentActivitiesList');
+        if (activityContainer && data.recent_activities) {
+            if (data.recent_activities.length === 0) {
+                activityContainer.innerHTML = '<div class="text-center py-4 text-muted small">Henüz aktivite kaydı bulunmuyor.</div>';
+            } else {
+                activityContainer.innerHTML = data.recent_activities.map(act => {
+                    let icon = 'fa-circle-dot';
+                    if (act.action.includes('Durum')) icon = 'fa-arrows-rotate';
+                    if (act.action.includes('Dosya')) icon = 'fa-file-medical';
+                    if (act.action.includes('Yetki')) icon = 'fa-user-shield';
+                    if (act.action.includes('Yer')) icon = 'fa-location-dot';
 
-        const distCtx = document.getElementById('statusDistChart').getContext('2d');
-        if(window.statusChartInstance) window.statusChartInstance.destroy();
-        
-        window.statusChartInstance = new Chart(distCtx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: counts,
-                    backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#64748b'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
-                }
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-icon-box">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">${act.action}</div>
+                                <div class="activity-desc" title="${act.description}">${act.description}</div>
+                                <div class="activity-meta">
+                                    <span class="activity-user">${act.user_name}</span>
+                                    <span class="activity-time">${act.date}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
-        });
+        }
 
         // Trend Chart
         const trendCtx = document.getElementById('refundTrendChart').getContext('2d');

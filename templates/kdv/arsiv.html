@@ -33,6 +33,14 @@
                         <option value="0">Arşivlenmiş / Tamamlanmış</option>
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <select id="personnelFilter" class="form-select border-0 bg-light rounded-3" onchange="fetchArchive()">
+                        <option value="">Tüm Personel (Hepsi)</option>
+                        {% for u in users_list %}
+                        <option value="{{ u.id }}">{{ u.username|upper }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
         </div>
         <div class="card-body p-0">
@@ -64,9 +72,13 @@
     async function fetchArchive() {
         const active = document.getElementById('filterActive').value;
         const search = document.getElementById('archiveSearch').value.toLowerCase();
+        const userId = document.getElementById('personnelFilter').value;
         
         try {
-            const response = await fetch(`/api/kdv/files?active=${active}`);
+            let apiUrl = `/api/kdv/files?active=${active}`;
+            if (userId) apiUrl += `&user_id=${userId}`;
+            
+            const response = await fetch(apiUrl);
             let files = await response.json();
             
             if (search) {

@@ -49,13 +49,40 @@ STATUS_STAGES = {
 @kdv_access_required
 @role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def index():
-    return render_template("kdv/dashboard.html")
+    user_id = session.get("user_id")
+    role = session.get("role")
+    
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Get all users with KDV access for the filter dropdown
+        c.execute("""
+            SELECT id, username, role 
+            FROM users 
+            WHERE (has_kdv_access != 0 OR role = 'admin') 
+              AND lower(username) NOT IN ('uzman', 'ymm', 'yonetici')
+            ORDER BY username ASC
+        """)
+        users_list = [dict(r) for r in c.fetchall()]
+        
+    return render_template("kdv/dashboard.html", users_list=users_list)
 
 @bp.route("/kdv-arsiv")
 @kdv_access_required
 @role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def archive():
-    return render_template("kdv/arsiv.html")
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Get all users with KDV access for the filter dropdown
+        c.execute("""
+            SELECT id, username, role 
+            FROM users 
+            WHERE (has_kdv_access != 0 OR role = 'admin') 
+              AND lower(username) NOT IN ('uzman', 'ymm', 'yonetici')
+            ORDER BY username ASC
+        """)
+        users_list = [dict(r) for r in c.fetchall()]
+        
+    return render_template("kdv/arsiv.html", users_list=users_list)
 
 
 @bp.route("/kdv-detay/<int:file_id>")
@@ -79,34 +106,52 @@ def mukellefler():
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
+        # Get all users with KDV access for the filter dropdown
+        c.execute("""
+            SELECT id, username, role 
+            FROM users 
+            WHERE (has_kdv_access != 0 OR role = 'admin') 
+              AND lower(username) NOT IN ('uzman', 'ymm', 'yonetici')
+            ORDER BY username ASC
+        """)
+        users_list = [dict(r) for r in c.fetchall()]
+
         if role in ('admin', 'ymm', 'yonetici'):
-            # Tüm KDV mükellefleri
+            # Fetch all clients with their assigned usernames
             c.execute("""
                 SELECT m.*, 
                        (SELECT COUNT(*) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as active_files,
-                       (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request
+                       (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request,
+                       (SELECT STRING_AGG(u.username, ', ') 
+                        FROM users u 
+                        JOIN kdv_user_assignments kua ON kua.user_id = u.id 
+                        WHERE kua.mukellef_id = m.id) as assigned_names
                 FROM kdv_mukellef m 
                 ORDER BY m.unvan ASC
             """)
         else:
-            # Sadece atanmış KDV mükellefleri
+            # Fetch only assigned clients for this user
             c.execute("""
                 SELECT m.*, 
                        (SELECT COUNT(*) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as active_files,
-                       (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request
+                       (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request,
+                       (SELECT STRING_AGG(u.username, ', ') 
+                        FROM users u 
+                        JOIN kdv_user_assignments kua ON kua.user_id = u.id 
+                        WHERE kua.mukellef_id = m.id) as assigned_names
                 FROM kdv_mukellef m 
-                JOIN kdv_user_assignments kua ON kua.mukellef_id = m.id
-                WHERE kua.user_id = %s
+                JOIN kdv_user_assignments kua_filter ON kua_filter.mukellef_id = m.id
+                WHERE kua_filter.user_id = %s
                 ORDER BY m.unvan ASC
             """, (user_id,))
             
-        mukellefler = c.fetchall()
+        mukellefler = [dict(r) for r in c.fetchall()]
         
-    return render_template("kdv/mukellefler.html", mukellefler=mukellefler)
+    return render_template("kdv/mukellefler.html", mukellefler=mukellefler, users_list=users_list)
 
 @bp.route("/kdv-ayarlar")
 @kdv_access_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
 def settings():
     return render_template("kdv/settings.html")
 
@@ -146,6 +191,7 @@ def get_stats():
     user_id = session.get("user_id")
     role = session.get("role")
     mukellef_id = request.args.get("mukellef_id") or request.args.get("mukellef")
+    filter_user_id = request.args.get("user_id")
 
     def parse_money(val):
         if not val:
@@ -189,6 +235,10 @@ def get_stats():
         if mukellef_id:
             base_filter += " AND mukellef_id = %s"
             params.append(mukellef_id)
+
+        if filter_user_id:
+            base_filter += " AND user_id = %s"
+            params.append(filter_user_id)
 
         # 🔹 ANA DATA
         c.execute(
@@ -303,6 +353,18 @@ def get_stats():
             "trend_data": trend_data,
         }
 
+        # 🕒 Son 5 Aktivite
+        try:
+            c.execute("""
+                SELECT date, user_name, action, description
+                FROM kdv_system_logs
+                ORDER BY id DESC
+                LIMIT 5
+            """)
+            stats["recent_activities"] = [dict(r) for r in c.fetchall()]
+        except:
+            stats["recent_activities"] = []
+
     return jsonify(stats)
 
 
@@ -317,6 +379,7 @@ def list_files():
     mukellef_filter = request.args.get("mukellef_id") or request.args.get("mukellef")
     status_filter = request.args.get("status")
     filter_type = request.args.get("filter_type")  # guarantee
+    filter_user_id = request.args.get("user_id")
 
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -349,6 +412,10 @@ def list_files():
         if mukellef_filter:
             query += " AND f.mukellef_id = %s"
             params.append(mukellef_filter)
+            
+        if filter_user_id:
+            query += " AND f.user_id = %s"
+            params.append(filter_user_id)
 
         # 🔹 STATÜ FİLTRESİ
         if status_filter:
@@ -807,8 +874,19 @@ def add_file():
                 datetime.now().strftime("%d.%m.%Y %H:%M"),
                 "Dosya oluşturuldu"
             ))
+            
+            # Log için mükellef adını al
+            c.execute("SELECT unvan FROM kdv_mukellef WHERE id = %s", (mukellef_id,))
+            m_row = c.fetchone()
+            m_name = m_row["unvan"] if m_row else "Bilinmeyen"
 
             conn.commit()
+            
+            kdv_log_action(
+                session.get("username", "Admin"),
+                "Dosya Oluşturma",
+                f"{session.get('username')} \"{m_name}\" mükellefi {data.get('period')} dönemi için yeni iade dosyası ekledi."
+            )
 
         return jsonify({
             "status": "success",
@@ -845,9 +923,13 @@ def update_status():
 
     with get_conn() as conn:
         c = conn.cursor()
-
-        # 🔍 Dosya var mı?
-        c.execute("SELECT id, mukellef_id FROM kdv_files WHERE id = %s", (file_id,))
+        # 🔍 Dosya ve Mükellef Bilgisi
+        c.execute("""
+            SELECT f.*, m.unvan 
+            FROM kdv_files f
+            JOIN kdv_mukellef m ON f.mukellef_id = m.id
+            WHERE f.id = %s
+        """, (file_id,))
         file_row = c.fetchone()
         if not file_row:
             return jsonify({
@@ -877,6 +959,12 @@ def update_status():
                 INSERT INTO kdv_history (file_id, date, text, description)
                 VALUES (%s, %s, %s, %s)
             """, (file_id, now_str, new_status, description))
+            
+            kdv_log_action(
+                session.get("username", "Admin"),
+                "Durum Değişikliği",
+                f"{session.get('username')} \"{file_row['unvan']}\" mükellefinin {file_row['period']} dönemi süreç akışını \"{new_status}\" olarak değiştirdi."
+            )
 
         # 📍 Lokasyon güncelleme
         if new_location:
@@ -890,6 +978,12 @@ def update_status():
                 INSERT INTO kdv_history (file_id, date, text, description)
                 VALUES (%s, %s, %s, %s)
             """, (file_id, now_str, new_location, description))
+            
+            kdv_log_action(
+                session.get("username", "Admin"),
+                "Yer Değişikliği",
+                f"{session.get('username')} \"{file_row['unvan']}\" mükellefinin {file_row['period']} dönemi dosya lokasyonunu \"{new_location}\" olarak değiştirdi."
+            )
 
         conn.commit()
 
@@ -915,13 +1009,15 @@ def delete_file():
     with get_conn() as conn:
         c = conn.cursor()
 
-        # Dosya var mı?
-        c.execute("SELECT id FROM kdv_files WHERE id = %s", (file_id,))
-        if not c.fetchone():
-            return jsonify({
-                "status": "error",
-                "message": "Dosya bulunamadı."
-            }), 404
+        # Dosya ve Mükellef Bilgisini Log için Al
+        c.execute("""
+            SELECT f.period, m.unvan 
+            FROM kdv_files f
+            JOIN kdv_mukellef m ON f.mukellef_id = m.id
+            WHERE f.id = %s
+        """, (file_id,))
+        f_row = c.fetchone()
+        f_info = f"\"{f_row['unvan']}\" mükellefinin {f_row['period']} dönemi" if f_row else f"ID {file_id}"
 
         c.execute("DELETE FROM kdv_files WHERE id = %s", (file_id,))
         conn.commit()
@@ -929,7 +1025,7 @@ def delete_file():
         kdv_log_action(
             session.get("username", "Admin"),
             "Dosya Silme",
-            f"ID {file_id} olan KDV dosyası silindi."
+            f"{session.get('username')} {f_info} iade dosyasını sildi."
         )
 
     return jsonify({"status": "success"})
@@ -1049,6 +1145,12 @@ def add_kdv_mukellef():
             """, (user_id, mukellef_id))
 
         conn.commit()
+        
+        kdv_log_action(
+            session.get("username", "Admin"),
+            "Mükellef Ekleme",
+            f"{session.get('username')} \"{data['unvan']}\" mükellefini sisteme ekledi."
+        )
 
     return jsonify({"status": "success"})
 
@@ -1099,6 +1201,12 @@ def update_kdv_mukellef():
             mid
         ))
         conn.commit()
+        
+        kdv_log_action(
+            session.get("username", "Admin"),
+            "Mükellef Güncelleme",
+            f"{session.get('username')} \"{data.get('unvan')}\" mükellefini güncelledi."
+        )
 
     return jsonify({"status": "success"})
 
@@ -1126,8 +1234,19 @@ def delete_kdv_mukellef():
             if not c.fetchone():
                 return jsonify({"status": "error", "message": "Bu mükellefi silme yetkiniz yok."}), 403
 
+        # Log için ismi al
+        c.execute("SELECT unvan FROM kdv_mukellef WHERE id = %s", (mid,))
+        m_row = c.fetchone()
+        m_name = m_row["unvan"] if m_row else "Bilinmeyen"
+
         c.execute("DELETE FROM kdv_mukellef WHERE id = %s", (mid,))
         conn.commit()
+        
+        kdv_log_action(
+            session.get("username", "Admin"),
+            "Mükellef Silme",
+            f"{session.get('username')} \"{m_name}\" mükellefini sildi."
+        )
 
     return jsonify({"status": "success"})
 
@@ -1239,7 +1358,23 @@ def upload_document():
                 c.execute(query, params)
                 new_id = c.lastrowid
                 
+            # Log için dosya/mükellef bilgisi al
+            c.execute("""
+                SELECT f.period, m.unvan 
+                FROM kdv_files f
+                JOIN kdv_mukellef m ON f.mukellef_id = m.id
+                WHERE f.id = %s
+            """, (file_id,))
+            f_row = c.fetchone()
+            f_info = f"{f_row['unvan']} {f_row['period']} dönemi" if f_row else "Bilinmeyen dosya"
+
             conn.commit()
+            
+            kdv_log_action(
+                session.get("username", "Admin"),
+                "Belge Yükleme",
+                f"{session.get('username')} {f_info} \"{doc_type}\" belgesini yükledi."
+            )
             
         return jsonify({
             "status": "success",
@@ -1303,8 +1438,25 @@ def delete_document(doc_id):
             except Exception as e:
                 print(f"Dosya silme hatası: {e}")
 
+        # Log için dosya/mükellef bilgisi al
+        c.execute("""
+            SELECT f.period, m.unvan, d.type
+            FROM kdv_documents d
+            JOIN kdv_files f ON d.file_id = f.id
+            JOIN kdv_mukellef m ON f.mukellef_id = m.id
+            WHERE d.id = %s
+        """, (doc_id,))
+        f_row = c.fetchone()
+        log_msg = f"{session.get('username')} {f_row['unvan']} {f_row['period']} dönemi \"{f_row['type']}\" belgesini sildi." if f_row else "Bir belge sildi."
+
         c.execute("DELETE FROM kdv_documents WHERE id = %s", (doc_id,))
         conn.commit()
+        
+        kdv_log_action(
+            session.get("username", "Admin"),
+            "Belge Silme",
+            log_msg
+        )
 
     return jsonify({"status": "success", "message": "Belge silindi"})
 
