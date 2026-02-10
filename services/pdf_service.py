@@ -72,55 +72,45 @@ def extract_mukellef_bilgileri(text: str):
         tur = "KDV"
 
     # --- VKN ---
-    m_vkn = re.search(r"Vergi Kimlik (?:No|Numaras\u0131)(?:\s*\(TC Kimlik No\))?\s+(\d{10,11})", text, re.I)
+    # Multi-line or varying labels
+    m_vkn = re.search(r"(?:Vergi Kimlik|Kimlik|T\.C\.\s*Kimlik)\s*(?:No|Numarası)[\s:]*(\d{10,11})", text, re.I)
     if m_vkn:
         vkn = m_vkn.group(1).strip()
     else:
-        # Alternatif VKN arama
-        m_vkn2 = re.search(r"Kimlik\s+Numaras\u0131\s+(\d{10,11})", text, re.I)
-        if m_vkn2: vkn = m_vkn2.group(1).strip()
+        # Fallback: find any 10 or 11 digit number near "Vergi Kimlik"
+        m_vkn_near = re.search(r"Vergi Kimlik.*?\s+(\d{10,11})", text, re.I | re.S)
+        if m_vkn_near: vkn = m_vkn_near.group(1).strip()
 
     # --- Unvan ---
-    # Kurumlar beyannamesinde unvan genelde "Soyad\u0131, Ad\u0131 (Unvan\u0131)" veya "Soyad\u0131 (Unvan\u0131)" alt\u0131nda olur
-    lines = text.splitlines()
-    for i, line in enumerate(lines):
-        if re.search(r"Soyad\u0131,? Ad\u0131 \(Unvan\u0131\)|Soyad\u0131 \(Unvan\u0131\)", line, re.I):
-            # Hemen yan\u0131ndaysa
-            match = re.search(r"(?:Unvan\u0131\))\s+([^\n]+)", line, re.I)
-            if match and len(match.group(1).strip()) > 3:
-                unvan = match.group(1).strip().upper()
-                break
-            # Bir sonraki sat\u0131rdaysa
-            if i + 1 < len(lines):
-                next_line = lines[i+1].strip()
-                if len(next_line) > 3:
-                    unvan = next_line.upper()
-                    # E\u011fer devam\u0131 da varsa (Ad\u0131 (Unvan\u0131n Devam\u0131))
-                    if i + 2 < len(lines) and "ADININ DEVAMI" not in lines[i+2].upper():
-                         unvan += " " + lines[i+2].strip().upper()
-                    break
+    # Look for "Unvanı" followed by text, or text between "Unvanı" and "Dönemi"
+    m_unvan = re.search(r"(?:Adı|Unvanı)[\s\):]*\n?\s*([^\n\d]+)", text, re.I)
+    if m_unvan:
+        unvan_candidate = m_unvan.group(1).strip()
+        if len(unvan_candidate) > 2:
+            unvan = unvan_candidate.upper()
 
     # --- Dönem ---
     if tur == "KDV":
-        m1 = re.search(r"Y\u0131l\s+(\d{4}).*?Ay\s+([A-Za-z\u00C7\u00D6\u015E\u0130\u00DC\u011E\u00E7\u00F6\u015F\u0131\u00FC\u011F]+)", text, re.IGNORECASE | re.DOTALL)
-        m2 = re.search(r"Ay\s+([A-Za-z\u00C7\u00D6\u015E\u0130\u00DC\u011E\u00E7\u00F6\u015F\u0131\u00FC\u011F]+).*?Y\u0131l\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
-        if m1:
-            donem = f"{m1.group(2).capitalize()} / {m1.group(1)}"
-        elif m2:
-            donem = f"{m2.group(1).capitalize()} / {m2.group(2)}"
+        # Check for Month Name
+        m_ay_ad = re.search(r"Ay\s+([A-Za-zÇÖŞİÜĞçöşıüğ]+)", text, re.I)
+        m_yil = re.search(r"Yıl\s+(\d{4})", text, re.I)
+        
+        if m_ay_ad and m_yil:
+            donem = f"{m_ay_ad.group(1).capitalize()} / {m_yil.group(1)}"
+        else:
+            # Check for numeric period like 01/2024
+            m_num = re.search(r"(\d{2})\s*/\s*(\d{4})", text)
+            if m_num:
+                donem = f"{m_num.group(1)} / {m_num.group(2)}"
     else:
-        # Kurumlar i\u00E7in tablo ba\u015Fl\u0131klar\u0131ndaki y\u0131llar\u0131 yakala: (2024)
-        m_yil = re.search(r"Cari D\u00F6nem\s*\n\s*\((\d{4})\)", text, re.I)
+        # Kurumlar/Bilanço
+        m_yil = re.search(r"Cari Dönem\s*\n\s*\((\d{4})\)", text, re.I)
         if m_yil:
             donem = m_yil.group(1)
         else:
-            m3 = re.search(r"D\u00D6NEM T\u0130P\u0130.*?Y\u0131l\s+(\d{4})", text, re.IGNORECASE | re.DOTALL)
-            if m3:
-                donem = m3.group(1)
-            else:
-                m4 = re.search(r"D\u00D6NEM[:\s]+(\d{4})", text)
-                if m4:
-                    donem = m4.group(1)
+            m_yil_gen = re.search(r"(?:DÖNEM|Yıl)[:\s]+(\d{4})", text, re.I)
+            if m_yil_gen:
+                donem = m_yil_gen.group(1)
 
     return {
         "unvan": unvan,
@@ -504,7 +494,7 @@ def parse_kdv_from_pdf(pdf_path):
                     
                     U = _stripped_canon(line)
 
-                    if _stripped_canon("Matrah Toplamı") in U:
+                    if _stripped_canon("Matrah Toplamı") in U or _stripped_canon("Matrah Toplam i") in U:
                         ensure_header("MATRAH TOPLAMI")
                         add_row("Matrah Toplamı", amt(line))
                         in_matrah_block = True
@@ -521,7 +511,7 @@ def parse_kdv_from_pdf(pdf_path):
                         if matched_summary:
                             continue
 
-                    if "MATRAH TOPLAMI" in U:
+                    if "MATRAH TOPLAMI" in U or "MATRAH TOPLAM I" in U:
                         ensure_header("MATRAH TOPLAMI")
                         add_row("Matrah Toplamı", amt(line))
                         in_matrah_block = True

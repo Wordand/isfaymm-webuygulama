@@ -22,8 +22,41 @@ def log_login_attempt(username, success, user_id=None):
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
-    flash("Yeni üye kaydı sistemi kapalıdır. Lütfen yönetici ile iletişime geçiniz.", "info")
-    return redirect(url_for("auth.login"))
+    if session.get("user_id"):
+        return redirect(url_for('main.home'))
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if not username or not password:
+            flash("Lütfen tüm alanları doldurun.", "warning")
+            return render_template("auth/register.html")
+
+        if len(password) < 6:
+            flash("Şifre en az 6 karakter olmalıdır.", "warning")
+            return render_template("auth/register.html")
+
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            # Kullanıcı adı kontrolü
+            c.execute("SELECT id FROM users WHERE username = %s", (username,))
+            if c.fetchone():
+                flash("Bu kullanıcı adı zaten alınmış.", "danger")
+                return render_template("auth/register.html")
+
+            # Yeni kullanıcıyı kaydet (is_approved=0 olarak başlar)
+            hashed_pw = generate_password_hash(password)
+            c.execute(
+                "INSERT INTO users (username, password, is_approved, role, has_kdv_access) VALUES (%s, %s, 0, 'user', 0)",
+                (username, hashed_pw)
+            )
+            conn.commit()
+
+        flash("Kaydınız başarıyla oluşturuldu. Giriş yapabilmek için admin onayı gereklidir.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/register.html")
 
 @bp.route("/login", methods=["GET", "POST"])
 @limiter.limit("50 per 10 minutes")

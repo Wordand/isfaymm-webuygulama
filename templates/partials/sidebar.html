@@ -21,8 +21,13 @@
         </a>
 
         <a href="{{ url_for('data.veri_giris') }}"
-            class="sidebar-link {% if request.path.startswith('/veri-giris') or request.path.startswith('/finansal-analiz') or request.path.startswith('/raporlama') %}active{% endif %}">
-            <i class="bi bi-pencil-square sidebar-icon"></i> Finansal Analiz ve Raporlama
+            class="sidebar-link {% if request.path.startswith('/veri-giris') %}active{% endif %}">
+            <i class="bi bi-cloud-upload sidebar-icon"></i> Veri Girişi & Yükleme
+        </a>
+
+        <a href="{{ url_for('report.raporlama') }}"
+            class="sidebar-link {% if request.path.startswith('/raporlama') or request.path.startswith('/finansal-analiz') %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow sidebar-icon"></i> Finansal Analiz ve Raporlama
         </a>
 
         <a href="{{ url_for('indirimlikurumlar.index') }}"

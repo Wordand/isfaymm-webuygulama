@@ -215,21 +215,3 @@ def delete_all_logs():
 
     flash("Tüm log kayıtları başarıyla silindi.", "success")
     return redirect(url_for("admin.login_logs"))
-@bp.route('/toggle_kdv_access/<int:user_id>')
-@login_required
-def toggle_kdv_access(user_id):
-    if session.get("username", "").lower() != "admin":
-        flash("Bu işlemi yapma yetkiniz yok.", "danger")
-        return redirect(url_for("main.home"))
-
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("""
-            UPDATE users
-            SET has_kdv_access = CASE WHEN has_kdv_access = 1 THEN 0 ELSE 1 END
-            WHERE id = %s
-        """, (user_id,))
-        conn.commit()
-
-    flash("Kullanıcının KDV Portalı erişim yetkisi güncellendi.", "info")
-    return redirect(url_for('admin.admin_users'))
