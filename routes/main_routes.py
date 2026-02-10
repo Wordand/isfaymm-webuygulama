@@ -98,6 +98,10 @@ def mevzuat():
 def mevzuat_degisiklikleri():
     return render_template("pages/mevzuat_degisiklikleri.html")
 
+@bp.route("/enflasyon-duzeltmesi")
+def enflasyon_duzeltmesi():
+    return render_template("pages/enflasyon_duzeltmesi.html")
+
 @bp.route("/indirim")
 def indirim():
     return render_template("pages/indirim.html")

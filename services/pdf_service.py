@@ -60,57 +60,59 @@ def extract_mukellef_bilgileri(text: str):
     vkn   = "Bilinmiyor"
     tur   = "Bilinmiyor"
 
+    # Normalize text for better matching
+    text_norm = _stripped_canon(text)
+
     # --- Tür ---
-    text_upper = text.upper()
-    if "KURUMLAR VERGİSİ BEYANNAMESİ" in text_upper:
+    if "KURUMLAR VERGISI" in text_norm:
         tur = "Kurumlar"
-        if "Bilanço" in text or "Kazancın Tespit Yöntemi Bilanço" in text:
+        if "BILANCO" in text_norm:
             tur = "Bilanço"
-        elif "GELİR TABLOSU" in text:
+        elif "GELIR TABLOSU" in text_norm:
             tur = "Gelir Tablosu"
-    elif "KATMA DEĞER VERGİSİ BEYANNAMESİ" in text_upper:
+    elif "KATMA DEGER VERGISI" in text_norm:
         tur = "KDV"
 
     # --- VKN ---
-    # Multi-line or varying labels
     m_vkn = re.search(r"(?:Vergi Kimlik|Kimlik|T\.C\.\s*Kimlik)\s*(?:No|Numarası)[\s:]*(\d{10,11})", text, re.I)
+    if not m_vkn:
+        m_vkn = re.search(r"(?:VKN|TCCK)\s*[:\s]*(\d{10,11})", text_norm)
+    
     if m_vkn:
         vkn = m_vkn.group(1).strip()
-    else:
-        # Fallback: find any 10 or 11 digit number near "Vergi Kimlik"
-        m_vkn_near = re.search(r"Vergi Kimlik.*?\s+(\d{10,11})", text, re.I | re.S)
-        if m_vkn_near: vkn = m_vkn_near.group(1).strip()
 
     # --- Unvan ---
-    # Look for "Unvanı" followed by text, or text between "Unvanı" and "Dönemi"
-    m_unvan = re.search(r"(?:Adı|Unvanı)[\s\):]*\n?\s*([^\n\d]+)", text, re.I)
+    m_unvan = re.search(r"(?:Adı|Unvanı|Soyadı/Ünvanı|Adı Soyadı/Ünvanı)[\s\):]*\n?\s*([^\n\d\(\)]+)", text, re.I)
     if m_unvan:
-        unvan_candidate = m_unvan.group(1).strip()
-        if len(unvan_candidate) > 2:
-            unvan = unvan_candidate.upper()
+        unvan = m_unvan.group(1).strip().upper()
+        # Clean common prefixes
+        for prefix in ["ADI SOYADI/UNVANI", "ADI SOYADI/ÜNVANI", "SOYADI/ÜNVANI", "SOYADI/UNVANI", ":"]:
+            if unvan.startswith(prefix):
+                unvan = unvan[len(prefix):].strip()
 
     # --- Dönem ---
-    if tur == "KDV":
-        # Check for Month Name
-        m_ay_ad = re.search(r"Ay\s+([A-Za-zÇÖŞİÜĞçöşıüğ]+)", text, re.I)
-        m_yil = re.search(r"Yıl\s+(\d{4})", text, re.I)
-        
-        if m_ay_ad and m_yil:
-            donem = f"{m_ay_ad.group(1).capitalize()} / {m_yil.group(1)}"
-        else:
-            # Check for numeric period like 01/2024
-            m_num = re.search(r"(\d{2})\s*/\s*(\d{4})", text)
-            if m_num:
-                donem = f"{m_num.group(1)} / {m_num.group(2)}"
+    # Yıl: 2025 Ay: Aralık
+    m_yil = re.search(r"\b(?:Yıl|Yil|YIL)\b[:\s]*(\d{4})", text, re.I)
+    m_ay = re.search(r"\b(?:Ay|AY)\b[:\s]*([^\s\d:]+)", text, re.I)
+    
+    if m_yil and m_ay:
+        ay_str = m_ay.group(1).strip()
+        # Basic mapping for corrupted month names
+        month_map = {
+            "ARALK": "Aralık", "ARALIK": "Aralık", "OCAK": "Ocak", "SUBAT": "Şubat", "ŞUBAT": "Şubat", 
+            "MART": "Mart", "NISAN": "Nisan", "NİSAN": "Nisan", "MAYIS": "Mayıs", "HAZIRAN": "Haziran", 
+            "HAZİRAN": "Haziran", "TEMMUZ": "Temmuz", "AGUSTOS": "Ağustos", "AĞUSTOS": "Ağustos", 
+            "EYLUL": "Eylül", "EYLÜL": "Eylül", "EKIM": "Ekim", "EKİM": "Ekim", "KASIM": "Kasım"
+        }
+        ay_norm = _stripped_canon(ay_str)
+        ay_clean = month_map.get(ay_norm, ay_str.capitalize())
+        donem = f"{ay_clean} / {m_yil.group(1)}"
     else:
-        # Kurumlar/Bilanço
-        m_yil = re.search(r"Cari Dönem\s*\n\s*\((\d{4})\)", text, re.I)
-        if m_yil:
+        m_num = re.search(r"(\d{2})\s*/\s*(\d{4})", text)
+        if m_num:
+            donem = f"{m_num.group(1)} / {m_num.group(2)}"
+        elif m_yil:
             donem = m_yil.group(1)
-        else:
-            m_yil_gen = re.search(r"(?:DÖNEM|Yıl)[:\s]+(\d{4})", text, re.I)
-            if m_yil_gen:
-                donem = m_yil_gen.group(1)
 
     return {
         "unvan": unvan,
@@ -438,8 +440,15 @@ def parse_gelir_from_pdf(pdf_path: str) -> dict:
     }
 
 def _stripped_canon(s: str) -> str:
+    if not s: return ""
+    # Normalize unicode
     s = "".join(ch for ch in unicodedata.normalize("NFD", s) if not unicodedata.combining(ch))
+    # Replace the replacement character and other unknowns with space or dots
+    s = s.replace("", "?")
+    # Convert to upper and clean spaces
     s = re.sub(r"\s+", " ", s).strip().upper()
+    # Simple transliteration for Turkish specific chars that might be messed up
+    s = s.replace("I", "I").replace("İ", "I").replace("Ğ", "G").replace("Ü", "U").replace("Ş", "S").replace("Ö", "O").replace("Ç", "C")
     return s
 
 def parse_kdv_from_pdf(pdf_path):
@@ -464,163 +473,135 @@ def parse_kdv_from_pdf(pdf_path):
     try:
         with pdfplumber.open(pdf_path) as pdf:            
             full_text = "\n".join((p.extract_text() or "") for p in pdf.pages)
-            if "KURUMLAR VERGİSİ BEYANNAMESİ" in full_text.upper():
-                return {
-                    "tur": "kurumlar",
-                    "donem": "Bilinmiyor",
-                    "unvan": "Bilinmiyor",
-                    "vergi_kimlik_no": "Bilinmiyor",
-                    "veriler": [],
-                    "hata": "Bu dosya Kurumlar Vergisi beyannamesi, KDV değil."
-                }
             
             muk = extract_mukellef_bilgileri(full_text)
             unvan = muk["unvan"]
             donem_adi = muk["donem"]
             vkn = muk["vergi_kimlik_no"]
 
+            sections_to_check = {
+                "MATRAH": [
+                    "Toplam Matrah", "Matrah Toplamı", "Hesaplanan Katma Değer Vergisi", "Hesaplanan KDV",
+                    "Daha Önce İndirim Konusu Yapılan KDV’nin İlavesi", "Toplam Katma Değer Vergisi", "Toplam KDV"
+                ],
+                "İNDİRİMLER": [
+                    "İndirimler Toplamı"
+                ],
+                "SONUÇ HESAPLARI": [
+                    "Tecil Edilecek Katma Değer Vergisi", "Tecil Edilecek KDV",
+                    "Bu Dönemde Ödenmesi Gereken Katma Değer Vergisi", "Ödenmesi Gereken KDV",
+                    "İade Edilmesi Gereken Katma Değer Vergisi", "İade Edilmesi Gereken KDV",
+                    "Sonraki Döneme Devreden Katma Değer Vergisi", "Sonraki Döneme Devreden KDV"
+                ],
+                "DİĞER BİLGİLER": [
+                    "Teslim ve Hizmetlerin Karşılığını Teşkil Eden Bedel (Aylık)",
+                    "Teslim ve Hizmetlerin Karşılığını Teşkil Eden Bedel (Kümülatif)",
+                    "Kredi Kartı İle Tahsil Edilen"
+                ]
+            }
+
             cur_sec = None
-            other_hdr_added = False
-            in_matrah_block = False 
-            SUM_CANON = { _stripped_canon(k): v for k, v in SUMMARY_REDIRECT.items() }            
+            in_custom_table = False
 
-            for page in pdf.pages:
-                lines = (page.extract_text() or "").split("\n")
-                consumed = set()         
+            for page_idx, page in enumerate(pdf.pages):
+                page_text = page.extract_text() or ""
+                lines = page_text.split("\n")
                 
+                # Check for "EKLER" block to stop summary parsing
+                if "EKLER" in page_text.upper():
+                    cur_sec = "EKLER"
+
                 for i, line in enumerate(lines):
-                    if i in consumed:
-                        continue
-                    
                     U = _stripped_canon(line)
-
-                    if _stripped_canon("Matrah Toplamı") in U or _stripped_canon("Matrah Toplam i") in U:
-                        ensure_header("MATRAH TOPLAMI")
-                        add_row("Matrah Toplamı", amt(line))
-                        in_matrah_block = True
-                        continue
-
-                    if in_matrah_block:
-                        matched_summary = False
-                        for k_can, shown_name in SUM_CANON.items():
-                            if k_can in U:
-                                ensure_header("MATRAH TOPLAMI")
-                                add_row(shown_name, amt(line))
-                                matched_summary = True
-                                break
-                        if matched_summary:
-                            continue
-
-                    if "MATRAH TOPLAMI" in U or "MATRAH TOPLAM I" in U:
-                        ensure_header("MATRAH TOPLAMI")
-                        add_row("Matrah Toplamı", amt(line))
-                        in_matrah_block = True
-                        continue
-
-                    if "TECIL EDILECEK KATMA DEGER VERGISI" in U:
-                        ensure_header("SONUÇ")
-                        add_row("Tecil Edilecek Katma Değer Vergisi", amt(line))
-                    if "BU DONEMDE ODENMESI GEREKEN KATMA DEGER VERGISI" in U:
-                        ensure_header("SONUÇ")
-                        add_row("Bu Dönemde Ödenmesi Gereken Katma Değer Vergisi", amt(line))
-                        continue
-
-                    if all(x in U for x in ["ISLEM", "TURU", "MATRAH", "VERG"]):
-                        ctx = " ".join(_stripped_canon(l) for l in lines[max(0, i-2): i+3])
-                        if _stripped_canon("DİĞER İŞLEMLER") in ctx:
-                            if not other_hdr_added:
-                                add_header("DİĞER İŞLEMLER")
-                                other_hdr_added = True
-                            cur_sec = "DİĞER İŞLEMLER"
-                            in_matrah_block = False
-                            continue
-
-                    sec = None
-                    for k in SECTION_KEYS:
-                        if U == _stripped_canon(k):
-                            sec = k
-                            break
-                    if not sec:
-                        for wrong, right in SECTION_ALIASES.items():
-                            if U == _stripped_canon(wrong):
-                                sec = right
-                                break
                     
-                    if sec:
-                        in_matrah_block = False
-                        cur_sec = sec
-                        add_header(sec)
-                        if sec == "DİĞER İŞLEMLER": other_hdr_added = True
-                        continue
+                    # 1. Check for basic headers
+                    header_found = False
+                    for h in SECTION_KEYS + ["MATRAH DETAYI", "İNDİRİMLER DETAYI", "SONUÇ HESAPLARI", "MATRAH"]:
+                        if _stripped_canon(h) == U:
+                            cur_sec = h
+                            ensure_header(h)
+                            header_found = True
+                            break
+                    if header_found: continue
 
-                    if cur_sec == "TEVKİFAT UYGULANMAYAN İŞLEMLER":
+                    # 2. Check for summary fields (ONLY ON PAGE 1 to avoid sub-total confusion)
+                    if page_idx == 0:
+                        for sec_name, fields in sections_to_check.items():
+                            for field in fields:
+                                field_canon = _stripped_canon(field)
+                                # Strict matching for summary fields to avoid catching "Toplam" lines in sub-tables
+                                if field_canon == U or (len(field_canon) > 15 and field_canon in U):
+                                    val = amt(line)
+                                    if (not val or val == "0,00") and i+1 < len(lines):
+                                        val = amt(lines[i+1])
+                                    
+                                    if val:
+                                        shown_name = field
+                                        if "Matrah" in field and "Toplam" in field: shown_name = "Matrah Toplamı"
+                                        if "KDV" in field and "Toplam" in field: shown_name = "Toplam KDV"
+                                        
+                                        ensure_header(sec_name)
+                                        add_row(shown_name, val)
+
+                    # 3. Dynamic table parsing for Matrah Detayı
+                    if cur_sec in ["TEVKİFAT UYGULANMAYAN İŞLEMLER", "MATRAH DETAYI"]:
+                        # Tevkifat Uygulanmayan
                         m = re.findall(r"(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d+)\s+(\d{1,3}(?:\.\d{3})*,\d{2})", line)
                         for matrah, oran, vergi in m:
-                            add_row(f"Tevkifatsız İşlem (%{oran}) - Matrah", matrah)
-                            add_row(f"Tevkifatsız İşlem (%{oran}) - Vergi", vergi)
-                        continue
-
-                    if cur_sec == "KISMİ TEVKİFAT UYGULANAN İŞLEMLER":
-                        mk = re.search(r"^(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,2})\s+(\d+/\d+)\s+(\d{1,3}(?:\.\d{3})*,\d{2})$", line)
-                        if mk:
-                            desc = norm(mk.group(1))
-                            add_row(f"{desc} - Matrah", mk.group(2))
-                            add_row(f"{desc} - KDV Oranı", f"{mk.group(3)}%")
-                            add_row(f"{desc} - Tevkifat Oranı", mk.group(4))
-                            add_row(f"{desc} - Vergi", mk.group(5))
-                            continue
+                            desc = line.split(matrah)[0].strip()
+                            desc = re.sub(r"^\d+\s*-\s*", "", desc).strip()
+                            if not desc or desc.isdigit(): desc = "Yurtiçi Teslim/Hizmet"
+                            add_row(f"{desc} (%{oran}) - Matrah", matrah)
+                            add_row(f"{desc} (%{oran}) - Vergi", vergi)
                         
-                        window_lines = lines[i:i+5]
-                        window = " ".join(window_lines)
-                        mk2 = re.search(r"(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,2})\s+(\d+/\d+)\s+(\d{1,3}(?:\.\d{3})*,\d{2})", window)
-                        if mk2:
-                            desc = norm(mk2.group(1))
-                            vergi_str  = mk2.group(5)
-                            add_row(f"{desc} - Matrah", mk2.group(2))
-                            add_row(f"{desc} - KDV Oranı", f"{mk2.group(3)}%")
-                            add_row(f"{desc} - Tevkifat Oranı", mk2.group(4))
-                            add_row(f"{desc} - Vergi", vergi_str)
-                            
-                            end_offset = 0
-                            for j, wl in enumerate(window_lines):
-                                if vergi_str in wl:
-                                    end_offset = j
-                                    break
-                            for k in range(1, end_offset+1):
-                                consumed.add(i+k)
-                            continue
-
-                    if cur_sec != "DİĞER İŞLEMLER" and re.search(r"(ALINAN MALLARIN İADESI|AMORT[Iİ]S?MAN)", _stripped_canon(line), re.I):
-                        nums_tmp = AMT_RE.findall(line)
-                        if len(nums_tmp) >= 2:
-                            if not other_hdr_added:
-                                add_header("DİĞER İŞLEMLER")
-                                other_hdr_added = True
-                            cur_sec = "DİĞER İŞLEMLER"
-
-                    if cur_sec == "DİĞER İŞLEMLER":
-                        mk = re.search(r"^(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})$", line)
+                        # Kısmi Tevkifat
+                        mk = re.search(r"(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,2})\s+(\d+/\d+)\s+(\d{1,3}(?:\.\d{3})*,\d{2})", line)
                         if mk:
-                            add_row(f"{norm(mk.group(1))} - Matrah", mk.group(2))
-                            add_row(f"{norm(mk.group(1))} - Vergi", mk.group(3))
-                            continue
-                        
-                        window = " ".join(lines[i:i+4])
-                        mk2 = re.search(r"(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})", window)
-                        if mk2:
-                            add_row(f"{norm(mk2.group(1))} - Matrah", mk2.group(2))
-                            add_row(f"{norm(mk2.group(1))} - Vergi", mk2.group(3))
-                             # Note: skipping accurate consumption logic for simplicity in this port, assuming 1 line mostly
-                            continue
+                            desc = line.split(mk.group(1))[0].strip()
+                            desc = re.sub(r"^\d+\s*-\s*", "", desc).strip()
+                            add_row(f"{desc} - Matrah", mk.group(1))
+                            add_row(f"{desc} - Oran", f"%{mk.group(2)}")
+                            add_row(f"{desc} - Tevkifat", mk.group(3))
+                            add_row(f"{desc} - Vergi", mk.group(4))
+
+                    # 4. Diğer İşlemler
+                    if (cur_sec == "DİĞER İŞLEMLER" or "DİĞER İŞLEMLER" in U) and not any(x in U for x in ["MATRAH", "VERGİ", "TOPLAM", "DETAYI", "GENEL"]):
+                        md = re.search(r"(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})", line)
+                        if md:
+                            desc = line.split(md.group(1))[0].strip()
+                            desc = re.sub(r"^\d+\s*-\s*", "", desc).strip()
+                            if desc:
+                                add_row(f"{desc} - Matrah", md.group(1))
+                                add_row(f"{desc} - Vergi", md.group(2))
+
+                    # 5. Bu Döneme Ait İndirilecek KDV
+                    if "DAĞILIMI" in U or "ORANLARA GÖRE" in U:
+                        cur_sec = "BU DÖNEME AİT İNDİRİLECEK KDV"
+                        ensure_header(cur_sec)
+                    
+                    if cur_sec == "BU DÖNEME AİT İNDİRİLECEK KDV":
+                        mi = re.findall(r"(\d+)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})", line)
+                        for oran, matrah, vergi in mi:
+                            add_row(f"İndirim (%{oran}) - Matrah", matrah)
+                            add_row(f"İndirim (%{oran}) - Vergi", vergi)
 
     except Exception as e:
         print(f"PDF Parsing Error: {e}")
         return {"hata": str(e)}
+
+    # Remove duplicates but keep order
+    seen = set()
+    unique_data = []
+    for row in data:
+        key = (row["alan"], row["deger"], row["tip"])
+        if key not in seen:
+            unique_data.append(row)
+            seen.add(key)
 
     return {
         "tur": "kdv",
         "donem": donem_adi,
         "unvan": unvan,
         "vergi_kimlik_no": vkn,
-        "veriler": data
+        "veriler": unique_data
     }
