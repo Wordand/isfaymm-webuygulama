@@ -27,7 +27,6 @@ from routes.data_routes import bp as data_bp
 from routes.report_routes import bp as report_bp
 from routes.tools_routes import bp as tools_bp
 from routes.indirimlikurumlar import bp as indirim_bp
-from routes.blog import blog_bp
 from routes.calculators import calculators_bp
 from routes.mukellef_routes import bp as mukellef_bp
 from routes.kdv_routes import bp as kdv_bp
@@ -132,7 +131,7 @@ app.register_blueprint(data_bp)
 app.register_blueprint(report_bp)
 app.register_blueprint(tools_bp)
 app.register_blueprint(indirim_bp)
-app.register_blueprint(blog_bp, url_prefix='/blog')
+
 app.register_blueprint(calculators_bp) 
 app.register_blueprint(mukellef_bp)
 app.register_blueprint(kdv_bp)

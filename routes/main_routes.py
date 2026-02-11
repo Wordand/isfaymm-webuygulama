@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, make_response, send_from_directory, url_for, current_app, redirect, flash
-from routes.blog import blog_posts
+
 from auth import login_required
 from datetime import datetime
 import os
@@ -13,7 +13,7 @@ def home():
         "financial_ratios": 120,
         "ymm_cities": 2
     }
-    return render_template("index.html", blog_posts=blog_posts, stats=stats, latest_posts=blog_posts[:3] if blog_posts else [])
+    return render_template("index.html", stats=stats)
 
 @bp.route("/about")
 @login_required
@@ -43,14 +43,7 @@ def sitemap_xml():
     host = request.host_url.rstrip('/')
     urls = []
 
-    # Dinamik Blog URL'leri
-    for post in blog_posts:
-        if post.get("slug"):
-            urls.append({
-                "loc": f"{host}/blog/{post['slug']}",
-                "lastmod": post.get("date", datetime.now().strftime("%Y-%m-%d")),
-                "priority": "0.8"
-            })
+
 
     # Statik URL'ler
     static_endpoints = [
@@ -58,6 +51,10 @@ def sitemap_xml():
         ('main.mevzuat', {}),
         ('main.indirim', {}),
         ('main.ceza', {}),
+        ('main.birlesme', {}),
+        ('main.kdv_tebligi', {}),
+        ('main.enflasyon_duzeltmesi', {}),
+        ('main.mevzuat_degisiklikleri', {}),
         ('main.contact', {}),
         ('tools.asgari', {}),
         ('tools.sermaye', {}),
@@ -93,6 +90,12 @@ def ceza():
 @bp.route("/mevzuat")
 def mevzuat():
     return render_template("pages/mevzuat.html")
+
+@bp.route("/mevzuat/kdv-tebligi")
+@login_required
+def kdv_tebligi():
+    # We will load the JSON via JavaScript in the template
+    return render_template("pages/kdv_tebligi.html")
 
 @bp.route("/mevzuat-degisiklikleri")
 def mevzuat_degisiklikleri():

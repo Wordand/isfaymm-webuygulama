@@ -3,372 +3,309 @@
 {% block title %}Enflasyon Düzeltmesi (VUK 298 & 555 No'lu Tebliğ) Detaylı Rehber | İSFA YMM{% endblock %}
 
 {% block content %}
-<style>
-    :root {
-        --vuk-blue: #1e3a8a;
-        --vuk-light-blue: #3b82f6;
-        --vuk-gold: #b45309;
-        --section-bg: #f8fafc;
-        --border-color: #e2e8f0;
-    }
-    .legislation-hero {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        padding: 80px 0 120px 0;
-        clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
-    }
-    .main-container {
-        max-width: 1200px;
-        margin: -80px auto 60px auto;
-        position: relative;
-        z-index: 10;
-    }
-    .resource-box {
-        background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        padding: 30px;
-        margin-bottom: 40px;
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    .resource-link-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 15px;
-        padding: 20px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        transition: all 0.3s;
-        text-decoration: none !important;
-        color: #1e293b !important;
-    }
-    .resource-link-card:hover {
-        background: #ffffff;
-        border-color: var(--vuk-light-blue);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.1);
-    }
-    .resource-link-card i {
-        font-size: 2rem;
-        margin-bottom: 15px;
-    }
-    .content-card {
-        background: #ffffff;
-        border-radius: 30px;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-        padding: 60px;
-        margin-bottom: 40px;
-    }
-    .section-title {
-        color: var(--vuk-blue);
-        font-weight: 800;
-        margin-bottom: 40px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        font-size: 2.25rem;
-        border-bottom: 3px solid #f1f5f9;
-        padding-bottom: 15px;
-    }
-    .sub-section-title {
-        color: var(--vuk-blue);
-        font-weight: 700;
-        margin: 40px 0 25px 0;
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .clause-box {
-        background: var(--section-bg);
-        border-left: 6px solid var(--vuk-blue);
-        padding: 40px;
-        border-radius: 20px;
-        margin-bottom: 40px;
-        position: relative;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    }
-    .clause-number {
-        position: absolute;
-        top: -15px;
-        left: 30px;
-        background: var(--vuk-blue);
-        color: white;
-        padding: 6px 25px;
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 700;
-        box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
-    }
-    .highlight-table {
-        width: 100%;
-        margin: 25px 0;
-        border-collapse: separate;
-        border-spacing: 0 12px;
-    }
-    .highlight-table td {
-        background: #ffffff;
-        padding: 22px;
-        border: 1px solid #e2e8f0;
-    }
-    .highlight-table td:first-child {
-        border-radius: 15px 0 0 15px;
-        font-weight: 700;
-        color: var(--vuk-blue);
-        width: 35%;
-        background: #f1f5f9;
-    }
-    .highlight-table td:last-child {
-        border-radius: 0 15px 15px 0;
-    }
-    .info-note {
-        border-left: 6px solid #3b82f6;
-        background: #eff6ff;
-        padding: 30px;
-        border-radius: 0 25px 25px 0;
-        margin: 45px 0;
-    }
-    .step-badge {
-        width: 50px;
-        height: 50px;
-        background: var(--vuk-blue);
-        color: white;
-        border-radius: 15px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        margin-right: 25px;
-        flex-shrink: 0;
-    }
-    .formula-card {
-        background: #0f172a;
-        color: #f1f5f9;
-        padding: 35px;
-        border-radius: 24px;
-        text-align: center;
-        margin: 40px 0;
-        border: 1px solid #1e293b;
-    }
-    .formula-text {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #38bdf8;
-    }
-    .data-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        padding: 30px;
-        height: 100%;
-        transition: 0.3s;
-    }
-    .summary-list {
-        list-style: none;
-        padding-left: 0;
-    }
-    .summary-list li {
-        padding: 15px 0 15px 40px;
-        position: relative;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    .summary-list li:last-child { border-bottom: none; }
-    .summary-list li::before {
-        content: "\f270";
-        font-family: Bootstrap-Icons;
-        position: absolute;
-        left: 0;
-        color: var(--vuk-light-blue);
-        font-size: 1.2rem;
-    }
-    @media (max-width: 768px) {
-        .content-card { padding: 30px; }
-        .section-title { font-size: 1.75rem; }
-    }
-</style>
 
-<section class="legislation-hero text-center text-white">
-    <div class="container" data-aos="zoom-in">
-        <span class="badge bg-primary px-3 py-2 mb-3 rounded-pill">VUK REHBERİ</span>
-        <h1 class="display-3 fw-bold mb-3">Enflasyon Düzeltmesi Mevzuatı</h1>
-        <p class="lead opacity-85 mx-auto" style="max-width: 900px;">
-            VUK Mükerrer Madde 298 (A, Ç) ve 555 Sıra No'lu Tebliğ Hükümleri.
-        </p>
+<!-- 🟦 Başlık Alanı -->
+<section class="py-5 text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1;"></div>
+    <div class="container position-relative" data-aos="fade-up">
+        <h1 class="fw-bold display-5 mb-3">Enflasyon Düzeltmesi Mevzuatı</h1>
+        <p class="lead text-white-50 mb-0">VUK Mükerrer Madde 298 (A, Ç) ve 555 Sıra No'lu Tebliğ Hükümleri</p>
     </div>
 </section>
 
-<div class="container main-container">
-    
-    <!-- 🔗 HIZLI ERİŞİM LİNKLERİ (Side-by-side) -->
-    <div class="resource-box animate__animated animate__fadeInUp">
-        <h5 class="fw-bold text-center mb-4"><i class="bi bi-link-45deg text-primary me-2"></i> RESMİ MEVZUAT VE KAYNAKLAR</h5>
-        <div class="row g-3">
-            <div class="col-6 col-md-3">
-                <a href="https://www.resmigazete.gov.tr/eskiler/2023/12/20231230M2-13.pdf" target="_blank" class="resource-link-card">
-                    <i class="bi bi-file-earmark-pdf text-danger"></i>
-                    <span class="fw-bold small">555 No'lu Tebliğ</span>
-                    <span class="text-muted" style="font-size: 0.7rem;">Resmi Gazete Metni</span>
-                </a>
+<!-- 🧭 Sekme Menü -->
+<section class="bg-white shadow-sm py-3 sticky-top" style="z-index: 1020; top: 0px;">
+    <div class="container text-center">
+        <div class="d-inline-flex bg-light p-1 rounded-pill border shadow-sm">
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold active bg-primary text-white" onclick="showSection('kanunSection', this)" id="btnKanun">
+                <i class="bi bi-book me-2"></i>KANUN HÜKÜMLERİ
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('tebligSection', this)" id="btnTeblig">
+                <i class="bi bi-journal-text me-2"></i>TEBLİĞ REHBERİ
+            </button>
+            <button class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-muted" onclick="showSection('linkSection', this)" id="btnLinks">
+                <i class="bi bi-link-45deg me-2"></i>HIZLI ERİŞİM
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- 📚 1. KANUN BÖLÜMÜ -->
+<section id="kanunSection" class="py-5 section-content bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sol Menü -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="kanunNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3 small">MADDELER</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-1" href="#k-298a">Md. 298/A: Enflasyon Düzeltmesi</a>
+                            <a class="nav-link mb-1" href="#k-298c">Md. 298/Ç: Yeniden Değerleme</a>
+                            <a class="nav-link mb-1" href="#k-parasal">Parasal / Parasal Olmayan</a>
+                        </nav>
+                    </div>
+                </nav>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/user_upload/sirkuler/vuk_165_sirkuler.pdf" target="_blank" class="resource-link-card">
-                    <i class="bi bi-file-earmark-text text-primary"></i>
-                    <span class="fw-bold small">VUK Sirküleri / 165</span>
+
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#kanunNavbar" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
                     
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/mevzuatek/vuksirku176_01112024.pdf" target="_blank" class="resource-link-card">
-                    <i class="bi bi-file-earmark-text text-success"></i>
-                    <span class="fw-bold small">VUK Sirküleri / 176</span>
-                    
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank" class="resource-link-card">
-                    <i class="bi bi-file-earmark-text text-info"></i>
-                    <span class="fw-bold small">VUK Sirküleri / 196</span>
-                    
-                </a>
+                    <!-- Md 298/A -->
+                    <div id="k-298a" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4 px-4">
+                            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-bookmark-fill text-danger me-2"></i>VUK Mükerrer Madde 298/A</h3>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <p>Mali tabloların enflasyonun etkisinden arındırılması amacıyla getirilen bu hüküm, kazancını bilanço esasına göre tespit eden gelir ve kurumlar vergisi mükelleflerine yöneliktir.</p>
+                            
+                            <div class="alert alert-primary border-0 shadow-sm p-4 my-4">
+                                <h6 class="fw-bold"><i class="bi bi-check2-circle me-2"></i>Zorunlu Uygulama Şartları</h6>
+                                <p class="mb-0">Aşağıdaki iki şartın <strong>birlikte</strong> gerçekleşmesi halinde uygulama zorunludur:</p>
+                                <ul class="mt-2 mb-0">
+                                    <li>Son 3 hesap döneminde Yİ-ÜFE artışının <strong>%100'ü</strong> aşması,</li>
+                                    <li>Cari hesap döneminde Yİ-ÜFE artışının <strong>%10'u</strong> aşması.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parasal/Parasal Olmayan -->
+                    <div id="k-parasal" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4 px-4">
+                            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-layers-half text-primary me-2"></i>Kıymetlerin Tasnifi</h3>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-light border-start border-4 border-danger rounded-3 h-100">
+                                        <h6 class="fw-bold text-danger"><i class="bi bi-cash-stack me-2"></i>Parasal Kıymetler</h6>
+                                        <p class="small text-muted mb-0">Ulusal para değerindeki değişmeler karşısında nominal değerleri aynı kalan kıymetlerdir (Kasa, Banka, Alacaklar, Borçlar). <strong>Düzeltmeye tabi tutulmazlar.</strong></p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-light border-start border-4 border-success rounded-3 h-100">
+                                        <h6 class="fw-bold text-success"><i class="bi bi-box-seam me-2"></i>Parasal Olmayan Kıymetler</h6>
+                                        <p class="small text-muted mb-0">Parasal kıymetler dışındaki kıymetlerdir (Stoklar, Maddi Duran Varlıklar, Sermaye, Yedekler). <strong>Enflasyon düzeltmesine tabi tuturlar.</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Md 298/Ç -->
+                    <div id="k-298c" class="card border-0 shadow-sm mb-5 overflow-hidden">
+                        <div class="card-header bg-white border-0 py-4 px-4">
+                            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-bookmark-fill text-warning me-2"></i>VUK Mükerrer Madde 298/Ç</h3>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            <p>Enflasyon düzeltmesi şartlarının gerçekleşmediği dönemlerde (sürekli yeniden değerleme), mükellefler amortismana tabi iktisadi kıymetlerini ve bunların birikmiş amortismanlarını her yıl yeniden değerleme hakkına sahiptirler.</p>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-white border rounded shadow-sm">
+                                        <h6 class="fw-bold text-primary">Kimler Faydalanabilir?</h6>
+                                        <p class="small mb-0">Tam mükellefiyete tabi olan ve bilanço esasına göre defter tutan gelir ve kurumlar vergisi mükellefleri (finans sektörü hariç).</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-white border rounded shadow-sm">
+                                        <h6 class="fw-bold text-danger">Vergisel Etki</h6>
+                                        <p class="small mb-0">Değer artış tutarı üzerinden <strong>%2 oranında vergi</strong> ödenir. Fon hesabına alınan tutarlar sermayeye eklenebilir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- ⚖️ KANUN HÜKÜMLERİ -->
-    <div class="content-card">
-        <h2 class="section-title"><i class="bi bi-bank"></i> I. Kanun Hükümleri</h2>
-        
-        <div class="law-section">
-            <h4 class="sub-section-title"><i class="bi bi-bookmark-fill text-danger"></i> VUK Mükerrer Madde 298/A - Enflasyon Düzeltmesi</h4>
-            <div class="clause-box">
-                <span class="clause-number">Madde 298/A</span>
-                <p>Mali tabloların enflasyonun etkisinden arındırılması amacıyla getirilen bu hüküm, kazancını bilanço esasına göre tespit eden gelir ve kurumlar vergisi mükelleflerine yöneliktir.</p>
-                
-                <div class="info-note">
-                    <h6 class="fw-bold"><i class="bi bi-check2-circle me-2"></i> Zorunlu Uygulama Şartları:</h6>
-                    <p class="mb-0">Aşağıdaki iki şartın <strong>birlikte</strong> gerçekleşmesi halinde uygulama zorunludur:</p>
-                    <ul class="mt-2 mb-0">
-                        <li>Son 3 hesap döneminde Yİ-ÜFE artışının <strong>%100'ü</strong> aşması,</li>
-                        <li>Cari hesap döneminde Yİ-ÜFE artışının <strong>%10'u</strong> aşması.</li>
-                    </ul>
-                </div>
+<!-- 📄 2. TEBLİĞ BÖLÜMÜ -->
+<section id="tebligSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sol Menü -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <nav id="tebligNavbar" class="h-100 d-flex flex-column">
+                    <div class="sticky-top" style="top: 100px;">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ps-3 small">TEBLİĞ REHBERİ</h6>
+                        <nav class="nav nav-pills flex-column sidebar-modern-nav">
+                            <a class="nav-link mb-1" href="#t-adımlar">İşlem Adımları</a>
+                            <a class="nav-link mb-1" href="#t-formül">Düzeltme Katsayısı</a>
+                            <a class="nav-link mb-1" href="#t-detaylar">Kritik Detaylar</a>
+                        </nav>
+                    </div>
+                </nav>
+            </div>
 
-                <div class="row g-4 mt-2">
-                    <div class="col-md-6">
-                        <div class="p-4 bg-white border rounded-4">
-                            <h6 class="fw-bold text-danger"><i class="bi bi-cash-stack me-2"></i> Parasal Kıymetler</h6>
-                            <p class="small text-muted mb-0">Ulusal para değerindeki değişmeler karşısında nominal değerleri aynı kalan kıymetlerdir (Kasa, Banka, Alacaklar, Borçlar). <strong>Düzeltmeye tabi tutulmazlar.</strong></p>
+            <!-- Sağ İçerik -->
+            <div class="col-lg-9">
+                <div data-bs-spy="scroll" data-bs-target="#tebligNavbar" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                    
+                    <!-- Adımlar -->
+                    <div id="t-adımlar" class="card border-0 shadow-sm mb-5">
+                        <div class="card-header bg-primary text-white py-3"><h4 class="mb-0 fw-bold">Uygulama İşlem Adımları</h4></div>
+                        <div class="card-body p-4">
+                            <div class="row g-4 text-center">
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm h-100">
+                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:40px; height:40px;">1</div>
+                                        <h6 class="fw-bold">Tasnif</h6>
+                                        <p class="small text-muted mb-0">Parasal/Parasal olmayan tespiti.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm h-100">
+                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:40px; height:40px;">2</div>
+                                        <h6 class="fw-bold">Esas Tutar</h6>
+                                        <p class="small text-muted mb-0">ROFM ayıklanması.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm h-100">
+                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:40px; height:40px;">3</div>
+                                        <h6 class="fw-bold">Katsayı</h6>
+                                        <p class="small text-muted mb-0">Endekslerin hesaplanması.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm h-100">
+                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:40px; height:40px;">4</div>
+                                        <h6 class="fw-bold">Muhasebe</h6>
+                                        <p class="small text-muted mb-0">698 HS Kayıtları.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-4 bg-white border rounded-4" style="border-left: 4px solid #10b981 !important;">
-                            <h6 class="fw-bold text-success"><i class="bi bi-box-seam me-2"></i> Parasal Olmayan Kıymetler</h6>
-                            <p class="small text-muted mb-0">Parasal kıymetler dışındaki kıymetlerdir (Stoklar, Maddi Duran Varlıklar, Sermaye, Yedekler). <strong>Enflasyon düzeltmesine tabi tutulurlar.</strong></p>
+
+                    <!-- Formül -->
+                    <div id="t-formül" class="card border-0 bg-dark text-white shadow-sm mb-5">
+                        <div class="card-body p-5 text-center">
+                            <h5 class="text-info text-uppercase small fw-bold mb-3">Düzeltme Katsayısı Formülü</h5>
+                            <div class="display-6 fw-bold mb-3" style="color: #38bdf8;">
+                                <div class="border-bottom border-light pb-2 mb-2">Mali Tablo Tarihindeki Endeks</div>
+                                <div>İlgili Kıymetin Düzeltmeye Esas Tarihindeki Endeks</div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <h6 class="fw-bold mt-4">ROFM (Reel Olmayan Finansman Maliyeti):</h6>
-                <p>Düzeltmeye esas tutara ulaşılırken, iktisadi kıymetlerin maliyetine dahil edilmiş olan finansman maliyetlerinin enflasyona tekabül eden kısmı düşülmelidir.</p>
-            </div>
-        </div>
-
-        <div class="law-section">
-            <h4 class="sub-section-title"><i class="bi bi-bookmark-fill text-warning"></i> VUK Mükerrer Madde 298/Ç - Yeniden Değerleme</h4>
-            <div class="clause-box">
-                <span class="clause-number">Madde 298/Ç</span>
-                <p>Enflasyon düzeltmesi şartlarının gerçekleşmediği dönemlerde (sürekli yeniden değerleme), mükellefler amortismana tabi iktisadi kıymetlerini ve bunların birikmiş amortismanlarını her yıl yeniden değerleme hakkına sahiptirler.</p>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="data-card shadow-sm border-start border-4 border-warning">
-                            <h6 class="fw-bold">Kimler Faydalanabilir?</h6>
-                            <p class="small mb-0">Tam mükellefiyete tabi olan ve bilanço esasına göre defter tutan gelir ve kurumlar vergisi mükellefleri (finans sektörü hariç).</p>
+                    <!-- Detaylar -->
+                    <div id="t-detaylar" class="card border-0 shadow-sm mb-5">
+                        <div class="card-header bg-info text-white py-3"><h4 class="mb-0 fw-bold">Kritik Uygulama Detayları</h4></div>
+                        <div class="card-body p-4">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0 py-3 d-flex">
+                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
+                                    <div><strong>Stoklar:</strong> Toplulaştırılmış yöntemler (Basit Ortalama veya Stok Devir Hızı) seçilebilir.</div>
+                                </li>
+                                <li class="list-group-item px-0 py-3 d-flex">
+                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
+                                    <div><strong>Duran Varlıklar:</strong> İlgili kıymetlerin maliyetine giren faiz ve kur farklarının "Reel Olmayan" kısmı arındırılır.</div>
+                                </li>
+                                <li class="list-group-item px-0 py-3 d-flex">
+                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
+                                    <div><strong>Özsermaye:</strong> Ödenmiş sermaye, yedekler ve fonlar düzeltilir. Yeniden değerleme fonları ise sıfırlanır.</div>
+                                </li>
+                                <li class="list-group-item px-0 py-3 d-flex">
+                                    <i class="bi bi-check-circle-fill text-success me-3 mt-1"></i>
+                                    <div><strong>Birikmiş Amortismanlar:</strong> Varlığın düzeltme katsayısına paralel olarak düzeltilir.</div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="data-card shadow-sm border-start border-4 border-primary">
-                            <h6 class="fw-bold">Vergisel Etki</h6>
-                            <p class="small mb-0">Değer artış tutarı üzerinden <strong>%2 oranında vergi</strong> ödenir. Fon hesabına alınan tutarlar sermayeye eklenebilir.</p>
-                        </div>
-                    </div>
+
                 </div>
-            </div>
-        </div>
-
-
-    </div>
-
-    <!-- 📄 TEBLİĞ HÜKÜMLERİ -->
-    <div class="content-card" style="margin-top: 60px;">
-        <h2 class="section-title"><i class="bi bi-journal-text text-primary"></i> II. Uygulama Tebliği (555 No'lu)</h2>
-        
-        <div class="law-section">
-            <p class="lead text-muted mb-5">
-                555 Sıra No'lu Genel Tebliğ, enflasyon düzeltmesi uygulamasının usul ve esaslarını belirleyen ana rehberdir.
-            </p>
-
-            <h4 class="sub-section-title"><i class="bi bi-gear-fill"></i> Uygulama İşlem Adımları</h4>
-            <div class="row g-4 mb-5">
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <div class="step-badge mx-auto mb-3">1</div>
-                        <h6 class="fw-bold">Tasnif</h6>
-                        <p class="small text-muted">Parasal ve parasal olmayan kıymetlerin tespiti.</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <div class="step-badge mx-auto mb-3">2</div>
-                        <h6 class="fw-bold">Esas Tutar</h6>
-                        <p class="small text-muted">Düzeltmeye esas değerin tespiti ve ROFM ayıklanması.</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <div class="step-badge mx-auto mb-3">3</div>
-                        <h6 class="fw-bold">Katsayı</h6>
-                        <p class="small text-muted">Düzeltme veya taşıma katsayısının bulunması.</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <div class="step-badge mx-auto mb-3">4</div>
-                        <h6 class="fw-bold">Düzeltme</h6>
-                        <p class="small text-muted">Değerlerin katsayı ile çarpılması ve muhasebe kaydı.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="formula-card">
-                <div class="small text-uppercase opacity-75 mb-2">Düzeltme Katsayısı Formülü</div>
-                <div class="formula-text">Mali Tablo Tarihindeki Endeks / İlgili Kıymetin Düzeltmeye Esas Tarihindeki Endeks</div>
-            </div>
-
-            <h4 class="sub-section-title"><i class="bi bi-layers-half text-info"></i> Kritik Uygulama Detayları</h4>
-            <div class="clause-box">
-                <ul class="summary-list">
-                    <li><strong>Stokların Düzeltilmesi:</strong> Toplulaştırılmış yöntemler (Basit Ortalama veya Stok Devir Hızı) seçilebilir.</li>
-                    <li><strong>Duran Varlıklar:</strong> İlgili kıymetlerin maliyetine giren faiz ve kur farklarının "Reel Olmayan" kısmı arındırılır.</li>
-                    <li><strong>Özsermaye:</strong> Ödenmiş sermaye, yedekler ve fonlar düzeltilir. Yeniden değerleme fonları ise sıfırlanır.</li>
-                    <li><strong>Birikmiş Amortismanlar:</strong> Varlığın düzeltme katsayısına paralel olarak düzeltilir.</li>
-                    <li><strong>Muhasebe Hesabı:</strong> Tüm farklar "698- Enflasyon Düzeltme Hesabı"nda toplanır.</li>
-                </ul>
-            </div>
-
-            <div class="info-note border-success bg-white shadow-sm border" style="border-radius: 20px;">
-                <h6 class="text-success fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> 2024 Geçici Vergi Dönemleri</h6>
-                <p class="mb-0">2023 düzeltmesi vergisiz iken, 2024 yılından itibaren oluşacak kar veya zararlar vergi matrahını (bazı mükellefler hariç) doğrudan etkilemeye başlamıştır.</p>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="text-center mt-5 mb-5">
-        <a href="{{ url_for('main.mevzuat') }}" class="btn btn-outline-secondary btn-lg px-5 rounded-pill shadow-sm">
+<!-- 🔗 3. HIZLI ERİŞİM -->
+<section id="linkSection" class="py-5 section-content bg-light d-none">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-10">
+                <div class="card border-0 shadow-sm p-5 text-center">
+                    <h3 class="fw-bold mb-5"><i class="bi bi-link-45deg text-primary me-2"></i>Resmi Mevzuat ve Kaynaklar</h3>
+                    <div class="row g-4">
+                        <div class="col-6 col-md-3">
+                            <a href="https://www.resmigazete.gov.tr/eskiler/2023/12/20231230M2-13.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                                <i class="bi bi-file-earmark-pdf text-danger display-6 mb-3"></i>
+                                <h6 class="fw-bold mb-0">555 No'lu Tebliğ</h6>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/user_upload/sirkuler/vuk_165_sirkuler.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                                <i class="bi bi-file-earmark-text text-primary display-6 mb-3"></i>
+                                <h6 class="fw-bold mb-0">VUK Sirküleri / 165</h6>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/mevzuatek/vuksirku176_01112024.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                                <i class="bi bi-file-earmark-text text-success display-6 mb-3"></i>
+                                <h6 class="fw-bold mb-0">VUK Sirküleri / 176</h6>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <a href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                                <i class="bi bi-file-earmark-text text-info display-6 mb-3"></i>
+                                <h6 class="fw-bold mb-0">VUK Sirküleri / 196</h6>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mevzuat Portalına Dön -->
+<div class="bg-light pb-5">
+    <div class="container text-center">
+        <a href="{{ url_for('main.mevzuat') }}" class="btn btn-outline-secondary px-5 py-3 rounded-pill fw-bold shadow-sm">
             <i class="bi bi-arrow-left me-2"></i>Mevzuat Portalına Dön
         </a>
     </div>
 </div>
+
+<script>
+    function showSection(sectionId, btn) {
+        document.querySelectorAll(".section-content").forEach(el => el.classList.add("d-none"));
+        const target = document.getElementById(sectionId);
+        target.classList.remove("d-none");
+        target.classList.add("fade-in-up");
+
+        document.querySelectorAll(".rounded-pill.border button").forEach(b => {
+             b.classList.remove("active", "bg-primary", "bg-primary", "bg-success", "bg-info", "text-white");
+             b.classList.add("text-muted");
+        });
+        
+        btn.classList.remove("text-muted");
+        btn.classList.add("active", "text-white");
+        
+        if(sectionId === 'kanunSection') btn.classList.add("bg-primary");
+        if(sectionId === 'tebligSection') btn.classList.add("bg-primary");
+        if(sectionId === 'linkSection') btn.classList.add("bg-primary");
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+<style>
+    .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .sidebar-modern-nav .nav-link { color: #555; border-radius: 8px; font-weight: 500; font-size: 0.9rem; padding: 10px 15px; transition: all 0.2s; }
+    .sidebar-modern-nav .nav-link:hover { background: #e2e8f0; color: #000; }
+    .sidebar-modern-nav .nav-link.active { background: #1e3a8a; color: #fff !important; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    .hover-card { transition: all 0.3s ease; }
+    .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #3b82f6 !important; }
+</style>
+
 {% endblock %}

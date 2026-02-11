@@ -219,9 +219,10 @@
     <!-- 🟦 SIDEBAR (Conditional) -->
     {% if show_sidebar %}
         {% include 'partials/sidebar.html' %}
-        <!-- Mobile Overlay for Sidebar -->
-        <div id="mobile-overlay" class="mobile-overlay"></div>
     {% endif %}
+    
+    <!-- Mobile Overlay for Sidebar and Navbar -->
+    <div id="mobile-overlay" class="mobile-overlay"></div>
 
     <!-- 🟦 CONTENT -->
     <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important; padding-top: 80px !important;' if not show_sidebar else '' }}">
@@ -439,6 +440,27 @@
                         }
                     }, intervalTime);
                 }
+            }
+
+            // 🟦 NAVBAR TOGGLE BLUR LOGIC
+            const mainNavbarCollapse = document.getElementById('navbarResponsive');
+            const mobileOverlay = document.getElementById('mobile-overlay');
+
+            if (mainNavbarCollapse) {
+                mainNavbarCollapse.addEventListener('show.bs.collapse', function () {
+                    document.body.classList.add('navbar-open');
+                    if (mobileOverlay) {
+                        mobileOverlay.style.display = 'block';
+                        setTimeout(() => { mobileOverlay.style.opacity = '1'; }, 10);
+                    }
+                });
+                mainNavbarCollapse.addEventListener('hide.bs.collapse', function () {
+                    document.body.classList.remove('navbar-open');
+                    if (mobileOverlay && !document.body.classList.contains('mobile-menu-open')) {
+                        mobileOverlay.style.opacity = '0';
+                        setTimeout(() => { mobileOverlay.style.display = 'none'; }, 300);
+                    }
+                });
             }
         });
         

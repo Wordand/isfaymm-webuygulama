@@ -71,7 +71,22 @@ ve usulsüzlük cezaları dahil tüm vergi mevzuatının güncel ve açıklamal�
                     </div>
                 </a>
             </div>
-            <!-- 4️⃣ ENFLASYON DÜZELTMESİ -->
+            <!-- 4️⃣ KDV TEBLİĞİ -->
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-earmark-ruled text-warning fs-1"></i>
+                            <h5 class="fw-bold mt-3">KDV Genel Uygulama Tebliği</h5>
+                            <p class="text-muted small">
+                                KDV mevzuatının tamamı, hiyerarşik ve açıklamalı olarak
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 5️⃣ ENFLASYON DÜZELTMESİ -->
             <div class="col-md-6 col-lg-4">
                 <a href="{{ url_for('main.enflasyon_duzeltmesi') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
@@ -114,6 +129,24 @@ ve usulsüzlük cezaları dahil tüm vergi mevzuatının güncel ve açıklamal�
         "position": 2,
         "name": "Vergi Cezaları (VUK)",
         "url": "https://www.isfaymm.com/ceza"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Devir, Birleşme ve Bölünme (KVK 17-20)",
+        "url": "https://www.isfaymm.com/birlesme"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "KDV Genel Uygulama Tebliği",
+        "url": "https://www.isfaymm.com/kdv-tebligi"
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": "Enflasyon Düzeltmesi ve Yeniden Değerleme",
+        "url": "https://www.isfaymm.com/enflasyon-duzeltmesi"
       }
     ]
   }

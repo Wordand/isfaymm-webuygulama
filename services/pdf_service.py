@@ -64,13 +64,14 @@ def extract_mukellef_bilgileri(text: str):
     text_norm = _stripped_canon(text)
 
     # --- Tür ---
-    if "KURUMLAR VERGISI" in text_norm:
+    # --- Tür ---
+    if re.search(r"KURUMLAR\s+VERG", text_norm) or re.search(r"KURUMLAR\s+VERG.S.", text_norm):
         tur = "Kurumlar"
-        if "BILANCO" in text_norm:
+        if re.search(r"BILAN.O", text_norm) or "BILANCO" in text_norm:
             tur = "Bilanço"
-        elif "GELIR TABLOSU" in text_norm:
+        elif re.search(r"GEL.R\s+TABLO", text_norm) or "GELIR TABLOSU" in text_norm:
             tur = "Gelir Tablosu"
-    elif "KATMA DEGER VERGISI" in text_norm:
+    elif re.search(r"KATMA\s*DE.ER\s*VERG", text_norm) or "KATMA DEGER VERGISI" in text_norm:
         tur = "KDV"
 
     # --- VKN ---
@@ -82,39 +83,89 @@ def extract_mukellef_bilgileri(text: str):
         vkn = m_vkn.group(1).strip()
 
     # --- Unvan ---
-    # Improved unvan extraction to handle multi-line names
-    m_unvan = re.search(r"(?:Adı|Unvanı|Soyadı/Ünvanı|Adı Soyadı/Ünvanı)[\s\):]*\n?\s*([^\n\d]+(?:\n\s*[A-ZÇĞİÖŞÜ\s\-]+(?![0-9]))*)", text, re.I)
-    if m_unvan:
-        unvan = m_unvan.group(1).strip().upper()
-        # Remove common labels if they were swallowed
-        for prefix in ["ADI SOYADI/UNVANI", "ADI SOYADI/ÜNVANI", "SOYADI/ÜNVANI", "SOYADI/UNVANI", "E-POSTA ADRESI", "TELEFON NO"]:
-            if prefix in unvan:
-                unvan = unvan.split(prefix)[0].strip()
-        unvan = re.sub(r"\s+", " ", unvan).strip(": ").strip()
+    # PDF format: "Soyadı (Unvanı) AKONA PLASTİK ZİR GID İNŞ"
+    #             "Adı (Unvanın Devamı) SAN VE TİC LTD"
+    lines = text.split("\n")
+    unvan_parts = []
+    
+    for i, line in enumerate(lines):
+        line_s = line.strip()
+        # Pattern 1: "Soyadı (Unvanı) COMPANY NAME" or "Soyadı/Ünvanı COMPANY NAME"
+        m1 = re.match(r"(?:Soyad[ıi]\s*(?:\(Unvan[ıi]\)|/\s*[ÜU]nvan[ıi]))\s+(.*)", line_s, re.I)
+        if m1:
+            part = m1.group(1).strip()
+            if part and not re.match(r"^Soyad", part, re.I):
+                unvan_parts = [part]
+                # Check next line for continuation
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1].strip()
+                    m2 = re.match(r"(?:Ad[ıi]\s*(?:\(Unvan[ıi]n\s*Devam[ıi]\)|/\s*[ÜU]nvan))\s+(.*)", next_line, re.I)
+                    if m2:
+                        cont = m2.group(1).strip()
+                        if cont:
+                            unvan_parts.append(cont)
+                break
+    
+    if unvan_parts:
+        unvan = " ".join(unvan_parts).upper()
+    else:
+        # Fallback: original regex approach
+        m_unvan = re.search(r"(?:Adı\s*Soyadı/Ünvanı|Soyadı/Ünvanı|Unvanı)[\s\):]*\n?\s*([^\n\d]+)", text, re.I)
+        if m_unvan:
+            unvan = m_unvan.group(1).strip().upper()
+    
+    # Clean up any label artifacts from the unvan
+    for label in ["(UNVANI)", "(UNVANIN DEVAMI)", "SOYADI/ÜNVANI", "SOYADI/UNVANI", 
+                   "ADI SOYADI/UNVANI", "ADI SOYADI/ÜNVANI", "E-POSTA ADRESI", "TELEFON NO",
+                   "SOYADI,", "ADI", "SOYADI"]:
+        unvan = re.sub(re.escape(label), "", unvan, flags=re.I).strip()
+    unvan = re.sub(r"^\(.*?\)\s*", "", unvan)  # Remove leading parenthetical like "(Unvanı)"
+    unvan = re.sub(r"\s+", " ", unvan).strip(": ").strip()
 
     # --- Dönem ---
-    # Yıl: 2025 Ay: Aralık
+    # Pattern 1: Yıl: 2025 Ay: Aralık
     m_yil = re.search(r"\b(?:Yıl|Yil|YIL)\b[:\s]*(\d{4})", text, re.I)
     m_ay = re.search(r"\b(?:Ay|AY)\b[:\s]*([^\s\d:]+)", text, re.I)
     
+    # Additional month names for matching
+    all_months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+    month_map = {
+        "ARALK": "Aralık", "ARALIK": "Aralık", "OCAK": "Ocak", "SUBAT": "Şubat", "ŞUBAT": "Şubat", 
+        "MART": "Mart", "NISAN": "Nisan", "NİSAN": "Nisan", "MAYIS": "Mayıs", "HAZIRAN": "Haziran", 
+        "HAZİRAN": "Haziran", "TEMMUZ": "Temmuz", "AGUSTOS": "Ağustos", "AĞUSTOS": "Ağustos", 
+        "EYLUL": "Eylül", "EYLÜL": "Eylül", "EKIM": "Ekim", "EKİM": "Ekim", "KASIM": "Kasım"
+    }
+    
     if m_yil and m_ay:
         ay_str = m_ay.group(1).strip()
-        # Basic mapping for corrupted month names
-        month_map = {
-            "ARALK": "Aralık", "ARALIK": "Aralık", "OCAK": "Ocak", "SUBAT": "Şubat", "ŞUBAT": "Şubat", 
-            "MART": "Mart", "NISAN": "Nisan", "NİSAN": "Nisan", "MAYIS": "Mayıs", "HAZIRAN": "Haziran", 
-            "HAZİRAN": "Haziran", "TEMMUZ": "Temmuz", "AGUSTOS": "Ağustos", "AĞUSTOS": "Ağustos", 
-            "EYLUL": "Eylül", "EYLÜL": "Eylül", "EKIM": "Ekim", "EKİM": "Ekim", "KASIM": "Kasım"
-        }
         ay_norm = _stripped_canon(ay_str)
         ay_clean = month_map.get(ay_norm, ay_str.capitalize())
         donem = f"{ay_clean} / {m_yil.group(1)}"
     else:
-        m_num = re.search(r"(\d{2})\s*/\s*(\d{4})", text)
-        if m_num:
-            donem = f"{m_num.group(1)} / {m_num.group(2)}"
-        elif m_yil:
-            donem = m_yil.group(1)
+        # Pattern 2: Dönem: Aralık 2024 / Vergilendirme Dönemi: Aralık 2024
+        m_donem_text = re.search(r"(?:Dönem|Vergilendirme\s*Dönemi)[:\s]*([A-Za-zÇĞİÖŞÜçğıöşü]+)\s*[/\-\s]*(\d{4})", text, re.I)
+        if m_donem_text:
+            ay_str = m_donem_text.group(1).strip()
+            ay_norm = _stripped_canon(ay_str)
+            ay_clean = month_map.get(ay_norm, ay_str.capitalize())
+            donem = f"{ay_clean} / {m_donem_text.group(2)}"
+        else:
+            # Pattern 3: 12/2024 or 12 / 2024
+            m_num = re.search(r"(\d{2})\s*/\s*(\d{4})", text)
+            if m_num:
+                donem = f"{m_num.group(1)} / {m_num.group(2)}"
+            # Pattern 4: Direct month name + year in text (e.g. "Aralık 2024")
+            elif not m_yil:
+                month_pattern = "|".join(all_months)
+                m_direct = re.search(rf"({month_pattern})\s*[/\-\s]*(\d{{4}})", text, re.I)
+                if m_direct:
+                    ay_str = m_direct.group(1).strip()
+                    ay_norm = _stripped_canon(ay_str)
+                    ay_clean = month_map.get(ay_norm, ay_str.capitalize())
+                    donem = f"{ay_clean} / {m_direct.group(2)}"
+            elif m_yil:
+                donem = m_yil.group(1)
 
     return {
         "unvan": unvan,
@@ -389,12 +440,21 @@ def parse_gelir_from_pdf(pdf_path: str) -> dict:
     has_inflation = False
 
     # Ba\u015Fl\u0131ktan enflasyon kolonunu kontrol et
+    # Baştan regex tanımları
+    find_gelir_header = re.compile(r"GEL.R\s*TABLO", re.I)
+    skip_header_terms = re.compile(r"BILAN.O|\bVE\b", re.I)
+    
     header_idx = -1
     for i, line in enumerate(lines):
-        if "GEL\u0130R TABLOSU" in line.upper():
+        # Regex ile ara
+        if find_gelir_header.search(line):
+            # Eğer satırda "Bilanço" veya "VE" varsa (örn: "Bilanço ve Gelir Tablosu"), bu başlık değildir
+            if skip_header_terms.search(line):
+                continue
+
             collecting = True
             header_idx = i
-            # Gelecek 5 sat\u0131rda 'enflasyon' ge\u00E7iyor mu?
+            # Gelecek 5 satırda 'enflasyon' geçiyor mu?
             hdr_context = " ".join(lines[i:i+6]).lower()
             if "enflasyon" in hdr_context:
                 has_inflation = True
@@ -446,7 +506,7 @@ def _stripped_canon(s: str) -> str:
     # Normalize unicode
     s = "".join(ch for ch in unicodedata.normalize("NFD", s) if not unicodedata.combining(ch))
     # Replace the replacement character and other unknowns with space or dots
-    s = s.replace("", "?")
+    s = s.replace("\ufffd", "?")
     # Convert to upper and clean spaces
     s = re.sub(r"\s+", " ", s).strip().upper()
     # Simple transliteration for Turkish specific chars that might be messed up

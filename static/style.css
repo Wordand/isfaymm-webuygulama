@@ -302,10 +302,19 @@ body {
 }
 
 /* Mobil menü açıkken overlay'i göster */
-body.mobile-menu-open .mobile-overlay {
+body.mobile-menu-open .mobile-overlay,
+body.navbar-open .mobile-overlay {
     display: block;
     opacity: 1;
     pointer-events: all;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Navbar açıkken ana içeriği bulanıklaştır */
+body.navbar-open .main-content {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
 }
 
 /* --- Navbar (Ana Üst Menü) --- */
@@ -317,7 +326,7 @@ body.mobile-menu-open .mobile-overlay {
     background-color: var(--white);
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     transition: background-color var(--transition-speed-slow) ease, padding var(--transition-speed-slow) ease;
-    z-index: 2000; /* 🔹 Sidebar ve overlay'den YÜKSEK */
+    z-index: 2500; /* 🔹 Sidebar ve overlay'den YÜKSEK */
     padding-top: 0.4rem;
     padding-bottom: 0.4rem;
 }
@@ -401,28 +410,51 @@ body.mobile-menu-open .mobile-overlay {
 /* --- [A] Mobil Navbar Menü Düzeni (Bootstrap collapse için) --- */
 @media (max-width: 991.98px) { /* Medium ve altı ekranlar için navbar düzeni */
     #mainNavbar .navbar-collapse {
-        background-color: var(--white);
-        border-radius: var(--border-radius-sm);
-        padding: 0.3rem 0;      /* 🔹 Daha az boşluk */
-        margin-top: 0;          /* 🔹 Üstten boşluk kaldır */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.82) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border-radius: 0 0 25px 25px;
+        padding: 2rem 1.5rem;      
+        margin-top: 0;          
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-top: 1px solid rgba(0,0,0,0.05);
+        max-height: 85vh;
+        overflow-y: auto;
     }
     #mainNavbar .navbar-nav .nav-link {
-        color: var(--dark-text); /* Mobil menüde metin rengi */
+        color: #1e293b; 
         text-align: center;
         margin-right: 0;
-        padding: 0.75rem 0;
+        padding: 1.2rem 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 0.5px;
+    }
+    #mainNavbar .navbar-nav .nav-link:last-child {
+        border-bottom: none;
     }
     #mainNavbar .navbar-nav .nav-link:hover {
-        background-color: #f8f9fa;
-        border-radius: var(--border-radius-sm);
+        background-color: rgba(13, 110, 253, 0.08);
+        color: var(--primary-blue);
+        transform: translateY(-2px);
+    }
+    #mainNavbar .navbar-nav .btn {
+        margin: 1.5rem auto;
+        width: 85%;
+        padding: 0.8rem 1rem;
+        font-size: 1.05rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
     #mainNavbar .navbar-toggler {
-        color: var(--dark-text); /* Hamburger ikon rengi */
-        border-color: rgba(0, 0, 0, 0.1);
-    }
-    .navbar-transparent.navbar-collapse .navbar-nav .nav-link {
-        color: var(--dark-text); /* Mobil açık menüde transparan olsa bile metin koyu */
+        background: rgba(220, 53, 69, 0.05);
+        border: 1px solid rgba(220, 53, 69, 0.1) !important;
     }
 }
 
@@ -505,12 +537,10 @@ body.mobile-menu-open .mobile-overlay {
 @media (max-width: 991.98px) {
   .navbar-collapse {
     position: absolute;
-    top: 80px; /* Navbar yüksekliği kadar */
+    top: 79px; /* Navbar yüksekliği kadar */
     left: 0;
     width: 100%;
-    background-color: var(--white);
     z-index: 2100;
-    border-top: 1px solid #ddd; /* Hafif ayırıcı çizgi */
   }
 }
 

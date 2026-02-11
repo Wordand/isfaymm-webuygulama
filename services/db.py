@@ -592,13 +592,33 @@ def migrate_kdv_tables():
         if not USE_SQLITE:
             # PostgreSQL Foreign Key Duzeltmesi (Eski mükellef tablosuna referans varsa kdv_mukellef'e çevir)
             try:
-                # kdv_files fix
+                # kdv_files FK fix
                 cur.execute("ALTER TABLE kdv_files DROP CONSTRAINT IF EXISTS kdv_files_mukellef_id_fkey;")
                 cur.execute("ALTER TABLE kdv_files ADD CONSTRAINT kdv_files_mukellef_id_fkey FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE;")
                 conn.commit()
             except Exception as e:
                 conn.rollback()
                 print(f"kdv_files FK fix skip: {e}")
+
+        # Check for amount_guarantee column
+        try:
+            if USE_SQLITE:
+                cur.execute("PRAGMA table_info(kdv_files)")
+                cols = {r["name"] for r in cur.fetchall()}
+            else:
+                cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='kdv_files'")
+                cols = {r["column_name"] for r in cur.fetchall()}
+            
+            if "amount_guarantee" not in cols:
+                print("Adding amount_guarantee column to kdv_files...")
+                if USE_SQLITE:
+                    cur.execute("ALTER TABLE kdv_files ADD COLUMN amount_guarantee REAL DEFAULT 0")
+                else:
+                    cur.execute("ALTER TABLE kdv_files ADD COLUMN amount_guarantee DOUBLE PRECISION DEFAULT 0")
+                conn.commit()
+        except Exception as e:
+            print(f"Migration error for amount_guarantee: {e}")
+
 
             try:
                 # kdv_bank_guarantees fix

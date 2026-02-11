@@ -45,6 +45,18 @@ STATUS_STAGES = {
     ]
 }
 
+def kdv_log_action(user_name, action, details):
+    try:
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute("""
+                INSERT INTO kdv_logs (user_name, action, details, timestamp)
+                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+            """, (user_name, action, details))
+            conn.commit()
+    except Exception as e:
+        print(f"Log Insert Error: {e}")
+
 @bp.route("/kdv-yonetimi")
 @kdv_access_required
 @role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
@@ -94,6 +106,35 @@ def details(file_id):
         file_id=file_id,
         STATUS_STAGES=STATUS_STAGES
     )
+
+@bp.route("/kdv-mukellef-ozet/<int:mukellef_id>")
+@kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
+def mukellef_ozet(mukellef_id):
+    user_id = session.get("user_id")
+    role = session.get("role")
+
+    # 🔐 UZMAN → SADECE ATANMIŞ MÜKELLEF
+    if role == "uzman":
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute("""
+                SELECT 1 FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (user_id, mukellef_id))
+            if not c.fetchone():
+                flash("Bu mükellefi görüntüleme yetkiniz yok.", "danger")
+                return redirect(url_for("kdv.mukellefler"))
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("SELECT * FROM kdv_mukellef WHERE id = %s", (mukellef_id,))
+        mukellef = c.fetchone()
+        if not mukellef:
+            flash("Mükellef bulunamadı.", "danger")
+            return redirect(url_for("kdv.mukellefler"))
+
+    return render_template("kdv/mukellef_ozet.html", mukellef=dict(mukellef))
 
 
 @bp.route("/kdv-mukellefler")
@@ -795,7 +836,7 @@ def get_file(file_id):
     return jsonify(file)
 
 
-@bp.route("/api/kdv/add", methods=["POST"])
+@bp.route("/api/kdv/add-file", methods=["POST"])
 @api_kdv_access_required
 @role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def add_file():
@@ -826,78 +867,116 @@ def add_file():
                     "message": "Bu mükellef için dosya oluşturma yetkiniz yok."
                 }), 403
 
+    
+    # Batch Support: 'periods' keys can be a list of period strings
+    # Fallback to single 'period' if not present
+    periods = data.get("periods", [])
+    if not periods and data.get("period"):
+        periods = [data.get("period")]
+    
+    if not periods:
+        return jsonify({"status": "error", "message": "En az bir dönem seçilmelidir."}), 400
+
+    no_refund = data.get("no_refund", False)
+    
+    # Common Values
+    base_subject = data.get("subject")
+    base_type = data.get("type")
+    base_amount = data.get("amount_request")
+
+    if no_refund:
+        base_subject = "İADESİ YOK"
+        base_type = "-"
+        base_amount = 0
+        initial_status = "İade Yok"
+    else:
+        initial_status = "Listeler hazırlanacak"
+
+    # Transaction Start
     try:
         with get_conn() as conn:
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            
+            inserted_count = 0
+            
+            for p in periods:
+                # Check duplication first
+                c.execute("""
+                    SELECT id FROM kdv_files 
+                    WHERE mukellef_id = %s AND period = %s AND is_active = TRUE
+                """, (mukellef_id, p))
+                if c.fetchone():
+                    continue # Skip existing
 
-            query = """
-                INSERT INTO kdv_files (
+                query = """
+                    INSERT INTO kdv_files (
+                        mukellef_id,
+                        user_id,
+                        period,
+                        subject,
+                        type,
+                        amount_request,
+                        status,
+                        date,
+                        is_active
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, TRUE)
+                """
+                
+                params = (
                     mukellef_id,
                     user_id,
-                    period,
-                    subject,
-                    type,
-                    amount_request,
-                    status,
-                    date,
-                    is_active
+                    p,
+                    base_subject,
+                    base_type,
+                    base_amount,
+                    initial_status,
+                    datetime.now().strftime("%d.%m.%Y")
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, TRUE)
-            """
 
-            params = (
-                mukellef_id,
-                user_id,
-                data.get("period"),
-                data.get("subject"),
-                data.get("type"),
-                data.get("amount_request"),
-                "Listeler hazırlanacak",
-                datetime.now().strftime("%d.%m.%Y")
-            )
-
-            from services.db import USE_SQLITE
-            if not USE_SQLITE:
+                file_id = None
+                # PostgreSQL
                 query += " RETURNING id"
                 c.execute(query, params)
-                file_id = c.fetchone()["id"]
-            else:
-                c.execute(query, params)
-                file_id = c.lastrowid
+                row = c.fetchone()
+                if row: file_id = row["id"]
+                
+                if file_id:
+                    inserted_count += 1
+                    # 📜 History
+                    c.execute("""
+                        INSERT INTO kdv_history (file_id, date, text)
+                        VALUES (%s, %s, %s)
+                    """, (
+                        file_id,
+                        datetime.now().strftime("%d.%m.%Y %H:%M"),
+                        "Dosya oluşturuldu - " + initial_status
+                    ))
 
-            # 📜 History
-            c.execute("""
-                INSERT INTO kdv_history (file_id, date, text)
-                VALUES (%s, %s, %s)
-            """, (
-                file_id,
-                datetime.now().strftime("%d.%m.%Y %H:%M"),
-                "Dosya oluşturuldu"
-            ))
-            
-            # Log için mükellef adını al
+            # Log
             c.execute("SELECT unvan FROM kdv_mukellef WHERE id = %s", (mukellef_id,))
             m_row = c.fetchone()
             m_name = m_row["unvan"] if m_row else "Bilinmeyen"
-
+            
             conn.commit()
+
+            if inserted_count == 0 and len(periods) > 0:
+                 return jsonify({"status": "error", "message": "Seçilen dönemler için zaten dosya mevcut."}), 400
             
             kdv_log_action(
                 session.get("username", "Admin"),
                 "Dosya Oluşturma",
-                f"{session.get('username')} \"{m_name}\" mükellefi {data.get('period')} dönemi için yeni iade dosyası ekledi."
+                f"{session.get('username')} \"{m_name}\" mükellefi için {inserted_count} adet yeni iade dosyası ekledi."
             )
 
         return jsonify({
-            "status": "success",
-            "file_id": file_id
+            "status": "success", 
+            "message": f"{inserted_count} adet dosya oluşturuldu."
         })
 
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
+        print(f"Error in add_file: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @bp.route("/api/kdv/update-status", methods=["POST"])
@@ -991,6 +1070,77 @@ def update_status():
         "status": "success",
         "message": "Dosya durumu güncellendi."
     })
+
+
+@bp.route("/api/kdv/update-file-amounts", methods=["POST"])
+@api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
+def update_file_amounts():
+    data = request.get_json()
+    file_id = data.get("file_id")
+    user_id = session.get("user_id")
+    role = session.get("role")
+
+    if not file_id:
+        return jsonify({"status": "error", "message": "Dosya ID zorunludur."}), 400
+
+    # Helper: Parse money
+    def pm(val):
+        if val is None or val == "":
+            return 0.0
+        if isinstance(val, (int, float)):
+            return float(val)
+        clean = str(val).replace(".", "").replace(",", ".").replace("₺", "").replace("TL", "").strip()
+        try:
+            return float(clean)
+        except:
+            return 0.0
+            
+    amt_request = pm(data.get("amount_request"))
+    amt_guarantee = pm(data.get("amount_guarantee"))
+    amt_tenzil = pm(data.get("amount_tenzil"))
+    amt_bloke = pm(data.get("amount_bloke"))
+    amt_resolved = pm(data.get("amount_resolved"))
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        # 🔍 Dosya ve Yetki Kontrolü
+        c.execute("""
+            SELECT f.mukellef_id, f.period, m.unvan 
+            FROM kdv_files f
+            JOIN kdv_mukellef m ON f.mukellef_id = m.id
+            WHERE f.id = %s
+        """, (file_id,))
+        row = c.fetchone()
+        
+        if not row:
+            return jsonify({"status": "error", "message": "Dosya bulunamadı."}), 404
+
+        # 🔐 UZMAN KONTROLÜ
+        if role == "uzman":
+            c.execute("SELECT 1 FROM kdv_user_assignments WHERE user_id = %s AND mukellef_id = %s", (user_id, row["mukellef_id"]))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Yetkisiz işlem."}), 403
+
+        # 💾 GÜNCELLEME
+        c.execute("""
+            UPDATE kdv_files
+            SET amount_request = %s,
+                amount_guarantee = %s,
+                amount_tenzil = %s,
+                amount_bloke = %s,
+                amount_resolved = %s
+            WHERE id = %s
+        """, (amt_request, amt_guarantee, amt_tenzil, amt_bloke, amt_resolved, file_id))
+
+        # 📜 Log
+        log_msg = f"{session.get('username')} \"{row['unvan']}\" {row['period']} dosyası tutarlarını güncelledi. (Talep: {amt_request}, Sonuç: {amt_resolved})"
+        kdv_log_action(session.get("username", "System"), "Tutar Güncelleme", log_msg)
+
+        conn.commit()
+
+    return jsonify({"status": "success", "message": "Tutarlar başarıyla güncellendi."})
 
 
 @bp.route("/api/kdv/delete", methods=["POST"])
@@ -1089,6 +1239,125 @@ def toggle_active():
         )
 
     return jsonify({"status": "success"})
+
+
+# --- KDV MÜKELLEF ÖZET ---
+
+@bp.route("/api/kdv/mukellef-summary/<int:mukellef_id>")
+@api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
+def mukellef_summary(mukellef_id):
+    user_id = session.get("user_id")
+    role = session.get("role")
+
+    # 🔐 UZMAN → SADECE ATANMIŞ MÜKELLEF
+    if role == "uzman":
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute("""
+                SELECT 1 FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (user_id, mukellef_id))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Yetkisiz erişim"}), 403
+
+    def parse_money(val):
+        if not val:
+            return 0.0
+        if isinstance(val, (int, float)):
+            return float(val)
+        clean = str(val).replace(".", "").replace(",", ".").replace("₺", "").replace("TL", "").strip()
+        try:
+            return float(clean)
+        except:
+            return 0.0
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Mükellef bilgisi
+        c.execute("SELECT id, unvan, vkn, vergi_dairesi FROM kdv_mukellef WHERE id = %s", (mukellef_id,))
+        mukellef = c.fetchone()
+        if not mukellef:
+            return jsonify({"status": "error", "message": "Mükellef bulunamadı"}), 404
+
+        # İade dosyaları
+        c.execute("""
+            SELECT f.id, f.period, f.subject, f.type, 
+                   f.amount_request, f.amount_tenzil, f.amount_bloke, f.amount_resolved,
+                   f.amount_guarantee,
+                   f.status, f.is_active, f.is_guaranteed, f.guarantee_date, f.date
+            FROM kdv_files f
+            WHERE f.mukellef_id = %s AND f.is_active = TRUE
+            ORDER BY f.period DESC, f.id DESC
+        """, (mukellef_id,))
+        files = c.fetchall()
+
+        # Banka teminatları (Yedek kaynak)
+        c.execute("""
+            SELECT bg.file_id, COALESCE(SUM(bg.amount), 0) as total_guarantee
+            FROM kdv_bank_guarantees bg
+            WHERE bg.mukellef_id = %s AND bg.status = 'Aktif'
+            GROUP BY bg.file_id
+        """, (mukellef_id,))
+        guarantee_map = {}
+        for row in c.fetchall():
+            guarantee_map[row["file_id"]] = parse_money(row["total_guarantee"])
+
+    # Dosyaları düzenle
+    result_files = []
+    totals = {
+        "amount_request": 0,
+        "amount_guarantee": 0,
+        "amount_post_guarantee": 0,
+        "amount_tenzil": 0,
+        "amount_bloke": 0,
+        "amount_resolved": 0
+    }
+
+    for f in files:
+        amt_request = parse_money(f["amount_request"])
+        amt_tenzil = parse_money(f.get("amount_tenzil"))
+        amt_bloke = parse_money(f.get("amount_bloke"))
+        amt_resolved = parse_money(f.get("amount_resolved"))
+        
+        # Teminat: Manuel girildiyse onu kullan, yoksa banka kayıtlarını kullan
+        amt_guarantee_manual = parse_money(f.get("amount_guarantee"))
+        amt_guarantee_bank = guarantee_map.get(f["id"], 0)
+        
+        amt_guarantee = amt_guarantee_manual if amt_guarantee_manual > 0 else amt_guarantee_bank
+        amt_post_guarantee = max(0, amt_request - amt_guarantee)
+
+        file_data = {
+            "id": f["id"],
+            "period": f["period"] or "",
+            "subject": f["subject"] or "",
+            "type": f["type"] or "",
+            "amount_request": amt_request,
+            "amount_guarantee": amt_guarantee,
+            "amount_post_guarantee": amt_post_guarantee,
+            "amount_tenzil": amt_tenzil,
+            "amount_bloke": amt_bloke,
+            "amount_resolved": amt_resolved,
+            "status": f["status"] or "",
+            "date": f.get("date") or ""
+        }
+        result_files.append(file_data)
+
+        totals["amount_request"] += amt_request
+        totals["amount_guarantee"] += amt_guarantee
+        totals["amount_post_guarantee"] += amt_post_guarantee
+        totals["amount_tenzil"] += amt_tenzil
+        totals["amount_bloke"] += amt_bloke
+        totals["amount_resolved"] += amt_resolved
+
+    return jsonify({
+        "status": "success",
+        "mukellef": dict(mukellef),
+        "files": result_files,
+        "totals": totals,
+        "file_count": len(result_files)
+    })
 
 
 # --- KDV MÜKELLEF İŞLEMLERİ ---
@@ -1516,3 +1785,42 @@ def delete_note(note_id):
         conn.commit()
         
     return jsonify({"status": "success", "message": "Bilgi silindi"})
+
+@bp.route("/api/kdv/delete-file/<int:file_id>", methods=["DELETE"])
+@api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
+def api_delete_file(file_id):
+    try:
+        user_id = session.get("user_id")
+        username = session.get("username", "Unknown")
+        
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            
+            # Get file info for log
+            c.execute("""
+                SELECT kf.mukellef_id, km.unvan, kf.period 
+                FROM kdv_files kf 
+                LEFT JOIN kdv_mukellef km ON kf.mukellef_id = km.id 
+                WHERE kf.id = %s
+            """, (file_id,))
+            row = c.fetchone()
+            
+            if not row:
+                return jsonify({"status": "error", "message": "Dosya bulunamadı"}), 404
+                
+            m_name = row['unvan'] or "Bilinmeyen"
+            period = row['period']
+
+            # Soft Delete
+            c.execute("UPDATE kdv_files SET is_active = FALSE WHERE id = %s", (file_id,))
+            conn.commit()
+            
+            # Log
+            kdv_log_action(username, "Dosya Silme", f"{username} kullanıcısı {m_name} mükellefine ait {period} dönemli dosyayı sildi.")
+            
+        return jsonify({"status": "success", "message": "Dosya başarıyla silindi."})
+            
+    except Exception as e:
+        print(f"Error in delete_file: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500

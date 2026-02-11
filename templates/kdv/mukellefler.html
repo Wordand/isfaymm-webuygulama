@@ -31,34 +31,38 @@
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }
 
-    /* Floating Action Buttons */
-    .top-actions {
-        position: absolute;
-        top: 20px;
-        right: 20px;
+    /* Card Top Row */
+    .card-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .card-top-row .top-actions {
         display: flex;
         gap: 8px;
-        z-index: 1000 !important;
+        flex-shrink: 0;
     }
 
     .tool-btn {
         width: 38px; height: 38px;
         border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        border: 1px solid #edf2f7;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid #e2e8f0;
         background: #f8fafc;
         color: #718096;
-        cursor: pointer !important;
-        transition: 0.2s;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        outline: none;
     }
     .tool-btn:hover {
         background: white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: scale(1.15);
     }
-    .tool-btn.edit:hover { color: var(--kdv-primary); border-color: var(--kdv-primary); }
-    .tool-btn.delete:hover { color: var(--kdv-danger); border-color: var(--kdv-danger); }
-    .tool-btn i { pointer-events: none; }
+    .tool-btn:active { transform: scale(0.95); }
+    .tool-btn.edit:hover { color: var(--kdv-primary); border-color: var(--kdv-primary); background: #eff6ff; }
+    .tool-btn.delete:hover { color: var(--kdv-danger); border-color: var(--kdv-danger); background: #fef2f2; }
 
     /* Card Elements */
     .avatar-box {
@@ -191,6 +195,140 @@
         text-transform: uppercase;
         margin-right: 15px;
     }
+
+    /* Summary Button */
+    .btn-summary {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+        border: none;
+        padding: 11px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 10px;
+    }
+    .btn-summary:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(5, 150, 105, 0.3);
+        color: white;
+    }
+
+    /* Summary Modal */
+    .summary-modal .modal-content {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+    }
+    .summary-modal .modal-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        padding: 24px 30px;
+        border: none;
+    }
+    .summary-modal .modal-header .btn-close {
+        filter: invert(1);
+    }
+    .summary-modal .modal-body {
+        padding: 30px;
+        background: #f8fafc;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .summary-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.85rem;
+    }
+    .summary-table thead th {
+        background: #1e293b;
+        color: white;
+        padding: 12px 14px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .summary-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .summary-table thead th:last-child { border-radius: 0 12px 0 0; }
+    .summary-table tbody td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .summary-table tbody tr:hover td { background: #eff6ff; }
+    .summary-table tbody tr:last-child td { border-bottom: none; }
+    .summary-table .amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .summary-table .amount.positive { color: #059669; }
+    .summary-table .amount.zero { color: #94a3b8; }
+    .totals-row td {
+        background: #f0fdf4 !important;
+        font-weight: 800 !important;
+        border-top: 2px solid #059669 !important;
+        font-size: 0.9rem;
+    }
+    .status-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .status-pill.ongoing { background: #fef3c7; color: #92400e; }
+    .status-pill.completed { background: #d1fae5; color: #065f46; }
+    .status-pill.problem { background: #fecaca; color: #991b1b; }
+    .period-badge {
+        font-weight: 800;
+        color: #1e293b;
+        background: #e2e8f0;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+    .type-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .summary-empty {
+        text-align: center;
+        padding: 50px 20px;
+        color: #94a3b8;
+    }
+    .summary-empty i { font-size: 3rem; margin-bottom: 15px; }
+    .summary-info-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .summary-info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 18px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+    }
+    .summary-info-card .label { font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .summary-info-card .value { font-size: 1.25rem; font-weight: 800; color: #1e293b; margin-top: 4px; }
+    .summary-info-card .value.green { color: #059669; }
 </style>
 {% endblock %}
 
@@ -226,31 +364,38 @@
         {% for m in mukellefler %}
         <div class="col-xl-4 col-md-6 client-card-wrapper" data-assigned="{{ m.assigned_names or '' }}">
             <div class="client-card">
-                <!-- Action Buttons -->
-                {% if session.role in ('admin', 'ymm', 'uzman', 'yonetici') %}
-                <div class="top-actions">
-                    <button type="button" class="tool-btn edit" 
-                            onclick="openEdit({{ m.id|tojson }}, {{ m.vkn|tojson }}, {{ m.unvan|tojson }}, {{ (m.vergi_dairesi or '')|tojson }}, {{ (m.ilgili_memur or '')|tojson }})" 
-                            title="Düzenle">
-                        <i class="fa-solid fa-pencil"></i>
-                    </button>
-                    <button type="button" class="tool-btn delete" 
-                            onclick="openDelete({{ m.id|tojson }}, {{ m.unvan|tojson }})" 
-                            title="Sil">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                </div>
-                {% endif %}
+                <!-- Top Row: Badge + Actions -->
+                <div class="card-top-row">
+                    {% if m.assigned_names %}
+                    <div class="assignment-badge-avatar" title="Sorumlu Personel: {{ m.assigned_names }}" style="margin-bottom:0;">
+                        <i class="fa-solid fa-user-tie"></i> {{ m.assigned_names }}
+                    </div>
+                    {% else %}
+                    <div class="assignment-badge-avatar unassigned-badge" style="margin-bottom:0;">
+                        <i class="fa-solid fa-user-slash"></i> Atanmamış
+                    </div>
+                    {% endif %}
 
-                {% if m.assigned_names %}
-                <div class="assignment-badge-avatar" title="Sorumlu Personel: {{ m.assigned_names }}">
-                    <i class="fa-solid fa-user-tie"></i> {{ m.assigned_names }}
+                    {% if session.role in ('admin', 'ymm', 'uzman', 'yonetici') %}
+                    <div class="top-actions">
+                        <button type="button" class="tool-btn edit js-edit-btn"
+                                data-id="{{ m.id }}"
+                                data-vkn="{{ m.vkn }}"
+                                data-unvan="{{ m.unvan }}"
+                                data-daire="{{ m.vergi_dairesi or '' }}"
+                                data-memur="{{ m.ilgili_memur or '' }}"
+                                title="Düzenle">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button type="button" class="tool-btn delete js-delete-btn"
+                                data-id="{{ m.id }}"
+                                data-unvan="{{ m.unvan }}"
+                                title="Sil">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="assignment-badge-avatar unassigned-badge">
-                    <i class="fa-solid fa-user-slash"></i> Atanmamış
-                </div>
-                {% endif %}
 
                 <div class="company-title" title="{{ m.unvan }}">{{ m.unvan }}</div>
                 <div class="vkn-badge">{{ m.vkn }}</div>
@@ -273,6 +418,9 @@
                     {% endif %}
                 </div>
 
+                <a href="{{ url_for('kdv.mukellef_ozet', mukellef_id=m.id) }}" class="btn-summary text-decoration-none">
+                    <i class="fa-solid fa-chart-bar"></i> KDV İade Özeti
+                </a>
                 <a href="{{ url_for('kdv.index') }}?mukellef={{ m.id }}" class="btn-main-action">
                     Dosyaları İncele <i class="fa-solid fa-arrow-right small"></i>
                 </a>
@@ -321,6 +469,7 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -333,37 +482,50 @@
         document.getElementById('mTitle').innerText = 'Yeni Mükellef Kaydı';
     }
 
-    window.openEdit = function(id, vkn, unvan, daire, memur) {
-        console.log("Edit requested for:", unvan);
-        document.getElementById('mId').value = id;
-        document.getElementById('mVkn').value = vkn;
-        document.getElementById('mUnvan').value = unvan;
-        document.getElementById('mDaire').value = daire;
-        document.getElementById('mMemur').value = memur;
-        document.getElementById('mTitle').innerText = 'Mükellef Bilgilerini Güncelle';
-        mModal.show();
-    };
+    // --- Event Delegation: Edit & Delete ---
+    document.addEventListener('click', function(e) {
+        // EDIT button
+        const editBtn = e.target.closest('.js-edit-btn');
+        if (editBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('mId').value = editBtn.dataset.id;
+            document.getElementById('mVkn').value = editBtn.dataset.vkn;
+            document.getElementById('mUnvan').value = editBtn.dataset.unvan;
+            document.getElementById('mDaire').value = editBtn.dataset.daire;
+            document.getElementById('mMemur').value = editBtn.dataset.memur;
+            document.getElementById('mTitle').innerText = 'Mükellef Bilgilerini Güncelle';
+            mModal.show();
+            return;
+        }
 
-    window.openDelete = function(id, unvan) {
-        Swal.fire({
-            title: 'Kayıt Silinecek!',
-            text: `"${unvan}" mükellefi ve bağlı tüm dosyalarını silmek istediğinize emin misiniz?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Evet, Sil',
-            cancelButtonText: 'Vazgeç',
-            borderRadius: '20px'
-        }).then(res => {
-            if (res.isConfirmed) {
-                fetch('/api/kdv/delete-mukellef', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id: id })
-                }).then(() => location.reload());
-            }
-        });
-    };
+        // DELETE button
+        const delBtn = e.target.closest('.js-delete-btn');
+        if (delBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const mid = delBtn.dataset.id;
+            const munvan = delBtn.dataset.unvan;
+            Swal.fire({
+                title: 'Kayıt Silinecek!',
+                text: '"' + munvan + '" mükellefi ve bağlı tüm dosyalarını silmek istediğinize emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Evet, Sil',
+                cancelButtonText: 'Vazgeç'
+            }).then(function(res) {
+                if (res.isConfirmed) {
+                    fetch('/api/kdv/delete-mukellef', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ id: mid })
+                    }).then(function() { location.reload(); });
+                }
+            });
+            return;
+        }
+    });
 
     document.getElementById('mSave').onclick = async () => {
         const id = document.getElementById('mId').value;

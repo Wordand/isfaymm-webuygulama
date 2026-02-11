@@ -1,0 +1,584 @@
+{% extends "layout.html" %}
+
+{% block title %}KDV Genel Uygulama Tebliği | İSFA YMM{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background: #f8faff;">
+    <div class="row g-4">
+        <!-- 📂 Sol Menü (Navigasyon Panels) -->
+        <div class="col-lg-3">
+            <div class="navigation-wrapper sticky-top" style="top: 85px; z-index: 100;">
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden" style="max-height: calc(100vh - 120px); display: flex; flex-direction: column;">
+                    <div class="gradient-header p-4 text-white">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-book-half fs-4"></i>
+                            <h5 class="mb-0 fw-bold">KDV TEBLİĞİ</h5>
+                        </div>
+                        <p class="small mb-0 opacity-75">Hiyerarşik Gezinti Paneli</p>
+                    </div>
+                    
+                    <div class="p-3 bg-white border-bottom">
+                        <div class="search-box position-relative">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-primary"></i>
+                            <input type="text" id="mevzuatSearch" class="form-control rounded-pill ps-5 border-light shadow-sm" placeholder="Başlık ara...">
+                        </div>
+                    </div>
+
+                    <div id="mevzuatNav" class="flex-grow-1 overflow-auto p-2 bg-white scrollbar-slim">
+                        <!-- Yükleniyor Spinner -->
+                        <div class="text-center py-5" id="navSpinner">
+                            <div class="spinner-grow text-primary" role="status"></div>
+                            <div class="small mt-2 text-muted fw-semibold">Mevzuat Hazırlanıyor...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📄 Sağ İçerik Alanı -->
+        <div class="col-lg-9">
+            <!-- Breadcrumb & Kontrol Paneli -->
+            <div class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 px-2" id="breadcrumbNav">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Mevzuat</a></li>
+                        <li class="breadcrumb-item active text-primary fw-bold" aria-current="page">KDV Genel Uygulama Tebliği</li>
+                    </ol>
+                </nav>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Yazdır
+                    </button>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm border-0" id="shareBtn">
+                        <i class="bi bi-share me-1"></i> Paylaş
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ana İçerik Kartı -->
+            <div class="glass-card shadow-lg border-0 rounded-4 min-vh-75 position-relative overflow-hidden" id="contentWrapper">
+                <!-- Arkaplan Dekorasyonu -->
+                <div class="position-absolute top-0 end-0 opacity-05 pointer-events-none p-5">
+                    <i class="bi bi-journal-text" style="font-size: 15rem;"></i>
+                </div>
+                
+                <div class="card-body p-4 p-lg-5 position-relative" id="mainContent">
+                    <div class="welcome-screen text-center py-5">
+                        <div class="icon-circle bg-primary-soft mx-auto mb-4" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                            <i class="bi bi-journal-richtext text-primary fs-1"></i>
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark mb-3">KDV Genel Uygulama Tebliği</h1>
+                        <p class="lead text-muted mb-5">Türkiye Cumhuriyeti Katma Değer Vergisi mevzuatının temel taşı olan Genel Uygulama Tebliği'ne hiyerarşik yapı ile hızlı erişin.</p>
+                        
+                        <div class="features-grid row g-4 text-start mb-5">
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-search text-primary fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Hızlı Arama</h6>
+                                    <p class="small text-muted mb-0">Tüm başlıklar arasında anlık arama yapın.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-list-check text-success fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Akıllı Hiyerarşi</h6>
+                                    <p class="small text-muted mb-0">İç içe geçmiş maddeler arasında kaybolmayın.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-lightning text-warning fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Hızlı Erişim</h6>
+                                    <p class="small text-muted mb-0">Tek tıkla istediğiniz maddeye doğrudan ulaşın.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search-large mx-auto" style="max-width: 600px;">
+                            <div class="input-group input-group-lg shadow-sm rounded-4 overflow-hidden border">
+                                <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control border-0 px-3" id="mainSearchInput" placeholder="Madde, konu veya başlık yazın...">
+                                <button class="btn btn-primary px-4" type="button" id="mainSearchBtn">Ara</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🎨 MODERN CSS STİLLERİ -->
+<style>
+    /* Glassmorphism & UI Design */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #004aad 100%);
+    }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+    .opacity-05 { opacity: 0.05; }
+    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    
+    /* Navigation Styles */
+    .nav-item-l1 {
+        font-weight: 700;
+        color: #1a1a1a;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+    .nav-item-l1:hover {
+        background: #f0f7ff;
+    }
+    .nav-item-l2 {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+    .nav-link-custom {
+        display: block;
+        padding: 8px 12px;
+        color: #444;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 0.83rem;
+        border-left: 3px solid transparent;
+        line-height: 1.4;
+    }
+    .nav-link-custom:hover {
+        background: #f0f7ff;
+        color: #0d6efd;
+    }
+    .nav-link-custom.active {
+        background: #e7f1ff;
+        color: #0d6efd;
+        border-left-color: #0d6efd;
+        font-weight: 700;
+    }
+    
+    /* Content Typography */
+    .content-body h1 { color: #004aad; font-weight: 800; margin-bottom: 1.5rem; }
+    .content-body h2 { color: #1a365d; font-weight: 700; margin-bottom: 1rem; }
+    .content-body h3 { color: #1a1a1a; font-weight: 700; margin-top: 2rem; border-left: 4px solid #0d6efd; padding-left: 1rem; }
+    .content-body p { line-height: 1.8; color: #374151; font-size: 1.02rem; margin-bottom: 1rem; text-align: justify; }
+    .content-body .id-badge { background: #0d6efd; color: white; padding: 2px 10px; border-radius: 5px; margin-right: 10px; font-size: 0.9rem; }
+    
+    /* Breadcrumb yolu */
+    .breadcrumb-path-segment {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .breadcrumb-path-segment.active {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    /* Scrollbar */
+    .scrollbar-slim::-webkit-scrollbar { width: 5px; }
+    .scrollbar-slim::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-slim::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 10px; }
+    .scrollbar-slim::-webkit-scrollbar-thumb:hover { background: #ced4da; }
+    
+    /* Search Result Highlight */
+    .search-highlight {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        padding: 0 2px;
+    }
+    
+    @media print {
+        .navigation-wrapper, .breadcrumb, .btn-group, .search-box { display: none !important; }
+        .col-lg-9 { width: 100% !important; }
+        .glass-card { border: none !important; box-shadow: none !important; }
+    }
+</style>
+
+<!-- 🖱️ INTERACTIVE LOGIC -->
+<script>
+let tebligData = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    initApp();
+});
+
+async function initApp() {
+    try {
+        const response = await fetch('/static/data/kdv_tebligi.json');
+        tebligData = await response.json();
+        renderSidebar(tebligData);
+        document.getElementById('navSpinner').style.display = 'none';
+        
+        // Sidebar arama
+        const searchInput = document.getElementById('mevzuatSearch');
+        searchInput.addEventListener('input', (e) => filterSidebar(e.target.value));
+        
+        // Ana sayfa arama
+        const mainSearch = document.getElementById('mainSearchInput');
+        mainSearch.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                document.getElementById('mevzuatSearch').value = e.target.value;
+                filterSidebar(e.target.value);
+            }
+        });
+        const mainSearchBtn = document.getElementById('mainSearchBtn');
+        if (mainSearchBtn) {
+            mainSearchBtn.addEventListener('click', () => {
+                const val = mainSearch.value;
+                document.getElementById('mevzuatSearch').value = val;
+                filterSidebar(val);
+            });
+        }
+
+    } catch (err) {
+        console.error("Hata:", err);
+        document.getElementById('navSpinner').innerHTML = `
+            <div class="p-3 text-center">
+                <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                <p class="small mt-2 text-danger">Veriler yüklenemedi.</p>
+                <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">Tekrar Dene</button>
+            </div>`;
+    }
+}
+
+function renderSidebar(data) {
+    const container = document.getElementById('mevzuatNav');
+    container.innerHTML = '';
+    
+    data.forEach((l1, idx) => {
+        const section = document.createElement('div');
+        section.className = 'mb-2 sidebar-section';
+        section.dataset.uid = l1.uid || l1.id;
+        
+        const header = document.createElement('div');
+        header.className = 'nav-item-l1 p-2 d-flex justify-content-between align-items-center rounded';
+        header.innerHTML = `
+            <span class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary" style="min-width: 30px; font-size: 0.8rem;">${l1.id}</span>
+                <span class="text-truncate text-dark" style="max-width: 180px; font-size: 0.85rem;">${l1.title}</span>
+            </span>
+            <i class="bi bi-chevron-down small text-muted"></i>
+        `;
+        header.onclick = () => {
+            const sub = header.nextElementSibling;
+            if (sub) {
+                sub.classList.toggle('d-none');
+                header.querySelector('i').classList.toggle('bi-chevron-down');
+                header.querySelector('i').classList.toggle('bi-chevron-right');
+            }
+        };
+        
+        const subContainer = document.createElement('div');
+        subContainer.className = 'ps-2 mt-1 d-none';
+        
+        if (l1.sub && l1.sub.length > 0) {
+            renderSubLayers(l1.sub, subContainer, 0);
+        } else {
+            header.onclick = () => loadContent(l1.uid || l1.id);
+        }
+        
+        section.appendChild(header);
+        section.appendChild(subContainer);
+        container.appendChild(section);
+    });
+}
+
+function renderSubLayers(items, container, level) {
+    items.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-1 sidebar-item';
+        wrapper.dataset.uid = item.uid || item.id;
+        
+        const link = document.createElement('a');
+        link.href = 'javascript:void(0)';
+        link.className = `nav-link-custom d-flex align-items-start gap-2`;
+        
+        // Seviyeye gore stil
+        const idColor = level === 0 ? 'text-primary fw-bold' : 'text-secondary';
+        const titleSize = level === 0 ? '0.88rem' : '0.82rem';
+        const titleColor = level === 0 ? 'color: #1a1a1a;' : 'color: #555;';
+        
+        link.innerHTML = `
+            <span class="${idColor}" style="font-size: 0.78rem; min-width: 28px; flex-shrink: 0;">${item.id}</span>
+            <span style="font-size: ${titleSize}; ${titleColor}">${item.title}</span>
+        `;
+        
+        const uid = item.uid || item.id;
+        
+        if (item.sub && item.sub.length > 0) {
+            const childContainer = document.createElement('div');
+            childContainer.className = 'ps-3 d-none';
+            
+            link.innerHTML += ` <i class="bi bi-caret-down-fill ms-auto text-muted" style="font-size: 0.55rem; flex-shrink: 0; margin-top: 4px;"></i>`;
+            link.onclick = (e) => {
+                e.stopPropagation();
+                childContainer.classList.toggle('d-none');
+                loadContent(uid);
+                // Active state
+                document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            };
+            renderSubLayers(item.sub, childContainer, level + 1);
+            wrapper.appendChild(link);
+            wrapper.appendChild(childContainer);
+        } else {
+            link.onclick = (e) => {
+                e.stopPropagation();
+                loadContent(uid);
+                document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            };
+            wrapper.appendChild(link);
+        }
+        
+        container.appendChild(wrapper);
+    });
+}
+
+function loadContent(uid) {
+    const item = findItemByUid(tebligData, uid);
+    if (!item) {
+        console.warn('Item bulunamadi:', uid);
+        return;
+    }
+
+    const contentArea = document.getElementById('mainContent');
+    
+    // Animation
+    contentArea.style.opacity = '0';
+    contentArea.style.transition = 'opacity 0.2s ease';
+    setTimeout(() => {
+        // UID'den yol bilgisi olustur: "II/A/1.1" -> "II.A.1.1"
+        const pathDisplay = uid.replace(/\//g, '.');
+        
+        let html = `
+            <div class="content-body">
+                <div class="d-flex align-items-center mb-4 flex-wrap gap-2">
+                    <span class="badge bg-primary px-3 py-2 fs-6">${pathDisplay}</span>
+                    <h1 class="mb-0 fs-3" style="color: #1a365d;">${item.title}</h1>
+                </div>
+                
+                <div class="content-text mb-5">
+                    ${formatContent(item.content)}
+                </div>
+        `;
+        
+        if (item.sub && item.sub.length > 0) {
+            html += `
+                <div class="sub-navigation mt-5">
+                    <h4 class="fw-bold mb-4 d-flex align-items-center gap-2" style="color: #1a365d;">
+                        <i class="bi bi-grid-fill text-primary"></i> Alt Başlıklar
+                    </h4>
+                    <div class="row g-3">
+                        ${item.sub.map(sub => {
+                            const subUid = sub.uid || sub.id;
+                            return `
+                            <div class="col-md-6">
+                                <div class="card h-100 border shadow-xs hover-lift p-3" onclick="loadContent('${subUid}')" style="cursor: pointer;">
+                                    <div class="d-flex gap-2 align-items-start">
+                                        <span class="badge bg-light text-primary border fw-bold">${sub.id}</span>
+                                        <div class="fw-bold" style="font-size: 0.93rem; color: #1a365d;">${sub.title}</div>
+                                    </div>
+                                    <p class="small text-muted mt-2 mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${sub.content ? sub.content.substring(0, 100).replace(/\n/g, ' ') : 'İçeriği keşfedin...'}</p>
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        contentArea.innerHTML = html;
+        contentArea.style.opacity = '1';
+        
+        // Breadcrumb guncelle
+        updateBreadcrumb(uid, item.title);
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 200);
+}
+
+function formatContent(text) {
+    if (!text) return '<p class="text-muted fst-italic">Bu bölüm için doğrudan metin bulunmamaktadır. Lütfen alt başlıkları inceleyiniz.</p>';
+    
+    // Split on double newlines (paragraph breaks) first, then fall back to double spaces
+    let paragraphs = text.split(/\n\n/);
+    
+    // If no paragraph breaks found, try double space splitting
+    if (paragraphs.length <= 1) {
+        paragraphs = text.split('  ').filter(p => p.trim());
+    }
+    
+    return paragraphs.map(p => {
+        if (!p.trim()) return '';
+        let content = p.trim();
+        
+        // Tire ile başlayan maddeler - indented list style
+        if (content.startsWith('- ')) {
+            return `<p class="mb-2 ps-4" style="text-indent: -1.2em; padding-left: 2.5em; color: #2d3748;">${content}</p>`;
+        }
+        
+        // a), b), c) gibi bent işaretleri ile başlayan paragraflar
+        const bentMatch = content.match(/^([a-hıçğöşüA-Hİ]\)\s)/);
+        if (bentMatch) {
+            const bent = bentMatch[1];
+            const rest = content.substring(bent.length);
+            return `<p class="mb-3 ps-3" style="text-indent: -1.5em; padding-left: 2em;"><strong style="color: #004aad;">${bent}</strong>${rest}</p>`;
+        }
+        
+        // Örnek: ile başlayan paragraflar
+        if (content.match(/^Örnek\s*\d*\s*:/)) {
+            const colonIdx = content.indexOf(':');
+            return `<p class="mb-3 mt-3 p-3" style="background: #f0f5ff; border-left: 3px solid #0d6efd; border-radius: 4px; font-size: 0.98rem;"><strong style="color: #004aad;">${content.substring(0, colonIdx + 1)}</strong>${content.substring(colonIdx + 1)}</p>`;
+        }
+        
+        // Dipnot numaraları
+        if (content.match(/^\d{1,2}\s+\d{2}[./]\d{2}[./]\d{4}\s+tarihli/) || content.match(/^\d{1,2}\s+\d+\s+Seri\s+No/)) {
+            return `<p class="mb-2" style="font-size: 0.85rem; color: #6c757d; border-top: 1px solid #e9ecef; padding-top: 0.5rem;">${content}</p>`;
+        }
+        
+        // Normal paragraf
+        return `<p class="mb-3">${content}</p>`;
+    }).join('');
+}
+
+// UID ile oge bul (benzersiz yol uzerinden)
+function findItemByUid(data, uid) {
+    for (const item of data) {
+        if (item.uid === uid) return item;
+        if (item.sub) {
+            const found = findItemByUid(item.sub, uid);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+// Breadcrumb guncelle - tam yolu goster
+function updateBreadcrumb(uid, title) {
+    const bc = document.getElementById('breadcrumbNav');
+    // UID'den yol parcalarini olustur: "II/A/1.1" -> ["II", "A", "1.1"]
+    const parts = uid.split('/');
+    
+    let html = `
+        <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Mevzuat</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="location.reload()" class="text-decoration-none text-muted">KDV Tebliği</a></li>
+    `;
+    
+    // Her yol parcasi icin breadcrumb ollustur
+    let currentPath = '';
+    parts.forEach((part, idx) => {
+        currentPath = currentPath ? currentPath + '/' + part : part;
+        const isLast = idx === parts.length - 1;
+        
+        if (isLast) {
+            html += `<li class="breadcrumb-item active text-primary fw-bold">${part}</li>`;
+        } else {
+            html += `<li class="breadcrumb-item"><a href="javascript:void(0)" onclick="loadContent('${currentPath}')" class="text-decoration-none breadcrumb-path-segment">${part}</a></li>`;
+        }
+    });
+    
+    bc.innerHTML = html;
+}
+
+// Sidebar arama - veri uzerinden calisan
+function filterSidebar(term) {
+    term = term.toLocaleLowerCase('tr-TR').trim();
+    
+    const nav = document.getElementById('mevzuatNav');
+    
+    if (!term) {
+        // Tum ogeleri goster, alt menuleri kapat
+        nav.querySelectorAll('.sidebar-section, .sidebar-item').forEach(el => {
+            el.style.display = '';
+        });
+        nav.querySelectorAll('.ps-2, .ps-3').forEach(el => {
+            el.classList.add('d-none');
+        });
+        return;
+    }
+    
+    // Veri uzerinden arama yap
+    const matchingUids = new Set();
+    searchInData(tebligData, term, matchingUids);
+    
+    // Tum ogeleri gizle
+    nav.querySelectorAll('.sidebar-section').forEach(el => {
+        el.style.display = 'none';
+    });
+    nav.querySelectorAll('.sidebar-item').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Eslesenler ve ust ogeleri goster
+    matchingUids.forEach(uid => {
+        // Ust yolu bul ve ac
+        const parts = uid.split('/');
+        let currentPath = '';
+        
+        parts.forEach((part, idx) => {
+            currentPath = currentPath ? currentPath + '/' + part : part;
+            
+            // Section veya item'i bul
+            const el = nav.querySelector(`[data-uid="${currentPath}"]`);
+            if (el) {
+                el.style.display = '';
+                // Alt menuyu ac
+                const subMenu = el.querySelector('.ps-2, .ps-3');
+                if (subMenu) subMenu.classList.remove('d-none');
+                
+                // Ust sidebar-section'i da goster
+                const parentSection = el.closest('.sidebar-section');
+                if (parentSection) {
+                    parentSection.style.display = '';
+                    const subContainer = parentSection.querySelector('.ps-2');
+                    if (subContainer) subContainer.classList.remove('d-none');
+                }
+            }
+        });
+        
+        // Tam uid icin eleman goster
+        const matchEl = nav.querySelector(`[data-uid="${uid}"]`);
+        if (matchEl) {
+            matchEl.style.display = '';
+            // Tum ust containerlari ac
+            let parent = matchEl.parentElement;
+            while (parent && parent !== nav) {
+                if (parent.classList.contains('d-none')) {
+                    parent.classList.remove('d-none');
+                }
+                if (parent.style.display === 'none') {
+                    parent.style.display = '';
+                }
+                parent = parent.parentElement;
+            }
+        }
+    });
+}
+
+function searchInData(items, term, results) {
+    for (const item of items) {
+        const titleMatch = (item.title || '').toLocaleLowerCase('tr-TR').includes(term);
+        const idMatch = (item.id || '').toLocaleLowerCase('tr-TR').includes(term);
+        const contentMatch = (item.content || '').toLocaleLowerCase('tr-TR').includes(term);
+        
+        if (titleMatch || idMatch || contentMatch) {
+            results.add(item.uid || item.id);
+        }
+        
+        if (item.sub) {
+            searchInData(item.sub, term, results);
+        }
+    }
+}
+
+</script>
+{% endblock %}

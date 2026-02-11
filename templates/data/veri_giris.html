@@ -232,17 +232,34 @@
                         <tbody>
                             {% for belge in yuklenen_tum_belgeler %}
                             <tr>
-                                <td class="fw-semibold">{{ belge.vkn }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ belge.unvan if belge.unvan and belge.unvan != 'Bilinmiyor' else belge.vkn }}</div>
+                                    {% if belge.unvan and belge.unvan != 'Bilinmiyor' %}
+                                    <small class="text-muted">{{ belge.vkn }}</small>
+                                    {% endif %}
+                                </td>
                                 <td>{{ belge.donem }}</td>
                                 <td>
-                                    <span class="badge {% if belge.belge_turu == 'mizan' %}bg-info{% else %}bg-secondary{% endif %} rounded-pill px-3">
-                                        {{ belge.belge_turu | upper }}
-                                    </span>
+                                    {% if belge.belge_turu == 'bilanco' %}
+                                        <span class="badge bg-primary rounded-pill px-3">BİLANÇO</span>
+                                    {% elif belge.belge_turu == 'bilanco_enf' %}
+                                        <span class="badge bg-primary rounded-pill px-3">ENFLASYONLU BİLANÇO</span>
+                                    {% elif belge.belge_turu == 'gelir' %}
+                                        <span class="badge bg-success rounded-pill px-3">GELİR TABLOSU</span>
+                                    {% elif belge.belge_turu == 'gelir_enf' %}
+                                        <span class="badge bg-success rounded-pill px-3">ENFLASYONLU GELİR TABLOSU</span>
+                                    {% elif belge.belge_turu == 'kdv' %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">KDV</span>
+                                    {% elif belge.belge_turu == 'mizan' %}
+                                        <span class="badge bg-info text-dark rounded-pill px-3">{{ belge.belge_turu | upper }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary rounded-pill px-3">{{ belge.belge_turu | upper }}</span>
+                                    {% endif %}
                                 </td>
                                 <td class="text-muted small">{{ belge.yuklenme_tarihi }}</td>
                                 <td class="text-end">
                                     <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                                        {% if belge.belge_turu in ['bilanco','gelir','kdv'] %}
+                                        {% if belge.belge_turu in ['bilanco','gelir','kdv','bilanco_enf','gelir_enf'] %}
                                         <a href="{{ url_for('report.pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
                                            class="btn btn-sm btn-white border" title="Görüntüle"><i class="bi bi-eye"></i></a>
                                         {% elif belge.belge_turu == 'mizan' %}
