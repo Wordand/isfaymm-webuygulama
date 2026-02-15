@@ -3,11 +3,9 @@
     <div class="container-fluid px-4 px-lg-5 d-flex align-items-center justify-content-between">
 
         <!-- 🔹 Sol tarafta: Sidebar toggler -->
-        {% if is_logged_in %}
         <button id="sidebarToggle" class="btn btn-outline-primary d-lg-none me-2" type="button">
             <i class="bi bi-list" style="font-size:1.6rem;"></i>
         </button>
-        {% endif %}
 
         <!-- 🔸 Ortada: Logo veya marka -->
         <a class="navbar-brand fw-bold text-isfa" href="{{ url_for('main.home') }}">
@@ -87,6 +85,13 @@
                         <li>
                             <a class="dropdown-item" href="{{ url_for('indirimlikurumlar.index') }}">
                                 📉 İndirimli Kurumlar Vergisi
+                            </a>
+                        </li>
+
+                        <!-- 💰 NAKDİ SERMAYE ARTIRIM İNDİRİMİ -->
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('tools.sermaye') }}">
+                                💰 Nakdi Sermaye Artırım İndirimi
                             </a>
                         </li>
 

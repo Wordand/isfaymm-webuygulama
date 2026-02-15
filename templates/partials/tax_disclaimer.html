@@ -2,4 +2,13 @@
     ⚖️ Bu hesaplama aracı bilgilendirme amaçlıdır.
     İşlemin özelliklerine göre farklı vergisel sonuçlar doğabilir.
     Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
+
+    {% if extra_disclaimer %}
+    <div class="mt-2 pt-2 border-top border-secondary opacity-75">
+        <strong>Yasal Sorumluluk Muafiyeti:</strong>
+        Bu analiz/hesaplama tamamen sağlanan veriler doğrultusunda yapılmıştır. 
+        Verilerin doğruluğu ve gizliliği kullanıcının sorumluluğundadır. 
+        Oluşabilecek zararlardan yazılım sağlayıcısı sorumlu tutulamaz.
+    </div>
+    {% endif %}
 </div>

@@ -92,7 +92,6 @@ def mevzuat():
     return render_template("pages/mevzuat.html")
 
 @bp.route("/mevzuat/kdv-tebligi")
-@login_required
 def kdv_tebligi():
     # We will load the JSON via JavaScript in the template
     return render_template("pages/kdv_tebligi.html")

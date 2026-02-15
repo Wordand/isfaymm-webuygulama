@@ -206,8 +206,13 @@
             pointer-events: none;
         }
     </style>
+    
+    {# 🚀 LOADER'I İSTENEN SAYFALARDA CSS İLE KÖKTEN GİZLE #}
+    {% if 'indirimlikurumlar' in request.path %}
+    <style>#intro-loader { display: none !important; animation: none !important; }</style>
+    {% endif %}
 </head>
-{% set show_sidebar = session.get('user_id') is not none and request.endpoint not in ['auth.login', 'auth.register'] %}
+{% set show_sidebar = session.get('user_id') is not none and request.endpoint not in ['auth.login', 'auth.register', 'main.kdv_tebligi'] %}
 
 <body class="{{ 'no-sidebar-layout' if not show_sidebar else '' }}">
     <!-- 🟦 LOADER HTML -->
@@ -392,8 +397,12 @@
                 const hasSeenIntro = sessionStorage.getItem("isfa_intro_v3");
                 
                 // Show intro only once per session (or force if debugging)
-                if (hasSeenIntro) {
+                // Ayrıca indirimlikurumlar sayfasında loader istenmiyor
+                const skipLoader = window.location.href.includes("indirimlikurumlar");
+
+                if (hasSeenIntro || skipLoader) {
                     loader.style.display = 'none';
+                    if (skipLoader) sessionStorage.setItem("isfa_intro_v3", "true");
                 } else {
                     const progressBar = document.querySelector(".progress-line-fill");
                     const statusText = document.querySelector(".loading-status");

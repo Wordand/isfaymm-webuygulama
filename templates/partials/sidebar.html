@@ -44,12 +44,16 @@
             <i class="bi bi-percent sidebar-icon"></i> Asgari Kurumlar Vergisi
         </a>
         <a href="{{ url_for('tools.sermaye') }}"
-            class="sidebar-link {% if request.path.startswith('/sermaye') %}active{% endif %}">
+            class="sidebar-link {% if request.path == url_for('tools.sermaye') %}active{% endif %}">
             <i class="bi bi-cash-stack sidebar-icon"></i> Nakdi Sermaye Artırım İndirimi
         </a>
         <a href="{{ url_for('tools.finansman') }}"
-            class="sidebar-link {% if request.path.startswith('/finansman') %}active{% endif %}">
+            class="sidebar-link {% if request.path == url_for('tools.finansman') %}active{% endif %}">
             <i class="bi bi-currency-dollar sidebar-icon"></i> Finansman Gider Kısıtlaması
+        </a>
+        <a href="{{ url_for('tools.sermaye_azaltimi') }}"
+            class="sidebar-link {% if request.path == url_for('tools.sermaye_azaltimi') %}active{% endif %}">
+            <i class="bi bi-arrow-down-right-circle sidebar-icon"></i> Sermaye Azaltımı
         </a>
     </nav>
 </div>

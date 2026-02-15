@@ -1,18 +1,487 @@
 {% extends "layout.html" %}
 
-{% block title %}Nakdi Sermaye Artırım İndirimi Hesaplama - İSFA YMM{% endblock %}
+{% block title %}Nakdi Sermaye Artırım İndirimi Hesaplama | İSFA YMM{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h2 class="section-title text-center mb-4">Nakdi Sermaye Artırım İndirimi Hesaplama</h2>
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <p class="text-muted text-center">Bu hesaplama aracı yapım aşamasındadır.</p>
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- 🚀 Hero Section -->
+        <div class="text-center mb-5 animate-fade-in">
+            <div class="badge bg-primary text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="letter-spacing: 1px;">
+                <i class="bi bi-graph-up-arrow me-1"></i> VERGİ AVANTAJI HESAPLAYICI
+            </div>
+            <h1 class="display-4 fw-bold text-dark mb-3">Nakdi Sermaye Artırım İndirimi</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                Şirket sermaye yapısının güçlendirilmesi amacıyla getirilen nakdi sermaye artışlarına yönelik kurumlar vergisi indirimini kolayca hesaplayın.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 🧮 Hesaplama Formu -->
+            <div class="col-lg-8">
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
+                    <div class="gradient-header p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-calculator fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Hesaplama Parametreleri</h5>
+                                <p class="small mb-0 opacity-75">Tescil ve ödeme detaylarını giriniz.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <form id="sermayeForm" class="row g-4">
+                            <!-- Genel Bilgiler -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Tescil Tarihi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="date" id="tescilTarihi" class="form-control border-start-0 bg-light" required onchange="calculate()">
+                                </div>
+                                <div class="form-text small">Ticaret siciline tescil edildiği tarih.</div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-dark">Dönem Seçimi</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-clock-history"></i></span>
+                                            <select id="faizDonemi" class="form-select border-start-0 bg-light" onchange="updateFaizRate()">
+                                                <option value="custom">-- Özel Faiz Oranı Gir --</option>
+                                                <optgroup label="2025 (Cari Yıl)">
+                                                    <option value="2025 4. GEÇİCİ" selected>2025 4. GEÇİCİ (%45,34)</option>
+                                                    <option value="2025">2025 Yıllık (Henüz Belli Değil)</option>
+                                                </optgroup>
+                                                <optgroup label="2024 (Eski Uygulama)">
+                                                    <option value="2024">2024 Yıllık (%55,58)</option>
+                                                </optgroup>
+                                                <optgroup label="Önceki Yıllar">
+                                                    <option value="2023">2023 Yıllık (%53,11)</option>
+                                                    <option value="2022">2022 Yıllık (%13,47)</option>
+                                                    <option value="2021">2021 Yıllık (%24,51)</option>
+                                                    <option value="2020">2020 Yıllık (%19,62)</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-dark">TCMB Faiz Oranı (%)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-percent"></i></span>
+                                            <input type="number" id="faizOrani" class="form-control border-start-0 bg-light" step="0.01" value="45.34" required oninput="calculate()">
+                                        </div>
+                                        <div class="form-text small">Seçilen döneme ait resmi faiz oranıdır.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- İndirim Oranı Seçimi -->
+                            <div class="col-12 mt-4">
+                                <label class="form-label fw-bold text-dark mb-3">Geçerli İndirim Oranı</label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check custom-radio border rounded-3 p-3 hover-lift h-100">
+                                            <input class="form-check-input" type="radio" name="indirimOran" id="oran50" value="50" checked onchange="calculate()">
+                                            <label class="form-check-label d-block cursor-pointer" for="oran50">
+                                                <span class="fw-bold d-block">Standart Oran (%50)</span>
+                                                <span class="small text-muted">Genel indirim oranı.</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check custom-radio border rounded-3 p-3 hover-lift h-100">
+                                            <input class="form-check-input" type="radio" name="indirimOran" id="oran75" value="75" onchange="calculate()">
+                                            <label class="form-check-label d-block cursor-pointer" for="oran75">
+                                                <span class="fw-bold d-block">Yurt Dışı Nakit Artış (%75)</span>
+                                                <span class="small text-muted">Yurt dışından getirilen sermaye artışları.</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check custom-radio border rounded-3 p-3 hover-lift h-100">
+                                            <input class="form-check-input" type="radio" name="indirimOran" id="oran100" value="100" onchange="calculate()">
+                                            <label class="form-check-label d-block cursor-pointer" for="oran100">
+                                                <span class="fw-bold d-block">Halka Açık / Tam Teşvikli (%100)</span>
+                                                <span class="small text-muted">Borsada işlem gören veya tam teşvikli yatırımlar.</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check custom-radio border rounded-3 p-3 hover-lift h-100">
+                                            <input class="form-check-input" type="radio" name="indirimOran" id="oranCustom" value="custom" onchange="toggleCustomOran()">
+                                            <label class="form-check-label d-block cursor-pointer" for="oranCustom">
+                                                <span class="fw-bold d-block">Özel Oran Belirle</span>
+                                                <div id="customOranInput" class="mt-2 d-none">
+                                                    <input type="number" id="manualOran" class="form-control form-control-sm" placeholder="%" value="50" oninput="calculate()">
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ödeme Detayları (Dinamik) -->
+                            <div class="col-12 mt-5">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-cash-stack me-2"></i>Ödeme Kayıtları</h6>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="addPaymentRow()">
+                                        <i class="bi bi-plus-lg me-1"></i> Ödeme Ekle
+                                    </button>
+                                </div>
+                                
+                                <div id="paymentList" class="payment-rows">
+                                    <!-- Dinamik satırlar buraya gelecek -->
+                                    <div class="payment-row row g-2 mb-2 p-3 bg-light rounded-3 border">
+                                        <div class="col-md-6">
+                                            <label class="small text-muted mb-1">Ödeme Giriş Tarihi</label>
+                                            <input type="date" class="form-control payment-date" required onchange="calculate()">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="small text-muted mb-1">Ödenen Tutar (TL)</label>
+                                            <input type="text" class="form-control payment-amount money-mask" placeholder="0,00" required oninput="calculate()">
+                                        </div>
+                                        <div class="col-md-1 d-flex align-items-end justify-content-center">
+                                            <button type="button" class="btn btn-link text-danger p-0 pb-2 disabled"><i class="bi bi-trash fs-5"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 📖 Mevzuat Bölümü -->
+                <div class="glass-card shadow border-0 rounded-4 overflow-hidden">
+                    <div class="card-header bg-white p-4 border-0">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active rounded-pill px-4 me-2" id="pills-info-tab" data-bs-toggle="pill" data-bs-target="#pills-info" type="button" role="tab">Giriş ve Kapsam</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4 me-2" id="pills-calc-tab" data-bs-toggle="pill" data-bs-target="#pills-calc" type="button" role="tab">Hesaplama Mantığı</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4" id="pills-extra-tab" data-bs-toggle="pill" data-bs-target="#pills-extra" type="button" role="tab">Diğer Hususlar</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 tab-content" id="pills-tabContent" style="background: #fff; text-align: justify; line-height: 1.8;">
+                        <!-- Tab 1: Kapsam -->
+                        <div class="tab-pane fade show active" id="pills-info" role="tabpanel">
+                            <h4 class="fw-bold text-dark mb-4">Sermaye Artırımında İndirim Uygulaması</h4>
+                            <p>Finans, bankacılık ve sigortacılık sektörlerinde faaliyet gösteren kurumlar ile kamu iktisadi teşebbüsleri hariç olmak üzere sermaye şirketlerinin ilgili hesap dönemi içinde, ticaret siciline tescil edilmiş olan <strong>ödenmiş veya çıkarılmış sermaye tutarlarındaki nakdi sermaye artışları</strong> üzerinden indirim hakkı tanınmıştır.</p>
+                            <div class="alert alert-info border-0 rounded-4 p-4 mb-4">
+                                <div class="d-flex gap-3">
+                                    <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+                                    <div>
+                                        <h6 class="fw-bold">Temel Kural</h6>
+                                        <p class="mb-0 small">İndirim tutarı, nakdi sermaye artışı üzerinden TCMB tarafından açıklanan yıllık ortalama ticari kredi faiz oranı dikkate alınarak, ilgili hesap döneminin sonuna kadar hesaplanır.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <h6 class="fw-bold mt-4">İndirimden Yararlanamayacak Durumlar:</h6>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-x-circle text-danger me-2"></i>Nakit dışındaki varlık devirleri</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-x-circle text-danger me-2"></i>Birleşme, devir ve bölünme işlemlerinden kaynaklanan artışlar</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-x-circle text-danger me-2"></i>Öz sermaye kalemlerinin (geçmiş yıl karları, yedekler vb.) sermayeye eklenmesi</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-x-circle text-danger me-2"></i>Ortaklarla ilişkili kişilerden borç alınarak yapılan artışlar</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Tab 2: Hesaplama -->
+                        <div class="tab-pane fade" id="pills-calc" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-4">İndirim Tutarı Nasıl Hesaplanır?</h5>
+                            <p class="bg-light p-3 rounded-3 font-monospace mb-4">
+                                İndirim Tutarı = Nakdi Sermaye Artışı x Faiz Oranı x İndirim Oranı x (Ay Sayısı / 12)
+                            </p>
+                            <h6 class="fw-bold">Süre (Ay Sayısı) Hesaplaması:</h6>
+                            <p>Ay kesri tam ay sayılmak suretiyle, sermayenin şirketin banka hesabına yatırıldığı tarihin içinde bulunduğu aydan hesap döneminin sonuna kadar olan süre dikkate alınır.</p>
+                            <div class="card border-0 bg-primary bg-opacity-10 rounded-4 p-4 mt-4">
+                                <h6 class="fw-bold text-primary"><i class="bi bi-lightning-fill me-2"></i>Kritik Not: Tescil Öncesi Ödemeler</h6>
+                                <p class="mb-0 small">Tescil tarihinden önce bankaya yatırılan kısımlar için <strong>tescil tarihi</strong> esas alınır. Tescilden sonraki ödemeler için ise doğrudan <strong>ödeme tarihi</strong> esas alınır.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Diğer -->
+                        <div class="tab-pane fade" id="pills-extra" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-4">Beş Hesap Dönemi Sınırı</h5>
+                            <p>5/7/2022 tarihinden itibaren yapılacak sermaye artırımları için indirimden, sermaye artırımına ilişkin kararın tescil edildiği hesap dönemi dahil olmak üzere <strong>beş hesap dönemi</strong> için yararlanılabilir.</p>
+                            <h6 class="fw-bold mt-4">Kazanç Yetersizliği:</h6>
+                            <p>İlgili dönemde kazanç yetersizliği nedeniyle indirilemeyen tutarlar, herhangi bir endekslemeye tabi tutulmaksızın sonraki dönemlere devreder.</p>
+                            <div class="card border-warning bg-warning bg-opacity-10 rounded-4 p-4 mt-4 text-dark shadow-sm">
+                                <i class="bi bi-exclamation-triangle-fill mb-2 fs-4 text-warning"></i>
+                                <h6 class="fw-bold">Sermaye Azaltımı Durumu</h6>
+                                <p class="mb-0 small">Daha sonra sermaye azaltımı yapılması halinde, azaltılan tutar kadarlık kısım için indirim hakkı tescil tarihini izleyen aydan itibaren sona erer.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Sonuç Kartı (Sticky) -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-slide-up">
+                        <div class="p-4 text-center" style="background: #2b3a67;">
+                            <h6 class="text-white-50 text-uppercase small ls-1 fw-bold mb-2">TOPLAM İNDİRİM TUTARI</h6>
+                            <h2 class="display-5 fw-bold text-white mb-0" id="resultTotal">0,00 ₺</h2>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Kıst Dönem İndirimi</span>
+                                <span class="fw-bold text-dark" id="resultKist">0,00 ₺</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Vergi Kalkanı (%25)</span>
+                                <span class="fw-bold text-success" id="resultTaxBenefit">0,00 ₺</span>
+                            </div>
+                            
+                            <!-- Özet Detaylar -->
+                            <div class="mt-4">
+                                <h6 class="small fw-bold text-muted text-uppercase mb-3">Hesap Detayı</h6>
+                                <div class="bg-light rounded-3 p-3">
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span>Efektif Oran:</span>
+                                        <span class="fw-bold" id="resEfektif">0%</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small">
+                                        <span>Maksimum Süre:</span>
+                                        <span class="fw-bold" id="resMaxMonth">0 Ay</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(1)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 1
+                                </button>
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(2)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 2
+                                </button>
+                                <button class="btn btn-light rounded-pill py-2 small mt-2" onclick="resetForm()"> Formu Temizle </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Geçici Vergi ve Dönem Uyarısı -->
+                    <div class="alert alert-info border-0 rounded-4 p-3 mb-3 shadow-sm animate-fade-in" style="font-size: 0.85rem;">
+                        <div class="d-flex gap-2">
+                            <i class="bi bi-patch-check-fill text-primary mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">Mesleki Görüş (TÜRMOB - 13.02.2026)</h6>
+                                <p class="mb-2 text-muted lh-base">
+                                    2. maddesi ile 4. Dönem Geçici Vergi yeniden ihdas edildiğinden, 2025/4 döneminde indirimden yararlanılabileceği değerlendirilmektedir.
+                                </p>
+                                <div class="p-2 rounded-3 mb-2" style="background: rgba(255,255,255,0.5);">
+                                    <ul class="mb-0 text-muted ps-3" style="font-size: 0.75rem;">
+                                        <li><b>Görüş:</b> 4. dönem yıllık kümülatif verileri kapsar.</li>
+                                        <li><b>GİB:</b> Resmi uygulama tebliği henüz yayınlanmamıştır.</li>
+                                        <li><b>1-2-3. Dönemler:</b> Yeni artışlar için kapsam dışıdır.</li>
+                                    </ul>
+                                </div>
+                                <div class="small text-primary opacity-75">
+                                    <i class="bi bi-info-circle me-1"></i> Hesaplama 4. dönemi kapsar.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İpucu Kartı -->
+                    <div class="glass-card bg-info bg-opacity-10 border-0 rounded-4 p-4 text-dark shadow-sm">
+                        <h6 class="fw-bold"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Pratik Bilgi</h6>
+                        <p class="small mb-0 opacity-75">
+                            Yılın ilk aylarında yapılan nakdi sermaye artışları, vergi indiriminden daha uzun süre yararlanmanızı sağlar. Tescil ve ödeme tarihlerini planlayarak vergi avantajınızı maksimize edebilirsiniz.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .gradient-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .ls-1 { letter-spacing: 1px; }
+    .cursor-pointer { cursor: pointer; }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+    .hover-lift { transition: transform 0.2s; }
+    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+    .animate-slide-up { animation: slideUp 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .custom-radio input:checked + label { border-color: #0d6efd !important; }
+    .custom-radio:has(input:checked) { border-color: #0d6efd !important; background: rgba(13, 110, 253, 0.05); }
+</style>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    let numInputs = [];
+    const faizOranlari = {
+        "2020": 19.62, "2021": 24.51, "2022": 13.47, "2023": 53.11,
+        "2024 1. GEÇİCİ": 67.59, "2024 2. GEÇİCİ": 61.09, "2024 3. GEÇİCİ": 57.00, "2024": 55.58,
+        "2025 1. GEÇİCİ": 54.74, "2025 2. GEÇİCİ": 57.86, "2025 3. GEÇİCİ": 47.55, "2025 4. GEÇİCİ": 45.34
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initMasks();
+        updateFaizRate();
+        const today = new Date();
+        document.getElementById('tescilTarihi').value = today.toISOString().split('T')[0];
+        document.querySelector('.payment-date').value = today.toISOString().split('T')[0];
+        calculate();
+    });
+
+    function updateFaizRate() {
+        const selected = document.getElementById('faizDonemi').value;
+        if (selected !== 'custom') {
+            document.getElementById('faizOrani').value = faizOranlari[selected];
+        }
+        calculate();
+    }
+
+    function initMasks() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            if (!el.getAttribute('data-numeric')) {
+                const an = new AutoNumeric(el, {
+                    currencySymbol: '', decimalCharacter: ',', digitGroupSeparator: '.', unformatOnSubmit: true
+                });
+                el.setAttribute('data-numeric', 'true');
+                numInputs.push(an);
+            }
+        });
+    }
+
+    function addPaymentRow() {
+        const list = document.getElementById('paymentList');
+        const row = document.createElement('div');
+        row.className = 'payment-row row g-2 mb-2 p-3 bg-light rounded-3 border animate-fade-in';
+        row.innerHTML = `
+            <div class="col-md-6">
+                <label class="small text-muted mb-1">Ödeme Giriş Tarihi</label>
+                <input type="date" class="form-control payment-date" required onchange="calculate()">
+            </div>
+            <div class="col-md-5">
+                <label class="small text-muted mb-1">Ödenen Tutar (TL)</label>
+                <input type="text" class="form-control payment-amount money-mask" placeholder="0,00" required oninput="calculate()">
+            </div>
+            <div class="col-md-1 d-flex align-items-end justify-content-center">
+                <button type="button" class="btn btn-link text-danger p-0 pb-2" onclick="removeRow(this)"><i class="bi bi-trash fs-5"></i></button>
+            </div>
+        `;
+        list.appendChild(row);
+        initMasks();
+        calculate();
+    }
+
+    function removeRow(btn) {
+        btn.closest('.payment-row').remove();
+        calculate();
+    }
+
+    function toggleCustomOran() {
+        const isCustom = document.getElementById('oranCustom').checked;
+        document.getElementById('customOranInput').classList.toggle('d-none', !isCustom);
+        calculate();
+    }
+
+    function calculate() {
+        const tescilDate = new Date(document.getElementById('tescilTarihi').value);
+        const faizOrani = parseFloat(document.getElementById('faizOrani').value) / 100 || 0;
+        
+        let indirimOraniVal = 50;
+        const selectedOran = document.querySelector('input[name="indirimOran"]:checked').value;
+        if (selectedOran === 'custom') {
+            indirimOraniVal = parseFloat(document.getElementById('manualOran').value) || 0;
+        } else {
+            indirimOraniVal = parseFloat(selectedOran);
+        }
+        const indirimOrani = indirimOraniVal / 100;
+
+        let totalIndirim = 0;
+        let totalCash = 0;
+        let maxMonth = 0;
+
+        const rows = document.querySelectorAll('.payment-row');
+        rows.forEach(row => {
+            const payDateVal = row.querySelector('.payment-date').value;
+            if(!payDateVal) return;
+            const payDate = new Date(payDateVal);
+            const amount = AutoNumeric.getAutoNumericElement(row.querySelector('.payment-amount'))?.getNumber() || 0;
+            
+            if (amount <= 0) return;
+            totalCash += amount;
+
+            let effectiveDate = payDate > tescilDate ? payDate : tescilDate;
+            const effectiveMonth = effectiveDate.getMonth() + 1;
+            const remainingMonths = 12 - effectiveMonth + 1;
+            
+            if (remainingMonths > maxMonth) maxMonth = remainingMonths;
+            const rowIndirim = amount * faizOrani * indirimOrani * (remainingMonths / 12);
+            totalIndirim += rowIndirim;
+        });
+
+        const formatMoney = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+        document.getElementById('resultTotal').innerText = formatMoney(totalIndirim);
+        document.getElementById('resultKist').innerText = formatMoney(totalIndirim);
+        document.getElementById('resultTaxBenefit').innerText = formatMoney(totalIndirim * 0.25);
+        document.getElementById('resEfektif').innerText = `%${(faizOrani * indirimOrani * 100).toFixed(2)}`;
+        document.getElementById('resMaxMonth').innerText = `${maxMonth} Ay`;
+    }
+
+    function resetForm() {
+        const list = document.getElementById('paymentList');
+        while (list.children.length > 1) { list.removeChild(list.lastChild); }
+        document.getElementById('tescilTarihi').value = new Date().toISOString().split('T')[0];
+        document.querySelector('.payment-date').value = new Date().toISOString().split('T')[0];
+        AutoNumeric.getAutoNumericElement(document.querySelector('.payment-amount'))?.set(0);
+        document.getElementById('oran50').checked = true;
+        calculate();
+    }
+
+    function loadExample(num) {
+        resetForm();
+        if (num === 1) {
+            document.getElementById('tescilTarihi').value = '2015-08-03';
+            document.getElementById('faizOrani').value = "10.00";
+            const dates = document.querySelectorAll('.payment-date');
+            const amounts = document.querySelectorAll('.payment-amount');
+            dates[0].value = '2015-07-30';
+            AutoNumeric.getAutoNumericElement(amounts[0]).set(1500000);
+            addPaymentRow();
+            const dates2 = document.querySelectorAll('.payment-date');
+            const amounts2 = document.querySelectorAll('.payment-amount');
+            dates2[1].value = '2015-08-06';
+            AutoNumeric.getAutoNumericElement(amounts2[1]).set(1500000);
+            addPaymentRow();
+            const dates3 = document.querySelectorAll('.payment-date');
+            const amounts3 = document.querySelectorAll('.payment-amount');
+            dates3[2].value = '2015-11-09';
+            AutoNumeric.getAutoNumericElement(amounts3[2]).set(3000000);
+            Swal.fire({ title: 'Tebliğ Örnek 1 Yüklendi', html: '<b>Beklenen İndirim: 87.500 TL</b>', icon: 'info' });
+        } else if (num === 2) {
+            document.getElementById('tescilTarihi').value = '2016-01-13';
+            document.getElementById('faizOrani').value = "10.00";
+            const dates = document.querySelectorAll('.payment-date');
+            const amounts = document.querySelectorAll('.payment-amount');
+            dates[0].value = '2015-12-29';
+            AutoNumeric.getAutoNumericElement(amounts[0]).set(3000000);
+            addPaymentRow();
+            const dates2 = document.querySelectorAll('.payment-date');
+            const amounts2 = document.querySelectorAll('.payment-amount');
+            dates2[1].value = '2016-01-29';
+            AutoNumeric.getAutoNumericElement(amounts2[1]).set(9000000);
+            Swal.fire({ title: 'Tebliğ Örnek 2 Yüklendi', html: '<b>Beklenen İndirim: 600.000 TL</b>', icon: 'info' });
+        }
+        calculate();
+    }
+</script>
+{% endblock %}
 {% endblock %}

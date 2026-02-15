@@ -160,8 +160,112 @@ def raporlama():
 @bp.route("/raporlama-grafik")
 @login_required
 def raporlama_grafik():
-    # Grafik oluşturma isteğini raporlama sayfasına yönlendir (filtreleri koruyarak)
-    return redirect(url_for('report.raporlama', **request.args))
+    """Trend grafiği oluşturma ve görüntüleme"""
+    vkn = request.args.get("vkn")
+    unvan = request.args.get("unvan")
+    donemler_str = request.args.get("donemler", "")
+    donemler = sorted([d.strip() for d in donemler_str.split(",") if d.strip()])
+    
+    if not vkn or not donemler:
+        flash("Mükellef ve dönem seçimi gerekli.", "warning")
+        return redirect(url_for("report.raporlama"))
+    
+    uid = session.get("user_id")
+    
+    # Veri toplama
+    kalem_series = {}  # {kalem_key: {year: value}}
+    kalem_index = []   # [{key: ..., label: ...}]
+    raporlar = {}      # {year: {oran_adi: {deger, formula, meaning, thresholds}}}
+    eksik_yillar = []
+    
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        for donem in donemler:
+            # Bilanço verisi
+            c.execute("""
+                SELECT b.veriler FROM beyanname b 
+                JOIN mukellef m ON b.mukellef_id=m.id 
+                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='bilanco' LIMIT 1
+            """, (uid, vkn, donem))
+            rb = c.fetchone()
+            
+            # Gelir tablosu verisi
+            c.execute("""
+                SELECT b.veriler FROM beyanname b 
+                JOIN mukellef m ON b.mukellef_id=m.id 
+                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='gelir' LIMIT 1
+            """, (uid, vkn, donem))
+            rg = c.fetchone()
+            
+            if not rb or not rg:
+                eksik_yillar.append(donem)
+                continue
+            
+            try:
+                # Verileri çöz
+                pb = json.loads(fernet.decrypt(rb["veriler"].tobytes() if isinstance(rb["veriler"], memoryview) else rb["veriler"]).decode("utf-8"))
+                pg = json.loads(fernet.decrypt(rg["veriler"].tobytes() if isinstance(rg["veriler"], memoryview) else rg["veriler"]).decode("utf-8"))
+                
+                # DataFrame'lere dönüştür
+                aktif_df = prepare_df(pd.DataFrame(pb.get("aktif", [])), "Cari Dönem")
+                pasif_df = prepare_df(pd.DataFrame(pb.get("pasif", [])), "Cari Dönem")
+                gelir_df = prepare_df(pd.DataFrame(pg.get("tablo", [])), "Cari Dönem")
+                
+                # Finansal oranları hesapla (tüm kategoriler için)
+                # Finansal oranları hesapla (tüm kategoriler için)
+                oranlar = hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="tum")
+                if donem not in raporlar:
+                    raporlar[donem] = {}
+                raporlar[donem].update(oranlar)
+                
+                # Kalem verilerini topla
+                for _, row in aktif_df.iterrows():
+                    key = f"AKTİF - {row.get('Kalem', 'Bilinmeyen')}"
+                    val = row.get("Cari Dönem")
+                    if pd.notna(val):
+                        if key not in kalem_series:
+                            kalem_series[key] = {}
+                            kalem_index.append({"key": key, "label": key})
+                        kalem_series[key][donem] = float(val)
+                
+                for _, row in pasif_df.iterrows():
+                    key = f"PASİF - {row.get('Kalem', 'Bilinmeyen')}"
+                    val = row.get("Cari Dönem")
+                    if pd.notna(val):
+                        if key not in kalem_series:
+                            kalem_series[key] = {}
+                            kalem_index.append({"key": key, "label": key})
+                        kalem_series[key][donem] = float(val)
+                
+                for _, row in gelir_df.iterrows():
+                    key = f"GELİR - {row.get('kalem', 'Bilinmeyen')}"
+                    val = row.get("cari_donem")
+                    if pd.notna(val):
+                        if key not in kalem_series:
+                            kalem_series[key] = {}
+                            kalem_index.append({"key": key, "label": key})
+                        kalem_series[key][donem] = float(val)
+                        
+            except Exception as e:
+                print(f"Hata ({donem}): {e}")
+                eksik_yillar.append(donem)
+    
+    # Trend analizi oluştur
+    analiz = analiz_olustur(raporlar)
+    
+    return render_template(
+        "reports/raporlama_grafik.html",
+        vkn=vkn,
+        unvan=unvan,
+        donemler=donemler,
+        fa_years=",".join(donemler),
+        kalem_series=kalem_series,
+        kalem_index=kalem_index,
+        raporlar=raporlar,
+        analiz=analiz,
+        eksik_yillar=eksik_yillar
+    )
 
 
 @bp.route("/finansal-oran-raporu")
@@ -193,12 +297,20 @@ def rapor_kdv():
                     data_bytes = row["veriler"].tobytes() if isinstance(row["veriler"], memoryview) else row["veriler"]
                     parsed = json.loads(fernet.decrypt(data_bytes).decode("utf-8"))
                     raw_donem = parsed.get("donem") or row["donem"]
-                    ay, yil = [p.strip() for p in raw_donem.split("/") if p.strip()]
-                    col = f"{yil}/{ay.upper()}"
+                    parts = [p.strip() for p in raw_donem.split("/") if p.strip()]
+                    if len(parts) == 2:
+                        ay, yil = parts[0], parts[1]
+                        col = f"{yil}/{ay.upper()}"
+                    else:
+                        col = raw_donem
+                        
                     if col not in kdv_months: kdv_months.append(col)
                     for rec in parsed.get("veriler", []):
                         kdv_data.setdefault(rec["alan"], {})[col] = rec["deger"]
-                except Exception as e: print(e)
+                except Exception as e: 
+                    import traceback
+                    traceback.print_exc()
+                    print(f"KDV Parse Error: {e}")
 
     kdv_months = sorted(set(kdv_months), key=month_key)
     
@@ -386,7 +498,7 @@ def finansal_analiz():
     kategori = request.args.get("kategori", "likidite")
     
     uid = session.get("user_id")
-    unvanlar, mevcut_yillar, trend_data = [], [], {}
+    unvanlar, mevcut_yillar, trend_data, oran_detaylari = [], [], {}, {}
     
     uyarilar = []
     with get_conn() as conn:
@@ -399,44 +511,92 @@ def finansal_analiz():
             c.execute("SELECT donem, tur FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.tur IN ('bilanco', 'gelir')", (uid, secili_vkn))
             existing_docs = c.fetchall()
             docs_by_year = {}
+            docs_by_year = {}
             for row in existing_docs:
-                docs_by_year.setdefault(row['donem'], set()).add(row['tur'])
+                # Veritabanından gelen dönem bilgisini temizle
+                clean_donem = str(row['donem']).strip()
+                docs_by_year.setdefault(clean_donem, set()).add(row['tur'])
 
+            print(f"DEBUG: Mevcut Belgeler (DB): {docs_by_year}")
             c.execute("SELECT DISTINCT donem FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.tur='bilanco'", (uid, secili_vkn))
             mevcut_yillar = sorted([r["donem"] for r in c.fetchall()], reverse=True)
             if not secili_yillar: secili_yillar = mevcut_yillar
 
-            for yil in secili_yillar:
-                doc_types = docs_by_year.get(yil, set())
-                if 'bilanco' not in doc_types or 'gelir' not in doc_types:
-                    missing = []
-                    if 'bilanco' not in doc_types: missing.append("Bilanço")
-                    if 'gelir' not in doc_types: missing.append("Gelir Tablosu")
-                    uyarilar.append(f"{yil} yılı için {' ve '.join(missing)} eksik olduğu için analiz hesaplanamadı.")
-                    continue
+            # Yıl ve mod kuyruğu oluştur
+            process_queue = []
+            secili_yillar_sorted = sorted(secili_yillar, reverse=True)
+            
+            for y_str in secili_yillar_sorted:
+                # DB'de bu yıla ait en uygun dönemi bul (Örn: 2023 veya 2023/ARALIK)
+                match_donem = None
+                for d in docs_by_year.keys():
+                    if d == y_str or d.startswith(y_str + "/"):
+                        if 'bilanco' in docs_by_year[d] and 'gelir' in docs_by_year[d]:
+                            match_donem = d
+                            break
+                
+                if not match_donem: continue
+                
+                # 2023 için özel çiftleme (Enflasyonlu + Normal)
+                if inflation_mode == 'auto' and y_str == '2023':
+                    process_queue.append({'label': '2023 (Enf)', 'db_donem': match_donem, 'mode': 'enflasyonlu'})
+                    process_queue.append({'label': '2023', 'db_donem': match_donem, 'mode': 'normal'})
+                elif inflation_mode == 'enflasyonlu':
+                    process_queue.append({'label': y_str, 'db_donem': match_donem, 'mode': 'enflasyonlu'})
+                else:
+                    process_queue.append({'label': y_str, 'db_donem': match_donem, 'mode': 'normal'})
+            
+            # Maksimum 3 dönem sınırla
+            process_queue = process_queue[:3]
+            # Grafikte kronolojik akması için alfabetik/yıl sıralı
+            process_queue = sorted(process_queue, key=lambda x: x['label'])
+            display_periods = [p['label'] for p in process_queue]
 
+            for item in process_queue:
+                label = item['label']
+                db_d = item['db_donem']
+                mode = item['mode']
+                
                 try:
-                    c.execute("SELECT b.veriler FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='bilanco' LIMIT 1", (uid, secili_vkn, yil))
+                    c.execute("SELECT veriler FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='bilanco'", (uid, secili_vkn, db_d))
                     rb = c.fetchone()
-                    c.execute("SELECT b.veriler FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='gelir' LIMIT 1", (uid, secili_vkn, yil))
+                    c.execute("SELECT veriler FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s AND b.tur='gelir'", (uid, secili_vkn, db_d))
                     rg = c.fetchone()
+                    
                     if not rb or not rg: continue
 
                     pb = json.loads(fernet.decrypt(rb["veriler"].tobytes() if isinstance(rb["veriler"], memoryview) else rb["veriler"]).decode("utf-8"))
                     pg = json.loads(fernet.decrypt(rg["veriler"].tobytes() if isinstance(rg["veriler"], memoryview) else rg["veriler"]).decode("utf-8"))
+                    
+                    t_col = "Cari Dönem"
+                    if mode == 'enflasyonlu':
+                        t_col = "Cari Dönem (Enflasyonlu)" if 'Cari Dönem (Enflasyonlu)' in pb.get("aktif", [{}])[0] else "Cari Dönem"
 
-                    aktif_df = prepare_df(pd.DataFrame(pb.get("aktif", [])), "Cari Dönem")
-                    pasif_df = prepare_df(pd.DataFrame(pb.get("pasif", [])), "Cari Dönem")
-                    gelir_df = prepare_df(pd.DataFrame(pg.get("tablo", [])), "Cari Dönem")
+                    aktif_df = prepare_df(pd.DataFrame(pb.get("aktif", [])), t_col)
+                    pasif_df = prepare_df(pd.DataFrame(pb.get("pasif", [])), t_col)
+                    gelir_df = prepare_df(pd.DataFrame(pg.get("tablo", [])), t_col)
                     
-                    oranlar = hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori)
-                    for k, v in oranlar.items():
-                        trend_data.setdefault(k, {})[yil] = float(v.get("deger", 0)) if isinstance(v, dict) else float(v or 0)
-                except Exception as e:
-                    print(f"Hata ({yil}): {e}")
-                    uyarilar.append(f"{yil} yılı analizi sırasında hata oluştu: {str(e)}")
+                    calc_res = hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori)
                     
-    return render_template("reports/finansal_analiz.html", unvanlar=unvanlar, secili_vkn=secili_vkn, kategori=kategori, mevcut_yillar=mevcut_yillar, secili_yillar=secili_yillar, inflation_mode=inflation_mode, trend_data=trend_data, uyarilar=uyarilar)
+                    for k, v in calc_res.items():
+                        val = v.get("deger") if isinstance(v, dict) else v
+                        trend_data.setdefault(k, {})[label] = float(val) if val is not None else None
+                        if isinstance(v, dict) and k not in oran_detaylari:
+                            oran_detaylari[k] = {"formula":v.get("formula"), "meaning":v.get("meaning"), "thresholds":v.get("thresholds"), "advice":v.get("advice")}
+                except Exception as ex:
+                    uyarilar.append(f"{label} hatası: {str(ex)}")
+
+    return render_template("reports/finansal_analiz.html", 
+                           unvanlar=unvanlar, 
+                           secili_vkn=secili_vkn, 
+                           kategori=kategori, 
+                           mevcut_yillar=mevcut_yillar, 
+                           secili_yillar=secili_yillar, 
+                           display_periods=display_periods, # Ensure display_periods is passed
+                           inflation_mode=inflation_mode, 
+                           trend_data=trend_data, 
+                           oran_detaylari=oran_detaylari,
+                           uyarilar=uyarilar)
 
 @bp.route("/pdf-belgeler-tablo")
 @login_required
@@ -473,11 +633,68 @@ def pdf_belgeler_tablo():
 
     donem_turu = request.args.get("donem_turu", "cari")
 
-    if tur == "bilanco":
-         return render_template("tables/tablo_bilanco.html", unvan=unvan, donem=donem, vkn=vkn, aktif_list=parsed.get("aktif",[]), pasif_list=parsed.get("pasif",[]), toplamlar=parsed.get("toplamlar", {}), secilen_donem=donem_turu, donem_mapping={"cari": donem, "onceki": "Önceki Dönem"}, has_inflation=parsed.get("has_inflation", False), gorunen_kolon="cari_donem" if donem_turu=="cari" else "onceki_donem")
-    elif tur == "gelir":
+    if tur in ["bilanco", "bilanco_enf"]:
+         # Enflasyonlu belge zaten enflasyon verisini 'Cari Dönem' olarak içerdiği için 
+         # tekrar enflasyon toggle'ına gerek yok ama dropdown'da gösterelim
+         override_inflation = False if tur == "bilanco_enf" else parsed.get("has_inflation", False)
+         
+         # Check if previous period data actually exists
+         has_prev_data = any(
+             row.get("Önceki Dönem") is not None 
+             for row in parsed.get("aktif", []) + parsed.get("pasif", [])
+         )
+         
+         # Build donem_mapping dynamically
+         donem_mapping = {"cari": donem}
+         if has_prev_data:
+             donem_mapping["onceki"] = str(int(donem)-1) if donem and donem.isdigit() else "Önceki Dönem"
+         
+         # For bilanco_enf, label the cari option as "Enflasyonlu" since that's what the data is
+         if tur == "bilanco_enf":
+             donem_mapping["cari"] = f"{donem} Enflasyonlu"
+         elif override_inflation:
+             donem_mapping["cari_enflasyon"] = f"{donem} Enflasyonlu"
+         
+         return render_template("tables/tablo_bilanco.html", 
+                                page_title="ENFLASYONLU BİLANÇO" if tur=="bilanco_enf" else "Bilanço Tablosu",
+                                unvan=unvan, 
+                                donem=donem, 
+                                vkn=vkn, 
+                                aktif_list=parsed.get("aktif",[]), 
+                                pasif_list=parsed.get("pasif",[]), 
+                                toplamlar=parsed.get("toplamlar", {}), 
+                                secilen_donem=donem_turu, 
+                                donem_mapping=donem_mapping, 
+                                has_inflation=True if tur == "bilanco_enf" else override_inflation, 
+                                gorunen_kolon="Cari Dönem" if donem_turu=="cari" else ("Cari Dönem (Enflasyonlu)" if donem_turu=="cari_enflasyon" else "Önceki Dönem"))
+    elif tur in ["gelir", "gelir_enf"]:
+         # Gelir tablosu için de benzer mantık
+         override_inflation = False if tur == "gelir_enf" else parsed.get("has_inflation", False)
          gelir_list = parsed.get("tablo") or parsed.get("veriler", [])
-         return render_template("tables/tablo_gelir.html", tablo=gelir_list, unvan=unvan, donem=donem, vkn=vkn, donem_mapping={"cari": donem, "onceki": "Önceki Dönem"}, secilen_donem=donem_turu, gorunen_kolon="cari_donem" if donem_turu=="cari" else "onceki_donem")
+         
+         # Check if previous period data actually exists
+         has_prev_data = any(
+             row.get("onceki_donem") is not None 
+             for row in gelir_list
+         )
+         
+         # Build donem_mapping dynamically
+         donem_mapping = {"cari": donem}
+         if has_prev_data:
+             donem_mapping["onceki"] = str(int(donem)-1) if donem and donem.isdigit() else "Önceki Dönem"
+         if override_inflation:
+             donem_mapping["cari_enflasyon"] = f"{donem} Enflasyonlu"
+         
+         return render_template("tables/tablo_gelir.html", 
+                                page_title="ENFLASYONLU GELİR TABLOSU" if tur=="gelir_enf" else "Gelir Tablosu",
+                                tablo=gelir_list, 
+                                unvan=unvan, 
+                                donem=donem, 
+                                vkn=vkn, 
+                                donem_mapping=donem_mapping, 
+                                secilen_donem=donem_turu, 
+                                has_inflation=override_inflation,
+                                gorunen_kolon="cari_donem" if donem_turu=="cari" else ("cari_donem_enflasyonlu" if donem_turu=="cari_enflasyon" else "onceki_donem"))
     elif tur == "kdv":
          kdv_data_raw = {r["alan"]: {"Cari": r["deger"]} for r in parsed.get("veriler", [])}
          kdv_months = ["Cari"]

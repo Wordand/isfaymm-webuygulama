@@ -84,27 +84,47 @@ def process_parsed_parts(full_data, doc_type):
         sections = ['tablo']
         title_base = "GELİR TABLOSU"
 
-    def create_part(source_col, target_year, type_suffix=""):
+    def create_part(source_col, target_year, type_suffix="", include_prev=False):
         new_d = copy.deepcopy(full_data)
         new_d['donem'] = str(target_year)
         
         has_any_data = False
         
+        # Keys mapping for previous and inflation columns
+        prev_key = cols['prev'] 
+        inf_key = cols.get('inf', None)  # Inflation column name
+
         for sec in sections:
             new_rows = []
             if sec in new_d:
                 for row in new_d[sec]:
                     val = row.get(source_col)
-                    if val is not None:
+                    prev_val = row.get(prev_key)
+                    inf_val = row.get(inf_key) if inf_key else None
+
+                    if val is not None or (include_prev and (prev_val is not None or inf_val is not None)):
                         base_keys = ['Kod', 'Açıklama', 'kod', 'aciklama', 'grup']
                         new_row = {k: v for k, v in row.items() if k in base_keys}
-                        new_row[target_val_key] = val
+                        
+                        # Set target value (Current Period or Inflation Adjusted)
+                        if val is not None:
+                            new_row[target_val_key] = val
+                            has_any_data = True
+                        
+                        # If including previous period data (only for main current year record)
+                        if include_prev and prev_val is not None:
+                            new_row[prev_key] = prev_val
+                        
+                        # If including inflation data (only for main current year record)
+                        if include_prev and inf_val is not None and inf_key:
+                            new_row[inf_key] = inf_val
+                        
                         new_rows.append(new_row)
-                        has_any_data = True
             new_d[sec] = new_rows
             
         new_d['veriler'] = {s: new_d.get(s, []) for s in sections}
-        new_d['has_inflation'] = (type_suffix == '_enf')
+        # has_inflation should be True if we have inflation column data
+        new_d['has_inflation'] = (type_suffix == '_enf') or (include_prev and full_data.get('has_inflation', False))
         
         final_tur = doc_type + type_suffix
         return new_d, has_any_data, final_tur
@@ -114,7 +134,7 @@ def process_parsed_parts(full_data, doc_type):
     if ok1: results.append((d1, t1, f"{yil-1} {title_base}"))
     
     # 2. Cari Dönem
-    d2, ok2, t2 = create_part(cols['curr'], yil)
+    d2, ok2, t2 = create_part(cols['curr'], yil, include_prev=True)
     if ok2: results.append((d2, t2, f"{yil} {title_base}"))
     
     # 3. Enflasyonlu
@@ -191,7 +211,7 @@ def yukle_coklu():
                      
                      # Bilanço Parsingleme ve Parçalama
                      try:
-                         res_b = parse_bilanco_from_pdf(temp_path)
+                         res_b = parse_bilanco_from_pdf(temp_path, full_text)
                          # Eğer bilanco içeriği varsa (aktif veya pasif doluysa)
                          if res_b.get("aktif") or res_b.get("pasif"):
                              parts_b = process_parsed_parts(res_b, "bilanco")
@@ -213,7 +233,7 @@ def yukle_coklu():
                          
                      # Gelir Tablosu Parsingleme ve Parçalama
                      try:
-                         res_g = parse_gelir_from_pdf(temp_path)
+                         res_g = parse_gelir_from_pdf(temp_path, full_text)
                          if res_g.get("tablo"):
                              parts_g = process_parsed_parts(res_g, "gelir")
                              for p_data, p_tur, p_title in parts_g:
@@ -231,7 +251,7 @@ def yukle_coklu():
 
                 # 3. KDV Kontrolü (Sadece yukarıdakiler değilse)
                 elif is_pdf and (re.search(r"KATMA\s*DE.ER\s*VERG", full_text, re.I) or "KDV" in full_text.upper()):
-                     res = parse_kdv_from_pdf(temp_path)
+                     res = parse_kdv_from_pdf(temp_path, full_text)
                      if not res.get("hata"):
                          parsed_data = res
                          tur = "kdv"

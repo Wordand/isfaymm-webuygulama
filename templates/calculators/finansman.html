@@ -1,18 +1,342 @@
 {% extends "layout.html" %}
 
-{% block title %}Finansman Gider Kısıtlaması Hesaplama - İSFA YMM{% endblock %}
+{% block title %}Finansman Gider Kısıtlaması Hesaplama | İSFA YMM{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h2 class="section-title text-center mb-4">Finansman Gider Kısıtlaması Hesaplama</h2>
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <p class="text-muted text-center">Bu hesaplama aracı yapım aşamasındadır.</p>
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- 🚀 Hero Section -->
+        <div class="text-center mb-5 animate-fade-in">
+            <div class="badge bg-primary text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="letter-spacing: 1px;">
+                <i class="bi bi-percent me-1"></i> VERGİ GÜVENLİK MÜESSESESİ
+            </div>
+            <h1 class="display-4 fw-bold text-dark mb-3">Finansman Gider Kısıtlaması</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                KVK Madde 11/1-i kapsamında, öz kaynaklarını aşan yabancı kaynak kullanan işletmelerde 
+                finansman giderlerinin KKEG tutarını profesyonelce hesaplayın.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 🧮 Hesaplama Formu -->
+            <div class="col-lg-8">
+                <!-- Bölüm 1: Bilanço Verileri -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in">
+                    <div class="gradient-header p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-journal-text fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">01. Bilanço ve Kaynak Bilgileri</h5>
+                                <p class="small mb-0 opacity-75">Dönem sonu öz kaynak ve yabancı kaynak tutarları.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Toplam Öz Kaynaklar</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-safe"></i></span>
+                                    <input type="text" id="ozKaynak" class="form-control border-start-0 bg-light money-mask" placeholder="0,00" oninput="calculate()">
+                                </div>
+                                <div class="form-text small">Bilançonun 5 no.lu grubu toplamı.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Toplam Yabancı Kaynaklar</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-bank"></i></span>
+                                    <input type="text" id="yabanciKaynak" class="form-control border-start-0 bg-light money-mask" placeholder="0,00" oninput="calculate()">
+                                </div>
+                                <div class="form-text small">3 ve 4 no.lu grupların genel toplamı.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bölüm 2: Gider Detayları -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="gradient-header p-4 text-white" style="background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-cash-stack fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">02. Finansman Gider Detayları</h5>
+                                <p class="small mb-0 opacity-75">Kısıtlamaya esas alınacak harcama ve maliyet unsurları.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-dark">Toplam Finansman Giderleri</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-wallet2 text-danger"></i></span>
+                                    <input type="text" id="toplamGider" class="form-control border-start-0 bg-light money-mask fw-bold" placeholder="0,00" oninput="calculate()">
+                                </div>
+                                <div class="form-text small">Faiz, komisyon, vade farkı, kâr payı, kur farkı vb. toplamı.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark small text-muted">Yatırım Maliyetine Eklenenler (-)</label>
+                                <input type="text" id="yatirimMaliyeti" class="form-control money-mask bg-light" placeholder="0,00" oninput="calculate()">
+                                <div class="form-text small text-xs">Aktifleştirilen zorunlu maliyetler kapsam dışıdır.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark small text-muted">Diğer KKEG Olanlar (-)</label>
+                                <input type="text" id="digerKKEG" class="form-control money-mask bg-light" placeholder="0,00" oninput="calculate()">
+                                <div class="form-text small text-xs">Örtülü sermaye, binek oto vb. nedeniyle zaten KKEG olanlar.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📖 Mevzuat Bölümü -->
+                <div class="glass-card shadow border-0 rounded-4 overflow-hidden animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-header bg-white p-4 border-0">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active rounded-pill px-4 me-2" id="pills-meta-tab" data-bs-toggle="pill" data-bs-target="#pills-meta" type="button" role="tab">Giriş ve Oran</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4 me-2" id="pills-calc-tab" data-bs-toggle="pill" data-bs-target="#pills-calc" type="button" role="tab">Hesaplama Formülü</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4" id="pills-warn-tab" data-bs-toggle="pill" data-bs-target="#pills-warn" type="button" role="tab">İstisnalar</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 tab-content" id="pills-tabContent" style="background: #fff; text-align: justify; line-height: 1.8;">
+                        <div class="tab-pane fade show active" id="pills-meta" role="tabpanel">
+                            <h4 class="fw-bold text-dark mb-4">Finansman Gider Kısıtlaması Nedir?</h4>
+                            <p>Kredi kuruluşları ve finansal kuruluşlar dışında, kullanılan <strong>yabancı kaynakları öz kaynaklarını aşan</strong> işletmelerde, aşan kısma münhasır olmak üzere finansman giderlerinin bir kısmı kanunen kabul edilmeyen gider (KKEG) olarak dikkate alınır.</p>
+                            <div class="alert alert-danger border-0 rounded-4 p-4 mb-4">
+                                <div class="d-flex gap-3 align-items-center">
+                                    <i class="bi bi-info-circle-fill fs-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Cari Kısıtlama Oranı: %10</h6>
+                                        <p class="mb-0 small">3490 sayılı Cumhurbaşkanı Kararı ile kısıtlama oranı %10 olarak belirlenmiştir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="pills-calc" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-4">Hesaplama Adımları</h5>
+                            <ol class="small">
+                                <li class="mb-2"><strong>Aşan Kısım:</strong> Yabancı Kaynaklar - Öz Kaynaklar</li>
+                                <li class="mb-2"><strong>Kısıtlamaya Tabi Matrah:</strong> Aşan Kısım / Toplam Yabancı Kaynaklar</li>
+                                <li class="mb-2"><strong>İsabet Eden Gider:</strong> (Toplam Gider - Muaf Giderler) x Kısıtlamaya Tabi Matrah</li>
+                                <li class="mb-2"><strong>KKEG Tutarı:</strong> İsabet Eden Gider x %10</li>
+                            </ol>
+                            <div class="card border-0 bg-primary bg-opacity-10 rounded-4 p-4 mt-4">
+                                <h6 class="fw-bold text-primary"><i class="bi bi-lightning-fill me-2"></i>Örnek Mantığı</h6>
+                                <p class="mb-0 small">Öz kaynağı 800 bin, yabancı kaynağı 1 milyon olan firmada 200 bin TL (%20) aşım vardır. 100 bin TL'lik faizin bu %20'sine (%10) kısıtlama uygulanır.</p>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-warn" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-4">Kapsam Dışı Olanlar</h5>
+                            <p>Aşağıdaki kurumlar ve giderler kısıtlamaya tabi değildir:</p>
+                            <ul class="list-group list-group-flush mb-4 small">
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-check-circle text-success me-2"></i>Bankalar, Sigorta Şirketleri, Finansman Şirketleri</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-check-circle text-success me-2"></i>Yatırımın maliyetine eklenen faiz ve kur farkları</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0"><i class="bi bi-check-circle text-success me-2"></i>Örtülü sermaye nedeniyle zaten KKEG olmuş tutarlar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Sonuç Kartı (Sticky) -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <!-- Result Summary -->
+                    <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-slide-up">
+                        <div class="p-4 text-center" style="background: #2b3a67;">
+                            <h6 class="text-white-50 text-uppercase small ls-1 fw-bold mb-2">HESAPLANAN KKEG TUTARI</h6>
+                            <h2 class="display-5 fw-bold text-white mb-0" id="resultKKEG">0,00 ₺</h2>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Aşan Kaynak Tutarı</span>
+                                <span class="fw-bold text-dark" id="resultAsanKisim">0,00 ₺</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Aşım Oranı %</span>
+                                <span class="fw-bold text-primary" id="resultAsimOrani">%0</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Kısıtlama Oranı</span>
+                                <span class="fw-bold text-danger text-uppercase">%10</span>
+                            </div>
+                            
+                            <!-- Özet Detaylar -->
+                            <div class="mt-4">
+                                <h6 class="small fw-bold text-muted text-uppercase mb-3">Hesap Özeti</h6>
+                                <div class="bg-light rounded-3 p-3">
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span>Gider Kabul Edilen:</span>
+                                        <span class="fw-bold text-success" id="resultGiderKabul">0,00 ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small">
+                                        <span>Toplam Finansman:</span>
+                                        <span class="fw-bold" id="resTotalRaw">0,00 ₺</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(1)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 1
+                                </button>
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(2)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 2
+                                </button>
+                                <button class="btn btn-light rounded-pill py-2 small mt-2" onclick="resetForm()"> Formu Temizle </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İpucu Kartı -->
+                    <div class="glass-card bg-info bg-opacity-10 border-0 rounded-4 p-4 text-dark shadow-sm">
+                        <h6 class="fw-bold"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Kritik Not</h6>
+                        <p class="small mb-0 opacity-75">
+                            Finansman gelirleri ile giderleri mahsuplaştırılamaz. Kısıtlama, toplam finansman gideri üzerinden (bazı istisnalar hariç) hesaplanır.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .gradient-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .ls-1 { letter-spacing: 1px; }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+    .animate-slide-up { animation: slideUp 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .money-mask { text-align: right; }
+    .icon-box { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }
+    .text-xs { font-size: 0.75rem; }
+
+    @media print {
+        .navbar, .sidebar, footer, .btn, .breadcrumb, .nav-pills, .sticky-top { display: none !important; }
+        .glass-card { border: 1px solid #ddd; page-break-inside: avoid; }
+        #resultKKEG { color: #000 !important; }
+    }
+</style>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    let numInputs = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initMasks();
+        calculate();
+    });
+
+    function initMasks() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            if (!el.getAttribute('data-numeric')) {
+                const an = new AutoNumeric(el, {
+                    currencySymbol: '',
+                    decimalCharacter: ',',
+                    digitGroupSeparator: '.',
+                    unformatOnSubmit: true
+                });
+                el.setAttribute('data-numeric', 'true');
+                numInputs.push(an);
+            }
+        });
+    }
+
+    function getVal(id) {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        return AutoNumeric.getAutoNumericElement(el)?.getNumber() || 0;
+    }
+
+    function calculate() {
+        const ozKaynak = getVal('ozKaynak');
+        const yabanciKaynak = getVal('yabanciKaynak');
+        const toplamGiderRaw = getVal('toplamGider');
+        const yatirimMaliyeti = getVal('yatirimMaliyeti');
+        const digerKKEG = getVal('digerKKEG');
+
+        // Logic
+        let kkeg = 0;
+        let asanKisim = 0;
+        let asimOrani = 0;
+        let isabetEdenGider = 0;
+
+        if (yabanciKaynak > ozKaynak) {
+            asanKisim = yabanciKaynak - ozKaynak;
+            asimOrani = asanKisim / yabanciKaynak; // Ratio of exceeding liabilities
+            
+            // Matrah computation: Subtract excluded items from total finance expense
+            const netMatrah = toplamGiderRaw - yatirimMaliyeti - digerKKEG;
+            
+            // Calculate expense corresponding to the exceeding liabilities
+            isabetEdenGider = netMatrah * asimOrani;
+            
+            // KKEG is 10% of that portion
+            kkeg = isabetEdenGider * 0.10;
+        }
+
+        const formatMoney = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+        
+        // Display
+        document.getElementById('resultKKEG').innerText = formatMoney(kkeg);
+        document.getElementById('resultAsanKisim').innerText = formatMoney(asanKisim);
+        document.getElementById('resultAsimOrani').innerText = `%${(asimOrani * 100).toFixed(2)}`;
+        document.getElementById('resultGiderKabul').innerText = formatMoney(toplamGiderRaw - kkeg);
+        document.getElementById('resTotalRaw').innerText = formatMoney(toplamGiderRaw);
+        
+        // Visual warning if KKEG > 0
+        const kkegBox = document.getElementById('resultKKEG').parentElement;
+        if (kkeg > 0) {
+            kkegBox.style.background = '#c0392b';
+        } else {
+            kkegBox.style.background = '#2b3a67';
+        }
+    }
+
+    function resetForm() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            AutoNumeric.getAutoNumericElement(el)?.set(0);
+        });
+        calculate();
+    }
+
+    function loadExample(num) {
+        resetForm();
+        if (num === 1) {
+            // Örnek 1: Öz kaynak 800.000, Yabancı Kaynak 1.000.000, Gider 100.000
+            AutoNumeric.getAutoNumericElement(document.getElementById('ozKaynak')).set(800000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('yabanciKaynak')).set(1000000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('toplamGider')).set(100000);
+            Swal.fire('Örnek 1 Yüklendi', 'Temel kısıtlama senaryosu (800k ÖK / 1M YK)', 'success');
+        } else if (num === 2) {
+            // Örnek 2: Öz kaynak 2.000.000, Yabancı Kaynak 2.500.000, Gider 200.000 (60k Yatırım)
+            AutoNumeric.getAutoNumericElement(document.getElementById('ozKaynak')).set(2000000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('yabanciKaynak')).set(2500000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('toplamGider')).set(200000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('yatirimMaliyeti')).set(60000);
+            Swal.fire('Örnek 2 Yüklendi', 'Yatırım maliyeti içeren senaryo.', 'success');
+        }
+        calculate();
+    }
+</script>
+{% endblock %}
 {% endblock %}

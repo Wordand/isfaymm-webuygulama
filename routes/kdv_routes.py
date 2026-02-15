@@ -478,7 +478,7 @@ def list_files():
 
 @bp.route("/api/kdv/users")
 @api_kdv_access_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
 def get_kdv_users():
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -573,7 +573,7 @@ def kdv_log_action(user_name, action, description):
 
 @bp.route("/api/kdv/user-assignments/<int:user_id>")
 @api_kdv_access_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
 def get_user_assignments(user_id):
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -590,7 +590,7 @@ def get_user_assignments(user_id):
 
 @bp.route("/api/kdv/assign-mukellef", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
 def assign_mukellef():
     data = request.json
     user_id = data.get("user_id")
@@ -643,7 +643,7 @@ def assign_mukellef():
 
 @bp.route("/api/kdv/remove-assignment", methods=["POST"])
 @api_kdv_access_required
-@role_required(allow_roles=("admin",))
+@role_required(allow_roles=("admin", "ymm", "yonetici"))
 def remove_assignment():
     data = request.json
     user_id = data.get("user_id")

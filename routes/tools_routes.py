@@ -100,7 +100,6 @@ def asgari():
     return render_template("calculators/asgari.html")
 
 @bp.route("/sermaye")
-@login_required
 def sermaye():
     return render_template("calculators/sermaye.html")
 
@@ -112,6 +111,11 @@ def serbest_meslek():
 @login_required
 def finansman():
     return render_template("calculators/finansman.html")
+
+@bp.route("/sermaye-azaltimi")
+@login_required
+def sermaye_azaltimi():
+    return render_template("calculators/sermaye_azaltimi.html")
 
 @bp.route("/vergi-hesapla", methods=["POST"])
 def vergi_hesapla_api():

@@ -1,18 +1,421 @@
 {% extends "layout.html" %}
 
-{% block title %}Asgari Kurumlar Vergisi Hesaplama - İSFA YMM{% endblock %}
+{% block title %}Asgari Kurumlar Vergisi Hesaplama | İSFA YMM{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h2 class="section-title text-center mb-4">Asgari Kurumlar Vergisi Hesaplama</h2>
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <p class="text-muted text-center">Bu hesaplama aracı yapım aşamasındadır.</p>
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- 🚀 Hero Section -->
+        <div class="text-center mb-5 animate-fade-in">
+            <div class="badge bg-primary text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="letter-spacing: 1px;">
+                <i class="bi bi-shield-lock me-1"></i> VERGİ GÜVENLİK MÜESSESESİ
+            </div>
+            <h1 class="display-4 fw-bold text-dark mb-3">Asgari Kurumlar Vergisi</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                7524 sayılı Kanun ile ihdas edilen ve KVK Madde 32/C kapsamında uygulanan asgari kurumlar vergisini profesyonel standartlarda hesaplayın.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 🧮 Hesaplama Formu -->
+            <div class="col-lg-8">
+                <!-- Bölüm 1: Matrah Parametreleri -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in">
+                    <div class="gradient-header p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-calculator fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">01. Temel Hesaplama Parametreleri</h5>
+                                <p class="small mb-0 opacity-75">Bilanço kârı ve KKEG bilgilerini giriniz.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Ticari Bilanço Kârı / Zararı (-)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-bank"></i></span>
+                                    <input type="text" id="ticariKar" class="form-control border-start-0 bg-light money-mask" placeholder="0,00" oninput="calculate()">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Kanunen Kabul Edilmeyen Giderler</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-plus-square"></i></span>
+                                    <input type="text" id="kkeg" class="form-control border-start-0 bg-light money-mask" placeholder="0,00" oninput="calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bölüm 2: Matrahtan Düşülen İstisnalar (32/C-2) -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="gradient-header p-4 text-white" style="background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-check-circle fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">02. Asgari Matrahtan Düşülen İstisnalar</h5>
+                                <p class="small mb-0 opacity-75">32/C-2 maddesi uyarınca düşülebilecek kalemler.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">İştirak Kazançları (5/1-a)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="istisna_51a" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Emisyon Primi Kazancı (5/1-ç)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="istisna_51c" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Yatırım Fon/Ort. (5/1-d - Taşınmaz Hariç)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="istisna_51d" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Teknoloji Geliştirme Bölgesi (4691)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="istisna_4691" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Serbest Bölge Kazançları (3218)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="istisna_3218" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Ar-Ge ve Tasarım İndirimi (5746)</label>
+                                <input type="text" class="form-control money-mask matrah-deductible" data-id="indir_5746" placeholder="0,00" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bölüm 3: Normal Vergiden Düşülenler & Danıştay -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="gradient-header p-4 text-white" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-file-earmark-diff fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">03. Zararlar ve Normal Vergi İndirimleri</h5>
+                                <p class="small mb-0 opacity-75">Sadece normal kurumlar vergisi matrahını etkileyen kalemler.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-4">
+                            <div class="col-md-12">
+                                <div class="bg-light p-3 rounded-3 border-start border-4 border-warning d-flex align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Geçmiş Yıl Zararları</h6>
+                                        <div class="input-group shadow-sm" style="max-width: 300px;">
+                                            <input type="text" id="gecmisYilZarar" class="form-control money-mask" placeholder="0,00" oninput="calculate()">
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="form-check form-switch fs-5">
+                                            <input class="form-check-input" type="checkbox" id="danistayCheck" onchange="calculate()">
+                                            <label class="form-check-label small fw-bold text-dark" for="danistayCheck">Danıştay Kararı</label>
+                                        </div>
+                                        <small class="text-muted">Zararı asgari vergiden de düşer.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold">Diğer İstisnalar (Taşınmaz vb.)</label>
+                                <input type="text" id="digerIstisnalar_Normal" class="form-control money-mask" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold">Bağış, Yardım ve Sponsorluk</label>
+                                <input type="text" id="bagisYardim_Normal" class="form-control money-mask" placeholder="0,00" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bölüm 4: Alınmayan Vergiler (32/C-3) -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in" style="animation-delay: 0.3s;">
+                    <div class="gradient-header p-4 text-white" style="background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-percent fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">04. Asgari Vergiden İndirilen Katkılar</h5>
+                                <p class="small mb-0 opacity-75">32/C-3 kapsamında asgari vergiden mahsup edilen tutarlar.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">İhracat Kaynaklı (5 Puan)</label>
+                                <input type="text" class="form-control money-mask tax-credit" data-id="credit_export" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Üretim Kaynaklı (1 Puan)</label>
+                                <input type="text" class="form-control money-mask tax-credit" data-id="credit_production" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Halka Arz Kaynaklı (2 Puan)</label>
+                                <input type="text" class="form-control money-mask tax-credit" data-id="credit_ipo" placeholder="0,00" oninput="calculate()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small fw-bold text-muted">Yatırım Teşvik (32/A - 2/8/24 Öncesi)</label>
+                                <input type="text" class="form-control money-mask tax-credit" data-id="credit_incentive" placeholder="0,00" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📖 Mevzuat Bölümü -->
+                <div class="glass-card shadow border-0 rounded-4 overflow-hidden animate-fade-in" style="animation-delay: 0.4s;">
+                    <div class="card-header bg-white p-4 border-0">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active rounded-pill px-4 me-2" id="pills-info-tab" data-bs-toggle="pill" data-bs-target="#pills-info" type="button" role="tab">32/C Metni</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4 me-2" id="pills-calc-tab" data-bs-toggle="pill" data-bs-target="#pills-calc" type="button" role="tab">İndirilebilenler</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4" id="pills-extra-tab" data-bs-toggle="pill" data-bs-target="#pills-extra" type="button" role="tab">Danıştay Kararı</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 tab-content text-justify" style="background: #fff; line-height: 1.8;">
+                        <div class="tab-pane fade show active" id="pills-info">
+                            <h5 class="fw-bold mb-3">Yurt İçi Asgari Kurumlar Vergisi (Madde 32/C)</h5>
+                            <p>32 nci ve 32/A maddeleri hükümleri dikkate alınarak hesaplanan kurumlar vergisi, indirim ve istisnalar düşülmeden önceki kurum kazancının %10’undan az olamaz.</p>
+                            <div class="alert alert-warning border-0 rounded-4 p-3 small">
+                                <i class="bi bi-info-circle me-2"></i> İlk defa faaliyete başlayan kurumlar için 3 hesap dönemi muafiyet vardır.
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="pills-calc">
+                            <h5 class="fw-bold mb-3">Asgari Matrahtan Düşülebilecek İstisna ve İndirimler</h5>
+                            <ul class="small">
+                                <li>İştirak kazançları istisnası (5/1-a)</li>
+                                <li>Emisyon primi kazancı istisnası (5/1-ç)</li>
+                                <li>Yatırım fon/ortaklıkları kazancı istisnası (5/1-d - Taşınmaz hariç)</li>
+                                <li>Serbest bölgelerde elde edilen kazanç istisnası (3218)</li>
+                                <li>Teknoloji geliştirme bölgelerinde elde edilen kazanç istisnası (4691)</li>
+                                <li>Ar-Ge ve tasarım indirimleri (5746)</li>
+                            </ul>
+                        </div>
+                        <div class="tab-pane fade" id="pills-extra">
+                            <h5 class="fw-bold text-danger mb-3">Danıştay 3. Daire İptal Kararı</h5>
+                            <p>Danıştay 3. Dairesi'nin 25/11/2025 tarihli kararı ile asgari kurumlar vergisi hesaplamasında <strong>geçmiş yıl zararlarının</strong> kurum kazancından düşülemeyeceğine ilişkin tebliğ düzenlemesinin yürütmesi durdurulmuştur (İptal edilmiştir).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Sonuç Kartı (Sticky) -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-slide-up">
+                        <div class="p-4 text-center" style="background: #2b3a67;">
+                            <h6 class="text-white-50 text-uppercase small ls-1 fw-bold mb-2">ÖDENECEK KURUMLAR VERGİSİ</h6>
+                            <h2 class="display-5 fw-bold text-white mb-0" id="resultFinal">0,00 ₺</h2>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Normal Kurumlar Vergisi</span>
+                                <span class="fw-bold text-dark" id="resultNormal">0,00 ₺</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                                <span class="text-muted">Asgari Kurumlar Vergisi</span>
+                                <span class="fw-bold text-danger" id="resultAsgari">0,00 ₺</span>
+                            </div>
+                            
+                            <!-- Özet Detaylar -->
+                            <div class="mt-4">
+                                <h6 class="small fw-bold text-muted text-uppercase mb-3">Analiz Detayı</h6>
+                                <div class="bg-light rounded-3 p-3">
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span>Asgari Matrah:</span>
+                                        <span class="fw-bold" id="resAsgariMatrah">0,00 ₺</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small">
+                                        <span>Durum:</span>
+                                        <span class="fw-bold text-primary" id="resStatus">Bekleniyor...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(1)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 1
+                                </button>
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(2)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 2
+                                </button>
+                                <button class="btn btn-outline-primary rounded-pill py-2 small" onclick="loadExample(3)">
+                                    <i class="bi bi-lightbulb me-1"></i> Tebliğ Örnek 3
+                                </button>
+                                <button class="btn btn-light rounded-pill py-2 small mt-2" onclick="resetForm()"> Formu Temizle </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İpucu Kartı -->
+                    <div class="glass-card bg-info bg-opacity-10 border-0 rounded-4 p-4 text-dark shadow-sm">
+                        <h6 class="fw-bold"><i class="bi bi-info-square me-2 text-primary"></i>Pratik Not</h6>
+                        <p class="small mb-0 opacity-75">
+                            Asgari vergi hesabında, 32/A kapsamında yatırıma katkı tutarları sadece 02/08/2024 tarihinden önce alınmış olan belgeler için asgari vergiden düşülebilir.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .gradient-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .ls-1 { letter-spacing: 1px; }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .money-mask { text-align: right; font-weight: 500; }
+    .icon-box { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }
+    
+    @media print {
+        .navbar, .sidebar, footer, .btn, .breadcrumb, .nav-pills, .sticky-top { display: none !important; }
+        .glass-card { border: 1px solid #000 !important; page-break-inside: avoid; }
+        #resultFinal { color: #000 !important; }
+    }
+</style>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    let numInputs = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initMasks();
+        calculate();
+    });
+
+    function initMasks() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            if (!el.getAttribute('data-numeric')) {
+                const an = new AutoNumeric(el, {
+                    currencySymbol: '',
+                    decimalCharacter: ',',
+                    digitGroupSeparator: '.',
+                    unformatOnSubmit: true
+                });
+                el.setAttribute('data-numeric', 'true');
+                numInputs.push(an);
+            }
+        });
+    }
+
+    function getVal(id) {
+        const el = document.getElementById(id);
+        if (!el) return 0;
+        return AutoNumeric.getAutoNumericElement(el)?.getNumber() || 0;
+    }
+
+    function getValByAttr(selector) {
+        let total = 0;
+        document.querySelectorAll(selector).forEach(el => {
+            total += AutoNumeric.getAutoNumericElement(el)?.getNumber() || 0;
+        });
+        return total;
+    }
+
+    function calculate() {
+        const ticariKar = getVal('ticariKar');
+        const kkeg = getVal('kkeg');
+        const istisnalarMatrah = getValByAttr('.matrah-deductible');
+        
+        const gecmisYilZarar = getVal('gecmisYilZarar');
+        const digerIstisnalar_Normal = getVal('digerIstisnalar_Normal');
+        const bagisYardim_Normal = getVal('bagisYardim_Normal');
+        const danistayApplied = document.getElementById('danistayCheck').checked;
+        
+        const credits = getValByAttr('.tax-credit');
+
+        // NORMAL VERGİ HESAPLAMA
+        let normalMatrah = (ticariKar + kkeg) - istisnalarMatrah - gecmisYilZarar - digerIstisnalar_Normal - bagisYardim_Normal;
+        normalMatrah = Math.max(0, normalMatrah);
+        let normalTax = (normalMatrah * 0.25) - credits;
+        normalTax = Math.max(0, normalTax);
+
+        // ASGARİ VERGİ HESAPLAMA
+        let asgariMatrah = (ticariKar + kkeg) - istisnalarMatrah;
+        if (danistayApplied) asgariMatrah -= gecmisYilZarar;
+        asgariMatrah = Math.max(0, asgariMatrah);
+        
+        let asgariTax = (asgariMatrah * 0.10) - credits;
+        asgariTax = Math.max(0, asgariTax);
+
+        // SONUÇ GÜNCELLEME
+        const finalTax = Math.max(normalTax, asgariTax);
+        const formatMoney = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+        
+        document.getElementById('resultFinal').innerText = formatMoney(finalTax);
+        document.getElementById('resultNormal').innerText = formatMoney(normalTax);
+        document.getElementById('resultAsgari').innerText = formatMoney(asgariTax);
+        document.getElementById('resAsgariMatrah').innerText = formatMoney(asgariMatrah);
+        
+        const statusEl = document.getElementById('resStatus');
+        if (asgariTax > normalTax) {
+            statusEl.innerText = "Asgari Vergi Ödenecek";
+            statusEl.className = "fw-bold text-danger";
+        } else {
+            statusEl.innerText = "Normal Vergi Ödenecek";
+            statusEl.className = "fw-bold text-success";
+        }
+    }
+
+    function resetForm() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            AutoNumeric.getAutoNumericElement(el)?.set(0);
+        });
+        document.getElementById('danistayCheck').checked = false;
+        calculate();
+    }
+
+    function loadExample(num) {
+        resetForm();
+        if (num === 1) {
+            // Örnek 1: Basit Matrah Hesabı
+            AutoNumeric.getAutoNumericElement(document.getElementById('ticariKar')).set(5000000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('kkeg')).set(500000);
+            Swal.fire('Örnek 1 Yüklendi', 'Temel kâr ve KKEG senaryosu.', 'info');
+        } else if (num === 2) {
+            // Örnek 2: İstisnalar
+            AutoNumeric.getAutoNumericElement(document.getElementById('ticariKar')).set(10000000);
+            AutoNumeric.getAutoNumericElement(document.querySelector('[data-id="istisna_51a"]')).set(2000000);
+            AutoNumeric.getAutoNumericElement(document.querySelector('[data-id="istisna_3218"]')).set(3000000);
+            Swal.fire('Örnek 2 Yüklendi', 'İştirak ve Serbest Bölge istisnaları senaryosu.', 'info');
+        } else if (num === 3) {
+            // Örnek 3: Kapsamlı (Tebliğdeki ana örnek)
+            AutoNumeric.getAutoNumericElement(document.getElementById('ticariKar')).set(4000000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('kkeg')).set(800000);
+            AutoNumeric.getAutoNumericElement(document.querySelector('[data-id="istisna_51a"]')).set(2000000);
+            AutoNumeric.getAutoNumericElement(document.querySelector('[data-id="istisna_4691"]')).set(500000);
+            AutoNumeric.getAutoNumericElement(document.querySelector('[data-id="indir_5746"]')).set(100000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('gecmisYilZarar')).set(400000);
+            AutoNumeric.getAutoNumericElement(document.getElementById('digerIstisnalar_Normal')).set(800000);
+            Swal.fire('Örnek 3 Yüklendi', 'Tebliğdeki kapsamlı örnek verileri uygulandı.', 'success');
+        }
+        calculate();
+    }
+</script>
+{% endblock %}
 {% endblock %}

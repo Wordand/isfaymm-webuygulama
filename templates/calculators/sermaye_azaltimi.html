@@ -1,0 +1,409 @@
+{% extends "layout.html" %}
+
+{% block title %}Sermaye Azaltımı Hesaplama | İSFA YMM{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
+    <div class="container">
+        <!-- 🚀 Hero Section -->
+        <div class="text-center mb-5 animate-fade-in">
+            <div class="badge bg-primary text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="letter-spacing: 1px;">
+                <i class="bi bi-shield-check me-1"></i> KVK MADDE 32/B UYUMLU
+            </div>
+            <h1 class="display-4 fw-bold text-dark mb-3">Sermaye Azaltımı Vergilendirme</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 800px;">
+                Kurumlar Vergisi Kanunu'nun 32/B maddesi uyarınca, sermayeye eklenen öz sermaye kalemlerinin 
+                çekilme sırasını ve vergi yükünü (5 yıl kuralı ve orantı yöntemi) profesyonelce hesaplayın.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 🧮 Hesaplama Formu -->
+            <div class="col-lg-8">
+                <!-- Bölüm 1: Tarihler ve Genel Bilgiler -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in">
+                    <div class="gradient-header p-4 text-white">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                <i class="bi bi-calendar3 fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">01. Tarih ve Oran Bilgileri</h5>
+                                <p class="small mb-0 opacity-75">Tescil tarihi ve vergi oranlarını belirleyin.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 p-lg-5 bg-white">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-dark">Azaltım Tescil Tarihi</label>
+                                <input type="date" id="azaltimTarihi" class="form-control bg-light" onchange="calculate()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-dark">KV Oranı (%)</label>
+                                <input type="number" id="kvOrani" class="form-control bg-light" value="25" step="1" oninput="calculate()">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-dark">Stopaj Oranı (%)</label>
+                                <input type="number" id="stopajOrani" class="form-control bg-light" value="10" step="1" oninput="calculate()">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-dark">Azaltılacak Toplam Tutar</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-dash-circle-fill"></i></span>
+                                    <input type="text" id="toplamAzaltim" class="form-control border-start-0 bg-light money-mask fw-bold" placeholder="0,00" oninput="calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bölüm 2: Sermaye Bileşenleri -->
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="gradient-header p-4 text-white" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="icon-box bg-white bg-opacity-20 rounded-3 p-2">
+                                    <i class="bi bi-layers-half fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-bold">02. Şirket Sermayesinin Yapısı</h5>
+                                    <p class="small mb-0 opacity-75">Sermayenizi oluşturan kalemleri aşağıdaki kategorilere göre ekleyin.</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="addRow()">
+                                <i class="bi bi-plus-lg me-1"></i> Yeni Kalem Ekle
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-white">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle border-0" id="sermayeTable">
+                                <thead class="small text-uppercase text-muted">
+                                    <tr>
+                                        <th style="width: 45%;">Paranın Kaynağı (Vergi Durumu)</th>
+                                        <th style="width: 25%;">Tutar (TL)</th>
+                                        <th style="width: 20%;">Tescil Tarihi</th>
+                                        <th style="width: 10%;" class="text-center">Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sermayeBody">
+                                    <!-- Dinamik satırlar -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Vergi Kategorileri Rehberi -->
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-3 border-start border-4 border-danger" style="background: #fff5f5;">
+                                    <h6 class="fw-bold text-danger mb-1" style="font-size: 0.85rem;">🔴 TORBA 1 (En Riskli)</h6>
+                                    <p class="small mb-0 text-muted">Enflasyon düzeltme farkları ve fonlar. <b>Hem KV hem Stopaj</b> alınır.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-3 border-start border-4 border-warning" style="background: #fffdf5;">
+                                    <h6 class="fw-bold text-warning-emphasis mb-1" style="font-size: 0.85rem;">🟡 TORBA 2 (Sadece Stopaj)</h6>
+                                    <p class="small mb-0 text-muted">Geçmiş yıl karları ve yedek akçeler. <b>Sadece %10 Stopaj</b> alınır.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-3 border-start border-4 border-success" style="background: #f5fff5;">
+                                    <h6 class="fw-bold text-success mb-1" style="font-size: 0.85rem;">🟢 TORBA 3 (Güvenli)</h6>
+                                    <p class="small mb-0 text-muted">Ortakların kendi cebinden koyduğu nakit para. Çekerken <b>Vergi Ödenmez.</b></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📖 Mevzuat ve Yardım -->
+                <div class="glass-card shadow border-0 rounded-4 overflow-hidden animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-header bg-white p-4 border-0">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active rounded-pill px-4 me-2" id="pills-logic-tab" data-bs-toggle="pill" data-bs-target="#pills-logic" type="button" role="tab">Neden Vergi Ödenir?</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill px-4 me-2" id="pills-rules-tab" data-bs-toggle="pill" data-bs-target="#pills-rules" type="button" role="tab">Çekilme Sırası (Kural)</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 tab-content" id="pills-tabContent" style="background: #fff; text-align: justify; line-height: 1.8;">
+                        <div class="tab-pane fade show active" id="pills-logic" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-3">Sermaye Azaltımı Bir "Kâr Dağıtımı" Sayılabilir</h5>
+                            <p>Şirketler kârlarını ortaklara dağıtırken vergi (stopaj) öderler. Eğer şirket kârı sermayeye ekler ve sonra vergisiz bir şekilde sermaye azaltımı yaparak bu parayı dışarı çıkarırsa, devlet bu işlemi <b>"vergisiz kâr dağıtımı"</b> olarak görür ve engeller.</p>
+                            <p>İşte bu yüzden, azalttığınız her bir liranın içinde ne kadar "kendi koyduğunuz nakit", ne kadar "sermayeye eklediğiniz kâr" olduğu hesaplanır.</p>
+                        </div>
+                        <div class="tab-pane fade" id="pills-rules" role="tabpanel">
+                            <h5 class="fw-bold text-dark mb-3">Devlet Hangi Parayı Önce Çektiğinizi Varsayar?</h5>
+                            <p>Meşhur 5 yıl kuralı şudur:</p>
+                            <ol class="small">
+                                <li><strong>5 Yıl Dolmadıysa:</strong> Devlet en çok vergi alacağı kalemden başlar. Önce vergiye tabi "Torba 1" (Fonlar), sonra "Torba 2" (Kârlar) ve en son "Torba 3" (Nakit) çekilir.</li>
+                                <li><strong>5 Yıl Dolduysa:</strong> Artık devlet daha insaflı davranır. Çekilen tutarı, sermayenizdeki kalemlerin oranına göre (hepsinden azar azar) dağıtır.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Sonuç Kartı (Sticky) -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px;">
+                    <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden mb-4 animate-slide-up">
+                        <div class="p-4 text-center" style="background: #1a1a2e;">
+                            <h6 class="text-white-50 text-uppercase small ls-1 fw-bold mb-2">ÖDENECEK TOPLAM VERGİ</h6>
+                            <h2 class="display-5 fw-bold text-white mb-0" id="totalTax">0,00 ₺</h2>
+                        </div>
+                        <div class="card-body p-4 bg-white">
+                            <!-- Açıklayıcı Özet Panel -->
+                            <div class="p-3 rounded-4 mb-4" style="background: #f8f9fa; border: 1px dashed #dee2e6;">
+                                <h6 class="fw-bold small text-primary mb-2"><i class="bi bi-info-circle-fill me-1"></i> Hesap Özeti:</h6>
+                                <p class="small text-muted mb-0" id="calculationExplanation">
+                                    Lütfen toplam azaltım tutarını ve sermaye kalemlerini girin.
+                                </p>
+                            </div>
+
+                            <div class="list-group list-group-flush mb-4">
+                                <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between">
+                                    <div>
+                                        <span class="d-block fw-bold text-dark">Kurumlar Vergisi</span>
+                                        <small class="text-muted">Grup A kaynakları üzerinden</small>
+                                    </div>
+                                    <span class="h5 fw-bold text-danger mb-0" id="resKV">0,00 ₺</span>
+                                </div>
+                                <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between">
+                                    <div>
+                                        <span class="d-block fw-bold text-dark">Gelir Vergisi (Stopaj)</span>
+                                        <small class="text-muted">Kar dağıtımı stopajı</small>
+                                    </div>
+                                    <span class="h5 fw-bold text-warning-emphasis mb-0" id="resStopaj">0,00 ₺</span>
+                                </div>
+                                <div class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between border-bottom-0">
+                                    <div>
+                                        <span class="d-block fw-bold text-dark">Ortağın Cebine Giren</span>
+                                        <small class="text-muted">Net ödenecek tutar</small>
+                                    </div>
+                                    <span class="h5 fw-bold text-success mb-0" id="resNet">0,00 ₺</span>
+                                </div>
+                            </div>
+
+                            <!-- Kaynak Dağılımı (Bar Chart Görünümü) -->
+                            <div class="mb-4">
+                                <h6 class="small fw-bold text-muted text-uppercase mb-3">Çekilen Paranın Kaynakları</h6>
+                                <div class="progress rounded-pill mb-3" style="height: 12px;">
+                                    <div id="barA" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                                    <div id="barB" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                                    <div id="barC" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div class="row g-2 text-center" style="font-size: 0.75rem;">
+                                    <div class="col-4 border-end">
+                                        <span class="d-block fw-bold text-danger" id="distA">0,00 ₺</span>
+                                        <span class="text-muted">Grup A</span>
+                                    </div>
+                                    <div class="col-4 border-end">
+                                        <span class="d-block fw-bold text-warning-emphasis" id="distB">0,00 ₺</span>
+                                        <span class="text-muted">Grup B</span>
+                                    </div>
+                                    <div class="col-4">
+                                        <span class="d-block fw-bold text-success" id="distC">0,00 ₺</span>
+                                        <span class="text-muted">Grup C</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary rounded-pill py-2 fw-bold" onclick="loadExample(1)">
+                                    <i class="bi bi-journal-text me-1"></i> Tebliğ Örneği Yükle
+                                </button>
+                                <button class="btn btn-light rounded-pill py-2 small" onclick="resetForm()"> Formu Temizle </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İpucu Kartı -->
+                    <div class="glass-card bg-info bg-opacity-10 border-0 rounded-4 p-4 text-dark shadow-sm">
+                        <h6 class="fw-bold text-info"><i class="bi bi-lightbulb-fill me-2"></i>Bilgi</h6>
+                        <p class="small mb-0 opacity-75">
+                            <b>Sermaye Azaltımı</b>, tasfiye edilmeyen bir şirketin sermaye fazlasını ortaklara dağıtmasıdır. Bu bir nevi "şirketin küçülmesidir".
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('azaltimTarihi').value = new Date().toISOString().split('T')[0];
+        addRow('C', 500000, '2015-01-01'); // Varsayılan örnek
+        calculate();
+    });
+
+    function initMasks() {
+        document.querySelectorAll('.money-mask').forEach(el => {
+            if (!el.getAttribute('data-numeric')) {
+                new AutoNumeric(el, { currencySymbol: '', decimalCharacter: ',', digitGroupSeparator: '.', unformatOnSubmit: true });
+                el.setAttribute('data-numeric', 'true');
+            }
+        });
+    }
+
+    function addRow(group = 'A', amount = 0, date = '') {
+        const body = document.getElementById('sermayeBody');
+        const row = document.createElement('tr');
+        row.className = 'sermaye-item-row';
+        row.innerHTML = `
+            <td>
+                <select class="form-select form-select-sm group-select" onchange="calculate()">
+                    <option value="A" ${group==='A'?'selected':''}>🔴 Grup A (Enf. Farkı, Fonlar vb.)</option>
+                    <option value="B" ${group==='B'?'selected':''}>🟡 Grup B (Kâr Yedekleri, G.Yıl Kârları)</option>
+                    <option value="C" ${group==='C'?'selected':''}>🟢 Grup C (Nakit veya Ayni Sermaye)</option>
+                </select>
+            </td>
+            <td><input type="text" class="form-control form-control-sm money-mask row-amount" placeholder="0,00" value="${amount}" oninput="calculate()"></td>
+            <td><input type="date" class="form-control form-control-sm row-date" value="${date}" onchange="calculate()"></td>
+            <td class="text-center">
+                <button class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove(); calculate();">
+                    <i class="bi bi-trash fs-5"></i>
+                </button>
+            </td>
+        `;
+        body.appendChild(row);
+        initMasks();
+    }
+
+    function calculate() {
+        const azaltimDate = new Date(document.getElementById('azaltimTarihi').value);
+        const kvRate = (parseFloat(document.getElementById('kvOrani').value) || 0) / 100;
+        const stpRate = (parseFloat(document.getElementById('stopajOrani').value) || 0) / 100;
+        let totalAzaltimMiktar = AutoNumeric.getAutoNumericElement(document.getElementById('toplamAzaltim'))?.getNumber() || 0;
+
+        const rows = Array.from(document.querySelectorAll('.sermaye-item-row')).map(row => {
+            const amount = AutoNumeric.getAutoNumericElement(row.querySelector('.row-amount'))?.getNumber() || 0;
+            const date = new Date(row.querySelector('.row-date').value);
+            const group = row.querySelector('.group-select').value;
+            
+            // 5 tam yıl kontrolü
+            const diffYears = (azaltimDate - date) / (1000 * 60 * 60 * 24 * 365.25);
+            return { group, amount, date, isFiveYearsOld: diffYears >= 5 };
+        });
+
+        let resultA = 0, resultB = 0, resultC = 0;
+        let remainingAzaltim = totalAzaltimMiktar;
+        let explanation = "";
+
+        // 1. Kural: ÖNCE 5 Yılı doldurmamış (Yeni) unsurlar işletmeden çekilir (A > B > C sırasıyla)
+        const newItems = rows.filter(r => !r.isFiveYearsOld);
+        const groupsHierarchy = ['A', 'B', 'C'];
+        
+        groupsHierarchy.forEach(g => {
+            const sumGroupAmount = newItems.filter(i => i.group === g).reduce((s, i) => s + i.amount, 0);
+            if (sumGroupAmount > 0 && remainingAzaltim > 0) {
+                const taken = Math.min(remainingAzaltim, sumGroupAmount);
+                if (g === 'A') resultA += taken;
+                else if (g === 'B') resultB += taken;
+                else if (g === 'C') resultC += taken;
+                remainingAzaltim -= taken;
+                explanation += `5 yılı dolmamış Grup ${g} kalemlerinden ${new Intl.NumberFormat('tr-TR').format(taken)} TL çekildi. `;
+            }
+        });
+
+        // 2. Kural: KALAN tutar, 5 yılı doldurmuş (Eski) unsurlar arasından ORANTILI çekilir
+        if (remainingAzaltim > 0) {
+            const oldItems = rows.filter(r => r.isFiveYearsOld);
+            const totalOldValue = oldItems.reduce((s, i) => s + i.amount, 0);
+            
+            if (totalOldValue > 0) {
+                const ratio = Math.min(remainingAzaltim, totalOldValue) / totalOldValue;
+                oldItems.forEach(i => {
+                    const portion = i.amount * ratio;
+                    if (i.group === 'A') resultA += portion;
+                    else if (i.group === 'B') resultB += portion;
+                    else if (i.group === 'C') resultC += portion;
+                });
+                explanation += `Kalan tutar, 5 yılı geçmiş tüm kalemlere orantılı ( %${(ratio*100).toFixed(1)} ) olarak dağıtıldı.`;
+                remainingAzaltim -= totalOldValue * ratio;
+            }
+        }
+
+        if (totalAzaltimMiktar > 0 && explanation === "") explanation = "Sermaye miktarınız azaltım miktarından az veya tanımlı kalem yok.";
+        document.getElementById('calculationExplanation').innerText = explanation;
+
+        // Vergileme
+        const kvAmount = resultA * kvRate;
+        const stpFromA = (resultA - kvAmount) * stpRate;
+        const stpFromB = resultB * stpRate;
+        
+        const totalStopaj = stpFromA + stpFromB;
+        const totalTax = kvAmount + totalStopaj;
+        const netAmount = totalAzaltimMiktar - totalTax;
+
+        const format = (v) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(v);
+        
+        document.getElementById('totalTax').innerText = format(totalTax);
+        document.getElementById('resKV').innerText = format(kvAmount);
+        document.getElementById('resStopaj').innerText = format(totalStopaj);
+        document.getElementById('resNet').innerText = format(netAmount);
+
+        document.getElementById('distA').innerText = format(resultA);
+        document.getElementById('distB').innerText = format(resultB);
+        document.getElementById('distC').innerText = format(resultC);
+
+        // Bar Chart
+        if (totalAzaltimMiktar > 0) {
+            document.getElementById('barA').style.width = (resultA / totalAzaltimMiktar * 100) + "%";
+            document.getElementById('barB').style.width = (resultB / totalAzaltimMiktar * 100) + "%";
+            document.getElementById('barC').style.width = (resultC / totalAzaltimMiktar * 100) + "%";
+        } else {
+            document.getElementById('barA').style.width = "0%";
+            document.getElementById('barB').style.width = "0%";
+            document.getElementById('barC').style.width = "0%";
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('sermayeBody').innerHTML = '';
+        AutoNumeric.getAutoNumericElement(document.getElementById('toplamAzaltim'))?.set(0);
+        addRow('C', 0, '2015-01-01');
+        calculate();
+    }
+
+    function loadExample(ex) {
+        document.getElementById('sermayeBody').innerHTML = '';
+        // Örnek: Kapsamlı bir tebliğ senaryosu
+        document.getElementById('azaltimTarihi').value = '2024-08-01';
+        AutoNumeric.getAutoNumericElement(document.getElementById('toplamAzaltim')).set(500000);
+        
+        addRow('C', 1000000, '2010-01-01'); // Eski Nakit
+        addRow('A', 200000, '2023-01-01');  // Yeni Fon (Grup A)
+        addRow('B', 300000, '2015-06-01');  // Eski Kar (Grup B)
+
+        Swal.fire({
+            title: 'Örnek Senaryo Yüklendi',
+            text: 'Bu senaryoda hem 5 yılı geçen hem de geçmeyen farklı vergi gruplarında kalemler bulunmaktadır.',
+            icon: 'info',
+            confirmButtonText: 'Tamam'
+        });
+        calculate();
+    }
+</script>
+<style>
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .gradient-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    .ls-1 { letter-spacing: 1px; }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+    .animate-slide-up { animation: slideUp 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .money-mask { text-align: right; }
+    .icon-box { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }
+    .progress-bar { transition: width 0.6s ease; }
+</style>
+{% endblock %}

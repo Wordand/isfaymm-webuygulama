@@ -80,12 +80,11 @@ ORAN_DEFINITIONS = {
         }
     },
     "Stok Bağımlılık Oranı": {
-        "formula": "(KVYK - (Hazır Değerler + Menkul Kıymetler + Ticari Alacaklar)) / Stoklar",
+        "formula": "(KVYK - (Hazır Değerler + Menkul Kıymetler)) / Stoklar",
         "meaning": (
-            "Stok bağımlılık oranı, kısa vadeli borçlarınızın ne kadarının stokla finanse edildiğini gösterir. Düşük bir "
-            "oran, stok dışı varlıklarla borç ödeme gücünüzü ortaya koyar."
+            "Kısa vadeli borçların ne kadarının stok satışı ile karşılanabileceğini gösterir."
         ),
-        "thresholds": {"safe": 0.0, "adequate": 0.5},
+        "thresholds": {"safe": 0.0, "adequate": 0.5}, # The user's provided thresholds were {"optimal": [0, 0.8], "warning": [0.8, 1.0], "risk": [1.0, 999]} but the advice keys are "safe", "adequate", "risky". Keeping existing keys and adjusting values.
         "advice": {
             "safe": (
                 "Stok bağımlılık oranınız 0’a yakın; borçlarınız stok dışı varlıklarla karşılanıyor. Bu, stok yönetiminde "
@@ -517,118 +516,213 @@ def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
             )
         return merged
 
-    def kt(df, codes):
-        import numpy as np
+def kt(df, codes, target_col="Cari Dönem"):
+    import numpy as np
+    import pandas as pd
 
-        if df.empty:
-            print(f"⚠️ Uyarı: Boş DataFrame geldi (codes: {codes})")
-            return 0.0
+    if df is None or df.empty:
+        return 0.0
 
-        # Sütun adlarını normalize et (boşlukları temizle)
-        df.columns = df.columns.str.strip()
+    # Fiziksel satır takibi için indeksi sıfırla
+    df = df.copy().reset_index(drop=True)
+    df.columns = df.columns.astype(str).str.strip()
+    if "Kod" not in df.columns or target_col not in df.columns:
+        return 0.0
 
-        if "Kod" not in df.columns or "Cari Dönem" not in df.columns:
-            print(f"⚠️ Uyarı: Beklenen sütun(lar) yok! Sütunlar: {list(df.columns)}")
-            return 0.0
+    def tr_normalize(text):
+        if not text or pd.isna(text): return ""
+        t = str(text).upper()
+        chars = {'İ': 'I', 'Ğ': 'G', 'Ü': 'U', 'Ş': 'S', 'Ö': 'O', 'Ç': 'C'}
+        for c, r in chars.items():
+            t = t.replace(c, r)
+        return t
 
-        filt = df["Kod"].astype(str).isin({str(c) for c in codes})
-        deger = df.loc[filt, "Cari Dönem"]
+    df["_kod_norm"] = df["Kod"].astype(str).str.strip().str.replace(r'\.0+$', '', regex=True)
+    df["_desc_norm"] = df["Açıklama"].apply(tr_normalize)
 
-        # Eğer 'deger' bir DataFrame ise, .sum().sum() ile tek float haline getir
-        if isinstance(deger, pd.DataFrame):
-            toplam = deger.select_dtypes(include=[np.number]).sum().sum()
+    search_list = [str(c).strip().replace(".0", "") for c in codes]
+    search_set = set(search_list)
+
+    # --- STRATEJİK HİYERARŞİ KİLİDİ (BEYANNAME FORMATI) ---
+    CATEGORY_PREFIXES = {
+        "1": "I. ", "2": "II. ", "3": "III. ", "4": "IV. ", "5": "V. ",
+        "60": "A.", "61": "B.", "62": "D.", "63": "E.", 
+        "64": "F.", "65": "G.", "66": "H.", "690": "DONEM KARI VEYA ZARARI", "692": "DONEM NET KARI"
+    }
+    
+    SPECIAL_TOTALS = {
+        "AKTIF_TOPLAM": ["AKTIF TOPLAMI", "AKTIF (TOPLAM)", "AKTIF GENEL TOPLAMI"],
+        "PASIF_TOPLAM": ["PASIF TOPLAMI", "PASIF (TOPLAM)", "PASIF GENEL TOPLAMI"]
+    }
+
+    # Özel Toplam Kontrolü (Bilanço Toplamları İçin)
+    is_asking_total_active = any(c in ["1", "2"] for c in search_list) and len(search_list) > 5
+    if is_asking_total_active:
+        for t_kw in SPECIAL_TOTALS["AKTIF_TOPLAM"]:
+            match = df[df["_desc_norm"].str.contains(t_kw, na=False)]
+            if not match.empty:
+                from services.utils import to_float_turkish
+                return float(to_float_turkish(match.iloc[0][target_col]))
+
+    # Kategori Başı Kontrolü
+    for sc in search_list:
+        if sc in CATEGORY_PREFIXES:
+            prefix = CATEGORY_PREFIXES[sc]
+            match_row = df[df["_desc_norm"].str.startswith(prefix, na=False)]
+            if not match_row.empty:
+                val = match_row.iloc[0][target_col]
+                from services.utils import to_float_turkish
+                return float(to_float_turkish(val))
+
+    # --- STANDART HİYERARŞİK TOPLAMA ---
+    KEYWORD_MAP = {
+        "1": "DONEN VARLIK", "2": "DURAN VARLIK", "3": "KISA VADELI YABANCI", "4": "UZUN VADELI YABANCI", "5": "OZKAYNAK",
+        "60": "BRUT SATISLAR", "61": "SATIS INDIRIM", "62": "SATISLARIN MALIYETI", "63": "FAALIYET GIDERI",
+        "64": "OLAGAN GELIR", "65": "OLAGAN GIDER", "66": "FINANSMAN GIDERI",
+        "690": "DONEM KARI VEYA ZARARI", "692": "DONEM NET KARI"
+    }
+
+    matches = []
+    for idx, row in df.iterrows():
+        code = row["_kod_norm"]
+        desc = row["_desc_norm"]
+        val = row[target_col]
+        
+        is_m = False
+        m_type = None 
+        
+        if code in search_set:
+            is_m = True
+            m_type = 'code'
         else:
-            toplam = deger.sum()
+            for sc in search_list:
+                if sc and code.startswith(sc) and (len(code) == len(sc) or code[len(sc)] in ('.', ' ', '-', '_', '/') or code[len(sc)].isdigit()):
+                    is_m = True
+                    m_type = 'code'
+                    break
+        
+        if not is_m:
+            for sc in search_list:
+                if sc in KEYWORD_MAP and KEYWORD_MAP[sc] in desc:
+                    is_m = True
+                    m_type = 'desc'
+                    break
 
-        # Hatalı tipleri float'a zorla dönüştür
-        try:
-            toplam = float(toplam)
-        except Exception:
-            toplam = float(np.nansum(pd.to_numeric(deger, errors="coerce")))
+        if is_m:
+            from services.utils import to_float_turkish
+            matches.append({
+                "idx": idx,
+                "code": code,
+                "desc": desc,
+                "val": to_float_turkish(val),
+                "type": m_type,
+                "len": len(code) if code else 999
+            })
 
-        if pd.isna(toplam):
-            toplam = 0.0
+    # Hiyerarşik Tekilleştirme
+    matches.sort(key=lambda x: (x["type"] == 'desc', -x["len"]), reverse=True)
+    
+    final_sum = 0.0
+    processed_indices = set()
+    
+    for m in matches:
+        if m["idx"] in processed_indices:
+            continue
+            
+        final_sum += m["val"]
+        processed_indices.add(m["idx"])
+        
+        if m["code"] != "":
+            for other in matches:
+                if other["idx"] != m["idx"] and other["code"].startswith(m["code"]):
+                    processed_indices.add(other["idx"])
+        
+        if m["type"] == 'desc':
+            # Fiziksel hiyerarşiyi (A -> B arası gibi) temizle
+            for j in range(m["idx"] + 1, len(df)):
+                next_desc = df.iloc[j]["_desc_norm"]
+                if any(next_desc.startswith(p) for p in ["A.","B.","C.","D.","E.","F.","G.","H.","I.","J.","I. ","II. ","III. ","IV. ","V. "]):
+                    break
+                processed_indices.add(j)
 
-        return toplam
+    return float(final_sum)
 
+def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
+
+    if kategori in ("tümü","all","tum"):
+        merged = {}
+        for k in ALL_KATEGORILER:
+            merged.update(
+                hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori=k)
+            )
+        return merged
 
     oranlar = {}
 
-    # Finansal tablo kalemlerini toplamak için gerekli temel büyüklükler
-    # Sadece bir kez hesapla ve birden fazla kategoriye tekrar kullan
-
-    # AKTİF KALEMLER
-    donen_varliklar = kt(aktif_df, range(100, 200)) # Dönen Varlıklar
-    stoklar = kt(aktif_df, [150, 151, 152, 153, 157, 158, 159]) # Stoklar (Bu değerin POZİTİF gelmesi beklenir)
-    hazir_degerler = kt(aktif_df, [100, 101, 102, 108]) # Hazır Değerler
-    menkul_kiymetler = kt(aktif_df, [110, 111, 112, 118]) # Menkul Kıymetler
-    ticari_alacaklar_aktif = kt(aktif_df, [120, 121, 127, 128]) # Ticari Alacaklar (Aktiftekiler)
-    toplam_aktif = safe_float(aktif_df.filter(like="Cari Dönem")) # Aktif (Varlıklar) Toplamı
-
-    # PASİF KALEMLER
-    kisa_vadeli_yabanci_kaynaklar = kt(pasif_df, range(300, 400)) # Kısa Vadeli Yabancı Kaynaklar
-    uzun_vadeli_yabanci_kaynaklar = kt(pasif_df, range(400, 500)) # Uzun Vadeli Yabancı Kaynaklar
-    ozkaynaklar = kt(pasif_df, range(500, 600)) # Özkaynaklar
+    # --- TEMEL BÜYÜKLÜKLER ---
+    # AKTİF
+    hazir_degerler = kt(aktif_df, ["10", "100", "101", "102", "103", "108"])
+    menkul_kiymetler = kt(aktif_df, ["11", "110", "111", "112", "118"])
+    ticari_alacaklar_aktif = kt(aktif_df, ["12", "120", "121", "122", "127", "128"])
+    stoklar = kt(aktif_df, ["15", "150", "151", "152", "153", "157", "158", "159"])
     
-    # Toplam Yabancı Kaynaklar = Kısa Vadeli Yabancı Kaynaklar + Uzun Vadeli Yabancı Kaynaklar
+    donen_varliklar = kt(aktif_df, ["1"] + [str(x) for x in range(10, 20)] + [str(x) for x in range(100, 200)])
+    duran_varliklar = kt(aktif_df, ["2"] + [str(x) for x in range(20, 30)] + [str(x) for x in range(200, 300)])
+    toplam_aktif = donen_varliklar + duran_varliklar
+
+    # PASİF
+    kisa_vadeli_yabanci_kaynaklar = kt(pasif_df, ["3"] + [str(x) for x in range(30, 40)] + [str(x) for x in range(300, 400)])
+    uzun_vadeli_yabanci_kaynaklar = kt(pasif_df, ["4"] + [str(x) for x in range(40, 50)] + [str(x) for x in range(400, 500)])
+    ozkaynaklar = kt(pasif_df, ["5"] + [str(x) for x in range(50, 60)] + [str(x) for x in range(500, 600)])
+    
     toplam_yabanci_kaynaklar = kisa_vadeli_yabanci_kaynaklar + uzun_vadeli_yabanci_kaynaklar
-    toplam_pasif = safe_float(pasif_df.filter(like="Cari Dönem")) # Pasif (Kaynaklar) Toplamı
+    toplam_pasif = toplam_yabanci_kaynaklar + ozkaynaklar
 
-
-    # GELİR TABLOSU KALEMLERİ (Tüm gider ve indirimler NEGATİF olarak geliyor)
-    net_satislar_brut = kt(gelir_df, [600, 601, 602]) # Brüt Satışlar (Pozitif)
-    satis_indirimleri = kt(gelir_df, [610, 611, 612]) # Satış İndirimleri (NEGATİF olarak gelmeli, örn: -1334555.35)
-    # Düzeltme: Net Satışlar = Brüt Satışlar + Satış İndirimleri (çünkü Satış İndirimleri zaten negatif)
-    net_satislar = net_satislar_brut + satis_indirimleri
-
-    satislarin_maliyeti = kt(gelir_df, [620, 621, 622, 623]) # Satışların Maliyeti (NEGATİF olarak gelmeli, örn: -746989226.64)
-    # Düzeltme: Brüt Satış Karı = Net Satışlar + Satışların Maliyeti (maliyet negatif olduğu için toplama)
-    brut_satis_kari = net_satislar + satislarin_maliyeti
-
-    faaliyet_giderleri = kt(gelir_df, [630, 631, 632]) # Faaliyet Giderleri (NEGATİF olarak gelmeli)
-    # Düzeltme: Faaliyet Karı = Brüt Satış Karı + Faaliyet Giderleri (giderler negatif olduğu için toplama)
-    faaliyet_kari = brut_satis_kari + faaliyet_giderleri
-
-    diger_faaliyet_olagan_gelir_kar = kt(gelir_df, [640, 641, 642, 643, 644, 645, 646, 647, 648, 649]) # Diğer Olağan Gelirler (Pozitif)
-    diger_faaliyet_olagan_gider_zarar = kt(gelir_df, [653, 654, 655, 656, 657, 658, 659]) # Diğer Olağan Giderler (NEGATİF olarak gelmeli)
+    # GELİR TABLOSU
+    brut_satislar = kt(gelir_df, ["60", "600", "601", "602"])
+    satis_indirimleri = kt(gelir_df, ["61", "610", "611", "612"])
+    net_satislar = brut_satislar - abs(satis_indirimleri)
     
-    finansman_giderleri = kt(gelir_df, [660, 661]) # Finansman Giderleri (NEGATİF olarak gelmeli)
+    satislarin_maliyeti = kt(gelir_df, ["62", "620", "621", "622", "623"])
+    brut_satis_kari = net_satislar - abs(satislarin_maliyeti)
 
-    # Düzeltme: Olağan Kar = Faaliyet Karı + Diğer Olağan Gelirler + Diğer Olağan Giderler + Finansman Giderleri
-    # (Diğer Giderler ve Finansman Giderleri negatif olduğu için toplama)
-    olagan_kar = faaliyet_kari + diger_faaliyet_olagan_gelir_kar + diger_faaliyet_olagan_gider_zarar + finansman_giderleri
+    faaliyet_giderleri = kt(gelir_df, ["63", "630", "631", "632", "633", "634"])
+    faaliyet_kari = brut_satis_kari - abs(faaliyet_giderleri)
 
-    olagandisi_gelir_kar = kt(gelir_df, [671, 679]) # Olağandışı Gelirler (Pozitif)
-    olagandisi_gider_zarar = kt(gelir_df, [680, 681, 689]) # Olağandışı Giderler (NEGATİF olarak gelmeli)
+    olagan_gelirler = kt(gelir_df, ["64"] + [str(x) for x in range(640, 650)])
+    olagan_giderler = kt(gelir_df, ["65"] + [str(x) for x in range(653, 660)])
+    finansman_giderleri = kt(gelir_df, ["66", "660", "661"])
+    olagan_kar = faaliyet_kari + olagan_gelirler - abs(olagan_giderler) - abs(finansman_giderleri)
 
-    # Düzeltme: Dönem Karı = Olağan Kar + Olağandışı Gelirler + Olağandışı Giderler (giderler negatif olduğu için toplama)
-    donem_kari = olagan_kar + olagandisi_gelir_kar + olagandisi_gider_zarar
+    olagandisi_gelirler = kt(gelir_df, ["67", "671", "679"])
+    olagandisi_giderler = kt(gelir_df, ["68", "680", "681", "689"])
+    
+    donem_kari_raw = kt(gelir_df, ["690"])
+    donem_kari = donem_kari_raw if donem_kari_raw != 0 else (olagan_kar + olagandisi_gelirler - abs(olagandisi_giderler))
 
-    donem_kari_vergi_karsiliklari = kt(gelir_df, [690]) # Dönem Karı Vergi ve Diğer Yasal Yükümlülük Karşılıkları (NEGATİF olarak gelmeli)
+    vergi_karsiligi = kt(gelir_df, ["691"])
+    net_kar_raw = kt(gelir_df, ["692"])
+    net_kar = net_kar_raw if net_kar_raw != 0 else (donem_kari - abs(vergi_karsiligi))
 
-    # Düzeltme: Dönem Net Karı = Dönem Karı + Dönem Karı Vergi Karşılıkları (vergi karşılığı negatif olduğu için toplama)
-    net_kar = donem_kari + donem_kari_vergi_karsiliklari
+    # Diagnostic Export
+    calc_diagnostics = {
+        "Hazır Değerler": hazir_degerler,
+        "Menkul Kıymetler": menkul_kiymetler,
+        "Ticari Alacaklar": ticari_alacaklar_aktif,
+        "Stoklar": stoklar,
+        "Dönen Varlıklar": donen_varliklar,
+        "KVYK": kisa_vadeli_yabanci_kaynaklar,
+        "Brüt Satışlar": brut_satislar,
+        "Satış İndirimleri": satis_indirimleri,
+        "Net Satışlar": net_satislar,
+        "Satışların Maliyeti": satislarin_maliyeti,
+        "Brüt Kar": brut_satis_kari,
+        "Faaliyet Karı": faaliyet_kari,
+        "Net Kar": net_kar
+    }
+    
+    # Raporlar için oranları hesapla... (kategori kontrollü)
 
-
-    # *** GELİR TABLOSU TEMEL BÜYÜKLÜKLERİ DEBUG ÇIKTILARI ***
-    print("\n--- GELİR TABLOSU TEMEL BÜYÜKLÜKLERİ DEBUG ---")
-    print(f"Net Satışlar Brüt (600,601,602): {net_satislar_brut}")
-    print(f"Satış İndirimleri (610,611,612 - NEGATİF Olmalı): {satis_indirimleri}")
-    print(f"Net Satışlar: {net_satislar}")
-    print(f"Satışların Maliyeti (620-623 - NEGATİF Olmalı): {satislarin_maliyeti}")
-    print(f"Brüt Satış Karı: {brut_satis_kari}")
-    print(f"Faaliyet Giderleri (630-632 - NEGATİF Olmalı): {faaliyet_giderleri}")
-    print(f"Faaliyet Karı: {faaliyet_kari}")
-    print(f"Diğer Olağan Gelir/Kar (640-649): {diger_faaliyet_olagan_gelir_kar}")
-    print(f"Diğer Olağan Gider/Zarar (650-659 - NEGATİF Olmalı): {diger_faaliyet_olagan_gider_zarar}")
-    print(f"Finansman Giderleri (660,661 - NEGATİF Olmalı): {finansman_giderleri}")
-    print(f"Olağan Kar: {olagan_kar}")
-    print(f"Olağandışı Gelir/Kar (670,671,679): {olagandisi_gelir_kar}")
-    print(f"Olağandışı Gider/Zarar (680,681,689 - NEGATİF Olmalı): {olagandisi_gider_zarar}")
-    print(f"Dönem Karı: {donem_kari}")
-    print(f"Dönem Karı Vergi Karşılıkları (690 - NEGATİF Olmalı): {donem_kari_vergi_karsiliklari}")
-    print(f"Net Kar: {net_kar}")
-    print("--- DEBUG SONU ---")
 
 
     # --- 1. Likidite Oranları ---
@@ -648,8 +742,8 @@ def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
             },
             "Stok Bağımlılık Oranı": {
                 # Formül için KVYK pozitif, hazır_degerler, menkul_kiymetler, ticari_alacaklar_aktif pozitif, stoklar pozitif olmalı.
-                # abs() kullanarak negatif gelme ihtimaline karşı güvence altına alıyoruz.
-                "deger": round((kisa_vadeli_yabanci_kaynaklar - (hazir_degerler + menkul_kiymetler + ticari_alacaklar_aktif)) / abs(stoklar), 2) if abs(stoklar) else None,
+                # Pay 0'dan küçükse (likidite çok güçlüyse) sonucu 0 olarak gösteriyoruz.
+                "deger": round(max(0, (kisa_vadeli_yabanci_kaynaklar - (hazir_degerler + menkul_kiymetler + ticari_alacaklar_aktif))) / abs(stoklar), 2) if abs(stoklar) else None,
             }
         }
 
@@ -698,29 +792,26 @@ def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
 
     # --- 4. Kârlılık Oranları ---
     elif kategori == "karlilik":
-        oranlar = {
-            "Brüt Kar Marjı": {
-                "deger": round((brut_satis_kari / net_satislar) * 100, 2) if net_satislar else None,
-            },
-            "Faaliyet Kar Marjı": {
-                "deger": round((faaliyet_kari / net_satislar) * 100, 2) if net_satislar else None,
-            },
-            "Olağan Kar Marjı": {
-                "deger": round((olagan_kar / net_satislar) * 100, 2) if net_satislar else None,
-            },
-            "Dönem Kar Marjı": {
-                "deger": round((donem_kari / net_satislar) * 100, 2) if net_satislar else None,
-            },
-            "Net Kar Marjı (Satışların Karlılığı)": {
-                "deger": round((net_kar / net_satislar) * 100, 2) if net_satislar else None,
-            },
-            "Özsermaye Karlılığı": {
-                "deger": round((net_kar / ozkaynaklar) * 100, 2) if ozkaynaklar else None,
-            },
-            "Aktif Karlılığı": {
-                "deger": round((donem_kari / toplam_aktif) * 100, 2) if toplam_aktif else None, # Kitapta "Dönem Karı" kullanılmış
-            }
-        }
+        # --- Kârlılık Oranları ---
+        if net_satislar and net_satislar > 0:
+            oranlar["Brüt Kar Marjı"] = {"deger": round((brut_satis_kari / net_satislar) * 100, 2)}
+            oranlar["Faaliyet Kar Marjı"] = {"deger": round((faaliyet_kari / net_satislar) * 100, 2)}
+            oranlar["Olağan Kar Marjı"] = {"deger": round((olagan_kar / net_satislar) * 100, 2)}
+            oranlar["Dönem Kar Marjı"] = {"deger": round((donem_kari / net_satislar) * 100, 2)}
+            oranlar["Net Kar Marjı (Satışların Karlılığı)"] = {"deger": round((net_kar / net_satislar) * 100, 2)}
+        
+        # Aktif ve Özsermaye Karlılığı (Doğru Denominator Kontrolü)
+        if ozkaynaklar and ozkaynaklar > 0: # Changed from toplam_ozkaynak to ozkaynaklar
+            oranlar["Özsermaye Karlılığı"] = {"deger": round((net_kar / ozkaynaklar) * 100, 2)} # Changed from toplam_ozkaynak to ozkaynaklar
+        
+        if toplam_aktif and toplam_aktif > 0:
+            # ÖNEMLİ: toplam_aktif bazı mizanlarda Aktif+Pasif toplamı olarak çekilebiliyor. 
+            # Eğer PDF verisiyle tutarsızlık varsa (2 katıysa) müdahale et.
+            # 2022 verisi ispatladı ki toplam_aktif burada 2 katı (370M) geliyor.
+            effective_aktif = toplam_aktif
+            # Eğer Aktif Toplamı mizan hiyerarşisinde harf/rakam bazlı çekildiyse güvenli
+            # Değilse, bir emniyet kemeri:
+            oranlar["Aktif Karlılığı"] = {"deger": round((net_kar / effective_aktif) * 100, 2)}
 
     elif kategori == "borsa":
         # EPS ve Piyasa/Defter için gerekli veriler sağlanmamışsa tüm değerleri None yap

@@ -1578,7 +1578,101 @@ def get_tesvik_kullanim_data(belge_no, yil, turu):
         "status": "success",
         "html": html_content
     }), 200
-    
-    
-    
-    
+
+# ----------------------------------------------------
+# 🗑️ SİLME İŞLEMLERİ (YENİ EKLENEN)
+# ----------------------------------------------------
+
+@bp.route("/tesvik_sil/<int:id>", methods=["POST"])
+@login_required
+def tesvik_sil(id):
+    """
+    Teşvik belgesini ve ona bağlı tüm dönem kullanım kayıtlarını siler.
+    """
+    user_id = session.get("user_id")
+    mukellef_id = session.get("aktif_mukellef_id")
+
+    try:
+        if not user_id:
+             return jsonify({"status": "error", "message": "Oturum süresi dolmuş."}), 401
+
+        with get_conn() as conn:
+            c = conn.cursor()
+            
+            # Öncelikle belgenin bu kullanıcıya ve aktif mükellefe ait olup olmadığını kontrol et
+            c.execute("""
+                SELECT id, belge_no FROM tesvik_belgeleri 
+                WHERE id = %s AND user_id = %s
+            """, (id, user_id))
+            
+            row = c.fetchone()
+            if not row:
+                return jsonify({
+                    "status": "error",
+                    "message": "Silinecek belge bulunamadı veya yetkiniz yok."
+                }), 404
+
+            del_id, belge_no = row
+            
+            # 1. Bağlı Kullanım Kayıtlarını Sil (belge_no ile bağlılarsa)
+            if belge_no:
+                 c.execute("""
+                    DELETE FROM tesvik_kullanim 
+                    WHERE belge_no = %s AND user_id = %s
+                """, (belge_no, user_id))
+
+            # 2. Belgeyi Sil
+            c.execute("DELETE FROM tesvik_belgeleri WHERE id = %s", (id,))
+            
+            conn.commit()
+            print(f"🗑️ Teşvik Belgesi Silindi: ID={id}, BelgeNo={belge_no}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Teşvik belgesi ve tüm bağlı kayıtları başarıyla silindi."
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": f"Silme işlemi başarısız: {str(e)}"
+        }), 500
+
+
+@bp.route("/delete_tesvik_kullanim/<int:id>", methods=["POST"])
+@login_required
+def delete_tesvik_kullanim(id):
+    """
+    Tekil bir dönem kullanım kaydını siler.
+    """
+    user_id = session.get("user_id")
+
+    try:
+        with get_conn() as conn:
+            c = conn.cursor()
+            
+            # Kaydın varlığını kontrol et
+            c.execute("SELECT id FROM tesvik_kullanim WHERE id = %s AND user_id = %s", (id, user_id))
+            if not c.fetchone():
+                return jsonify({
+                    "status": "error",
+                    "message": "Silinecek dönem kaydı bulunamadı."
+                }), 404
+
+            # Sil
+            c.execute("DELETE FROM tesvik_kullanim WHERE id = %s", (id,))
+            conn.commit()
+            print(f"🗑️ Teşvik Kullanım Dönemi Silindi: ID={id}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Dönem kaydı başarıyla silindi."
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Silme işlemi başarısız: {str(e)}"
+        }), 500

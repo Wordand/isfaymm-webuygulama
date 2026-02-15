@@ -156,7 +156,7 @@ body {
 
 /* --- Sidebar (Yan Menü) Stilleri --- */
 .sidebar {
-    width: 270px; /* Varsayılan genişlik */
+    width: 280px; /* Genişletildi */
     background: var(--dark-sidebar); /* Koyu arka plan */
     color: var(--white);
     padding: 20px;
@@ -215,16 +215,18 @@ body {
     transition: all var(--transition-speed-fast);
     padding: 10px 12px;
     border-radius: var(--border-radius-sm);
-    font-size: 1.05rem;
+    font-size: 0.95rem; /* Yazı boyutu hafif küçültüldü */
+    white-space: normal; /* Kaymaya izin ver ama taşmaya dikkat et */
+    line-height: 1.3;
 }
 .sidebar-nav .sidebar-link i.sidebar-icon {
     margin-right: 12px;
     font-size: 1.2rem;
+    flex-shrink: 0;
 }
 .sidebar-nav .sidebar-link:hover {
     color: var(--white);
     background-color: var(--hover-dark);
-    padding-left: 15px;
 }
 
 /* Aktif menü öğesi */
@@ -265,8 +267,8 @@ body {
     transition: margin-left var(--transition-speed-normal) ease;
     
     /* 🟩 Başlangıç konumu — sidebar genişliği kadar boşluk bırak */
-    margin-left: 240px;
-    padding: 100px 40px 40px; /* Navbar (80px) + ekstra 20px güvenlik boşluğu */
+    margin-left: 280px;
+    padding: 110px 30px 40px; 
     
     /* Yüksekliği ekranla orantılı ayarla */
     min-height: calc(100vh - 80px); /* Navbar yüksekliğini çıkar */

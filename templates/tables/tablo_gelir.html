@@ -79,7 +79,7 @@
     <div class="row justify-content-center">
         <div class="col-xl-9">
             <div class="page-header text-center animate__animated animate__fadeIn">
-                <h2 class="page-title">Gelir Tablosu</h2>
+                <h2 class="page-title">{{ page_title or 'Gelir Tablosu' }}</h2>
                 <div class="mt-3">
                     <span class="text-secondary fw-bold fs-5">{{ unvan }}</span>
                 </div>
@@ -101,6 +101,11 @@
                                 {% if donem_mapping.cari %}
                                     <option value="cari" {% if secilen_donem == 'cari' %}selected{% endif %}>
                                         📅 Cari Dönem ({{ donem_mapping.cari }})
+                                    </option>
+                                {% endif %}
+                                {% if has_inflation and donem_mapping.cari_enflasyon %}
+                                    <option value="cari_enflasyon" {% if secilen_donem == 'cari_enflasyon' %}selected{% endif %}>
+                                        📅 Cari Dönem ({{ donem_mapping.cari_enflasyon }})
                                     </option>
                                 {% endif %}
                             </select>

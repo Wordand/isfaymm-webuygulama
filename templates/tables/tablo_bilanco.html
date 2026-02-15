@@ -86,7 +86,7 @@
     <div class="row justify-content-center">
         <div class="col-xl-11">
             <div class="page-header text-center">
-                <h2 class="page-title">Bilanço Tablosu</h2>
+                <h2 class="page-title">{{ page_title or 'Bilanço Tablosu' }}</h2>
                 <div class="mt-3">
                     <span class="badge-period me-2">{{ vkn }}</span>
                     <span class="text-secondary fw-bold">{{ unvan or "" }}</span>
@@ -113,7 +113,7 @@
                                 {% endif %}
                                 {% if has_inflation and donem_mapping.cari_enflasyon %}
                                     <option value="cari_enflasyon" {% if secilen_donem == 'cari_enflasyon' %}selected{% endif %}>
-                                        Cari Enflasyonlu ({{ donem_mapping.cari_enflasyon }})
+                                        Cari Dönem ({{ donem_mapping.cari_enflasyon }})
                                     </option>
                                 {% endif %}
                             </select>

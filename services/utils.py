@@ -45,89 +45,155 @@ def currency_filter(amount):
 
 def to_float_turkish(s):
     """
-    Türk Lirası formatındaki sayısal stringi (örneğin '1.234,56', '(1.234,56)', '1.234,56 -') float'a dönüştürür.
+    Türkçe sayı formatını float'a çevirir. 
+    Örn: '1.250,50' -> 1250.5, '(1.250,50)' -> -1250.5
     """
     if isinstance(s, (int, float)):
-        return s
+        return float(s)
+    if s is None or pd.isna(s) or str(s).strip() in ['', '-', '.', ',']:
+        return 0.0
+    
+    s = str(s).strip()
+    
+    # Negatif kontrolleri
+    is_neg = False
+    if (s.startswith('(') and s.endswith(')')) or s.endswith('-') or s.startswith('-'):
+        is_neg = True
+        s = s.replace('(', '').replace(')', '').replace('-', '').strip()
 
-    if s is None or pd.isna(s) or str(s).strip() == '':
-        return None
-    
-    s = str(s).strip() 
-    
-    is_negative_parentheses = False
-    if s.startswith('(') and s.endswith(')'):
-        s = s[1:-1] 
-        is_negative_parentheses = True
-    
-    is_negative_trailing_dash = False
-    if s.endswith('-'):
-        s = s[:-1].strip() 
-        is_negative_trailing_dash = True
-  
-    s = s.replace('.', '').replace(',', '.')
+    if ',' in s:
+        # TR Formatı: 1.234,56 -> 1234.56
+        s = s.replace('.', '').replace(',', '.')
+    else:
+        # Virgül yoksa. Nokta binlik mi yoksa ondalık mı?
+        # Örn: "1.250" (TR binlik) veya "1.25" (Ondalık)
+        dot_count = s.count('.')
+        if dot_count > 1:
+            # Birden fazla nokta varsa kesin binlik ayracıdır. "1.000.000"
+            s = s.replace('.', '')
+        elif dot_count == 1:
+            parts = s.split('.')
+            if len(parts[1]) == 3:
+                # Noktadan sonra tam 3 hane varsa binlik ayracı olma ihtimali %99.
+                # İstisna: 1.001 gibi çok küçük sayılar. Ama mizanlarda genelde binliktir.
+                s = s.replace('.', '')
+            else:
+                # 1.2 veya 1.25 gibi bir şeyse ondalık kalsın.
+                pass
     
     try:
-        float_val = float(s)
-        if is_negative_parentheses or is_negative_trailing_dash:
-            float_val = -float_val
-        return float_val
-    except ValueError:
-        return None
+        val = float(s)
+        return -val if is_neg else val
+    except:
+        return 0.0
 
 def prepare_df(df_raw, column_name):
     if df_raw is None or df_raw.empty:
         raise ValueError('Boş tablo alındı')
 
-    # --- Kolon adlarını normalize et ---
-    col_map = {col.strip().lower().replace('ı', 'i').replace('ş', 's').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o').replace('ç', 'c'): col for col in df_raw.columns}
+    df_raw = df_raw.copy() # df_raw'ı kopyala
+    col_map = {str(col).strip().lower().replace('ı', 'i').replace('ş', 's').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o').replace('ç', 'c'): col for col in df_raw.columns}
 
+    kod_kolon = col_map.get('kod')
+    aciklama_kolon = col_map.get('aciklama') or col_map.get('aciklama adi') or col_map.get('hesap adi') or col_map.get('aciklama')
+    
     alternatifler = {
-        'cari donem': ['cari_donem', 'cari donem', 'donem', 'cari'],
+        'cari donem': ['tutar', 'bakiye', 'cari donem (enflasyonlu)', 'cari_donem_enflasyonlu', 'cari_donem', 'cari donem', 'donem', 'cari'],
         'onceki donem': ['onceki_donem', 'onceki donem', 'gecen donem', 'onceki'],
     }
 
-    anahtar = column_name.lower().replace('ı', 'i').replace('ş', 's').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o').replace('ç', 'c')
+    # Aranan kolonun normalize hali
+    anahtar = str(column_name).lower().replace('ı', 'i').replace('ş', 's').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o').replace('ç', 'c')
+    
+    # 1. Tam eşleşme ara
     ana_kolon = col_map.get(anahtar)
-    if not ana_kolon and anahtar in alternatifler:
-        for alt in alternatifler[anahtar]:
+    
+    # 2. Alternatifler içinde ara
+    if not ana_kolon:
+        search_keys = []
+        if 'enflasyon' in anahtar:
+            # Eğer anahtar enflasyon içeriyorsa, önce enflasyonlu alternatifleri dene
+            search_keys = [alt for alt in alternatifler['cari donem'] if 'enflasyon' in alt] + [alt for alt in alternatifler['cari donem'] if 'enflasyon' not in alt]
+        else: # 'cari' veya genel arama
+            search_keys = alternatifler['cari donem']
+            
+        for alt in search_keys:
             if alt in col_map:
                 ana_kolon = col_map[alt]
                 break
 
+    # 3. Yıl tespiti (Örn: "2022" veya "Önceki Dönem (2022)")
+    if not ana_kolon:
+        import re
+        # Önce tam eşleşen yıl ara
+        for col in df_raw.columns:
+            if re.match(r'^\d{4}$', str(col).strip()):
+                if str(col).strip() in anahtar: # Eğer anahtar yıl içeriyorsa (2022 gibi)
+                    ana_kolon = col
+                    break
+        
+        # Bulamadıysa, kolon isminin içinde yılı ara
+        if not ana_kolon and re.search(r'\d{4}', anahtar):
+            target_year = re.search(r'\d{4}', anahtar).group()
+            for col in df_raw.columns:
+                if target_year in str(col):
+                    ana_kolon = col
+                    break
+
+    # 4. Final Fallback: En sağdaki mantıklı kolon
+    if not ana_kolon:
+        # Kod ve Açıklama kolonları hariç potansiyel kolonlar
+        potential_cols = [c for c in df_raw.columns if c not in [kod_kolon, aciklama_kolon, 'grup', 'Grup']]
+        if potential_cols:
+            # Eğer 'cari', 'donem' veya 'tutar' içeren bir aday varsa onu tercih et
+            candidates = [c for c in potential_cols if any(x in str(c).lower() for x in ['cari', 'donem', 'tutar'])]
+            if candidates:
+                # En sağdaki cari/dönem/tutar adayını seç
+                ana_kolon = candidates[-1]
+            else:
+                # Hiç cari/dönem/tutar adayı yoksa, en sağdaki kolonu al
+                ana_kolon = potential_cols[-1]
+
+    # Önceki Dönem tespiti
     onceki_kolon = None
     for alt in alternatifler['onceki donem']:
-        if alt in col_map:
+        if alt in col_map and col_map[alt] != ana_kolon: # ana_kolon ile çakışma kontrolü
             onceki_kolon = col_map[alt]
             break
 
-    kod_kolon = col_map.get('kod')
-    aciklama_kolon = col_map.get('aciklama') or col_map.get('aciklama adi') or col_map.get('hesap adi')
+    # Güvenli kolon listesi
+    kolonlar = []
+    if kod_kolon: kolonlar.append(kod_kolon)
+    if aciklama_kolon: kolonlar.append(aciklama_kolon)
+    if ana_kolon: kolonlar.append(ana_kolon)
+    if onceki_kolon and onceki_kolon != ana_kolon: kolonlar.append(onceki_kolon)
 
-    # --- Güvenli kolon kontrolü ---
-    kolonlar = [k for k in [kod_kolon, aciklama_kolon, ana_kolon] if k]
-    if not kolonlar:
-        raise ValueError('Kolon eşleşmesi yapılamadı: Kod, Açıklama veya Dönem sütunu bulunamadı.')
+    if not ana_kolon and not kod_kolon:
+        raise ValueError('Kritik kolonlar (Kod/Dönem) bulunamadı.')
 
     df = df_raw[kolonlar].copy()
-
-    # --- Kolon adlarını standartlaştır ---
+    
+    # Standartlaştırma
     rename_map = {}
+    if ana_kolon: rename_map[ana_kolon] = 'Cari Dönem'
+    if onceki_kolon: rename_map[onceki_kolon] = 'Önceki Dönem'
     if kod_kolon: rename_map[kod_kolon] = 'Kod'
     if aciklama_kolon: rename_map[aciklama_kolon] = 'Açıklama'
-    if ana_kolon: rename_map[ana_kolon] = 'Cari Dönem'
     df.rename(columns=rename_map, inplace=True)
+    
+    # Sayısal dönüşüm
+    def safe_conv(val):
+        if isinstance(val, str):
+            val = to_float_turkish(val)
+        try:
+            return float(val) if val is not None else 0.0
+        except:
+            return 0.0
 
-    # --- Önceki dönem ekle ---
-    if onceki_kolon:
-        df.loc[:, 'Önceki Dönem'] = pd.to_numeric(df_raw[onceki_kolon], errors='coerce').fillna(0)
-    else:
-        df.loc[:, 'Önceki Dönem'] = 0
-
-    # --- Sayısal dönüşüm ---
-    if 'Cari Dönem' in df.columns:
-        df.loc[:, 'Cari Dönem'] = pd.to_numeric(df['Cari Dönem'], errors='coerce').fillna(0)
-
+    for col in ['Cari Dönem', 'Önceki Dönem']:
+        if col in df.columns:
+            df[col] = df[col].apply(safe_conv)
+    
     # --- Kolon sırasını düzenle ---
     hedef_sira = ['Kod', 'Açıklama', 'Önceki Dönem', 'Cari Dönem']
     df = df[[c for c in hedef_sira if c in df.columns] + [c for c in df.columns if c not in hedef_sira]]
