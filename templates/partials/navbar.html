@@ -81,13 +81,6 @@
                             </a>
                         </li>
 
-                        <!-- 📉 İNDİRİMLİ KURUMLAR VERGİSİ -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('indirimlikurumlar.index') }}">
-                                📉 İndirimli Kurumlar Vergisi
-                            </a>
-                        </li>
-
                         <!-- 💰 NAKDİ SERMAYE ARTIRIM İNDİRİMİ -->
                         <li>
                             <a class="dropdown-item" href="{{ url_for('tools.sermaye') }}">
@@ -95,7 +88,12 @@
                             </a>
                         </li>
 
-
+                        <!-- 📉 İNDİRİMLİ KURUMLAR VERGİSİ -->
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('indirimlikurumlar.index') }}">
+                                📉 İndirimli Kurumlar Vergisi
+                            </a>
+                        </li>
 
                         <li>
                             <hr class="dropdown-divider">
@@ -150,6 +148,11 @@
                                 📑 KDV Tebliği
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('main.kv_tebligi') }}">
+                                🏢 Kurumlar Vergisi Tebliği
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -163,9 +166,9 @@
 
                 {% if session.get('has_kdv_access') or session.get('username') == 'admin' %}
                 <li class="nav-item">
-                    <a class="btn btn-warning btn-sm ms-lg-3 fw-bold px-3 shadow-sm border-0 d-flex align-items-center gap-2" 
-                       href="{{ url_for('kdv.index') }}" 
-                       style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:white;">
+                    <a class="btn btn-warning btn-sm ms-lg-3 fw-bold px-3 shadow-sm border-0 d-flex align-items-center gap-2"
+                        href="{{ url_for('kdv.index') }}"
+                        style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:white;">
                         <i class="bi bi-shield-lock-fill"></i> KDV PORTALI
                     </a>
                 </li>

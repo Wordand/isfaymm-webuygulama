@@ -17,6 +17,8 @@ try:
     if key:
         fernet = Fernet(key.encode())
     else:
-        print("Warning: FERNET_KEY not found in config or env.")
+        print("Warning: FERNET_KEY not found. Using a temporary key.")
+        fernet = Fernet(Fernet.generate_key())
 except Exception as e:
     print(f"Error initializing Fernet: {e}")
+    fernet = Fernet(Fernet.generate_key())

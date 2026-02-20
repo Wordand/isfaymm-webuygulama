@@ -1,0 +1,947 @@
+{% extends "layout.html" %}
+
+{% block title %}Kurumlar Vergisi Genel Tebliği | İSFA YMM{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background: #f8faff;">
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <div class="row g-4">
+        <!-- 📂 Sol Menü (Navigasyon Panels) -->
+        <div class="col-lg-3">
+            <div class="navigation-wrapper sticky-top" style="top: 85px; z-index: 100;">
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden" style="max-height: calc(100vh - 120px); display: flex; flex-direction: column;">
+                    <div class="gradient-header p-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-book-half fs-4 text-white"></i>
+                            <h5 class="mb-0 fw-bold text-white">KV TEBLİĞİ</h5>
+                        </div>
+                        <p class="small mb-0 opacity-75 text-white-50">Hiyerarşik Gezinti Paneli</p>
+                    </div>
+                    
+                    <div class="p-3 bg-white border-bottom">
+                        <div class="search-box position-relative">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-primary"></i>
+                            <input type="text" id="mevzuatSearch" class="form-control rounded-pill ps-5 border-light shadow-sm" placeholder="Başlık ara...">
+                        </div>
+                    </div>
+
+                    <div id="mevzuatNav" class="flex-grow-1 overflow-auto p-2 bg-white scrollbar-slim">
+                        <!-- Yükleniyor Spinner -->
+                        <div class="text-center py-5" id="navSpinner">
+                            <div class="spinner-grow text-primary" role="status"></div>
+                            <div class="small mt-2 text-muted fw-semibold">Mevzuat Hazırlanıyor...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📄 Sağ İçerik Alanı -->
+        <div class="col-lg-9">
+            <!-- Breadcrumb & Kontrol Paneli -->
+            <div class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 px-2" id="breadcrumbNav">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Mevzuat</a></li>
+                        <li class="breadcrumb-item active text-primary fw-bold" aria-current="page">Kurumlar Vergisi Genel Tebliği</li>
+                    </ol>
+                </nav>
+                <div class="d-flex gap-2 align-items-center">
+                    <!-- Global Header Search -->
+                    <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs" style="width: 250px;">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-0" id="headerGlobalSearch" placeholder="Tebliğde ara..." onkeypress="if(event.key==='Enter') handleMainSearch(this.value)">
+                    </div>
+                    <div class="vr mx-1"></div>
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-xs border" onclick="openFavoritesModal()" title="Favorilerim">
+                        <i class="bi bi-star-fill me-1"></i> Favoriler
+                    </button>
+                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-xs border" onclick="openNotesModal()" title="Notlarım">
+                        <i class="bi bi-sticky-fill me-1"></i> Notlar
+                    </button>
+                    <div class="vr mx-1"></div>
+                    <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i>
+                    </button>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm border-0" id="shareBtn">
+                        <i class="bi bi-share me-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ana İçerik Kartı -->
+            <div class="glass-card shadow-lg border-0 rounded-4 min-vh-75 position-relative overflow-hidden" id="contentWrapper">
+                <!-- Arkaplan Dekorasyonu -->
+                <div class="position-absolute top-0 end-0 opacity-05 pointer-events-none p-5">
+                    <i class="bi bi-journal-text" style="font-size: 15rem;"></i>
+                </div>
+                
+                <div class="card-body p-4 p-lg-5 position-relative" id="mainContent">
+                    <div class="welcome-screen text-center py-5">
+                        <div class="icon-circle bg-primary-soft mx-auto mb-4" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                            <i class="bi bi-journal-richtext text-primary fs-1"></i>
+                        </div>
+                        <h1 class="display-5 fw-bold text-dark mb-3">Kurumlar Vergisi Genel Tebliği</h1>
+                        <p class="lead text-muted mb-5">Kurumlar Vergisi Genel Tebliği'ne hiyerarşik yapı ile hızlı erişin.</p>
+                        
+                        <div class="features-grid row g-4 text-start mb-5">
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-search text-primary fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Detaylı Arama</h6>
+                                    <p class="small text-muted mb-0">Tüm başlıklar ve içerikler arasında anlık arama yapın.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-star text-warning fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Favoriler & Notlar</h6>
+                                    <p class="small text-muted mb-0">Önemli maddeleri yıldızlayın ve özel notlar alın.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 hover-lift">
+                                    <i class="bi bi-pen text-info fs-3 mb-2"></i>
+                                    <h6 class="fw-bold">Metin Vurgulama</h6>
+                                    <p class="small text-muted mb-0">Önemli yerleri sarı fosforlu kalemle çizin.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search-large mx-auto" style="max-width: 600px;">
+                            <div class="input-group input-group-lg shadow-sm rounded-4 overflow-hidden border">
+                                <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control border-0 px-3" id="mainSearchInput" placeholder="Madde, konu veya içerik ara...">
+                                <button class="btn btn-primary px-4" type="button" id="mainSearchBtn">Ara</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Text Selection Menu -->
+<div id="textSelectionMenu" class="text-selection-menu shadow-lg rounded-3 border bg-dark text-white px-2 py-1" style="display: none; position: absolute; z-index: 1050;">
+    <div class="btn-group btn-group-sm">
+        <button class="btn btn-dark btn-sm text-warning" onclick="highlightSelection()">
+            <i class="bi bi-highlighter"></i> Vurgula
+        </button>
+        <div class="vr bg-secondary mx-1"></div>
+        <button class="btn btn-dark btn-sm text-info" onclick="saveSelectionAsNote()">
+            <i class="bi bi-sticky"></i> Not Al
+        </button>
+    </div>
+</div>
+
+<!-- Favorites Modal -->
+<div class="modal fade" id="favoritesModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-warning-emphasis"><i class="bi bi-star-fill me-2"></i>Favorilerim</h5>
+                <div class="d-flex gap-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-warning border-0" onclick="renderFavoritesList('id')">Başlık No</button>
+                        <button type="button" class="btn btn-outline-warning border-0" onclick="renderFavoritesList('title')">Alfabetik</button>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0" style="max-height: 500px; overflow-y: auto;">
+                <div id="favoritesList" class="list-group list-group-flush">
+                    <!-- JS populate -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Modal -->
+<div class="modal fade" id="notesModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 bg-info bg-opacity-10">
+                <h5 class="modal-title fw-bold text-info-emphasis"><i class="bi bi-sticky-fill me-2"></i>Kayıtlı Notlarım</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light" style="max-height: 600px; overflow-y: auto;">
+                <div id="notesList" class="row g-3">
+                    <!-- JS populate -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🎨 MODERN CSS STİLLERİ -->
+<style>
+    /* Glassmorphism & UI Design */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .gradient-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #004aad 100%);
+    }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+    .opacity-05 { opacity: 0.05; }
+    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    
+    /* Navigation Styles */
+    .nav-item-l1 {
+        font-weight: 700;
+        color: #1a1a1a;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+    .nav-item-l1:hover {
+        background: #f0f7ff;
+    }
+    
+    /* Override any potential white text in headers - FORCE BLACK */
+    .nav-item-l1 .text-dark, 
+    .nav-link-custom .text-dark,
+    .nav-header-item .text-dark,
+    .nav-item-wrapper .text-dark {
+        color: #212529 !important;
+    }
+    
+    /* Highlight Mark Style */
+    mark.highlight-term {
+        background-color: #ffeb3b !important;
+        color: #000 !important;
+        padding: 0 4px;
+        border-radius: 2px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    /* Content Typography */
+    .content-body h1 { color: #000000; font-weight: 800; margin-bottom: 1.5rem; }
+    .content-body h2 { color: #000000; font-weight: 700; margin-bottom: 1rem; }
+    .content-body h3 { color: #000000; font-weight: 700; margin-top: 2rem; border-left: 4px solid #0d6efd; padding-left: 1rem; }
+    .content-body p { line-height: 1.8; color: #000000; font-size: 1.05rem; margin-bottom: 1rem; text-align: justify; }
+    .content-body .id-badge { background: #0d6efd; color: white; padding: 2px 10px; border-radius: 5px; margin-right: 10px; font-size: 0.9rem; }
+    
+    /* User Highlighter Style */
+    .user-highlight {
+        background-color: #fef08a; /* Yellow-200 */
+        cursor: pointer;
+        transition: background-color 0.2s;
+        border-bottom: 2px solid #facc15;
+    }
+    .user-highlight:hover {
+        background-color: #fde047;
+    }
+    
+    /* Scrollbar */
+    .scrollbar-slim::-webkit-scrollbar { width: 5px; }
+    .scrollbar-slim::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-slim::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 10px; }
+    .scrollbar-slim::-webkit-scrollbar-thumb:hover { background: #ced4da; }
+    
+    @media print {
+        .navigation-wrapper, .breadcrumb, .btn-group, .search-box { display: none !important; }
+        .col-lg-9 { width: 100% !important; }
+        .glass-card { border: none !important; box-shadow: none !important; }
+    }
+
+    .text-selection-menu::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        margin-left: -6px;
+        border-width: 6px 6px 0;
+        border-style: solid;
+        border-color: #212529 transparent transparent transparent;
+    }
+    
+    /* ============================================
+       RESMİ TEBLİĞ FORMATLAMASI - ÖZEL STİLLER
+       ============================================ */
+    
+    /* Dipnotlar (Footnotes) */
+    .footnote-item {
+        background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    .footnote-item:hover {
+        background: linear-gradient(to right, #e0f2fe 0%, #f8fafc 100%);
+        transform: translateX(3px);
+    }
+    
+    /* Örnekler (Examples) */
+    .example-box {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
+    }
+    .example-box:hover {
+        box-shadow: 0 4px 8px rgba(234, 179, 8, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    /* Listeler (Lists) */
+    .list-item {
+        transition: all 0.2s ease;
+        padding: 4px 0;
+    }
+    .list-item:hover {
+        background-color: rgba(13, 110, 253, 0.03);
+        border-radius: 4px;
+        padding-left: 8px;
+    }
+    
+    /* İçerik paragrafları */
+    #article-text p {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+    
+    /* Kanun referansları */
+    #article-text strong {
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+    
+    /* İtalik vurgular */
+    #article-text em {
+        font-style: italic;
+        font-weight: 500;
+    }
+    
+    /* Liste marker'ları */
+    .list-item span:first-child {
+        font-family: 'Arial', sans-serif;
+    }
+    
+    /* Başlık stilleri */
+    #article-container h2 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #0f172a;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    
+    /* Badge stilleri - madde numaraları */
+    .badge.rounded-pill {
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.75rem;
+        letter-spacing: 0.02em;
+    }
+    
+    /* Yazdırma için optimizasyon */
+    @media print {
+        .footnote-item {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+        .example-box {
+            background: #fef9e6 !important;
+            break-inside: avoid;
+        }
+        #article-text p {
+            font-size: 11pt;
+            line-height: 1.6;
+        }
+    }
+</style>
+
+<!-- 🖱️ INTERACTIVE LOGIC -->
+<script>
+// Global Scope
+window.tebligData = [];
+// Flattened list for navigation
+window.flatData = [];
+let searchTimeout = null;
+
+// User Data Storage 
+// (KV için ayrı keyler kullanalım)
+const STORAGE_KEY_FAVS = 'kv_tebligi_favs';
+const STORAGE_KEY_NOTES = 'kv_tebligi_notes';
+const STORAGE_KEY_HILITES = 'kv_tebligi_highlights';
+
+document.addEventListener('DOMContentLoaded', function() {
+    initApp();
+});
+
+async function initApp() {
+    try {
+        // Cache-busting: Add timestamp to force fresh load
+        const response = await fetch('/static/data/kv_tebligi.json?v=' + new Date().getTime());
+        if (!response.ok) throw new Error("Veri dosyası yüklenemedi");
+        
+        window.tebligData = await response.json();
+        console.log("KV Mevzuat verisi yüklendi:", window.tebligData.length, "ana başlık.");
+        
+        // Flatten data for navigation
+        flattenData(window.tebligData);
+        
+        // İlk render (Hepsi kapalı)
+        renderSidebar(window.tebligData, false);
+        
+        // Spinner'ı gizle
+        const spinner = document.getElementById('navSpinner');
+        if(spinner) spinner.style.display = 'none';
+        
+        // Listener'ları tanımla
+        setupEventListeners();
+        setupTextSelection();
+
+    } catch (err) {
+        console.error("Başlangıç hatası:", err);
+        const spinner = document.getElementById('navSpinner');
+        if(spinner) {
+            spinner.innerHTML = `
+                <div class="p-3 text-center">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                    <p class="small mt-2 text-danger">Mevzuat verisi yüklenemedi.</p>
+                    <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">Sayfayı Yenile</button>
+                </div>`;
+        }
+    }
+}
+
+// Helper to flatten recursive data for next/prev logic
+function flattenData(items) {
+    items.forEach(item => {
+        const uid = item.uid || item.id;
+        window.flatData.push({ id: uid, title: item.title, obj: item });
+        if(item.sub && item.sub.length > 0) {
+            flattenData(item.sub);
+        }
+    });
+}
+
+function setupEventListeners() {
+    // Sidebar Arama Kutusu
+    const searchInput = document.getElementById('mevzuatSearch');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+    }
+
+    // Ana Sayfa Büyük Arama Kutusu
+    const mainSearch = document.getElementById('mainSearchInput');
+    const mainSearchBtn = document.getElementById('mainSearchBtn');
+    
+    if(mainSearch) {
+        mainSearch.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleMainSearch(e.target.value);
+        });
+    }
+    
+    if(mainSearchBtn && mainSearch) {
+        mainSearchBtn.addEventListener('click', () => handleMainSearch(mainSearch.value));
+    }
+}
+
+function setupTextSelection() {
+    const contentArea = document.getElementById('contentWrapper');
+    const menu = document.getElementById('textSelectionMenu');
+    
+    document.addEventListener('mouseup', (e) => {
+        const selection = window.getSelection();
+        if (selection.toString().length > 0 && contentArea.contains(selection.anchorNode)) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            
+            // Show menu above selection
+            menu.style.display = 'block';
+            menu.style.top = (window.scrollY + rect.top - 40) + 'px';
+            menu.style.left = (window.scrollX + rect.left + (rect.width / 2) - (menu.offsetWidth / 2)) + 'px';
+        } else {
+            // Hide if clicked outside menu
+            if (!menu.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        }
+    });
+}
+
+// ----------------------
+// SEARCH LOGIC
+// ----------------------
+
+function handleSearch(term) {
+    // Sidebar search only looks at titles for speed
+    if(searchTimeout) clearTimeout(searchTimeout);
+    
+    const container = document.getElementById('mevzuatNav');
+    term = term ? term.trim() : "";
+
+    if(term.length === 0) {
+        renderSidebar(window.tebligData, false, "");
+        return;
+    }
+    
+    if(container) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                <span class="ms-2 text-muted small">Aranıyor...</span>
+            </div>
+        `;
+    }
+
+    searchTimeout = setTimeout(() => {
+        // Param 3: 'false' means only title search for sidebar
+        const filteredResults = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), false);
+        renderSearchResults(filteredResults, term);
+    }, 350); 
+}
+
+function handleMainSearch(term) {
+    // Main search looks deep into content
+    term = term ? term.trim() : "";
+    if(term.length === 0) return;
+
+    // Show loading
+    const contentArea = document.getElementById('mainContent');
+    contentArea.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <h4 class="mt-3">İçerik taranıyor...</h4>
+        </div>
+    `;
+
+    setTimeout(() => {
+        // Param 3: 'true' means include CONTENT search
+        const filteredResults = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), true);
+        
+        // Also update sidebar to reflect results
+        renderSearchResults(filteredResults, term);
+        
+        // Show results summary in main content
+        displayMainSearchResults(filteredResults, term);
+    }, 500);
+}
+
+function filterDataRecursive(items, term, deepSearch) {
+    let matches = [];
+    
+    for(const item of items) {
+        const title = (item.title || "").toLocaleLowerCase('tr-TR');
+        const id = (item.id || "").toLocaleLowerCase('tr-TR');
+        const content = deepSearch ? (item.content || "").toLocaleLowerCase('tr-TR') : "";
+        
+        // Match conditions
+        const isMatch = title.includes(term) || id.includes(term) || (deepSearch && content.includes(term));
+        
+        let subMatches = [];
+        if(item.sub && item.sub.length > 0) {
+            subMatches = filterDataRecursive(item.sub, term, deepSearch);
+        }
+        
+        if(isMatch || subMatches.length > 0) {
+            const newItem = { ...item };
+            
+            if(subMatches.length > 0) {
+                newItem.sub = subMatches;
+            } else if(isMatch) {
+                // If only parent matches, clean subs for display clarity in nav
+                if(!deepSearch) newItem.sub = []; 
+            }
+            // Tag item if it was a content match
+            if(deepSearch && content.includes(term)) {
+                newItem._contentMatch = true;
+            }
+            matches.push(newItem);
+        }
+    }
+    return matches;
+}
+
+function renderSearchResults(results, term) {
+    const container = document.getElementById('mevzuatNav');
+    if(!container) return;
+    
+    container.innerHTML = '';
+    if(results.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted opacity-75">
+                <i class="bi bi-search fs-1 mb-2 d-block"></i>
+                <span>Sonuç bulunamadı</span>
+            </div>`;
+    } else {
+        renderSidebar(results, true, term);
+    }
+}
+
+function displayMainSearchResults(results, term) {
+    const contentArea = document.getElementById('mainContent');
+    
+    let flatResults = [];
+    
+    // Flatten helper for display
+    function collectFlat(items) {
+        items.forEach(i => {
+            if(i._contentMatch || (i.title || "").toLocaleLowerCase('tr-TR').includes(term.toLocaleLowerCase('tr-TR'))) {
+                flatResults.push(i);
+            }
+            if(i.sub) collectFlat(i.sub);
+        });
+    }
+    collectFlat(results);
+    
+    // Remove duplicates if any (parent/child confusion)
+    flatResults = [...new Map(flatResults.map(item => [item.uid || item.id, item])).values()];
+
+    let html = `
+        <div class="mb-4">
+            <h3 class="fw-bold">Arama Sonuçları: "${term}"</h3>
+            <p class="text-muted">${flatResults.length} adet başlık veya içerik bulundu.</p>
+        </div>
+        <div class="list-group list-group-flush border rounded-4">
+    `;
+    
+    flatResults.forEach(item => {
+        const uid = item.uid || item.id;
+        const snippet = item.content ? getSnippet(item.content, term) : "Alt kategorilerde eşleşme...";
+        const highlightedTitle = highlightText(item.title, term);
+        html += `
+            <a href="#" onclick="loadContent('${uid}'); return false;" class="list-group-item list-group-item-action p-4 border-bottom">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0 fw-bold text-primary">${highlightedTitle}</h5>
+                    <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${uid}</span>
+                </div>
+                <p class="mb-1 text-muted small">${snippet}</p>
+            </a>
+        `;
+    });
+    
+    html += `</div>`;
+    contentArea.innerHTML = html;
+}
+
+function getSnippet(text, term) {
+    const lowerText = text.toLocaleLowerCase('tr-TR');
+    const lowerTerm = term.toLocaleLowerCase('tr-TR');
+    const index = lowerText.indexOf(lowerTerm);
+    
+    if(index === -1) return text.substring(0, 150) + "...";
+    
+    const start = Math.max(0, index - 60);
+    const end = Math.min(text.length, index + 100);
+    const snippet = text.substring(start, end);
+    return "..." + highlightText(snippet, term) + "...";
+}
+
+// ----------------------
+// RENDER & NAVIGATION Logic
+// ----------------------
+
+function highlightText(text, term) {
+    if (!term) return text;
+    // HTML tagleri temizle ki arama yaparken tagleri bozmayalım (mark vs eklerken)
+    // Arama yapıldığında formatlamayı (italik vs) kaybederiz ama güvenli olur.
+    const plainText = text.replace(/<[^>]*>/g, '');
+    
+    const lowerText = plainText.toLocaleLowerCase('tr-TR');
+    const lowerTerm = term.toLocaleLowerCase('tr-TR');
+    
+    let result = '';
+    let lastIndex = 0;
+    let index = lowerText.indexOf(lowerTerm);
+    
+    // Eğer eşleşme yoksa plainText dön
+    if (index === -1) return plainText;
+
+    while (index !== -1) {
+        result += plainText.substring(lastIndex, index);
+        result += `<mark class="highlight-term">${plainText.substring(index, index + lowerTerm.length)}</mark>`;
+        lastIndex = index + lowerTerm.length;
+        index = lowerText.indexOf(lowerTerm, lastIndex);
+    }
+    
+    result += plainText.substring(lastIndex);
+    return result;
+}
+
+function renderSidebar(data, expandAll = false, searchTerm = "") {
+    const container = document.getElementById('mevzuatNav');
+    if(this.isRootCall === undefined || this.isRootCall === true) {
+         container.innerHTML = '';
+    }
+    
+    function createNodes(items, parentElement, defaultExpanded) {
+        items.forEach(item => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'nav-item-wrapper mb-1';
+            
+            const hasSub = item.sub && item.sub.length > 0;
+            const uid = item.uid || item.id;
+            
+            const header = document.createElement('div');
+            header.className = `p-2 rounded d-flex align-items-center justify-content-between cursor-pointer nav-header-item`;
+            header.style.transition = 'all 0.2s';
+            header.style.cursor = 'pointer';
+            
+            header.onmouseover = () => header.classList.add('bg-light');
+            header.onmouseout = () => header.classList.remove('bg-light');
+            
+            const iconClass = (defaultExpanded && hasSub) ? 'bi-chevron-down' : (hasSub ? 'bi-chevron-right' : 'bi-dash');
+            
+            const highlightedTitle = searchTerm ? highlightText(item.title, searchTerm) : item.title;
+            // Tooltip için HTML taglerini temizle ve tırnak işaretlerini kaçır
+            const cleanTitleAttr = item.title.replace(/<[^>]*>/g, '').replace(/"/g, '&quot;');
+
+            header.innerHTML = `
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${item.id}</span>
+                    <span class="text-dark small fw-medium" title="${cleanTitleAttr}" style="word-wrap: break-word; white-space: normal;">${highlightedTitle}</span>
+                </div>
+                <i class="bi ${iconClass} text-muted x-small ms-2"></i>
+            `;
+            
+            const subContainer = document.createElement('div');
+            subContainer.className = 'ms-3 border-start ps-2 mt-1';
+            if(!defaultExpanded) subContainer.classList.add('d-none');
+            
+            header.onclick = (e) => {
+                e.stopPropagation();
+                if(hasSub) {
+                    const isClosed = subContainer.classList.contains('d-none');
+                    if(isClosed) {
+                        subContainer.classList.remove('d-none');
+                        header.querySelector('.bi').classList.replace('bi-chevron-right', 'bi-chevron-down');
+                    } else {
+                        subContainer.classList.add('d-none');
+                        header.querySelector('.bi').classList.replace('bi-chevron-down', 'bi-chevron-right');
+                    }
+                    loadContent(uid); // Load content on click
+                } else {
+                    loadContent(uid);
+                }
+            };
+            
+            wrapper.appendChild(header);
+            if(hasSub) {
+                createNodes(item.sub, subContainer, defaultExpanded);
+                wrapper.appendChild(subContainer);
+            }
+            parentElement.appendChild(wrapper);
+        });
+    }
+    
+    createNodes(data, container, expandAll);
+}
+
+// ----------------------
+// CONTENT LOADING & FEATURES
+// ----------------------
+
+function loadContent(uid) {
+    // Clear active states in nav
+    document.querySelectorAll('.nav-header-item').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
+    
+    const item = window.flatData.find(i => i.id === uid)?.obj;
+    if(!item) return;
+    
+    const contentArea = document.getElementById('mainContent');
+    contentArea.style.opacity = '0.5';
+    
+    setTimeout(() => {
+        // Prepare Features
+        const isFav = getFavorites().includes(uid);
+        const starClass = isFav ? "bi-star-fill text-warning" : "bi-star text-muted";
+        
+        let html = `
+            <div class="animate-fade-in" id="article-container" data-uid="${uid}">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge fw-bold border rounded-pill" style="background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${uid.replace(/\//g, '.')}</span>
+                        <h2 class="h4 mb-0 fw-bold text-dark">${item.title}</h2>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        ${item.page ? `<span class="badge bg-light text-muted border fw-normal" title="Orijinal PDF Sayfa No"><i class="bi bi-file-pdf me-1"></i>Sayfa ${item.page}</span>` : ''}
+                        <button class="btn btn-outline-light border shadow-sm text-dark" onclick="toggleFavorite('${uid}')" title="Favorilere Ekle">
+                            <i class="bi ${starClass} fs-5" id="fav-icon-${uid}"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="content-text fs-6 text-dark position-relative" id="article-text" style="line-height: 1.8; text-align: justify;">
+                     ${formatContentText(item.content)}
+                </div>
+        `;
+        
+        // Sub Categories (Alt Alta Liste)
+        if(item.sub && item.sub.length > 0) {
+            html += `
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-diagram-2 me-2"></i>Alt Başlıklar</h5>
+                    <div class="list-group">
+                        ${item.sub.map(s => `
+                            <a href="#" onclick="loadContent('${s.uid || s.id}'); return false;" class="list-group-item list-group-item-action border-start border-3 border-primary py-3 mb-2 rounded-3 shadow-sm hover-shadow transition-all">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="badge fw-bold border rounded-pill" style="min-width: 50px; font-size: 0.9rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${s.id}</span>
+                                    <span class="fw-semibold text-dark flex-grow-1">${s.title}</span>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        
+        contentArea.innerHTML = html;
+        contentArea.style.opacity = '1';
+        
+        // Scroll to top of content
+        document.getElementById('contentWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+    }, 200);
+}
+
+function formatContentText(text) {
+    if (!text) return '<p class="text-muted fst-italic">Bu başlık altında doğrudan metin bulunmamaktadır.</p>';
+
+    // 1. Tabloları koru
+    // (Python parser <!-- TABLE_START --> etiketleri basıyor)
+    let parts = text.split(/(<!-- TABLE_START -->[\s\S]*?<!-- TABLE_END -->)/g);
+    
+    return parts.map(part => {
+        if (part.startsWith('<!-- TABLE_START -->')) {
+            return part; // Tablo HTML'i direkt dön
+        }
+        
+        // Metin işleme
+        return part.split('\n').filter(line => line.trim() !== '').map(line => {
+            // Dipnot kontrolü: (1), (2) vs
+            if (/^\(\d+\)/.test(line)) {
+                return `<div class="footnote-item p-3 mb-2 small text-muted border-start border-4 border-warning shadow-sm"><i class="bi bi-info-circle me-2"></i>${line}</div>`;
+            }
+            // Örnek: ...
+            if (line.trim().startsWith('Örnek') || line.trim().startsWith('ÖRNEK')) {
+                return `<div class="example-box bg-light border-start border-4 border-success p-4 my-3"><h6 class="text-success fw-bold"><i class="bi bi-lightbulb me-2"></i>Örnek</h6>${line}</div>`;
+            }
+            // List item: - veya a)
+            if (/^(\-|•|\*|[a-z]\))\s/.test(line)) {
+                 return `<div class="list-item ps-3 mb-1"><span class="fw-bold text-primary me-2">•</span>${line.replace(/^[-\.•*a-z)]+\s*/, '')}</div>`;
+            }
+
+            return `<p>${line}</p>`;
+        }).join('');
+    }).join('');
+}
+
+
+// --- FAVORITES & NOTES & HIGHLIGHTS MOCK ---
+// (Bu kısımlar localStorage kullanır)
+
+function getFavorites() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_FAVS) || '[]');
+}
+
+function toggleFavorite(uid) {
+    let favs = getFavorites();
+    const index = favs.indexOf(uid);
+    const icon = document.getElementById(`fav-icon-${uid}`);
+    
+    if (index === -1) {
+        favs.push(uid);
+        if(icon) {
+            icon.classList.remove('bi-star', 'text-muted');
+            icon.classList.add('bi-star-fill', 'text-warning');
+        }
+        Swal.fire({
+            icon: 'success',
+            title: 'Favorilere Eklendi',
+            text: 'Bu madde favori listenize kaydedildi.',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    } else {
+        favs.splice(index, 1);
+        if(icon) {
+            icon.classList.remove('bi-star-fill', 'text-warning');
+            icon.classList.add('bi-star', 'text-muted');
+        }
+        Swal.fire({
+            icon: 'info',
+            title: 'Favorilerden Çıkarıldı',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+    localStorage.setItem(STORAGE_KEY_FAVS, JSON.stringify(favs));
+}
+
+function openFavoritesModal() {
+    const modal = new bootstrap.Modal(document.getElementById('favoritesModal'));
+    renderFavoritesList();
+    modal.show();
+}
+
+function renderFavoritesList(sortBy = 'id') {
+    const list = document.getElementById('favoritesList');
+    const favs = getFavorites();
+    
+    if(favs.length === 0) {
+        list.innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-star display-4 mb-3 d-block"></i>Henüz favori eklemediniz.</div>';
+        return;
+    }
+    
+    let items = window.flatData.filter(i => favs.includes(i.id));
+    
+    if(sortBy === 'title') {
+        items.sort((a, b) => a.title.localeCompare(b.title));
+    } else {
+        // id sort logic might be complex, default string sort for now
+         items.sort((a, b) => a.id.localeCompare(b.id));
+    }
+
+    list.innerHTML = items.map(item => `
+        <button onclick="loadContent('${item.id}'); bootstrap.Modal.getInstance(document.getElementById('favoritesModal')).hide();" class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center">
+            <div>
+                <span class="badge bg-warning text-dark me-2">${item.id}</span>
+                <span class="fw-medium">${item.title}</span>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    `).join('');
+}
+
+// Similar dummies for Notes...
+function openNotesModal() {
+   Swal.fire("Bilgi", "Not sistemi geliştirme aşamasındadır.", "info");
+}
+function saveSelectionAsNote() {
+    Swal.fire("Bilgi", "Not alma özelliği yakında eklenecek.", "info");
+}
+function highlightSelection() {
+    // Basic highlight demo
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const span = document.createElement('span');
+        span.className = 'user-highlight';
+        span.textContent = selection.toString();
+        range.deleteContents();
+        range.insertNode(span);
+        // Clear selection menu
+        document.getElementById('textSelectionMenu').style.display = 'none';
+        selection.removeAllRanges();
+    }
+}
+</script>
+{% endblock %}

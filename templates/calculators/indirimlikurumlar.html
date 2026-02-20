@@ -44,6 +44,12 @@
     </a>
   </li>
 
+  <li class="nav-item">
+    <a class="nav-link rounded-pill px-4 py-2 {% if sekme=='mevzuat' %}active shadow-sm{% endif %}" href="?sekme=mevzuat">
+      <i class="bi bi-book-half me-1"></i> Mevzuat & Rehber
+    </a>
+  </li>
+
 </ul>
 
 
@@ -52,8 +58,8 @@
   {% if sekme == 'tesvik' %}
   {% include 'reports/tesvik.html' %}
 
-
-
+  {% elif sekme == 'mevzuat' %}
+  {% include 'calculators/indirimlikurumlar_mevzuat.html' %}
 
   {% elif sekme == 'form' %}
   <form id="form-giris" method="POST" action="{{ url_for('indirimlikurumlar.form_kaydet') }}" novalidate class="mx-auto"

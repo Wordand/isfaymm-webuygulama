@@ -96,6 +96,11 @@ def kdv_tebligi():
     # We will load the JSON via JavaScript in the template
     return render_template("pages/kdv_tebligi.html")
 
+@bp.route("/mevzuat/kv-tebligi")
+def kv_tebligi():
+    # We will load the JSON via JavaScript in the template
+    return render_template("pages/kv_tebligi.html")
+
 @bp.route("/mevzuat-degisiklikleri")
 def mevzuat_degisiklikleri():
     return render_template("pages/mevzuat_degisiklikleri.html")

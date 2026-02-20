@@ -1,6 +1,6 @@
 import os
 import sqlite3
-import psycopg
+import psycopg2 # Use psycopg2 to match requirements.txt
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -187,7 +187,7 @@ if DATABASE_URL.startswith("sqlite:///"):
 # 2️⃣ Production (PostgreSQL / Supabase)
 # ======================================================
 print("☁️ Production ortam algılandı — PostgreSQL (Supabase) kullanılacak.")
-conn = psycopg.connect(DATABASE_URL)
+conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 
 # --- USERS TABLOSU (PostgreSQL) ---

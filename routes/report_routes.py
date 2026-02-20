@@ -15,7 +15,15 @@ import shutil
 import tempfile
 import pdfkit
 from datetime import datetime
-from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    # Fallback for Python < 3.9
+    try:
+        from backports.zoneinfo import ZoneInfo
+    except ImportError:
+        # Final fallback if neither is available
+        ZoneInfo = None 
 from urllib.parse import unquote
 from collections import OrderedDict
 import unicodedata

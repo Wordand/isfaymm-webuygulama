@@ -46,9 +46,13 @@ app = Flask(__name__)
 app.config.from_object("config")
 
 # --- Configuration & Extensions ---
-app.config["DATABASE_URL"] = os.getenv("DATABASE_URL")
-if not app.config["DATABASE_URL"]:
-    raise ValueError("DATABASE_URL bulunamadı.")
+# Try to get DATABASE_URL, fallback to sqlite if missing to prevent total crash
+_db_url = os.getenv("DATABASE_URL")
+if not _db_url:
+    print("WARNING: DATABASE_URL not found in environment. Falling back to SQLite.")
+    _db_url = "sqlite:///instance/hesaptanit.db"
+
+app.config["DATABASE_URL"] = _db_url
 
 app.json = SafeJSONProvider(app)
 limiter.init_app(app)
@@ -67,6 +71,23 @@ app.debug = os.getenv("FLASK_DEBUG", "0") == "1"
 app.config['ENV'] = 'production'
 
 if not app.debug:
+    import logging
+    from logging.handlers import RotatingFileHandler
+    try:
+        if not os.path.exists('logs'):
+            os.makedirs('logs', exist_ok=True)
+        file_handler = RotatingFileHandler('logs/hesaptanit.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('HesapTanit startup in production mode')
+    except Exception as log_err:
+        print(f"Logging setup failed: {log_err}")
+
+    # Talisman and Security
     from flask_talisman import Talisman
     Talisman(app, content_security_policy=None)
     app.config.update(
@@ -104,25 +125,6 @@ def bootstrap_admin_from_env():
                 print(f"Admin hesabı güncellendi: {username}")
         conn.commit()
 
-# --- Initialization ---
-with app.app_context():
-    try:
-        migrate_users_table()   
-        migrate_login_logs_table()
-        migrate_tesvik_columns()
-        migrate_tesvik_kullanim_table()
-        migrate_profit_data_table()
-        migrate_kdv_mukellef_table() # Önce mukellef tablosu
-        migrate_kdv_tables()        # Sonra bağımlı tablolar
-        migrate_kdv_documents_table() 
-        migrate_kdv_notes_table()
-        migrate_mukellef_table()
-        bootstrap_admin_from_env()
-        
-        print("Baslangic kontrolleri tamamlandi.")
-    except Exception as e:
-        print(f"Baslangic hatasi: {e}")
-
 # --- Blueprints Registration ---
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
@@ -136,13 +138,38 @@ app.register_blueprint(calculators_bp)
 app.register_blueprint(mukellef_bp)
 app.register_blueprint(kdv_bp)
 
-# --- Supabase Check ---
-try:
-    with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1;")
-except Exception as e:
-    print(f"⚠️ Veritabanı bağlantı hatası: {e}")
+# --- Initialization & Database Check ---
+with app.app_context():
+    try:
+        # Tables & Migrations
+        app.logger.info("Running migrations...")
+        migrate_users_table()   
+        migrate_login_logs_table()
+        migrate_tesvik_columns()
+        migrate_tesvik_kullanim_table()
+        migrate_profit_data_table()
+        migrate_kdv_mukellef_table()
+        migrate_kdv_tables()
+        migrate_kdv_documents_table() 
+        migrate_kdv_notes_table()
+        migrate_mukellef_table()
+        
+        # Superuser
+        bootstrap_admin_from_env()
+        
+        # Quick Connection Test
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+        
+        app.logger.info("Startup sequence completed successfully.")
+        print("Baslangic kontrolleri tamamlandi.")
+    except Exception as e:
+        error_msg = f"Startup / Database Check Failure: {e}"
+        print(f"⚠️ {error_msg}")
+        app.logger.error(error_msg)
+        import traceback
+        app.logger.error(traceback.format_exc())
 
 if __name__ == "__main__":
     app.run(debug=True)

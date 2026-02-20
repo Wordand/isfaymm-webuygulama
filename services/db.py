@@ -166,11 +166,12 @@ def execute(query, params=None):
 def migrate_users_table():
     """
     users tablosunu kontrol eder ve eksik sütunları ekler.
-    Hem SQLite hem PostgreSQL için tam uyumludur.
+    Eğer tablo yoksa temel yapısıyla oluşturur.
     """
     with get_conn() as conn:
         cur = conn.cursor()
 
+        # Tablo var mı ve kolonları neler?
         try:
             # PostgreSQL ortamı
             cur.execute("""
@@ -179,35 +180,70 @@ def migrate_users_table():
                 WHERE LOWER(table_name) = 'users';
             """)
             rows = cur.fetchall()
-            # Bazı sürümler dict döner, bazıları tuple
             existing = {r["column_name"] if isinstance(r, dict) else r[0] for r in rows}
         except Exception:
             # SQLite ortamı
-            cur.execute("PRAGMA table_info(users);")
-            rows = cur.fetchall()
-            existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
+            try:
+                cur.execute("PRAGMA table_info(users);")
+                rows = cur.fetchall()
+                existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
+            except:
+                existing = set()
 
-        # Eksik kolonlar
-        columns_to_add = [
-            ("is_approved", "INTEGER DEFAULT 0"),
-            ("is_suspended", "INTEGER DEFAULT 0"),
-            ("role", "TEXT DEFAULT 'user'"),
-            ("created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-            ("last_login", "TIMESTAMP NULL"),
-            ("admin_notes", "TEXT NULL"),
-            ("has_kdv_access", "INTEGER DEFAULT 0"),
-            ("kdv_pin", "TEXT DEFAULT '1234'"),
-        ]
+        if not existing:
+            print("Users tablosu bulunamadı, oluşturuluyor...")
+            if USE_SQLITE:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    is_approved INTEGER DEFAULT 0,
+                    is_suspended INTEGER DEFAULT 0,
+                    role TEXT DEFAULT 'user',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP,
+                    admin_notes TEXT,
+                    has_kdv_access INTEGER DEFAULT 0,
+                    kdv_pin TEXT DEFAULT '1234'
+                );
+                """)
+            else:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    is_approved INTEGER DEFAULT 0,
+                    is_suspended INTEGER DEFAULT 0,
+                    role TEXT DEFAULT 'user',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_login TIMESTAMP,
+                    admin_notes TEXT,
+                    has_kdv_access INTEGER DEFAULT 0,
+                    kdv_pin TEXT DEFAULT '1234'
+                );
+                """)
+        else:
+            # Eksik kolonlar (Tablo varsa ama güncel değilse)
+            columns_to_add = [
+                ("is_approved", "INTEGER DEFAULT 0"),
+                ("is_suspended", "INTEGER DEFAULT 0"),
+                ("role", "TEXT DEFAULT 'user'"),
+                ("created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
+                ("last_login", "TIMESTAMP NULL"),
+                ("admin_notes", "TEXT NULL"),
+                ("has_kdv_access", "INTEGER DEFAULT 0"),
+                ("kdv_pin", "TEXT DEFAULT '1234'"),
+            ]
 
-        # Sütunları sırayla kontrol et ve ekle
-        for name, definition in columns_to_add:
-            if name not in existing:
-                try:
-                    cur.execute(f"ALTER TABLE users ADD COLUMN {name} {definition};")
-                    print(f"'{name}' sutunu eklendi.")
-                except Exception as e:
-                    # Eger zaten varsa sessiz gec
-                    print(f"'{name}' sutunu eklenemedi: {e}")
+            for name, definition in columns_to_add:
+                if name not in existing:
+                    try:
+                        cur.execute(f"ALTER TABLE users ADD COLUMN {name} {definition};")
+                        print(f"'{name}' sutunu eklendi.")
+                    except Exception as e:
+                        print(f"'{name}' sutunu eklenemedi: {e}")
 
         conn.commit()
     print("Users tablosu kontrol edildi.")
@@ -224,22 +260,53 @@ def migrate_mukellef_table():
             existing = {r["column_name"] if isinstance(r, dict) else r[0] for r in rows}
         except Exception:
             # SQLite
-            cur.execute("PRAGMA table_info(mukellef);")
-            rows = cur.fetchall()
-            existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
+            try:
+                cur.execute("PRAGMA table_info(mukellef);")
+                rows = cur.fetchall()
+                existing = {r["name"] if isinstance(r, dict) else r[1] for r in rows}
+            except:
+                existing = set()
 
-        columns = [
-            ("vergi_dairesi", "TEXT NULL"),
-            ("ilgili_memur", "TEXT NULL")
-        ]
+        if not existing:
+            print("Mukellef tablosu bulunamadı, oluşturuluyor...")
+            if USE_SQLITE:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS mukellef (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    vergi_kimlik_no TEXT NOT NULL,
+                    unvan TEXT NOT NULL,
+                    vergi_dairesi TEXT,
+                    ilgili_memur TEXT,
+                    UNIQUE(user_id, vergi_kimlik_no),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+                """)
+            else:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS mukellef (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    vergi_kimlik_no TEXT NOT NULL,
+                    unvan TEXT NOT NULL,
+                    vergi_dairesi TEXT,
+                    ilgili_memur TEXT,
+                    UNIQUE(user_id, vergi_kimlik_no)
+                );
+                """)
+        else:
+            columns = [
+                ("vergi_dairesi", "TEXT NULL"),
+                ("ilgili_memur", "TEXT NULL")
+            ]
 
-        for name, definition in columns:
-            if name not in existing:
-                try:
-                    cur.execute(f"ALTER TABLE mukellef ADD COLUMN {name} {definition};")
-                    print(f"'{name}' sutunu eklendi.")
-                except Exception as e:
-                    print(f"'{name}' sutunu eklenemedi: {e}")
+            for name, definition in columns:
+                if name not in existing:
+                    try:
+                        cur.execute(f"ALTER TABLE mukellef ADD COLUMN {name} {definition};")
+                        print(f"'{name}' sutunu eklendi.")
+                    except Exception as e:
+                        print(f"'{name}' sutunu eklenemedi: {e}")
         conn.commit()
     print("Mukellef tablosu kontrol edildi.")
 
