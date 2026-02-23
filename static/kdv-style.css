@@ -1,0 +1,72 @@
+/**
+ * KDV İade Takip Sistemi - Ortak Stiller
+ */
+
+:root {
+    --kdv-primary: #2563eb;
+    --kdv-secondary: #64748b;
+    --kdv-success: #10b981;
+    --kdv-warning: #f59e0b;
+    --kdv-danger: #ef4444;
+    --kdv-bg: #f8fafc;
+    --kdv-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Hover Effects */
+.hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Enhancements */
+.table-v-middle td, 
+.table-v-middle th {
+    vertical-align: middle;
+}
+
+/* Custom Badges */
+.badge-soft-primary {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+}
+
+.badge-soft-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* Dashed Button for Uploads */
+.dashed-btn {
+    border: 2px dashed #e2e8f0 !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    transition: all 0.2s;
+}
+
+.dashed-btn:hover {
+    border-color: var(--kdv-primary) !important;
+    color: var(--kdv-primary) !important;
+    background: #eff6ff !important;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .kdv-main-container {
+        padding: 1rem !important;
+    }
+}
