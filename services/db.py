@@ -790,6 +790,7 @@ def migrate_kdv_tables():
                 amount_tenzil DOUBLE PRECISION DEFAULT 0,
                 amount_bloke DOUBLE PRECISION DEFAULT 0,
                 amount_resolved DOUBLE PRECISION DEFAULT 0,
+                amount_guarantee DOUBLE PRECISION DEFAULT 0,
                 status TEXT NOT NULL,
                 location TEXT,
                 date TEXT NOT NULL,

@@ -45,17 +45,44 @@ STATUS_STAGES = {
     ]
 }
 
-def kdv_log_action(user_name, action, details):
+# Helper for System Logs - Works for both SQLite and PostgreSQL
+def kdv_log_action(user_name, action, description):
     try:
         with get_conn() as conn:
             c = conn.cursor()
+            # Ensure table exists (Portable between environments)
+            try:
+                c.execute("SELECT 1 FROM kdv_system_logs LIMIT 1")
+            except:
+                if "sqlite" in str(type(conn)).lower():
+                    c.execute("""
+                        CREATE TABLE IF NOT EXISTS kdv_system_logs (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            date TEXT,
+                            user_name TEXT,
+                            action TEXT,
+                            description TEXT
+                        )
+                    """)
+                else:
+                    c.execute("""
+                        CREATE TABLE IF NOT EXISTS kdv_system_logs (
+                            id SERIAL PRIMARY KEY,
+                            date TEXT,
+                            user_name TEXT,
+                            action TEXT,
+                            description TEXT
+                        )
+                    """)
+                conn.commit()
+
             c.execute("""
-                INSERT INTO kdv_logs (user_name, action, details, timestamp)
-                VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-            """, (user_name, action, details))
+                INSERT INTO kdv_system_logs (date, user_name, action, description)
+                VALUES (%s, %s, %s, %s)
+            """, (datetime.now().strftime("%d.%m.%Y %H:%M"), user_name, action, description))
             conn.commit()
     except Exception as e:
-        print(f"Log Insert Error: {e}")
+        print(f"Log Error: {e}")
 
 @bp.route("/kdv-yonetimi")
 @kdv_access_required
@@ -252,161 +279,137 @@ def get_stats():
         except:
             return 0.0
 
-    with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        with get_conn() as conn:
+            c = conn.cursor()
 
-        # 🔒 GÜVENLİ BASE FILTER
-        base_filter = " WHERE is_active = TRUE"
-        params = []
+            # 🔒 GÜVENLİ BASE FILTER
+            base_filter = " WHERE is_active = TRUE"
+            params = []
 
-        if role == "uzman":
-            base_filter += """
-                AND mukellef_id IN (
-                    SELECT mukellef_id
-                    FROM kdv_user_assignments
-                    WHERE user_id = %s
-                )
-            """
-            params.append(user_id)
+            if role == "uzman":
+                base_filter += """
+                    AND mukellef_id IN (
+                        SELECT mukellef_id
+                        FROM kdv_user_assignments
+                        WHERE user_id = %s
+                    )
+                """
+                params.append(user_id)
 
-        elif role not in ("admin", "ymm", "yonetici"):
-            base_filter += " AND user_id = %s"
-            params.append(user_id)
+            elif role not in ("admin", "ymm", "yonetici"):
+                base_filter += " AND user_id = %s"
+                params.append(user_id)
 
-        if mukellef_id:
-            base_filter += " AND mukellef_id = %s"
-            params.append(mukellef_id)
+            if mukellef_id:
+                base_filter += " AND mukellef_id = %s"
+                params.append(mukellef_id)
 
-        if filter_user_id:
-            base_filter += " AND user_id = %s"
-            params.append(filter_user_id)
+            if filter_user_id and filter_user_id != "":
+                base_filter += " AND user_id = %s"
+                params.append(filter_user_id)
 
-        # 🔹 ANA DATA
-        c.execute(
-            f"""
-            SELECT status, amount_request, type, subject, date
-            FROM kdv_files
-            {base_filter}
-            """,
-            tuple(params),
-        )
-        all_files = c.fetchall()
+            # 🔹 ANA DATA
+            c.execute(
+                f"""
+                SELECT status, amount_request, type, subject, date, period
+                FROM kdv_files
+                {base_filter}
+                """,
+                tuple(params),
+            )
+            all_files = c.fetchall()
 
-        pending_amount = 0.0
-        completed_amount = 0.0
-        missing_docs_count = 0
-        guarantee_amount = 0.0
-        status_dist_map = {}
+            pending_amount = 0.0
+            completed_amount = 0.0
+            missing_docs_count = 0
+            guarantee_amount = 0.0
+            status_dist_map = {}
 
-        for f in all_files:
-            amt = parse_money(f["amount_request"])
-            status = f["status"] or "Bilinmiyor"
+            for f in all_files:
+                amt = parse_money(f.get("amount_request"))
+                status = f.get("status") or "Bilinmiyor"
 
-            if status not in ("İade Tamamlandı", "İade Alındı"):
-                pending_amount += amt
-            else:
-                completed_amount += amt
+                if status not in ("İade Tamamlandı", "İade Alındı"):
+                    pending_amount += amt
+                else:
+                    completed_amount += amt
 
-            if status == "Eksiklik yazısı geldi":
-                missing_docs_count += 1
+                if status == "Eksiklik yazısı geldi":
+                    missing_docs_count += 1
 
-            subj = (f.get("subject") or "").lower()
-            typ = (f.get("type") or "").lower()
-            if "teminat" in subj or "teminat" in typ:
-                guarantee_amount += amt
+                subj = (f.get("subject") or "").lower()
+                typ = (f.get("type") or "").lower()
+                if "teminat" in subj or "teminat" in typ:
+                    guarantee_amount += amt
 
-            status_dist_map[status] = status_dist_map.get(status, 0) + 1
+                status_dist_map[status] = status_dist_map.get(status, 0) + 1
 
-        status_dist = [
-            {"status": k, "count": v} for k, v in status_dist_map.items()
-        ]
+            status_dist = [
+                {"status": str(k), "count": int(v)} for k, v in status_dist_map.items()
+            ]
 
-        # 🔹 TREND
-        c.execute(
-            f"""
-            SELECT date, amount_request
-            FROM kdv_files
-            {base_filter}
-            """,
-            tuple(params),
-        )
-        trend_rows = c.fetchall()
+            # 🔹 TREND (Dönem bazlı son 6 ay)
+            # f["period"] formatı: "01/2026"
+            from collections import defaultdict
+            monthly_totals = defaultdict(float)
 
-        from collections import defaultdict
-
-        monthly_totals = defaultdict(float)
-
-        for f in trend_rows:
-            try:
-                d = f["date"]
-                if not d:
+            for f in all_files:
+                try:
+                    p = f.get("period")
+                    if not p or "/" not in p:
+                        continue
+                        
+                    m, y = p.split("/")
+                    key = f"{y}-{m.zfill(2)}" # YYYY-MM
+                    monthly_totals[key] += parse_money(f.get("amount_request"))
+                except:
                     continue
 
-                if "." in d:
-                    parts = d.split(".")
-                    if len(parts) == 3 and len(parts[2]) == 4:
-                        key = f"{parts[2]}-{parts[1]}"
-                        monthly_totals[key] += parse_money(
-                            f["amount_request"]
-                        )
-                elif "-" in d:
-                    parts = d.split("-")
-                    if len(parts) == 3 and len(parts[0]) == 4:
-                        key = f"{parts[0]}-{parts[1]}"
-                        monthly_totals[key] += parse_money(
-                            f["amount_request"]
-                        )
+            # Son 6 ayı al (Kronolojik sırala)
+            sorted_months = sorted(monthly_totals.keys())[-6:]
+
+            tr_months = {
+                "01": "Oca", "02": "Şub", "03": "Mar", "04": "Nis",
+                "05": "May", "06": "Haz", "07": "Tem", "08": "Ağu",
+                "09": "Eyl", "10": "Eki", "11": "Kas", "12": "Ara",
+            }
+
+            trend_labels = []
+            trend_data = []
+
+            for m in sorted_months:
+                year, month = m.split("-")
+                label = f"{tr_months.get(month, month)} {year[2:]}"
+                trend_labels.append(label)
+                trend_data.append(monthly_totals[m])
+
+            stats = {
+                "pending_amount": float(pending_amount),
+                "completed_amount": float(completed_amount),
+                "missing_docs_count": int(missing_docs_count),
+                "guarantee_amount": float(guarantee_amount),
+                "status_dist": status_dist,
+                "trend_labels": trend_labels,
+                "trend_data": trend_data,
+            }
+
+            # 🕒 Son 5 Aktivite
+            try:
+                c.execute("""
+                    SELECT date, user_name, action, description
+                    FROM kdv_system_logs
+                    ORDER BY id DESC
+                    LIMIT 5
+                """)
+                stats["recent_activities"] = [dict(r) for r in c.fetchall()]
             except:
-                continue
+                stats["recent_activities"] = []
 
-        sorted_months = sorted(monthly_totals.keys(), reverse=True)[:6]
-
-        tr_months = {
-            "01": "Oca",
-            "02": "Şub",
-            "03": "Mar",
-            "04": "Nis",
-            "05": "May",
-            "06": "Haz",
-            "07": "Tem",
-            "08": "Ağu",
-            "09": "Eyl",
-            "10": "Eki",
-            "11": "Kas",
-            "12": "Ara",
-        }
-
-        trend_labels = []
-        trend_data = []
-
-        for m in reversed(sorted_months):
-            year, month = m.split("-")
-            trend_labels.append(tr_months.get(month, month))
-            trend_data.append(monthly_totals[m])
-
-        stats = {
-            "pending_amount": float(pending_amount),
-            "completed_amount": float(completed_amount),
-            "missing_docs_count": int(missing_docs_count),
-            "guarantee_amount": float(guarantee_amount),
-            "status_dist": status_dist,
-            "trend_labels": trend_labels,
-            "trend_data": trend_data,
-        }
-
-        # 🕒 Son 5 Aktivite
-        try:
-            c.execute("""
-                SELECT date, user_name, action, description
-                FROM kdv_system_logs
-                ORDER BY id DESC
-                LIMIT 5
-            """)
-            stats["recent_activities"] = [dict(r) for r in c.fetchall()]
-        except:
-            stats["recent_activities"] = []
-
-    return jsonify(stats)
+        return jsonify(stats)
+    except Exception as e:
+        print(f"Error in get_stats: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @bp.route("/api/kdv/files")
@@ -422,58 +425,62 @@ def list_files():
     filter_type = request.args.get("filter_type")  # guarantee
     filter_user_id = request.args.get("user_id")
 
-    with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        with get_conn() as conn:
+            c = conn.cursor()
 
-        # 🔒 GÜVENLİ BASE QUERY
-        query = """
-            SELECT f.*, m.unvan AS client_name
-            FROM kdv_files f
-            JOIN kdv_mukellef m ON f.mukellef_id = m.id
-            WHERE f.is_active = %s
-        """
-        params = [True if is_active == 1 else False]
-
-        # 🔐 ROL BAZLI ERİŞİM
-        if role == "uzman":
-            query += """
-                AND f.mukellef_id IN (
-                    SELECT mukellef_id
-                    FROM kdv_user_assignments
-                    WHERE user_id = %s
-                )
+            # 🔒 GÜVENLİ BASE QUERY
+            query = """
+                SELECT f.*, m.unvan AS client_name
+                FROM kdv_files f
+                JOIN kdv_mukellef m ON f.mukellef_id = m.id
+                WHERE f.is_active = %s
             """
-            params.append(user_id)
+            params = [True if is_active == 1 else False]
 
-        elif role not in ("admin", "ymm", "yonetici"):
-            query += " AND f.user_id = %s"
-            params.append(user_id)
+            # 🔐 ROL BAZLI ERİŞİM
+            if role == "uzman":
+                query += """
+                    AND f.mukellef_id IN (
+                        SELECT mukellef_id
+                        FROM kdv_user_assignments
+                        WHERE user_id = %s
+                    )
+                """
+                params.append(user_id)
 
-        # 🔹 MÜKELLEF FİLTRESİ (artık güvenli)
-        if mukellef_filter:
-            query += " AND f.mukellef_id = %s"
-            params.append(mukellef_filter)
-            
-        if filter_user_id:
-            query += " AND f.user_id = %s"
-            params.append(filter_user_id)
+            elif role not in ("admin", "ymm", "yonetici"):
+                query += " AND f.user_id = %s"
+                params.append(user_id)
 
-        # 🔹 STATÜ FİLTRESİ
-        if status_filter:
-            query += " AND f.status = %s"
-            params.append(status_filter)
+            # 🔹 MÜKELLEF FİLTRESİ
+            if mukellef_filter:
+                query += " AND f.mukellef_id = %s"
+                params.append(mukellef_filter)
+                
+            if filter_user_id and filter_user_id != "":
+                query += " AND f.user_id = %s"
+                params.append(filter_user_id)
 
-        # 🔹 ÖZEL FİLTRELER
-        if filter_type == "guarantee":
-            query += " AND (f.subject ILIKE %s OR f.type ILIKE %s)"
-            params.extend(["%Teminat%", "%Teminat%"])
+            # 🔹 STATÜ FİLTRESİ
+            if status_filter:
+                query += " AND f.status = %s"
+                params.append(status_filter)
 
-        query += " ORDER BY f.id DESC"
+            # 🔹 ÖZEL FİLTRELER
+            if filter_type == "guarantee":
+                query += " AND (f.subject ILIKE %s OR f.type ILIKE %s)"
+                params.extend(["%Teminat%", "%Teminat%"])
 
-        c.execute(query, tuple(params))
-        files = [dict(r) for r in c.fetchall()]
+            query += " ORDER BY f.id DESC"
 
-    return jsonify(files)
+            c.execute(query, tuple(params))
+            files = [dict(r) for r in c.fetchall()]
+
+        return jsonify(files)
+    except Exception as e:
+        print(f"Error in list_files: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @bp.route("/api/kdv/users")
@@ -546,27 +553,7 @@ def update_kdv_pin():
     })
 
 
-# Helper for System Logs
-def kdv_log_action(user_name, action, description):
-    try:
-        with get_conn() as conn:
-            c = conn.cursor()
-            c.execute("""
-                CREATE TABLE IF NOT EXISTS kdv_system_logs (
-                    id SERIAL PRIMARY KEY,
-                    date TEXT,
-                    user_name TEXT,
-                    action TEXT,
-                    description TEXT
-                )
-            """)
-            c.execute("""
-                INSERT INTO kdv_system_logs (date, user_name, action, description)
-                VALUES (%s, %s, %s, %s)
-            """, (datetime.now().strftime("%d.%m.%Y %H:%M"), user_name, action, description))
-            conn.commit()
-    except Exception as e:
-        print(f"Log Error: {e}")
+# Note: add_kdv_user removed as per user request (should not add users from here)
 
 # Note: add_kdv_user removed as per user request (should not add users from here)
 
