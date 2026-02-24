@@ -281,7 +281,8 @@ def get_stats():
 
     try:
         with get_conn() as conn:
-            c = conn.cursor()
+            # 💡 Açıkça RealDictCursor kullanarak 'AttributeError: tuple object has no attribute get' hatasını engelliyoruz
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
             # 🔒 GÜVENLİ BASE FILTER
             base_filter = " WHERE is_active = TRUE"
@@ -327,6 +328,7 @@ def get_stats():
             status_dist_map = {}
 
             for f in all_files:
+                # RealDictRow olduğu için .get güvenle kullanılabilir
                 amt = parse_money(f.get("amount_request"))
                 status = f.get("status") or "Bilinmiyor"
 
@@ -338,8 +340,8 @@ def get_stats():
                 if status == "Eksiklik yazısı geldi":
                     missing_docs_count += 1
 
-                subj = (f.get("subject") or "").lower()
-                typ = (f.get("type") or "").lower()
+                subj = str(f.get("subject") or "").lower()
+                typ = str(f.get("type") or "").lower()
                 if "teminat" in subj or "teminat" in typ:
                     guarantee_amount += amt
 
@@ -350,7 +352,6 @@ def get_stats():
             ]
 
             # 🔹 TREND (Dönem bazlı son 6 ay)
-            # f["period"] formatı: "01/2026"
             from collections import defaultdict
             monthly_totals = defaultdict(float)
 
@@ -360,7 +361,11 @@ def get_stats():
                     if not p or "/" not in p:
                         continue
                         
-                    m, y = p.split("/")
+                    parts = p.split("/")
+                    if len(parts) < 2:
+                        continue
+                        
+                    m, y = parts[0], parts[1]
                     key = f"{y}-{m.zfill(2)}" # YYYY-MM
                     monthly_totals[key] += parse_money(f.get("amount_request"))
                 except:
@@ -379,10 +384,15 @@ def get_stats():
             trend_data = []
 
             for m in sorted_months:
-                year, month = m.split("-")
-                label = f"{tr_months.get(month, month)} {year[2:]}"
-                trend_labels.append(label)
-                trend_data.append(monthly_totals[m])
+                try:
+                    parts = m.split("-")
+                    if len(parts) < 2: continue
+                    year, month = parts[0], parts[1]
+                    label = f"{tr_months.get(month, month)} {year[2:] if len(year) >= 2 else year}"
+                    trend_labels.append(label)
+                    trend_data.append(monthly_totals[m])
+                except:
+                    continue
 
             stats = {
                 "pending_amount": float(pending_amount),
@@ -402,14 +412,17 @@ def get_stats():
                     ORDER BY id DESC
                     LIMIT 5
                 """)
-                stats["recent_activities"] = [dict(r) for r in c.fetchall()]
+                rows = c.fetchall()
+                stats["recent_activities"] = [dict(r) for r in rows]
             except:
                 stats["recent_activities"] = []
 
         return jsonify(stats)
     except Exception as e:
-        print(f"Error in get_stats: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        # Hata detayını sunucu tarafında logla
+        import traceback
+        current_app.logger.error(f"Error in get_stats: {e}\n{traceback.format_exc()}")
+        return jsonify({"status": "error", "message": "İstatistikler yüklenirken bir hata oluştu."}), 500
 
 
 @bp.route("/api/kdv/files")
@@ -427,7 +440,8 @@ def list_files():
 
     try:
         with get_conn() as conn:
-            c = conn.cursor()
+            # 💡 Açıkça RealDictCursor kullanarak tutarlılık sağlıyoruz
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
             # 🔒 GÜVENLİ BASE QUERY
             query = """
@@ -475,12 +489,14 @@ def list_files():
             query += " ORDER BY f.id DESC"
 
             c.execute(query, tuple(params))
-            files = [dict(r) for r in c.fetchall()]
+            rows = c.fetchall()
+            files = [dict(r) for r in rows]
 
         return jsonify(files)
     except Exception as e:
-        print(f"Error in list_files: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        current_app.logger.error(f"Error in list_files: {e}\n{traceback.format_exc()}")
+        return jsonify({"status": "error", "message": "Dosya listesi yüklenirken hata oluştu."}), 500
 
 
 @bp.route("/api/kdv/users")
