@@ -25,7 +25,7 @@ bp = Blueprint('data', __name__)
 
 def kaydet_beyanname(data, tur):
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         vkn = data.get("vergi_kimlik_no")
         unvan = data.get("unvan")
@@ -339,55 +339,61 @@ def veri_giris():
     donemler = []
     yuklenen_tum_belgeler = []
 
-    with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        
-        # M\u00FCkellefleri getir
-        c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
-        mukellefler = [dict(r) for r in c.fetchall()]
-
-        if secili_vkn:
-            # Se\u00E7ili m\u00FCkellefin d\u00F6nemlerini getir
-            c.execute("""
-                SELECT DISTINCT donem FROM beyanname b 
-                JOIN mukellef m ON b.mukellef_id=m.id 
-                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
-                ORDER BY donem DESC
-            """, (uid, secili_vkn))
-            donemler = [r["donem"] for r in c.fetchall()]
-
-            # Belgeleri getir
-            query = """
-                SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn, m.unvan 
-                FROM beyanname b 
-                JOIN mukellef m ON b.mukellef_id=m.id 
-                WHERE m.user_id=%s AND m.vergi_kimlik_no=%s
-            """
-            params = [uid, secili_vkn]
-            if secili_donem:
-                query += " AND b.donem=%s"
-                params.append(secili_donem)
+    try:
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             
-            query += " ORDER BY b.yuklenme_tarihi DESC"
-            c.execute(query, params)
-            yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
-        else:
-            # M\u00FCkellef se\u00E7ilmemi\u015Fse son 50 belgeyi g\u00F6ster
-            c.execute("""
-                SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn, m.unvan 
-                FROM beyanname b 
-                JOIN mukellef m ON b.mukellef_id=m.id 
-                WHERE m.user_id=%s 
-                ORDER BY b.yuklenme_tarihi DESC LIMIT 50
-            """, (uid,))
-            yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+            # Mükellefleri getir
+            c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
+            mukellefler = [dict(r) for r in c.fetchall()]
 
-    return render_template("data/veri_giris.html", 
-                           mukellefler=mukellefler, 
-                           donemler=donemler,
-                           secili_vkn=secili_vkn,
-                           secili_donem=secili_donem,
-                           yuklenen_tum_belgeler=yuklenen_tum_belgeler)
+            if secili_vkn:
+                # Seçili mükellefin dönemlerini getir
+                c.execute("""
+                    SELECT DISTINCT donem FROM beyanname b 
+                    JOIN mukellef m ON b.mukellef_id=m.id 
+                    WHERE m.user_id=%s AND m.vergi_kimlik_no=%s 
+                    ORDER BY donem DESC
+                """, (uid, secili_vkn))
+                donemler = [r["donem"] for r in c.fetchall()]
+
+                # Belgeleri getir
+                query = """
+                    SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn, m.unvan 
+                    FROM beyanname b 
+                    JOIN mukellef m ON b.mukellef_id=m.id 
+                    WHERE m.user_id=%s AND m.vergi_kimlik_no=%s
+                """
+                params = [uid, secili_vkn]
+                if secili_donem:
+                    query += " AND b.donem=%s"
+                    params.append(secili_donem)
+                
+                query += " ORDER BY b.yuklenme_tarihi DESC"
+                c.execute(query, params)
+                yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+            else:
+                # Mükellef seçilmemişse son 50 belgeyi göster
+                c.execute("""
+                    SELECT b.donem, b.tur as belge_turu, b.yuklenme_tarihi, m.vergi_kimlik_no as vkn, m.unvan 
+                    FROM beyanname b 
+                    JOIN mukellef m ON b.mukellef_id=m.id 
+                    WHERE m.user_id=%s 
+                    ORDER BY b.yuklenme_tarihi DESC LIMIT 50
+                """, (uid,))
+                yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+
+        return render_template("data/veri_giris.html", 
+                               mukellefler=mukellefler, 
+                               donemler=donemler,
+                               secili_vkn=secili_vkn,
+                               secili_donem=secili_donem,
+                               yuklenen_tum_belgeler=yuklenen_tum_belgeler)
+    except Exception as e:
+        import traceback
+        current_app.logger.error(f"Error in veri_giris: {e}\n{traceback.format_exc()}")
+        flash("Veri giriş sayfası yüklenirken bir hata oluştu.", "danger")
+        return redirect(url_for("main.home"))
 
 @bp.route("/mukellef-sil", methods=["POST"])
 @login_required
@@ -397,7 +403,7 @@ def mukellef_sil():
 
     try:
         with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute("SELECT id FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s", (vkn, session["user_id"]))
             row = c.fetchone()
             if not row: return jsonify({"status": "error", "message": "Mükellef bulunamadı."}), 404
@@ -422,7 +428,7 @@ def donem_sil():
 
     try:
         with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute("SELECT id FROM mukellef WHERE vergi_kimlik_no=%s", (vkn,))
             row = c.fetchone()
             if not row: return jsonify({"status": "error", "message": "Bulunamadı."}), 404
@@ -453,7 +459,7 @@ def yeniden_yukle():
         elif isinstance(veriler, bytes): veriler = fernet.encrypt(veriler)
         
         with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute("SELECT id, unvan FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s", (vkn, session["user_id"]))
             row = c.fetchone()
             if not row: return jsonify({"status": "error", "message": "Bulunamadı."}), 404
@@ -489,7 +495,7 @@ def matrah():
             conn.commit()
             
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         c.execute("SELECT gelir, gider, matrah, tarih FROM matrahlar WHERE user_id = %s ORDER BY tarih DESC", (session["user_id"],))
         kayitlar = c.fetchall()
         
