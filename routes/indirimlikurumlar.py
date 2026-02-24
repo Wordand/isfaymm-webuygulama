@@ -401,9 +401,9 @@ def mukellef_listesi():
     """Aktif kullanıcının mükellef listesini getirir"""
     uid = session.get("user_id")
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s", (uid,))
-        rows = [dict(zip([desc[0] for desc in c.description], r)) for r in c.fetchall()]
+        rows = [dict(r) for r in c.fetchall()]
     return jsonify(rows)
 
 
@@ -516,7 +516,7 @@ def index():
     if not session.get("aktif_mukellef_unvan"):
         try:
             with get_conn() as conn:
-                c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
                 c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s AND user_id = %s", (aktif_mukellef_id, user_id))
                 row = c.fetchone()
                 if row:
