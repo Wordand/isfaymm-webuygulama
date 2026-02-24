@@ -107,13 +107,13 @@ def is_numeric_header(text):
         if t_str.isdigit(): return False # Sadece sayı (70, 90) olamaz
         if len(t_str) < 3: return False
         
-        # Bazı başlıklar biraz daha uzun olabilir (örn. 25/12/2003 tarihli... gibi)
-        if len(t_str) > 120: return False
+        # Bazı başlıklar biraz daha uzun olabilir
+        if len(t_str) > 200: return False
         
         if t_str.endswith("dir.") or t_str.endswith("dır.") or t_str.endswith("tır.") or t_str.endswith("tir."): return False
         if t_str.endswith("belirlenmiştir.") or t_str.endswith("yazılmıştır."): return False
         # Eğer çok uzunsa ve nokta ile bitiyorsa muhtemelen paragraftır, başlık değildir.
-        if t_str.endswith(".") and len(t_str.split()) > 6: return False 
+        if t_str.endswith(".") and len(t_str.split()) > 10: return False 
 
         low_t = tr_lower(t_str)
         forbidden_phrases = [
@@ -135,8 +135,6 @@ def is_numeric_header(text):
     clean_t = text.strip()
     
     # Çok seviyeli (örn: 2.1.3.1.2) başlıkları yakalamak için geliştirilmiş regex
-    # Seviye 1 ise (nokta içermeyen numara ise) mutlaka bir ayırıcı (. , - gibi) bekleyelim.
-    # Ayırıcı beklemek dipnotları (35 Seri No.lu gibi) elemeye yardımcı olur.
     m = re.match(r'^(\d+(?:\.\d+){0,5})\s*([\.\-\–])\s*(.*)$', clean_t)
     if m:
         num_part, sep_part, title_part = m.group(1), m.group(2), m.group(3)
@@ -182,7 +180,7 @@ def extract_tables_as_html(page):
         return []
 
 def parse_pdf():
-    print(f"--- ANALİZ BAŞLIYOR MASTER V9 (Final Fix): {PDF_PATH} ---")
+    print(f"--- ANALİZ BAŞLIYOR MASTER V10 (Multi-line Headers): {PDF_PATH} ---")
     data_structure = []
     stack = [] 
     current_content = []
@@ -199,12 +197,15 @@ def parse_pdf():
             if not text: continue
             
             lines = text.split('\n')
-            
-            for line in lines:
-                line = line.strip()
+            line_idx = 0
+            while line_idx < len(lines):
+                line = lines[line_idx].strip()
+                line_idx += 1
+                
                 if not line or len(line) < 3: continue
                 if "RESMİ GAZETE" in line or re.match(r'^\d+\s+[A-Z][a-z]+', line): continue
 
+                # 1. ROMAN HEADER
                 roman, r_title = is_roman_header(line)
                 if roman:
                     if stack and current_content:
@@ -216,6 +217,7 @@ def parse_pdf():
                     stack.append((0, node))
                     continue
 
+                # 2. LETTER HEADER
                 letter, l_title = is_kn_header(line)
                 if letter:
                     if stack and current_content:
@@ -236,13 +238,48 @@ def parse_pdf():
                     stack.append((1, node))
                     continue
 
+                # 3. NUMERIC HEADER (Multiple Levels)
                 lvl, num, n_title = is_numeric_header(line)
                 if lvl:
+                    # Look ahead for title continuation
+                    while line_idx < len(lines):
+                        next_line = lines[line_idx].strip()
+                        if not next_line: 
+                            line_idx += 1
+                            continue
+                        
+                        # Stop if it's another header or clearly separate
+                        if is_roman_header(next_line)[0] or is_kn_header(next_line)[0] or is_numeric_header(next_line)[0]:
+                            break
+                        
+                        # Exclusion list for title continuation:
+                        # 1. Starts with list marker (-, *, •, a), 1.)
+                        # 2. Ends with colon (Tebliğin: ) or dot (if it's long)
+                        # 3. Too long to be just a title continuation
+                        
+                        is_list_marker = re.match(r'^(\-|\d+\.|\w+\)|•|\*)', next_line)
+                        if is_list_marker: break
+                        
+                        if next_line.endswith(":") or next_line.endswith(";"): break
+                        
+                        # Heuristic: Title continuations are usually short and don't end with a dot
+                        # unless the whole title is a sentence.
+                        if len(next_line) < 60 and not next_line.endswith("."):
+                            n_title += " " + next_line
+                            line_idx += 1
+                        elif len(next_line) < 30: # Even with a dot, very short lines might be part of title
+                            n_title += " " + next_line
+                            line_idx += 1
+                        else:
+                            break
+                    
                     target_depth = lvl + 1
                     if stack and current_content:
                         stack[-1][1]["content"] += "\n" + "\n".join(current_content)
                         current_content = []
+                    
                     while stack and stack[-1][0] >= target_depth: stack.pop()
+                    
                     if stack:
                         parent = stack[-1][1]
                         node = {"id": num, "title": n_title, "content": "", "sub": [], "type": "numeric", "page": i+1}

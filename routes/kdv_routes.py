@@ -92,7 +92,7 @@ def index():
     role = session.get("role")
     
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         # Get all users with KDV access for the filter dropdown
         c.execute("""
             SELECT id, username, role 
@@ -110,7 +110,7 @@ def index():
 @role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def archive():
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         # Get all users with KDV access for the filter dropdown
         c.execute("""
             SELECT id, username, role 
@@ -172,7 +172,7 @@ def mukellefler():
     role = session.get("role")
     
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         # Get all users with KDV access for the filter dropdown
         c.execute("""
@@ -1197,7 +1197,7 @@ def get_tax_offices():
     ]
 
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         c.execute("""
             SELECT DISTINCT vergi_dairesi
             FROM kdv_mukellef
