@@ -106,10 +106,13 @@ def is_numeric_header(text):
         if t_str.isdigit(): return False # Sadece sayı (70, 90) olamaz
         if len(t_str) < 3: return False
         
-        if len(t_str) > 85: return False
+        # Bazı başlıklar biraz daha uzun olabilir (örn. 25/12/2003 tarihli... gibi)
+        if len(t_str) > 120: return False
+        
         if t_str.endswith("dir.") or t_str.endswith("dır.") or t_str.endswith("tır.") or t_str.endswith("tir."): return False
         if t_str.endswith("belirlenmiştir.") or t_str.endswith("yazılmıştır."): return False
-        if t_str.endswith(".") and len(t_str.split()) > 3: return False 
+        # Eğer çok uzunsa ve nokta ile bitiyorsa muhtemelen paragraftır, başlık değildir.
+        if t_str.endswith(".") and len(t_str.split()) > 6: return False 
 
         low_t = tr_lower(t_str)
         forbidden_phrases = ["vergilendirme dönemi", "devreden vergi", "iade hakkı", "hesaplanan kdv", "mükellef,", "mükellefin", "tarafından", "dolayısıyla", "gerekmektedir", "bulunmamaktadır", "örneğin", "tablo", "yukarıda", "aşağıda", "tl'lik", "binde", "oranında", "bu tutar", "bu işlemleri", "mart ve nisan", "herhangi bir", "nakden", "banka hesabına"]
@@ -123,20 +126,16 @@ def is_numeric_header(text):
 
     clean_t = text.strip()
     
-    m3 = re.match(r'^(\d+\.\d+\.\d+)\s*[\.\-\–]?\s*(.*)$', clean_t)
-    if m3:
-        n, t = m3.group(1), m3.group(2)
-        if is_valid_num(n) and is_valid_title(t): return 3, n, clean_title(t)
+    # Çok seviyeli (örn: 2.1.3.1.2) başlıkları yakalamak için geliştirilmiş regex
+    # En uzun eşleşmeyi yakalamak için \d+(?:\.\d+)* kullanıyoruz
+    m = re.match(r'^(\d+(?:\.\d+){0,5})\s*[\.\-\–]?\s*(.*)$', clean_t)
+    if m:
+        num_part, title_part = m.group(1), m.group(2)
+        if is_valid_num(num_part) and is_valid_title(title_part):
+            lvl = len(num_part.split('.'))
+            return lvl, num_part, clean_title(title_part)
 
-    m2 = re.match(r'^(\d+\.\d+)\s*[\.\-\–]?\s*(.*)$', clean_t)
-    if m2:
-        n, t = m2.group(1), m2.group(2)
-        if is_valid_num(n) and is_valid_title(t): return 2, n, clean_title(t)
-
-    m1 = re.match(r'^(\d+)\s*[\.\-\–]\s*(.*)$', clean_t)
-    if m1:
-        n, t = m1.group(1), m1.group(2)
-        if is_valid_num(n) and is_valid_title(t): return 1, n, clean_title(t)
+    return None, None, None
 
     return None, None, None
 

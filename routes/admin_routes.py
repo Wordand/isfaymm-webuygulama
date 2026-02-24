@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import generate_password_hash
 from services.db import get_conn
 from auth import login_required
@@ -35,13 +35,20 @@ def admin_users():
 
     query += " ORDER BY id DESC"
 
-    with get_conn() as conn:
-        # Explicit factory usage from app.py kept for safety
-        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        c.execute(query, tuple(params))
-        users = c.fetchall()
-
-    return render_template("admin/admin_users.html", users=users)
+    try:
+        with get_conn() as conn:
+            # Explicitly use RealDictCursor for consistency
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute(query, tuple(params))
+            rows = c.fetchall()
+            users = [dict(r) for r in rows]
+        
+        return render_template("admin/admin_users.html", users=users)
+    except Exception as e:
+        import traceback
+        current_app.logger.error(f"Error in admin_users: {e}\n{traceback.format_exc()}")
+        flash("Kullanıcı listesi yüklenirken bir hata oluştu.", "danger")
+        return redirect(url_for("main.home"))
 
 @bp.route("/approve/<int:user_id>")
 @login_required
@@ -194,12 +201,19 @@ def login_logs():
         flash("Bu sayfaya erişim izniniz yok.", "danger")
         return redirect(url_for("main.home"))
 
-    with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        c.execute("SELECT * FROM login_logs ORDER BY id DESC LIMIT 100")
-        logs = c.fetchall()
+    try:
+        with get_conn() as conn:
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute("SELECT * FROM login_logs ORDER BY id DESC LIMIT 100")
+            rows = c.fetchall()
+            logs = [dict(r) for r in rows]
 
-    return render_template("admin/admin_login_logs.html", logs=logs)
+        return render_template("admin/admin_login_logs.html", logs=logs)
+    except Exception as e:
+        import traceback
+        current_app.logger.error(f"Error in login_logs: {e}\n{traceback.format_exc()}")
+        flash("Giriş logları yüklenirken bir hata oluştu.", "danger")
+        return redirect(url_for("admin.admin_users"))
 
 @bp.route("/delete_all_logs", methods=["POST"])
 @login_required
