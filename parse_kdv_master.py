@@ -103,6 +103,7 @@ def is_numeric_header(text):
         t_str = t_str.strip()
         
         # --- KRİTİK FİLTRELER ---
+        if not t_str[0].isupper(): return False # Başlıklar büyük harfle başlamalı
         if t_str.isdigit(): return False # Sadece sayı (70, 90) olamaz
         if len(t_str) < 3: return False
         
@@ -115,7 +116,14 @@ def is_numeric_header(text):
         if t_str.endswith(".") and len(t_str.split()) > 6: return False 
 
         low_t = tr_lower(t_str)
-        forbidden_phrases = ["vergilendirme dönemi", "devreden vergi", "iade hakkı", "hesaplanan kdv", "mükellef,", "mükellefin", "tarafından", "dolayısıyla", "gerekmektedir", "bulunmamaktadır", "örneğin", "tablo", "yukarıda", "aşağıda", "tl'lik", "binde", "oranında", "bu tutar", "bu işlemleri", "mart ve nisan", "herhangi bir", "nakden", "banka hesabına"]
+        forbidden_phrases = [
+            "seri no.lu", "sayılı kanun", "maddesinde", "fıkrasında", "çerçevesinde", 
+            "vergilendirme dönemi", "devreden vergi", "iade hakkı", "hesaplanan kdv", 
+            "mükellef,", "mükellefin", "tarafından", "dolayısıyla", "gerekmektedir", 
+            "bulunmamaktadır", "örneğin", "tablo", "yukarıda", "aşağıda", "tl'lik", 
+            "binde", "oranında", "bu tutar", "bu işlemleri", "mart ve nisan", 
+            "herhangi bir", "nakden", "banka hesabına"
+        ]
         for phrase in forbidden_phrases:
             if phrase in low_t: return False
         
@@ -127,25 +135,27 @@ def is_numeric_header(text):
     clean_t = text.strip()
     
     # Çok seviyeli (örn: 2.1.3.1.2) başlıkları yakalamak için geliştirilmiş regex
-    # En uzun eşleşmeyi yakalamak için \d+(?:\.\d+)* kullanıyoruz
-    m = re.match(r'^(\d+(?:\.\d+){0,5})\s*[\.\-\–]?\s*(.*)$', clean_t)
+    # Seviye 1 ise (nokta içermeyen numara ise) mutlaka bir ayırıcı (. , - gibi) bekleyelim.
+    # Ayırıcı beklemek dipnotları (35 Seri No.lu gibi) elemeye yardımcı olur.
+    m = re.match(r'^(\d+(?:\.\d+){0,5})\s*([\.\-\–])\s*(.*)$', clean_t)
     if m:
-        num_part, title_part = m.group(1), m.group(2)
+        num_part, sep_part, title_part = m.group(1), m.group(2), m.group(3)
         if is_valid_num(num_part) and is_valid_title(title_part):
             lvl = len(num_part.split('.'))
             return lvl, num_part, clean_title(title_part)
 
     return None, None, None
 
-    return None, None, None
-
 def add_uid_recursive(items, parent_uid=""):
     for item in items:
+        uid = item.get("id", "none")
         if parent_uid:
-            if parent_uid == "": item["uid"] = item["id"]
-            else: item["uid"] = f"{parent_uid}/{item['id']}"
-        else: item["uid"] = item["id"]
-        if item.get("sub"): add_uid_recursive(item["sub"], item["uid"])
+            item["uid"] = f"{parent_uid}/{uid}"
+        else:
+            item["uid"] = uid
+            
+        if item.get("sub"):
+            add_uid_recursive(item["sub"], item["uid"])
 
 def extract_tables_as_html(page):
     try:

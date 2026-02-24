@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session, current_app, flash, redirect, url_for
 from services.db import get_conn
 from auth import login_required
 import psycopg2.extras
@@ -9,18 +9,26 @@ bp = Blueprint('mukellef', __name__)
 @login_required
 def index():
     user_id = session.get("user_id")
-    with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        c.execute("""
-            SELECT m.*, 
-                   (SELECT COUNT(*) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as active_files,
-                   (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request
-            FROM mukellef m 
-            WHERE m.user_id = %s 
-            ORDER BY m.unvan ASC
-        """, (user_id,))
-        mukellefler = c.fetchall()
-    return render_template("mukellef/index.html", mukellefler=mukellefler)
+    try:
+        with get_conn() as conn:
+            # Using RealDictCursor for safer dict access
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            c.execute("""
+                SELECT m.*, 
+                       (SELECT COUNT(*) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as active_files,
+                       (SELECT COALESCE(SUM(amount_request), 0) FROM kdv_files WHERE mukellef_id = m.id AND is_active = TRUE) as total_request
+                FROM mukellef m 
+                WHERE m.user_id = %s 
+                ORDER BY m.unvan ASC
+            """, (user_id,))
+            rows = c.fetchall()
+            mukellefler = [dict(r) for r in rows]
+        return render_template("mukellef/index.html", mukellefler=mukellefler)
+    except Exception as e:
+        import traceback
+        current_app.logger.error(f"Error in mukellef.index: {e}\n{traceback.format_exc()}")
+        flash("Mükellef listesi yüklenirken bir hata oluştu.", "danger")
+        return redirect(url_for("main.home"))
 
 @bp.route("/api/mukellef-listesi")
 @login_required
@@ -28,7 +36,7 @@ def listesi():
     """Aktif kullanıcının mükellef listesini JSON olarak getirir"""
     uid = session.get("user_id")
     with get_conn() as conn:
-        c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s ORDER BY unvan ASC", (uid,))
         rows = [dict(r) for r in c.fetchall()]
     return jsonify(rows)
@@ -117,7 +125,7 @@ def sec():
 
     try:
         with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             c.execute("SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE id = %s AND user_id = %s", (mukellef_id, user_id))
             row = c.fetchone()
 
