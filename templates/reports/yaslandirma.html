@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>📊 Yaşlandırma Hesaplama</h3>
+
+    <!-- 📂 Her zaman gösterilen dosya yükleme formu -->
+    <form method="POST" enctype="multipart/form-data" class="mb-3">
+        <input type="file" name="file" class="form-control mb-2" required>
+        <label>📅 Kaç Aylık Yaşlandırma?</label>
+        <select name="ay_sayisi" class="form-control mb-3">
+            {% for i in range(1,61) %}
+                <option value="{{ i }}" {% if i==12 %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary mt-2" name="islem" value="yukle">📂 Yükle ve Hesapla</button>
+        <button class="btn btn-danger mt-2" name="islem" value="temizle">🗑️ Temizle</button>
+    </form>
+
+    <!-- 🔍 Filtre alanları -->
+    {% if secenekler %}
+    <form method="GET" class="mb-3">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Hesap Kodu</label>
+                <select name="hesap_kodu" class="form-control" multiple onchange="this.form.submit()">
+                    {% for h in secenekler.hesap %}
+                        <option value="{{ h }}" {% if h in filtreler.hesap %}selected{% endif %}>{{ h }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Özel Kod</label>
+                <select name="ozel_kod" class="form-control" multiple onchange="this.form.submit()">
+                    {% for o in secenekler.ozel %}
+                        <option value="{{ o }}" {% if o in filtreler.ozel %}selected{% endif %}>{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Ölçü Birimi</label>
+                <select name="olcu_birimi" class="form-control" multiple onchange="this.form.submit()">
+                    {% for o in secenekler.olcu %}
+                        <option value="{{ o }}" {% if o in filtreler.olcu %}selected{% endif %}>{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Açıklama</label>
+                <select name="aciklama" class="form-control" multiple onchange="this.form.submit()">
+                    {% for a in secenekler.aciklama %}
+                        <option value="{{ a }}" {% if a in filtreler.aciklama %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if mesaj %}
+        <div class="alert alert-warning mt-3">{{ mesaj }}</div>
+    {% endif %}
+
+    <!-- 📊 Tablo -->
+    {% if tablo %}
+        <hr>
+        <div class="table-responsive">
+            {{ tablo | safe }}
+        </div>
+        <form method="POST">
+            <button class="btn btn-success mt-3" name="indir" value="1">📥 Excel Olarak İndir</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

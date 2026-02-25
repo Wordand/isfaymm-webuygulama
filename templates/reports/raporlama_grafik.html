@@ -1,0 +1,571 @@
+{% extends "layout.html" %}
+{% block title %}Finansal Trend Analizi | Profesyonel Raporlama{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #0f172a;
+        --secondary-color: #334155;
+        --accent-color: #2563eb;
+        --accent-hover: #1d4ed8;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --border-color: #e2e8f0;
+        --success-bg: #ecfdf5; --success-text: #059669;
+        --warning-bg: #fffbeb; --warning-text: #d97706;
+        --danger-bg: #fef2f2; --danger-text: #dc2626;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    body { background-color: var(--bg-color); color: var(--primary-color); font-family: 'Inter', sans-serif; }
+
+    /* --- Hero Header --- */
+    .analysis-header {
+        background: white;
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    
+    .page-title { font-weight: 800; letter-spacing: -0.02em; color: var(--primary-color); margin-bottom: 0.5rem; }
+    .page-subtitle { color: var(--secondary-color); font-size: 1.1rem; }
+
+    /* --- Cards --- */
+    .analysis-card {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card-header-custom {
+        padding: 1.25rem 1.5rem;
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .card-title-custom { font-weight: 700; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+    .card-body-custom { padding: 1.5rem; }
+
+    /* --- Controls & Inputs --- */
+    .search-input-group { position: relative; }
+    .search-input {
+        padding: 1rem 1rem 1rem 3rem;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--border-color);
+        width: 100%;
+        transition: all 0.2s;
+        font-size: 1rem;
+    }
+    .search-input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); outline: none; }
+    .search-icon { position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem; }
+
+    .control-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid var(--border-color);
+        background: white;
+        color: var(--secondary-color);
+        transition: all 0.2s;
+    }
+    .control-btn:hover, .control-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+    /* --- Results List --- */
+    .result-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.1s;
+        cursor: pointer;
+    }
+    .result-item:hover { background-color: #f8fafc; }
+    .result-item:last-child { border-bottom: none; }
+    
+    .add-btn {
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        background: #f1f5f9;
+        color: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .add-btn:hover { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+    /* --- Table Styling --- */
+    .modern-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .modern-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+    }
+    
+    .cell-safe { background-color: var(--success-bg); color: var(--success-text); font-weight: 600; }
+    .cell-warn { background-color: var(--warning-bg); color: var(--warning-text); font-weight: 600; }
+    .cell-risk { background-color: var(--danger-bg); color: var(--danger-text); font-weight: 600; }
+    
+    .trend-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .trend-up { background: var(--success-bg); color: var(--success-text); }
+    .trend-down { background: var(--danger-bg); color: var(--danger-text); }
+    .trend-flat { background: #f1f5f9; color: #64748b; }
+
+    /* --- Selected Tags --- */
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        background: #eff6ff;
+        color: var(--accent-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+    .tag-close { margin-left: 0.5rem; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+    .tag-close:hover { opacity: 1; }
+
+    /* Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+</style>
+
+<!-- Header -->
+<div class="analysis-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Trend Analizi</h1>
+                <p class="page-subtitle mb-0 text-muted">{{ unvan or "Mükellef Seçilmedi" }}</p>
+            </div>
+            <a href="{{ url_for('report.raporlama', vkn=vkn, unvan=unvan) }}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+                <i class="bi bi-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- Uyarılar -->
+    {% if eksik_yillar %}
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3">
+        <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+        <div>
+            <strong>Eksik Veri Uyarısı:</strong> Aşağıdaki yıllar için bilanço veya gelir tablosu bulunamadı:
+            <span class="fw-bold">{{ eksik_yillar|join(', ') }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 1. İnteraktif Grafik Bölümü -->
+    <div class="analysis-card">
+        <div class="card-header-custom">
+            <h5 class="card-title-custom text-primary"><i class="bi bi-activity"></i> Dinamik Trend Grafiği</h5>
+            <div class="d-flex gap-2">
+                <div class="btn-group" role="group">
+                    <button class="control-btn active" data-ctype="line" id="btnLine"><i class="bi bi-graph-up"></i> Çizgi</button>
+                    <button class="control-btn" data-ctype="bar" id="btnBar"><i class="bi bi-bar-chart-fill"></i> Sütun</button>
+                </div>
+                <div class="btn-group ms-2" role="group">
+                    <button class="control-btn" id="last3">Son 3 Yıl</button>
+                    <button class="control-btn active" id="allY">Tümü</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body-custom">
+            <div class="row g-4">
+                <!-- Sol: Arama ve Seçim -->
+                <div class="col-lg-4 border-end">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Analiz Kalemi Ekle</label>
+                        <div class="search-input-group">
+                            <i class="bi bi-search search-icon"></i>
+                            <input id="searchBox" class="search-input" placeholder="Örn: Cari Oran, Net Satışlar..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                         <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold text-uppercase">Sonuçlar</span>
+                        </div>
+                        <div id="resultList" class="custom-scroll border rounded-3 bg-white" style="max-height: 250px; overflow-y: auto;">
+                            <!-- JS ile doldurulacak -->
+                            <div class="p-4 text-center text-muted opacity-50">
+                                <i class="bi bi-search fs-1"></i>
+                                <p class="small mt-2">Aramak için yukarıya yazın</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold text-uppercase">Seçili Göstergeler</span>
+                            <button id="clearSel" class="btn btn-link btn-sm text-danger text-decoration-none p-0 fw-bold" style="font-size: 0.8rem;">Temizle</button>
+                        </div>
+                        <div id="selectedArea" class="d-flex flex-wrap gap-2" style="min-height: 50px;">
+                             <!-- JS ile doldurulacak -->
+                             <span class="text-muted small fst-italic">Henüz seçim yapılmadı.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ: Grafik -->
+                <div class="col-lg-8">
+                    <div style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Detaylı Oran Tablosu -->
+    {% if analiz.oran_analizleri %}
+    <div class="analysis-card mt-5">
+        <div class="card-header-custom bg-light">
+            <h5 class="card-title-custom text-dark"><i class="bi bi-table"></i> Finansal Oran Analiz Tablosu</h5>
+            <div class="d-flex gap-2 small">
+                <span class="d-flex align-items-center gap-1"><span class="badge rounded-circle p-1 bg-success"> </span> Güçlü</span>
+                <span class="d-flex align-items-center gap-1"><span class="badge rounded-circle p-1 bg-warning"> </span> Yeterli</span>
+                <span class="d-flex align-items-center gap-1"><span class="badge rounded-circle p-1 bg-danger"> </span> Riskli</span>
+            </div>
+        </div>
+        <div class="table-responsive custom-scroll">
+            <table class="table modern-table mb-0 table-hover">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 25%;">Oran Adı / Gösterge</th>
+                        {% for y in donemler %}
+                        <th class="text-center">{{ y }}</th>
+                        {% endfor %}
+                        <th class="text-center" style="width: 15%;">Trend</th>
+                        <th style="width: 30%;">Analiz Sonucu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set last_y = donemler[-1] if donemler else None %}
+                    {% for oran_adi, oran_detay in analiz.oran_analizleri.items() %}
+                    {% set defn = (raporlar.get(last_y, {}) or {}).get(oran_adi) %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">
+                            {{ oran_adi }}
+                            {% if defn and defn.formula %}
+                            <i class="bi bi-info-circle ms-1 text-muted opacity-50" data-bs-toggle="tooltip" title="{{ defn.formula }}"></i>
+                            {% endif %}
+                        </td>
+                        
+                        {% for y in donemler %}
+                            {% set oran = (raporlar.get(y, {}) or {}).get(oran_adi) %}
+                            {% set val = oran.deger if oran else None %}
+                            {% set th = oran.thresholds if oran else {} %}
+                            {% set cls = '' %}
+                            
+                            {% if val is not none and th %}
+                                {% if th.safe is not none and val >= th.safe %}{% set cls='cell-safe' %}
+                                {% elif th.adequate is not none and val >= th.adequate %}{% set cls='cell-warn' %}
+                                {% else %}{% set cls='cell-risk' %}{% endif %}
+                            {% endif %}
+                            
+                            <td class="text-center {{ cls }}">
+                                {{ val if val is not none else '-' }}
+                            </td>
+                        {% endfor %}
+
+                        <td class="text-center">
+                            {% set t = (oran_detay.trend or '')|lower %}
+                            {% set tcls = 'trend-flat' %}
+                            {% set ticon = 'bi-dash' %}
+                            
+                            {% if 'güçlü art' in t or 'art' in t %}
+                                {% set tcls='trend-up' %}{% set ticon='bi-graph-up-arrow' %}
+                            {% elif 'düş' in t %}
+                                {% set tcls='trend-down' %}{% set ticon='bi-graph-down-arrow' %}
+                            {% endif %}
+                            
+                            <span class="trend-badge {{ tcls }}">
+                                <i class="bi {{ ticon }}"></i> {{ oran_detay.trend }}
+                            </span>
+                        </td>
+                        <td class="small text-muted pe-4">{{ oran_detay.sonucu }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script>
+  // Backend Verileri
+  const YEARS = {{ donemler | default ([]) | tojson }};
+  const INDEX = {{ kalem_index | default ([]) | tojson }};
+  
+  // Kalem Verileri (Bilanço/Gelir): { 'Kalem Adı': { 2023: 100, 2024: 150 } }
+  const SERILER = {{ kalem_series | default ({}) | tojson }};
+  
+  // Oran İsimleri Listesi
+  const ORANLAR = Object.keys({{ analiz.oran_analizleri | default({ }) | tojson }});
+
+  // HAM RAPOR VERİLERİ (Oran değerlerini buradan çekeceğiz)
+  const RAW_REPORTS = {{ raporlar | default({}) | tojson }};
+
+  // State
+  const state = {
+      chartType: 'line',
+      yearsWindow: [...YEARS], 
+      selectedKeys: new Set(),
+      chart: null
+  };
+
+  // DOM Elements
+  const els = {
+      search: document.getElementById('searchBox'),
+      results: document.getElementById('resultList'),
+      selected: document.getElementById('selectedArea'),
+      ctx: document.getElementById('mainChart').getContext('2d'),
+      btns: {
+          line: document.getElementById('btnLine'),
+          bar: document.getElementById('btnBar'),
+          last3: document.getElementById('last3'),
+          allY: document.getElementById('allY'),
+          clear: document.getElementById('clearSel')
+      }
+  };
+
+  // --- Functions ---
+  
+  function renderResults() {
+    const q = (els.search.value || '').toLowerCase().trim();
+    els.results.innerHTML = '';
+    
+    if(!q && state.selectedKeys.size > 0) { 
+        els.results.innerHTML = '<div class="p-3 text-center text-muted small">Daha fazla eklemek için arayın...</div>'; 
+        return; 
+    }
+
+    const results = [];
+    
+    // 1️⃣ Kalemler (Filtre uygulanmış)
+    INDEX.forEach(it => {
+      // "Bilinmeyen" veya "Tanımsız" olanları listeye alma
+      if (it.label.includes('Bilinmeyen') || it.label.includes('Tanımsız')) return;
+      if (!q || it.label.toLowerCase().includes(q)) results.push({ type: 'kalem', key: it.key, label: it.label });
+    });
+    
+    // 2️⃣ Oranlar
+    ORANLAR.forEach(o => {
+      if (!q || o.toLowerCase().includes(q)) results.push({ type: 'oran', key: o, label: o });
+    });
+
+    if (!results.length) {
+      els.results.innerHTML = '<div class="p-3 text-center text-muted small">Sonuç bulunamadı.</div>';
+      return;
+    }
+
+    results.slice(0, 50).forEach(it => {
+      const isSel = state.selectedKeys.has(it.key);
+      const row = document.createElement('div');
+      row.className = `result-item ${isSel ? 'bg-light opacity-50' : ''}`;
+      
+      // Etiketleri (ORAN/KALEM) kaldırdık, sadece isim görünecek
+      row.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+            <span class="small fw-semibold text-dark ps-2">${it.label}</span>
+        </div>
+        ${!isSel ? '<button class="add-btn shadow-sm"><i class="bi bi-plus-lg"></i></button>' : '<i class="bi bi-check-circle-fill text-success fs-5"></i>'}
+      `;
+      
+      if(!isSel) {
+          const btn = row.querySelector('button');
+          btn.addEventListener('click', (e) => { e.stopPropagation(); addKey(it.key); });
+          row.style.cursor = 'pointer'; // Make row clickable
+          row.addEventListener('click', () => addKey(it.key));
+      } else {
+          row.style.pointerEvents = 'none'; // Disable click if already selected
+      }
+      
+      els.results.appendChild(row);
+    });
+  }
+
+  function renderSelected() {
+    els.selected.innerHTML = '';
+    if (!state.selectedKeys.size) {
+      els.selected.innerHTML = '<span class="text-muted small fst-italic w-100 text-center py-3">Henüz seçim yapılmadı. Listeden veya aramadan ekleyin.</span>';
+      return;
+    }
+    [...state.selectedKeys].forEach(key => {
+      const tag = document.createElement('div');
+      tag.className = 'tag animate__animated animate__fadeIn';
+      tag.innerHTML = `<span>${key}</span><i class="bi bi-x tag-close" onclick="removeKey('${key}')"></i>`;
+      els.selected.appendChild(tag);
+    });
+  }
+
+  function addKey(key) { state.selectedKeys.add(key); renderSelected(); renderResults(); draw(); }
+  function removeKey(key) { state.selectedKeys.delete(key); renderSelected(); renderResults(); draw(); }
+  function clearAll() { state.selectedKeys.clear(); renderSelected(); renderResults(); draw(); }
+
+  // Veri Çekme Mantığı: Hem Kalemleri hem Oranları destekle
+  function getDataValue(key, year) {
+      // 1. Kalem Serilerinde Ara
+      if (SERILER[key] && SERILER[key][year] !== undefined) {
+          return SERILER[key][year];
+      }
+      
+      // 2. Raporlarda Ara (Oranlar)
+      try {
+          if (RAW_REPORTS[year] && RAW_REPORTS[year][key]) {
+             const val = RAW_REPORTS[year][key].deger;
+             return (val !== null && val !== undefined) ? val : null;
+          }
+      } catch(e) { console.error("Veri okuma hatası:", e); }
+      
+      return null;
+  }
+
+  function draw() {
+    if (state.chart) state.chart.destroy();
+    
+    const datasets = [...state.selectedKeys].map((key, idx) => {
+        const hue = (idx * 137.508) % 360; 
+        const items = state.chartType === 'line' 
+            ? { bg: `hsla(${hue}, 70%, 60%, 0.2)`, border: `hsl(${hue}, 65%, 50%)` }
+            : { bg: `hsla(${hue}, 70%, 60%, 0.7)`, border: `hsl(${hue}, 65%, 50%)` };
+
+        const vals = state.yearsWindow.map(y => {
+            const val = getDataValue(key, y);
+            return Number.isFinite(val) ? val : null;
+        });
+
+        // Oran kontrolü
+        const isRatio = ORANLAR.includes(key);
+
+        return {
+            label: key,
+            data: vals,
+            borderColor: items.border,
+            backgroundColor: items.bg,
+            borderWidth: 2,
+            tension: 0.3,
+            fill: state.chartType === 'line' && !isRatio, // Oranlarda altını doldurma
+            pointRadius: 4,
+            pointHoverRadius: 6
+        };
+    });
+    
+    state.chart = new Chart(els.ctx, {
+      type: state.chartType,
+      data: { labels: state.yearsWindow, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#1e293b',
+            bodyColor: '#475569',
+            borderColor: '#e2e8f0',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 6,
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y == null ? '—' : new Intl.NumberFormat('tr-TR').format(ctx.parsed.y)}`
+            }
+          }
+        },
+        scales: { 
+            y: { 
+                beginAtZero: false,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#64748b' }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#64748b', font: { weight: 'bold' } }
+            }
+        },
+        interaction: { mode: 'index', intersect: false }
+      }
+    });
+  }
+
+  // --- Event Listeners ---
+  els.btns.line.addEventListener('click', () => { 
+      state.chartType = 'line'; 
+      els.btns.line.classList.add('active'); els.btns.bar.classList.remove('active');
+      draw(); 
+  });
+  els.btns.bar.addEventListener('click', () => { 
+      state.chartType = 'bar'; 
+      els.btns.bar.classList.add('active'); els.btns.line.classList.remove('active');
+      draw(); 
+  });
+  
+  els.btns.last3.addEventListener('click', () => { 
+      state.yearsWindow = YEARS.slice(0, 3);
+      els.btns.last3.classList.add('active'); els.btns.allY.classList.remove('active');
+      draw();
+  });
+  els.btns.allY.addEventListener('click', () => { 
+      state.yearsWindow = [...YEARS];
+      els.btns.allY.classList.add('active'); els.btns.last3.classList.remove('active');
+      draw();
+  });
+
+  els.btns.clear.addEventListener('click', clearAll);
+  els.search.addEventListener('input', renderResults);
+
+  // Init
+  document.addEventListener('DOMContentLoaded', () => {
+      renderResults();
+      renderSelected();
+      draw();
+      
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
+  });
+  
+  window.removeKey = removeKey;
+</script>
+{% endblock %}

@@ -47,7 +47,7 @@ __MACOSX/
 *.pdf
 
 # HTML export, rapor çıktıları (eğer otomatik üretiliyorsa)
-reports/
+/reports/
 exports/
 outputs/
 

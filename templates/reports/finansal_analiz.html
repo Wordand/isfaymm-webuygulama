@@ -1,0 +1,670 @@
+{% extends "layout.html" %}
+{% block title %}Finansal Analiz Raporu{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #0f172a;
+        --secondary-color: #334155;
+        --accent-color: #3b82f6; 
+        --accent-light: #eff6ff;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --border-color: #e2e8f0;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+    }
+
+    body { background-color: var(--bg-color); color: var(--primary-color); font-family: 'Inter', sans-serif; }
+
+    /* --- Page Header --- */
+    .page-header {
+        background: white;
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    
+    .page-title { font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: var(--primary-color); }
+    .page-subtitle { color: var(--secondary-color); font-size: 1.1rem; }
+
+    /* --- Layout Components --- */
+    .analysis-container { min-height: 80vh; }
+    
+    /* Left: Ratio List */
+    .ratio-list-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        height: 100%;
+        max-height: calc(100vh - 200px);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .ratio-list-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        background: #f8fafc;
+        font-weight: 700;
+        color: var(--secondary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .ratio-list-body {
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+    
+    .ratio-item {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+    
+    .ratio-item:hover { background-color: #f1f5f9; }
+    .ratio-item.active { background-color: var(--accent-light); border-left: 4px solid var(--accent-color); }
+    .ratio-item.active .ratio-name { color: var(--accent-color); font-weight: 700; }
+    
+    .ratio-name { font-weight: 500; font-size: 0.95rem; color: var(--primary-color); }
+    .ratio-val-badge { 
+        font-size: 0.8rem; 
+        font-weight: 700; 
+        padding: 0.25rem 0.6rem; 
+        border-radius: 6px; 
+        background: #e2e8f0; 
+        color: #475569;
+    }
+
+    /* Right: Detail View */
+    .detail-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        min-height: 400px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    
+    .detail-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #94a3b8;
+        text-align: center;
+        min-height: 400px;
+    }
+    
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+    
+    .detail-title { font-size: 1.75rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.02em; }
+    .detail-meta { display: flex; gap: 1rem; margin-top: 0.5rem; }
+    
+    .stat-box {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+    .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700; margin-bottom: 0.5rem; }
+    .stat-content { color: var(--secondary-color); line-height: 1.6; }
+    
+    .advice-box {
+        background: #ecfdf5; 
+        border: 1px solid #a7f3d0; 
+        color: #065f46;
+    }
+    .advice-box.risk { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .advice-box.warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    
+    .formula-code {
+        font-family: 'Fira Code', monospace;
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    /* Filters - Top Bar */
+    .filter-bar {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .gauge-container {
+        width: 100%;
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 5px;
+        position: relative;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+    .gauge-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 1s ease-out;
+    }
+    
+    /* Scrollbar */
+    .ratio-list-body::-webkit-scrollbar { width: 5px; }
+    .ratio-list-body::-webkit-scrollbar-track { background: transparent; }
+    .ratio-list-body::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title"><i class="bi bi-file-earmark-bar-graph me-2"></i>Finansal Röntgen</h1>
+                <p class="page-subtitle mb-0">Detaylı Finansal Oran Analiz Raporu</p>
+            </div>
+            <a href="{{ url_for('report.raporlama') }}" class="btn btn-outline-secondary rounded-pill fw-bold px-4">
+                <i class="bi bi-arrow-left me-2"></i>Panele Dön
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5 analysis-container">
+    
+    <!-- Filtreler -->
+    <div class="filter-bar shadow-sm">
+        <form id="filterForm" method="get" class="d-flex gap-3 w-100 flex-wrap align-items-center">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-building text-muted"></i>
+                <select name="vkn" class="form-select border-0 bg-light fw-bold" onchange="this.form.submit()">
+                    <option value="">Mükellef Seçiniz...</option>
+                    {% for m in unvanlar %}
+                        <option value="{{ m.vkn }}" {% if secili_vkn==m.vkn %}selected{% endif %}>{{ m.unvan }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="vr opacity-25"></div>
+
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-folder text-muted"></i>
+                <select name="kategori" class="form-select border-0 bg-light fw-bold" onchange="this.form.submit()">
+                    {% set kats = [('likidite','Likidite'),('yapi','Mali Yapı'),('varlik','Varlık Kullanım'),('karlilik','Kârlılık'),('borsa','Borsa')] %}
+                    {% for k, l in kats %}
+                        <option value="{{ k }}" {% if kategori==k %}selected{% endif %}>{{ l }} Oranları</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="vr opacity-25"></div>
+
+            <!-- Yıl Seçimi (Modern Dropdown) -->
+            <div class="dropdown">
+                <button class="btn btn-white bg-white border border-secondary fw-bold dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <i class="bi bi-calendar-check me-2 text-primary"></i>
+                    {% if secili_yillar|length == mevcut_yillar|length %}
+                        Tüm Dönemler
+                    {% else %}
+                        {{ secili_yillar|length }} Yıl Seçili
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu p-3 shadow-lg border-0" style="min-width: 250px; border-radius: 15px;">
+                    <h6 class="dropdown-header text-uppercase x-small fw-bold text-muted ps-0 mb-2">Görüntülenecek Yıllar</h6>
+                    <div class="row g-2">
+                        {% for yil in mevcut_yillar %}
+                        <div class="col-6">
+                            <div class="form-check custom-check py-1">
+                                <input class="form-check-input" type="checkbox" name="yillar" value="{{ yil }}" id="y_{{ yil }}" {% if yil in secili_yillar %}checked{% endif %}>
+                                <label class="form-check-label fw-medium small" for="y_{{ yil }}">
+                                    {{ yil }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="dropdown-divider my-2"></div>
+                    <div class="text-center p-1">
+                         <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold">Dönemleri Güncelle</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vr opacity-25"></div>
+            
+            <div class="d-flex align-items-center gap-2 bg-light p-1 px-3 rounded-pill border">
+                <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.7rem;">Enflasyon:</span>
+                <div class="btn-group btn-group-sm">
+                    <input type="radio" class="btn-check" name="inflation_mode" id="iAuto" value="auto" {% if inflation_mode=='auto' %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="btn btn-outline-primary border-0 rounded-pill px-3" for="iAuto">Oto</label>
+                    <input type="radio" class="btn-check" name="inflation_mode" id="iOff" value="enflasyonsuz" {% if inflation_mode=='enflasyonsuz' %}checked{% endif %} onchange="this.form.submit()">
+                    <label class="btn btn-outline-primary border-0 rounded-pill px-3" for="iOff">Düzeltmesiz</label>
+                </div>
+            </div>
+
+            <div class="vr opacity-25"></div>
+
+            <!-- AI Tahmin Toggle -->
+            <div class="form-check form-switch d-flex align-items-center gap-2 ps-0">
+                <input class="form-check-input ms-0" type="checkbox" id="aiProjectionToggle">
+                <label class="form-check-label small fw-bold text-primary" for="aiProjectionToggle" style="cursor: pointer;">
+                    <i class="bi bi-stars me-1 text-purple"></i>AI Tahmini
+                </label>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Uyarılar / Analiz Notları -->
+    {% if uyarilar and uyarilar|length > 0 %}
+    <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 p-3 d-flex align-items-start gap-3" style="background: #f0f9ff; border-left: 5px solid #0ea5e9 !important;">
+        <i class="bi bi-info-circle-fill fs-4 text-info"></i>
+        <div class="flex-grow-1">
+            <h6 class="mb-1 fw-bold text-info">Sistem Notları</h6>
+            <div class="small text-secondary">
+                {% for u in uyarilar %}<div class="mb-1"><i class="bi bi-dot me-1"></i> {{ u }}</div>{% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not secili_vkn %}
+    <div class="text-center py-5">
+        <i class="bi bi-search display-1 text-muted opacity-25"></i>
+        <h4 class="mt-4 text-secondary">Analiz İçin Mükellef Seçiniz</h4>
+    </div>
+    {% else %}
+    
+    <div class="row g-4 h-100">
+        <!-- SOL SÜTUN: LİSTE -->
+        <div class="col-lg-4">
+            <div class="ratio-list-card shadow-sm border-0" style="border-radius: 20px;">
+                <div class="ratio-list-header px-4 py-3 bg-white border-bottom">
+                    <div class="flex-grow-1">
+                        <span class="fw-bold text-primary"><i class="bi bi-grid-3x3-gap me-2"></i>Oranlar</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% for dp in display_periods %}
+                            <span class="text-muted x-small fw-bold text-uppercase" style="width: 60px; text-align: center; font-size: 0.6rem;">{{ dp }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="ratio-list-body" id="ratioList">
+                    {% for key, val_dict in trend_data.items() %}
+                        <div class="ratio-item px-4 border-bottom" onclick="selectRatio('{{ key|escape }}', this)">
+                            <div class="ratio-name flex-grow-1 text-truncate pe-2" style="font-size: 0.85rem;">{{ key }}</div>
+                            <div class="d-flex gap-2 align-items-center">
+                                {% for dp in display_periods %}
+                                    {% set val = val_dict.get(dp) %}
+                                    <div class="text-center" style="width: 60px;">
+                                        {% if val is not none %}
+                                            <span class="fw-bold small {{ 'text-danger' if val < 0 else 'text-dark' }}" style="font-size: 0.75rem;">{{ "%.2f"|format(val) }}</span>
+                                        {% else %}
+                                            <span class="text-muted opacity-25">-</span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ SÜTUN: DETAY -->
+        <div class="col-lg-8">
+            <div class="detail-card shadow-lg" id="detailPanel">
+                <!-- Seçim yapılmadığında -->
+                <div class="detail-empty" id="emptyState">
+                    <i class="bi bi-mouse display-4 mb-3 opacity-50"></i>
+                    <h5>Detayları görüntülemek için soldan bir oran seçin</h5>
+                    <p class="small">Seçtiğiniz oranın trend grafiği, anlamı ve aksiyon önerileri burada görüntülenecektir.</p>
+                </div>
+                
+                <!-- Seçim yapıldığında (Gizli) -->
+                <div id="contentState" style="display: none;">
+                    <div class="detail-header">
+                        <div>
+                            <h2 class="detail-title" id="dTitle">Cari Oran</h2>
+                            <div class="detail-meta">
+                                <span class="badge bg-dark text-white border-0 p-2" id="dFormulaBadge"><i class="bi bi-calculator me-1"></i> Formül Mevcut</span>
+                                <span class="badge bg-primary text-white border-0 p-2" id="dTrendBadge"><i class="bi bi-graph-up me-1"></i> Artış Trendi</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="d-block text-muted small fw-bold">SON DÖNEM DEĞERİ</span>
+                            <span class="display-6 fw-bold text-primary" id="dValue">2.15</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-7">
+                            <div class="stat-box h-100">
+                                <div class="stat-label"><i class="bi bi-bar-chart-line me-1"></i> Dönemsel Değişim</div>
+                                <div style="height: 250px; width: 100%;">
+                                    <canvas id="detailChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="stat-box h-100 d-flex flex-col justify-content-center">
+                                <div class="stat-label mb-3"><i class="bi bi-speedometer2 me-1"></i> Risk Durumu</div>
+                                <div class="text-center py-4">
+                                    <h3 class="fw-bold mb-2" id="riskLabel">GÜVENLİ</h3>
+                                    <div class="gauge-container">
+                                        <div class="gauge-fill bg-success" id="riskBar" style="width: 85%;"></div>
+                                    </div>
+                                    <p class="small text-muted mt-3" id="riskDesc">Mevcut oran ideal aralıkta seyrediyor.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                             <div class="stat-box bg-white border-start border-4 border-primary">
+                                <div class="stat-label text-primary"><i class="bi bi-info-circle-fill me-1"></i> Anlamı ve Önemi</div>
+                                <div class="stat-content" id="dMeaning">
+                                    Cari oran, işletmenin kısa vadeli borçlarını ödeme gücünü gösterir.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="stat-box advice-box" id="adviceBox">
+                                <div class="stat-label"><i class="bi bi-lightbulb-fill me-1"></i> Yapay Zeka Tavsiyesi</div>
+                                <div class="stat-content fw-medium" id="dAdvice">
+                                    Oranınız gayet sağlıklı. Nakit fazlanızı yatırıma dönüştürebilirsiniz.
+                                </div>
+                            </div>
+                        </div>
+                        
+                         <div class="col-12">
+                            <div class="stat-box bg-dark text-white border-0">
+                                <div class="stat-label text-white-50"><i class="bi bi-code-slash me-1"></i> Hesaplama Formülü</div>
+                                <code class="formula-code mt-2" id="dFormula">Dönen Varlıklar / Kısa Vadeli Yabancı Kaynaklar</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% set extra_disclaimer = True %}
+    {% include 'partials/tax_disclaimer.html' %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<script>
+    {% if secili_vkn %}
+    // Backend verilerini JS'e aktar
+    const DATA = {{ trend_data | tojson }};
+    const META = {{ oran_detaylari | default({}) | tojson }};
+    const YEARS = {{ display_periods | default([]) | tojson }}; 
+    
+    // Global Chart Instance
+    let myChart = null;
+
+    function selectRatio(key, el) {
+        // UI Aktiflik
+        document.querySelectorAll('.ratio-item').forEach(i => i.classList.remove('active'));
+        if(el) el.classList.add('active');
+        
+        // Görünüm Değişimi
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('contentState').style.display = 'block';
+
+        // Veri Hazırlığı
+        const valuesMap = DATA[key] || {};
+        const meta = META[key] || {};
+        
+        // Etiketlere (YEARS) göre verileri eşle
+        const labels = YEARS;
+        const chartData = labels.map(label => valuesMap[label] !== undefined ? valuesMap[label] : null);
+        
+        const lastYear = YEARS[YEARS.length - 1]; 
+        const lastVal = valuesMap[lastYear];
+
+        // İçerik Doldurma
+        document.getElementById('dTitle').innerText = key;
+        document.getElementById('dValue').innerText = (lastVal !== undefined && lastVal !== null) ? formatNum(lastVal) : '-';
+        document.getElementById('dMeaning').innerText = meta.meaning || "Açıklama bulunamadı.";
+        document.getElementById('dFormula').innerText = meta.formula || "Veri yok";
+        document.getElementById('dAdvice').innerText = getEffectiveAdvice(lastVal, meta) || "Hesaplanamadı.";
+        
+        // Risk Analizi
+        updateRiskIndicator(lastVal, meta.thresholds);
+
+        // Grafik Çizimi
+        drawChart(labels, chartData, key);
+        
+        // Mobil uyum için scroll
+        if(window.innerWidth < 992) {
+             document.getElementById('detailPanel').scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
+    function drawChart(labels, data, label) {
+        const ctx = document.getElementById('detailChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        
+        // AI Tahmin Kontrolü
+        const showProjection = document.getElementById('aiProjectionToggle').checked;
+        
+        // Veri Hazırlığı
+        let chartLabels = [...labels];
+        let chartData = [...data];
+        let projectionDataset = null;
+
+        if (showProjection && chartData.length >= 2) {
+             // Basit Lineer Regresyon ile Tahmin
+             const nextVal = calculateProjection(chartData);
+             if (nextVal !== null) {
+                 // Tahmin verisi: Mevcut verilerin sonuncusu ile başlar, tahmin edilen ile biter
+                 const lastVal = chartData[chartData.length - 1];
+                 const nextYear = parseInt(chartLabels[chartLabels.length - 1]) + 1;
+                 
+                 // Ana grafiği etkilememesi için ayrı dataset
+                 projectionDataset = {
+                     label: 'AI Tahmini (2026)',
+                     data: Array(chartData.length - 1).fill(null).concat([lastVal, nextVal]),
+                     borderColor: '#8b5cf6', // Mor renk
+                     borderDash: [5, 5],
+                     pointStyle: 'star',
+                     pointRadius: 6,
+                     pointBackgroundColor: '#8b5cf6',
+                     fill: false,
+                     tension: 0
+                 };
+                 
+                 chartLabels.push(nextYear);
+                 // Ana data dizisini de null ile doldur ki uzunluk eşleşsin
+                 chartData.push(null);
+             }
+        }
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+        gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        const datasets = [{
+            label: label,
+            data: chartData,
+            borderColor: '#3b82f6',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#3b82f6',
+            pointBorderWidth: 2
+        }];
+
+        if (projectionDataset) {
+            datasets.push(projectionDataset);
+        }
+        
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: showProjection },
+                    tooltip: { 
+                        backgroundColor: '#1e293b', 
+                        padding: 12,
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 14, weight: 'bold' },
+                        displayColors: true,
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label || label}: ${ctx.parsed.y !== null ? formatNum(ctx.parsed.y) : ''}`
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: false, 
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { size: 11, weight: 'bold' }, color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 12 }, color: '#64748b' }
+                    }
+                }
+            }
+        });
+    }
+
+    function calculateProjection(data) {
+        // Null olmayan değerleri al
+        const validPoints = data.map((v, i) => v !== null ? {x: i, y: v} : null).filter(p => p !== null);
+        if (validPoints.length < 2) return null;
+        
+        // Basit Lineer Regresyon (Least Squares)
+        const n = validPoints.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        
+        validPoints.forEach(p => {
+            sumX += p.x;
+            sumY += p.y;
+            sumXY += p.x * p.y;
+            sumXX += p.x * p.x;
+        });
+        
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        
+        // Bir sonraki adımı tahmin et (mevcut data uzunluğu indexi)
+        const nextIndex = data.length; 
+        return slope * nextIndex + intercept;
+    }
+    
+    // Toggle Event Listener
+    document.getElementById('aiProjectionToggle').addEventListener('change', () => {
+         // Seçili oran varsa grafiği yenile
+         const activeItem = document.querySelector('.ratio-item.active');
+         if(activeItem) {
+             const key = activeItem.querySelector('.ratio-name').innerText;
+             // Mevcut verilerle redraw
+             const valuesMap = DATA[key] || {};
+             const sortedYears = [...YEARS].sort();
+             const chartData = sortedYears.map(y => valuesMap[y] !== undefined ? valuesMap[y] : null);
+             drawChart(sortedYears, chartData, key);
+         }
+    });
+
+    function updateRiskIndicator(val, thresholds) {
+        const bar = document.getElementById('riskBar');
+        const label = document.getElementById('riskLabel');
+        const desc = document.getElementById('riskDesc');
+        const box = document.getElementById('adviceBox'); // Advice kutusunun rengini de değiştirelim
+        
+        box.classList.remove('risk', 'warn'); // Reset colors
+        
+        if (val === undefined || val === null) {
+            label.innerText = "BİLİNMİYOR";
+            label.className = "fw-bold mb-2 text-muted";
+            bar.style.width = "0%";
+            bar.className = "gauge-fill bg-secondary";
+            desc.innerText = "Veri yetersiz.";
+            return;
+        }
+
+        let status = 'risk';
+        if (thresholds) {
+            if (thresholds.safe !== undefined && val >= thresholds.safe) status = 'safe';
+            else if (thresholds.adequate !== undefined && val >= thresholds.adequate) status = 'adequate';
+        }
+
+        if (status === 'safe') {
+            label.innerText = "GÜÇLÜ";
+            label.className = "fw-bold mb-2 text-success";
+            bar.style.width = "100%";
+            bar.className = "gauge-fill bg-success";
+            desc.innerText = "Mükemmel seviyede.";
+            // Advice box default is green
+        } else if (status === 'adequate') {
+            label.innerText = "MAKUL";
+            label.className = "fw-bold mb-2 text-warning";
+            bar.style.width = "60%";
+            bar.className = "gauge-fill bg-warning";
+            desc.innerText = "İyileştirme alanı mevcut.";
+            box.classList.add('warn');
+        } else {
+            label.innerText = "RİSKLİ";
+            label.className = "fw-bold mb-2 text-danger";
+            bar.style.width = "25%";
+            bar.className = "gauge-fill bg-danger";
+            desc.innerText = "Aksiyon alınması önerilir.";
+            box.classList.add('risk');
+        }
+    }
+
+    function getEffectiveAdvice(val, meta) {
+        if (!meta.advice || val === undefined || val === null) return null;
+        if (typeof meta.advice === 'string') return meta.advice; // Düz metinse
+        
+        // Eşiklere göre doğru tavsiyeyi seç
+        const th = meta.thresholds || {};
+        if (th.safe !== undefined && val >= th.safe) return meta.advice.safe;
+        if (th.adequate !== undefined && val >= th.adequate) return meta.advice.adequate;
+        return meta.advice.risky;
+    }
+
+    function formatNum(n) {
+        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(n);
+    }
+    {% endif %}
+</script>
+{% endblock %}

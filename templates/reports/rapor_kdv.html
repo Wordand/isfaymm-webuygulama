@@ -1,0 +1,396 @@
+{% extends "layout.html" %}
+{% block title %}KDV Analiz Özeti{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --premium-blue: #4e54c8;
+        --premium-gradient: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --vuk-blue: #1e3a8a;
+        --vuk-light: #f1f5f9;
+        --danger-soft: #fef2f2;
+    }
+
+    .kdv-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    h2.page-title {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: var(--premium-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    /* KPI Cards */
+    .metric-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.3s;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    .metric-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Content Boxes */
+    .content-box {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        border: 1px solid #f1f5f9;
+        margin-bottom: 2rem;
+    }
+
+    .validation-box {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .kdv-table {
+        font-size: 0.9rem;
+    }
+
+    .kdv-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 700;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .kdv-section-row {
+        background: #f8fafc !important;
+    }
+
+    .kdv-section-cell {
+        font-weight: 800;
+        color: #1e3a8a;
+        background: #f1f5f9 !important;
+        padding: 1rem !important;
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .search-box input {
+        padding-left: 2.8rem;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        height: 48px;
+        transition: all 0.2s;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.1rem;
+    }
+
+    .btn-premium {
+        background: var(--premium-gradient);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 0.8rem 1.8rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(78, 84, 200, 0.2);
+    }
+
+    .chart-container {
+        height: 350px;
+    }
+
+    .badge-vkn {
+        background: #1e293b;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <!-- Header Area -->
+    <div class="kdv-header d-flex flex-column flex-md-row justify-content-between align-items-center animate__animated animate__fadeIn">
+        <div>
+            <h2 class="page-title">KDV Beyanname Analiz Özeti</h2>
+            <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge badge-vkn shadow-sm"><i class="bi bi-hash me-1"></i>{{ secili_vkn }}</span>
+                <span class="text-secondary fw-bold ms-1">{{ secili_unvan }}</span>
+            </div>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-light border" style="border-radius: 12px;">
+                <i class="bi bi-printer"></i> Yazdır
+            </button>
+            <a href="{{ url_for('report.rapor_kdv_excel', vkn=secili_vkn, unvan=secili_unvan, donemler=','.join(secili_donemler)) }}" 
+               class="btn btn-premium d-flex align-items-center gap-2" 
+               style="--premium-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                <i class="bi bi-file-earmark-excel-fill"></i> Excel Aktar
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metrics -->
+    {% if kdv_months %}
+        <div class="row g-4 mb-4 animate__animated animate__fadeInUp">
+            {% set last_month = kdv_months[-1] %}
+            {% set stats = kdv_summary[last_month] %}
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #eef2ff; color: #4f46e5;"><i class="bi bi-cash-stack"></i></div>
+                    <div>
+                        <div class="metric-label">Matrah ({{ last_month }})</div>
+                        <div class="metric-value text-primary">{{ "{:,.2f} \u20BA".format(stats.matrah).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #fff7ed; color: #ea580c;"><i class="bi bi-percent"></i></div>
+                    <div>
+                        <div class="metric-label">Toplam KDV</div>
+                        <div class="metric-value text-warning">{{ "{:,.2f} \u20BA".format(stats.hesaplanan).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #ecfdf5; color: #059669;"><i class="bi bi-arrow-up-right-circle"></i></div>
+                    <div>
+                        <div class="metric-label">Devreden KDV</div>
+                        <div class="metric-value text-success">{{ "{:,.2f} \u20BA".format(stats.devreden).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #fef2f2; color: #dc2626;"><i class="bi bi-clipboard-pulse"></i></div>
+                    <div>
+                        <div class="metric-label">İade Edilebilir KDV</div>
+                        <div class="metric-value text-danger">{{ "{:,.2f} \u20BA".format(stats.iade).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info rounded-4 shadow-sm animate__animated animate__fadeIn">
+            <i class="bi bi-info-circle-fill me-2"></i> Seçilen dönemler için yüklü KDV beyannamesi bulunamadı. Lütfen beyannamelerin yüklü olduğundan emin olun.
+        </div>
+    {% endif %}
+
+    <!-- Validation Notices -->
+    {% if inconsistencies %}
+    <div class="validation-box animate__animated animate__shakeX">
+        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Veri Tutarlılık Uyarıları</h6>
+        <ul class="mb-0 ps-3">
+            {% for inc in inconsistencies %}
+            <li class="text-secondary small mb-2">{{ inc }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Visual Trend Graph -->
+        <div class="col-lg-12 mb-4 animate__animated animate__fadeInUp">
+            <div class="content-box">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold m-0"><i class="bi bi-graph-up text-primary me-2"></i>Dönemsel Matrah ve KDV Trendi</h5>
+                </div>
+                <div class="chart-container">
+                    <canvas id="kdvTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytical Data Table -->
+        <div class="col-12 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+            <div class="content-box">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                    <h5 class="fw-bold m-0"><i class="bi bi-list-check text-primary me-2"></i>Detaylı Analiz Verileri</h5>
+                    <div class="search-box" style="min-width: 350px;">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="kdvSearch" class="form-control" placeholder="Kalemlerde veya tutarlarda ara...">
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="max-height: 700px;">
+                    <table class="table kdv-table align-middle" id="kdvMainTable">
+                        <thead class="sticky-top" style="z-index: 5;">
+                            <tr>
+                                <th style="min-width: 320px; background: white; border-right: 1px solid #f1f5f9;">AÇIKLAMA</th>
+                                {% for m in kdv_months %}
+                                    <th class="text-center">{{ m }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alan, aylik in kdv_data.items() %}
+                                {% if alan and alan.startswith('§ ') %}
+                                    <tr class="kdv-section-row">
+                                        <td class="kdv-section-cell" colspan="{{ 1 + kdv_months|length }}">
+                                            <i class="bi bi-layers-half me-2"></i>{{ alan[2:] }}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr class="kdv-data-row">
+                                        <td class="fw-semibold text-dark">{{ alan }}</td>
+                                        {% for m in kdv_months %}
+                                            {% set v = aylik.get(m) %}
+                                            <td class="text-end font-monospace text-nowrap">
+                                                {{ '' if v is none or v=='' or (v|string)|lower in ['nan','none','-'] else v }}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Chart Config ---
+        const ctx = document.getElementById('kdvTrendChart').getContext('2d');
+        const months = {{ kdv_months | tojson }};
+        const matrahs = [];
+        const kdvs = [];
+        
+        {% for m in kdv_months %}
+            matrahs.push({{ kdv_summary[m].matrah }});
+            kdvs.push({{ kdv_summary[m].hesaplanan }});
+        {% endfor %}
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Toplam Matrah',
+                        data: matrahs,
+                        borderColor: '#4e54c8',
+                        backgroundColor: 'rgba(78, 84, 200, 0.08)',
+                        borderWidth: 4,
+                        pointBackgroundColor: '#4e54c8',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Hesaplanan KDV',
+                        data: kdvs,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        borderWidth: 4,
+                        pointBackgroundColor: '#f59e0b',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 20, usePointStyle: true, font: { weight: 'bold', size: 12 } } },
+                    tooltip: { padding: 12, backgroundColor: 'rgba(255,255,255,0.9)', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
+                },
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', grid: { color: '#f1f5f9' }, title: { display: true, text: 'Matrah (\u20BA)', color: '#4e54c8', font: { weight: 'bold' } } },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'KDV (\u20BA)', color: '#f59e0b', font: { weight: 'bold' } } }
+                }
+            }
+        });
+
+        // --- Live Search ---
+        const searchInput = document.getElementById('kdvSearch');
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLocaleLowerCase('tr-TR');
+            const dataRows = document.querySelectorAll('.kdv-data-row');
+            
+            dataRows.forEach(row => {
+                const text = row.innerText.toLocaleLowerCase('tr-TR');
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+            
+            // Handle sections visibility
+            const sections = document.querySelectorAll('.kdv-section-row');
+            sections.forEach(sec => {
+                let hasVisible = false;
+                let next = sec.nextElementSibling;
+                while(next && next.classList.contains('kdv-data-row')) {
+                    if(next.style.display !== 'none') { hasVisible = true; break; }
+                    next = next.nextElementSibling;
+                }
+                sec.style.display = (hasVisible || query === '') ? '' : 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

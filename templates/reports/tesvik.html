@@ -1,0 +1,392 @@
+{# This file is included in indirimlikurumlar.html, do NOT extend layout.html again #}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold text-dark mb-1">Teşvik Yönetim Merkezi</h1>
+            <p class="text-muted mb-0">Toplam <b>{{ docs|length }}</b> kayıtlı yatırım teşvik belgesi bulundu.</p>
+        </div>
+        <a href="/indirimlikurumlar/?sekme=form" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+            <i class="bi bi-plus-lg me-2"></i>Yeni Belge Ekle
+        </a>
+    </div>
+
+    <!-- Ledger List -->
+    <div class="ledger-container">
+        {% for doc in docs %}
+        <div class="ledger-sheet" id="doc-sheet-{{ doc.id }}">
+            <!-- Header: Belge Kimliği -->
+            <div class="ledger-header">
+                <div class="ledger-title-group">
+                    <span class="ledger-no">{{ doc.belge_no }}</span>
+                    <span class="ledger-date text-uppercase">
+                        <i class="bi bi-calendar3 me-1"></i> Başlangıç: {{ doc.belge_tarihi }}
+                    </span>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold shadow-sm">
+                        {{ doc.karar }}
+                    </span>
+                    <button class="btn btn-action-delete" onclick="confirmDeleteDoc({{ doc.id }})" title="Belgeyi Tamamen Sil">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Bar: Kritik Veriler -->
+            <div class="ledger-summary-bar">
+                <div class="summary-item">
+                    <span class="summary-label">Gerçekleşen Harcama</span>
+                    <span class="summary-value text-success">{{ doc.toplam_harcama_tutari|tlformat }} TL</span>
+                    <small class="text-muted d-block mt-1">Belge Tutarı: {{ doc.toplam_tutar|tlformat }} TL</small>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Uygulanan Oranlar</span>
+                    <div class="d-flex flex-column gap-1 mt-1">
+                        <span class="badge bg-secondary fw-normal text-start px-2 py-1">
+                           Katkı Oranı: %{{ doc.katki_orani }}
+                        </span>
+                        <span class="badge bg-primary fw-normal text-start px-2 py-1">
+                           Vergi İndirimi: %{{ doc.vergi_orani }}
+                        </span>
+                        <span class="badge bg-success fw-normal text-start px-2 py-1">
+                           Diğer Faaliyet: %{{ doc.diger_oran }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Tür</span>
+                    <span class="summary-value text-truncate" title="{{ doc.yatirim_turu1 }} - {{ doc.yatirim_turu2 }}">
+                        {{ doc.yatirim_turu1 }}
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Vize Durumu</span>
+                    <span class="summary-value">
+                        {% if 'Evet' in doc.vize_durumu %}
+                        <span class="text-success"><i class="bi bi-patch-check-fill me-1"></i>Vize Yapıldı</span>
+                        {% else %}
+                        <span class="text-warning"><i class="bi bi-clock-history me-1"></i>Yatırım Devam</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Body: Dönem Kullanımları (Table-Like but Modern) -->
+            <div class="ledger-body">
+                <div class="period-table-header" style="grid-template-columns: 0.8fr 1fr 1fr 1fr 1fr 1fr 0.5fr;">
+                    <span>Yıl / Dönem</span>
+                    <span>Dönem Türü</span>
+                    <span>İnd. Vergi Matrahı</span>
+                    <span>C. Yatırım Katkı</span>
+                    <span>C. Diğer Katkı</span>
+                    <span>C. Toplam Katkı</span>
+                    <span class="text-end">İşlemler</span>
+                </div>
+                
+                {% set donemler = kullanimlar.get(doc.belge_no, []) %}
+                {% if donemler %}
+                    {% for d in donemler %}
+                    <div class="period-row" id="period-row-{{ d.id }}" style="grid-template-columns: 0.8fr 1fr 1fr 1fr 1fr 1fr 0.5fr;">
+                        <div class="period-year-badge">{{ d.hesap_donemi }}</div>
+                        <div>
+                            <span class="period-type-pill">{{ d.donem_turu }}</span>
+                        </div>
+                        <div class="period-amount text-dark fw-bold">
+                            {{ d.indirimli_matrah|tlformat }} TL
+                        </div>
+                        <div class="period-amount text-muted">
+                            {{ d.cari_yatirim_katki|tlformat }} TL
+                        </div>
+                        <div class="period-amount text-muted">
+                            {{ d.cari_diger_katki|tlformat }} TL
+                        </div>
+                        <div class="period-amount text-primary fw-bold">
+                            {{ d.cari_toplam_katki|tlformat }} TL
+                        </div>
+
+                        <div class="action-center">
+                            <button class="btn-action-icon btn-action-edit" onclick="goToEditPeriod({{ doc.id }}, '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn-action-icon btn-action-view" onclick="openPeriodModal(this)" data-period='{{ d | tojson | safe }}' title="Verileri İncele">
+                                <i class="bi bi-eye-fill"></i>
+                            </button>
+                            <button class="btn-action-icon btn-action-delete" onclick="confirmDeletePeriod({{ d.id }})" title="Dönemi Sil">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 bg-light rounded-4 opacity-75">
+                        <i class="bi bi-inbox text-muted display-6 mb-3 d-block"></i>
+                        <p class="text-muted small fw-bold">Bu belgeye ait henüz bir kullanım kaydı bulunmuyor.</p>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="goToStep2({{ doc.id }})">
+                            <i class="bi bi-plus-lg me-1"></i>İlk Dönemi Ekle
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer: Global Belge Aksiyonu -->
+            <div class="p-4 bg-white border-top d-flex justify-content-end">
+                <button class="btn-ledger-inspect" onclick="openDocModal(this)" data-doc='{{ doc | tojson | safe }}'>
+                    <i class="bi bi-file-earmark-ruled-fill"></i> ANA BELGEYİ VE TÜM VERİLERİ İNCELE
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if not docs %}
+<div class="text-center py-5">
+    <div class="display-1 text-muted opacity-25 mb-4"><i class="bi bi-file-earmark-x"></i></div>
+    <h3 class="fw-bold text-dark">Henüz Bir Teşvik Belgeniz Yok</h3>
+    <p class="text-muted">Hemen bir belge ekleyerek hesaplamalara başlayabilirsiniz.</p>
+    <a href="/indirimlikurumlar/?sekme=form" class="btn btn-primary rounded-pill px-5 py-2 mt-3">Yeni Belge Başlat</a>
+</div>
+{% endif %}
+
+<!-- 🟢 BELGE DETAY MODALI -->
+<div class="modal fade" id="docViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-file-earmark-text me-2"></i>Teşvik Belgesi Detayları</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div id="docViewContent"></div>
+      </div>
+      <div class="modal-footer border-top-0 bg-light">
+         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔵 DÖNEM DETAY MODALI -->
+<div class="modal fade" id="periodViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light border-bottom-0">
+        <h5 class="modal-title fw-bold text-success"><i class="bi bi-calendar-check me-2"></i>Dönem Hesaplama Detayları</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div id="periodViewContent"></div>
+      </div>
+      <div class="modal-footer border-top-0 bg-light">
+         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    // --- FORMATTERS ---
+    const formatCurrency = (n) => {
+        if (!n && n !== 0) return '-';
+        return parseFloat(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+    };
+
+    // --- MODAL ACTION: BELGE VE ORAN İNCELE ---
+    function openDocModal(btn) {
+        try {
+            const doc = JSON.parse(btn.getAttribute('data-doc'));
+            const html = `
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-white border rounded shadow-sm h-100">
+                            <h6 class="text-secondary fw-bold text-uppercase small mb-3">Temel Bilgiler</h6>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                <li><strong>Belge No:</strong> ${doc.belge_no}</li>
+                                <li><strong>Tarih:</strong> ${doc.belge_tarihi}</li>
+                                <li><strong>Karar:</strong> <span class="badge bg-primary">${doc.karar}</span></li>
+                                <li><strong>Yatırım Türü:</strong> ${doc.yatirim_turu1} / ${doc.yatirim_turu2}</li>
+                                <li><strong>Vize:</strong> ${doc.vize_durumu}</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="col-md-6">
+                        <div class="p-3 bg-white border rounded shadow-sm h-100">
+                             <h6 class="text-secondary fw-bold text-uppercase small mb-3">Finansal Özet</h6>
+                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                <li><strong>Toplam Yatırım:</strong> <span class="text-primary fw-bold">${formatCurrency(doc.toplam_tutar)}</span></li>
+                                <li><strong>Gerçekleşen:</strong> <span class="text-success fw-bold">${formatCurrency(doc.toplam_harcama_tutari)}</span></li>
+                                <li><strong>Gerçekleşen Tevsi:</strong> ${formatCurrency(doc.gerceklesen_tevsi_yatirim_tutari)}</li>
+                                <li><strong>Top. Harcama (İnd. Tabi):</strong> ${formatCurrency(doc.toplam_harcama_tutari)}</li>
+                             </ul>
+                        </div>
+                    </div>
+                     <div class="col-12">
+                        <div class="p-3 bg-info bg-opacity-10 border border-info rounded">
+                            <h6 class="text-info fw-bold text-uppercase small mb-2">Uygulanan Oranlar</h6>
+                            <div class="d-flex flex-wrap gap-3">
+                                <span class="badge bg-white text-dark border border-primary px-3 py-2" style="color: #000 !important;">Katkı: %${doc.katki_orani}</span>
+                                <span class="badge bg-white text-dark border border-success px-3 py-2" style="color: #000 !important;">Vergi İnd: %${doc.vergi_orani}</span>
+                                <span class="badge bg-white text-dark border border-info px-3 py-2" style="color: #000 !important;">Diğer: %${doc.diger_oran}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('docViewContent').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('docViewModal')).show();
+        } catch (e) {
+            console.error("Belge parse hatası:", e);
+        }
+    }
+
+    // --- MODAL ACTION: DÖNEM İNCELE ---
+    function openPeriodModal(btn) {
+        try {
+            const d = JSON.parse(btn.getAttribute('data-period'));
+            // d objesinde period detaylar olmayabilir, template'te 'donemler' loop icinde 'd' iterate ediliyor.
+            // Bu d objesi Flask tarafindan render edilen obje, tojson ile full data gelir.
+            
+            const html = `
+                 <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th colspan="2" class="text-center text-primary fw-bold">
+                                    ${d.hesap_donemi} - ${d.donem_turu}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="50%">İndirimli Vergi Matrahı</td>
+                                <td class="fw-bold fs-5">${formatCurrency(d.indirimli_matrah)}</td>
+                            </tr>
+                            <tr>
+                                <td>Hesaplanan İndirimli Kurumlar Vergisi</td>
+                                <td class="text-danger fw-bold">${formatCurrency(d.indirimli_kv)}</td>
+                            </tr>
+                             <tr>
+                                <td>Cari Dönem Yatırım Katkı Tutarı</td>
+                                <td>${formatCurrency(d.cari_yatirim_katki)}</td>
+                            </tr>
+                             <tr>
+                                <td>Cari Dönem Diğer Faaliyet Katkı Tutarı</td>
+                                <td>${formatCurrency(d.cari_diger_katki)}</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td class="fw-bold">Toplam Yararlanılan Katkı Tutarı</td>
+                                <td class="fw-bold text-success fs-5">${formatCurrency(d.cari_toplam_katki)}</td>
+                            </tr>
+                             <tr>
+                                <td>Önceki Dönemden Devreden Katkı</td>
+                                <td>${formatCurrency(d.onceki_katki_tutari)}</td>
+                            </tr>
+                            <tr>
+                                <td>Sonraki Döneme Devreden Katkı Bakiyesi</td>
+                                <td>${formatCurrency(d.kalan_katki_tutari)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>
+            `;
+            document.getElementById('periodViewContent').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('periodViewModal')).show();
+        } catch (e) {
+             console.error("Dönem parse hatası:", e);
+        }
+    }
+
+    // ✏️ Dönem Düzenle (Forma Gitmek Zorunda - Mantık Orada)
+    function goToEditPeriod(docId, yil, donemTuru) {
+        window.location.href = `/indirimlikurumlar/?sekme=form&view=${docId}&year=${yil}&type=${donemTuru}`;
+    }
+
+    // ➕ Dönem Ekle (Forma gider)
+    function goToStep2(docId) {
+        window.location.href = `/indirimlikurumlar/?sekme=form&view=${docId}#step2`;
+    }
+
+    // 🗑️ Belge Silme Onayı
+    function confirmDeleteDoc(id) {
+        Swal.fire({
+            title: 'TEŞVİK BELGESİNİ SİL',
+            text: "Bu işlem geri alınamaz! Belgeye bağlı tüm hesaplamalar silinecektir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Evet, Sil',
+            cancelButtonText: 'Vazgeç'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteDocument(id);
+            }
+        });
+    }
+
+    // 🗑️ Dönem Silme Onayı
+    function confirmDeletePeriod(id) {
+        Swal.fire({
+            title: 'Dönem Kaydını Sil',
+            text: "Sadece bu döneme ait hesaplama silinecektir.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sil',
+            cancelButtonText: 'Vazgeç'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deletePeriod(id);
+            }
+        });
+    }
+
+    // AJAX: Belge Sil (İyileştirilmiş Hata Yönetimi)
+    function deleteDocument(id) {
+        Swal.showLoading();
+        fetch(`/indirimlikurumlar/delete/${id}`, { method: 'POST' })
+            .then(async res => {
+                if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if(data.status === 'success') {
+                    $(`#doc-sheet-${id}`).fadeOut(400, function() { $(this).remove(); });
+                    Swal.fire('Başarılı', 'Belge başarıyla silindi.', 'success');
+                } else {
+                    Swal.fire('Hata', data.message || 'Silme işlemi başarısız.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Hata', 'Bağlantı hatası oluştu veya sunucu yanıt vermiyor.', 'error');
+            });
+    }
+
+    // AJAX: Dönem Sil (İyileştirilmiş Hata Yönetimi)
+    function deletePeriod(id) {
+        Swal.showLoading();
+        fetch(`/indirimlikurumlar/delete_tesvik_kullanim/${id}`, { method: 'POST' })
+            .then(async res => {
+                 if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
+                 return res.json();
+            })
+            .then(data => {
+                if(data.status === 'success') {
+                    $(`#period-row-${id}`).fadeOut(300, function() { $(this).remove(); });
+                    Swal.fire('Başarılı', 'Dönem kaydı silindi.', 'success');
+                } else {
+                    Swal.fire('Hata', data.message || 'Silme başarısız.', 'error');
+                }
+            })
+             .catch(err => {
+                console.error(err);
+                Swal.fire('Hata', 'Silme işlemi sırasında bir hata oluştu.', 'error');
+            });
+    }
+</script>

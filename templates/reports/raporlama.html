@@ -1,0 +1,354 @@
+{% extends "layout.html" %}
+
+{% block title %}Analiz Merkezi | Finansal Yönetim Paneli{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Modern Dashboard Stili --- */
+    :root {
+        --primary-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --primary-text: #1e293b;
+        --secondary-text: #64748b;
+        --accent-blue: #3b82f6; 
+        --accent-purple: #8b5cf6;
+        --accent-teal: #14b8a6;
+        --border-color: #e2e8f0;
+        --radius-xl: 24px;
+        --radius-lg: 16px;
+        --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
+        --shadow-hover: 0 20px 40px -10px rgba(0,0,0,0.12);
+        --gradient-blue: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        --gradient-purple: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    }
+
+    body { background-color: var(--primary-bg); color: var(--primary-text); font-family: 'Inter', sans-serif; }
+
+    .dashboard-header {
+        padding: 3rem 0 2rem;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .dashboard-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(to right, #1e293b, #334155);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.1rem;
+        color: var(--secondary-text);
+        line-height: 1.6;
+    }
+
+    /* --- Filtre Kartı --- */
+    .filter-section {
+        background: var(--card-bg);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-color);
+        margin-bottom: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .filter-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    }
+
+    /* --- Modül Kartları (Split View) --- */
+    .module-card {
+        background: var(--card-bg);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .module-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+        border-color: transparent;
+    }
+
+    .module-card.trend:hover { box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2); }
+    .module-card.xray:hover { box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.2); }
+
+    .module-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        font-size: 2.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .module-card:hover .module-icon { transform: scale(1.1) rotate(-5deg); }
+
+    .module-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary-text); }
+    .module-desc { color: var(--secondary-text); font-size: 0.95rem; margin-bottom: 2rem; min-height: 48px; }
+
+    .module-bg-blue { background: var(--gradient-blue); color: var(--accent-blue); }
+    .module-bg-purple { background: var(--gradient-purple); color: var(--accent-purple); }
+
+    .btn-action {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-trend { background-color: var(--accent-blue); color: white; }
+    .btn-trend:hover { background-color: #2563eb; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); }
+
+    .btn-xray { background-color: var(--accent-purple); color: white; }
+    .btn-xray:hover { background-color: #7c3aed; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
+
+    /* Form Elements */
+    .custom-select {
+        border-radius: 12px;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        font-weight: 600;
+        color: var(--primary-text);
+        cursor: pointer;
+    }
+    .custom-select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .year-checkbox {
+        display: none;
+    }
+    
+    .year-label {
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        border: 2px solid var(--border-color);
+        color: var(--secondary-text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+    }
+
+    .year-checkbox:checked + .year-label {
+        border-color: var(--accent-teal);
+        background-color: #f0fdfa;
+        color: #0d9488;
+    }
+    
+    .kdv-section {
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px dashed var(--border-color);
+    }
+    
+</style>
+
+<div class="container pb-5">
+    
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Analiz Merkezi</h1>
+        <p class="dashboard-subtitle">
+            Finansal verilerinizi profesyonel araçlarla analiz edin. Tek bir merkezden trendleri inceleyin veya detaylı finansal röntgen çekin.
+        </p>
+    </div>
+
+    <!-- Ortak Form Alanı -->
+    <form id="mainAnalysisForm" method="get">
+        
+        <!-- Üst Kısım: Seçimler -->
+        <div class="filter-section animate__animated animate__fadeInUp">
+            <div class="row g-4 align-items-center">
+                <!-- Mükellef Seçimi -->
+                <div class="col-md-6">
+                    <label class="form-label text-uppercase small fw-bold text-muted mb-2">1. Mükellef Seçimi</label>
+                    <select id="vknSelect" name="vkn" class="form-select custom-select" onchange="this.form.submit()">
+                        <option value="">Analiz Yapılacak Mükellefi Seçin...</option>
+                        {% for m in mukellefler %}
+                        <option value="{{ m.vkn }}" {% if secili_vkn == m.vkn %}selected{% endif %}>
+                            {{ m.unvan }} ({{ m.vkn }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Dönem Seçimi -->
+                <div class="col-md-6">
+                    <label class="form-label text-uppercase small fw-bold text-muted mb-2">2. Dönem Seçimi (Çoklu)</label>
+                    
+                    {% if not secili_vkn %}
+                        <div class="alert alert-light border mb-0 py-2 text-muted small">
+                            <i class="bi bi-arrow-left me-2"></i>Önce mükellef seçiniz.
+                        </div>
+                    {% else %}
+                        {% if not donemler %}
+                            <div class="text-warning small"><i class="bi bi-exclamation-circle me-1"></i>Kayıtlı dönem bulunamadı.</div>
+                        {% else %}
+                            <div class="checkbox-group">
+                                {% for d in donemler %}
+                                <div class="form-check p-0 m-0">
+                                    <input type="checkbox" class="year-checkbox" name="yillar" id="year_{{ d }}" value="{{ d }}" 
+                                        {% if d in donemler[:2] %}checked{% endif %}> 
+                                        <!-- Varsayılan olarak son 2 yılı seçili getiriyoruz -->
+                                    <label class="year-label" for="year_{{ d }}">
+                                        {{ d }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <!-- Gizli inputlar (Eski form yapısına uyumluluk için) -->
+                            <input type="hidden" name="donemler" id="hiddenDonemler" value="">
+                            <input type="hidden" name="unvan" value="{{ secili_unvan }}">
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Alt Kısım: İki Ana Seçenek (Trend vs Röntgen) -->
+        {% if secili_vkn %}
+        <div class="row g-4 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+            
+            <!-- Seçenek 1: Trend Analizi -->
+            <div class="col-md-6">
+                <div class="module-card trend" onclick="submitTo('{{ url_for('report.raporlama_grafik') }}')">
+                    <div class="module-icon module-bg-blue">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h3 class="module-title">Dinamik Trend Analizi</h3>
+                    <p class="module-desc">
+                        Yıllar arasındaki finansal değişimi görsel grafiklerle inceleyin. Artış ve azalış trendlerini anında tespit edin.
+                    </p>
+                    <button type="button" class="btn btn-action btn-trend">
+                        Görsel Analizi Başlat <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                    <!-- Trend grafiği sayfası, dönemleri 'donemler' parametresi string olarak bekleyebilir, JS ile halledeceğiz -->
+                </div>
+            </div>
+
+            <!-- Seçenek 2: Finansal Röntgen -->
+            <div class="col-md-6">
+                <div class="module-card xray" onclick="submitTo('{{ url_for('report.finansal_analiz') }}')">
+                    <div class="module-icon module-bg-purple">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <h3 class="module-title">Finansal Röntgen</h3>
+                    <p class="module-desc">
+                        Finansal oranların derinlemesine analizi, risk göstergeleri ve yapay zeka destekli iyileştirme tavsiyeleri.
+                    </p>
+                    <button type="button" class="btn btn-action btn-xray">
+                        Detaylı Röntgeni Çek <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- KDV Alanı (Opsiyonel) -->
+        <div class="kdv-section text-center animate__animated animate__fadeIn" style="animation-delay: 0.2s;">
+            <p class="text-muted fw-bold mb-3 small text-uppercase">Alternatif Raporlar</p>
+            <div class="d-inline-flex gap-3">
+                <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary" 
+                        onclick="submitKDV('{{ url_for('report.rapor_kdv') }}')">
+                    <i class="bi bi-table me-2 text-warning"></i>KDV Analiz Raporu
+                </button>
+                <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary"
+                        onclick="submitKDV('{{ url_for('report.rapor_kdv_excel') }}')">
+                    <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>KDV Özeti (Excel)
+                </button>
+            </div>
+            <!-- KDV sayfası için input (kdv_periods olarak gidiyor genellikle) -->
+            <input type="hidden" name="kdv_periods" id="kdvPeriodsInput">
+        </div>
+
+        {% endif %}
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function getSelectedYears() {
+        const checked = document.querySelectorAll('.year-checkbox:checked');
+        return Array.from(checked).map(cb => cb.value);
+    }
+
+    function validateSelection() {
+        const years = getSelectedYears();
+        if (years.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Dönem Seçimi Gerekli',
+                text: 'Lütfen analiz için en az bir dönem seçiniz.',
+                confirmButtonColor: '#334155'
+            });
+            return false;
+        }
+        return years;
+    }
+
+    function submitTo(url) {
+        const years = validateSelection();
+        if(!years) return;
+
+        const form = document.getElementById('mainAnalysisForm');
+        
+        // Inputları hazırla
+        // Raporlama Grafik 'donemler' parametresi bekler (virgülle ayrılmış string)
+        document.getElementById('hiddenDonemler').value = years.join(',');
+        
+        // Finansal Röntgen 'yillar' (list) bekler, checkboxlar zaten 'yillar' adıyla submit edilir, bu OK.
+
+        form.action = url;
+        form.submit();
+    }
+    
+    function submitKDV(url) {
+        const years = validateSelection();
+        if(!years) return;
+        
+        // KDV rotası 'kdv_periods' bekler
+        document.getElementById('kdvPeriodsInput').value = years.join(',');
+        
+        const form = document.getElementById('mainAnalysisForm');
+        form.action = url;
+        form.submit();
+    }
+</script>
+{% endblock %}
