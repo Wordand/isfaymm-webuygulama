@@ -102,33 +102,38 @@ function renderFilesList(files) {
         // Durum renkleri ve ikonları
         let statusClass = 'bg-primary';
         let statusIcon = 'fa-circle-dot';
+        let cardStatusClass = 'card-status-info';
         
         const status = file.status || '';
         if (status.includes('Eksiklik')) {
             statusClass = 'bg-warning text-dark';
             statusIcon = 'fa-triangle-exclamation';
+            cardStatusClass = 'card-status-warning';
         } else if (status.includes('Tamamlandı') || status.includes('Bitti')) {
             statusClass = 'bg-success';
             statusIcon = 'fa-check-double';
+            cardStatusClass = 'card-status-success';
         } else if (status.includes('İptal') || status.includes('Red')) {
             statusClass = 'bg-danger';
             statusIcon = 'fa-xmark';
+            cardStatusClass = 'card-status-danger'; 
         } else if (status.includes('Vergi Dairesi') || status.includes('Makam')) {
             statusClass = 'bg-info text-dark';
             statusIcon = 'fa-building-columns';
+            cardStatusClass = 'card-status-info';
         }
         
         const periodStr = (file.period_year && file.period_month) ? `${file.period_year}-${file.period_month}` : (file.period || '-');
 
         html += `
             <div class="col-md-6 col-lg-4 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden stat-card-premium position-relative" 
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden file-card-premium ${cardStatusClass} position-relative" 
                      onclick="window.location.href='/kdv-detay/${file.id}'" 
-                     style="transition: all 0.3s ease; cursor: pointer; border: 1px solid rgba(0,0,0,0.03) !important;">
-                    <div class="card-body p-4 d-flex flex-column">
+                     style="transition: all 0.3s ease; cursor: pointer; border: 1px solid rgba(0,0,0,0.03) !important; padding: 0;">
+                    <div class="card-body p-4 d-flex flex-column" style="min-height: 200px;">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <span class="badge ${statusClass} rounded-pill px-3 py-2 small fw-bold shadow-sm">
-                                <i class="fa-solid ${statusIcon} me-1 small"></i> ${file.status || 'İşlem Başladı'}
+                                <i class="fa-solid ${statusIcon} me-1 small"></i> ${file.status || 'İade dilekçesi girildi'}
                             </span>
                             <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.7rem;">
                                 ${periodStr}

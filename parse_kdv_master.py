@@ -19,51 +19,104 @@ def clean_text(text):
     if not text: return ""
     if "<!-- TABLE_START -->" in text: return text 
 
-    text = re.sub(r'\.{4,}.*$', '', text)
-    lines = text.split('\n')
-    cleaned_lines = [re.sub(r'\s+', ' ', l).strip() for l in lines if l.strip()]
+    # Sayfa altı dipnotları ve tarihlerini temizle (örn: "21/12/2021-31696")
+    text = re.sub(r'\d{2}/\d{2}/\d{4}-\d+', '', text)
+    text = re.sub(r'Sayfa \d+ / \d+', '', text)
     
+    # İçindekiler kalıntısı (nokta dizileri)
+    text = re.sub(r'\.{4,}.*$', '', text, flags=re.MULTILINE)
+    
+    lines = text.split('\n')
+    cleaned_lines = []
+    for l in lines:
+        ls = l.strip()
+        if not ls: continue
+        # Agresif sayfa başlığı/footer temizliği
+        if "RESMİ GAZETE" in ls.upper() or "SAYFA" in ls.upper(): continue
+        # Sadece tarihten oluşan satırlar
+        if re.match(r'^\d{2}\.\d{2}\.\d{4}$', ls): continue
+        cleaned_lines.append(ls)
+    
+    if not cleaned_lines: return ""
+
     formatted_blocks = []
     current_block = []
 
-    for line in cleaned_lines:
-        is_list_item = re.search(r'^(\-|•|\*|\d+\.|[a-zçğıöşü]\))\s', line, re.IGNORECASE)
-        # Hata önleyici: 20.000 gibi sayılar liste değildir.
-        if is_list_item and re.search(r'^\d+\.\d{3}', line): is_list_item = False
+    for i, line in enumerate(cleaned_lines):
+        # Dipnot satırı tespiti: "52 35 Seri No.lu..." veya "(1) ..."
+        is_fn = re.match(r'^\d+\s+\d+\s+Seri No', line) or \
+                re.match(r'^\d+\s+Seri No', line) or \
+                (line.startswith("(") and any(x in line for x in ["Tebliğ", "Değişik", "Yürürlük"]))
+        
+        is_list = re.match(r'^(\-|\d+\.|[a-zçğıöşü]\)|•|\*)\s', line, re.IGNORECASE)
+        if is_list and re.match(r'^\d+\.\d{3}', line): is_list = False
 
-        is_example = line.startswith("Örnek") or line.startswith("ÖRNEK")
-        is_footnote = line.startswith("(") and ("Tebliğ" in line or "Değişik" in line or "Yürürlük" in line)
+        is_ex = line.upper().startswith("ÖRNEK")
 
-        if is_list_item or is_example or is_footnote:
-            if current_block: formatted_blocks.append(" ".join(current_block))
-            current_block = []
+        if is_list or is_ex or is_fn:
+            if current_block:
+                formatted_blocks.append(" ".join(current_block))
+                current_block = []
+            
+            # Bloğa eklemeden önce, eğer dipnot ise önceki blok sonundaki referans sayısını sil
+            if is_fn and formatted_blocks:
+                formatted_blocks[-1] = re.sub(r'(\w)\d{1,2}$', r'\1', formatted_blocks[-1]).strip()
+            
             formatted_blocks.append(line)
         else:
-            if not current_block: current_block.append(line)
+            if not current_block:
+                current_block.append(line)
             else:
-                last_line_part = current_block[-1]
-                if line[0].isupper() and (last_line_part.endswith('.') or last_line_part.endswith(':')):
+                prev = current_block[-1]
+                should_join = False
+                # Birleştirme kuralları
+                if not prev.endswith(('.', ':', ';', '!', '?')): should_join = True
+                elif line[0].islower(): should_join = True
+                elif line.split()[0].lower() in ["ve", "veya", "ile", "da", "de"]: should_join = True
+                
+                if should_join:
+                    current_block.append(line)
+                else:
                     formatted_blocks.append(" ".join(current_block))
                     current_block = [line]
-                else: current_block.append(line)
     
-    if current_block: formatted_blocks.append(" ".join(current_block))
-    return "\n\n".join(formatted_blocks)
+    if current_block:
+        formatted_blocks.append(" ".join(current_block))
+    
+    # Final temizlik
+    processed = []
+    for b in formatted_blocks:
+        # Cümle içi yapışık dipnot numaraları: "yapılır.32" -> "yapılır."
+        # Not: Binlik ayraçlarını (.000) bozmamak için sadece 1-2 basamaklıları hedefliyoruz.
+        b = re.sub(r'([\.])(\d{1,2})(\s|$)', r'\1\3', b)
+        # Kelimeye yapışık dipnotlar: "şirketleri,32" -> "şirketleri,"
+        b = re.sub(r'([,])(\d{1,2})(\s|$)', r'\1\3', b)
+        # Fazla boşluklar
+        if "<!-- TABLE_START -->" not in b:
+            b = re.sub(r' +', ' ', b)
+        processed.append(b.strip())
+
+    return "\n\n".join(processed)
 
 def is_toc_line(text):
     return bool(re.search(r'\.{4,}\s*\d*$', text))
 
 def clean_title(title):
-    t = re.sub(r'\s+', ' ', title).strip()
-    return re.sub(r'(?<=[a-zA-ZüğışçöÜĞİŞÇÖ])\d+$', '', t).strip()
+    # Başlık sonundaki dipnot numaralarını sil (örn: "Kapsam32")
+    t = re.sub(r'([a-zA-ZüğışçöÜĞİŞÇÖ])\d+$', r'\1', title)
+    t = re.sub(r'\s+', ' ', t).strip()
+    # Başlık sonundaki fazlalık noktaları temizle
+    while t.endswith("."): t = t[:-1].strip()
+    return t
 
 def is_roman_header(text):
     if is_toc_line(text): return None, None
-    m = re.match(r'^([XVI]+)\s*[\.\-\–]\s*(.*)$', text)
+    # Support "I.", "I-", "I "
+    m = re.match(r'^([XVI]+)\s*[\.\-\–\s]\s*(.*)$', text)
     if m:
         roman = m.group(1)
-        title = m.group(2)
-        if roman in ROMAN_NUMERALS and len(title) > 3 and title.strip()[0].isupper():
+        title = m.group(2).strip()
+        if roman in ROMAN_NUMERALS and len(title) > 3 and title[0].isupper():
             if len(title) > 150: return None, None 
             return roman, clean_title(title)
     return None, None
@@ -135,9 +188,18 @@ def is_numeric_header(text):
     clean_t = text.strip()
     
     # Çok seviyeli (örn: 2.1.3.1.2) başlıkları yakalamak için geliştirilmiş regex
-    m = re.match(r'^(\d+(?:\.\d+){0,5})\s*([\.\-\–])\s*(.*)$', clean_t)
+    # Durum 1: Ayırıcı var (2.1.3. - Başlık)
+    m1 = re.match(r'^(\d+(?:\.\d+){0,5})\s*[\.\-\–]\s*(.*)$', clean_t)
+    # Durum 2: Ayırıcı yok (2.1.3.1 Başlık)
+    m2 = re.match(r'^(\d+(?:\.\d+){1,5})\s+(.*)$', clean_t)
+    
+    m = m1 or m2
     if m:
-        num_part, sep_part, title_part = m.group(1), m.group(2), m.group(3)
+        num_part, title_part = m.group(1), m.group(2)
+        # Seviye 1 (noktasız) ise mutlaka ayırıcı olmalı (dipnotları elemeyi garantilemek için)
+        if '.' not in num_part and not m1:
+            return None, None, None
+            
         if is_valid_num(num_part) and is_valid_title(title_part):
             lvl = len(num_part.split('.'))
             return lvl, num_part, clean_title(title_part)
@@ -161,16 +223,26 @@ def extract_tables_as_html(page):
         html_tables = []
         if tables:
             for table in tables:
-                if not table or not any(row for row in table if any(cell and cell.strip() for cell in row)): continue
+                # Temizle: Boş satırları ve sütunları ele
+                t_clean = []
+                for row in table:
+                    if any(cell and cell.strip() for cell in row):
+                        t_clean.append([ (c or "").replace("\n", " ").strip() for c in row ])
+                
+                if not t_clean: continue
+                
+                # Sütunları kontrol et (tamamen boş sütun var mı?)
+                col_mask = [any(row[col] for row in t_clean) for col in range(len(t_clean[0]))]
+                t_final = [[row[col] for col in range(len(row)) if col_mask[col]] for row in t_clean]
+
                 html = '\n<!-- TABLE_START -->\n<div class="table-responsive my-3 shadow-sm border rounded"><table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9em;">'
-                if len(table) > 0:
+                if len(t_final) > 0:
                     html += '<thead class="table-light"><tr>'
-                    for cell in table[0]: html += f'<th scope="col" class="fw-bold text-center align-middle">{(cell or "").replace("\n", " ").strip()}</th>'
+                    for cell in t_final[0]: html += f'<th scope="col" class="fw-bold text-center align-middle">{cell}</th>'
                     html += '</tr></thead><tbody>'
-                    for row in table[1:]:
-                        if not any(cell and cell.strip() for cell in row): continue
+                    for row in t_final[1:]:
                         html += '<tr>'
-                        for cell in row: html += f'<td class="align-middle">{(cell or "").replace("\n", "<br>").strip()}</td>'
+                        for cell in row: html += f'<td class="align-middle">{cell}</td>'
                         html += '</tr>'
                     html += '</tbody></table></div>\n<!-- TABLE_END -->\n'
                     html_tables.append(html)
@@ -253,21 +325,21 @@ def parse_pdf():
                             break
                         
                         # Exclusion list for title continuation:
-                        # 1. Starts with list marker (-, *, •, a), 1.)
-                        # 2. Ends with colon (Tebliğin: ) or dot (if it's long)
-                        # 3. Too long to be just a title continuation
+                        # 1. Starts with list marker
+                        # 2. Ends with colon
+                        # 3. Too long as a continuation
+                        # 4. Starts with lowercase (titles rarely continue from lowercase unless it's a sentence)
                         
-                        is_list_marker = re.match(r'^(\-|\d+\.|\w+\)|•|\*)', next_line)
-                        if is_list_marker: break
-                        
+                        if re.match(r'^(\-|\d+\.|[a-zçğıöşü]\)|•|\*)', next_line): break
                         if next_line.endswith(":") or next_line.endswith(";"): break
                         
-                        # Heuristic: Title continuations are usually short and don't end with a dot
-                        # unless the whole title is a sentence.
-                        if len(next_line) < 60 and not next_line.endswith("."):
+                        # Heuristic: Title continuations usually start with uppercase
+                        if next_line[0].islower() and len(n_title) > 20: break
+
+                        if len(next_line) < 70 and not next_line.endswith("."):
                             n_title += " " + next_line
                             line_idx += 1
-                        elif len(next_line) < 30: # Even with a dot, very short lines might be part of title
+                        elif len(next_line) < 35: 
                             n_title += " " + next_line
                             line_idx += 1
                         else:

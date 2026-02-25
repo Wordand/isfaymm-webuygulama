@@ -1,6 +1,7 @@
 import os
 import sqlite3
-from psycopg2 import pool, extras
+import psycopg2
+from psycopg2 import extras
 from contextlib import contextmanager
 from dotenv import load_dotenv
 
@@ -27,21 +28,6 @@ _db_pool = None
 
 
 
-def get_pool():
-    global _db_pool
-    if _db_pool is None and not USE_SQLITE:
-        _db_pool = pool.SimpleConnectionPool(
-            1, 5,
-            DATABASE_URL,
-            connect_timeout=5,
-            keepalives=1,
-            keepalives_idle=30,
-            keepalives_interval=10,
-            keepalives_count=5,
-            cursor_factory=extras.RealDictCursor
-        )
-        print("PostgreSQL baglanti havuzu baslatildi.")
-    return _db_pool
 
 
 # ============================================================
@@ -114,10 +100,6 @@ class FakeConnection:
 # ============================================================
 @contextmanager
 def get_conn():
-    """
-    Ortama göre (SQLite veya PostgreSQL) bağlantı döndürür.
-    PostgreSQL'de her cursor otomatik olarak RealDictCursor olur.
-    """
     if USE_SQLITE:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
         conn = FakeConnection(DB_PATH)
@@ -126,19 +108,20 @@ def get_conn():
         finally:
             conn.close()
     else:
-        conn = get_pool().getconn()
+        conn = psycopg2.connect(
+            DATABASE_URL,
+            sslmode="require",
+            connect_timeout=5
+        )
         try:
-            # ✅ Her cursor RealDictCursor olarak dönecek
+            # 🔥 kritik satır
             conn.cursor_factory = extras.RealDictCursor
             yield conn
-        except Exception as e:
-            try:
-                conn.rollback()
-            except Exception:
-                pass  # bağlantı zaten kapanmış olabilir
-            raise e
+        except Exception:
+            conn.rollback()
+            raise
         finally:
-            get_pool().putconn(conn)
+            conn.close()
 
 
 
