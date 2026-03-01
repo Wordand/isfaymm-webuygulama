@@ -30,6 +30,7 @@ from routes.indirimlikurumlar import bp as indirim_bp
 from routes.calculators import calculators_bp
 from routes.mukellef_routes import bp as mukellef_bp
 from routes.kdv_routes import bp as kdv_bp
+from routes.mobile_api import bp as mobile_api_bp
 
 try:
     from flask.json.provider import DefaultJSONProvider
@@ -144,6 +145,7 @@ app.register_blueprint(indirim_bp)
 app.register_blueprint(calculators_bp) 
 app.register_blueprint(mukellef_bp)
 app.register_blueprint(kdv_bp)
+app.register_blueprint(mobile_api_bp)  # ISFA Mobil API
 
 # --- Initialization & Database Check ---
 with app.app_context():

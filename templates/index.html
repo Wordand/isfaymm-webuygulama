@@ -19,9 +19,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
 <section class="hero text-center position-relative overflow-hidden">
   <div class="hero-background">
-    <video autoplay muted loop playsinline poster="{{ url_for('static', filename='images/hero-bg.jpg') }}" class="hero-video">
-      <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
-    </video>
+    <!-- 🎬 Cinematic Animated Background Image is now active via CSS -->
   </div>
   
   <div class="container hero-content" data-aos="zoom-in" data-aos-duration="1500">
@@ -601,6 +599,19 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
     counters.forEach(counter => {
       observer.observe(counter);
     });
+
+    // 📹 Video Fade-in Effect
+    const heroVideo = document.querySelector('.hero-video');
+    if (heroVideo) {
+      // Eğer video zaten oynamaya başladıysa (önbellekten vs.)
+      if (heroVideo.readyState >= 3) {
+        heroVideo.classList.add('video-loaded');
+      }
+      
+      heroVideo.addEventListener('playing', function() {
+        heroVideo.classList.add('video-loaded');
+      });
+    }
   });
 </script>
 <!-- ⭐ MAIN SEO SCHEMA – ANA SAYFA İÇİN EN KRİTİK BÖLÜM -->

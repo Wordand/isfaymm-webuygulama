@@ -361,8 +361,9 @@ body.navbar-open .main-content {
     z-index: 2000; /* Yine en üstte kalır */
 }
 .navbar-transparent .navbar-brand,
-.navbar-transparent .nav-link {
-    color: var(--white);
+.navbar-transparent .nav-link,
+.navbar-transparent .nav-link-animated {
+    color: rgba(255, 255, 255, 0.9) !important;
 }
 .navbar-transparent .navbar-toggler-icon {
     filter: invert(1);
@@ -379,8 +380,9 @@ body.navbar-open .main-content {
     padding-bottom: 1rem !important;
 }
 .navbar-scrolled .navbar-brand,
-.navbar-scrolled .nav-link {
-    color: var(--dark-text);
+.navbar-scrolled .nav-link,
+.navbar-scrolled .nav-link-animated {
+    color: var(--dark-text) !important;
 }
 
 /* İç sayfa sekmeleri */
@@ -832,7 +834,19 @@ thead th {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; 
+    z-index: 0;
+    background-color: #0f172a;
+    background-image: url('images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    animation: cinematicZoom 20s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes cinematicZoom {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 /* ⬛ DARK OVERLAY for better text contrast */
@@ -851,8 +865,13 @@ thead th {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 1;
+    opacity: 0;
     filter: brightness(0.8);
+    transition: opacity 2s ease-in-out;
+}
+
+.hero-video.video-loaded {
+    opacity: 1;
 }
 
 .hero-content {
@@ -931,6 +950,64 @@ thead th {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-3px) scale(1.02);
+}
+
+/* --- Responsive Hero Fixes --- */
+@media (max-width: 991.98px) {
+    .hero {
+        min-height: auto; /* Allow content to dictate height on mobile */
+        padding: 6rem 1rem 4rem;
+        display: block; /* Avoid flex vertical centering issues on small screens */
+    }
+    .hero-video {
+        display: none !important; /* Hide video on mob/tablet for reliability */
+    }
+    .hero-background {
+        background-color: #0f172a;
+        background-image: url('images/hero-bg.jpg'); /* Show the high-quality poster as background */
+        background-size: cover;
+        background-position: center;
+    }
+    .hero-content {
+        padding: 2.5rem 1.5rem;
+        border-radius: 24px;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 500px;
+    }
+    .hero-content h1 {
+        font-size: 3rem !important;
+        letter-spacing: -1.5px !important;
+    }
+    .hero-content h3 {
+        font-size: 1rem !important;
+        letter-spacing: 3px !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-content h1 {
+        font-size: 2.4rem !important;
+        letter-spacing: -1px !important;
+    }
+    .hero-content {
+        padding: 2rem 1.25rem;
+    }
+    .hero-content h3 {
+        font-size: 0.85rem !important;
+        letter-spacing: 2px !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .hero-content .lead {
+        font-size: 0.95rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .hero .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        display: block;
+        width: 100%;
+    }
 }
 
 

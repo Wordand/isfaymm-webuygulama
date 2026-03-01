@@ -235,7 +235,7 @@
     <div id="mobile-overlay" class="mobile-overlay"></div>
 
     <!-- 🟦 CONTENT -->
-    <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important; padding-top: 80px !important;' if not show_sidebar else '' }}">
+    <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important;' if not show_sidebar else '' }} {{ 'padding-top: 0 !important;' if request.endpoint == 'main.home' else 'padding-top: 80px !important;' if not show_sidebar else '' }}">
         <!-- Endpoint: {{ request.endpoint }} -->
         {% block content %}{% endblock %}
     </main>

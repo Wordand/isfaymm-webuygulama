@@ -77,6 +77,20 @@
                                     <div class="dmi-desc">SMM hesaplama</div>
                                 </div>
                             </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.ithalat_kdv') }}">
+                                <div class="dmi-icon bg-cyan"><i class="bi bi-truck"></i></div>
+                                <div>
+                                    <div class="dmi-label">İthalatta KDV</div>
+                                    <div class="dmi-desc">KDV indirimi hesabı</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.gecikme_zammi') }}">
+                                <div class="dmi-icon bg-orange"><i class="bi bi-stopwatch"></i></div>
+                                <div>
+                                    <div class="dmi-label">Gecikme Zammı</div>
+                                    <div class="dmi-desc">Güncel oranlarla hesaplama</div>
+                                </div>
+                            </a>
                         </div>
 
                         <div class="dropdown-divider-modern"></div>
@@ -294,10 +308,10 @@
    NAV LINKS
 ═══════════════════════════════════════ */
 .nav-link-animated {
-    color: #444 !important;
-    font-weight: 500;
-    font-size: 0.9rem;
-    padding: 0.4rem 0.6rem !important;
+    color: #444;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem !important;
     position: relative;
     transition: color 0.2s ease;
 }
@@ -312,7 +326,7 @@
     border-radius: 2px;
     transition: left 0.25s ease, right 0.25s ease;
 }
-.nav-link-animated:hover { color: #c8102e !important; }
+.nav-link-animated:hover { color: #ef4444 !important; }
 .nav-link-animated:hover::after { left: 6px; right: 6px; }
 
 /* Separator */
@@ -355,6 +369,24 @@
     color: white !important;
     border-color: #c8102e !important;
     box-shadow: 0 4px 12px rgba(200,16,46,0.3);
+}
+.navbar-transparent {
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+    z-index: 2000;
+}
+/* Ana sayfada en üstteyken butonları biraz daha sadeleştir */
+.navbar-transparent .nav-pill-btn {
+    background: rgba(255,255,255,0.1) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+    color: white !important;
+}
+.navbar-transparent .nav-pill-btn i {
+    color: white !important;
 }
 
 /* ═══════════════════════════════════════
@@ -520,11 +552,3 @@
     transition: all 0.3s ease;
 }
 </style>
-
-<script>
-// Scroll effect
-const navbar = document.getElementById('mainNavbar');
-window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 30);
-});
-</script>
