@@ -163,15 +163,13 @@ def _clean_json_value(val):
 
 
 def get_user_profit_df(user_id: int) -> pd.DataFrame:
-    """
-    Belirtilen kullanıcıya ait kâr tablosu verilerini veritabanından çeker
-    ve bir Pandas DataFrame'e dönüştürür.
-    Eğer veri yoksa, varsayılan bir DataFrame oluşturur ve veritabanına kaydeder.
-    """
     df = pd.DataFrame({
         'Açıklama': explanations,
         'B': 0.0, 'C': 0.0, 'D': 0.0, 'E': 0.0
     })
+
+    if user_id == -1 or user_id is None:
+        return df
 
     with get_conn() as conn:
         c = conn.cursor()
@@ -205,9 +203,9 @@ def get_user_profit_df(user_id: int) -> pd.DataFrame:
     return df
 
 def save_user_profit_df(user_id: int, dataframe: pd.DataFrame):
-    """
-    Kullanıcının kâr tablosu verilerini veritabanına kaydeder/günceller.
-    """
+    if user_id == -1 or user_id is None:
+        return
+    
     with get_conn() as conn:
         c = conn.cursor()
         for i, row in dataframe.iterrows():
@@ -261,9 +259,8 @@ def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
 
 
 @bp.route('/ayrintili-kazanc', methods=['GET', 'POST'])
-@login_required
 def ayrintili_kazanc():
-    user_id = session["user_id"]
+    user_id = session.get("user_id") or -1 # Public session
 
     try:
         if request.method == 'POST':
@@ -501,38 +498,45 @@ def new_tesvik():
 
 
 @bp.route("/", methods=["GET", "POST"])
-@login_required
 def index():
     print("🔥 indirimlikurumlar.index çalıştı")
     sekme = request.args.get("sekme", "form")
-    user_id = session["user_id"]
-    aktif_mukellef_id = session.get("aktif_mukellef_id")
+    is_logged_in = session.get("logged_in", False)
+    user_id = session.get("user_id") if is_logged_in else None
+    aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
 
-    if not aktif_mukellef_id:
-        from flask import url_for
-        return redirect(url_for("mukellef.index", next=url_for("indirimlikurumlar.index")))
-    
-    # 🔍 Eğer unvan oturumda yoksa veritabanından çek (Formun görünmesi için kritik)
-    if not session.get("aktif_mukellef_unvan"):
-        try:
-            with get_conn() as conn:
-                c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-                c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s AND user_id = %s", (aktif_mukellef_id, user_id))
-                row = c.fetchone()
-                if row:
-                    session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
-                    session["aktif_mukellef_unvan"] = row["unvan"]
-                    print(f"✅ Oturum verisi tazelendi: {row['unvan']}")
-        except Exception as e:
-            print(f"⚠️ Oturum verisi tazelenirken hata: {e}")
+    # Ziyaretçi modu — DB'ye gitme, sayfayı hemen yükle
+    mukellefler = []
+    if not is_logged_in:
+        # Hesaplama aracı misafir kullanım için de açık
+        pass
+    else:
+        # Giriş yapılmış kullanıcı için mükellef seçimi zorunlu
+        if not aktif_mukellef_id:
+            from flask import url_for
+            return redirect(url_for("mukellef.index", next=url_for("indirimlikurumlar.index")))
 
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute(
-            "SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s ORDER BY id DESC",
-            (user_id,),
-        )
-        mukellefler = c.fetchall()
+        # Unvan oturumda yoksa DB'den çek
+        if not session.get("aktif_mukellef_unvan"):
+            try:
+                with get_conn() as conn:
+                    c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                    c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE id = %s AND user_id = %s", (aktif_mukellef_id, user_id))
+                    row = c.fetchone()
+                    if row:
+                        session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
+                        session["aktif_mukellef_unvan"] = row["unvan"]
+                        print(f"✅ Oturum verisi tazelendi: {row['unvan']}")
+            except Exception as e:
+                print(f"⚠️ Oturum verisi tazelenirken hata: {e}")
+
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute(
+                "SELECT id, vergi_kimlik_no, unvan FROM mukellef WHERE user_id = %s ORDER BY id DESC",
+                (user_id,),
+            )
+            mukellefler = c.fetchall()
 
     docs, user_df, current_belge = [], None, None
     edit_doc = None
@@ -585,13 +589,13 @@ def index():
                     kullanimlar[bno].append(item)
     # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
     rows = []
-    if sekme == "ayrintili":
+    if sekme == "ayrintili" and is_logged_in and user_id:
         try:
             df = get_user_profit_df(user_id)
             rows = format_df_for_html(df)
         except Exception as e:
             print(f"⚠️ Ayrıntılı tablo yüklenirken hata: {e}")
-            rows = []  # hata olsa bile boş liste dön
+            rows = []
 
     # Güvenli JSON objeleri
     safe_bolge_map = {}
@@ -643,18 +647,22 @@ def index():
 
 
 @bp.route("/form", methods=["POST"])
-@login_required
 def form_kaydet():
     print(">>> form_kaydet GİRİLDİ")
-    user_id = session["user_id"]
+    user_id = session.get("user_id")
     mukellef_id = session.get("aktif_mukellef_id")
 
-    if not mukellef_id:
+    # Public visitor mode check
+    if not user_id or not mukellef_id:
+        # We can still process and return "calculated" values if frontend needs them, 
+        # but the frontend seems to do the math. 
+        # If it's a guest, we just skip saving and return success.
         return jsonify({
-            "status": "error",
-            "title": "Eksik Bilgi!",
-            "message": "Lütfen önce bir mükellef seçiniz."
-        }), 400
+            "status": "success",
+            "title": "Hesaplandı!",
+            "message": "Ziyaretçi modunda verileriniz kaydedilmez ancak hesaplama tamamlandı.",
+            "tesvik_id": -1
+        })
 
     # ---------------------------------------------------
     #        🔍 1) TESVIK ID BELİRLEME

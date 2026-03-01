@@ -95,7 +95,6 @@ def gecikme_zammi_hesapla(borc, vade, odeme, borc_turu):
 # --- Routes ---
 
 @bp.route("/asgari")
-@login_required
 def asgari():
     return render_template("calculators/asgari.html")
 
@@ -108,12 +107,10 @@ def serbest_meslek():
     return render_template("calculators/serbest_meslek.html")
 
 @bp.route("/finansman")
-@login_required
 def finansman():
     return render_template("calculators/finansman.html")
 
 @bp.route("/sermaye-azaltimi")
-@login_required
 def sermaye_azaltimi():
     return render_template("calculators/sermaye_azaltimi.html")
 

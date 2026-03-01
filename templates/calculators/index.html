@@ -5,93 +5,101 @@ Vergi Hesaplama Araçları | İSFA YMM
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="text-center mb-5" data-aos="fade-down">
+        <h1 class="display-4 fw-bold text-dark">
+            <span class="text-danger">Bilgi</span> Paneli
+        </h1>
+        <p class="lead text-muted mx-auto" style="max-width: 700px;">
+            Güncel mevzuat ve idari görüşler esas alınarak hazırlanmış, 
+            karar alma süreçlerinizi hızlandıracak profesyonel hesaplama araçları.
+        </p>
+    </div>
 
-    <h1 class="mb-4">Vergi Hesaplama Araçları</h1>
+    <!-- Dashboard Grid -->
+    <div class="row g-4 justify-content-center">
 
-    <p class="text-muted mb-4">
-        Güncel mevzuat ve idari görüşler esas alınarak hazırlanmış,
-        bilgilendirme amaçlı vergi hesaplama araçları.
-    </p>
-
-    <div class="row g-4">
-
-        <!-- İthalatta KDV -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">İthalatta KDV İndirimi</h5>
-                    <p class="card-text text-muted small">
-                        İthalatta gözetim ve korunma maliyetlerine ait KDV'nin indirilebilir / indirilemez ayrımı.
+        <!-- Gelir Vergisi -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-bank fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Gelir Vergisi</h4>
+                    <p class="text-muted mb-4 small">
+                        Yıllık beyanname veya ücret gelirleri için güncel tarifeye göre vergi hesaplaması.
                     </p>
-                </div>
-                <div class="card-footer bg-white border-0 text-end">
-                    <a href="{{ url_for('calculators.ithalat_kdv') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                    <a href="{{ url_for('calculators.gelir_vergisi') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
 
-        <!-- Gelir Vergisi -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Gelir Vergisi Hesaplama</h5>
-                    <p class="card-text text-muted small">
-                        Yıllık beyanname veya ücret gelirleri için güncel tarifeye göre vergi hesaplaması.
+        <!-- İthalatta KDV -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-truck fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">İthalatta KDV</h4>
+                    <p class="text-muted mb-4 small">
+                        İthalatta gözetim ve korunma maliyetlerine ait KDV'nin indirilebilir/indirilemez ayrımı.
                     </p>
-                </div>
-                <div class="card-footer bg-white border-0 text-end">
-                    <a href="{{ url_for('calculators.gelir_vergisi') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                    <a href="{{ url_for('calculators.ithalat_kdv') }}" class="btn btn-info text-white px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
 
         <!-- Gecikme Zammı -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Gecikme Zammı Hesaplama</h5>
-                    <p class="card-text text-muted small">
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-stopwatch fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Gecikme Zammı</h4>
+                    <p class="text-muted mb-4 small">
                         Vadesi geçmiş vergi borçları için güncel oranlarla gecikme zammı hesaplaması.
                     </p>
-                </div>
-                <div class="card-footer bg-white border-0 text-end">
-                    <a href="{{ url_for('calculators.gecikme_zammi') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                    <a href="{{ url_for('calculators.gecikme_zammi') }}" class="btn btn-danger px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
 
         <!-- Nakdi Sermaye İndirimi -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold">Nakdi Sermaye İndirimi</h5>
-                    <p class="card-text text-muted small">
-                         Nakit sermaye artırımlarında Kurumlar Vergisi matrahından indirilecek tutarın hesaplanması.
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-currency-dollar fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Sermaye İndirimi</h4>
+                    <p class="text-muted mb-4 small">
+                        Nakit sermaye artırımlarında Kurumlar Vergisi matrahından indirilecek tutarın hesabı.
                     </p>
-                </div>
-                <div class="card-footer bg-white border-0 text-end">
-                    <a href="{{ url_for('calculators.sermaye') }}" class="btn btn-outline-primary btn-sm">Git →</a>
+                    <a href="{{ url_for('calculators.sermaye') }}" class="btn btn-success px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
 
-        <!-- Tek Düzen Hesap Planı -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0 bg-light">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold text-dark">📚 Tek Düzen Hesap Planı ve Açıklamaları</h5>
-                    <p class="card-text text-muted small">
+        <!-- TDHP -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-dark-subtle text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-journal-text fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Hesap Planı</h4>
+                    <p class="text-muted mb-4 small">
                         Muhasebe sisteminde kullanılan tüm hesap kodları, açıklamalar ve sınıflandırmalar.
                     </p>
-                </div>
-                <div class="card-footer bg-transparent border-0 text-end">
-                    <a href="{{ url_for('calculators.tdhp') }}" class="btn btn-dark btn-sm rounded-pill px-3">İncele →</a>
+                    <a href="{{ url_for('calculators.tdhp') }}" class="btn btn-dark px-4 rounded-pill fw-bold">İncele</a>
                 </div>
             </div>
         </div>
 
     </div>
-
 </div>
 {% endblock %}

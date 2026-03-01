@@ -1,5 +1,5 @@
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 from flask import Flask, session
 from flask_limiter import Limiter
@@ -72,11 +72,18 @@ app.config['ENV'] = 'production'
 
 if not app.debug:
     import logging
-    from logging.handlers import RotatingFileHandler
+    from logging.handlers import TimedRotatingFileHandler
     try:
         if not os.path.exists('logs'):
             os.makedirs('logs', exist_ok=True)
-        file_handler = RotatingFileHandler('logs/hesaptanit.log', maxBytes=10240, backupCount=10)
+        # TimedRotatingFileHandler ile Windows lock sorunu önlenir
+        file_handler = TimedRotatingFileHandler(
+            'logs/hesaptanit.log',
+            when='midnight',
+            backupCount=10,
+            encoding='utf-8',
+            delay=True
+        )
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
         ))

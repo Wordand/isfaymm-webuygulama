@@ -37,6 +37,7 @@
         letter-spacing: -0.03em;
         background: linear-gradient(to right, #1e293b, #334155);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 1rem;
     }
@@ -190,6 +191,20 @@
     <!-- Ortak Form Alanı -->
     <form id="mainAnalysisForm" method="get">
         
+        {% if is_public %}
+        <div class="alert alert-info border-0 shadow-sm rounded-4 p-4 text-center mb-5 animate__animated animate__pulse">
+            <h4 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Ziyaretçi Modu</h4>
+            <p class="mb-0">
+                Finansal raporlama ve analiz modülü, şirketinizin <b>Bilanço</b> ve <b>Gelir Tablosu</b> verilerinin analizini yapar. 
+                Kendi verilerinizle deneme yapmak için lütfen ücretsiz hesap oluşturun veya giriş yapın.
+            </p>
+            <div class="mt-3">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary rounded-pill px-4">Giriş Yap</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary rounded-pill px-4 ms-2">Hesap Oluştur</a>
+            </div>
+        </div>
+        {% endif %}
+        
         <!-- Üst Kısım: Seçimler -->
         <div class="filter-section animate__animated animate__fadeInUp">
             <div class="row g-4 align-items-center">
@@ -245,7 +260,7 @@
             
             <!-- Seçenek 1: Trend Analizi -->
             <div class="col-md-6">
-                <div class="module-card trend" onclick="submitTo('{{ url_for('report.raporlama_grafik') }}')">
+                <div class="module-card trend" onclick='submitTo("{{ url_for("report.raporlama_grafik") }}")'>
                     <div class="module-icon module-bg-blue">
                         <i class="bi bi-graph-up"></i>
                     </div>
@@ -262,7 +277,7 @@
 
             <!-- Seçenek 2: Finansal Röntgen -->
             <div class="col-md-6">
-                <div class="module-card xray" onclick="submitTo('{{ url_for('report.finansal_analiz') }}')">
+                <div class="module-card xray" onclick='submitTo("{{ url_for("report.finansal_analiz") }}")'>
                     <div class="module-icon module-bg-purple">
                         <i class="bi bi-activity"></i>
                     </div>
@@ -283,11 +298,11 @@
             <p class="text-muted fw-bold mb-3 small text-uppercase">Alternatif Raporlar</p>
             <div class="d-inline-flex gap-3">
                 <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary" 
-                        onclick="submitKDV('{{ url_for('report.rapor_kdv') }}')">
+                        onclick='submitKDV("{{ url_for("report.rapor_kdv") }}")'>
                     <i class="bi bi-table me-2 text-warning"></i>KDV Analiz Raporu
                 </button>
                 <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary"
-                        onclick="submitKDV('{{ url_for('report.rapor_kdv_excel') }}')">
+                        onclick='submitKDV("{{ url_for("report.rapor_kdv_excel") }}")'>
                     <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>KDV Özeti (Excel)
                 </button>
             </div>

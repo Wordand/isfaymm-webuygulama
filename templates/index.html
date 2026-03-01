@@ -19,30 +19,34 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
 <section class="hero text-center position-relative overflow-hidden">
   <div class="hero-background">
-    <video autoplay muted playsinline preload="none" poster="{{ url_for('static', filename='images/hero-bg.jpg') }}"
-      class="hero-video">
+    <video autoplay muted loop playsinline poster="{{ url_for('static', filename='images/hero-bg.jpg') }}" class="hero-video">
       <source src="{{ url_for('static', filename='videos/video.mp4') }}" type="video/mp4">
-      <source src="{{ url_for('static', filename='videos/hero-video.webm') }}" type="video/webm">
-      <img src="{{ url_for('static', filename='images/hero-bg.jpg') }}" alt="Finansal Danışmanlık Arka Planı"
-        class="img-fluid hero-fallback-img">
     </video>
   </div>
-  <div class="container hero-content" data-aos="fade-up">
+  
+  <div class="container hero-content" data-aos="zoom-in" data-aos-duration="1500">
+    <div class="header-badges mb-4" data-aos="fade-down" data-aos-delay="500">
+        <span class="badge bg-danger px-3 py-2 rounded-pill">YEMİNLİ MALİ MÜŞAVİRLİK</span>
+        <span class="badge bg-secondary px-3 py-2 rounded-pill ms-2">DENETİM & DANIŞMANLIK</span>
+    </div>
 
-    <h1 class="display-3 fw-bold mb-3 text-white" data-aos="fade-up" data-aos-delay="0">
-      <span class="text-isfa">İSFA</span><br>
-      YEMİNLİ MALİ MÜŞAVİRLİK
+    <h1 class="display-1 fw-bold mb-3 text-white">
+      <span class="text-isfa">İSFA</span> YMM
     </h1>
-    <h3 class="fw-light text-white mb-4" data-aos="fade-up" data-aos-delay="0" data-aos-duration="400" style="letter-spacing: 2px;">
-      BİLGİ <span class="mx-2">|</span> HIZ <span class="mx-2">|</span> GÜVEN
+    
+    <h3 class="text-white mb-4">
+      BİLGİ <span class="mx-2 text-danger">|</span> HIZ <span class="mx-2 text-danger">|</span> GÜVEN
     </h3>
-    <p class="lead mb-4 text-white-50" data-aos-delay="50">
-      İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi, vergi danışmanlığı ve inceleme
-      danışmanlığında uzman ekibimizle yanınızdayız.
+    
+    <p class="lead mb-5 text-white-50 mx-auto" style="max-width: 700px;">
+      İşletmenizin geleceğini bugünden güvence altına alın. Tam tasdik, KDV iadesi ve vergi danışmanlığında 
+      uzman ekibimiz ve dijital altyapımızla yanınızdayız.
     </p>
-    <a href="#services" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hizmetlerimiz</a>
-    <a href="#about" class="btn btn-primary btn-lg me-2 btn-gradient-hover">Hakkımızda</a>
-
+    
+    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+        <a href="#services" class="btn btn-primary btn-lg px-5">Hizmetlerimiz</a>
+        <a href="#contact" class="btn btn-outline-light btn-lg px-5">İletişime Geç</a>
+    </div>
   </div>
 </section>
 
@@ -86,11 +90,12 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟩 TAM TASDİK -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-check-circle-fill service-icon text-success mb-3"></i>
+            <i class="bi bi-shield-check service-icon text-success mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Tam Tasdik Hizmeti</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">Beyannamelerinizin mevzuata uyumunun denetimi ve tasdiki.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#tamTasdikModal">Detayları İncele</a>
           </div>
         </div>
@@ -98,11 +103,12 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟨 KDV İADESİ -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-arrow-counterclockwise service-icon text-warning mb-3"></i>
+            <i class="bi bi-cash-coin service-icon text-warning mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">KDV İadesi</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">İade süreçlerinin hızlı ve hatasız sonuçlandırılması.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#kdvIadesiModal">Detayları İncele</a>
           </div>
         </div>
@@ -110,11 +116,12 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟩 İNDİRİMLİ KURUMLAR VERGİSİ -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-percent service-icon text-success mb-3"></i>
+            <i class="bi bi-graph-down-arrow service-icon text-success mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">İndirimli Kurumlar Vergisi</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">Yatırım teşvik avantajlarının maksimize edilmesi.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#indirimliKvModal">Detayları İncele</a>
           </div>
         </div>
@@ -122,11 +129,12 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟦 VERGİ DANIŞMANLIĞI -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-people-fill service-icon text-primary mb-3"></i>
+            <i class="bi bi-person-workspace service-icon text-primary mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Vergi Danışmanlığı</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">Stratejik vergi planlaması ve risk yönetimi.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#vergiDanismanligiModal">Detayları İncele</a>
           </div>
         </div>
@@ -134,11 +142,12 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟥 VERGİ İNCELEME DANIŞMANLIĞI -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-search service-icon text-danger mb-3"></i>
+            <i class="bi bi-search-heart service-icon text-danger mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Vergi İnceleme Danışmanlığı</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">İnceleme süreçlerinde teknik ve hukuki destek.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#vergiIncelemeModal">Detayları İncele</a>
           </div>
         </div>
@@ -146,34 +155,37 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
       <!-- 🟦 TEŞVİK, İNDİRİM, MUAFİYET -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-gift-fill service-icon text-info mb-3"></i>
+            <i class="bi bi-gift service-icon text-info mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Teşvik, İndirim, İstisna ve Muafiyet</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">Ar-Ge, yatırım ve teknoloji projelerine özel teşvikler.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#tesvikModal">Detayları İncele</a>
           </div>
         </div>
       </div>
 
       <!-- 💰 NAKDİ SERMAYE ARTIRIM İNDİRİMİ -->
-      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="650">
-        <div class="service-card card h-100 shadow-sm border-0">
+      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-cash-stack service-icon text-primary mb-3"></i>
+            <i class="bi bi-bank2 service-icon text-primary mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Nakdi Sermaye Artırım İndirimi</h5>
-            <a href="{{ url_for('tools.sermaye') }}" class="btn btn-sm btn-outline-primary mt-3">Hesapla ve İncele</a>
+            <p class="text-muted small">Sermaye artırımlarında vergi indirimi hesaplama ve danışmanlık.</p>
+            <a href="{{ url_for('tools.sermaye') }}" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3">Hesapla ve İncele</a>
           </div>
         </div>
       </div>
 
       <!-- 🟫 TRANSFER FİYATLANDIRMASI -->
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="700">
-        <div class="service-card card h-100 shadow-sm border-0">
+        <div class="service-card card h-100 shadow-sm border-0 hover-glow">
           <div class="card-body text-center p-4">
-            <i class="bi bi-arrows-move service-icon text-secondary mb-3"></i>
+            <i class="bi bi-globe2 service-icon text-secondary mb-3 fs-1"></i>
             <h5 class="card-title fw-bold">Transfer Fiyatlandırması</h5>
-            <a href="#" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal"
+            <p class="text-muted small">Uluslararası işlemler ve emsal bedel raporlama süreçleri.</p>
+            <a href="#" class="btn btn-sm btn-outline-primary mt-3 rounded-pill px-3" data-bs-toggle="modal"
               data-bs-target="#transferModal">Detayları İncele</a>
           </div>
         </div>
@@ -184,6 +196,76 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
   </div>
 </section>
 
+<!-- 🟦 DİJİTAL ÇÖZÜMLER PORTALI (Yeni Bölüm) -->
+<section id="digital-tools" class="py-5 bg-light border-top border-bottom">
+  <div class="container" data-aos="fade-up">
+    <div class="text-center mb-5">
+      <span class="badge bg-danger mb-2 px-3 py-2 rounded-pill">DİJİTAL PLATFORM</span>
+      <h2 class="section-title">Hesaplama ve Analiz Araçları</h2>
+      <p class="text-muted">Tüm profesyonel araçlarımıza giriş yapmadan direkt erişebilirsiniz.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Finansal Analiz -->
+      <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="100">
+        <a href="{{ url_for('report.raporlama') }}" class="text-decoration-none">
+          <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center bg-white border-0 hover-glow">
+            <div class="mb-3">
+              <i class="bi bi-graph-up-arrow fs-1 text-success"></i>
+            </div>
+            <h6 class="fw-bold text-dark">Finansal Analiz</h6>
+            <p class="text-muted small mb-0">Şirket verilerinizi analiz edin ve detaylı raporlar oluşturun.</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- İndirimli Kurumlar -->
+      <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="200">
+        <a href="{{ url_for('indirimlikurumlar.index') }}" class="text-decoration-none">
+          <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center bg-white border-0 hover-glow">
+            <div class="mb-3">
+              <i class="bi bi-percent fs-1 text-danger"></i>
+            </div>
+            <h6 class="fw-bold text-dark">İndirimli Kurumlar</h6>
+            <p class="text-muted small mb-0">Yatırım teşvik avantajlarınızı dijital sistemle hesaplayın.</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Sermaye Azaltımı -->
+      <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="300">
+        <a href="{{ url_for('tools.sermaye_azaltimi') }}" class="text-decoration-none">
+          <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center bg-white border-0 hover-glow">
+            <div class="mb-3">
+              <i class="bi bi-arrow-down-right-circle fs-1 text-primary"></i>
+            </div>
+            <h6 class="fw-bold text-dark">Sermaye Azaltımı</h6>
+            <p class="text-muted small mb-0">Sermaye azaltımı stopaj ve vergi yükü simülasyonu.</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Mevzuat Portalı -->
+      <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="400">
+        <a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none">
+          <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center bg-white border-0 hover-glow">
+            <div class="mb-3">
+              <i class="bi bi-balance-scale fs-1 text-secondary"></i>
+            </div>
+            <h6 class="fw-bold text-dark">Mevzuat Portalı</h6>
+            <p class="text-muted small mb-0">Güncel vergi yasaları ve tebliğlere anında ulaşın.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('calculators.index') }}" class="btn btn-outline-danger rounded-pill px-5 py-2">
+        Tüm Hesaplama Araçlarını Gör <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+    </div>
+  </div>
+</section>
 
 {% include 'modals/home_modals.html' %}
 
@@ -208,7 +290,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
 
     <div class="row feature-grid g-4">
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
-        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center hover-glow">
           <i class="bi bi-lightbulb feature-icon text-primary mb-3"></i>
           <h5 class="fw-bold">Bilgi ve Uzmanlık</h5>
           <p class="text-muted">Vergi mevzuatındaki her gelişmeyi yakından izleyerek, teknik bilgimizi danışmanlık
@@ -217,7 +299,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
       </div>
 
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
-        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center hover-glow">
           <i class="bi bi-shield-lock feature-icon text-success mb-3"></i>
           <h5 class="fw-bold">Güven ve Şeffaflık</h5>
           <p class="text-muted">Tüm süreçlerimizde dürüstlük ve veri güvenliğini esas alarak, müşterilerimizle uzun
@@ -226,7 +308,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
       </div>
 
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
-        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center hover-glow">
           <i class="bi bi-speedometer2 feature-icon text-warning mb-3"></i>
           <h5 class="fw-bold">Hız ve Verimlilik</h5>
           <p class="text-muted">Gelişmiş dijital araçlarımızla beyanname, analiz ve raporlama süreçlerini en kısa sürede
@@ -235,7 +317,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
       </div>
 
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
-        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center hover-glow">
           <i class="bi bi-award feature-icon text-danger mb-3"></i>
           <h5 class="fw-bold">Tecrübe ve Disiplin</h5>
           <p class="text-muted">Yıllara dayanan mesleki deneyimimizle, her sektöre özgü mali çözümler üretiyor ve
@@ -244,7 +326,7 @@ Dijital altyapı ile güvenli, hızlı ve mevzuata uygun çözümler.
       </div>
 
       <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
-        <div class="feature-card h-100 p-4 rounded-3 shadow-sm text-center">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm text-center hover-glow">
           <i class="bi bi-cpu feature-icon text-info mb-3"></i>
           <h5 class="fw-bold">Yazılım ve Teknoloji</h5>
           <p class="text-muted">Kendi geliştirdiğimiz dijital platformlar ile mali verilerinizi güvenli biçimde analiz

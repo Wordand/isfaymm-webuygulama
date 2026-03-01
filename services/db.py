@@ -5,7 +5,7 @@ from psycopg2 import extras
 from contextlib import contextmanager
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # ============================================================
 # Ortam Algilama
@@ -100,21 +100,28 @@ class FakeConnection:
 # ============================================================
 @contextmanager
 def get_conn():
-    if USE_SQLITE:
-        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        conn = FakeConnection(DB_PATH)
+    # Her çağrıda .env'den taze oku (Flask watchdog yeniden başlatma sorunu için)
+    load_dotenv(override=True)
+    _db_url = os.getenv("DATABASE_URL", "").strip()
+    _use_sqlite = _db_url.startswith("sqlite:///") or (
+        not _db_url.startswith("postgresql://")
+    )
+
+    if _use_sqlite:
+        _path = _db_url.replace("sqlite:///", "") or "instance/database.db"
+        os.makedirs(os.path.dirname(_path) if os.path.dirname(_path) else ".", exist_ok=True)
+        conn = FakeConnection(_path)
         try:
             yield conn
         finally:
             conn.close()
     else:
         conn = psycopg2.connect(
-            DATABASE_URL,
+            _db_url,
             sslmode="require",
             connect_timeout=5
         )
         try:
-            # 🔥 kritik satır
             conn.cursor_factory = extras.RealDictCursor
             yield conn
         except Exception:

@@ -194,7 +194,29 @@
 </div>
 
 <div class="container pb-5 analysis-container">
-    
+
+    {% if is_guest %}
+    <!-- Ziyaretçi Modu Banner -->
+    <div class="d-flex align-items-center gap-3 px-4 py-3 mb-4 rounded-4 shadow-sm"
+         style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+             style="width:42px; height:42px; background:#3b82f6;">
+            <i class="bi bi-info-circle-fill text-white fs-5"></i>
+        </div>
+        <div class="flex-grow-1">
+            <div class="fw-bold text-primary small mb-1">Ziyaretçi Modundasınız</div>
+            <div class="text-secondary small">
+                Finansal analiz yapmak için <strong>mükellef verilerinizi yüklemeniz</strong> gerekmektedir.
+                Kendi verilerinizin analizini görmek için lütfen giriş yapın.
+            </div>
+        </div>
+        <a href="{{ url_for('auth.login') }}"
+           class="btn btn-primary btn-sm rounded-pill px-4 fw-bold flex-shrink-0">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Giriş Yap
+        </a>
+    </div>
+    {% endif %}
+
     <!-- Filtreler -->
     <div class="filter-bar shadow-sm">
         <form id="filterForm" method="get" class="d-flex gap-3 w-100 flex-wrap align-items-center">

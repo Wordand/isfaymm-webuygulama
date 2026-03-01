@@ -132,7 +132,6 @@ def reorder_by_section(kdv_data: dict) -> "OrderedDict[str, dict]":
 # --- Routes ---
 
 @bp.route("/raporlama")
-@login_required
 def raporlama():
     vkn = request.args.get("vkn")
     fa_years = [y for y in request.args.get("fa_years", "").split(",") if y]
@@ -142,6 +141,18 @@ def raporlama():
     unvanlar, donemler, grafik_listesi, yuklenen_dosyalar = [], [], [], []
     secili_unvan = None
     uid = session.get("user_id")
+
+    if not uid:
+        # Public visitor mode - minimal functionality or redirect to demo
+        return render_template("reports/raporlama.html", 
+                             mukellefler=[], 
+                             donemler=[], 
+                             secili_vkn=vkn, 
+                             secili_unvan=None, 
+                             analiz_turu=analiz_turu, 
+                             yuklenen_dosyalar=[], 
+                             grafik_listesi=[],
+                             is_public=True)
 
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -166,7 +177,6 @@ def raporlama():
     return render_template("reports/raporlama.html", mukellefler=unvanlar, donemler=donemler, secili_vkn=vkn, secili_unvan=secili_unvan, secili_fa_years=fa_years, secili_kdv_periods=kdv_periods, analiz_turu=analiz_turu, yuklenen_dosyalar=yuklenen_dosyalar, grafik_listesi=grafik_listesi)
 
 @bp.route("/raporlama-grafik")
-@login_required
 def raporlama_grafik():
     """Trend grafiği oluşturma ve görüntüleme"""
     vkn = request.args.get("vkn")
@@ -282,14 +292,12 @@ def raporlama_grafik():
 
 
 @bp.route("/finansal-oran-raporu")
-@login_required
 def finansal_oran_raporu():
     # Finansal oran raporu isteğini (PDF/Excel) şimdilik analiz sayfasına yönlendir
     return redirect(url_for('report.finansal_analiz', **request.args))
 
 
 @bp.route("/rapor-kdv")
-@login_required
 def rapor_kdv():
     vkn = request.args.get("vkn")
     unvan = request.args.get("unvan")
@@ -376,7 +384,6 @@ def rapor_kdv():
                            inconsistencies=inconsistencies)
 
 @bp.route("/rapor-kdv-excel")
-@login_required
 def rapor_kdv_excel():
     vkn = request.args.get("vkn")
     unvan = request.args.get("unvan", "M\u00FCkellef")
@@ -470,7 +477,6 @@ def rapor_kdv_excel():
     return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 @bp.route("/tablo-mizan/<string:tur>")
-@login_required
 def tablo_mizan(tur):
     vkn = request.args.get("vkn")
     donem = request.args.get("donem")
@@ -512,7 +518,6 @@ def tablo_mizan(tur):
     return redirect(url_for("data.veri_giris"))
 
 @bp.route("/finansal-analiz")
-@login_required
 def finansal_analiz():
     secili_vkn = request.args.get("vkn")
     secili_yillar = request.args.getlist("yillar") or []
@@ -521,13 +526,18 @@ def finansal_analiz():
     
     uid = session.get("user_id")
     unvanlar, mevcut_yillar, trend_data, oran_detaylari = [], [], {}, {}
+    is_guest = not uid
     
     uyarilar = []
     try:
-        with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
-            unvanlar = [{"vkn": r["vergi_kimlik_no"], "unvan": r["unvan"]} for r in c.fetchall()]
+        if not uid:
+            # Ziyaretçi modu — DB sorgusu yapma
+            pass
+        else:
+            with get_conn() as conn:
+                c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                c.execute("SELECT vergi_kimlik_no, unvan FROM mukellef WHERE user_id=%s ORDER BY unvan", (uid,))
+                unvanlar = [{"vkn": r["vergi_kimlik_no"], "unvan": r["unvan"]} for r in c.fetchall()]
             
             if secili_vkn:
                 # Önce bu mükellefe ait tüm yüklenen belge türlerini çek (Hangi yıllarda ne eksik görmek için)
@@ -621,11 +631,12 @@ def finansal_analiz():
                            kategori=kategori, 
                            mevcut_yillar=mevcut_yillar, 
                            secili_yillar=secili_yillar, 
-                           display_periods=display_periods, # Ensure display_periods is passed
+                           display_periods=display_periods,
                            inflation_mode=inflation_mode, 
                            trend_data=trend_data, 
                            oran_detaylari=oran_detaylari,
-                           uyarilar=uyarilar)
+                           uyarilar=uyarilar,
+                           is_guest=is_guest)
 
 @bp.route("/pdf-belgeler-tablo")
 @login_required

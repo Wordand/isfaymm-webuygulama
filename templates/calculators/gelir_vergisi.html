@@ -4,32 +4,31 @@
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-bank me-2"></i>Gelir Vergisi Hesaplama</h4>
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="bi bi-bank me-2 text-danger"></i>Gelir Vergisi Hesaplama</h4>
+                        <span class="badge bg-danger">2026 GÜNCEL</span>
+                    </div>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-md-5">
                     
                     <form id="gelirVergisiForm">
-                        
                         <!-- Hesaplama Yılı ve Türü -->
-                        <div class="row g-3 mb-4">
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="yilInput" class="form-label fw-bold">Hesaplama Yılı</label>
-                                <select class="form-select" id="yilInput" required>
+                                <select class="form-select border-0 bg-light rounded-3 p-3" id="yilInput" required>
                                     <option value="2026" selected>2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
                                     <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2020">2020</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label for="gelirTuru" class="form-label fw-bold">Gelir Türü</label>
-                                <select class="form-select" id="gelirTuru" required>
+                                <select class="form-select border-0 bg-light rounded-3 p-3" id="gelirTuru" required>
                                     <option value="ucret" selected>Ücret (Maaş)</option>
                                     <option value="normal">Ücret Dışı (Kira, Değer Artış vb.)</option>
                                 </select>
@@ -37,18 +36,17 @@
                         </div>
 
                         <!-- Tutar ve Dönem -->
-                        <div class="row g-3 mb-4">
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <label for="brutUcret" class="form-label fw-bold">Kümülatif Vergi Matrahı (₺)</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="brutUcret" placeholder="0,00" required>
-                                    <span class="input-group-text">₺</span>
+                                    <input type="text" class="form-control border-0 bg-light rounded-start-3 p-3" id="brutUcret" placeholder="0,00" required>
+                                    <span class="input-group-text border-0 bg-light rounded-end-3">₺</span>
                                 </div>
-                                <div class="form-text">İlgili aydaki brüt geliriniz (kümülatif matrah dahil edilecekse sistem soracaktır).</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="aySecimi" class="form-label fw-bold">Dönem Seçimi</label>
-                                <select class="form-select" id="aySecimi">
+                                <select class="form-select border-0 bg-light rounded-3 p-3" id="aySecimi">
                                     <option value="0">Yıllık Toplam</option>
                                     {% set aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"] %}
                                     {% for ay in aylar %}
@@ -58,48 +56,61 @@
                             </div>
                         </div>
 
-                        <div class="form-check mb-4">
+                        <div class="form-check mb-4 custom-switch">
                             <input class="form-check-input" type="checkbox" id="asgariIstisna" checked>
-                            <label class="form-check-label" for="asgariIstisna">
+                            <label class="form-check-label text-muted" for="asgariIstisna">
                                 Asgari Ücret İstisnası Uygulansın
                             </label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 btn-lg">
-                            <i class="bi bi-calculator me-2"></i> Hesapla
+                        <button type="submit" class="btn btn-danger w-100 btn-lg rounded-pill py-3 shadow-sm hover-glow">
+                            <i class="bi bi-cpu me-2"></i> Analiz Et ve Hesapla
                         </button>
-
-                        <hr class="my-4">
-
-                        <!-- Sonuç Alanı -->
-                        <div id="sonucAlani" style="display:none;">
-                            <h5 class="fw-bold text-primary mb-3">Hesaplama Sonucu</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <th class="w-50">Hesaplanan Gelir Vergisi</th>
-                                            <td class="text-end text-danger fw-bold fs-5" id="resVergi">0,00 ₺</td>
-                                        </tr>
-                                        <tr id="rowIstisna">
-                                            <th>Uygulanan İstisna (Asgari Ücret)</th>
-                                            <td class="text-end text-success fw-bold" id="resIstisna">0,00 ₺</td>
-                                        </tr>
-                                        <tr id="rowOdenecek">
-                                            <th>Ödenecek Gelir Vergisi</th>
-                                            <td class="text-end fw-bold" id="resOdenecek">0,00 ₺</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
                     </form>
 
-                    <div class="mt-3">
-                        <div class="alert alert-light border small text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Bilgi:</strong> Ücretliler için kümülatif vergi matrahı hesabı yapılırken önceki ayların matrahları gerekebilir. Sistem ilgili durumda size soracaktır.
+                    <hr class="my-5">
+
+                    <!-- Sonuç Alanı Visualized -->
+                    <div id="sonucAlani" style="display:none;" class="animate__animated animate__fadeIn">
+                        <div id="exportArea">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold text-dark m-0"><i class="bi bi-pie-chart-fill text-danger me-2"></i>Hesaplama Analizi</h5>
+                                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3" onclick="exportToPDF()">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Rapor Al (PDF)
+                                </button>
+                            </div>
+
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-6">
+                                    <div class="chart-container p-3 bg-light rounded-4" style="position: relative; height:300px;">
+                                        <canvas id="resultChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="table-responsive rounded-4 border overflow-hidden">
+                                        <table class="table table-borderless m-0">
+                                            <tbody class="align-middle">
+                                                <tr class="bg-light">
+                                                    <td class="ps-4">Hesaplanan Vergi</td>
+                                                    <td class="text-end pe-4 fw-bold text-danger fs-5" id="resVergi">0,00 ₺</td>
+                                                </tr>
+                                                <tr id="rowIstisna">
+                                                    <td class="ps-4">Asgari Ücret İstisnası (-)</td>
+                                                    <td class="text-end pe-4 fw-bold text-success" id="resIstisna">0,00 ₺</td>
+                                                </tr>
+                                                <tr class="border-top">
+                                                    <td class="ps-4 fw-bold">Ödenecek Net Vergi</td>
+                                                    <td class="text-end pe-4 fw-bold text-dark fs-4" id="resOdenecek">0,00 ₺</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="mt-3 p-3 bg-danger-subtle rounded-3 small">
+                                        <i class="bi bi-info-circle-fill me-2 text-danger"></i>
+                                        Efektif Vergi Oranı: <span id="effectiveRate" class="fw-bold">0%</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -107,37 +118,32 @@
             </div>
 
             <!-- Geçmiş Hesaplamalar -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">📋 Son Hesaplamalar</h6>
+            <div class="card border-0 shadow-sm mt-4 rounded-4 overflow-hidden">
+                <div class="card-header bg-light p-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Son Hesaplamalar</h6>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0" id="logTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-3">Yıl</th>
-                                    <th>Tür</th>
-                                    <th>Matrah</th>
-                                    <th>Vergi</th>
-                                    <th>İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- JS ile dolacak -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="logTable">
+                        <thead class="bg-light small text-uppercase">
+                            <tr>
+                                <th class="ps-4">Yıl</th>
+                                <th>Tür</th>
+                                <th>Matrah</th>
+                                <th>Vergi</th>
+                                <th class="text-end pe-4">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small"></tbody>
+                    </table>
                 </div>
             </div>
 
         </div>
     </div>
-    <div class="mt-4">
+    <div class="mt-5">
         {% include "partials/tax_disclaimer.html" %}
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_scripts %}
@@ -150,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const istisnaCheckbox = document.getElementById("asgariIstisna");
     const sonucAlani = document.getElementById("sonucAlani");
 
-    // Para birimi formatlama
+    // Para birimi formatlama (Input mask)
     brutUcretInput.addEventListener("input", function (e) {
         let val = e.target.value.replace(/[^\d]/g, "");
         if (!val) return;
@@ -166,10 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
         istisnaCheckbox.disabled = !isUcret;
         if (!isUcret) {
             istisnaCheckbox.checked = false;
-            // Ücret dışı gelirde "Dönem" genellikle yıllık olur ama kullanıcı seçebilir kalsın mı?
-            // Orijinal kodda disabled yapılıyordu.
-             aySecimi.value = "0";
-             aySecimi.disabled = true;
+            aySecimi.value = "0";
+            aySecimi.disabled = true;
         } else {
             aySecimi.disabled = false;
         }
@@ -177,6 +181,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gelirTuruInput.addEventListener("change", gelirTuruKontrol);
     gelirTuruKontrol();
+
+    // --- Chart & PDF Logic ---
+    let resultChart = null;
+
+    function updateChart(vergi, matrah) {
+        const ctx = document.getElementById('resultChart').getContext('2d');
+        const net = Math.max(matrah - vergi, 0);
+
+        if (resultChart) resultChart.destroy();
+
+        resultChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Net Gelir', 'Gelir Vergisi'],
+                datasets: [{
+                    data: [net, vergi],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    window.exportToPDF = async function() {
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById('exportArea');
+        
+        // Hide button during capture
+        const btn = element.querySelector('button');
+        btn.style.display = 'none';
+
+        try {
+            const canvas = await html2canvas(element, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.setFontSize(18);
+            pdf.text("İSFA YMM - Vergi Hesaplama Raporu", 105, 15, { align: "center" });
+            pdf.addImage(imgData, 'PNG', 0, 25, pdfWidth, pdfHeight);
+            pdf.save(`ISFA_YMM_Gelir_Vergisi_Raporu_${new Date().getTime()}.pdf`);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            btn.style.display = 'block';
+        }
+    }
 
     document.getElementById("gelirVergisiForm").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -192,122 +254,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let oncekiMatrahlar = {};
 
-        // Eğer ücret ve belirli bir ay seçilmişse (Ocak hariç), kümülatif matrah sor
         if (ay > 1 && gelirTuru === "ucret") {
-            const ayAdlari = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
-            let html = '<div class="text-start small mb-2">Artan oranlı vergi dilimi hesabı için önceki ayların toplam matrahı gereklidir.</div><div style="text-align:left;">';
-            
-            // Kullanıcıyı yormamak için tek hane kümülatif sorabiliriz ama orijinal kod her ayı soruyor.
-            // Orijinali koruyalım ama belki basitleştirebiliriz.
-            // Şimdilik orijinal mantığı koruyorum:
-            html += '<p class="fw-bold mb-2">Önceki Matrah Toplamı (veya ayrı ayrı giriniz):</p>';
-            
-            // Pratiklik için tek bir "Toplam Kümülatif" alanı koyalım?
-            // Ancak backend "onceki_matrahlar" dict bekliyor olabilir.
-            // Backend kodunu incelediğimde: for v in onceki_dict.values(): onceki_toplam += float(v)
-            // Yani backend sadece değerlerin toplamını alıyor! Dict key'leri önemsiz (sadece iterasyon).
-            // O zaman kullanıcıdan TEK BİR "Önceki Ayların Toplam Matrahı" istemek çok daha UX dostu olur.
-            
-            html += `
-                <div class="mb-2">
-                    <label class="form-label">Önceki Aylar Toplam Matrahı</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control swal2-input onceki-toplam" placeholder="0,00">
-                        <span class="input-group-text">₺</span>
-                    </div>
-                </div>`;
-            
-            html += '</div>';
-
             const { value } = await Swal.fire({
-                title: "Kümülatif Matrah Bilgisi",
-                html,
+                title: "Kümülatif Matrah",
+                html: '<input type="text" class="form-control swal2-input onceki-toplam" placeholder="Önceki Toplam Matrah">',
                 confirmButtonText: "Hesapla",
-                showCancelButton: true,
-                cancelButtonText: "İptal",
                 preConfirm: () => {
                    const val = document.querySelector(".onceki-toplam").value;
                    return parseFloat(val.replace(/\./g,"").replace(",", ".")) || 0;
                 }
             });
-
-            if (value === undefined) return; // İptal
-            
-            // Backend'e tek bir değer gönderelim (key=toplam)
+            if (value === undefined) return;
             oncekiMatrahlar["toplam"] = value;
         }
 
-        // Hesaplama İsteği
         try {
             const response = await fetch("/vergi-hesapla", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    brut,
-                    yil,
-                    ay,
-                    gelir_turu: gelirTuru,
-                    istisna,
-                    onceki_matrahlar: oncekiMatrahlar
-                })
+                body: JSON.stringify({ brut, yil, ay, gelir_turu: gelirTuru, istisna, onceki_matrahlar: oncekiMatrahlar })
             });
             
             const d = await response.json();
+            if (d.error) { Swal.fire("Hata", d.error, "error"); return; }
 
-            if (d.error) {
-                Swal.fire("Hata", d.error, "error");
-                return;
-            }
-
-            // Sonuçları Göster
             sonucAlani.style.display = "block";
-            
             const vergi = d.vergi;
             const istisnaTutari = d.istisna || 0; 
-            // d.istisna backend'den dönen istisna tutarı (vergi indirimi).
-            // Backend: vergi = max(vergi - istisna, 0) yapıp "vergi"yi dönüyor mu?
-            // Backend koduna baktım: "vergi = max(vergi - istisna, 0)" yapıyor ve bunu "vergi" olarak dönüyor.
-            // Ayrıca "istisna"yı da dönüyor.
-            // Yani d.vergi = Ödenecek Vergi (İstisna düşülmüş)
-            // Ancak kullanıcı "Hesaplanan Vergi" ve "Ödenecek Vergi"yi ayrı görmek ister mi?
-            // Serbest Meslek tablosunda mantığı:
-            // "Hesaplanan Gelir Vergisi" (İstisna öncesi)
-            // "İstisna"
-            // "Ödenecek"
-            
             const hesaplananVergi = vergi + istisnaTutari;
 
             document.getElementById('resVergi').textContent = hesaplananVergi.toLocaleString("tr-TR",{minimumFractionDigits:2}) + ' ₺';
             document.getElementById('resIstisna').textContent = istisnaTutari.toLocaleString("tr-TR",{minimumFractionDigits:2}) + ' ₺';
             document.getElementById('resOdenecek').textContent = vergi.toLocaleString("tr-TR",{minimumFractionDigits:2}) + ' ₺';
 
-            if (istisnaTutari > 0) {
-                document.getElementById('rowIstisna').style.display = 'table-row';
-                document.getElementById('rowOdenecek').style.display = 'table-row';
-            } else {
-                 document.getElementById('rowIstisna').style.display = 'none';
-                 // Sadece vergi görünse yeterli, çünkü ödenecek = hesaplanan.
-                 // Ama netlik için kalsın.
-                 document.getElementById('rowOdenecek').style.display = 'table-row';
-            }
+            const effectiveRate = ((vergi / brut) * 100).toFixed(2);
+            document.getElementById('effectiveRate').textContent = `%${effectiveRate}`;
 
-            // Tabloya Ekle
+            updateChart(vergi, brut);
             logToTable(yil, gelirTuru, brut, vergi);
 
         } catch (err) {
-            Swal.fire("Hata", "Sunucu hatası oluştu: " + err, "error");
+            Swal.fire("Hata", "Sunucu hatası oluştu.", "error");
         }
     });
 
     function logToTable(yil, tur, matrah, vergi) {
         const tbody = document.querySelector("#logTable tbody");
         const tr = document.createElement("tr");
+        tr.className = "animate__animated animate__fadeIn";
         tr.innerHTML = `
-            <td class="ps-3">${yil}</td>
+            <td class="ps-4">${yil}</td>
             <td>${tur === "ucret" ? '<span class="badge bg-info">Ücret</span>' : '<span class="badge bg-warning text-dark">Diğer</span>'}</td>
             <td>${matrah.toLocaleString("tr-TR",{minimumFractionDigits:2})} ₺</td>
             <td class="fw-bold text-danger">${vergi.toLocaleString("tr-TR",{minimumFractionDigits:2})} ₺</td>
-            <td><button class="btn btn-sm btn-outline-secondary py-0" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+            <td class="text-end pe-4"><button class="btn btn-sm btn-link text-muted p-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
         `;
         tbody.prepend(tr);
     }

@@ -1,190 +1,530 @@
 <!-- 🟦 NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" id="mainNavbar">
-    <div class="container-fluid px-4 px-lg-5 d-flex align-items-center justify-content-between">
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNavbar">
+    <div class="container-fluid px-4 px-lg-5">
 
-        <!-- 🔹 Sol tarafta: Sidebar toggler -->
-        <button id="sidebarToggle" class="btn btn-outline-primary d-lg-none me-2" type="button">
-            <i class="bi bi-list" style="font-size:1.6rem;"></i>
-        </button>
-
-        <!-- 🔸 Ortada: Logo veya marka -->
-        <a class="navbar-brand fw-bold text-isfa" href="{{ url_for('main.home') }}">
-            <i class="bi bi-calculator-fill me-1"></i> İSFA YMM
+        <!-- Logo -->
+        <a class="navbar-brand" href="{{ url_for('main.home') }}">
+            <div class="brand-wrapper">
+                <div class="brand-icon">
+                    <i class="bi bi-calculator-fill"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">İSFA</span>
+                    <span class="brand-sub">YMM</span>
+                </div>
+            </div>
         </a>
 
-        <!-- 🔹 Sağ tarafta: Navbar menü toggler -->
+        <!-- Mobile toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
             aria-controls="navbarResponsive" aria-expanded="false" aria-label="Menüyü Aç/Kapat">
-            <span class="navbar-toggler-icon"></span>
+            <span class="toggler-bar"></span>
+            <span class="toggler-bar"></span>
+            <span class="toggler-bar"></span>
         </button>
 
-        <!-- 🟢 Menü -->
+        <!-- Menu -->
         <div class="collapse navbar-collapse justify-content-end" id="navbarResponsive">
-            <ul class="navbar-nav my-2 my-lg-0 navbar-nav-scroll text-center">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}">Anasayfa</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}#services">Hizmetlerimiz</a>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}#about">Hakkımızda</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.home') }}#team">Ekibimiz</a></li>
-
+            <ul class="navbar-nav align-items-lg-center gap-1 my-3 my-lg-0">
 
                 <li class="nav-item">
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}">Anasayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#services">Hizmetlerimiz</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#about">Hakkımızda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#team">Ekibimiz</a>
+                </li>
+                <li class="nav-item">
                     {% if not is_logged_in %}
-                    <a class="nav-link" href="{{ url_for('main.home') }}#contact">İletişim</a>
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#contact">İletişim</a>
                     {% else %}
-                    <a class="nav-link" href="{{ url_for('main.contact') }}">İletişim</a>
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.contact') }}">İletişim</a>
                     {% endif %}
                 </li>
 
-                <li class="nav-item dropdown ms-2">
-
-                    <a class="nav-link dropdown-toggle fw-semibold px-3 py-1 rounded-pill border border-primary text-primary hover-vergi text-blink"
-                        href="#" id="vergiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-cash-coin me-1"></i> Vergi Hesaplamaları
-                    </a>
-
-                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="vergiDropdown">
-
-                        <!-- 📚 TEK DÜZEN HESAP PLANI -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('calculators.tdhp') }}">
-                                📚 Tek Düzen Hesap Planı ve Açıklamaları
-                            </a>
-                        </li>
-
-
-                        <!-- 📄 GELİR VERGİSİ -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('calculators.gelir_vergisi') }}">
-                                📄 Gelir Vergisi Hesapla
-                            </a>
-                        </li>
-
-                        <!-- ✍️ SERBEST MESLEK MAKBUZU -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('tools.serbest_meslek') }}">
-                                ✍️ Serbest Meslek Makbuzu Hesapla
-                            </a>
-                        </li>
-
-                        <!-- 🚢 İTHALATTA KDV -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('calculators.ithalat_kdv') }}">
-                                🚢 İthalatta KDV Hesapla
-                            </a>
-                        </li>
-
-                        <!-- ⏱️ GECİKME ZAMMI -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('calculators.gecikme_zammi') }}">
-                                ⏱️ Gecikme Zammı Hesapla
-                            </a>
-                        </li>
-
-                        <!-- 💰 NAKDİ SERMAYE ARTIRIM İNDİRİMİ -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('tools.sermaye') }}">
-                                💰 Nakdi Sermaye Artırım İndirimi
-                            </a>
-                        </li>
-
-                        <!-- 📉 İNDİRİMLİ KURUMLAR VERGİSİ -->
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('indirimlikurumlar.index') }}">
-                                📉 İndirimli Kurumlar Vergisi
-                            </a>
-                        </li>
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <!-- 🧾 DAMGA VERGİSİ -->
-                        <li>
-                            <a class="dropdown-item disabled">
-                                🧾 Damga Vergisi (yakında)
-                            </a>
-                        </li>
-
-
-
-                        <!-- 🚗 MTV -->
-                        <li>
-                            <a class="dropdown-item disabled">
-                                🚗 Motorlu Taşıtlar Vergisi (yakında)
-                            </a>
-                        </li>
-
-
-
-                    </ul>
+                <!-- Separator -->
+                <li class="nav-item d-none d-lg-block">
+                    <div class="nav-separator"></div>
                 </li>
 
+                <!-- Dijital Çözümler Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-pill-btn nav-pill-primary dropdown-toggle"
+                        href="#" id="dijitalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-cpu-fill me-1"></i> Dijital Çözümler
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-modern dropdown-menu-end" aria-labelledby="dijitalDropdown">
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">
+                                <i class="bi bi-calculator text-primary"></i> Hesaplama Araçları
+                            </div>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.gelir_vergisi') }}">
+                                <div class="dmi-icon bg-blue"><i class="bi bi-person-badge"></i></div>
+                                <div>
+                                    <div class="dmi-label">Gelir Vergisi Hesapla</div>
+                                    <div class="dmi-desc">Tarifeli hesaplama</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('tools.serbest_meslek') }}">
+                                <div class="dmi-icon bg-indigo"><i class="bi bi-file-earmark-text"></i></div>
+                                <div>
+                                    <div class="dmi-label">Serbest Meslek Makbuzu</div>
+                                    <div class="dmi-desc">SMM hesaplama</div>
+                                </div>
+                            </a>
+                        </div>
 
+                        <div class="dropdown-divider-modern"></div>
 
-                <li class="nav-item dropdown ms-2">
-                    <a class="nav-link dropdown-toggle fw-bold px-3 py-1 rounded-pill border border-danger text-danger hover-mevzuat text-blink-red"
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">
+                                <i class="bi bi-building text-danger"></i> Kurumsal & Teşvik
+                            </div>
+                            <a class="dropdown-item-modern" href="{{ url_for('indirimlikurumlar.index') }}">
+                                <div class="dmi-icon bg-red"><i class="bi bi-graph-down-arrow"></i></div>
+                                <div>
+                                    <div class="dmi-label">İndirimli Kurumlar Vergisi</div>
+                                    <div class="dmi-desc">Teşvik belgesi hesaplama</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('tools.sermaye') }}">
+                                <div class="dmi-icon bg-green"><i class="bi bi-cash-stack"></i></div>
+                                <div>
+                                    <div class="dmi-label">Nakdi Sermaye Artırımı</div>
+                                    <div class="dmi-desc">İndirim hesaplama</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('tools.sermaye_azaltimi') }}">
+                                <div class="dmi-icon bg-orange"><i class="bi bi-arrow-down-right-circle"></i></div>
+                                <div>
+                                    <div class="dmi-label">Sermaye Azaltımı</div>
+                                    <div class="dmi-desc">Vergisel analiz</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('tools.asgari') }}">
+                                <div class="dmi-icon bg-purple"><i class="bi bi-percent"></i></div>
+                                <div>
+                                    <div class="dmi-label">Asgari Kurumlar Vergisi</div>
+                                    <div class="dmi-desc">Minimum vergi hesabı</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('tools.finansman') }}">
+                                <div class="dmi-icon bg-red"><i class="bi bi-currency-dollar"></i></div>
+                                <div>
+                                    <div class="dmi-label">Finansman Gider Kısıtlaması</div>
+                                    <div class="dmi-desc">Gider kısıtlama hesabı</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider-modern"></div>
+
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">
+                                <i class="bi bi-bar-chart text-success"></i> Analiz & Raporlama
+                            </div>
+                            <a class="dropdown-item-modern" href="{{ url_for('report.raporlama') }}">
+                                <div class="dmi-icon bg-teal"><i class="bi bi-graph-up-arrow"></i></div>
+                                <div>
+                                    <div class="dmi-label">Finansal Analiz & Raporlama</div>
+                                    <div class="dmi-desc">Bilanço & gelir tablosu analizi</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.tdhp') }}">
+                                <div class="dmi-icon bg-cyan"><i class="bi bi-book"></i></div>
+                                <div>
+                                    <div class="dmi-label">Tek Düzen Hesap Planı</div>
+                                    <div class="dmi-desc">TDHP rehberi</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Mevzuat Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-pill-btn nav-pill-danger dropdown-toggle"
                         href="#" id="mevzuatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-book-half me-1"></i> Mevzuat
+                        <i class="bi bi-journal-text me-1"></i> Mevzuat
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="mevzuatDropdown">
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center justify-content-between"
-                                href="{{ url_for('main.mevzuat_degisiklikleri') }}">
-                                <span>📢 Mevzuat Değişiklikleri</span>
-                                <span class="badge bg-danger ms-2">Yeni</span>
+                    <div class="dropdown-menu dropdown-menu-modern dropdown-menu-end" aria-labelledby="mevzuatDropdown">
+                        <div class="dropdown-section">
+                            <a class="dropdown-item-modern" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
+                                <div class="dmi-icon bg-red"><i class="bi bi-megaphone"></i></div>
+                                <div>
+                                    <div class="dmi-label">Mevzuat Değişiklikleri <span class="badge-new">YENİ</span></div>
+                                    <div class="dmi-desc">Güncel değişiklikler</div>
+                                </div>
                             </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('main.mevzuat') }}">
-                                ⚖️ Mevzuat Portalı
+                            <a class="dropdown-item-modern" href="{{ url_for('main.mevzuat') }}">
+                                <div class="dmi-icon bg-indigo"><i class="bi bi-balance-scale"></i></div>
+                                <div>
+                                    <div class="dmi-label">Mevzuat Portalı</div>
+                                    <div class="dmi-desc">Tüm mevzuat</div>
+                                </div>
                             </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('main.kdv_tebligi') }}">
-                                📑 KDV Tebliği
+                            <a class="dropdown-item-modern" href="{{ url_for('main.kdv_tebligi') }}">
+                                <div class="dmi-icon bg-blue"><i class="bi bi-file-text"></i></div>
+                                <div>
+                                    <div class="dmi-label">KDV Tebliği</div>
+                                    <div class="dmi-desc">Detaylı içerik</div>
+                                </div>
                             </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('main.kv_tebligi') }}">
-                                🏢 Kurumlar Vergisi Tebliği
+                            <a class="dropdown-item-modern" href="{{ url_for('main.kv_tebligi') }}">
+                                <div class="dmi-icon bg-purple"><i class="bi bi-building"></i></div>
+                                <div>
+                                    <div class="dmi-label">Kurumlar Vergisi Tebliği</div>
+                                    <div class="dmi-desc">Detaylı içerik</div>
+                                </div>
                             </a>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                 </li>
 
+                <!-- Admin -->
                 {% if session.get('username', '').lower() == 'admin' %}
                 <li class="nav-item">
-                    <a class="nav-link text-danger fw-semibold" href="{{ url_for('admin.admin_users') }}">
-                        👤 Kullanıcı Onayları
+                    <a class="nav-link nav-link-animated text-danger fw-semibold" href="{{ url_for('admin.admin_users') }}">
+                        <i class="bi bi-shield-check me-1"></i> Yönetim
                     </a>
                 </li>
                 {% endif %}
 
+                <!-- KDV Portal -->
                 {% if session.get('has_kdv_access') or session.get('username') == 'admin' %}
                 <li class="nav-item">
-                    <a class="btn btn-warning btn-sm ms-lg-3 fw-bold px-3 shadow-sm border-0 d-flex align-items-center gap-2"
-                        href="{{ url_for('kdv.index') }}"
-                        style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:white;">
-                        <i class="bi bi-shield-lock-fill"></i> KDV PORTALI
+                    <a class="btn-kdv-portal" href="{{ url_for('kdv.index') }}">
+                        <i class="bi bi-shield-lock-fill me-1"></i> KDV PORTALI
                     </a>
                 </li>
                 {% endif %}
 
+                <!-- Kullanıcı menüsü -->
                 {% if is_logged_in %}
-                <li class="nav-item"><a class="nav-link text-primary fw-semibold"
-                        href="{{ url_for('auth.change_password') }}">🔒 Şifre Değiştir</a></li>
-                <li class="nav-item"><a class="btn btn-danger btn-sm ms-lg-3 btn-gradient-hover-small"
-                        href="{{ url_for('auth.logout') }}">Çıkış Yap</a></li>
-                {% else %}
-                <li class="nav-item"><a class="btn btn-primary btn-sm ms-lg-3 btn-gradient-hover-small"
-                        href="{{ url_for('auth.login') }}">Giriş Yap</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-user-btn dropdown-toggle" href="#" id="userDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-avatar">{{ session.get('username', 'U')[0].upper() }}</div>
+                        <span class="d-none d-lg-inline">{{ session.get('username', 'Hesabım') }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item rounded-3 py-2" href="{{ url_for('auth.change_password') }}">
+                            <i class="bi bi-key me-2 text-primary"></i> Şifre Değiştir</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item rounded-3 py-2 text-danger" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i> Çıkış Yap</a></li>
+                    </ul>
+                </li>
                 {% endif %}
+
             </ul>
         </div>
-
     </div>
 </nav>
+
+<style>
+/* ═══════════════════════════════════════
+   NAVBAR CORE
+═══════════════════════════════════════ */
+#mainNavbar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    padding: 0.6rem 0;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+}
+#mainNavbar.scrolled {
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+}
+
+/* ═══════════════════════════════════════
+   BRAND / LOGO
+═══════════════════════════════════════ */
+.brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+.brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #c8102e 0%, #a00d24 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(200,16,46,0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.navbar-brand:hover .brand-icon {
+    transform: rotate(-8deg) scale(1.08);
+    box-shadow: 0 6px 16px rgba(200,16,46,0.45);
+}
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+.brand-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #c8102e;
+    letter-spacing: 1.5px;
+}
+.brand-sub {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #888;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   NAV LINKS
+═══════════════════════════════════════ */
+.nav-link-animated {
+    color: #444 !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem !important;
+    position: relative;
+    transition: color 0.2s ease;
+}
+.nav-link-animated::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    right: 50%;
+    height: 2px;
+    background: #c8102e;
+    border-radius: 2px;
+    transition: left 0.25s ease, right 0.25s ease;
+}
+.nav-link-animated:hover { color: #c8102e !important; }
+.nav-link-animated:hover::after { left: 6px; right: 6px; }
+
+/* Separator */
+.nav-separator {
+    width: 1px;
+    height: 24px;
+    background: rgba(0,0,0,0.12);
+    margin: 0 4px;
+}
+
+/* ═══════════════════════════════════════
+   PILL BUTTONS (dropdown triggers)
+═══════════════════════════════════════ */
+.nav-pill-btn {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    padding: 0.35rem 0.9rem !important;
+    border-radius: 50px !important;
+    transition: all 0.2s ease;
+    border: 1.5px solid transparent;
+}
+.nav-pill-primary {
+    color: #1d4ed8 !important;
+    border-color: #dbeafe !important;
+    background: #eff6ff;
+}
+.nav-pill-primary:hover, .nav-pill-primary.show {
+    background: #1d4ed8 !important;
+    color: white !important;
+    border-color: #1d4ed8 !important;
+    box-shadow: 0 4px 12px rgba(29,78,216,0.3);
+}
+.nav-pill-danger {
+    color: #c8102e !important;
+    border-color: #fecdd3 !important;
+    background: #fff1f2;
+}
+.nav-pill-danger:hover, .nav-pill-danger.show {
+    background: #c8102e !important;
+    color: white !important;
+    border-color: #c8102e !important;
+    box-shadow: 0 4px 12px rgba(200,16,46,0.3);
+}
+
+/* ═══════════════════════════════════════
+   MODERN DROPDOWN
+═══════════════════════════════════════ */
+.dropdown-menu-modern {
+    min-width: 320px;
+    padding: 12px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08);
+    animation: dropFade 0.2s ease;
+    background: white;
+}
+@keyframes dropFade {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dropdown-section { padding: 4px 0; }
+.dropdown-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9ca3af;
+    padding: 4px 8px 8px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.dropdown-divider-modern {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 8px 0;
+}
+.dropdown-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.18s ease;
+    cursor: pointer;
+}
+.dropdown-item-modern:hover {
+    background: #f8faff;
+    color: #1d4ed8;
+    transform: translateX(3px);
+}
+.dmi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: white;
+    flex-shrink: 0;
+}
+.bg-blue    { background: linear-gradient(135deg,#3b82f6,#1d4ed8); }
+.bg-indigo  { background: linear-gradient(135deg,#6366f1,#4338ca); }
+.bg-red     { background: linear-gradient(135deg,#ef4444,#b91c1c); }
+.bg-green   { background: linear-gradient(135deg,#22c55e,#15803d); }
+.bg-orange  { background: linear-gradient(135deg,#f97316,#c2410c); }
+.bg-purple  { background: linear-gradient(135deg,#a855f7,#7e22ce); }
+.bg-teal    { background: linear-gradient(135deg,#14b8a6,#0f766e); }
+.bg-cyan    { background: linear-gradient(135deg,#06b6d4,#0e7490); }
+.dmi-label  { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+.dmi-desc   { font-size: 0.72rem; color: #9ca3af; margin-top: 1px; }
+.badge-new  {
+    background: #fee2e2; color: #c8102e;
+    font-size: 0.6rem; font-weight: 700;
+    padding: 1px 5px; border-radius: 4px;
+    letter-spacing: 0.5px; vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════
+   SPECIAL BUTTONS
+═══════════════════════════════════════ */
+.btn-kdv-portal {
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(135deg, #d97706, #b45309);
+    box-shadow: 0 3px 10px rgba(180,83,9,0.35);
+    transition: all 0.2s ease;
+}
+.btn-kdv-portal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(180,83,9,0.45);
+    color: white;
+}
+.btn-login {
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    background: linear-gradient(135deg, #c8102e, #a00d24);
+    box-shadow: 0 3px 10px rgba(200,16,46,0.30);
+    transition: all 0.2s ease;
+}
+.btn-login:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(200,16,46,0.40);
+    color: white;
+}
+
+/* ═══════════════════════════════════════
+   USER AVATAR
+═══════════════════════════════════════ */
+.nav-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.3rem 0.7rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    text-decoration: none;
+    background: #f3f4f6;
+    border: 1.5px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+.nav-user-btn:hover { background: #e5e7eb; color: #111; }
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c8102e, #a00d24);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ═══════════════════════════════════════
+   MOBILE TOGGLER
+═══════════════════════════════════════ */
+.navbar-toggler {
+    border: none; background: none; padding: 8px;
+    display: flex; flex-direction: column; gap: 5px; cursor: pointer;
+}
+.navbar-toggler:focus { box-shadow: none; }
+.toggler-bar {
+    display: block; width: 24px; height: 2px;
+    background: #c8102e; border-radius: 2px;
+    transition: all 0.3s ease;
+}
+</style>
+
+<script>
+// Scroll effect
+const navbar = document.getElementById('mainNavbar');
+window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 30);
+});
+</script>
