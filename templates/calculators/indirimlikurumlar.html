@@ -155,6 +155,34 @@
     letter-spacing: 0.02em;
     white-space: nowrap;
 }
+/* --- MOBILE APP OVERRIDES --- */
+{% if hide_ui %}
+.ikv-header {
+    background: #1e2a47;
+    padding: 1rem 1rem 0 1rem !important;
+}
+.ikv-header::before, .ikv-header::after { display: none; }
+.ikv-header h3 { font-size: 1.25rem !important; margin-bottom: 0px !important; }
+.ikv-header p { display: none; }
+.ikv-badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; border: none !important; }
+.ikv-banner { flex-direction: column; text-align: center; gap: 0.25rem; padding: 0.5rem; margin-top: 0.5rem; }
+.ikv-tabbar { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; margin-top: 0.5rem; padding-bottom: 0px; margin-bottom: 0; background: transparent; }
+.ikv-tab { font-size: 0.75rem; padding: 0.4rem; white-space: nowrap; flex: 0 0 auto; color: rgba(255,255,255,0.6); }
+.ikv-tab.active { background: #fff; color: #1e2a47; border-radius: 8px 8px 0 0; }
+.ikv-new-badge { transform: scale(0.85); transform-origin: left center; margin-bottom: 0; }
+.container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+.card { border-radius: 0 !important; box-shadow: none !important; border: 0 !important; }
+.corporate-card { padding: 1rem 0.75rem !important; border: none !important; margin: 0 !important; box-shadow: none !important; }
+.modern-stepper { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; padding-top: 5px; justify-content: flex-start; scrollbar-width: none; }
+.modern-stepper::-webkit-scrollbar { display: none; }
+.stepper-item { min-width: 65px; margin-right: 5px; }
+.step-counter { width: 24px; height: 24px; font-size: 0.75rem; line-height: 24px; }
+.step-name { font-size: 0.6rem !important; }
+.form-control, .form-select, .input-group-text { font-size: 0.85rem; padding: 0.4rem 0.5rem; }
+.mb-3.text-end { display: flex; flex-direction: column; gap: 0.35rem; text-align: left !important; }
+.mb-3.text-end > button, .mb-3.text-end > a { font-size: 0.75rem; padding: 0.4rem; width: 100%; margin: 0 !important; justify-content: center; }
+body, html { background: #fff !important; }
+{% endif %}
 </style>
 
 <div class="container py-4">

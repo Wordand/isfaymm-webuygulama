@@ -3,7 +3,7 @@ from services.db import get_conn
 from auth import login_required
 import psycopg2.extras
 
-bp = Blueprint('mukellef', __name__)
+bp = Blueprint("mukellef", __name__, url_prefix="/mukellef")
 
 @bp.route("/mukellef-yonetimi")
 @login_required

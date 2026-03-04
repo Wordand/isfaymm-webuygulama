@@ -4,7 +4,7 @@ from auth import login_required, kdv_access_required, api_kdv_access_required, r
 import psycopg2.extras
 from datetime import datetime
 
-bp = Blueprint('kdv', __name__)
+bp = Blueprint("kdv", __name__, url_prefix="/kdv")
 
 STATUS_STAGES = {
     'Listeler': [
@@ -82,7 +82,7 @@ def kdv_log_action(user_name, action, description):
             """, (datetime.now().strftime("%d.%m.%Y %H:%M"), user_name, action, description))
             conn.commit()
     except Exception as e:
-        print(f"Log Error: {e}")
+        ("  ")
 
 @bp.route("/kdv-yonetimi")
 @kdv_access_required
@@ -978,7 +978,7 @@ def add_file():
         })
 
     except Exception as e:
-        print(f"Error in add_file: {e}")
+        ("   ")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -1708,7 +1708,7 @@ def delete_document(doc_id):
                 if os.path.exists(full_path):
                     os.remove(full_path)
             except Exception as e:
-                print(f"Dosya silme hatası: {e}")
+                ("   ")
 
         # Log için dosya/mükellef bilgisi al
         c.execute("""
@@ -1825,5 +1825,5 @@ def api_delete_file(file_id):
         return jsonify({"status": "success", "message": "Dosya başarıyla silindi."})
             
     except Exception as e:
-        print(f"Error in delete_file: {e}")
+        ("   ")
         return jsonify({"status": "error", "message": str(e)}), 500

@@ -21,7 +21,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from decimal import Decimal
 
-bp = Blueprint('data', __name__)
+bp = Blueprint("data", __name__)
 
 def kaydet_beyanname(data, tur):
     with get_conn() as conn:

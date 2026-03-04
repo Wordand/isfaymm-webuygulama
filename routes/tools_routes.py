@@ -4,7 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from config import tarifeler, asgari_ucretler, GECIKME_ZAMMI_ORANLARI
 from auth import login_required
 
-bp = Blueprint('tools', __name__)
+bp = Blueprint("tools", __name__)
 
 # --- Helper Functions ---
 def gelir_vergisi_hesapla(yil: int, gelir: float, tarifeler: dict, ucret: bool = False) -> float:
@@ -206,6 +206,6 @@ def gecikme_zammi_hesapla_api():
         })
 
     except Exception as e:
-        print("Gecikme zammı hatası:", repr(e))
+        ("  ", ())
         # Keep 500 or 400? app.py raised, which causes 500 usually
         raise e

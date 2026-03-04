@@ -47,7 +47,7 @@ def tdhp():
             with open(json_path, 'r', encoding='utf-8') as f:
                 descriptions = json.load(f)
         except Exception as e:
-            print(f"Error loading JSON: {e}")
+            print("TDHP JSON yukleme hatasi:", e)
 
     # Maliyet Hesapları (Basitleştirilmiş)
     maliyet_hesaplari = {

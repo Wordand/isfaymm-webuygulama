@@ -5,7 +5,7 @@ from auth import login_required
 import re
 import psycopg2.extras
 
-bp = Blueprint('admin', __name__, url_prefix='/admin')
+bp = Blueprint("admin", __name__)
 
 @bp.route("/users")
 @login_required

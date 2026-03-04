@@ -6,7 +6,7 @@ from datetime import timedelta
 import re
 import psycopg2.extras
 
-bp = Blueprint('auth', __name__)
+bp = Blueprint("auth", __name__)
 
 def log_login_attempt(username, success, user_id=None):
     with get_conn() as conn:

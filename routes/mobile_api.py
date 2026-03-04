@@ -12,7 +12,7 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime
 from config import tarifeler, asgari_ucretler
 
-bp = Blueprint('mobile_api', __name__, url_prefix='/api/mobile')
+bp = Blueprint("mobile_api", __name__, url_prefix="/api/mobile")
 
 
 # ─────────────────────────────────────────

@@ -4,7 +4,7 @@ from auth import login_required
 from datetime import datetime
 import os
 
-bp = Blueprint('main', __name__)
+bp = Blueprint("main", __name__)
 
 @bp.route("/")
 def home():
@@ -33,10 +33,8 @@ def contact():
     return render_template("pages/contact.html")
 
 @bp.route("/robots.txt")
-def robots_txt():
-    response = make_response(render_template("robots.txt"))
-    response.headers["Content-Type"] = "text/plain"
-    return response
+def robots():
+    return send_from_directory("static", "robots.txt")
 
 @bp.route("/sitemap.xml")
 def sitemap_xml():

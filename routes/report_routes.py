@@ -28,7 +28,7 @@ from urllib.parse import unquote
 from collections import OrderedDict
 import unicodedata
 
-bp = Blueprint('report', __name__)
+bp = Blueprint("reports", __name__)
 
 # --- KDV Helpers ---
 
@@ -266,7 +266,7 @@ def raporlama_grafik():
                             kalem_series[key][donem] = float(val)
                             
                 except Exception as e:
-                    print(f"Hata ({donem}): {e}")
+                    (" () ")
                     eksik_yillar.append(donem)
         
         # Trend analizi oluştur
@@ -426,7 +426,7 @@ def rapor_kdv_excel():
                     for rec in parsed.get("veriler", []):
                         kdv_data.setdefault(rec["alan"], {})[col] = rec.get("deger")
                 except Exception as e:
-                    print(f"Excel Export Error: {e}")
+                    ("   ")
 
     kdv_months = sorted(set(kdv_months), key=month_key)
     final_data = reorder_by_section(consolidate_kdv_rows(kdv_data))
@@ -550,7 +550,7 @@ def finansal_analiz():
                 clean_donem = str(row['donem']).strip()
                 docs_by_year.setdefault(clean_donem, set()).add(row['tur'])
 
-            print(f"DEBUG: Mevcut Belgeler (DB): {docs_by_year}")
+            ("   () ")
             c.execute("SELECT DISTINCT donem FROM beyanname b JOIN mukellef m ON b.mukellef_id=m.id WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.tur='bilanco'", (uid, secili_vkn))
             mevcut_yillar = sorted([r["donem"] for r in c.fetchall()], reverse=True)
             if not secili_yillar: secili_yillar = mevcut_yillar

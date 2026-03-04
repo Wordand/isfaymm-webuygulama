@@ -138,7 +138,7 @@ def parse_ikv_from_pdf(path):
                 tablolar.append({'veriler': veriler})
                 
                 bulunan_alanlar = [v['alan'] for v in veriler]
-                print("Tespit edilen alanlar:", bulunan_alanlar)
+                ("  ", )
 
     return {"tablolar": tablolar}
 
@@ -379,7 +379,7 @@ def ayrintili_kazanc():
         )
 
     except Exception as e:
-        print(f"ayrintili_kazanc hata: {e}")
+        ("  ")
         return jsonify({
             "status": "error",
             "title": "Sunucu Hatası!",
@@ -499,7 +499,7 @@ def new_tesvik():
 
 @bp.route("/", methods=["GET", "POST"])
 def index():
-    print("🔥 indirimlikurumlar.index çalıştı")
+    (" . ")
     sekme = request.args.get("sekme", "form")
     is_logged_in = session.get("logged_in", False)
     user_id = session.get("user_id") if is_logged_in else None
@@ -526,9 +526,9 @@ def index():
                     if row:
                         session["aktif_mukellef_vkn"] = row["vergi_kimlik_no"]
                         session["aktif_mukellef_unvan"] = row["unvan"]
-                        print(f"✅ Oturum verisi tazelendi: {row['unvan']}")
+                        ("    ''")
             except Exception as e:
-                print(f"⚠️ Oturum verisi tazelenirken hata: {e}")
+                ("️     ")
 
         with get_conn() as conn:
             c = conn.cursor()
@@ -554,7 +554,7 @@ def index():
         if sekme == "tesvik" and view_id:
             edit_doc = next((d for d in docs if d["id"] == view_id and d["mukellef_id"] == aktif_mukellef_id), None)
             if edit_doc:
-                print(f"📄 Teşvik detayı görüntüleniyor: ID={view_id}")
+                ("    ")
 
         elif sekme == "form" and view_id:
             with get_conn() as conn_form:
@@ -567,7 +567,7 @@ def index():
                 current_belge = cur.fetchone()
 
             if current_belge:
-                print(f"📝 Form için belge yüklendi: ID={view_id}")
+                ("     ")
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
@@ -594,7 +594,7 @@ def index():
             df = get_user_profit_df(user_id)
             rows = format_df_for_html(df)
         except Exception as e:
-            print(f"⚠️ Ayrıntılı tablo yüklenirken hata: {e}")
+            ("️     ")
             rows = []
 
     # Güvenli JSON objeleri
@@ -623,6 +623,9 @@ def index():
             for c in ["C", "D", "E"]
         }
 
+    # Mobil App için UI gizleme tespiti
+    hide_ui = request.args.get("source") == "mobile"
+
     ctx = dict(
         sekme=sekme,
         mukellefler=mukellefler,
@@ -639,6 +642,7 @@ def index():
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}),
         TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
         rows=rows,
+        hide_ui=hide_ui,
     )
 
     if sekme == "mukellef":
@@ -648,7 +652,7 @@ def index():
 
 @bp.route("/form", methods=["POST"])
 def form_kaydet():
-    print(">>> form_kaydet GİRİLDİ")
+    ("  ")
     user_id = session.get("user_id")
     mukellef_id = session.get("aktif_mukellef_id")
 
@@ -672,17 +676,17 @@ def form_kaydet():
 
     if view_id:
         tesvik_id = view_id
-        print(f"🔗 URL’den gelen view_id kullanılıyor: {tesvik_id}")
+        (" ’    ")
 
     else:
         tesvik_id_raw = request.form.get("tesvik_id")
         if tesvik_id_raw and tesvik_id_raw.isdigit():
             tesvik_id = int(tesvik_id_raw)
-            print(f"📌 Formdaki tesvik_id kullanılıyor: {tesvik_id}")
+            ("    ")
 
         elif session.get("current_tesvik_id"):
             tesvik_id = session["current_tesvik_id"]
-            print(f"📌 Session’daki mevcut tesvik_id kullanılıyor: {tesvik_id}")
+            (" ’    ")
 
     belge_no = request.form.get("belge_no") \
          or request.form.get("belge_no_hidden") \
@@ -706,9 +710,9 @@ def form_kaydet():
             row0 = c0.fetchone()
             if row0:
                 tesvik_id = row0["id"]
-                print(f"🔄 Belge no ile mevcut ID bulundu: {tesvik_id}")
+                ("       ")
 
-    print("🎯 SON KULLANILACAK TESVIK ID =", tesvik_id)
+    ("     ", )
 
     # ---------------------------------------------------
     #        🔢 2) SAYISAL PARSER
@@ -823,7 +827,7 @@ def form_kaydet():
 
                 session["current_tesvik_id"] = tesvik_id
                 conn.commit()
-                print(f"✅ Belge ID {tesvik_id} başarıyla güncellendi.")
+                ("     .")
 
             else:
                 # ------------------ INSERT ------------------
@@ -866,10 +870,10 @@ def form_kaydet():
         except Exception as e:
             conn.rollback()
             # 🔔 KRİTİK LOGLAMA: Hata izini ve değişkenleri konsola yazdır
-            print("-" * 50)
-            print(f"❌ KAYIT BAŞARISIZ! Tespit Edilen Hata: {repr(e)}")
-            print(f"❌ Hataya Neden Olan Değişkenler: {log_vars}")
-            print("-" * 50)
+            print("-" * 60)
+            print("  HATA! form_kaydet() fonksiyonu")
+            print("  log_vars:", log_vars)
+            print("-" * 60)
             traceback.print_exc()
             return jsonify({
                 "status": "error",
@@ -999,7 +1003,7 @@ def delete_tesvik(doc_id):
 
         except Exception as e:
             conn.rollback()
-            print(f"❌ Belge silme hatası: {e}")
+            ("    ")
             return jsonify({
                 "status": "error",
                 "title": "Hata!",
@@ -1085,7 +1089,7 @@ def download_tesvik_pdf(doc_id):
             tmp_path = tmpfile.name
 
     except Exception as e:
-        print("❌ PDF oluşturma hatası:", e)
+        ("   ", )
         return jsonify({
             "status": "error",
             "title": "PDF Hatası",
@@ -1273,7 +1277,7 @@ def save_tesvik_kullanim():
         })
 
     except Exception as e:
-        print("save_tesvik_kullanim hatası:", e)
+        (" ", )
         import traceback
         traceback.print_exc()
         
@@ -1390,7 +1394,7 @@ def clone_tesvik_donem():
                 "message": f"{belge_no} ({donem_text}) dönemi zaten eklenmiş."
             }), 409 # Conflict
              
-        print("⚠️ clone_tesvik_donem hata:", e)
+        ("️  ", )
         return jsonify({
             "status": "error",
             "title": "Hata",
@@ -1465,7 +1469,7 @@ def delete_tesvik_donem():
         }), 400
         
     except Exception as e:
-        print(f"⚠️ delete_tesvik_donem hata: {e}")
+        ("️   ")
         return jsonify({
             "status": "error",
             "title": "Silme Hatası",
@@ -1633,7 +1637,7 @@ def tesvik_sil(id):
             c.execute("DELETE FROM tesvik_belgeleri WHERE id = %s", (id,))
             
             conn.commit()
-            print(f"🗑️ Teşvik Belgesi Silindi: ID={id}, BelgeNo={belge_no}")
+            ("️    , ")
 
         return jsonify({
             "status": "success",
@@ -1672,7 +1676,7 @@ def delete_tesvik_kullanim(id):
             # Sil
             c.execute("DELETE FROM tesvik_kullanim WHERE id = %s", (id,))
             conn.commit()
-            print(f"🗑️ Teşvik Kullanım Dönemi Silindi: ID={id}")
+            ("️     ")
 
         return jsonify({
             "status": "success",

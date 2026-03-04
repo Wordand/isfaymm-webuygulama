@@ -224,10 +224,12 @@
     {% include 'partials/loader.html' %}
 
     <!-- 🟦 NAVBAR -->
-    {% include 'partials/navbar.html' %}
+    {% if not hide_ui %}
+        {% include 'partials/navbar.html' %}
+    {% endif %}
 
     <!-- 🟦 SIDEBAR (Conditional) -->
-    {% if show_sidebar %}
+    {% if show_sidebar and not hide_ui %}
         {% include 'partials/sidebar.html' %}
     {% endif %}
     
@@ -235,13 +237,13 @@
     <div id="mobile-overlay" class="mobile-overlay"></div>
 
     <!-- 🟦 CONTENT -->
-    <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important;' if not show_sidebar else '' }} {{ 'padding-top: 0 !important;' if request.endpoint == 'main.home' else 'padding-top: 80px !important;' if not show_sidebar else '' }}">
+    <main class="main-content flex-grow-1" style="{{ 'margin-left: 0 !important; width: 100% !important; max-width: 100% !important;' if (not show_sidebar or hide_ui) else '' }} {{ 'padding-top: 0 !important;' if (request.endpoint == 'main.home' or hide_ui) else 'padding-top: 80px !important;' if (not show_sidebar or hide_ui) else '' }}">
         <!-- Endpoint: {{ request.endpoint }} -->
         {% block content %}{% endblock %}
     </main>
 
-    <!-- 🟦 FOOTER (Simple Copyright) -->
     <!-- 🟦 FOOTER (Premium) -->
+    {% if not hide_ui %}
     <footer class="text-white pt-5 pb-4 mt-auto" style="background-color: #263238;">
         <div class="container">
             <div class="row">
@@ -309,6 +311,7 @@
             </div>
         </div>
     </footer>
+    {% endif %}
 
     <!-- 🍪 Cookie Consent Banner -->
     <div id="cookie-consent-banner" class="fixed-bottom bg-dark text-white p-4 shadow-lg border-top border-secondary" style="z-index: 9999; display: none;">
