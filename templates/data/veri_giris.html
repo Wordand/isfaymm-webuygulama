@@ -260,7 +260,7 @@
                                 <td class="text-end">
                                     <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
                                         {% if belge.belge_turu in ['bilanco','gelir','kdv','bilanco_enf','gelir_enf'] %}
-                                        <a href="{{ url_for('report.pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
+                                        <a href="{{ url_for('reports.pdf_belgeler_tablo', tur=belge.belge_turu, vkn=belge.vkn, donem=belge.donem) }}"
                                            class="btn btn-sm btn-white border" title="Görüntüle"><i class="bi bi-eye"></i></a>
                                         {% elif belge.belge_turu == 'mizan' %}
                                         <a href="{{ url_for('tablo_mizan', tur='bilanco', vkn=belge.vkn, donem=belge.donem) }}"

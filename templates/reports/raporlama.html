@@ -277,7 +277,7 @@
 
             <!-- Seçenek 2: Finansal Röntgen -->
             <div class="col-md-6">
-                <div class="module-card xray" onclick='submitTo("{{ url_for("report.finansal_analiz") }}")'>
+                <div class="module-card xray" onclick='submitTo("{{ url_for("reports.finansal_analiz") }}")'>
                     <div class="module-icon module-bg-purple">
                         <i class="bi bi-activity"></i>
                     </div>
@@ -298,11 +298,11 @@
             <p class="text-muted fw-bold mb-3 small text-uppercase">Alternatif Raporlar</p>
             <div class="d-inline-flex gap-3">
                 <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary" 
-                        onclick='submitKDV("{{ url_for("report.rapor_kdv") }}")'>
+                        onclick='submitKDV("{{ url_for("reports.rapor_kdv") }}")'>
                     <i class="bi bi-table me-2 text-warning"></i>KDV Analiz Raporu
                 </button>
                 <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary"
-                        onclick='submitKDV("{{ url_for("report.rapor_kdv_excel") }}")'>
+                        onclick='submitKDV("{{ url_for("reports.rapor_kdv_excel") }}")'>
                     <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>KDV Özeti (Excel)
                 </button>
             </div>
