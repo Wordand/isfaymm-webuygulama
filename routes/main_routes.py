@@ -57,9 +57,23 @@ def sitemap_xml():
         ('main.enflasyon_duzeltmesi', {}),
         ('main.mevzuat_degisiklikleri', {}),
         ('main.contact', {}),
+        
+        # Araçlar (Tools)
         ('tools.asgari', {}),
         ('tools.sermaye', {}),
-        ('tools.finansman', {})
+        ('tools.finansman', {}),
+        ('tools.serbest_meslek', {}),
+        ('tools.sermaye_azaltimi', {}),
+        
+        # Hesaplamalar (Calculators)
+        ('calculators.index', {}),
+        ('calculators.gelir_vergisi', {}),
+        ('calculators.ithalat_kdv', {}),
+        ('calculators.gecikme_zammi', {}),
+        ('calculators.tdhp', {}),
+        
+        # İndirimli Kurumlar
+        ('indirimlikurumlar.index', {}),
     ]
 
     for rule, kw in static_endpoints:

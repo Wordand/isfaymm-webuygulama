@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 
-{% block title %}
-Vergi Hesaplama Araçları | İSFA YMM
-{% endblock %}
+{% block title %}Vergi Hesaplama Araçları | İSFA YMM{% endblock %}
+
+{% block description %}Güncel mevzuat ve idari görüşler esas alınarak hazırlanmış, karar alma süreçlerinizi hızlandıracak profesyonel vergi hesaplama araçları.{% endblock %}
+{% block og_desc %}İSFA YMM Vergi ve Finans Hesaplama Araçları Merkesi{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -103,3 +104,22 @@ Vergi Hesaplama Araçları | İSFA YMM
     </div>
 </div>
 {% endblock %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "headline": "Vergi Hesaplama Araçları Merkezi",
+  "name": "Hesaplama Araçları",
+  "description": "Gelir vergisi, ithalatta KDV, gecikme zammı, sermaye indirimi ve diğer finansal hesaplamalar için güncel araçlar.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.isfaymm.com/static/images/logo.png"
+    }
+  }
+}
+</script>

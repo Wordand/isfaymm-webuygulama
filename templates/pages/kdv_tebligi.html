@@ -2,6 +2,9 @@
 
 {% block title %}KDV Genel Uygulama Tebliği | İSFA YMM{% endblock %}
 
+{% block description %}KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini, hiyerarşik yapı içerisinde kolayca arayın, inceleyin ve notlar alın.{% endblock %}
+{% block og_desc %}KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5" style="background: #f8faff;">
     <!-- External Libraries -->
@@ -1240,5 +1243,28 @@ function showToast(msg, type = 'info') {
     });
 }
 
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "KDV Genel Uygulama Tebliği Rehberi",
+  "name": "KDV Genel Uygulama Tebliği",
+  "description": "KDV Genel Uygulama Tebliği'nin güncel ve detaylı arama motoru. Maddeler, açıklamalar ve özellikli durumlar içerir.",
+  "author": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.isfaymm.com/static/images/logo.png"
+    }
+  }
+}
 </script>
 {% endblock %}

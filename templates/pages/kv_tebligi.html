@@ -2,6 +2,9 @@
 
 {% block title %}Kurumlar Vergisi Genel Tebliği | İSFA YMM{% endblock %}
 
+{% block description %}Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini, hiyerarşik yapı içerisinde kolayca arayın, inceleyin ve notlar alın.{% endblock %}
+{% block og_desc %}Kurumlar Vergisi Tebliği detaylı arama motoru ve rehberi.{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5" style="background: #f8faff;">
     <!-- External Libraries -->
@@ -942,6 +945,29 @@ function highlightSelection() {
         document.getElementById('textSelectionMenu').style.display = 'none';
         selection.removeAllRanges();
     }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Kurumlar Vergisi Genel Tebliği Rehberi",
+  "name": "Kurumlar Vergisi Genel Tebliği",
+  "description": "Kurumlar Vergisi Genel Tebliği'nin güncel ve detaylı arama motoru. Maddeler, açıklamalar ve özellikli durumlar içerir.",
+  "author": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.isfaymm.com/static/images/logo.png"
+    }
+  }
 }
 </script>
 {% endblock %}

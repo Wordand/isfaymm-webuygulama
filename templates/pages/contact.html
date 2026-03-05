@@ -1,5 +1,8 @@
 {% extends 'layout.html' %}
-{% block title %}İSFAYMM - İletişim Bilgileri{% endblock %}
+{% block title %}İletişim Bilgileri - İSFA YMM{% endblock %}
+
+{% block description %}İSFA Yeminli Mali Müşavirlik iletişim bilgileri, İstanbul ve Konya ofis adresleri, telefon numaraları ve çalışma saatleri.{% endblock %}
+{% block og_desc %}İSFA YMM Danışmanlık ve İletişim Bilgileri{% endblock %}
 
 {% block content %}
 
@@ -133,3 +136,38 @@
 </section>
 
 {% endblock %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "İSFA YMM İletişim Bilgileri",
+  "description": "Vergi, teşvik ve mali danışmanlık hizmetlerinde bize ulaşın.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com"
+  },
+  "mainEntity": {
+    "@type": "LocalBusiness",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "image": "https://www.isfaymm.com/static/images/logo.png",
+    "email": "bilgi@isfaymm.com",
+    "telephone": "+905079198118",
+    "address": [
+      {
+        "@type": "PostalAddress",
+        "streetAddress": "Ziya Gökalp Mah. Süleyman Demirel Bulvarı Mall of İstanbul Ofis No:7E/131 Başakşehir",
+        "addressLocality": "İstanbul",
+        "addressCountry": "TR"
+      },
+      {
+        "@type": "PostalAddress",
+        "streetAddress": "Ferhuniye Mah. Sultanşah Cd. 46/1 Selçuklu",
+        "addressLocality": "Konya",
+        "addressCountry": "TR"
+      }
+    ]
+  }
+}
+</script>

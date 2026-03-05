@@ -2,6 +2,9 @@
 
 {% block title %}Mevzuat Değişiklikleri | İSFA YMM{% endblock %}
 
+{% block description %}Vergi dünyasındaki son dakika gelişmeleri, Resmî Gazete özetleri ve kritik yasal değişiklikleri İSFA YMM mevzuat bülteninden takip edin.{% endblock %}
+{% block og_desc %}Güncel Vergi ve Finans Mevzuat Değişiklikleri Bülteni{% endblock %}
+
 {% block content %}
 <style>
     .legislation-hero {
@@ -333,3 +336,22 @@
     </div>
 </section>
 {% endblock %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "headline": "Mevzuat Değişiklikleri Bülteni",
+  "name": "Mevzuat Değişiklikleri",
+  "description": "Vergi dünyasındaki son dakika gelişmelerini, Resmî Gazete özetlerini ve kritik yasal değişiklikleri takip edebileceğiniz platform.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.isfaymm.com/static/images/logo.png"
+    }
+  }
+}
+</script>
