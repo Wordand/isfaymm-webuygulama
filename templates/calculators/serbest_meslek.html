@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}Serbest Meslek Makbuzu Hesaplama{% endblock %}
+{% block title %}Serbest Meslek Makbuzu Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Netten brüte, brütten nete veya ele geçen tutar üzerinden Serbest Meslek Makbuzu (SMM) vergi kesintilerini güncel oranlarla hesaplayın.{% endblock %}
+{% block og_desc %}Netten brüte, brütten nete veya ele geçen tutar üzerinden Serbest Meslek Makbuzu (SMM) vergi kesintilerini güncel oranlarla hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -157,5 +160,20 @@
         document.getElementById('resKdv').textContent = formatMoney(kdv);
         document.getElementById('resTahsil').textContent = formatMoney(tahsil);
     }
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Serbest Meslek Makbuzu Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "Brütten nete, netten brüte veya tahsil edilen tutara göre Serbest Meslek Makbuzu KDV ve Stopaj kesintilerini kolayca hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
 </script>
 {% endblock %}

@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}İthalatta KDV İndirimi Hesaplama{% endblock %}
+{% block title %}İthalatta KDV İndirimi Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Gözetim uygulaması dâhil ithalat işlemlerinizde indirilebilecek ve maliyete atılacak KDV tutarını ücretsiz hesaplayın.{% endblock %}
+{% block og_desc %}Gözetim uygulaması dâhil ithalat işlemlerinizde indirilebilecek ve maliyete atılacak KDV tutarını ücretsiz hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -205,5 +208,20 @@
             uyariEl.className = "alert alert-info mt-3";
         }
     }
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "İthalatta KDV İndirimi Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "7846 sayılı Karar kapsamında ithalatta gözetim farkı nedeniyle kısıtlanan KDV indirim tutarını hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
 </script>
 {% endblock %}

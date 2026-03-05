@@ -2,6 +2,9 @@
 
 {% block title %}Nakdi Sermaye Artırım İndirimi Hesaplama | İSFA YMM{% endblock %}
 
+{% block description %}Kurumlar vergisi avantajı sağlayan nakdi sermaye artırım indirimini şirketiniz için saniyeler içinde kolayca hesaplayın.{% endblock %}
+{% block og_desc %}Kurumlar vergisi avantajı sağlayan nakdi sermaye artırım indirimini şirketiniz için saniyeler içinde kolayca hesaplayın.{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
     <div class="container">
@@ -322,6 +325,21 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Nakdi Sermaye Artırım İndirimi Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "Şirket sermaye yapısının güçlendirilmesi amacıyla getirilen nakdi sermaye artışlarına yönelik kurumlar vergisi indirimini (vergi avantajı) kolayca hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
 <script>
     let numInputs = [];
     const faizOranlari = {

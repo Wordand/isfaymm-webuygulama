@@ -4,7 +4,7 @@ from auth import login_required, kdv_access_required, api_kdv_access_required, r
 import psycopg2.extras
 from datetime import datetime
 
-bp = Blueprint("kdv", __name__, url_prefix="/kdv")
+bp = Blueprint("kdv", __name__)
 
 STATUS_STAGES = {
     'Listeler': [

@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}Gecikme Zammı Hesaplama{% endblock %}
+{% block title %}Gecikme Zammı Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Vergi aslı, vergi ziyaı ve diğer borçlar için güncel gecikme zammını ücretsiz ve saniyeler içinde hesaplayın.{% endblock %}
+{% block og_desc %}Vergi aslı, vergi ziyaı ve diğer borçlar için güncel gecikme zammını ücretsiz ve saniyeler içinde hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -183,5 +186,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gecikme Zammı Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "Vergi borçları, vergi ziyaı ve diğer amme alacakları için güncel oranlarla gecikme zammı hesaplama aracı.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
 </script>
 {% endblock %}

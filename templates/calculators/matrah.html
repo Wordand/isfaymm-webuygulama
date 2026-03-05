@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 
-{% block title %}Matrah Hesaplama{% endblock %}
+{% block title %}Matrah Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Toplam gelir ve gider üzerinden vergi matrahınızı online ve ücretsiz olarak kolayca hesaplayın.{% endblock %}
+{% block og_desc %}Toplam gelir ve gider üzerinden vergi matrahınızı online ve ücretsiz olarak kolayca hesaplayın.{% endblock %}
 
 {% block content %}
 <h3>Matrah Hesaplama</h3>
@@ -48,4 +51,20 @@
         </tbody>
     </table>
 {% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Basit Matrah Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "Ticari gelir gider üzerinden vergi matrahı tespit etmenizi sağlayan ücretsiz basit hesaplama aracı.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
 {% endblock %}

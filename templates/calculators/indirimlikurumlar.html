@@ -1,9 +1,27 @@
 {% extends "layout.html" %}
-{% block title %}İndirimli Kurumlar Vergisi{% endblock %}
+{% block title %}İndirimli Kurumlar Vergisi Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Yatırım teşvik belgesi kapsamındaki yatırımlarınız için sağlanan indirimli kurumlar vergisi avantajını saniyeler içinde ücretsiz hesaplayın.{% endblock %}
+{% block og_desc %}Yatırım teşvik belgesi kapsamındaki yatırımlarınız için sağlanan indirimli kurumlar vergisi avantajını saniyeler içinde ücretsiz hesaplayın.{% endblock %}
 
 {% block content %}
 <!-- IMask Library -->
 <script src="https://unpkg.com/imask"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "İndirimli Kurumlar Vergisi Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "Yatırım teşvik belgesi(YTB) kapsamındaki yatırımlarınız için indirimli kurumlar vergisini hesaplayıp avantajınızı ölçün.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
 
 <style>
 .ikv-header {

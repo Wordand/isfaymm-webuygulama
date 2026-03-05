@@ -2,6 +2,9 @@
 
 {% block title %}Asgari Kurumlar Vergisi Hesaplama | İSFA YMM{% endblock %}
 
+{% block description %}7524 sayılı Kanun ve KVK Madde 32/C kapsamında uygulanan asgari kurumlar vergisini profesyonel kurumlar vergisi aracımız ile hesaplayın.{% endblock %}
+{% block og_desc %}7524 sayılı Kanun ve KVK Madde 32/C kapsamında uygulanan asgari kurumlar vergisini profesyonel kurumlar vergisi aracımız ile hesaplayın.{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
     <div class="container">
@@ -300,6 +303,21 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Asgari Kurumlar Vergisi Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "7524 sayılı Kanun ve KVK Madde 32/C kapsamında uygulanan asgari kurumlar vergisini profesyonel aracımız ile kolayca hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
 <script>
     let numInputs = [];
 

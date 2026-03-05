@@ -2,6 +2,9 @@
 
 {% block title %}Finansman Gider Kısıtlaması Hesaplama | İSFA YMM{% endblock %}
 
+{% block description %}KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.{% endblock %}
+{% block og_desc %}KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
     <div class="container">
@@ -238,6 +241,21 @@
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Finansman Gider Kısıtlaması Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
 <script>
     let numInputs = [];
 

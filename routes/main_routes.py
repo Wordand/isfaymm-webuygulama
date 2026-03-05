@@ -46,11 +46,14 @@ def sitemap_xml():
     # Statik URL'ler
     static_endpoints = [
         ('main.home', {}),
+        ('main.about', {}),
+        ('main.team', {}),
         ('main.mevzuat', {}),
         ('main.indirim', {}),
         ('main.ceza', {}),
         ('main.birlesme', {}),
         ('main.kdv_tebligi', {}),
+        ('main.kv_tebligi', {}),
         ('main.enflasyon_duzeltmesi', {}),
         ('main.mevzuat_degisiklikleri', {}),
         ('main.contact', {}),

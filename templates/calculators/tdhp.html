@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 
-{% block title %}Tek Düzen Hesap Planı - Pratik Rehber{% endblock %}
+{% block title %}Tek Düzen Hesap Planı - Pratik Rehber | İSFA YMM{% endblock %}
+
+{% block description %}Güncel Tek Düzen Hesap Planı (TDHP) arama motoru, hesap kodları, işleyiş açıklamaları ve örnek muhasebe kayıtları.{% endblock %}
+{% block og_desc %}Güncel Tek Düzen Hesap Planı (TDHP) arama motoru, hesap kodları, işleyiş açıklamaları ve örnek muhasebe kayıtları.{% endblock %}
 
 {% block content %}
 <div class="container py-4" style="max-width: 900px;">
@@ -603,5 +606,21 @@
     // Init button styles correctly on load
     updateButtonStyles(document.querySelector('#filterButtons button'));
 
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Tek Düzen Hesap Planı (TDHP) Arama Motoru",
+  "operatingSystem": "All",
+  "applicationCategory": "ReferenceApplication",
+  "description": "Muhasebe profesyonelleri için pratik, açıklamalı ve örnekli Tek Düzen Hesap Planı arama aracı.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
 </script>
 {% endblock %}

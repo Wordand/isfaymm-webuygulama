@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}Gelir Vergisi Hesaplama{% endblock %}
+{% block title %}Gelir Vergisi Hesaplama | İSFA YMM{% endblock %}
+
+{% block description %}Yeni yıl verilerine göre ücret ve diğer gelirleriniz için güncel oranlarla gelir verginizi (dilimlerle beraber) hemen hesaplayın.{% endblock %}
+{% block og_desc %}Yeni yıl verilerine göre ücret ve diğer gelirleriniz için güncel oranlarla gelir verginizi (dilimlerle beraber) hemen hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -312,5 +315,20 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.prepend(tr);
     }
 });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Gelir Vergisi Hesaplama Aracı",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "2026 yılı güncel vergi dilimleri ile ücret ve diğer kazançların gelir vergisini ücretsiz ve hızlıca hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
 </script>
 {% endblock %}
