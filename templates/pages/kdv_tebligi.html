@@ -1,11 +1,50 @@
 {% extends "layout.html" %}
 
-{% block title %}KDV Genel Uygulama Tebliği | İSFA YMM{% endblock %}
+{% block title %}
+{% if selected_item %}
+    {{ selected_item.title }} | KDV Genel Uygulama Tebliği
+{% else %}
+    KDV Genel Uygulama Tebliği | İSFA YMM
+{% endif %}
+{% endblock %}
 
-{% block description %}KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini, hiyerarşik yapı içerisinde kolayca arayın, inceleyin ve notlar alın.{% endblock %}
-{% block og_desc %}KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.{% endblock %}
+{% block description %}
+{% if selected_item %}
+    {{ selected_item.content[:150] | striptags | replace("\n", " ") }}...
+{% else %}
+    KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini, hiyerarşik yapı içerisinde kolayca arayın, inceleyin ve notlar alın.
+{% endif %}
+{% endblock %}
+
+{% block og_desc %}
+{% if selected_item %}
+    KDV Tebliği: {{ selected_item.title }} detaylı açıklaması ve mevzuat rehberi.
+{% else %}
+    KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
+{% endif %}
+{% endblock %}
 
 {% block content %}
+{% if selected_item %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ selected_item.title }}",
+  "name": "{{ selected_item.title }} - KDV Tebliği",
+  "description": "{{ selected_item.content[:200] | striptags | replace('\n', ' ') | replace('"', '\\"') }}...",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA Yeminli Mali Müşavirlik",
+    "url": "https://www.isfaymm.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.isfaymm.com/static/images/logo.png"
+    }
+  }
+}
+</script>
+{% endif %}
 <div class="container-fluid py-5" style="background: #f8faff;">
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -405,6 +444,12 @@ async function initApp() {
         // Listener'ları tanımla
         setupEventListeners();
         setupTextSelection();
+        
+        // Eğer sunucu bir madde ID'si (bolum_id) gönderdiyse onu otomatik yükle
+        const initialId = "{{ bolum_id | default('') }}".replace(/\-/g, '/');
+        if (initialId) {
+            setTimeout(() => { loadContent(initialId); }, 100);
+        }
 
     } catch (err) {
         console.error("Başlangıç hatası:", err);
@@ -419,6 +464,24 @@ async function initApp() {
         }
     }
 }
+
+// Tarayıcı geri/ileri butonları için
+window.addEventListener('popstate', function(e) {
+    const path = window.location.pathname;
+    if (path.includes('/mevzuat/kdv-tebligi/')) {
+        const parts = path.split('/mevzuat/kdv-tebligi/');
+        if (parts.length > 1 && parts[1]) {
+            const uid = parts[1].replace(/\-/g, '/');
+            loadContent(uid);
+        }
+    } else if (path === '/mevzuat/kdv-tebligi') {
+        const contentArea = document.getElementById('mainContent');
+        if (contentArea) {
+            // Ana giriş ekranını geri yükle (basit bir yenileme de yapılabilir)
+            location.reload(); 
+        }
+    }
+});
 
 // Helper to flatten recursive data for next/prev logic
 function flattenData(items) {
@@ -616,8 +679,9 @@ function displayMainSearchResults(results, term) {
         const uid = item.uid || item.id;
         const snippet = item.content ? getSnippet(item.content, term) : "Alt kategorilerde eşleşme...";
         const highlightedTitle = highlightText(item.title, term);
+        const linkUid = uid.replace(/\//g, '-');
         html += `
-            <a href="#" onclick="loadContent('${uid}'); return false;" class="list-group-item list-group-item-action p-4 border-bottom">
+            <a href="/mevzuat/kdv-tebligi/${linkUid}" onclick="loadContent('${uid}'); history.pushState(null, '', '/mevzuat/kdv-tebligi/${linkUid}'); return false;" class="list-group-item list-group-item-action p-4 border-bottom">
                 <div class="d-flex w-100 justify-content-between align-items-center mb-2">
                     <h5 class="mb-0 fw-bold text-primary">${highlightedTitle}</h5>
                     <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${uid}</span>
@@ -693,12 +757,14 @@ function renderSidebar(data, expandAll = false, searchTerm = "") {
             const iconClass = (defaultExpanded && hasSub) ? 'bi-chevron-down' : (hasSub ? 'bi-chevron-right' : 'bi-dash');
             
             const highlightedTitle = searchTerm ? highlightText(item.title, searchTerm) : item.title;
+            const linkUid = uid.replace(/\//g, '-');
+            const href = `/mevzuat/kdv-tebligi/${linkUid}`;
 
             header.innerHTML = `
-                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <a href="${href}" class="d-flex align-items-center gap-2 overflow-hidden text-decoration-none" onclick="event.preventDefault();">
                     <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${item.id}</span>
                     <span class="text-dark small fw-medium" title="${item.title}" style="word-wrap: break-word; white-space: normal;">${highlightedTitle}</span>
-                </div>
+                </a>
                 <i class="bi ${iconClass} text-muted x-small ms-2"></i>
             `;
             
@@ -708,6 +774,10 @@ function renderSidebar(data, expandAll = false, searchTerm = "") {
             
             header.onclick = (e) => {
                 e.stopPropagation();
+                
+                const linkUidForHistory = uid.replace(/\//g, '-');
+                history.pushState(null, '', '/mevzuat/kdv-tebligi/' + linkUidForHistory);
+                
                 if(hasSub) {
                     const isClosed = subContainer.classList.contains('d-none');
                     if(isClosed) {
@@ -792,15 +862,18 @@ function loadContent(uid) {
                     <div class="mt-5 pt-4 border-top">
                         <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-diagram-2 me-2"></i>Alt Başlıklar</h5>
                         <div class="list-group">
-                            ${item.sub.map(s => `
-                                <a href="#" onclick="loadContent('${s.uid || s.id}'); return false;" class="list-group-item list-group-item-action border-start border-3 border-primary py-3 mb-2 rounded-3 shadow-sm hover-shadow transition-all">
+                            ${item.sub.map(s => {
+                                const subLink = (s.uid || s.id).replace(/\//g, '-');
+                                return `
+                                <a href="/mevzuat/kdv-tebligi/${subLink}" onclick="loadContent('${s.uid || s.id}'); history.pushState(null, '', '/mevzuat/kdv-tebligi/${subLink}'); return false;" class="list-group-item list-group-item-action border-start border-3 border-primary py-3 mb-2 rounded-3 shadow-sm hover-shadow transition-all">
                                     <div class="d-flex align-items-center gap-3">
                                         <span class="badge fw-bold border rounded-pill" style="min-width: 50px; font-size: 0.9rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${s.id}</span>
                                         <span class="fw-semibold text-dark flex-grow-1">${s.title}</span>
                                         <i class="bi bi-chevron-right text-muted"></i>
                                     </div>
                                 </a>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -812,14 +885,14 @@ function loadContent(uid) {
                 <div class="d-flex justify-content-between mt-5 pt-3 border-top">
                     <div>
                         ${neighbors.prev ? `
-                            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="loadContent('${neighbors.prev.id}')">
+                            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="const prevId = '${neighbors.prev.id}'.replace(/\\//g, '-'); history.pushState(null, '', '/mevzuat/kdv-tebligi/' + prevId); loadContent('${neighbors.prev.id}')">
                                 <i class="bi bi-arrow-left me-2"></i> Önceki: ${neighbors.prev.id}
                             </button>
                         ` : ''}
                     </div>
                     <div>
                         ${neighbors.next ? `
-                            <button class="btn btn-primary rounded-pill px-4" onclick="loadContent('${neighbors.next.id}')">
+                            <button class="btn btn-primary rounded-pill px-4" onclick="const nextId = '${neighbors.next.id}'.replace(/\\//g, '-'); history.pushState(null, '', '/mevzuat/kdv-tebligi/' + nextId); loadContent('${neighbors.next.id}')">
                                 Sonraki: ${neighbors.next.id} <i class="bi bi-arrow-right ms-2"></i>
                             </button>
                         ` : ''}

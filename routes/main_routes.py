@@ -86,6 +86,37 @@ def sitemap_xml():
             })
         except Exception:
             pass
+            
+    # Dinamik KDV ve KV rotaları
+    import json
+    def parse_links(items, base_route):
+        for item in items:
+            uid = str(item.get("uid", item.get("id", "")))
+            clean_uid = uid.replace("/", "-")
+            url = url_for(base_route, bolum_id=clean_uid, _external=True)
+            urls.append({
+                "loc": url,
+                "lastmod": datetime.now().strftime("%Y-%m-%d"),
+                "priority": "0.8"
+            })
+            if item.get("sub"):
+                parse_links(item["sub"], base_route)
+                
+    try:
+        kdv_path = os.path.join(current_app.root_path, 'static', 'data', 'kdv_tebligi.json')
+        if os.path.exists(kdv_path):
+            with open(kdv_path, 'r', encoding='utf-8') as f:
+                parse_links(json.load(f), 'main.kdv_tebligi')
+    except Exception as e:
+        current_app.logger.error(f"Sitemap KDV Data Error: {e}")
+        
+    try:
+        kv_path = os.path.join(current_app.root_path, 'static', 'data', 'kv_tebligi.json')
+        if os.path.exists(kv_path):
+            with open(kv_path, 'r', encoding='utf-8') as f:
+                parse_links(json.load(f), 'main.kv_tebligi')
+    except Exception as e:
+        current_app.logger.error(f"Sitemap KV Data Error: {e}")
 
     response = make_response(render_template("sitemap.xml", urls=urls))
     response.headers["Content-Type"] = "application/xml"
@@ -107,14 +138,64 @@ def mevzuat():
     return render_template("pages/mevzuat.html")
 
 @bp.route("/mevzuat/kdv-tebligi")
-def kdv_tebligi():
-    # We will load the JSON via JavaScript in the template
-    return render_template("pages/kdv_tebligi.html")
+@bp.route("/mevzuat/kdv-tebligi/<path:bolum_id>")
+def kdv_tebligi(bolum_id=None):
+    import json
+    selected_item = None
+    if bolum_id:
+        json_path = os.path.join(current_app.root_path, 'static', 'data', 'kdv_tebligi.json')
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                def find_item(items, target_id):
+                    for item in items:
+                        uid = str(item.get("uid", item.get("id", "")))
+                        clean_uid = uid.replace("/", "-")
+                        if clean_uid == target_id:
+                            return item
+                        if item.get("sub"):
+                            found = find_item(item["sub"], target_id)
+                            if found:
+                                return found
+                    return None
+                    
+                selected_item = find_item(data, bolum_id)
+        except Exception as e:
+            current_app.logger.error(f"Error reading kdv_tebligi.json: {e}")
+            
+    return render_template("pages/kdv_tebligi.html", bolum_id=bolum_id, selected_item=selected_item)
 
 @bp.route("/mevzuat/kv-tebligi")
-def kv_tebligi():
-    # We will load the JSON via JavaScript in the template
-    return render_template("pages/kv_tebligi.html")
+@bp.route("/mevzuat/kv-tebligi/<path:bolum_id>")
+def kv_tebligi(bolum_id=None):
+    import json
+    import os
+    from flask import current_app
+    selected_item = None
+    if bolum_id:
+        json_path = os.path.join(current_app.root_path, 'static', 'data', 'kv_tebligi.json')
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                def find_item(items, target_id):
+                    for item in items:
+                        uid = str(item.get("uid", item.get("id", "")))
+                        clean_uid = uid.replace("/", "-")
+                        if clean_uid == target_id:
+                            return item
+                        if item.get("sub"):
+                            found = find_item(item["sub"], target_id)
+                            if found:
+                                return found
+                    return None
+                    
+                selected_item = find_item(data, bolum_id)
+        except Exception as e:
+            current_app.logger.error(f"Error reading kv_tebligi.json: {e}")
+            
+    return render_template("pages/kv_tebligi.html", bolum_id=bolum_id, selected_item=selected_item)
 
 @bp.route("/mevzuat-degisiklikleri")
 def mevzuat_degisiklikleri():
