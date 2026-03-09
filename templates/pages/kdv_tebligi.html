@@ -317,10 +317,11 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
 <style>
     /* Glassmorphism & UI Design */
     .glass-card {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     }
     
     body {
@@ -330,7 +331,7 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
     }
 
     .gradient-header {
-        background: linear-gradient(135deg, #0d6efd 0%, #004aad 100%);
+        background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
     }
 
     .sidebar-top-link:hover .gradient-header {
@@ -536,19 +537,52 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .nav-header-item.active {
-        background: #f0f7ff !important;
-        border-right: 4px solid #0d6efd;
+    .nav-header-item {
+        margin-bottom: 4px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        cursor: pointer;
     }
 
-    .nav-header-item.active .badge {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border-color: #0d6efd !important;
+    .nav-header-item:hover {
+        background: #f1f5f9 !important;
+        border-color: #e2e8f0;
+        transform: translateX(4px);
+    }
+
+    .nav-header-item.active {
+        background: #eff6ff !important;
+        border-color: #bfdbfe;
     }
 
     .nav-header-item.active .text-dark {
-        color: #0d6efd !important;
+        color: #1d4ed8 !important;
+    }
+
+    .badge-number {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+
+    .nav-header-item:hover .badge-number,
+    .nav-header-item.active .badge-number {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+        transform: scale(1.1);
     }
 
     .content-body h2 {
@@ -1200,11 +1234,11 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
                 const href = `/mevzuat/kdv-tebligi/${linkUid}`;
 
                 header.innerHTML = `
-                <a href="${href}" class="d-flex align-items-center gap-2 overflow-hidden text-decoration-none" onclick="event.preventDefault();">
-                    <span class="badge fw-bold border rounded-pill" style="min-width: 40px; font-size: 0.75rem; background-color: #1e293b !important; color: #ffffff !important; border-color: #1e293b !important;">${item.id}</span>
-                    <span class="text-dark small fw-bold" title="${item.title}" style="word-wrap: break-word; white-space: normal; color: #0f172a !important;">${highlightedTitle}</span>
+                <a href="${href}" class="d-flex align-items-center gap-3 overflow-hidden text-decoration-none" onclick="event.preventDefault();">
+                    <span class="badge-number">${item.id}</span>
+                    <span class="text-dark small fw-bold" title="${item.title}" style="word-wrap: break-word; white-space: normal; color: #334155 !important; letter-spacing: -0.2px;">${highlightedTitle}</span>
                 </a>
-                <i class="bi ${iconClass} text-muted x-small ms-2"></i>
+                <i class="bi ${iconClass} text-muted opacity-50 x-small ms-2"></i>
             `;
 
                 const subContainer = document.createElement('div');
@@ -1801,7 +1835,7 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
 
             const data = await res.json();
             
-            // Yeni yapıda data = { answer: "...", items: [...] }
+            // Simplified layout: No sidebar, cleaner cards
             let html = `
                 <div class="ai-answer-box p-4 rounded-4 shadow-lg mb-4" style="background: #ffffff; border-left: 6px solid #0056b3; border-right: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
                     <div class="d-flex align-items-center justify-content-between mb-3">
@@ -1814,21 +1848,19 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
             </div>`;
 
             html += `
-            <div class="mt-5 px-1">
+            <div class="mt-5 px-1 pb-5">
                 <h5 class='fw-bold mb-4 d-flex align-items-center' style="color: #1e293b; letter-spacing: -0.5px;">
-                    <i class="bi bi-intersect text-primary me-2"></i> İlgili Tebliğ Kaynakları
+                    <i class="bi bi-intersect text-primary me-2 fs-4"></i> İlgili Mevzuat Kaynakları
                 </h5>
-                <div class="row g-3">
+                <div class="row g-4">
             `;
 
             if (data.items && data.items.length > 0) {
                 data.items.forEach(r => {
                     const cleanId = (r.id || "").replace(/\//g, "-");
-                    const url = "/mevzuat/kdv-tebligi/" + cleanId;
                     
-                    // Kelime Vurgulama + Temizlik
-                    let snippet = r.snippet || (r.content ? r.content.substring(0, 200) + "..." : "");
-                    // Metin gürültülerini buradaki kesitte de temizle (9/1045 -> 9/10)
+                    // Word Highlighting
+                    let snippet = r.snippet || (r.content ? r.content.substring(0, 250) + "..." : "");
                     snippet = snippet.replace(/(\d+\/\d+)\d{2,}/g, "$1");
                     
                     const highlightTerms = question.toLowerCase().trim().split(' ').filter(word => word.length > 2);
@@ -1840,26 +1872,31 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
                     html += `
                         <div class="col-md-6">
                             <div class="source-card p-4 rounded-4 border bg-white shadow-xs h-100 position-relative animate-fade-in" 
-                                 onclick="location.href='${url}'"
-                                 style="cursor: pointer; transition: all 0.3s ease; border-left: 5px solid #0056b3 !important;">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="p-2 bg-light rounded-circle me-3"><i class="bi bi-quote text-primary"></i></div>
-                                    <h6 class="fw-bold text-dark mb-0 fs-6">${r.title}</h6>
+                                 onclick="loadContent('${r.id}'); document.getElementById('aiResults').scrollIntoView({behavior:'smooth'});"
+                                 style="cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-left: 6px solid #0061ff !important;">
+                                <div class="d-flex align-items-start justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-2 bg-blue-soft text-primary rounded-3 me-3"><i class="bi bi-file-text-fill"></i></div>
+                                        <h6 class="fw-bold text-dark mb-0 fs-6">${r.title}</h6>
+                                    </div>
                                 </div>
-                                <div class="small text-secondary mb-0 lh-lg" style="text-align: justify; font-size: 0.85rem;">
+                                <div class="small text-secondary mb-3 lh-lg" style="text-align: justify; font-size: 0.88rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
                                     ${snippet}
                                 </div>
-                                <div class="mt-3 text-end">
-                                    <span class="text-primary fw-bold small" style="font-size: 0.7rem;">İncele <i class="bi bi-arrow-right"></i></span>
+                                <div class="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-light text-muted border-0 fw-normal small"><i class="bi bi-eye me-1"></i>Detaylı İncele</span>
+                                        ${r.page ? `<span class="badge bg-light text-muted border-0 fw-normal small"><i class="bi bi-file-pdf me-1"></i>S. ${r.page}</span>` : ''}
+                                    </div>
+                                    <i class="bi bi-arrow-right-circle-fill text-primary fs-5"></i>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 html += `</div></div>`;
-            } else {
-                html += "<div class='col-12'><p class='text-muted small'>Eşleşen madde bulunamadı.</p></div></div></div>";
             }
+
+            resultsDiv.innerHTML = html;
 
             resultsDiv.innerHTML = html;
         } catch (error) {

@@ -1,17 +1,22 @@
+import os
+# Prevent OpenMP and threading crashes on Windows - MUST BE BEFORE ANY OTHER IMPORTS
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
 from flask import Blueprint, render_template, request, make_response, jsonify, send_from_directory, url_for, current_app, redirect, flash
 from auth import login_required
 from datetime import datetime
-import os
 import numpy as np
 import logging
 import re
 import json
 import torch # To control threading and prevent ERR_RESET
 from rapidfuzz import fuzz
+import threading
 
-# Prevent OpenMP and threading crashes on Windows
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 torch.set_num_threads(1)
+_resource_lock = threading.Lock()
 
 bp = Blueprint("main", __name__)
 
@@ -55,32 +60,39 @@ _SEARCH_RESOURCES = {
 def get_search_resources(tax_type=None):
     global _SEARCH_RESOURCES
     
-    # 1. Load Model
-    if _SEARCH_RESOURCES["model"] is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            print("🚀 Loading AI Model into Memory...")
-            _SEARCH_RESOURCES["model"] = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-        except Exception as e:
-            logging.error(f"AI Model Load Failed: {e}")
-            return None
-
-    # 2. Load Tax Data (KDV or KV)
-    if tax_type in ["kdv", "kv"]:
-        if _SEARCH_RESOURCES[tax_type]["meta"] is None:
-            emb_dir = os.path.join(current_app.root_path, "static", "data", "embeddings")
-            meta_path = os.path.join(emb_dir, f"{tax_type}_meta.json")
-            vector_path = os.path.join(emb_dir, f"{tax_type}_vectors.npy")
-            
+    with _resource_lock:
+        # 1. Load Model
+        if _SEARCH_RESOURCES["model"] is None:
             try:
-                print(f"📊 Loading {tax_type.upper()} Data into Memory...")
-                with open(meta_path, "r", encoding="utf-8") as f:
-                    _SEARCH_RESOURCES[tax_type]["meta"] = json.load(f)
-                _SEARCH_RESOURCES[tax_type]["vectors"] = np.load(vector_path)
+                from sentence_transformers import SentenceTransformer
+                current_app.logger.info("🚀 Loading AI Model into Memory (paraphrase-multilingual-MiniLM-L12-v2)...")
+                # Force CPU to avoid CUDA conflicts on some Windows setups if not needed
+                _SEARCH_RESOURCES["model"] = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device='cpu')
             except Exception as e:
-                logging.error(f"{tax_type.upper()} Data Load Failed: {e}")
+                current_app.logger.error(f"❌ AI Model Load Failed: {e}", exc_info=True)
                 return None
+
+        # 2. Load Tax Data (KDV or KV)
+        if tax_type in ["kdv", "kv"]:
+            if _SEARCH_RESOURCES[tax_type]["meta"] is None:
+                emb_dir = os.path.join(current_app.root_path, "static", "data", "embeddings")
+                meta_path = os.path.join(emb_dir, f"{tax_type}_meta.json")
+                vector_path = os.path.join(emb_dir, f"{tax_type}_vectors.npy")
                 
+                if not os.path.exists(meta_path) or not os.path.exists(vector_path):
+                    current_app.logger.error(f"❌ Missing data files for {tax_type.upper()} in {emb_dir}")
+                    return None
+
+                try:
+                    current_app.logger.info(f"📊 Loading {tax_type.upper()} Data into Memory...")
+                    with open(meta_path, "r", encoding="utf-8") as f:
+                        _SEARCH_RESOURCES[tax_type]["meta"] = json.load(f)
+                    _SEARCH_RESOURCES[tax_type]["vectors"] = np.load(vector_path)
+                    current_app.logger.info(f"✅ {tax_type.upper()} Data loaded successfully. Vectors shape: {_SEARCH_RESOURCES[tax_type]['vectors'].shape}")
+                except Exception as e:
+                    current_app.logger.error(f"❌ {tax_type.upper()} Data Load Failed: {e}", exc_info=True)
+                    return None
+                    
     return _SEARCH_RESOURCES
 
 # --- SEARCH HELPERS ---
@@ -119,27 +131,42 @@ def get_legal_level(id_str):
     return "Fıkra/Bent"
 
 def detect_query_intent(question):
-    """Identifies the goal of the user query"""
+    """Sorgunun amacını tespit eder (Oran, Liste, Tanım vb.)"""
     q = question.lower()
-    if any(w in q for w in ["oran", "yüzde", "%", "tutar", "limit", "sınır"]):
+    if any(w in q for w in ["oran", "yüzde", "%", "tutar", "limit", "sınır", "kaçtır"]):
         return "RATE"
-    if any(w in q for w in ["nedir", "ne demek", "tanım", "kapsam"]):
+    if any(w in q for w in ["nedir", "ne demek", "tanım", "kapsam", "kimdir"]):
         return "DEFINITION"
-    if any(w in q for w in ["çeşit", "tür", "liste", "nelerdir", "hangileri"]):
+    if any(w in q for w in ["çeşit", "tür", "liste", "nelerdir", "hangileri", "sayılan"]):
         return "LIST"
-    if any(w in q for w in ["nasıl", "yol", "yöntem", "hesapla"]):
+    if any(w in q for w in ["nasıl", "yol", "yöntem", "hesapla", "şartlar"]):
         return "HOWTO"
     return "GENERAL"
+
+def extract_list_from_content(content):
+    """Metin içindeki liste öğelerini (madde madde) ayıklar"""
+    # 1. Sayısal listeler (1., 2. veya a), b))
+    items = re.findall(r"(?:^|\s)(\d+\.|\w\))\s+([^.]+?)(?=\s+\d+\.|\s+\w\)|$)", content)
+    if items:
+        return [f"{i[0]} {i[1].strip()}" for i in items[:8]] # İlk 8 madde
+    
+    # 2. Tireli listeler
+    items = re.findall(r"(?:^|\s)-\s+([^.]+?)(?=\s+-|$)", content)
+    if items:
+        return [f"• {i.strip()}" for i in items[:8]]
+        
+    return []
 
 def synthesize_ai_answer(best_item, question, intent):
     """Nokta atışı cevap üretici: Sadece en alakalı bilgiyi (Örn: Oran) gösterir"""
     content = (best_item.get('content', '') or "").strip()
-    # Mevzuat gürültülerini temizle (9/1045 -> 9/10) - Sadece 2+ rakam varsa temizle
-    content = re.sub(r'(\d+/\d+)\d{2,}', r'\1', content)
+    title = best_item.get('title', 'İlgili Mevzuat')
     
+    # Mevzuat gürültülerini temizle
+    content = re.sub(r'(\d+/\d+)\d{2,}', r'\1', content)
     sentences = re.split(r'(?<=[.!?])\s+', content)
     
-    # 1. ORAN SORGUSU: Dolgun ve Modern Kutu
+    # 1. ORAN SORGUSU: Dolgun Kutu
     if intent == "RATE":
         all_rates = re.findall(r"(\d+/10|%\s*\d+)", content)
         best_sentence = ""
@@ -150,38 +177,54 @@ def synthesize_ai_answer(best_item, question, intent):
         
         if all_rates:
             val = all_rates[0].replace(" ", "")
-            title_text = best_item.get('title', 'İlgili Mevzuat Maddesi')
             return f"""
-            <div class='py-2 px-1'>
+            <div class='py-3'>
                 <div class='row align-items-center'>
                     <div class='col-md-4 text-center border-end'>
-                        <span class='badge bg-danger mb-2' style='font-size: 3.5rem; padding: 15px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(220, 53, 69, 0.3);'>{val}</span>
-                        <div class='small text-muted fw-bold text-uppercase' style='letter-spacing: 1px;'>Güncel Oran</div>
+                        <div class='display-4 fw-bold text-primary mb-1'>{val}</div>
+                        <div class='small text-muted text-uppercase fw-bold'>Güncel Oran/Limit</div>
                     </div>
                     <div class='col-md-8 ps-md-4'>
-                        <h5 class='fw-bold text-dark mb-2'><i class='bi bi-bookmark-check text-primary me-2'></i>{title_text}</h5>
-                        <p class='text-secondary small mb-0 lh-lg' style='text-align: justify;'>{best_sentence}</p>
+                        <h6 class='fw-bold text-dark mb-2'><i class='bi bi-info-circle-fill text-primary me-2'></i>{title}</h6>
+                        <p class='text-secondary small mb-0 lh-base'>{best_sentence}</p>
                     </div>
                 </div>
             </div>
             """
 
-    # 2. LİSTE VEYA TANIM SORGUSU: Maksimum 2 cümlede bitir
+    # 2. LİSTE SORGUSU: Madde Madde Göster
+    if intent == "LIST":
+        list_items = extract_list_from_content(content)
+        if list_items:
+            list_html = "".join([f"<li class='mb-2'>{item}</li>" for item in list_items])
+            return f"""
+            <div class='py-2'>
+                <h6 class='fw-bold text-dark mb-3'><i class='bi bi-list-check text-success me-2'></i>{title} (Özet Liste)</h6>
+                <ul class='small text-secondary list-unstyled ps-0'>
+                    {list_html}
+                </ul>
+                <div class='small text-primary mt-2 italic'>* Detaylı bilgi için aşağıdaki kaynak maddeyi inceleyebilirsiniz.</div>
+            </div>
+            """
+
+    # 3. GENEL / TANIM SORGUSU: Özetle
     search_terms = [t for t in re.findall(r"\w+", question.lower()) if len(t) > 3]
     relevant_sentences = []
     for s in sentences:
         if any(t in s.lower() for t in search_terms):
             relevant_sentences.append(s.strip())
-            if len(relevant_sentences) >= 2: break
+            if len(relevant_sentences) >= 3: break
 
-    summary = " ".join(relevant_sentences) if relevant_sentences else content[:150] + "..."
-    return f"🎯 <b>Cevap:</b> {summary}"
+    summary = " ".join(relevant_sentences) if relevant_sentences else content[:250] + "..."
+    return f"🚀 <b>Özet Analiz:</b> {summary}"
 
 def perform_hybrid_search(tax_type, question):
     try:
         # 0. Resources Check
+        current_app.logger.info(f"🔍 Starting {tax_type} hybrid search for: {question[:50]}...")
         resources = get_search_resources(tax_type)
         if not resources or not resources[tax_type]["meta"]:
+            current_app.logger.warning("⚠️ Search resources not available.")
             return "Sistem henüz hazır değil, lütfen bekleyin.", []
 
         model = resources["model"]
@@ -196,7 +239,11 @@ def perform_hybrid_search(tax_type, question):
         article_match = re.search(r"\b\d+(\.\d+)*\b", expanded_question)
         
         # 2. Semantic Score (Vector - Normalized Dot Product)
-        q_vec = model.encode([expanded_question], normalize_embeddings=True, show_progress_bar=False)[0]
+        current_app.logger.info("🧠 Encoding question with AI model...")
+        with torch.no_grad():
+            q_vec = model.encode([expanded_question], normalize_embeddings=True, show_progress_bar=False)[0]
+        
+        current_app.logger.info("📈 Calculating semantic scores...")
         semantic_scores = np.dot(vectors, q_vec)
         
         # 3. N-grams for Exact Matching
@@ -266,13 +313,6 @@ def perform_hybrid_search(tax_type, question):
         intent = detect_query_intent(question)
         answer = synthesize_ai_answer(final_results[0], question, intent)
         
-        # Hardcoded List Handlers
-        if intent == "LIST" and "tevkifat" in question.lower():
-            if "tam" in question.lower():
-                answer = "📋 <b>Tam Tevkifat Uygulanan İşlemler:</b><br>1. İkametgâhı,... (Tam liste mevzuatta yer almaktadır)"
-            elif "kısmi" in question.lower() or "kismi" in question.lower():
-                answer = "📋 <b>Kısmi Tevkifat Uygulanan İşlemler:</b><br>Hizmet Grupları, Mal Grupları (Detaylı liste mevzuatta yer almaktadır)"
-
         return answer, final_results
 
     except Exception as e:

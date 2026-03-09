@@ -19,3 +19,7 @@ python-dotenv
 Flask-Limiter==3.5.0
 psycopg2-binary
 flask-talisman
+numpy
+torch
+sentence-transformers
+rapidfuzz
