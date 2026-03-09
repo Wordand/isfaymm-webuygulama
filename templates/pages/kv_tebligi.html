@@ -55,19 +55,25 @@
         <!-- 📂 Sol Menü (Navigasyon Panels) -->
         <div class="col-lg-3">
             <div class="navigation-wrapper sticky-top" style="top: 85px; z-index: 100;">
-                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden" style="max-height: calc(100vh - 120px); display: flex; flex-direction: column;">
-                    <div class="gradient-header p-4">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-book-half fs-4 text-white"></i>
-                            <h5 class="mb-0 fw-bold text-white">KV TEBLİĞİ</h5>
+                <div class="glass-card shadow-lg border-0 rounded-4 overflow-hidden"
+                    style="max-height: calc(100vh - 120px); display: flex; flex-direction: column;">
+                    <a href="{{ url_for('main.kv_tebligi', skipIntro='true') }}" class="text-decoration-none d-block sidebar-top-link">
+                        <div class="gradient-header p-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); cursor: pointer; transition: all 0.3s ease;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-book-half fs-4 text-info"></i>
+                                <h5 class="mb-0 fw-bold text-white">KV TEBLİĞİ</h5>
+                            </div>
+                            <p class="small mb-0 fw-semibold text-white">HIZLI MADDE ERİŞİMİ</p>
                         </div>
-                        <p class="small mb-0 opacity-75 text-white-50">Hiyerarşik Gezinti Paneli</p>
-                    </div>
-                    
+                    </a>
+
                     <div class="p-3 bg-white border-bottom">
                         <div class="search-box position-relative">
-                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-primary"></i>
-                            <input type="text" id="mevzuatSearch" class="form-control rounded-pill ps-5 border-light shadow-sm" placeholder="Başlık ara...">
+                            <i
+                                class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-primary"></i>
+                            <input type="text" id="mevzuatSearch"
+                                class="form-control rounded-pill ps-5 border-light shadow-sm"
+                                placeholder="Başlık ara...">
                         </div>
                     </div>
 
@@ -85,24 +91,34 @@
         <!-- 📄 Sağ İçerik Alanı -->
         <div class="col-lg-9">
             <!-- Breadcrumb & Kontrol Paneli -->
-            <div class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0">
+            <div
+                class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0 px-2" id="breadcrumbNav">
-                        <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Mevzuat</a></li>
-                        <li class="breadcrumb-item active text-primary fw-bold" aria-current="page">Kurumlar Vergisi Genel Tebliği</li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}"
+                                class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Mevzuat</a>
+                        </li>
+                        <li class="breadcrumb-item active text-primary fw-bold" aria-current="page">Kurumlar Vergisi Genel
+                            Tebliği</li>
                     </ol>
                 </nav>
                 <div class="d-flex gap-2 align-items-center">
                     <!-- Global Header Search -->
-                    <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs" style="width: 250px;">
-                        <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" class="form-control border-0" id="headerGlobalSearch" placeholder="Tebliğde ara..." onkeypress="if(event.key==='Enter') handleMainSearch(this.value)">
+                    <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs"
+                        style="width: 250px;">
+                        <span class="input-group-text bg-white border-0 ps-3"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" class="form-control border-0" id="headerGlobalSearch"
+                            placeholder="Tebliğde ara..."
+                            onkeypress="if(event.key==='Enter') handleMainSearch(this.value)">
                     </div>
                     <div class="vr mx-1"></div>
-                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-xs border" onclick="openFavoritesModal()" title="Favorilerim">
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 shadow-xs border"
+                        onclick="openFavoritesModal()" title="Favorilerim">
                         <i class="bi bi-star-fill me-1"></i> Favoriler
                     </button>
-                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-xs border" onclick="openNotesModal()" title="Notlarım">
+                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-xs border"
+                        onclick="openNotesModal()" title="Notlarım">
                         <i class="bi bi-sticky-fill me-1"></i> Notlar
                     </button>
                     <div class="vr mx-1"></div>
@@ -116,49 +132,77 @@
             </div>
 
             <!-- Ana İçerik Kartı -->
-            <div class="glass-card shadow-lg border-0 rounded-4 min-vh-75 position-relative overflow-hidden" id="contentWrapper">
-                <!-- Arkaplan Dekorasyonu -->
-                <div class="position-absolute top-0 end-0 opacity-05 pointer-events-none p-5">
-                    <i class="bi bi-journal-text" style="font-size: 15rem;"></i>
-                </div>
-                
-                <div class="card-body p-4 p-lg-5 position-relative" id="mainContent">
-                    <div class="welcome-screen text-center py-5">
-                        <div class="icon-circle bg-primary-soft mx-auto mb-4" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                            <i class="bi bi-journal-richtext text-primary fs-1"></i>
-                        </div>
-                        <h1 class="display-5 fw-bold text-dark mb-3">Kurumlar Vergisi Genel Tebliği</h1>
-                        <p class="lead text-muted mb-5">Kurumlar Vergisi Genel Tebliği'ne hiyerarşik yapı ile hızlı erişin.</p>
-                        
-                        <div class="features-grid row g-4 text-start mb-5">
-                            <div class="col-md-4">
-                                <div class="p-4 border rounded-4 hover-lift">
-                                    <i class="bi bi-search text-primary fs-3 mb-2"></i>
-                                    <h6 class="fw-bold">Detaylı Arama</h6>
-                                    <p class="small text-muted mb-0">Tüm başlıklar ve içerikler arasında anlık arama yapın.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-4 border rounded-4 hover-lift">
-                                    <i class="bi bi-star text-warning fs-3 mb-2"></i>
-                                    <h6 class="fw-bold">Favoriler & Notlar</h6>
-                                    <p class="small text-muted mb-0">Önemli maddeleri yıldızlayın ve özel notlar alın.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="p-4 border rounded-4 hover-lift">
-                                    <i class="bi bi-pen text-info fs-3 mb-2"></i>
-                                    <h6 class="fw-bold">Metin Vurgulama</h6>
-                                    <p class="small text-muted mb-0">Önemli yerleri sarı fosforlu kalemle çizin.</p>
-                                </div>
-                            </div>
-                        </div>
+            <div class="glass-card shadow-lg border-0 rounded-4 min-vh-75 position-relative overflow-hidden"
+                id="contentWrapper">
 
-                        <div class="search-large mx-auto" style="max-width: 600px;">
-                            <div class="input-group input-group-lg shadow-sm rounded-4 overflow-hidden border">
-                                <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" class="form-control border-0 px-3" id="mainSearchInput" placeholder="Madde, konu veya içerik ara...">
-                                <button class="btn btn-primary px-4" type="button" id="mainSearchBtn">Ara</button>
+                <div class="card-body p-4 p-lg-5 position-relative" id="mainContent">
+                    <div class="welcome-screen text-center py-2 mb-4 px-3">
+                        <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                            <div class="icon-circle bg-white shadow-sm"
+                                style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transform: rotate(-5deg);">
+                                <i class="bi bi-journal-richtext text-primary fs-4"></i>
+                            </div>
+                            <h1 class="h2 fw-black text-dark mb-0" style="letter-spacing: -1px;">Kurumlar Vergisi <span class="text-primary-gradient">Tebliği</span></h1>
+                        </div>
+                        <p class="small text-muted mx-auto mb-0" style="max-width: 500px;">
+                            Modern, hızlı ve yapay zeka destekli mevzuat rehberiniz.
+                        </p>
+
+                        <!-- Main Search Section (Visible after Intro) -->
+                        <div id="mainSearchSection" class="search-section mt-4 mx-auto" style="max-width: 1200px; opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+                            
+                            <!-- AI Akıllı Arama (Vurgulanan) -->
+                            <div class="ai-search-card card border-0 shadow-lg rounded-4 p-3 p-md-4 mb-4 overflow-hidden">
+                                
+                                <div class="relative-z">
+                                    <div class="d-flex align-items-center gap-3 mb-4">
+                                        <div class="ai-badge">SMART AI</div>
+                                        <h3 class="h4 fw-bold mb-0 text-dark">
+                                            KV Tebliği Akıllı Arama
+                                        </h3>
+                                    </div>
+                                    
+                                    <p class="text-muted mb-3 small">
+                                        Mevzuat konularını günlük dille sorun, AI sizin için en alakalı maddeleri ve istisnaları bulsun.
+                                    </p>
+
+                                    <div class="ai-input-group mb-4">
+                                        <div class="d-flex align-items-center ps-3 text-primary">
+                                            <i class="bi bi-chat-left-dots fs-5"></i>
+                                        </div>
+                                        <input id="aiQuestion" type="text" class="form-control fs-5"
+                                            placeholder="Örn: İştirak kazançları istisnası şartları nelerdir?"
+                                            onkeypress="if(event.key==='Enter') askAI()">
+                                        <button class="ai-btn-primary text-white" onclick="askAI()">
+                                            <span>Sorgula</span>
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="suggestions d-flex flex-wrap gap-2 align-items-center">
+                                        <span class="small fw-bold text-dark me-2"><i class="bi bi-lightning-charge text-warning"></i> AI Önerileri:</span>
+                                        <!-- Dynamic Suggestions will be loaded here -->
+                                        <div class="suggestion-pill" onclick="setAiQuestion('İştirak kazançları istisnası?')">İştirak Kazançları</div>
+                                        <div class="suggestion-pill" onclick="setAiQuestion('Örtülü sermaye şartları?')">Örtülü Sermaye</div>
+                                    </div>
+                                </div>
+
+                                <div id="aiResults" class="mt-5"></div>
+                            </div>
+
+                            <!-- Klasik Madde Arama Ayracı -->
+                            <div class="d-flex align-items-center mb-4 mt-5">
+                                <div class="flex-grow-1" style="height: 1px; background: linear-gradient(to right, transparent, #dee2e6);"></div>
+                                <span class="mx-3 text-primary fw-bold small text-uppercase" style="letter-spacing: 1px;">Klasik Madde Arama</span>
+                                <div class="flex-grow-1" style="height: 1px; background: linear-gradient(to left, transparent, #dee2e6);"></div>
+                            </div>
+                            <div class="search-large mb-3">
+                                <div class="input-group input-group-lg classic-search-bar shadow-sm">
+                                    <span class="input-group-text border-0 ps-4 bg-transparent"><i class="bi bi-list-columns-reverse text-primary"></i></span>
+                                    <input type="text" class="form-control border-0 px-3 fs-6 bg-transparent" id="mainSearchInput"
+                                        placeholder="Madde numarası veya aramak istediğiniz kelime...">
+                                    <button class="btn btn-primary px-5 rounded-pill m-2 py-2 fw-bold shadow-sm" type="button" id="mainSearchBtn">Maddeyi Getir</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -168,8 +212,46 @@
     </div>
 </div>
 
+<!-- 🎭 Premium Intro Splash (Ayrı Gelen Kısım) -->
+<div id="onboardingSplash" class="onboarding-overlay">
+    <div class="onboarding-content text-center">
+        <div class="badge rounded-pill bg-primary px-3 py-2 mb-4 animate-bounce">YENİ NESİL MEVZUAT DENEYİMİ</div>
+        <h2 class="text-white fw-bold mb-5 fs-1">Neler Sunuyoruz?</h2>
+        
+        <div class="row g-4 justify-content-center mb-5" style="max-width: 1000px;">
+            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.1s">
+                <div class="glass-intro-card">
+                    <div class="intro-icon"><i class="bi bi-robot text-primary"></i></div>
+                    <h5>Yapay Zeka</h5>
+                    <p>Mevzuatı günlük dille sorun, AI saniyeler içinde cevaplasın.</p>
+                </div>
+            </div>
+            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.3s">
+                <div class="glass-intro-card">
+                    <div class="intro-icon"><i class="bi bi-lightning-charge-fill text-warning"></i></div>
+                    <h5>Hızlı Erişim</h5>
+                    <p>Maddeler arası hiyerarşik bağlar ve saniyelik geçişler.</p>
+                </div>
+            </div>
+            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.5s">
+                <div class="glass-intro-card">
+                    <div class="intro-icon"><i class="bi bi-bookmarks-fill text-info"></i></div>
+                    <h5>Kişiselleştirme</h5>
+                    <p>Notlarınızı alın, favorilerinizi ekleyin ve vurgulamalar yapın.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="onboarding-progress mx-auto">
+            <div class="progress-bar-fill"></div>
+        </div>
+        <p class="text-white-50 mt-3 small">Mevzuat Hazırlanıyor...</p>
+    </div>
+</div>
+
 <!-- Floating Text Selection Menu -->
-<div id="textSelectionMenu" class="text-selection-menu shadow-lg rounded-3 border bg-dark text-white px-2 py-1" style="display: none; position: absolute; z-index: 1050;">
+<div id="textSelectionMenu" class="text-selection-menu shadow-lg rounded-3 border bg-dark text-white px-2 py-1"
+    style="display: none; position: absolute; z-index: 1050;">
     <div class="btn-group btn-group-sm">
         <button class="btn btn-dark btn-sm text-warning" onclick="highlightSelection()">
             <i class="bi bi-highlighter"></i> Vurgula
@@ -181,16 +263,24 @@
     </div>
 </div>
 
+<button id="backToTop" class="btn btn-primary shadow-lg rounded-circle" style="display: none; position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 50px; height: 50px; transition: all 0.3s ease;">
+    <i class="bi bi-arrow-up fs-4"></i>
+</button>
+
 <!-- Favorites Modal -->
 <div class="modal fade" id="favoritesModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-0 bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
-                <h5 class="modal-title fw-bold text-warning-emphasis"><i class="bi bi-star-fill me-2"></i>Favorilerim</h5>
+            <div
+                class="modal-header border-0 bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-warning-emphasis"><i class="bi bi-star-fill me-2"></i>Favorilerim
+                </h5>
                 <div class="d-flex gap-2">
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-warning border-0" onclick="renderFavoritesList('id')">Başlık No</button>
-                        <button type="button" class="btn btn-outline-warning border-0" onclick="renderFavoritesList('title')">Alfabetik</button>
+                        <button type="button" class="btn btn-outline-warning border-0"
+                            onclick="renderFavoritesList('id')">Başlık No</button>
+                        <button type="button" class="btn btn-outline-warning border-0"
+                            onclick="renderFavoritesList('title')">Alfabetik</button>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -209,7 +299,8 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-0 bg-info bg-opacity-10">
-                <h5 class="modal-title fw-bold text-info-emphasis"><i class="bi bi-sticky-fill me-2"></i>Kayıtlı Notlarım</h5>
+                <h5 class="modal-title fw-bold text-info-emphasis"><i class="bi bi-sticky-fill me-2"></i>Kayıtlı
+                    Notlarım</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4 bg-light" style="max-height: 600px; overflow-y: auto;">
@@ -225,20 +316,145 @@
 <style>
     /* Glassmorphism & UI Design */
     .glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
     }
+    
+    body {
+        background-image: radial-gradient(#d1d5db 0.5px, transparent 0.5px);
+        background-size: 20px 20px;
+        background-color: #f8faff;
+    }
+
     .gradient-header {
         background: linear-gradient(135deg, #0d6efd 0%, #004aad 100%);
     }
-    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
-    .opacity-05 { opacity: 0.05; }
-    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
-    .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    
+
+    .sidebar-top-link:hover .gradient-header {
+        filter: brightness(1.2);
+    }
+
+    .text-primary-gradient {
+        background: linear-gradient(90deg, #0d6efd, #00d2ff);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+
+    /* Onboarding Overlay Styles */
+    .onboarding-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-intro-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        padding: 40px 30px;
+        height: 100%;
+        color: white;
+        transition: all 0.5s ease;
+    }
+
+    .intro-icon {
+        width: 70px;
+        height: 70px;
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .intro-card-wrapper {
+        opacity: 0;
+        transform: translateY(40px);
+        animation: cardAppear 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        animation-delay: var(--delay);
+    }
+
+    @keyframes cardAppear {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .onboarding-progress {
+        width: 200px;
+        height: 4px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #0d6efd;
+        width: 0;
+        animation: progressMove 3.5s linear forwards;
+    }
+
+    @keyframes progressMove {
+        to { width: 100%; }
+    }
+
+    .dissolve-onboarding {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(1.1);
+    }
+
+    .animate-bounce {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-10px);}
+        60% {transform: translateY(-5px);}
+    }
+
+    .classic-search-bar {
+        background: #ffffff;
+        border-radius: 100px;
+        border: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+    }
+
+    .classic-search-bar:focus-within {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+    }
+
+    .fw-black { font-weight: 900; }
+
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .shadow-xs {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
     /* Navigation Styles */
     .nav-item-l1 {
         font-weight: 700;
@@ -246,18 +462,11 @@
         border-bottom: 1px solid #f0f0f0;
         cursor: pointer;
     }
+
     .nav-item-l1:hover {
         background: #f0f7ff;
     }
-    
-    /* Override any potential white text in headers - FORCE BLACK */
-    .nav-item-l1 .text-dark, 
-    .nav-link-custom .text-dark,
-    .nav-header-item .text-dark,
-    .nav-item-wrapper .text-dark {
-        color: #212529 !important;
-    }
-    
+
     /* Highlight Mark Style */
     mark.highlight-term {
         background-color: #ffeb3b !important;
@@ -269,29 +478,100 @@
     }
 
     /* Content Typography */
-    .content-body h1 { color: #000000; font-weight: 800; margin-bottom: 1.5rem; }
-    .content-body h2 { color: #000000; font-weight: 700; margin-bottom: 1rem; }
-    .content-body h3 { color: #000000; font-weight: 700; margin-top: 2rem; border-left: 4px solid #0d6efd; padding-left: 1rem; }
-    .content-body p { line-height: 1.8; color: #000000; font-size: 1.05rem; margin-bottom: 1rem; text-align: justify; }
-    .content-body .id-badge { background: #0d6efd; color: white; padding: 2px 10px; border-radius: 5px; margin-right: 10px; font-size: 0.9rem; }
-    
+    .content-animate-in {
+        animation: contentSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes contentSlideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nav-header-item {
+        cursor: pointer !important;
+        transition: all 0.2s;
+    }
+
+    .nav-header-item * {
+        cursor: pointer !important;
+    }
+
+    .nav-header-item.active {
+        background: #f0f7ff !important;
+        border-right: 4px solid #0d6efd;
+    }
+
+    .nav-header-item.active .badge {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border-color: #0d6efd !important;
+    }
+
+    .nav-header-item.active .text-dark {
+        color: #0d6efd !important;
+    }
+
+    .content-body h2 {
+        color: #000000;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .content-body h3 {
+        color: #000000;
+        font-weight: 700;
+        margin-top: 2rem;
+        border-left: 4px solid #0d6efd;
+        padding-left: 1rem;
+    }
+
+    .content-body p {
+        line-height: 1.8;
+        color: #000000;
+        font-size: 1.05rem;
+        margin-bottom: 1rem;
+        text-align: justify;
+    }
+
+    .content-body .id-badge {
+        background: #0d6efd;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 0.9rem;
+    }
+
     /* User Highlighter Style */
     .user-highlight {
-        background-color: #fef08a; /* Yellow-200 */
+        background-color: #fef08a;
         cursor: pointer;
         transition: background-color 0.2s;
         border-bottom: 2px solid #facc15;
     }
+
     .user-highlight:hover {
         background-color: #fde047;
     }
-    
+
     /* Scrollbar */
-    .scrollbar-slim::-webkit-scrollbar { width: 5px; }
-    .scrollbar-slim::-webkit-scrollbar-track { background: transparent; }
-    .scrollbar-slim::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 10px; }
-    .scrollbar-slim::-webkit-scrollbar-thumb:hover { background: #ced4da; }
-    
+    .scrollbar-slim::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-thumb {
+        background: #dee2e6;
+        border-radius: 10px;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-thumb:hover {
+        background: #ced4da;
+    }
+
     @media print {
         .navigation-wrapper, .breadcrumb, .btn-group, .search-box { display: none !important; }
         .col-lg-9 { width: 100% !important; }
@@ -308,100 +588,95 @@
         border-style: solid;
         border-color: #212529 transparent transparent transparent;
     }
-    
-    /* ============================================
-       RESMİ TEBLİĞ FORMATLAMASI - ÖZEL STİLLER
-       ============================================ */
-    
-    /* Dipnotlar (Footnotes) */
-    .footnote-item {
-        background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
-        border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-    .footnote-item:hover {
-        background: linear-gradient(to right, #e0f2fe 0%, #f8fafc 100%);
-        transform: translateX(3px);
-    }
-    
-    /* Örnekler (Examples) */
-    .example-box {
-        border-radius: 8px;
+
+    /* AI Search Special Styles */
+    .ai-search-card {
+        background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        position: relative;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
     }
-    .example-box:hover {
-        box-shadow: 0 4px 8px rgba(234, 179, 8, 0.2);
-        transform: translateY(-2px);
-    }
-    
-    /* Listeler (Lists) */
-    .list-item {
-        transition: all 0.2s ease;
-        padding: 4px 0;
-    }
-    .list-item:hover {
-        background-color: rgba(13, 110, 253, 0.03);
-        border-radius: 4px;
-        padding-left: 8px;
-    }
-    
-    /* İçerik paragrafları */
-    #article-text p {
-        font-family: 'Georgia', 'Times New Roman', serif;
-        font-size: 1rem;
-        line-height: 1.8;
-        color: #1e293b;
-        margin-bottom: 1rem;
-    }
-    
-    /* Kanun referansları */
-    #article-text strong {
-        font-weight: 600;
-        letter-spacing: 0.01em;
-    }
-    
-    /* İtalik vurgular */
-    #article-text em {
-        font-style: italic;
-        font-weight: 500;
-    }
-    
-    /* Liste marker'ları */
-    .list-item span:first-child {
-        font-family: 'Arial', sans-serif;
-    }
-    
-    /* Başlık stilleri */
-    #article-container h2 {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #0f172a;
+
+    .ai-badge {
+        background: linear-gradient(90deg, #0d6efd, #00d2ff);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.75rem;
         font-weight: 700;
-        letter-spacing: -0.02em;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
     }
-    
-    /* Badge stilleri - madde numaraları */
-    .badge.rounded-pill {
+
+    .ai-input-group {
+        display: flex;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .ai-input-group:focus-within {
+        border-color: #0d6efd;
+        box-shadow: 0 10px 30px rgba(13, 110, 253, 0.1);
+    }
+
+    .ai-input-group input {
+        border: none;
+        box-shadow: none !important;
+    }
+
+    .ai-btn-primary {
+        background: #0d6efd;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 24px;
         font-weight: 600;
-        font-size: 0.85rem;
-        padding: 0.35rem 0.75rem;
-        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
     }
-    
-    /* Yazdırma için optimizasyon */
-    @media print {
-        .footnote-item {
-            background: #f8fafc !important;
-            border-color: #cbd5e1 !important;
-        }
-        .example-box {
-            background: #fef9e6 !important;
-            break-inside: avoid;
-        }
-        #article-text p {
-            font-size: 11pt;
-            line-height: 1.6;
-        }
+
+    .ai-btn-primary:hover {
+        background: #004aad;
+        transform: scale(1.02);
+    }
+
+    .suggestion-pill {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .suggestion-pill:hover {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .ai-answer-box {
+        background: white;
+        border-radius: 20px;
+        border-left: 6px solid #0d6efd;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
@@ -409,64 +684,172 @@
 <script>
 // Global Scope
 window.tebligData = [];
-// Flattened list for navigation
 window.flatData = [];
 let searchTimeout = null;
 
-// User Data Storage 
-// (KV için ayrı keyler kullanalım)
 const STORAGE_KEY_FAVS = 'kv_tebligi_favs';
 const STORAGE_KEY_NOTES = 'kv_tebligi_notes';
 const STORAGE_KEY_HILITES = 'kv_tebligi_highlights';
 
 document.addEventListener('DOMContentLoaded', function() {
     initApp();
+    
+    // Intro Logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const skipIntro = urlParams.get('skipIntro');
+
+    if (skipIntro === 'true') {
+        const splash = document.getElementById('onboardingSplash');
+        const mainSearch = document.getElementById('mainSearchSection');
+        if (splash) splash.remove();
+        if (mainSearch) {
+            mainSearch.style.opacity = '1';
+            mainSearch.style.transform = 'translateY(0)';
+        }
+    } else {
+        setTimeout(() => {
+            const splash = document.getElementById('onboardingSplash');
+            const mainSearch = document.getElementById('mainSearchSection');
+            if (splash) {
+                splash.classList.add('dissolve-onboarding');
+                if (mainSearch) {
+                    mainSearch.style.opacity = '1';
+                    mainSearch.style.transform = 'translateY(0)';
+                }
+                setTimeout(() => splash.remove(), 1000);
+            }
+        }, 3500);
+    }
+
+    loadDynamicSuggestions();
 });
 
-async function initApp() {
+async function loadDynamicSuggestions() {
     try {
-        // Cache-busting: Add timestamp to force fresh load
-        const response = await fetch('/static/data/kv_tebligi.json?v=' + new Date().getTime());
-        if (!response.ok) throw new Error("Veri dosyası yüklenemedi");
-        
-        window.tebligData = await response.json();
-        console.log("KV Mevzuat verisi yüklendi:", window.tebligData.length, "ana başlık.");
-        
-        // Flatten data for navigation
-        flattenData(window.tebligData);
-        
-        // İlk render (Hepsi kapalı)
-        renderSidebar(window.tebligData, false);
-        
-        // Spinner'ı gizle
-        const spinner = document.getElementById('navSpinner');
-        if(spinner) spinner.style.display = 'none';
-        
-        // Listener'ları tanımla
-        setupEventListeners();
-        setupTextSelection();
-        
-        // Eğer sunucu bir madde ID'si (bolum_id) gönderdiyse onu otomatik yükle
-        const initialId = "{{ bolum_id | default('') }}".replace(/\-/g, '/');
-        if (initialId) {
-            setTimeout(() => { loadContent(initialId); }, 100);
+        const response = await fetch('/api/kv-suggestions');
+        const data = await response.json();
+        const container = document.querySelector('.suggestions');
+        if (data.suggestions && container) {
+            const staticSpan = container.querySelector('span');
+            container.innerHTML = '';
+            container.appendChild(staticSpan);
+            data.suggestions.forEach(q => {
+                const pill = document.createElement('div');
+                pill.className = 'suggestion-pill';
+                pill.textContent = q;
+                pill.onclick = () => setAiQuestion(q);
+                container.appendChild(pill);
+            });
         }
+    } catch (e) { console.error("Suggestions error:", e); }
+}
 
-    } catch (err) {
-        console.error("Başlangıç hatası:", err);
-        const spinner = document.getElementById('navSpinner');
-        if(spinner) {
-            spinner.innerHTML = `
-                <div class="p-3 text-center">
-                    <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
-                    <p class="small mt-2 text-danger">Mevzuat verisi yüklenemedi.</p>
-                    <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">Sayfayı Yenile</button>
-                </div>`;
-        }
+function setAiQuestion(text) {
+    const input = document.getElementById('aiQuestion');
+    if (input) {
+        input.value = text;
+        askAI();
     }
 }
 
-// Tarayıcı geri/ileri butonları için
+async function askAI() {
+    const question = document.getElementById('aiQuestion').value;
+    const resultsContainer = document.getElementById('aiResults');
+    
+    if (!question.trim()) return;
+
+    resultsContainer.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">AI Analiz Ediyor...</p>
+        </div>`;
+
+    try {
+        const response = await fetch('/api/kv-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: question })
+        });
+        const data = await response.json();
+        
+        // Yeni modern cevap kutusu
+        let html = `
+            <div class="ai-answer-box p-4 rounded-4 shadow-lg mb-4" style="background: #ffffff; border-left: 6px solid #0056b3; border-right: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="ai-badge" style="background: linear-gradient(90deg, #0056b3, #00d2ff); box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);">AI ANALİSTİ</div>
+                    <span class="text-muted fw-bold small" style="font-size: 0.7rem; letter-spacing: 1px;">ANLIK ANALİZ • ${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="fs-6 text-dark mb-0 lh-base" style="color: #1e293b !important; font-weight: 500;">
+                    ${data.answer || "Cevap üretilemedi."}
+                </div>
+            </div>
+            <div class="mt-5 px-1">
+                <h5 class='fw-bold mb-4 d-flex align-items-center' style="color: #1e293b; letter-spacing: -0.5px;">
+                    <i class="bi bi-intersect text-primary me-2"></i> İlgili Tebliğ Kaynakları
+                </h5>
+                <div class="row g-3">
+        `;
+
+        if (data.items && data.items.length > 0) {
+            data.items.forEach(item => {
+                const linkUid = item.id.replace(/\//g, '-');
+                const url = `/mevzuat/kv-tebligi/${linkUid}`;
+                
+                // Kelime Vurgulama
+                let snippet = item.snippet || (item.content ? item.content.substring(0, 180) + "..." : "");
+                const highlightTerms = question.toLowerCase().trim().split(' ').filter(word => word.length > 2);
+                highlightTerms.forEach(term => {
+                    const regex = new RegExp(`(${term})`, "gi");
+                    snippet = snippet.replace(regex, "<strong>$1</strong>");
+                });
+
+                html += `
+                    <div class="col-md-6">
+                        <div class="source-card p-4 rounded-4 border bg-white shadow-xs h-100 position-relative animate-fade-in" 
+                             onclick="location.href='${url}'"
+                             style="cursor: pointer; transition: all 0.3s ease; border-left: 5px solid #0056b3 !important;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="p-2 bg-light rounded-circle me-3"><i class="bi bi-quote text-primary"></i></div>
+                                <h6 class="fw-bold text-dark mb-0 fs-6 line-clamp-1">${item.title}</h6>
+                            </div>
+                            <div class="small text-secondary mb-0 lh-lg" style="text-align: justify; font-size: 0.85rem;">
+                                ${snippet}
+                            </div>
+                            <div class="mt-3 text-end">
+                                <span class="text-primary fw-bold small" style="font-size: 0.7rem;">İncele <i class="bi bi-arrow-right"></i></span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+        } else {
+            html += "<div class='col-12'><p class='text-muted small'>Eşleşen madde bulunamadı.</p></div></div></div>";
+        }
+        resultsContainer.innerHTML = html;
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+        resultsContainer.innerHTML = `<div class="alert alert-danger">Bir hata oluştu. Lütfen tekrar deneyin.</div>`;
+    }
+}
+
+async function initApp() {
+    try {
+        const response = await fetch('/static/data/kv_tebligi.json?v=' + new Date().getTime());
+        if (!response.ok) throw new Error("Veri dosyası yüklenemedi");
+        window.tebligData = await response.json();
+        flattenData(window.tebligData);
+        renderSidebar(window.tebligData, false);
+        const spinner = document.getElementById('navSpinner');
+        if(spinner) spinner.style.display = 'none';
+        setupEventListeners();
+        setupTextSelection();
+        const initialId = "{{ bolum_id | default('') }}".replace(/\-/g, '/');
+        if (initialId) { setTimeout(() => { loadContent(initialId); }, 100); }
+    } catch (err) {
+        console.error("Başlangıç hatası:", err);
+    }
+}
+
 window.addEventListener('popstate', function(e) {
     const path = window.location.pathname;
     if (path.includes('/mevzuat/kv-tebligi/')) {
@@ -475,549 +858,196 @@ window.addEventListener('popstate', function(e) {
             const uid = parts[1].replace(/\-/g, '/');
             loadContent(uid);
         }
-    } else if (path === '/mevzuat/kv-tebligi') {
-        const contentArea = document.getElementById('mainContent');
-        if (contentArea) {
-            location.reload(); 
-        }
     }
 });
 
-// Helper to flatten recursive data for next/prev logic
 function flattenData(items) {
     items.forEach(item => {
         const uid = item.uid || item.id;
         window.flatData.push({ id: uid, title: item.title, obj: item });
-        if(item.sub && item.sub.length > 0) {
-            flattenData(item.sub);
-        }
+        if(item.sub && item.sub.length > 0) { flattenData(item.sub); }
     });
 }
 
 function setupEventListeners() {
-    // Sidebar Arama Kutusu
     const searchInput = document.getElementById('mevzuatSearch');
-    if(searchInput) {
-        searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-    }
+    if(searchInput) searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
 
-    // Ana Sayfa Büyük Arama Kutusu
-    const mainSearch = document.getElementById('mainSearchInput');
+    const mainSearchInput = document.getElementById('mainSearchInput');
     const mainSearchBtn = document.getElementById('mainSearchBtn');
-    
-    if(mainSearch) {
-        mainSearch.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') handleMainSearch(e.target.value);
-        });
-    }
-    
-    if(mainSearchBtn && mainSearch) {
-        mainSearchBtn.addEventListener('click', () => handleMainSearch(mainSearch.value));
-    }
-}
+    if(mainSearchInput) mainSearchInput.addEventListener('keypress', (e) => { if(e.key==='Enter') loadContentFromInput(); });
+    if(mainSearchBtn) mainSearchBtn.addEventListener('click', loadContentFromInput);
 
-function setupTextSelection() {
-    const contentArea = document.getElementById('contentWrapper');
-    const menu = document.getElementById('textSelectionMenu');
-    
-    document.addEventListener('mouseup', (e) => {
-        const selection = window.getSelection();
-        if (selection.toString().length > 0 && contentArea.contains(selection.anchorNode)) {
-            const range = selection.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            
-            // Show menu above selection
-            menu.style.display = 'block';
-            menu.style.top = (window.scrollY + rect.top - 40) + 'px';
-            menu.style.left = (window.scrollX + rect.left + (rect.width / 2) - (menu.offsetWidth / 2)) + 'px';
-        } else {
-            // Hide if clicked outside menu
-            if (!menu.contains(e.target)) {
-                menu.style.display = 'none';
-            }
-        }
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) backToTop.style.display = 'flex';
+        else backToTop.style.display = 'none';
     });
+    backToTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ----------------------
-// SEARCH LOGIC
-// ----------------------
+function loadContentFromInput() {
+    const val = document.getElementById('mainSearchInput').value.trim();
+    if(val) {
+        // Madde no ise doğrudan yükle, değilse ara
+        const match = window.flatData.find(f => f.id === val);
+        if(match) loadContent(val);
+        else handleMainSearch(val);
+    }
+}
 
 function handleSearch(term) {
-    // Sidebar search only looks at titles for speed
     if(searchTimeout) clearTimeout(searchTimeout);
-    
-    const container = document.getElementById('mevzuatNav');
-    term = term ? term.trim() : "";
-
-    if(term.length === 0) {
-        renderSidebar(window.tebligData, false, "");
-        return;
-    }
-    
-    if(container) {
-        container.innerHTML = `
-            <div class="text-center py-4">
-                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                <span class="ms-2 text-muted small">Aranıyor...</span>
-            </div>
-        `;
-    }
-
     searchTimeout = setTimeout(() => {
-        // Param 3: 'false' means only title search for sidebar
-        const filteredResults = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), false);
-        renderSearchResults(filteredResults, term);
-    }, 350); 
+        const results = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), false);
+        renderSidebar(results, term.length > 0, term);
+    }, 300);
 }
 
 function handleMainSearch(term) {
-    // Main search looks deep into content
-    term = term ? term.trim() : "";
-    if(term.length === 0) return;
-
-    // Show loading
-    const contentArea = document.getElementById('mainContent');
-    contentArea.innerHTML = `
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <h4 class="mt-3">İçerik taranıyor...</h4>
-        </div>
-    `;
-
-    setTimeout(() => {
-        // Param 3: 'true' means include CONTENT search
-        const filteredResults = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), true);
-        
-        // Also update sidebar to reflect results
-        renderSearchResults(filteredResults, term);
-        
-        // Show results summary in main content
-        displayMainSearchResults(filteredResults, term);
-    }, 500);
+    const results = filterDataRecursive(window.tebligData, term.toLocaleLowerCase('tr-TR'), true);
+    displayMainSearchResults(results, term);
 }
 
 function filterDataRecursive(items, term, deepSearch) {
     let matches = [];
-    
     for(const item of items) {
         const title = (item.title || "").toLocaleLowerCase('tr-TR');
         const id = (item.id || "").toLocaleLowerCase('tr-TR');
         const content = deepSearch ? (item.content || "").toLocaleLowerCase('tr-TR') : "";
-        
-        // Match conditions
-        const isMatch = title.includes(term) || id.includes(term) || (deepSearch && content.includes(term));
-        
+        const isMatch = title.includes(term) || id.includes(term) || content.includes(term);
         let subMatches = [];
-        if(item.sub && item.sub.length > 0) {
-            subMatches = filterDataRecursive(item.sub, term, deepSearch);
-        }
-        
+        if(item.sub) subMatches = filterDataRecursive(item.sub, term, deepSearch);
         if(isMatch || subMatches.length > 0) {
             const newItem = { ...item };
-            
-            if(subMatches.length > 0) {
-                newItem.sub = subMatches;
-            } else if(isMatch) {
-                // If only parent matches, clean subs for display clarity in nav
-                if(!deepSearch) newItem.sub = []; 
-            }
-            // Tag item if it was a content match
-            if(deepSearch && content.includes(term)) {
-                newItem._contentMatch = true;
-            }
+            if(subMatches.length > 0) newItem.sub = subMatches;
             matches.push(newItem);
         }
     }
     return matches;
 }
 
-function renderSearchResults(results, term) {
-    const container = document.getElementById('mevzuatNav');
-    if(!container) return;
-    
-    container.innerHTML = '';
-    if(results.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-5 text-muted opacity-75">
-                <i class="bi bi-search fs-1 mb-2 d-block"></i>
-                <span>Sonuç bulunamadı</span>
-            </div>`;
-    } else {
-        renderSidebar(results, true, term);
-    }
-}
-
-function displayMainSearchResults(results, term) {
-    const contentArea = document.getElementById('mainContent');
-    
-    let flatResults = [];
-    
-    // Flatten helper for display
-    function collectFlat(items) {
-        items.forEach(i => {
-            if(i._contentMatch || (i.title || "").toLocaleLowerCase('tr-TR').includes(term.toLocaleLowerCase('tr-TR'))) {
-                flatResults.push(i);
-            }
-            if(i.sub) collectFlat(i.sub);
-        });
-    }
-    collectFlat(results);
-    
-    // Remove duplicates if any (parent/child confusion)
-    flatResults = [...new Map(flatResults.map(item => [item.uid || item.id, item])).values()];
-
-    let html = `
-        <div class="mb-4">
-            <h3 class="fw-bold">Arama Sonuçları: "${term}"</h3>
-            <p class="text-muted">${flatResults.length} adet başlık veya içerik bulundu.</p>
-        </div>
-        <div class="list-group list-group-flush border rounded-4">
-    `;
-    
-    flatResults.forEach(item => {
-        const uid = item.uid || item.id;
-        const snippet = item.content ? getSnippet(item.content, term) : "Alt kategorilerde eşleşme...";
-        const highlightedTitle = highlightText(item.title, term);
-        const linkUid = uid.replace(/\//g, '-');
-        html += `
-            <a href="/mevzuat/kv-tebligi/${linkUid}" onclick="loadContent('${uid}'); history.pushState(null, '', '/mevzuat/kv-tebligi/${linkUid}'); return false;" class="list-group-item list-group-item-action p-4 border-bottom">
-                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                    <h5 class="mb-0 fw-bold text-primary">${highlightedTitle}</h5>
-                    <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${uid}</span>
-                </div>
-                <p class="mb-1 text-muted small">${snippet}</p>
-            </a>
-        `;
-    });
-    
-    html += `</div>`;
-    contentArea.innerHTML = html;
-}
-
-function getSnippet(text, term) {
-    const lowerText = text.toLocaleLowerCase('tr-TR');
-    const lowerTerm = term.toLocaleLowerCase('tr-TR');
-    const index = lowerText.indexOf(lowerTerm);
-    
-    if(index === -1) return text.substring(0, 150) + "...";
-    
-    const start = Math.max(0, index - 60);
-    const end = Math.min(text.length, index + 100);
-    const snippet = text.substring(start, end);
-    return "..." + highlightText(snippet, term) + "...";
-}
-
-// ----------------------
-// RENDER & NAVIGATION Logic
-// ----------------------
-
-function highlightText(text, term) {
-    if (!term) return text;
-    // HTML tagleri temizle ki arama yaparken tagleri bozmayalım (mark vs eklerken)
-    // Arama yapıldığında formatlamayı (italik vs) kaybederiz ama güvenli olur.
-    const plainText = text.replace(/<[^>]*>/g, '');
-    
-    const lowerText = plainText.toLocaleLowerCase('tr-TR');
-    const lowerTerm = term.toLocaleLowerCase('tr-TR');
-    
-    let result = '';
-    let lastIndex = 0;
-    let index = lowerText.indexOf(lowerTerm);
-    
-    // Eğer eşleşme yoksa plainText dön
-    if (index === -1) return plainText;
-
-    while (index !== -1) {
-        result += plainText.substring(lastIndex, index);
-        result += `<mark class="highlight-term">${plainText.substring(index, index + lowerTerm.length)}</mark>`;
-        lastIndex = index + lowerTerm.length;
-        index = lowerText.indexOf(lowerTerm, lastIndex);
-    }
-    
-    result += plainText.substring(lastIndex);
-    return result;
-}
-
 function renderSidebar(data, expandAll = false, searchTerm = "") {
     const container = document.getElementById('mevzuatNav');
-    if(this.isRootCall === undefined || this.isRootCall === true) {
-         container.innerHTML = '';
-    }
+    container.innerHTML = '';
     
     function createNodes(items, parentElement, defaultExpanded) {
         items.forEach(item => {
+            const uid = item.uid || item.id;
+            const hasSub = item.sub && item.sub.length > 0;
+            
             const wrapper = document.createElement('div');
             wrapper.className = 'nav-item-wrapper mb-1';
-            
-            const hasSub = item.sub && item.sub.length > 0;
-            const uid = item.uid || item.id;
-            
+            wrapper.dataset.uid = uid;
+
             const header = document.createElement('div');
-            header.className = `p-2 rounded d-flex align-items-center justify-content-between cursor-pointer nav-header-item`;
-            header.style.transition = 'all 0.2s';
-            header.style.cursor = 'pointer';
-            
-            header.onmouseover = () => header.classList.add('bg-light');
-            header.onmouseout = () => header.classList.remove('bg-light');
-            
-            const iconClass = (defaultExpanded && hasSub) ? 'bi-chevron-down' : (hasSub ? 'bi-chevron-right' : 'bi-dash');
-            
+            header.className = `p-2 rounded d-flex align-items-center justify-content-between nav-header-item`;
             const highlightedTitle = searchTerm ? highlightText(item.title, searchTerm) : item.title;
-            // Tooltip için HTML taglerini temizle ve tırnak işaretlerini kaçır
-            const cleanTitleAttr = item.title.replace(/<[^>]*>/g, '').replace(/"/g, '&quot;');
             const linkUid = uid.replace(/\//g, '-');
-            const href = `/mevzuat/kv-tebligi/${linkUid}`;
 
             header.innerHTML = `
-                <a href="${href}" class="d-flex align-items-center gap-2 overflow-hidden text-decoration-none" onclick="event.preventDefault();">
-                    <span class="badge fw-bold border rounded-pill" style="min-width: 35px; font-size: 0.75rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${item.id}</span>
-                    <span class="text-dark small fw-medium" title="${cleanTitleAttr}" style="word-wrap: break-word; white-space: normal;">${highlightedTitle}</span>
-                </a>
-                <i class="bi ${iconClass} text-muted x-small ms-2"></i>
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <span class="badge rounded-pill shadow-sm" style="min-width: 40px; font-size: 0.75rem; background-color: #1e293b !important; color: #ffffff !important; border-color: #1e293b !important;">${item.id}</span>
+                    <span class="text-dark small fw-bold text-truncate" style="color: #0f172a !important;">${highlightedTitle}</span>
+                </div>
+                ${hasSub ? '<i class="bi bi-chevron-right text-muted small"></i>' : ''}
             `;
-            
-            const subContainer = document.createElement('div');
-            subContainer.className = 'ms-3 border-start ps-2 mt-1';
-            if(!defaultExpanded) subContainer.classList.add('d-none');
             
             header.onclick = (e) => {
                 e.stopPropagation();
                 
-                const linkUidForHistory = uid.replace(/\//g, '-');
-                history.pushState(null, '', '/mevzuat/kv-tebligi/' + linkUidForHistory);
-                
+                // Toggle Logic
                 if(hasSub) {
-                    const isClosed = subContainer.classList.contains('d-none');
+                    const sub = header.nextElementSibling;
+                    const isClosed = sub.classList.contains('d-none');
                     if(isClosed) {
-                        subContainer.classList.remove('d-none');
-                        header.querySelector('.bi').classList.replace('bi-chevron-right', 'bi-chevron-down');
+                        sub.classList.remove('d-none');
+                        header.querySelector('i').classList.replace('bi-chevron-right', 'bi-chevron-down');
                     } else {
-                        subContainer.classList.add('d-none');
-                        header.querySelector('.bi').classList.replace('bi-chevron-down', 'bi-chevron-right');
+                        sub.classList.add('d-none');
+                        header.querySelector('i').classList.replace('bi-chevron-down', 'bi-chevron-right');
                     }
-                    loadContent(uid); // Load content on click
-                } else {
-                    loadContent(uid);
                 }
+
+                // Load and Push State
+                history.pushState(null, '', '/mevzuat/kv-tebligi/' + linkUid);
+                loadContent(uid);
             };
-            
+
             wrapper.appendChild(header);
+            
             if(hasSub) {
-                createNodes(item.sub, subContainer, defaultExpanded);
-                wrapper.appendChild(subContainer);
+                const subDiv = document.createElement('div');
+                subDiv.className = 'ms-3 border-start ps-2 d-none shadow-none';
+                if(defaultExpanded) subDiv.classList.remove('d-none');
+                createNodes(item.sub, subDiv, defaultExpanded);
+                wrapper.appendChild(subDiv);
             }
             parentElement.appendChild(wrapper);
         });
     }
-    
     createNodes(data, container, expandAll);
 }
 
-// ----------------------
-// CONTENT LOADING & FEATURES
-// ----------------------
+function highlightText(text, term) {
+    if(!term) return text;
+    const regex = new RegExp(`(${term})`, 'gi');
+    return text.replace(regex, '<mark class="highlight-term">$1</mark>');
+}
 
-function loadContent(uid) {
-    // Clear active states in nav
-    document.querySelectorAll('.nav-header-item').forEach(el => el.classList.remove('bg-primary', 'bg-opacity-10'));
-    
-    const item = window.flatData.find(i => i.id === uid)?.obj;
+async function loadContent(uid) {
+    const item = window.flatData.find(f => f.id === uid);
     if(!item) return;
-    
+
     const contentArea = document.getElementById('mainContent');
-    contentArea.style.opacity = '0.5';
-    
-    setTimeout(() => {
-        // Prepare Features
-        const isFav = getFavorites().includes(uid);
-        const starClass = isFav ? "bi-star-fill text-warning" : "bi-star text-muted";
-        
-        let html = `
-            <div class="animate-fade-in" id="article-container" data-uid="${uid}">
-                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge fw-bold border rounded-pill" style="background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${uid.replace(/\//g, '.')}</span>
-                        <h2 class="h4 mb-0 fw-bold text-dark">${item.title}</h2>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center">
-                        ${item.page ? `<span class="badge bg-light text-muted border fw-normal" title="Orijinal PDF Sayfa No"><i class="bi bi-file-pdf me-1"></i>Sayfa ${item.page}</span>` : ''}
-                        <button class="btn btn-outline-light border shadow-sm text-dark" onclick="toggleFavorite('${uid}')" title="Favorilere Ekle">
-                            <i class="bi ${starClass} fs-5" id="fav-icon-${uid}"></i>
-                        </button>
-                    </div>
+    contentArea.innerHTML = `
+        <div class="content-animate-in">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <span class="badge bg-primary mb-2">MADDE ${item.id}</span>
+                    <h2 class="fw-bold text-dark">${item.title}</h2>
                 </div>
-                
-                <div class="content-text fs-6 text-dark position-relative" id="article-text" style="line-height: 1.8; text-align: justify;">
-                     ${formatContentText(item.content)}
-                </div>
-        `;
-        
-        // Sub Categories (Alt Alta Liste)
-        if(item.sub && item.sub.length > 0) {
-            html += `
-                <div class="mt-5 pt-4 border-top">
-                    <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-diagram-2 me-2"></i>Alt Başlıklar</h5>
-                    <div class="list-group">
-                        ${item.sub.map(s => {
-                            const subLink = (s.uid || s.id).replace(/\//g, '-');
-                            return `
-                            <a href="/mevzuat/kv-tebligi/${subLink}" onclick="loadContent('${s.uid || s.id}'); history.pushState(null, '', '/mevzuat/kv-tebligi/${subLink}'); return false;" class="list-group-item list-group-item-action border-start border-3 border-primary py-3 mb-2 rounded-3 shadow-sm hover-shadow transition-all">
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="badge fw-bold border rounded-pill" style="min-width: 50px; font-size: 0.9rem; background-color: #e0f2fe !important; color: #0284c7 !important; border-color: #bae6fd !important;">${s.id}</span>
-                                    <span class="fw-semibold text-dark flex-grow-1">${s.title}</span>
-                                    <i class="bi bi-chevron-right text-muted"></i>
-                                </div>
-                            </a>`;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        
-        contentArea.innerHTML = html;
-        contentArea.style.opacity = '1';
-        
-        // Scroll to top of content
-        document.getElementById('contentWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
-    }, 200);
-}
-
-function formatContentText(text) {
-    if (!text) return '<p class="text-muted fst-italic">Bu başlık altında doğrudan metin bulunmamaktadır.</p>';
-
-    // 1. Tabloları koru
-    // (Python parser <!-- TABLE_START --> etiketleri basıyor)
-    let parts = text.split(/(<!-- TABLE_START -->[\s\S]*?<!-- TABLE_END -->)/g);
-    
-    return parts.map(part => {
-        if (part.startsWith('<!-- TABLE_START -->')) {
-            return part; // Tablo HTML'i direkt dön
-        }
-        
-        // Metin işleme
-        return part.split('\n').filter(line => line.trim() !== '').map(line => {
-            // Dipnot kontrolü: (1), (2) vs
-            if (/^\(\d+\)/.test(line)) {
-                return `<div class="footnote-item p-3 mb-2 small text-muted border-start border-4 border-warning shadow-sm"><i class="bi bi-info-circle me-2"></i>${line}</div>`;
-            }
-            // Örnek: ...
-            if (line.trim().startsWith('Örnek') || line.trim().startsWith('ÖRNEK')) {
-                return `<div class="example-box bg-light border-start border-4 border-success p-4 my-3"><h6 class="text-success fw-bold"><i class="bi bi-lightbulb me-2"></i>Örnek</h6>${line}</div>`;
-            }
-            // List item: - veya a)
-            if (/^(\-|•|\*|[a-z]\))\s/.test(line)) {
-                 return `<div class="list-item ps-3 mb-1"><span class="fw-bold text-primary me-2">•</span>${line.replace(/^[-\.•*a-z)]+\s*/, '')}</div>`;
-            }
-
-            return `<p>${line}</p>`;
-        }).join('');
-    }).join('');
-}
-
-
-// --- FAVORITES & NOTES & HIGHLIGHTS MOCK ---
-// (Bu kısımlar localStorage kullanır)
-
-function getFavorites() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY_FAVS) || '[]');
-}
-
-function toggleFavorite(uid) {
-    let favs = getFavorites();
-    const index = favs.indexOf(uid);
-    const icon = document.getElementById(`fav-icon-${uid}`);
-    
-    if (index === -1) {
-        favs.push(uid);
-        if(icon) {
-            icon.classList.remove('bi-star', 'text-muted');
-            icon.classList.add('bi-star-fill', 'text-warning');
-        }
-        Swal.fire({
-            icon: 'success',
-            title: 'Favorilere Eklendi',
-            text: 'Bu madde favori listenize kaydedildi.',
-            timer: 1500,
-            showConfirmButton: false
-        });
-    } else {
-        favs.splice(index, 1);
-        if(icon) {
-            icon.classList.remove('bi-star-fill', 'text-warning');
-            icon.classList.add('bi-star', 'text-muted');
-        }
-        Swal.fire({
-            icon: 'info',
-            title: 'Favorilerden Çıkarıldı',
-            timer: 1500,
-            showConfirmButton: false
-        });
-    }
-    localStorage.setItem(STORAGE_KEY_FAVS, JSON.stringify(favs));
-}
-
-function openFavoritesModal() {
-    const modal = new bootstrap.Modal(document.getElementById('favoritesModal'));
-    renderFavoritesList();
-    modal.show();
-}
-
-function renderFavoritesList(sortBy = 'id') {
-    const list = document.getElementById('favoritesList');
-    const favs = getFavorites();
-    
-    if(favs.length === 0) {
-        list.innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-star display-4 mb-3 d-block"></i>Henüz favori eklemediniz.</div>';
-        return;
-    }
-    
-    let items = window.flatData.filter(i => favs.includes(i.id));
-    
-    if(sortBy === 'title') {
-        items.sort((a, b) => a.title.localeCompare(b.title));
-    } else {
-        // id sort logic might be complex, default string sort for now
-         items.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    list.innerHTML = items.map(item => `
-        <button onclick="loadContent('${item.id}'); bootstrap.Modal.getInstance(document.getElementById('favoritesModal')).hide();" class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center">
-            <div>
-                <span class="badge bg-warning text-dark me-2">${item.id}</span>
-                <span class="fw-medium">${item.title}</span>
+                <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="copyContentLink('${uid}')">
+                    <i class="bi bi-link-45deg"></i> Linki Kopyala
+                </button>
             </div>
-            <i class="bi bi-chevron-right"></i>
-        </button>
-    `).join('');
+            <div class="content-body text-dark lh-lg">${item.obj.content}</div>
+        </div>`;
+    
+    // Precise Highlight & Parent Expansion
+    document.querySelectorAll('.nav-item-wrapper').forEach(wrapper => {
+        const itemUid = wrapper.dataset.uid;
+        const header = wrapper.querySelector('.nav-header-item');
+        if(itemUid === uid) {
+            header.classList.add('active');
+            let parentSub = wrapper.parentElement;
+            while(parentSub && parentSub.classList.contains('ms-3')) {
+                if(parentSub.classList.contains('d-none')) {
+                    parentSub.classList.remove('d-none');
+                    const prevHeader = parentSub.previousElementSibling;
+                    if(prevHeader) {
+                        const icon = prevHeader.querySelector('.bi-chevron-right');
+                        if(icon) icon.classList.replace('bi-chevron-right', 'bi-chevron-down');
+                    }
+                }
+                parentSub = parentSub.parentElement.parentElement;
+            }
+        } else {
+            header.classList.remove('active');
+        }
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Similar dummies for Notes...
-function openNotesModal() {
-   Swal.fire("Bilgi", "Not sistemi geliştirme aşamasındadır.", "info");
+function copyContentLink(uid) {
+    const url = window.location.origin + '/mevzuat/kv-tebligi/' + uid.replace(/\//g, '-');
+    navigator.clipboard.writeText(url);
+    Swal.fire({ icon: 'success', title: 'Link Kopyalandı', showConfirmButton: false, timer: 1500 });
 }
-function saveSelectionAsNote() {
-    Swal.fire("Bilgi", "Not alma özelliği yakında eklenecek.", "info");
-}
-function highlightSelection() {
-    // Basic highlight demo
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const span = document.createElement('span');
-        span.className = 'user-highlight';
-        span.textContent = selection.toString();
-        range.deleteContents();
-        range.insertNode(span);
-        // Clear selection menu
-        document.getElementById('textSelectionMenu').style.display = 'none';
-        selection.removeAllRanges();
-    }
+
+function setupTextSelection() {
+    // Basic placeholder for the selection menu logic
 }
 </script>
-
-
 {% endblock %}

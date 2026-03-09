@@ -166,14 +166,18 @@ def is_numeric_header(text):
 
         low_t = tr_lower(t_str)
         forbidden_phrases = [
-            "seri no.lu", "sayılı kanun", "maddesinde", "fıkrasında", "çerçevesinde", 
-            "dolayısıyla", "gerekmektedir", "bulunmamaktadır", "örneğin", "tablo", 
+            "seri no.lu", "sayılı kanun", "maddesinde", "fıkrasında", 
+            "gerekmektedir", "bulunmamaktadır", "örneğin", "tablo", 
             "yukarıda", "aşağıda", "binde", "bu tutar", "bu işlemleri", "mart ve nisan", 
             "herhangi bir", "vergilendirme döneminde", 
             "tl dir", "tl'dir", "tutarında", "hesaplanan kdv"
         ]
         for phrase in forbidden_phrases:
-            if phrase in low_t: return False
+            if phrase in ["binde", "tablo", "yukarıda", "aşağıda"]:
+                if re.search(r'\b' + re.escape(phrase) + r'\b', low_t): 
+                    return False
+            elif phrase in low_t: 
+                return False
         
         # Eğer cümle 'mükellef' ile başlayıp nokta ile bitiyorsa başlık değildir
         if low_t.startswith("mükellef") and t_str.endswith("."): return False
