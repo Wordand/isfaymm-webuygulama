@@ -466,6 +466,6 @@ def kdv_suggestions():
 
 @bp.route("/api/kv-suggestions", methods=["GET"])
 def kv_suggestions():
-    expert_questions = ["İştirak Kazançları İstisnası?", "Örtülü Sermaye Şartları?", "Kurumlar Vergisi Oranı 2026", "Amortisman Ayırma", "Zarar Mahsubu"]
+    expert_questions = ["İştirak Kazançları İstisnası?", "Örtülü Sermaye Şartları?", "Kurumlar Vergisi Oranı 2026", "Zarar Mahsubu"]
     import random
     return jsonify({"suggestions": random.sample(expert_questions, 4)})
