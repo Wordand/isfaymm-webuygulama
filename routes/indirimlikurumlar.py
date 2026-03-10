@@ -123,7 +123,7 @@ def parse_ikv_from_pdf(path):
 
                 ekle("Toplam Yatırıma Katkı Tutarı", r"Toplam Yatırıma Katkı Tutarı[^\d]*([0-9\.,]+)")
                 ekle("Cari Yılda Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı", r"Cari Yılda Fiilen Gerçekleştirilen(?: Yatırım Harcaması)?(?: Tutarı)?[^\d]*([0-9\.,]+)")
-                ekle("Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı \(Başlangıçtan İtibaren\)", r"Gerçekleştirilen Yatırım Harcaması.*Başlangıçtan.*?:?\s*([0-9\.,]+)")
+                ekle("Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı (Başlangıçtan İtibaren)", r"Gerçekleştirilen Yatırım Harcaması.*Başlangıçtan.*?:?\s*([0-9\.,]+)")
                 ekle("Fiili Yatırım Harcaması Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı", r"Hak Kazanılan Yatırıma Katkı Tutarı\s*:?\s*([0-9\.,]+)")
                 ekle("Endekslenmiş Tutarlar Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı", r"Endekslenmiş.*Hak Kazanılan.*Katkı Tutarı\s*:?\s*([0-9\.,]+)")
 

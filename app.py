@@ -179,11 +179,11 @@ with app.app_context():
         # Superuser
         bootstrap_admin_from_env()
         
-        # Pre-load AI Model & Resources to verify startup
-        from routes.main_routes import get_search_resources
-        app.logger.info("Pre-loading AI search resources...")
-        get_search_resources("kdv")
-        get_search_resources("kv")
+        # Pre-load AI Model & Resources to verify startup (DISABLED to save memory on Render)
+        # from routes.main_routes import get_search_resources
+        # app.logger.info("Pre-loading AI search resources...")
+        # get_search_resources("kdv")
+        # get_search_resources("kv")
         
         # Quick Connection Test
         with get_conn() as conn:
