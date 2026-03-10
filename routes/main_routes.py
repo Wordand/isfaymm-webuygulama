@@ -98,11 +98,12 @@ def get_search_resources(tax_type=None):
                     return None
 
                 try:
-                    current_app.logger.info(f"📊 Loading {tax_type.upper()} Data into Memory...")
+                    current_app.logger.info(f"📊 Loading {tax_type.upper()} Data (Memory Optimized)...")
                     with open(meta_path, "r", encoding="utf-8") as f:
                         _SEARCH_RESOURCES[tax_type]["meta"] = json.load(f)
-                    _SEARCH_RESOURCES[tax_type]["vectors"] = np.load(vector_path)
-                    current_app.logger.info(f"✅ {tax_type.upper()} Data loaded successfully. Vectors shape: {_SEARCH_RESOURCES[tax_type]['vectors'].shape}")
+                    # mmap_mode='r' sayesinde vektörler RAM'e YÜKLENMEZ, diskten okunur. BU KRİTİKTİR!
+                    _SEARCH_RESOURCES[tax_type]["vectors"] = np.load(vector_path, mmap_mode='r')
+                    current_app.logger.info(f"✅ {tax_type.upper()} Data ready (Disk Mapping enabled).")
                 except Exception as e:
                     current_app.logger.error(f"❌ {tax_type.upper()} Data Load Failed: {e}", exc_info=True)
                     return None
