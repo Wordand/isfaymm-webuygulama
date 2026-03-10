@@ -11,11 +11,11 @@ import numpy as np
 import logging
 import re
 import json
-import torch # To control threading and prevent ERR_RESET
+# Heavy AI imports moved inside functions to save startup RAM
 from rapidfuzz import fuzz
 import threading
 
-torch.set_num_threads(1)
+# torch and sentence_transformers will be imported lazily
 _resource_lock = threading.Lock()
 
 bp = Blueprint("main", __name__)
@@ -66,6 +66,9 @@ def get_search_resources(tax_type=None):
             try:
                 import gc
                 gc.collect() # Free up any unused memory before loading heavy model
+                
+                import torch
+                torch.set_num_threads(1)
                 
                 from sentence_transformers import SentenceTransformer
                 current_app.logger.info("🚀 Loading AI Model into Memory (paraphrase-multilingual-MiniLM-L12-v2)...")
