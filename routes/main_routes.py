@@ -64,10 +64,21 @@ def get_search_resources(tax_type=None):
         # 1. Load Model
         if _SEARCH_RESOURCES["model"] is None:
             try:
+                import gc
+                gc.collect() # Free up any unused memory before loading heavy model
+                
                 from sentence_transformers import SentenceTransformer
                 current_app.logger.info("🚀 Loading AI Model into Memory (paraphrase-multilingual-MiniLM-L12-v2)...")
-                # Force CPU to avoid CUDA conflicts on some Windows setups if not needed
-                _SEARCH_RESOURCES["model"] = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', device='cpu')
+                
+                # Use a local cache to avoid re-downloading and reduce transient memory spikes
+                model_name = 'paraphrase-multilingual-MiniLM-L12-v2'
+                _SEARCH_RESOURCES["model"] = SentenceTransformer(model_name, device='cpu')
+                
+                # Reduce model internal memory if possible
+                if hasattr(_SEARCH_RESOURCES["model"], 'to'):
+                    _SEARCH_RESOURCES["model"].to('cpu')
+                
+                current_app.logger.info("✅ AI Model loaded successfully.")
             except Exception as e:
                 current_app.logger.error(f"❌ AI Model Load Failed: {e}", exc_info=True)
                 return None
@@ -240,8 +251,10 @@ def perform_hybrid_search(tax_type, question):
         
         # 2. Semantic Score (Vector - Normalized Dot Product)
         current_app.logger.info("🧠 Encoding question with AI model...")
+        import torch
+        torch.set_num_threads(1) # Extra insurance
         with torch.no_grad():
-            q_vec = model.encode([expanded_question], normalize_embeddings=True, show_progress_bar=False)[0]
+            q_vec = model.encode([expanded_question], normalize_embeddings=True, show_progress_bar=False, convert_to_numpy=True)[0]
         
         current_app.logger.info("📈 Calculating semantic scores...")
         semantic_scores = np.dot(vectors, q_vec)
