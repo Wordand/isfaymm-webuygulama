@@ -237,6 +237,10 @@ def perform_hybrid_search(tax_type, question):
         target_id = article_match.group() if article_match else None
 
         candidate_results = []
+        # Filter out generic terms for core matching
+        generic_terms = ["oran", "nedir", "kaçtır", "hakkında", "nasıl", "ne", "bir", "ve", "ile", "için"]
+        core_query_words = [w for w in search_words if w not in generic_terms]
+
         for item in meta_data:
             score = 0
             content_lower = (item.get("content", "") or "").lower()
@@ -279,7 +283,7 @@ def perform_hybrid_search(tax_type, question):
                 res["snippet"] = get_smart_snippet(res["content"], question, search_words)
                 final_results.append(res)
                 seen_ids.add(res["id"])
-            if len(final_results) >= 5: break
+            if len(final_results) >= 1: break
         
         if not final_results:
             return "Üzgünüm, aradığınız konuyu mevzuatta bulamadım.", []
