@@ -7,15 +7,12 @@ os.environ["MKL_NUM_THREADS"] = "1"
 from flask import Blueprint, render_template, request, make_response, jsonify, send_from_directory, url_for, current_app, redirect, flash
 from auth import login_required
 from datetime import datetime
-import numpy as np
 import logging
 import re
 import json
-# Heavy AI imports moved inside functions to save startup RAM
-from rapidfuzz import fuzz
+from rapidfuzz import fuzz, process
 import threading
 
-# torch and sentence_transformers will be imported lazily
 _resource_lock = threading.Lock()
 
 bp = Blueprint("main", __name__)
@@ -50,62 +47,53 @@ def expand_query(question):
         return question + " " + " ".join(unique_additions)
     return question
 
-# --- GLOBAL SEARCH CACHE (Singleton) ---
+# --- GLOBAL SEARCH CACHE ---
 _SEARCH_RESOURCES = {
-    "model": None,
-    "kdv": {"meta": None, "vectors": None},
-    "kv": {"meta": None, "vectors": None}
+    "kdv": {"meta": None},
+    "kv": {"meta": None}
 }
 
 def get_search_resources(tax_type=None):
     global _SEARCH_RESOURCES
     
     with _resource_lock:
-        # 1. Load Model
-        if _SEARCH_RESOURCES["model"] is None:
-            try:
-                import gc
-                gc.collect() # Free up any unused memory before loading heavy model
-                
-                import torch
-                torch.set_num_threads(1)
-                
-                from sentence_transformers import SentenceTransformer
-                current_app.logger.info("🚀 Loading AI Model into Memory (paraphrase-multilingual-MiniLM-L12-v2)...")
-                
-                # Use a local cache to avoid re-downloading and reduce transient memory spikes
-                model_name = 'paraphrase-multilingual-MiniLM-L12-v2'
-                _SEARCH_RESOURCES["model"] = SentenceTransformer(model_name, device='cpu')
-                
-                # Reduce model internal memory if possible
-                if hasattr(_SEARCH_RESOURCES["model"], 'to'):
-                    _SEARCH_RESOURCES["model"].to('cpu')
-                
-                current_app.logger.info("✅ AI Model loaded successfully.")
-            except Exception as e:
-                current_app.logger.error(f"❌ AI Model Load Failed: {e}", exc_info=True)
-                return None
-
-        # 2. Load Tax Data (KDV or KV)
         if tax_type in ["kdv", "kv"]:
             if _SEARCH_RESOURCES[tax_type]["meta"] is None:
-                emb_dir = os.path.join(current_app.root_path, "static", "data", "embeddings")
-                meta_path = os.path.join(emb_dir, f"{tax_type}_meta.json")
-                vector_path = os.path.join(emb_dir, f"{tax_type}_vectors.npy")
+                # Try to load the simpler metadata from embeddings dir, or fall back to main json
+                meta_path = os.path.join(current_app.root_path, "static", "data", "embeddings", f"{tax_type}_meta.json")
+                if not os.path.exists(meta_path):
+                    # Fallback to the original json if meta doesn't exist
+                    meta_path = os.path.join(current_app.root_path, "static", "data", f"{tax_type}_tebligi.json")
                 
-                if not os.path.exists(meta_path) or not os.path.exists(vector_path):
-                    current_app.logger.error(f"❌ Missing data files for {tax_type.upper()} in {emb_dir}")
+                if not os.path.exists(meta_path):
+                    current_app.logger.error(f"❌ Missing data files for {tax_type.upper()}")
                     return None
 
                 try:
-                    current_app.logger.info(f"📊 Loading {tax_type.upper()} Data (Memory Optimized)...")
+                    current_app.logger.info(f"📊 Loading {tax_type.upper()} Metadata...")
                     with open(meta_path, "r", encoding="utf-8") as f:
-                        _SEARCH_RESOURCES[tax_type]["meta"] = json.load(f)
-                    # mmap_mode='r' sayesinde vektörler RAM'e YÜKLENMEZ, diskten okunur. BU KRİTİKTİR!
-                    _SEARCH_RESOURCES[tax_type]["vectors"] = np.load(vector_path, mmap_mode='r')
-                    current_app.logger.info(f"✅ {tax_type.upper()} Data ready (Disk Mapping enabled).")
+                        data = json.load(f)
+                        
+                    # If it's the raw tebligi.json, we need to flatten it
+                    if isinstance(data, list) and len(data) > 0 and "sub" in data[0]:
+                        flat_items = []
+                        def flatten(items):
+                            for it in items:
+                                if it.get("content"):
+                                    flat_items.append({
+                                        "id": it.get("uid", it.get("id")),
+                                        "title": it.get("title"),
+                                        "content": it.get("content")
+                                    })
+                                if it.get("sub"): flatten(it["sub"])
+                        flatten(data)
+                        _SEARCH_RESOURCES[tax_type]["meta"] = flat_items
+                    else:
+                        _SEARCH_RESOURCES[tax_type]["meta"] = data
+                        
+                    current_app.logger.info(f"✅ {tax_type.upper()} Metadata loaded.")
                 except Exception as e:
-                    current_app.logger.error(f"❌ {tax_type.upper()} Data Load Failed: {e}", exc_info=True)
+                    current_app.logger.error(f"❌ {tax_type.upper()} Meta Load Failed: {e}")
                     return None
                     
     return _SEARCH_RESOURCES
@@ -235,77 +223,46 @@ def synthesize_ai_answer(best_item, question, intent):
 
 def perform_hybrid_search(tax_type, question):
     try:
-        # 0. Resources Check
-        current_app.logger.info(f"🔍 Starting {tax_type} hybrid search for: {question[:50]}...")
+        current_app.logger.info(f"🔍 Starting {tax_type} fuzzy search for: {question[:50]}...")
         resources = get_search_resources(tax_type)
         if not resources or not resources[tax_type]["meta"]:
-            current_app.logger.warning("⚠️ Search resources not available.")
             return "Sistem henüz hazır değil, lütfen bekleyin.", []
 
-        model = resources["model"]
         meta_data = resources[tax_type]["meta"]
-        vectors = resources[tax_type]["vectors"]
+        expanded_question = expand_query(question).lower()
+        search_words = [w for w in re.findall(r"\w+", question.lower()) if len(w) > 2]
         
-        # 0.1 Query Processing
-        expanded_question = expand_query(question)
-        search_words = [w for w in re.findall(r"\w+", question) if len(w) > 2]
-        
-        # 1. Regex Extraction
-        article_match = re.search(r"\b\d+(\.\d+)*\b", expanded_question)
-        
-        # 2. Semantic Score (Vector - Normalized Dot Product)
-        current_app.logger.info("🧠 Encoding question with AI model...")
-        import torch
-        torch.set_num_threads(1) # Extra insurance
-        with torch.no_grad():
-            q_vec = model.encode([expanded_question], normalize_embeddings=True, show_progress_bar=False, convert_to_numpy=True)[0]
-        
-        current_app.logger.info("📈 Calculating semantic scores...")
-        semantic_scores = np.dot(vectors, q_vec)
-        
-        # 3. N-grams for Exact Matching
-        words = question.lower().split()
-        phrases = []
-        for n in [2, 3, 4]:
-            if len(words) >= n:
-                for i in range(len(words)-n+1):
-                    phrases.append(" ".join(words[i:i+n]))
+        # 1. Regex ID Extraction
+        article_match = re.search(r"\b\d+(\.\d+)*\b", question)
+        target_id = article_match.group() if article_match else None
 
         candidate_results = []
-        for idx, item in enumerate(meta_data):
-            # Base Semantic Score (scall 0-60)
-            score = float(semantic_scores[idx]) * 60
-            
+        for item in meta_data:
+            score = 0
             content_lower = (item.get("content", "") or "").lower()
             title_lower = (item.get("title", "") or "").lower()
             id_str = (item.get("id", "") or "").lower()
             
-            # Phrase Boosts (HEAVY for EXACT PHRASES)
-            for p in phrases:
-                if p in title_lower: score += 50
-                elif p in content_lower: score += 25
+            # Fuzzy Match scores (Title is more important)
+            title_fuzzy = fuzz.partial_ratio(expanded_question, title_lower)
+            content_fuzzy = fuzz.partial_ratio(expanded_question, content_lower)
             
-            # Keyword Boost (Boost specialized tax terms)
+            score += title_fuzzy * 0.8
+            score += content_fuzzy * 0.2
+            
+            # Exact Phrase Matching
+            if question.lower() in title_lower: score += 40
+            elif question.lower() in content_lower: score += 20
+            
+            # Keyword Boost
             for w in search_words:
-                w = w.lower()
-                if w in title_lower: score += 20
-                elif w in content_lower: score += 10
-                
-                # Extra boost for critical terms
-                if w in ["isgucu", "tevkifat", "oran", "ihracat", "iade"]:
-                    if w in title_lower: score += 30
-                    if w in content_lower: score += 15
-                
-                # METAL BOOST: Bakır, Demir, Alüminyum vb. için muazzam öncelik
-                if w in ["bakir", "demir", "aluminyum", "cinko", "kursun", "metal"]:
-                    if w in title_lower: score += 80
-                    if w in content_lower: score += 50
-            
+                if w in title_lower: score += 15
+                if w in content_lower: score += 5
             # Article/ID Boost
-            if article_match and article_match.group() in id_str:
+            if target_id and target_id in id_str:
                 score += 100
                 
-            if score > 25:
+            if score > 50:
                 candidate_results.append({
                     "score": score,
                     "id": item.get("id"),
@@ -313,7 +270,7 @@ def perform_hybrid_search(tax_type, question):
                     "content": item.get("content")
                 })
 
-        # 4. Diversification & Best Result
+        # Diversification & Best Result
         candidate_results = sorted(candidate_results, key=lambda x: x["score"], reverse=True)
         final_results = []
         seen_ids = set()
@@ -323,7 +280,7 @@ def perform_hybrid_search(tax_type, question):
                 final_results.append(res)
                 seen_ids.add(res["id"])
             if len(final_results) >= 5: break
-
+        
         if not final_results:
             return "Üzgünüm, aradığınız konuyu mevzuatta bulamadım.", []
 

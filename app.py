@@ -1,8 +1,4 @@
 import os
-# Prevent OpenMP and threading crashes on Windows - MUST BE AT THE ABSOLUTE TOP
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
 
 import sys
 if hasattr(sys.stdout, 'reconfigure'):
@@ -17,8 +13,6 @@ from flask import Flask, session
 from flask_limiter import Limiter
 from werkzeug.security import generate_password_hash
 from jinja2 import Undefined
-import torch
-torch.set_num_threads(1)
 from datetime import timedelta
 
 # Custom Modules
@@ -179,11 +173,7 @@ with app.app_context():
         # Superuser
         bootstrap_admin_from_env()
         
-        # Pre-load AI Model & Resources to verify startup (DISABLED to save memory on Render)
-        # from routes.main_routes import get_search_resources
-        # app.logger.info("Pre-loading AI search resources...")
-        # get_search_resources("kdv")
-        # get_search_resources("kv")
+        # AI resources will be loaded lazily via fuzzy search, no pre-loading needed.
         
         # Quick Connection Test
         with get_conn() as conn:
