@@ -1018,15 +1018,29 @@ def update_status():
         if new_status:
             completed_at_sql = ""
             completed_at_val = None
+            # 🛠 Eğer iade tamamlandıysa ve sonuçlanan tutar 0 ise otomatik doldur
+            resolved_sql = ""
             if new_status in ("İade Tamamlandı", "İade Alındı"):
-                # Eğer kullanıcı tarih göndermişse onu kullan, yoksa bugünü kullan
-                if custom_date:
-                    completed_at_val = custom_date
-                else:
-                    completed_at_val = datetime.now().strftime("%d.%m.%Y %H:%M")
-                completed_at_sql = ", completed_at = %s"
-            
-            sql = f"UPDATE kdv_files SET status = %s {completed_at_sql} WHERE id = %s"
+                # Mevcut resolved tutarını kontrol et
+                if not file_row.get("amount_resolved") or str(file_row.get("amount_resolved")).strip() in ("0", "0,00", "0.00"):
+                    # amount_request - amount_tenzil (parse_money kullanarak güvenli işlem)
+                    def p_mon(v):
+                        if not v: return 0.0
+                        if isinstance(v, (int, float)): return float(v)
+                        try:
+                            clean = str(v).replace(".", "").replace(",", ".").replace("₺", "").strip()
+                            return float(clean)
+                        except: return 0.0
+                    
+                    req = p_mon(file_row.get("amount_request"))
+                    ten = p_mon(file_row.get("amount_tenzil"))
+                    res_val = max(0, req - ten)
+                    if res_val > 0:
+                        # Türk formatında kaydet (1.234.567,89)
+                        res_fmt = "{:,.2f}".format(res_val).replace(",", "X").replace(".", ",").replace("X", ".")
+                        resolved_sql = f", amount_resolved = '{res_fmt}'"
+
+            sql = f"UPDATE kdv_files SET status = %s {completed_at_sql} {resolved_sql} WHERE id = %s"
             params = (new_status, completed_at_val, file_id) if completed_at_val else (new_status, file_id)
             c.execute(sql, params)
 
@@ -1140,21 +1154,52 @@ def update_file_amounts():
             if not c.fetchone():
                 return jsonify({"status": "error", "message": "Yetkisiz işlem."}), 403
 
-        # 💾 GÜNCELLEME
-        c.execute("""
-            UPDATE kdv_files
-            SET amount_request = %s,
-                amount_guarantee = %s,
-                amount_tenzil = %s,
-                amount_bloke = %s,
-                amount_resolved = %s,
-                guarantee_date = %s
-            WHERE id = %s
-        """, (amt_request, amt_guarantee, amt_tenzil, amt_bloke, amt_resolved, data.get("guarantee_date"), file_id))
+        # 💾 DİNAMİK GÜNCELLEME SORGUSU
+        fields = []
+        params = []
+        
+        # Sayısal Alanlar (Varsa güncelle)
+        if "amount_request" in data:
+            fields.append("amount_request = %s")
+            params.append(pm(data["amount_request"]))
+        if "amount_guarantee" in data:
+            fields.append("amount_guarantee = %s")
+            params.append(pm(data["amount_guarantee"]))
+        if "amount_tenzil" in data:
+            fields.append("amount_tenzil = %s")
+            params.append(pm(data["amount_tenzil"]))
+        if "amount_bloke" in data:
+            fields.append("amount_bloke = %s")
+            params.append(pm(data["amount_bloke"]))
+        if "amount_resolved" in data:
+            fields.append("amount_resolved = %s")
+            params.append(pm(data["amount_resolved"]))
+            
+        # Metin/Tarih Alanlar (Varsa güncelle)
+        if "guarantee_date" in data:
+            fields.append("guarantee_date = %s")
+            params.append(data["guarantee_date"])
+        if "date" in data:
+            fields.append("date = %s")
+            params.append(data["date"])
+        if "type" in data:
+            fields.append("type = %s")
+            params.append(data["type"])
+        if "subject" in data:
+            fields.append("subject = %s")
+            params.append(data["subject"])
+
+        if not fields:
+            return jsonify({"status": "error", "message": "Güncellenecek veri gönderilmedi."}), 400
+
+        params.append(file_id)
+        update_sql = f"UPDATE kdv_files SET {', '.join(fields)} WHERE id = %s"
+        
+        c.execute(update_sql, tuple(params))
 
         # 📜 Log
-        log_msg = f"{session.get('username')} \"{row['unvan']}\" {row['period']} dosyası tutarlarını güncelledi. (Talep: {amt_request}, Sonuç: {amt_resolved})"
-        kdv_log_action(session.get("username", "System"), "Tutar Güncelleme", log_msg)
+        log_msg = f"{session.get('username')} \"{row['unvan']}\" {row['period']} dosyası bilgilerini güncelledi."
+        kdv_log_action(session.get("username", "System"), "Dosya Güncelleme", log_msg)
 
         conn.commit()
 
@@ -1299,17 +1344,17 @@ def mukellef_summary(mukellef_id):
         if not mukellef:
             return jsonify({"status": "error", "message": "Mükellef bulunamadı"}), 404
 
-        # İade dosyaları
+        # İade dosyaları (Hepsi - Özet kartları için)
         c.execute("""
             SELECT f.id, f.period, f.subject, f.type, 
                    f.amount_request, f.amount_tenzil, f.amount_bloke, f.amount_resolved,
                    f.amount_guarantee,
                    f.status, f.is_active, f.is_guaranteed, f.guarantee_date, f.date
             FROM kdv_files f
-            WHERE f.mukellef_id = %s AND f.is_active = TRUE
+            WHERE f.mukellef_id = %s
             ORDER BY f.period DESC, f.id DESC
         """, (mukellef_id,))
-        files = c.fetchall()
+        rows = c.fetchall()
 
         # Banka teminatları (Yedek kaynak)
         c.execute("""
@@ -1332,49 +1377,59 @@ def mukellef_summary(mukellef_id):
         "amount_bloke": 0,
         "amount_resolved": 0
     }
+    active_count = 0
 
-    for f in files:
+    for f in rows:
         amt_request = parse_money(f["amount_request"])
         amt_tenzil = parse_money(f.get("amount_tenzil"))
         amt_bloke = parse_money(f.get("amount_bloke"))
         amt_resolved = parse_money(f.get("amount_resolved"))
         
-        # Teminat: Manuel girildiyse onu kullan, yoksa banka kayıtlarını kullan
+        # 🔗 Eğer iade tamamlandıysa ama sonuçlanan tutar boşsa (eski kayıtlar için) hesapla
+        if amt_resolved == 0 and (f["status"] == "İade Tamamlandı" or f["status"] == "İade Alındı"):
+            amt_resolved = max(0, amt_request - amt_tenzil)
+        
         amt_guarantee_manual = parse_money(f.get("amount_guarantee"))
         amt_guarantee_bank = guarantee_map.get(f["id"], 0)
-        
         amt_guarantee = amt_guarantee_manual if amt_guarantee_manual > 0 else amt_guarantee_bank
         amt_post_guarantee = max(0, amt_request - amt_guarantee)
 
-        file_data = {
-            "id": f["id"],
-            "period": f["period"] or "",
-            "subject": f["subject"] or "",
-            "type": f["type"] or "",
-            "amount_request": amt_request,
-            "amount_guarantee": amt_guarantee,
-            "amount_post_guarantee": amt_post_guarantee,
-            "amount_tenzil": amt_tenzil,
-            "amount_bloke": amt_bloke,
-            "amount_resolved": amt_resolved,
-            "status": f["status"] or "",
-            "date": f.get("date") or ""
-        }
-        result_files.append(file_data)
-
-        totals["amount_request"] += amt_request
-        totals["amount_guarantee"] += amt_guarantee
-        totals["amount_post_guarantee"] += amt_post_guarantee
-        totals["amount_tenzil"] += amt_tenzil
-        totals["amount_bloke"] += amt_bloke
+        # Kartlar için toplamları hesapla
+        # Sonuçlanan iade her zaman eklenir (arşivdekiler dahil)
         totals["amount_resolved"] += amt_resolved
+        
+        # Diğer toplamlar sadece AKTİF dosyalar için
+        if f["is_active"]:
+            active_count += 1
+            totals["amount_request"] += amt_request
+            totals["amount_guarantee"] += amt_guarantee
+            totals["amount_post_guarantee"] += amt_post_guarantee
+            totals["amount_tenzil"] += amt_tenzil
+            totals["amount_bloke"] += amt_bloke
+
+            # Tabloya sadece aktifleri koy
+            file_data = {
+                "id": f["id"],
+                "period": f["period"] or "",
+                "subject": f["subject"] or "",
+                "type": f["type"] or "",
+                "amount_request": amt_request,
+                "amount_guarantee": amt_guarantee,
+                "amount_post_guarantee": amt_post_guarantee,
+                "amount_tenzil": amt_tenzil,
+                "amount_bloke": amt_bloke,
+                "amount_resolved": amt_resolved,
+                "status": f["status"] or "",
+                "date": f.get("date") or ""
+            }
+            result_files.append(file_data)
 
     return jsonify({
         "status": "success",
         "mukellef": dict(mukellef),
         "files": result_files,
         "totals": totals,
-        "file_count": len(result_files)
+        "file_count": active_count
     })
 
 

@@ -158,9 +158,12 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="metric-card-sm">
+                <div class="metric-card-sm position-relative">
                     <label>Ekleme Tarihi</label>
-                    <span id="metricDate" class="d-block mt-2">-</span>
+                    <span id="metricDate" class="d-block mb-2">-</span>
+                    <button class="btn btn-sm btn-light border py-1 px-3 rounded-pill text-primary fw-bold" style="font-size: 0.75rem;" onclick="promptEditFileDate()">
+                        <i class="fa-solid fa-pen me-1"></i> Değiştir
+                    </button>
                 </div>
             </div>
         </div>
@@ -358,7 +361,7 @@
             }
 
             // --- Render Components ---
-            renderTimeline(file.history || []);
+            renderTimeline(file.history || [], file);
             renderDocuments(file.documents || []);
             renderNotes(file.notes || []);
             renderGuaranteeCard(file);
@@ -374,22 +377,26 @@
         }
     }
 
-    function renderTimeline(history) {
+    function renderTimeline(history, fileObj) {
         const containerStatus = document.getElementById('timelineContainerStatus');
         const containerMakam = document.getElementById('timelineContainerMakam');
         if (!containerStatus || !containerMakam) return;
 
         const makamItems = STAGES_FLAT['Vergi Dairesi (Makam)'] || [];
         
-        // Iade Tamamlandi hem status hem location olabilir, bu yuzden history icinde 
-        // nereden geldigini anlamak icin basina marker eklemistik ya da db'den bakmaliyiz.
-        // Ama genellikle history nesnesinde id var.
-        
-        const renderItem = (h, colorClass) => `
+        const renderItem = (h, colorClass) => {
+            let itemText = h.text;
+            // Eğer İade Tamamlandı ise ve dosyanın tamamlanma tarihi varsa parantez içinde ekle
+            if ((itemText === 'İade Tamamlandı' || itemText === 'İade Alındı') && fileObj && fileObj.completed_at) {
+                const cDate = fileObj.completed_at.split(' ')[0];
+                itemText = `${itemText} (${cDate})`;
+            }
+
+            return `
             <div class="timeline-item position-relative" style="padding-bottom: 25px; border-left: 2px solid #eef2f7; padding-left: 20px; margin-left: 5px;">
                 <div style="position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--bs-${colorClass}); border: 2px solid white; box-shadow: 0 0 0 2px #eef2f7;"></div>
                 <div class="d-flex justify-content-between align-items-start">
-                    <h3 class="h6 fw-bold mb-0 text-dark" style="font-size: 0.9rem;">${h.text}</h3>
+                    <h3 class="h6 fw-bold mb-0 text-dark" style="font-size: 0.9rem;">${itemText}</h3>
                     <button onclick="deleteHistoryItem(${h.id})" class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none opacity-50 hover-opacity-100" style="font-size: 0.75rem;">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
@@ -397,6 +404,7 @@
                 <span class="d-block text-muted small mt-1 mb-2" style="font-size: 0.7rem;">${h.date}</span>
                 ${h.description ? `<p class="small text-muted mb-0 bg-light p-2 rounded-3 border-start border-3 border-${colorClass}">${h.description}</p>` : ''}
             </div>`;
+        };
         
         const statusHistory = history.filter(h => !makamItems.includes(h.text));
         const makamHistory = history.filter(h => makamItems.includes(h.text));
@@ -727,7 +735,7 @@
         const remaining = getReportRemainingDays(file);
         
         // Sadece teminatlı dosyalarda ve iade tamamlanmadıysa göster
-        if (remaining !== null) {
+        if (remaining !== null && file.type === 'Teminatlı') {
             div.style.display = 'block';
             const dateSource = file.guarantee_date ? 'Teminat Yatış Tarihi' : 'Dosya Açılış Tarihi';
             div.innerHTML = `
@@ -770,6 +778,40 @@
                 const result = await res.json();
                 if (result.status === 'success') {
                     Swal.fire('Başarılı', 'Tarih kaydedildi, rapor süresi güncellendi.', 'success').then(() => initDetailPage());
+                } else {
+                    Swal.fire('Hata', result.message, 'error');
+                }
+            } catch (e) { Swal.fire('Hata', 'Sunucu hatası.', 'error'); }
+        }
+    }
+
+    async function promptEditFileDate() {
+        const currentDate = document.getElementById('metricDate').innerText;
+        const { value: date } = await Swal.fire({
+            title: 'Ekleme Tarihini Güncelle',
+            text: 'Dosyanın sisteme giriş tarihini değiştirin (GG.AA.YYYY):',
+            input: 'text',
+            inputValue: currentDate,
+            showCancelButton: true,
+            confirmButtonText: 'Kaydet',
+            cancelButtonText: 'İptal',
+            inputValidator: (value) => {
+                if (!value || !/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(value)) {
+                    return 'Lütfen GG.AA.YYYY formatında bir tarih giriniz!';
+                }
+            }
+        });
+
+        if (date && date !== currentDate) {
+            try {
+                const res = await fetch('/api/kdv/update-file-amounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_id: FILE_ID, date: date })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    Swal.fire('Başarılı', 'Ekleme tarihi güncellendi.', 'success').then(() => initDetailPage());
                 } else {
                     Swal.fire('Hata', result.message, 'error');
                 }
