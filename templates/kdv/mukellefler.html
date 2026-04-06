@@ -421,7 +421,7 @@
                 <a href="{{ url_for('kdv.mukellef_ozet', mukellef_id=m.id) }}" class="btn-summary text-decoration-none">
                     <i class="fa-solid fa-chart-bar"></i> KDV İade Özeti
                 </a>
-                <a href="{{ url_for('kdv.index') }}?mukellef={{ m.id }}" class="btn-main-action">
+                <a href="{{ url_for('kdv.archive') }}?mukellef={{ m.id }}" class="btn-main-action" style="background: #4f46e5;">
                     Dosyaları İncele <i class="fa-solid fa-arrow-right small"></i>
                 </a>
             </div>

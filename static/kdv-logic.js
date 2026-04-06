@@ -15,15 +15,24 @@ function formatMoney(amount) {
 function getReportRemainingDays(file) {
     if (!file || !file.date) return null;
     
+    // Eğer iade zaten tamamlandıysa süre gösterme
+    if (file.status === 'İade Tamamlandı' || file.status === 'İade Alındı' || file.location === 'İade Tamamlandı') {
+        return null;
+    }
+    
     try {
+        // Öncelik Teminat Tarihi (İadenin yattığı tarih), yoksa normal kayıt tarihi
+        let baseDateStr = file.guarantee_date || file.date;
+        if (!baseDateStr) return null;
+
         // DD.MM.YYYY formatını YYYY-MM-DD formatına çevir
-        const parts = file.date.split('.');
+        const parts = baseDateStr.split(' ')[0].split('.');
         if (parts.length !== 3) return null;
         
         const startDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
         const today = new Date();
         
-        // Varsayılan: Yükleme tarihinden itibaren 6 ay
+        // 6 ay hesapla (Teminat sonrası rapor süresi)
         const dueDate = new Date(startDate);
         dueDate.setMonth(dueDate.getMonth() + 6);
         
@@ -82,23 +91,28 @@ async function fetchActiveFiles() {
     }
 }
 
-// Dosya listesini render et (Dashboard için)
 function renderFilesList(files) {
     const container = document.getElementById('filesListContainer');
     if (!container) return;
-    
-    if (!files || files.length === 0) {
+
+    let html = '<div class="row g-4">';
+    const activeOperations = files.filter(f => 
+        f.status !== 'İade Tamamlandı' && 
+        f.status !== 'İade Alındı' && 
+        f.location !== 'İade Tamamlandı'
+    );
+
+    if (activeOperations.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-5 bg-white rounded-4 border shadow-sm">
+            <div class="text-center py-5 bg-white rounded-4 border shadow-sm w-100">
                 <i class="fa-solid fa-folder-open fs-1 mb-3 text-muted opacity-25"></i>
                 <p class="text-secondary mb-0">Şu an takip edilen aktif dosya bulunmuyor.</p>
                 <button class="btn btn-link fw-bold text-decoration-none mt-2" onclick="openNewFileModal()">Yeni bir tane ekle</button>
             </div>`;
         return;
     }
-    
-    let html = '<div class="row g-4">';
-    files.forEach(file => {
+
+    activeOperations.forEach(file => {
         // Durum renkleri ve ikonları
         let statusClass = 'bg-primary';
         let statusIcon = 'fa-circle-dot';

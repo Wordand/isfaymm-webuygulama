@@ -70,3 +70,56 @@
         padding: 1rem !important;
     }
 }
+/* Status Picker Modal Styles */
+.status-picker-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.status-picker-category {
+    margin-bottom: 0.5rem;
+}
+
+.status-picker-category h4 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.status-picker-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.status-btn-choice {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.status-btn-choice:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #1e293b;
+    transform: translateY(-1px);
+}
+
+.status-btn-choice.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}

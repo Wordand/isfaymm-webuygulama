@@ -74,9 +74,14 @@
         const search = document.getElementById('archiveSearch').value.toLowerCase();
         const userId = document.getElementById('personnelFilter').value;
         
+        // URL'den mükellef ID'sini al (Eğer varsa otomatik filtrele)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mukellefId = urlParams.get('mukellef');
+        
         try {
             let apiUrl = `/api/kdv/files?active=${active}`;
             if (userId) apiUrl += `&user_id=${userId}`;
+            if (mukellefId) apiUrl += `&mukellef_id=${mukellefId}`;
             
             const response = await fetch(apiUrl);
             let files = await response.json();
@@ -125,6 +130,14 @@
             // Format period safely
             const periodStr = (f.period_year && f.period_month) ? `${f.period_year}-${f.period_month}` : (f.period || '-');
 
+            const statusStr = f.status || 'İşlem Yok';
+            let badgeClass = 'bg-info text-info border-info';
+            if (statusStr.includes('Tamamlandı') || statusStr.includes('Alındı')) {
+                badgeClass = 'bg-success text-success border-success';
+            } else if (statusStr.includes('Eksiklik')) {
+                badgeClass = 'bg-danger text-danger border-danger';
+            }
+
             return `
             <tr>
                 <td class="ps-4">
@@ -134,7 +147,7 @@
                 <td><span class="badge bg-light text-dark border">${periodStr}</span></td>
                 <td class="small text-secondary fw-medium">${f.subject || '-'}</td>
                 <td class="fw-bold text-dark">₺ ${formatMoney(f.amount_request)}</td>
-                <td><span class="badge bg-opacity-10 bg-info text-info border border-info border-opacity-25 rounded-pill px-3">${f.status || 'İşlem Yok'}</span></td>
+                <td><span class="badge bg-opacity-10 ${badgeClass} border border-opacity-25 rounded-pill px-3">${statusStr}</span></td>
                 <td class="text-end pe-4">
                     <div class="btn-group shadow-sm rounded-3">
                         <button class="btn btn-sm btn-white border border-end-0" onclick="window.location.href='/kdv-detay/${f.id}'" title="Dosya Detayı">

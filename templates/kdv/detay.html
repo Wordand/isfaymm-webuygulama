@@ -320,12 +320,29 @@
             }
 
             // --- Header & Global Data ---
+            const badgeEl = document.getElementById('fileBadge');
+            if (badgeEl) {
+                badgeEl.innerText = file.status.toUpperCase();
+                if (file.status.includes('Tamamlandı') || file.status.includes('Alındı')) {
+                    badgeEl.style.background = '#d1fae5';
+                    badgeEl.style.color = '#065f46';
+                    badgeEl.style.borderColor = '#34d399';
+                } else if (file.status.includes('Eksiklik')) {
+                    badgeEl.style.background = '#fef2f2';
+                    badgeEl.style.color = '#991b1b';
+                    badgeEl.style.borderColor = '#fca5a5';
+                } else {
+                    badgeEl.style.background = '#eff6ff';
+                    badgeEl.style.color = '#3b82f6';
+                    badgeEl.style.borderColor = '#dbeafe';
+                }
+            }
+
             const fields = {
                 'fileDetailTitle': file.client_name,
                 'headerPeriod': file.period,
                 'headerSubject': file.subject,
                 'fileTotalRequested': '₺ ' + formatMoney(file.amount_request),
-                'fileBadge': file.status.toUpperCase(),
                 'metricStatus': file.status,
                 'metricLocation': file.location || '---',
                 'metricDate': file.date
@@ -363,18 +380,52 @@
         if (!containerStatus || !containerMakam) return;
 
         const makamItems = STAGES_FLAT['Vergi Dairesi (Makam)'] || [];
-        const statusHistory = history.filter(h => !makamItems.includes(h.text));
-        const makamHistory = history.filter(h => makamItems.includes(h.text));
+        
+        // Iade Tamamlandi hem status hem location olabilir, bu yuzden history icinde 
+        // nereden geldigini anlamak icin basina marker eklemistik ya da db'den bakmaliyiz.
+        // Ama genellikle history nesnesinde id var.
         
         const renderItem = (h, colorClass) => `
-            <div class="timeline-item">
-                <h3 class="h6 fw-bold mb-1 text-dark" style="font-size: 0.95rem;">${h.text}</h3>
-                <span class="d-block text-secondary small fw-bold mb-2" style="font-size: 0.75rem;">${h.date}</span>
+            <div class="timeline-item position-relative" style="padding-bottom: 25px; border-left: 2px solid #eef2f7; padding-left: 20px; margin-left: 5px;">
+                <div style="position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--bs-${colorClass}); border: 2px solid white; box-shadow: 0 0 0 2px #eef2f7;"></div>
+                <div class="d-flex justify-content-between align-items-start">
+                    <h3 class="h6 fw-bold mb-0 text-dark" style="font-size: 0.9rem;">${h.text}</h3>
+                    <button onclick="deleteHistoryItem(${h.id})" class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none opacity-50 hover-opacity-100" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                <span class="d-block text-muted small mt-1 mb-2" style="font-size: 0.7rem;">${h.date}</span>
                 ${h.description ? `<p class="small text-muted mb-0 bg-light p-2 rounded-3 border-start border-3 border-${colorClass}">${h.description}</p>` : ''}
             </div>`;
+        
+        const statusHistory = history.filter(h => !makamItems.includes(h.text));
+        const makamHistory = history.filter(h => makamItems.includes(h.text));
             
         containerStatus.innerHTML = statusHistory.length ? statusHistory.map(h => renderItem(h, 'primary')).join('') : '<div class="text-muted small fst-italic py-3">Henüz işlem kaydı yok.</div>';
-        containerMakam.innerHTML = makamHistory.length ? makamHistory.map(h => renderItem(h, 'danger')).join('') : '<div class="text-muted small fst-italic py-3">Henüz makam hareketi yok.</div>';
+        containerMakam.innerHTML = makamHistory.length ? makamHistory.map(h => renderItem(h, 'primary')).join('') : '<div class="text-muted small fst-italic py-3">Henüz makam hareketi yok.</div>';
+    }
+
+    async function deleteHistoryItem(id) {
+        const result = await Swal.fire({
+            title: 'Kaydı Sil?',
+            text: "Bu işlem geri alınamaz!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Evet, Sil',
+            cancelButtonText: 'İptal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/api/kdv/history/delete/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    initDetailPage();
+                } else {
+                    Swal.fire('Hata', data.message, 'error');
+                }
+            } catch (err) { console.error(err); }
+        }
     }
 
     const DOC_CATEGORIES = {
@@ -616,7 +667,42 @@
 
     async function submitStatusUpdate() {
         if (!selectedStatus) { Swal.fire('Uyarı', 'Lütfen bir seçim yapınız.', 'warning'); return; }
-        const data = { file_id: FILE_ID, description: document.getElementById('updateDescription').value };
+        
+        let completionDate = null;
+        if (selectedStatus === 'İade Tamamlandı' || selectedStatus === 'İade Alındı') {
+            // Bootstrap modalı gizle ki Swal input'u klavye girişini alabilsin (tabindex çakışması)
+            const bModal = bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal'));
+            if (bModal) bModal.hide();
+
+            const { value: date } = await Swal.fire({
+                title: 'Tamamlanma Tarihi',
+                text: 'İadenin gerçekleştiği tarihi giriniz (GG.AA.YYYY):',
+                input: 'text',
+                inputValue: new Date().toLocaleDateString('tr-TR'),
+                showCancelButton: true,
+                confirmButtonText: 'Devam Et',
+                cancelButtonText: 'İptal',
+                inputValidator: (value) => {
+                    if (!value) return 'Tarih boş bırakılamaz!';
+                    // Daha esnek regex: tek haneli gün/ay girişini kabul et
+                    if (!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(value)) {
+                        return 'Lütfen GG.AA.YYYY formatına uygun bir tarih giriniz!';
+                    }
+                }
+            });
+            if (!date) {
+                // Eğer tarih girilmezse veya iptal edilirse modalı geri açmak isteyebiliriz
+                // Ama genellikle iptalse süreçten çıkılmıştır. 
+                return;
+            }
+            completionDate = date;
+        }
+
+        const data = { 
+            file_id: FILE_ID, 
+            description: document.getElementById('updateDescription').value,
+            date: completionDate
+        };
         if (currentUpdateType === 'location') data.location = selectedStatus;
         else data.status = selectedStatus;
 
@@ -628,7 +714,7 @@
             if(result.status === 'success') {
                 bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal')).hide();
                 initDetailPage();
-                Swal.fire('Başarılı', 'Güncelleme yapıldı.', 'success');
+                Swal.fire('Başarılı', result.message || 'Güncelleme yapıldı.', 'success');
             } else {
                 Swal.fire('Hata', result.message || 'Güncelleme başarısız.', 'error');
             }
@@ -639,15 +725,55 @@
         const div = document.getElementById('guaranteeInfoCard');
         if (!div) return;
         const remaining = getReportRemainingDays(file);
+        
+        // Sadece teminatlı dosyalarda ve iade tamamlanmadıysa göster
         if (remaining !== null) {
             div.style.display = 'block';
+            const dateSource = file.guarantee_date ? 'Teminat Yatış Tarihi' : 'Dosya Açılış Tarihi';
             div.innerHTML = `
                 <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 text-center bg-white border-start border-primary border-5">
-                    <small class="text-uppercase fw-bold text-secondary">Rapor Teslimine Kalan</small>
-                    <div class="display-5 fw-bold my-2 ${remaining < 5 ? 'text-danger' : 'text-primary'}">${remaining} Gün</div>
+                    <small class="text-uppercase fw-bold text-secondary" style="font-size: 0.65rem;">${dateSource} Bazlı</small>
+                    <div class="fw-bold text-secondary small mb-1">Rapor Teslimine Kalan</div>
+                    <div class="display-5 fw-bold my-1 ${remaining < 15 ? 'text-danger' : 'text-primary'}">${remaining} Gün</div>
+                    <button class="btn btn-sm btn-link text-decoration-none fw-bold mt-2" style="font-size: 0.75rem;" onclick="promptGuaranteeDate()">
+                        <i class="fa-solid fa-calendar-day me-1"></i> ${file.guarantee_date ? 'Tarihi Güncelle' : 'İade Yatış Tarihini Gir'}
+                    </button>
                 </div>`;
         } else {
             div.style.display = 'none';
+        }
+    }
+
+    async function promptGuaranteeDate() {
+        const { value: date } = await Swal.fire({
+            title: 'İade/Teminat Yatış Tarihi',
+            text: 'Paranın hesaba yattığı tarihi giriniz (GG.AA.YYYY):',
+            input: 'text',
+            inputPlaceholder: 'Örn: 24.03.2026',
+            showCancelButton: true,
+            confirmButtonText: 'Kaydet',
+            cancelButtonText: 'İptal',
+            inputValidator: (value) => {
+                if (!value || !/^\d{2}\.\d{2}\.\d{4}$/.test(value)) {
+                    return 'Lütfen GG.AA.YYYY formatında bir tarih giriniz!';
+                }
+            }
+        });
+
+        if (date) {
+            try {
+                const res = await fetch('/api/kdv/update-file-amounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_id: FILE_ID, guarantee_date: date })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    Swal.fire('Başarılı', 'Tarih kaydedildi, rapor süresi güncellendi.', 'success').then(() => initDetailPage());
+                } else {
+                    Swal.fire('Hata', result.message, 'error');
+                }
+            } catch (e) { Swal.fire('Hata', 'Sunucu hatası.', 'error'); }
         }
     }
 

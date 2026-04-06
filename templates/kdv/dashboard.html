@@ -203,18 +203,22 @@
             <div class="stat-meta">
                 <span class="stat-label">Toplam Bekleyen İade</span>
                 <div class="stat-value" id="stat-pending-amount">₺ 0</div>
-                <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> Geçen aya göre +12%</div>
             </div>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="stat-card-premium">
-            <div class="stat-icon icon-green"><i class="fa-solid fa-check-double"></i></div>
-            <div class="stat-meta">
-                <span class="stat-label">Bu Ay Tamamlanan İade</span>
-                <div class="stat-value" id="stat-completed-amount">₺ 0</div>
+        <a href="{{ url_for('kdv.tamamlananlar') }}" class="text-decoration-none">
+            <div class="stat-card-premium" style="cursor: pointer; min-height: 120px;">
+                <div class="stat-icon icon-green" style="margin-top: 10px;"><i class="fa-solid fa-check-double"></i></div>
+                <div class="stat-meta w-100">
+                    <span class="stat-label mb-1">Tamamlanan İadeler</span>
+                    <div id="stat-completed-amount" class="d-flex flex-column gap-0">
+                        <div class="stat-value" style="font-size: 1.1rem;">₺ 0,00</div>
+                        <div class="text-muted small fw-bold" style="font-size: 0.75rem;">Veri Yükleniyor...</div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-premium" onclick="loadModalData('deficiency')" style="cursor: pointer;">
@@ -222,62 +226,36 @@
             <div class="stat-meta">
                 <span class="stat-label">Açık Eksiklik Yazıları</span>
                 <div class="stat-value" id="stat-missing-count">0 Adet</div>
-                <div class="stat-trend trend-warning">İşlem Bekleyen</div>
             </div>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-premium" onclick="loadModalData('guarantee')" style="cursor: pointer;">
-            <div class="stat-icon icon-purple"><i class="fa-solid fa-file-contract"></i></div>
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-file-shield"></i></div>
             <div class="stat-meta">
-                <span class="stat-label">Teminat Mektubu</span>
-                <div class="stat-value" id="stat-guarantee-amount">₺ 0</div>
+                <span class="stat-label">Süresi Yaklaşan Teminatlar</span>
+                <div class="stat-value" id="stat-guarantee-amount" style="display:none;">₺ 0</div>
+                <div id="stat-guarantee-alert" class="text-danger fw-bold p-2 mt-2" style="display:none; font-size: 0.95rem; background: #fee2e2; border-radius: 10px; border-left: 4px solid #ef4444;"></div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Charts Row -->
-<div class="row g-4 mb-5">
-    <div class="col-lg-7">
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3>Aylık İade / Tahsilat Trendi</h3>
+<!-- Activities (Full Width for a cleaner look without Chart) -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-4 border-bottom-0">
+                <h3 class="h6 mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i> Son İşlemler</h3>
             </div>
-            <div class="chart-container">
-                <canvas id="refundTrendChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-5">
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i> Son 5 Aktivite</h3>
-            </div>
-            <div class="activity-list" id="recentActivitiesList">
+            <div class="activity-list px-4 pb-4" id="recentActivitiesList">
                 <div class="text-center py-4 text-muted small">Yükleniyor...</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Operations Section -->
-<div class="section-header d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h4 fw-bold mb-1"><i class="fa-solid fa-bolt-lightning text-warning me-2"></i> Aktif Operasyon Takibi</h2>
-        <p class="text-secondary small mb-0">Devam eden iade süreçlerinin güncel durum ve öncelik sıralaması.</p>
-    </div>
-    <a href="{{ url_for('kdv.archive') }}" class="btn btn-outline-secondary rounded-3 fw-semibold">
-        <i class="fa-solid fa-list-check me-2"></i> Tüm Arşivi Yönet
-    </a>
-</div>
-
-<div id="filesListContainer" class="pb-5">
-    <!-- Loading Spinner -->
-    <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-    </div>
-</div>
+<!-- No operative list on dashboard by user request -->
 
 <!-- Modal etc. (kept from previous implementation) -->
 <!-- New File Modal (Updated Design) -->
@@ -595,8 +573,16 @@
         
         try {
             const response = await fetch(apiUrl);
-            const files = await response.json();
+            let files = await response.json();
             
+            // Eğer teminat mektubu ise sadece < 30 gün kalanları göster (User isteği)
+            if (type === 'guarantee') {
+                files = files.filter(f => {
+                    const rem = getReportRemainingDays(f);
+                    return rem !== null && rem <= 30;
+                });
+            }
+
             container.innerHTML = '';
             
             if (files.length === 0) {
@@ -606,11 +592,21 @@
             
             files.forEach(file => {
                 const tr = document.createElement('tr');
+                
+                let extraBadge = '';
+                if (type === 'guarantee') {
+                    const remaining = getReportRemainingDays(file);
+                    if (remaining !== null) {
+                        const color = remaining < 15 ? 'danger' : (remaining < 45 ? 'warning' : 'success');
+                        extraBadge = `<br><span class="badge bg-${color}-subtle text-${color} border border-${color} shadow-sm mt-1" style="font-size: 0.65rem; background-color: rgba(var(--bs-${color}-rgb), 0.1) !important;">RAPOR: ${remaining} GÜN</span>`;
+                    }
+                }
+
                 tr.innerHTML = `
                     <td class="ps-3"><span class="fw-bold text-dark">${file.client_name}</span></td>
-                    <td><div class="d-flex flex-column"><span class="fw-medium">${file.subject}</span><span class="small text-muted">${file.period_year}-${file.period_month}</span></div></td>
+                    <td><div class="d-flex flex-column"><span class="fw-medium">${file.subject}</span><span class="small text-muted">${file.period_year || file.period}</span></div></td>
                     <td><span class="fw-bold text-dark">₺ ${formatMoney(file.amount_request)}</span></td>
-                    <td><span class="badge bg-light text-dark border">${file.status || '-'}</span></td>
+                    <td><span class="badge bg-light text-dark border">${file.status || '-'}</span>${extraBadge}</td>
                     <td class="text-end pe-3">
                         <a href="/kdv-detay/${file.id}" class="btn btn-sm btn-primary rounded-pill px-3">Detay</a>
                     </td>
@@ -645,14 +641,44 @@
             if(document.getElementById('stat-pending-amount'))
                 document.getElementById('stat-pending-amount').textContent = `₺ ${formatMoney(data.pending_amount)}`;
             
-            if(document.getElementById('stat-completed-amount'))
-                document.getElementById('stat-completed-amount').textContent = `₺ ${formatMoney(data.completed_amount)}`;
+            if(document.getElementById('stat-completed-amount')) {
+                const currentAmt = data.completed_amount || 0;
+                const prevAmt = data.completed_prev || 0;
+                const currentMonth = data.current_month_name || 'Bu Ay';
+                const prevMonth = data.prev_month_name || 'Geçen Ay';
+                
+                document.getElementById('stat-completed-amount').innerHTML = `
+                    <div class="d-flex align-items-baseline gap-2 mb-1">
+                        <span class="fw-bold text-success" style="font-size: 1.1rem;">${currentMonth}: ₺ ${formatMoney(currentAmt)}</span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <span class="text-muted fw-semibold" style="font-size: 0.85rem;">${prevMonth}: ₺ ${formatMoney(prevAmt)}</span>
+                    </div>
+                `;
+            }
             
             if(document.getElementById('stat-missing-count'))
                 document.getElementById('stat-missing-count').textContent = `${data.missing_docs_count} Adet`;
             
-            if(document.getElementById('stat-guarantee-amount'))
-                document.getElementById('stat-guarantee-amount').textContent = `₺ ${formatMoney(data.guarantee_amount)}`;
+            if(document.getElementById('stat-guarantee-amount')) {
+                const gAmt = data.guarantee_amount || 0;
+                const gAmtEl = document.getElementById('stat-guarantee-amount');
+                if (gAmt > 0) {
+                    gAmtEl.textContent = `₺ ${formatMoney(gAmt)}`;
+                    gAmtEl.style.display = 'block';
+                } else {
+                    gAmtEl.style.display = 'none';
+                }
+                const alertEl = document.getElementById('stat-guarantee-alert');
+                if(alertEl) {
+                    if(data.guarantee_alert_count > 0) {
+                        alertEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${data.guarantee_alert_count} dosyanın rapor süresi dolmak üzere.`;
+                        alertEl.style.display = 'block';
+                    } else {
+                        alertEl.style.display = 'none';
+                    }
+                }
+            }
                 
             // Update Charts
             updateChartsWithData(data);
@@ -696,7 +722,10 @@
         }
 
         // Trend Chart
-        const trendCtx = document.getElementById('refundTrendChart').getContext('2d');
+        const chartEl = document.getElementById('refundTrendChart');
+        if (!chartEl) return; // Çizim alanı yoksa dur
+        
+        const trendCtx = chartEl.getContext('2d');
         if(window.trendChartInstance) window.trendChartInstance.destroy();
         
         const trendLabels = (data.trend_labels && data.trend_labels.length) ? data.trend_labels : ['Veri Yok'];

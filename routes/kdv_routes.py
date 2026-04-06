@@ -50,39 +50,14 @@ def kdv_log_action(user_name, action, description):
     try:
         with get_conn() as conn:
             c = conn.cursor()
-            # Ensure table exists (Portable between environments)
-            try:
-                c.execute("SELECT 1 FROM kdv_system_logs LIMIT 1")
-            except:
-                if "sqlite" in str(type(conn)).lower():
-                    c.execute("""
-                        CREATE TABLE IF NOT EXISTS kdv_system_logs (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            date TEXT,
-                            user_name TEXT,
-                            action TEXT,
-                            description TEXT
-                        )
-                    """)
-                else:
-                    c.execute("""
-                        CREATE TABLE IF NOT EXISTS kdv_system_logs (
-                            id SERIAL PRIMARY KEY,
-                            date TEXT,
-                            user_name TEXT,
-                            action TEXT,
-                            description TEXT
-                        )
-                    """)
-                conn.commit()
-
             c.execute("""
                 INSERT INTO kdv_system_logs (date, user_name, action, description)
                 VALUES (%s, %s, %s, %s)
             """, (datetime.now().strftime("%d.%m.%Y %H:%M"), user_name, action, description))
             conn.commit()
     except Exception as e:
-        ("  ")
+        import traceback
+        print(f"KDV Log Error: {e}\n{traceback.format_exc()}")
 
 @bp.route("/kdv-yonetimi")
 @kdv_access_required
@@ -122,6 +97,23 @@ def archive():
         users_list = [dict(r) for r in c.fetchall()]
         
     return render_template("kdv/arsiv.html", users_list=users_list)
+
+@bp.route("/kdv-tamamlananlar")
+@kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
+def tamamlananlar():
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("""
+            SELECT id, username, role 
+            FROM users 
+            WHERE (has_kdv_access != 0 OR role = 'admin') 
+              AND lower(username) NOT IN ('uzman', 'ymm', 'yonetici')
+            ORDER BY username ASC
+        """)
+        users_list = [dict(r) for r in c.fetchall()]
+        
+    return render_template("kdv/tamamlananlar.html", users_list=users_list)
 
 
 @bp.route("/kdv-detay/<int:file_id>")
@@ -281,148 +273,117 @@ def get_stats():
 
     try:
         with get_conn() as conn:
-            # 💡 Açıkça RealDictCursor kullanarak 'AttributeError: tuple object has no attribute get' hatasını engelliyoruz
-            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-            # 🔒 GÜVENLİ BASE FILTER
-            base_filter = " WHERE is_active = TRUE"
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            
+            now_dt = datetime.now()
+            curr_month_str = now_dt.strftime("%m.%Y")
+            from datetime import timedelta
+            prev_month_dt = now_dt.replace(day=1) - timedelta(days=1)
+            prev_month_str = prev_month_dt.strftime("%m.%Y")
+            
             params = []
-
+            where_sql = " WHERE is_active = TRUE"
             if role == "uzman":
-                base_filter += """
-                    AND mukellef_id IN (
-                        SELECT mukellef_id
-                        FROM kdv_user_assignments
-                        WHERE user_id = %s
-                    )
-                """
+                where_sql += " AND mukellef_id IN (SELECT mukellef_id FROM kdv_user_assignments WHERE user_id = %s)"
                 params.append(user_id)
-
             elif role not in ("admin", "ymm", "yonetici"):
-                base_filter += " AND user_id = %s"
+                where_sql += " AND user_id = %s"
                 params.append(user_id)
-
             if mukellef_id:
-                base_filter += " AND mukellef_id = %s"
+                where_sql += " AND mukellef_id = %s"
                 params.append(mukellef_id)
 
-            if filter_user_id and filter_user_id != "":
-                base_filter += " AND user_id = %s"
-                params.append(filter_user_id)
+            cur.execute(f"SELECT status, amount_request, completed_at FROM kdv_files {where_sql}", tuple(params))
+            rows = cur.fetchall()
 
-            # 🔹 ANA DATA
-            c.execute(
-                f"""
-                SELECT status, amount_request, type, subject, date, period
-                FROM kdv_files
-                {base_filter}
-                """,
-                tuple(params),
-            )
-            all_files = c.fetchall()
+            pending_amt = 0.0
+            missing_count = 0
+            comp_curr = 0.0
+            comp_prev = 0.0
 
-            pending_amount = 0.0
-            completed_amount = 0.0
-            missing_docs_count = 0
-            guarantee_amount = 0.0
-            status_dist_map = {}
-
-            for f in all_files:
-                # RealDictRow olduğu için .get güvenle kullanılabilir
-                amt = parse_money(f.get("amount_request"))
-                status = f.get("status") or "Bilinmiyor"
-
-                if status not in ("İade Tamamlandı", "İade Alındı"):
-                    pending_amount += amt
-                else:
-                    completed_amount += amt
-
-                if status == "Eksiklik yazısı geldi":
-                    missing_docs_count += 1
-
-                subj = str(f.get("subject") or "").lower()
-                typ = str(f.get("type") or "").lower()
-                if "teminat" in subj or "teminat" in typ:
-                    guarantee_amount += amt
-
-                status_dist_map[status] = status_dist_map.get(status, 0) + 1
-
-            status_dist = [
-                {"status": str(k), "count": int(v)} for k, v in status_dist_map.items()
-            ]
-
-            # 🔹 TREND (Dönem bazlı son 6 ay)
-            from collections import defaultdict
-            monthly_totals = defaultdict(float)
-
-            for f in all_files:
+            for r in rows:
                 try:
-                    p = f.get("period")
-                    if not p or "/" not in p:
-                        continue
+                    stat = r['status'] or ""
+                    amt_str = r['amount_request'] or "0"
+                    comp_at = r['completed_at'] or ""
+                    
+                    amt = parse_money(amt_str)
+
+                    if stat not in ('İade Tamamlandı', 'İade Alındı'):
+                        pending_amt += amt
+                    
+                    if stat == 'Eksiklik yazısı geldi':
+                        missing_count += 1
                         
-                    parts = p.split("/")
-                    if len(parts) < 2:
-                        continue
-                        
-                    m, y = parts[0], parts[1]
-                    key = f"{y}-{m.zfill(2)}" # YYYY-MM
-                    monthly_totals[key] += parse_money(f.get("amount_request"))
+                    if stat in ('İade Tamamlandı', 'İade Alındı'):
+                        if curr_month_str in comp_at: comp_curr += amt
+                        elif prev_month_str in comp_at: comp_prev += amt
                 except:
                     continue
 
-            # Son 6 ayı al (Kronolojik sırala)
-            sorted_months = sorted(monthly_totals.keys())[-6:]
-
-            tr_months = {
-                "01": "Oca", "02": "Şub", "03": "Mar", "04": "Nis",
-                "05": "May", "06": "Haz", "07": "Tem", "08": "Ağu",
-                "09": "Eyl", "10": "Eki", "11": "Kas", "12": "Ara",
-            }
-
-            trend_labels = []
-            trend_data = []
-
-            for m in sorted_months:
+            # Pasif tamamlananlar
+            cur.execute(f"SELECT amount_request, completed_at FROM kdv_files WHERE is_active=FALSE AND status IN ('İade Tamamlandı','İade Alındı') {'AND user_id=%s' if 'user_id' in where_sql else ''}", (user_id,) if 'user_id' in where_sql else ())
+            for ar in cur.fetchall():
                 try:
-                    parts = m.split("-")
-                    if len(parts) < 2: continue
-                    year, month = parts[0], parts[1]
-                    label = f"{tr_months.get(month, month)} {year[2:] if len(year) >= 2 else year}"
-                    trend_labels.append(label)
-                    trend_data.append(monthly_totals[m])
-                except:
-                    continue
+                    a = parse_money(ar['amount_request'])
+                    c_at = ar['completed_at'] or ""
+                    if curr_month_str in c_at: comp_curr += a
+                    elif prev_month_str in c_at: comp_prev += a
+                except: continue
 
-            stats = {
-                "pending_amount": float(pending_amount),
-                "completed_amount": float(completed_amount),
-                "missing_docs_count": int(missing_docs_count),
-                "guarantee_amount": float(guarantee_amount),
-                "status_dist": status_dist,
-                "trend_labels": trend_labels,
-                "trend_data": trend_data,
-            }
+            cur.execute("SELECT amount_request, date, guarantee_date FROM kdv_files WHERE is_active=TRUE AND (subject LIKE '%%Teminat%%' OR type LIKE '%%Teminat%%')")
+            g_total = 0.0
+            g_alerts = 0
+            for gf in cur.fetchall():
+                try:
+                    b_date = gf['guarantee_date'] or gf['date']
+                    if b_date:
+                        pts = str(b_date).split(' ')[0].split('.')
+                        if len(pts) >= 3:
+                            s_dt = datetime(int(pts[-1]), int(pts[1]), int(pts[0]))
+                            rem = (s_dt + timedelta(days=180) - datetime.now()).days
+                            if rem <= 30:
+                                g_total += parse_money(gf['amount_request'])
+                                g_alerts += 1
+                except: continue
 
-            # 🕒 Son 5 Aktivite
-            try:
-                c.execute("""
-                    SELECT date, user_name, action, description
-                    FROM kdv_system_logs
-                    ORDER BY id DESC
-                    LIMIT 5
-                """)
-                rows = c.fetchall()
-                stats["recent_activities"] = [dict(r) for r in rows]
-            except:
-                stats["recent_activities"] = []
+            cur.execute(f"SELECT period, amount_request FROM kdv_files {where_sql} ORDER BY id DESC LIMIT 500", tuple(params))
+            monthly_totals = {}
+            for tr in cur.fetchall():
+                try:
+                    p = tr['period']
+                    if p and '/' in p:
+                        pts = p.split("/")
+                        key = f"{pts[1]}-{pts[0].zfill(2)}"
+                        monthly_totals[key] = monthly_totals.get(key, 0) + parse_money(tr['amount_request'])
+                except: continue
 
-        return jsonify(stats)
+            tr_m = {"01":"Oca","02":"Şub","03":"Mar","04":"Nis","05":"May","06":"Haz","07":"Tem","08":"Ağu","09":"Eyl","10":"Eki","11":"Kas","12":"Ara"}
+            sorted_m = sorted(monthly_totals.keys())[-6:]
+            trend_l = [f"{tr_m.get(m.split('-')[1], m.split('-')[1])} {m.split('-')[0][2:]}" for m in sorted_m]
+            trend_d = [monthly_totals[m] for m in sorted_m]
+
+            # Son Aktiviteler
+            cur.execute("SELECT date, user_name, action, description FROM kdv_system_logs ORDER BY id DESC LIMIT 5")
+            activities = [dict(l) for l in cur.fetchall()]
+
+            return jsonify({
+                "pending_amount": pending_amt,
+                "completed_amount": comp_curr,
+                "completed_prev": comp_prev,
+                "current_month_name": tr_m.get(now_dt.strftime("%m")),
+                "prev_month_name": tr_m.get(prev_month_dt.strftime("%m")),
+                "missing_docs_count": int(missing_count),
+                "guarantee_amount": g_total,
+                "guarantee_alert_count": int(g_alerts),
+                "trend_labels": trend_l,
+                "trend_data": trend_d,
+                "recent_activities": activities
+            })
     except Exception as e:
-        # Hata detayını sunucu tarafında logla
         import traceback
-        current_app.logger.error(f"Error in get_stats: {e}\n{traceback.format_exc()}")
-        return jsonify({"status": "error", "message": "İstatistikler yüklenirken bir hata oluştu."}), 500
+        current_app.logger.error(f"KDV Stats Error: {traceback.format_exc()}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @bp.route("/api/kdv/files")
@@ -432,7 +393,14 @@ def list_files():
     user_id = session.get("user_id")
     role = session.get("role")
 
-    is_active = request.args.get("active", 1, type=int)
+    is_active_arg = request.args.get("active")
+    if is_active_arg == "all":
+        is_active = -1
+    else:
+        try:
+            is_active = int(is_active_arg) if is_active_arg is not None else 1
+        except:
+            is_active = 1
     mukellef_filter = request.args.get("mukellef_id") or request.args.get("mukellef")
     status_filter = request.args.get("status")
     filter_type = request.args.get("filter_type")  # guarantee
@@ -448,9 +416,13 @@ def list_files():
                 SELECT f.*, m.unvan AS client_name
                 FROM kdv_files f
                 JOIN kdv_mukellef m ON f.mukellef_id = m.id
-                WHERE f.is_active = %s
+                WHERE 1=1
             """
-            params = [True if is_active == 1 else False]
+            params = []
+            
+            if is_active != -1: # -1 indicates "all"
+                query += " AND f.is_active = %s"
+                params.append(True if is_active == 1 else False)
 
             # 🔐 ROL BAZLI ERİŞİM
             if role == "uzman":
@@ -736,11 +708,16 @@ def get_kdv_logs():
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Tablo var mı kontrolü
-        c.execute("SELECT to_regclass('public.kdv_system_logs')")
-        res = c.fetchone()
-        if not res or not list(res.values())[0]:
-            return jsonify([])
+        # Tablo var mı kontrolü (PostgreSQL)
+        if "sqlite" not in str(type(conn)).lower():
+            c.execute("SELECT 1 FROM information_schema.tables WHERE table_name = 'kdv_system_logs'")
+            if not c.fetchone():
+                return jsonify([])
+        else:
+            # SQLite check
+            c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='kdv_system_logs'")
+            if not c.fetchone():
+                return jsonify([])
 
         c.execute("""
             SELECT *
@@ -1018,6 +995,14 @@ def update_status():
                 "status": "error",
                 "message": "Dosya bulunamadı."
             }), 404
+        
+        custom_date = data.get("date") # GG.AA.YYYY formatında gelebilir
+        
+        # 🔗 Mevcut durumu kontrol et (Aynı statüyü tekrar eklememek için)
+        if (new_status and file_row["status"] == new_status) or (new_location and file_row["location"] == new_location):
+             # Eğer statü zaten aynıysa ve iade tamamlandı değilse (tarih güncelleme için izin veriyoruz)
+             if not custom_date:
+                return jsonify({"status": "success", "message": "Durum zaten güncel."})
 
         # 🔐 UZMAN → SADECE ATANMIŞ MÜKELLEF
         if role == "uzman":
@@ -1031,11 +1016,19 @@ def update_status():
 
         # 🔄 Statü güncelleme
         if new_status:
-            c.execute("""
-                UPDATE kdv_files
-                SET status = %s
-                WHERE id = %s
-            """, (new_status, file_id))
+            completed_at_sql = ""
+            completed_at_val = None
+            if new_status in ("İade Tamamlandı", "İade Alındı"):
+                # Eğer kullanıcı tarih göndermişse onu kullan, yoksa bugünü kullan
+                if custom_date:
+                    completed_at_val = custom_date
+                else:
+                    completed_at_val = datetime.now().strftime("%d.%m.%Y %H:%M")
+                completed_at_sql = ", completed_at = %s"
+            
+            sql = f"UPDATE kdv_files SET status = %s {completed_at_sql} WHERE id = %s"
+            params = (new_status, completed_at_val, file_id) if completed_at_val else (new_status, file_id)
+            c.execute(sql, params)
 
             c.execute("""
                 INSERT INTO kdv_history (file_id, date, text, description)
@@ -1050,11 +1043,19 @@ def update_status():
 
         # 📍 Lokasyon güncelleme
         if new_location:
-            c.execute("""
-                UPDATE kdv_files
-                SET location = %s
-                WHERE id = %s
-            """, (new_location, file_id))
+            completed_at_sql = ""
+            completed_at_val = None
+            if new_location == "İade Tamamlandı":
+                 # Eğer kullanıcı tarih göndermişse onu kullan, yoksa bugünü kullan
+                if custom_date:
+                    completed_at_val = custom_date
+                else:
+                    completed_at_val = datetime.now().strftime("%d.%m.%Y %H:%M")
+                completed_at_sql = ", completed_at = %s, status = 'İade Tamamlandı'"
+            
+            sql = f"UPDATE kdv_files SET location = %s {completed_at_sql} WHERE id = %s"
+            params = (new_location, completed_at_val, file_id) if completed_at_val else (new_location, file_id)
+            c.execute(sql, params)
 
             c.execute("""
                 INSERT INTO kdv_history (file_id, date, text, description)
@@ -1066,8 +1067,21 @@ def update_status():
                 "Yer Değişikliği",
                 f"{session.get('username')} \"{file_row['unvan']}\" mükellefinin {file_row['period']} dönemi dosya lokasyonunu \"{new_location}\" olarak değiştirdi."
             )
-
+            
         conn.commit()
+        return jsonify({"status": "success", "message": "Durum güncellendi."})
+
+@bp.route("/api/kdv/history/delete/<int:item_id>", methods=["DELETE"])
+@api_kdv_access_required
+def delete_history_item(item_id):
+    """Süreç akışından bir kaydı siler."""
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM kdv_history WHERE id = %s", (item_id,))
+        conn.commit()
+        if c.rowcount > 0:
+            return jsonify({"status": "success", "message": "Kayıt silindi."})
+        return jsonify({"status": "error", "message": "Kayıt bulunamadı."}), 404
 
     return jsonify({
         "status": "success",
@@ -1133,9 +1147,10 @@ def update_file_amounts():
                 amount_guarantee = %s,
                 amount_tenzil = %s,
                 amount_bloke = %s,
-                amount_resolved = %s
+                amount_resolved = %s,
+                guarantee_date = %s
             WHERE id = %s
-        """, (amt_request, amt_guarantee, amt_tenzil, amt_bloke, amt_resolved, file_id))
+        """, (amt_request, amt_guarantee, amt_tenzil, amt_bloke, amt_resolved, data.get("guarantee_date"), file_id))
 
         # 📜 Log
         log_msg = f"{session.get('username')} \"{row['unvan']}\" {row['period']} dosyası tutarlarını güncelledi. (Talep: {amt_request}, Sonuç: {amt_resolved})"

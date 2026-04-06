@@ -360,8 +360,8 @@
             <button class="btn-header primary me-2" data-bs-toggle="modal" data-bs-target="#addFileModal">
                 <i class="fa-solid fa-plus"></i> Yeni Dosya Ekle
             </button>
-            <a href="{{ url_for('kdv.index') }}?mukellef={{ mukellef.id }}" class="btn-header primary">
-                <i class="fa-solid fa-folder-open"></i> Dosyaları İncele
+            <a href="{{ url_for('kdv.archive') }}?mukellef={{ mukellef.id }}" class="btn-header primary">
+                <i class="fa-solid fa-list-ul"></i> Tüm Dosyaları Listele
             </a>
         </div>
     </div>
@@ -474,6 +474,11 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">SONUÇLANAN İADE</label>
                         <input type="number" step="0.01" id="editResolved" class="form-control fw-bold text-success">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TEMİNAT YATIRILMA / İADE TARİHİ</label>
+                        <input type="text" id="editGuaranteeDate" class="form-control fw-bold" placeholder="GG.AA.YYYY">
+                        <div class="form-text" style="font-size: 0.75rem;">YMM rapor teslim süresi (6 ay) bu tarihe göre hesaplanır.</div>
                     </div>
                 </form>
             </div>
@@ -817,6 +822,7 @@
         document.getElementById('editTenzil').value = f.amount_tenzil;
         document.getElementById('editBloke').value = f.amount_bloke;
         document.getElementById('editResolved').value = f.amount_resolved;
+        document.getElementById('editGuaranteeDate').value = f.guarantee_date || '';
         calcPostGuarantee(); // Initial calc
         editModal.show();
     }
@@ -835,7 +841,8 @@
             amount_guarantee: document.getElementById('editGuarantee').value,
             amount_tenzil: document.getElementById('editTenzil').value,
             amount_bloke: document.getElementById('editBloke').value,
-            amount_resolved: document.getElementById('editResolved').value
+            amount_resolved: document.getElementById('editResolved').value,
+            guarantee_date: document.getElementById('editGuaranteeDate').value
         };
 
         fetch('/api/kdv/update-file-amounts', {

@@ -104,7 +104,7 @@ def get_conn():
     load_dotenv(override=True)
     _db_url = os.getenv("DATABASE_URL", "").strip()
     _use_sqlite = _db_url.startswith("sqlite:///") or (
-        not _db_url.startswith("postgresql://")
+        not _db_url.startswith("postgresql://") and not _db_url.startswith("postgres://")
     )
 
     if _use_sqlite:
@@ -706,6 +706,7 @@ def migrate_kdv_tables():
                 is_active INTEGER DEFAULT 1,
                 is_guaranteed INTEGER DEFAULT 0,
                 guarantee_date TEXT,
+                completed_at TEXT,
                 FOREIGN KEY (mukellef_id) REFERENCES kdv_mukellef(id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             );
@@ -786,7 +787,8 @@ def migrate_kdv_tables():
                 date TEXT NOT NULL,
                 is_active BOOLEAN DEFAULT TRUE,
                 is_guaranteed BOOLEAN DEFAULT FALSE,
-                guarantee_date TEXT
+                guarantee_date TEXT,
+                completed_at TEXT
             );
             """)
 
@@ -838,6 +840,37 @@ def migrate_kdv_tables():
 
         conn.commit()
     print("KDV tablolari kontrol edildi.")
+    # Ayrıca log tablosunu da kontrol et
+    migrate_kdv_system_logs_table()
+    # Eksik kolonları ekle
+    migrate_kdv_files_extra_cols()
+
+def migrate_kdv_system_logs_table():
+    """KDV Portalındaki sistem log kayıtlarını tutan tabloyu oluşturur."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_system_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT,
+                user_name TEXT,
+                action TEXT,
+                description TEXT
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS kdv_system_logs (
+                id SERIAL PRIMARY KEY,
+                date TEXT,
+                user_name TEXT,
+                action TEXT,
+                description TEXT
+            );
+            """)
+        conn.commit()
+    print("kdv_system_logs tablosu kontrol edildi.")
 
 def migrate_kdv_documents_table():
     """kdv_documents tablosuna eksik sütunları ekler."""
@@ -885,3 +918,23 @@ def migrate_kdv_notes_table():
             """)
         conn.commit()
     print("kdv_notes tablosu kontrol edildi.")
+
+def migrate_kdv_files_extra_cols():
+    """kdv_files tablosundaki eksik kolonları (guarantee_date, completed_at) ekler."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            if USE_SQLITE:
+                cur.execute("PRAGMA table_info(kdv_files)")
+                existing = {r["name"] for r in cur.fetchall()}
+            else:
+                cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name='kdv_files'")
+                existing = {r["column_name"].lower() for r in cur.fetchall()}
+
+            for col in ["guarantee_date", "completed_at"]:
+                if col not in existing:
+                    print(f"'{col}' sutunu kdv_files tablosuna ekleniyor...")
+                    cur.execute(f'ALTER TABLE kdv_files ADD COLUMN {col} TEXT')
+                    conn.commit()
+        except Exception as e:
+            print(f"migrate_kdv_files_extra_cols hatasi: {e}")
