@@ -10,6 +10,11 @@
     .bg-soft-blue { background: #eff6ff; color: #2563eb; border: 1px solid #3b82f620; }
     .cur-pointer { cursor: pointer; transition: all 0.2s; }
     .cur-pointer:hover { transform: scale(1.05); filter: brightness(0.95); }
+    th.sortable { cursor: pointer; position: relative; padding-right: 20px !important; }
+    th.sortable:hover { color: #3b82f6 !important; background: #f8fafc !important; }
+    th.sortable i { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); color: #cbd5e1; font-size: 0.6rem; }
+    th.sortable.active { color: #3b82f6 !important; }
+    th.sortable.active i { color: #3b82f6 !important; }
 </style>
 {% endblock %}
 
@@ -65,10 +70,12 @@
                 <table class="table table-hover align-middle mb-0" id="completedTable">
                     <thead class="bg-light text-secondary small fw-bold text-uppercase" style="font-size: 0.7rem;">
                         <tr>
-                            <th class="ps-4">Mükellef Bilgisi</th>
-                            <th>Dönem / Konu</th>
-                            <th>Tamamlanma Tarihi</th>
-                            <th class="text-end">İade Tutarı</th>
+                            <th class="ps-4 sortable" onclick="handleSort('client_name')">Mükellef Bilgisi <i class="fa-solid fa-sort"></i></th>
+                            <th class="sortable" onclick="handleSort('period_sort')">Dönem / Konu <i class="fa-solid fa-sort"></i></th>
+                            <th class="sortable" onclick="handleSort('date_sort')">Ekleme Tarihi <i class="fa-solid fa-sort"></i></th>
+                            <th class="sortable active" onclick="handleSort('completed_at_sort')">Tamamlanma Tarihi <i class="fa-solid fa-sort-down"></i></th>
+                            <th class="text-center sortable" onclick="handleSort('duration_sort')">İade Süresi <i class="fa-solid fa-sort"></i></th>
+                            <th class="text-end sortable" onclick="handleSort('amount_request')">İade Tutarı <i class="fa-solid fa-sort"></i></th>
                             <th class="text-center">Durum</th>
                             <th class="text-end pe-4">Detay</th>
                         </tr>
@@ -99,27 +106,52 @@
             const response = await fetch(apiUrl);
             const files = await response.json();
             
-            // Sadece tamamlananları filtrele
+            // Sadece tamamlananları filtrele & Verileri sıralama için hazırla
             ALL_COMPLETED_FILES = files.filter(f => 
                 f.status === 'İade Tamamlandı' || 
                 f.status === 'İade Alındı' || 
                 f.location === 'İade Tamamlandı'
-            );
+            ).map(f => {
+                // Dönem sort (YYYYMM)
+                const pts = f.period ? f.period.split('/') : ['00','0000'];
+                const period_sort = (pts[1] || '0000') + (pts[0] || '00');
+                
+                // Tarihler
+                const date_sort = parseTurkishDate(f.date);
+                const comp_sort = parseTurkishDate(f.completed_at);
+                
+                // Süre
+                let duration_sort = 0;
+                if (date_sort && comp_sort) {
+                    duration_sort = Math.ceil((comp_sort - date_sort) / (1000 * 60 * 60 * 24));
+                }
 
-            // Tamamlanma tarihlerine göre azalan sırala
-            ALL_COMPLETED_FILES.sort((a, b) => {
-                const dateA = a.completed_at ? parseTurkishDate(a.completed_at) : 0;
-                const dateB = b.completed_at ? parseTurkishDate(b.completed_at) : 0;
-                return dateB - dateA;
+                return { ...f, period_sort, date_sort, completed_at_sort: comp_sort, duration_sort };
             });
 
             populateMonthFilter(ALL_COMPLETED_FILES);
-            renderTable(ALL_COMPLETED_FILES);
+            filterCompleted();
 
         } catch (error) {
             console.error('Fetch error:', error);
-            body.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Bağlantı hatası.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Bağlantı hatası.</td></tr>`;
         }
+    }
+
+    function calculateDaysDiff(startDateStr, endDateStr) {
+        if (!startDateStr || !endDateStr) return '-';
+        try {
+            const startParts = startDateStr.split('.');
+            const endParts = endDateStr.split(' ')[0].split('.');
+            if (startParts.length < 3 || endParts.length < 3) return '-';
+            
+            const start = new Date(`${startParts[2]}-${startParts[1]}-${startParts[0]}`);
+            const end = new Date(`${endParts[2]}-${endParts[1]}-${endParts[0]}`);
+            
+            const diffTime = (end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 ? diffDays + ' Gün' : '0 Gün';
+        } catch (e) { return '-'; }
     }
 
     function parseTurkishDate(str) {
@@ -148,11 +180,40 @@
         select.value = currentVal;
     }
 
+    let sortConfig = { key: 'completed_at_sort', direction: 'desc' };
+
+    function handleSort(key) {
+        if (sortConfig.key === key) {
+            sortConfig.direction = (sortConfig.direction === 'asc') ? 'desc' : 'asc';
+        } else {
+            sortConfig.key = key;
+            sortConfig.direction = 'asc';
+        }
+
+        // UI Update icons
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.classList.remove('active');
+            const icon = th.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-sort';
+        });
+
+        const headers = document.querySelectorAll('th.sortable');
+        headers.forEach(th => {
+            if (th.getAttribute('onclick').includes(`'${key}'`)) {
+                th.classList.add('active');
+                const i = th.querySelector('i');
+                if(i) i.className = `fa-solid fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'}`;
+            }
+        });
+
+        filterCompleted();
+    }
+
     function filterCompleted() {
         const search = document.getElementById('completedSearch').value.toLowerCase();
         const month = document.getElementById('monthFilter').value;
 
-        const filtered = ALL_COMPLETED_FILES.filter(f => {
+        let filtered = ALL_COMPLETED_FILES.filter(f => {
             const matchesSearch = !search || 
                 (f.client_name && f.client_name.toLowerCase().includes(search)) ||
                 (f.subject && f.subject.toLowerCase().includes(search)) ||
@@ -161,6 +222,21 @@
             const matchesMonth = !month || (f.completed_at && f.completed_at.includes(month));
             
             return matchesSearch && matchesMonth;
+        });
+
+        // Apply Sorting
+        filtered.sort((a, b) => {
+            let valA = a[sortConfig.key];
+            let valB = b[sortConfig.key];
+
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+
+            if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
         });
 
         renderTable(filtered);
@@ -174,7 +250,9 @@
             return;
         }
 
-        body.innerHTML = files.map(f => `
+        body.innerHTML = files.map(f => {
+            const iadeSuresi = calculateDaysDiff(f.date, f.completed_at);
+            return `
             <tr>
                 <td class="ps-4">
                     <div class="fw-bold text-dark">${f.client_name}</div>
@@ -184,9 +262,13 @@
                     <div class="small text-muted" style="font-size: 0.65rem;">${f.subject}</div>
                 </td>
                 <td>
-                    <div class="stat-badge bg-soft-blue d-inline-block cur-pointer" onclick="editCompletionDate(${f.id}, '${f.completed_at || ''}')" title="Tarihi Düzenle">
-                        <i class="fa-regular fa-calendar-check me-1"></i> ${f.completed_at || 'Tarih Seç'}
-                    </div>
+                    <div class="small text-secondary">${f.date || '-'}</div>
+                </td>
+                <td>
+                    <div class="small text-secondary">${f.completed_at ? f.completed_at.split(' ')[0] : '-'}</div>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-light text-dark border fw-bold">${iadeSuresi}</span>
                 </td>
                 <td class="text-end fw-bold text-success">₺ ${formatMoney(f.amount_request)}</td>
                 <td class="text-center">
@@ -198,7 +280,7 @@
                     </a>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
     }
 
     async function editCompletionDate(fileId, currentDate) {
