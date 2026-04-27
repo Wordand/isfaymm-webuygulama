@@ -37,7 +37,7 @@ def kaydet_beyanname(data, tur):
         if not row:
             c.execute("INSERT INTO mukellef (user_id, vergi_kimlik_no, unvan) VALUES (%s, %s, %s) RETURNING id", 
                       (session["user_id"], vkn, unvan))
-            mukellef_id = c.fetchone()[0]
+            mukellef_id = c.fetchone()["id"]
         else:
             mukellef_id = row["id"]
             if unvan and unvan != "Bilinmiyor":

@@ -69,14 +69,20 @@ def classify_section(key: str) -> str:
     if key.startswith("§ "): return key[2:].strip()
     
     # 1. Kodlu Detay Kalemleri (Sayfa 2-3)
-    if re.match(r"^(1100|616|504|113|114|115|116|117|118|119|120)\b", u): return "MATRAH DETAYI"
-    if re.match(r"^(103|108|109|110)\b", u) or "INDIRIM (% " in u or "ONCEKI DONEMDEN DEVREDEN KDV" in u:
+    # Matrah Detayı: 1100, 616, 504 etc.
+    if re.match(r"^(1100|616|504|113|114|115|116|117|118|119|120)\b", u) or "KAPASITE BEDELI" in u: 
+        return "MATRAH DETAYI"
+    
+    # İndirimler Detayı: 103, 108, 109, 110, Oran Dağılımı, Devreden
+    if re.match(r"^(103|108|109|110)\b", u) or "INDIRIM (%" in u or "ONCEKI DONEMDEN DEVREDEN KDV" in u or "YURTICI ALIMLARA" in u or "ITHALDE ODENEN" in u:
         return "İNDİRİMLER DETAYI"
-    if re.match(r"^(301|302|303|304|338|450)\b", u) or "TESLIM TUTARI" in u or "YUKLENILEN KDV" in u or "IADEYE KONU" in u:
+    
+    # İstisnalar: 301, 302, 325, 338, 410, 450 etc.
+    if re.match(r"^(301|302|303|304|325|338|410|450)\b", u) or "TESLIM TUTARI" in u or "YUKLENILEN KDV" in u or "IADEYE KONU" in u or "TESLIM BEDELI" in u or "IADE EDILECEK" in u:
         return "İSTİSNALAR VE İADE"
 
     # 2. Özet Başlıklar (Sayfa 1)
-    if any(x in u for x in ["TOPLAM MATRAH", "HESAPLANAN KDV", "ILAVESI", "TOPLAM KDV"]): return "MATRAH"
+    if any(x in u for x in ["TOPLAM MATRAH", "MATRAH TOPLAMI", "HESAPLANAN KDV", "ILAVESI", "TOPLAM KDV"]): return "MATRAH"
     if "INDIRIMLER TOPLAMI" in u: return "İNDİRİMLER"
     if any(x in u for x in ["SONRAKI DONEME DEVREDEN", "ODENMESI GEREKEN", "IADE EDILMESI GEREKEN", "TECIL EDILECEK"]):
         return "SONUÇ HESAPLARI"
@@ -352,7 +358,7 @@ def rapor_kdv():
         for m, v in aylik.items():
             val = to_float_turkish(v) or 0
             # KPI Extraction
-            if "MATRAH TOPLAMI" in u_alan: kdv_summary[m]["matrah"] = val
+            if "MATRAH TOPLAMI" in u_alan or "TOPLAM MATRAH" in u_alan: kdv_summary[m]["matrah"] = val
             elif "HESAPLANAN KDV" in u_alan or "TOPLAM KDV" in u_alan: kdv_summary[m]["hesaplanan"] = val
             elif "INDIRIMLER TOPLAMI" in u_alan: kdv_summary[m]["indirim"] = val
             elif "SONRAKI DONEME DEVREDEN" in u_alan: kdv_summary[m]["devreden"] = val
@@ -360,9 +366,9 @@ def rapor_kdv():
             elif "IADE EDILMESI GEREKEN" in u_alan: kdv_summary[m]["iade"] = val
             
             # Validation Logic: Sum up specific items to check against totals
-            if "(%" in u_alan and "- Matrah" in u_alan:
+            if "(%" in u_alan and "- MATRAH" in u_alan and "INDIRIM" not in u_alan:
                 calc_checks[m]["sub_matrah"] += val
-            if "(%" in u_alan and "- Vergi" in u_alan:
+            if "(%" in u_alan and "- VERGI" in u_alan and "INDIRIM" not in u_alan:
                 calc_checks[m]["sub_kdv"] += val
 
     # Perform Cross-Checks

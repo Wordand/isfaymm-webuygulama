@@ -190,25 +190,7 @@
         <div class="row g-4 mb-4 animate__animated animate__fadeInUp">
             {% set last_month = kdv_months[-1] %}
             {% set stats = kdv_summary[last_month] %}
-            <div class="col-md-3">
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: #eef2ff; color: #4f46e5;"><i class="bi bi-cash-stack"></i></div>
-                    <div>
-                        <div class="metric-label">Matrah ({{ last_month }})</div>
-                        <div class="metric-value text-primary">{{ "{:,.2f} \u20BA".format(stats.matrah).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: #fff7ed; color: #ea580c;"><i class="bi bi-percent"></i></div>
-                    <div>
-                        <div class="metric-label">Toplam KDV</div>
-                        <div class="metric-value text-warning">{{ "{:,.2f} \u20BA".format(stats.hesaplanan).replace(',', 'X').replace('.', ',').replace('X', '.') }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
                 <div class="metric-card">
                     <div class="metric-icon" style="background: #ecfdf5; color: #059669;"><i class="bi bi-arrow-up-right-circle"></i></div>
                     <div>
@@ -217,7 +199,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
                 <div class="metric-card">
                     <div class="metric-icon" style="background: #fef2f2; color: #dc2626;"><i class="bi bi-clipboard-pulse"></i></div>
                     <div>
@@ -246,17 +228,6 @@
     {% endif %}
 
     <div class="row">
-        <!-- Visual Trend Graph -->
-        <div class="col-lg-12 mb-4 animate__animated animate__fadeInUp">
-            <div class="content-box">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold m-0"><i class="bi bi-graph-up text-primary me-2"></i>Dönemsel Matrah ve KDV Trendi</h5>
-                </div>
-                <div class="chart-container">
-                    <canvas id="kdvTrendChart"></canvas>
-                </div>
-            </div>
-        </div>
 
         <!-- Analytical Data Table -->
         <div class="col-12 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
@@ -308,89 +279,33 @@
 </div>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Chart Config ---
-        const ctx = document.getElementById('kdvTrendChart').getContext('2d');
-        const months = {{ kdv_months | tojson }};
-        const matrahs = [];
-        const kdvs = [];
-        
-        {% for m in kdv_months %}
-            matrahs.push({{ kdv_summary[m].matrah }});
-            kdvs.push({{ kdv_summary[m].hesaplanan }});
-        {% endfor %}
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: 'Toplam Matrah',
-                        data: matrahs,
-                        borderColor: '#4e54c8',
-                        backgroundColor: 'rgba(78, 84, 200, 0.08)',
-                        borderWidth: 4,
-                        pointBackgroundColor: '#4e54c8',
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.4,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Hesaplanan KDV',
-                        data: kdvs,
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                        borderWidth: 4,
-                        pointBackgroundColor: '#f59e0b',
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.4,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 20, usePointStyle: true, font: { weight: 'bold', size: 12 } } },
-                    tooltip: { padding: 12, backgroundColor: 'rgba(255,255,255,0.9)', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1 }
-                },
-                scales: {
-                    y: { type: 'linear', display: true, position: 'left', grid: { color: '#f1f5f9' }, title: { display: true, text: 'Matrah (\u20BA)', color: '#4e54c8', font: { weight: 'bold' } } },
-                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'KDV (\u20BA)', color: '#f59e0b', font: { weight: 'bold' } } }
-                }
-            }
-        });
-
         // --- Live Search ---
         const searchInput = document.getElementById('kdvSearch');
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLocaleLowerCase('tr-TR');
-            const dataRows = document.querySelectorAll('.kdv-data-row');
-            
-            dataRows.forEach(row => {
-                const text = row.innerText.toLocaleLowerCase('tr-TR');
-                row.style.display = text.includes(query) ? '' : 'none';
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLocaleLowerCase('tr-TR');
+                const dataRows = document.querySelectorAll('.kdv-data-row');
+                
+                dataRows.forEach(row => {
+                    const text = row.innerText.toLocaleLowerCase('tr-TR');
+                    row.style.display = text.includes(query) ? '' : 'none';
+                });
+                
+                // Handle sections visibility
+                const sections = document.querySelectorAll('.kdv-section-row');
+                sections.forEach(sec => {
+                    let hasVisible = false;
+                    let next = sec.nextElementSibling;
+                    while(next && next.classList.contains('kdv-data-row')) {
+                        if(next.style.display !== 'none') { hasVisible = true; break; }
+                        next = next.nextElementSibling;
+                    }
+                    sec.style.display = (hasVisible || query === '') ? '' : 'none';
+                });
             });
-            
-            // Handle sections visibility
-            const sections = document.querySelectorAll('.kdv-section-row');
-            sections.forEach(sec => {
-                let hasVisible = false;
-                let next = sec.nextElementSibling;
-                while(next && next.classList.contains('kdv-data-row')) {
-                    if(next.style.display !== 'none') { hasVisible = true; break; }
-                    next = next.nextElementSibling;
-                }
-                sec.style.display = (hasVisible || query === '') ? '' : 'none';
-            });
-        });
+        }
     });
 </script>
 {% endblock %}

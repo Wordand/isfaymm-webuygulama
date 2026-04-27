@@ -199,11 +199,10 @@
             showCancelButton: true,
             confirmButtonText: 'Evet, Seç',
             cancelButtonText: 'İptal',
-            confirmButtonColor: '#4e54c8',
-            borderRadius: '16px'
+            confirmButtonColor: '#4e54c8'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/mukellef-sec', {
+                fetch('/mukellef/api/mukellef-sec', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
@@ -253,11 +252,10 @@
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
             confirmButtonText: 'Evet, Sil!',
-            cancelButtonText: 'Vazgeç',
-            borderRadius: '16px'
+            cancelButtonText: 'Vazgeç'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/api/mukellef-sil', {
+                fetch('/mukellef/api/mukellef-sil', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
@@ -285,7 +283,7 @@
             return Swal.fire('Uyarı', 'Lütfen tüm alanları doldurun.', 'warning');
         }
 
-        const url = id ? '/api/mukellef-guncelle' : '/api/mukellef-ekle';
+        const url = id ? '/mukellef/api/mukellef-guncelle' : '/mukellef/api/mukellef-ekle';
         const payload = { id: id || null, vergi_kimlik_no: vkn, unvan: unvan };
 
         Swal.fire({ title: 'İşleniyor...', didOpen: () => Swal.showLoading() });
