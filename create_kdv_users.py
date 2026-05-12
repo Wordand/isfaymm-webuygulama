@@ -34,6 +34,12 @@ USERS_TO_CREATE = [
         "password": "Sifre.1",
         "role": "uzman",
         "kdv_pin": "1234"
+    },
+    {
+        "username": "seyda",
+        "password": "tax.7070",
+        "role": "yonetici",
+        "kdv_pin": "1234"
     }
 ]
 

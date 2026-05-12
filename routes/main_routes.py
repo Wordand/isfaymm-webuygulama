@@ -328,8 +328,8 @@ def sitemap_xml():
     urls = []
     static_endpoints = [
         ('main.home', {}), ('main.about', {}), ('main.team', {}), ('main.mevzuat', {}),
-        ('main.indirim', {}), ('main.ceza', {}), ('main.birlesme', {}), ('main.kdv_tebligi', {}),
-        ('main.kv_tebligi', {}), ('main.enflasyon_duzeltmesi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
+        ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
+        ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.tdhp', {}),
         ('indirimlikurumlar.index', {}),
@@ -409,14 +409,12 @@ def kv_tebligi(bolum_id=None):
 @bp.route("/mevzuat-degisiklikleri")
 def mevzuat_degisiklikleri(): return render_template("pages/mevzuat_degisiklikleri.html")
 
-@bp.route("/enflasyon-duzeltmesi")
-def enflasyon_duzeltmesi(): return render_template("pages/enflasyon_duzeltmesi.html")
+
 
 @bp.route("/indirim")
 def indirim(): return render_template("pages/indirim.html")
 
-@bp.route("/birlesme")
-def birlesme(): return render_template("pages/birlesme.html")
+
 
 # --- API ROUTES ---
 

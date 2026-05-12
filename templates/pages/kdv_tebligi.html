@@ -2,18 +2,17 @@
 
 {% block title %}
 {% if selected_item %}
-{{ selected_item.title }} | KDV Genel Uygulama Tebliği
+{{ selected_item.title }} - KDV Genel Uygulama Tebliği (2026 Güncel)
 {% else %}
-KDV Genel Uygulama Tebliği | İSFA YMM
+KDV Genel Uygulama Tebliği - Madde Madde Arama ve Açıklamalı Rehber (2026)
 {% endif %}
 {% endblock %}
 
 {% block description %}
 {% if selected_item %}
-{{ selected_item.content[:150] | striptags | replace("\n", " ") }}...
+KDV Tebliği {{ selected_item.title }} bölümü: {{ selected_item.content[:160] | striptags | replace("\n", " ") }}... Güncel, aranabilir ve not alınabilir tam metin.
 {% else %}
-KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini, hiyerarşik yapı içerisinde kolayca arayın, inceleyin ve notlar
-alın.
+KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik yapı içerisinde kolayca arayın, inceleyin, favorilerinize ekleyin ve notlar alın.
 {% endif %}
 {% endblock %}
 
@@ -875,6 +874,37 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.5; transform: scale(1.2); }
     }
+
+    /* Smart Links Bridge */
+    .smart-link-wrapper {
+        position: relative;
+        display: inline;
+        border-bottom: 2px dashed #0d6efd40;
+        padding-bottom: 1px;
+    }
+
+    .smart-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #0d6efd;
+        color: white !important;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 50px;
+        text-decoration: none !important;
+        margin-left: 6px;
+        vertical-align: middle;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    }
+
+    .smart-action-btn:hover {
+        background: #004aad;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
 </style>
 
 <!-- 🖱️ INTERACTIVE LOGIC -->
@@ -1500,10 +1530,30 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
             p = p.replace(/(213 sayılı (?:Kanun|Vergi Usul Kanunu))/gi, '<strong class="text-primary">$1</strong>');
             p = p.replace(/(Kanunun\s+(?:mükerrer\s+)?\d+\s*(?:nc[ıi]|inci|üncü|uncu|nci)?\s+madde(?:si|sinin|sine)?)/gi, '<strong class="text-info">$1</strong>');
 
-            // 6. NORMAL PARAGRAF
+            // 🟦 7. HESAPLAMA ARAÇLARI KÖPRÜSÜ (Smart Links)
+            const smartLinks = [
+                { pattern: /İndirimli Kurumlar Vergisi/gi, url: '/indirimlikurumlar', label: 'Hesapla' },
+                { pattern: /Yatırım Teşvik Belgesi/gi, url: '/indirimlikurumlar', label: 'Teşvik Robotu' },
+                { pattern: /İthalatta KDV/gi, url: '/hesaplama-araclari/ithalat-kdv', label: 'Hesapla' },
+                { pattern: /Gecikme Zammı/gi, url: '/hesaplama-araclari/gecikme-zammi', label: 'Hesapla' },
+                { pattern: /Gelir Vergisi/gi, url: '/hesaplama-araclari/gelir-vergisi', label: 'Hesapla' }
+            ];
+
+            smartLinks.forEach(link => {
+                p = p.replace(link.pattern, (match) => {
+                    return `<span class="smart-link-wrapper">${match}<a href="${link.url}" class="smart-action-btn" title="${link.label}"><i class="bi bi-calculator"></i> ${link.label}</a></span>`;
+                });
+            });
+
+            // 6. NORMAL PARAGRAF VEYA TABLO
             const formattedP = p.replace(/\n/g, '<br>');
 
-            html += `<p class="mb-3" style="text-align: justify; line-height: 1.8; color: #2c3e50;">${formattedP}</p>`;
+            // Tablo ise <p> içine alma
+            if (p.includes('<!-- TABLE_START -->') || p.startsWith('<div')) {
+                html += `<div class="content-block my-3">${formattedP}</div>`;
+            } else {
+                html += `<p class="mb-3" style="text-align: justify; line-height: 1.8; color: #2c3e50;">${formattedP}</p>`;
+            }
         });
 
         return html;

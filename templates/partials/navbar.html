@@ -175,25 +175,147 @@
                                     <div class="dmi-desc">Güncel değişiklikler</div>
                                 </div>
                             </a>
+
+                            <div class="dropdown-divider-modern my-2"></div>
+
+                            <!-- Alt Menülü Kategori: Katma Değer Vergisi -->
+                            <div class="dropdown-submenu-modern position-relative">
+                                <a class="dropdown-item-modern" href="javascript:void(0)">
+                                    <div class="dmi-icon bg-orange"><i class="bi bi-receipt"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="dmi-label">Katma Değer Vergisi</div>
+                                        <div class="dmi-desc">KDV İade ve Tevkifat Uygulamaları</div>
+                                    </div>
+                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
+                                </a>
+                                <div class="submenu-modern-content">
+                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> KDV İadesi Rehberi</div>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KDV TEBLİĞİ - 10.05.2026.pdf') }}#page=48&zoom=125,0,50" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Tevkifata Tabi İşlemlerde KDV İadesi</div>
+                                            <div class="dmi-desc">Bölüm 2.1.5. (Sayfa 48)</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Alt Menülü Kategori: Yatırım Teşvik -->
+                            <div class="dropdown-submenu-modern position-relative">
+                                <a class="dropdown-item-modern" href="javascript:void(0)">
+                                    <div class="dmi-icon bg-green"><i class="bi bi-graph-up-arrow"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="dmi-label">Yatırım Teşvik Mevzuatı</div>
+                                        <div class="dmi-desc">Teşvik belgelerine ilişkin mevzuat</div>
+                                    </div>
+                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
+                                </a>
+                                <div class="submenu-modern-content">
+                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2012-3305 SAYILI KARAR.pdf') }}" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2012/3305 Sayılı Karar</div>
+                                            <div class="dmi-desc">Yatırımlarda Devlet Yardımları Hakkında Karar</div>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2025-9903 SAYILI KARAR.pdf') }}" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2025/9903 Sayılı Karar</div>
+                                            <div class="dmi-desc">Yatırımlarda Devlet Yardımları Yeni Sistem Kararı</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Alt Menülü Kategori: İndirimli Kurumlar -->
+                            <div class="dropdown-submenu-modern position-relative">
+                                <a class="dropdown-item-modern" href="javascript:void(0)">
+                                    <div class="dmi-icon bg-blue"><i class="bi bi-building"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="dmi-label">İndirimli Kurumlar Mevzuatı</div>
+                                        <div class="dmi-desc">KVK 32/A uygulamaları</div>
+                                    </div>
+                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
+                                </a>
+                                <div class="submenu-modern-content">
+                                    <div class="dropdown-section-title"><i class="bi bi-journal-bookmark-fill text-primary"></i> Rehber ve Makaleler</div>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('main.indirim') }}">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-book text-info me-1"></i> İndirimli Kurumlar Rehberi</div>
+                                            <div class="dmi-desc">Detaylı açıklamalar ve mevzuat analizi</div>
+                                        </div>
+                                    </a>
+                                    <div class="dropdown-divider-modern my-2"></div>
+                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ KANUNU - 10.05.2026.pdf') }}#page=42&zoom=125,0,700" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> KVK Madde 32/A</div>
+                                            <div class="dmi-desc">İndirimli Kurumlar Vergisi Kanunu (Sayfa 42)</div>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ TEBLİĞİ - 10.05.2026.pdf') }}#page=211" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 1 Seri No.lu KV Genel Tebliği</div>
+                                            <div class="dmi-desc">Tebliğin 32.2. Bölümü (Sayfa 211)</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Alt Menülü Kategori: Enflasyon Düzeltmesi -->
+                            <div class="dropdown-submenu-modern position-relative">
+                                <a class="dropdown-item-modern" href="javascript:void(0)">
+                                    <div class="dmi-icon bg-purple"><i class="bi bi-graph-up"></i></div>
+                                    <div class="flex-grow-1">
+                                        <div class="dmi-label">Enflasyon Düzeltmesi</div>
+                                        <div class="dmi-desc">VUK Mükerrer 298/A uygulamaları</div>
+                                    </div>
+                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
+                                </a>
+                                <div class="submenu-modern-content">
+                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 555 NOLU VUK TEBLİĞİ.pdf') }}" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 555 No'lu Tebliğ</div>
+                                            <div class="dmi-desc">Enflasyon Düzeltmesi Tebliği</div>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 165 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 165 No'lu Sirküler</div>
+                                            <div class="dmi-desc">Düzeltme Uygulama Esasları</div>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 176 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 176 No'lu Sirküler</div>
+                                            <div class="dmi-desc">Uygulama Detayları</div>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item-modern p-2" href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank">
+                                        <div>
+                                            <div class="dmi-label text-dark"><i class="bi bi-link-45deg text-info me-1"></i> 196 No'lu Sirküler</div>
+                                            <div class="dmi-desc">GİB Resmi Sayfası</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider-modern"></div>
+
+                        <div class="dropdown-section">
+                            <a class="dropdown-item-modern" href="{{ url_for('main.ceza') }}">
+                                <div class="dmi-icon bg-orange"><i class="bi bi-exclamation-triangle"></i></div>
+                                <div>
+                                    <div class="dmi-label">Güncel Vergi Cezaları</div>
+                                    <div class="dmi-desc">2026 yılı VUK ceza hükümleri</div>
+                                </div>
+                            </a>
                             <a class="dropdown-item-modern" href="{{ url_for('main.mevzuat') }}">
                                 <div class="dmi-icon bg-indigo"><i class="bi bi-balance-scale"></i></div>
                                 <div>
                                     <div class="dmi-label">Mevzuat Portalı</div>
-                                    <div class="dmi-desc">Tüm mevzuat</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.kdv_tebligi') }}">
-                                <div class="dmi-icon bg-blue"><i class="bi bi-file-text"></i></div>
-                                <div>
-                                    <div class="dmi-label">KDV Tebliği</div>
-                                    <div class="dmi-desc">Detaylı içerik</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.kv_tebligi') }}">
-                                <div class="dmi-icon bg-purple"><i class="bi bi-building"></i></div>
-                                <div>
-                                    <div class="dmi-label">Kurumlar Vergisi Tebliği</div>
-                                    <div class="dmi-desc">Detaylı içerik</div>
+                                    <div class="dmi-desc">Tüm mevzuat arşivi</div>
                                 </div>
                             </a>
                         </div>
@@ -550,5 +672,57 @@
     display: block; width: 24px; height: 2px;
     background: #c8102e; border-radius: 2px;
     transition: all 0.3s ease;
+}
+
+/* ═══════════════════════════════════════
+   SUBMENU MODERN (HOVER NESTED)
+═══════════════════════════════════════ */
+.dropdown-submenu-modern {
+    position: relative;
+}
+.dropdown-submenu-modern:hover > .submenu-modern-content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.submenu-modern-content {
+    position: absolute;
+    top: -10px;
+    right: 100%;
+    margin-right: 5px;
+    background: white;
+    border-radius: 16px;
+    min-width: 300px;
+    padding: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08);
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 1060;
+}
+/* Bu görünmez köprü sayesinde fare alt menüye geçerken boşluğa düşüp menüyü kapatmaz */
+.submenu-modern-content::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -20px;
+    width: 20px;
+    height: 100%;
+    background: transparent;
+}
+/* Mobil uyumluluk: Mobilde sağdan sola açılmak yerine alta doğru açılsın */
+@media (max-width: 991px) {
+    .submenu-modern-content {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        background: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 12px;
+    }
 }
 </style>

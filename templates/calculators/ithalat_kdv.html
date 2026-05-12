@@ -1,213 +1,335 @@
 {% extends "layout.html" %}
 {% block title %}İthalatta KDV İndirimi Hesaplama | İSFA YMM{% endblock %}
-
-{% block description %}Gözetim uygulaması dâhil ithalat işlemlerinizde indirilebilecek ve maliyete atılacak KDV tutarını ücretsiz hesaplayın.{% endblock %}
-{% block og_desc %}Gözetim uygulaması dâhil ithalat işlemlerinizde indirilebilecek ve maliyete atılacak KDV tutarını ücretsiz hesaplayın.{% endblock %}
+{% block description %}7846 sayılı CB Kararı kapsamında ithalat işlemlerinde indirilebilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
+{% block og_desc %}7846 sayılı CB Kararı kapsamında ithalat işlemlerinde indirilebilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
 
 {% block content %}
+<style>
+:root { --calc-blue: #4e54c8; --calc-grad: linear-gradient(135deg,#4e54c8,#8f94fb); }
+.calc-card { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.3); border-radius:24px; padding:2rem; box-shadow:0 15px 35px rgba(0,0,0,0.08); }
+.section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid #f1f5f9; }
+.section-title i { color:var(--calc-blue); }
+.amt-input { font-family:'Roboto Mono',monospace; text-align:right; font-weight:600; }
+.result-card { border-radius:16px; padding:1.5rem; text-align:center; }
+.result-card h6 { font-size:.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.5rem; }
+.result-card .val { font-size:1.6rem; font-weight:800; font-family:'Roboto Mono',monospace; }
+.detail-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid #f1f5f9; font-size:.9rem; }
+.detail-row:last-child { border:none; }
+.detail-val { font-weight:700; font-family:'Roboto Mono',monospace; }
+.badge-7846 { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:.65rem; padding:2px 8px; border-radius:20px; font-weight:700; vertical-align:middle; }
+</style>
+
 <div class="container py-4">
+    <div class="text-center mb-4">
+        <h3 style="font-weight:800;font-size:2rem;background:var(--calc-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+            İthalatta KDV İndirimi Hesaplama
+        </h3>
+        <p class="text-muted">7846 sayılı CB Kararı & KDV Genel Uygulama Tebliği (III/C-2.6)</p>
+    </div>
+
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-truck me-2"></i>İthalatta KDV İndirimi Hesaplama</h4>
-                </div>
-                <div class="card-body p-4">
+        <div class="col-xl-10">
+            <div class="calc-card">
+                <form id="ithalatForm" autocomplete="off">
 
-                    <form id="ithalatForm">
-                        <!-- Tutar Girişleri -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="cif" class="form-label fw-bold">CIF Bedeli (TL)</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="cif" placeholder="0.00" step="0.01" required>
-                                    <span class="input-group-text">₺</span>
-                                </div>
-                                <div class="form-text">Malın Bedeli + Sigorta + Navlun</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="gumruk" class="form-label fw-bold">Toplam Gümrük Kıymeti (TL)</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="gumruk" placeholder="0.00" step="0.01" required>
-                                    <span class="input-group-text">₺</span>
-                                </div>
-                                <div class="form-text">Gözetim uygulaması dahil kıymet. CIF bedelinden düşük olamaz.</div>
-                            </div>
+                    <!-- BÖLÜM 1: Temel Bilgiler -->
+                    <div class="section-title"><i class="bi bi-box-seam me-2"></i>Beyanname Temel Bilgileri</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Mal Bedeli (CIF) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control amt-input" id="malBedeli" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            <div class="form-text">Mal + Sigorta + Navlun</div>
                         </div>
-
-                        <!-- Oran Girişleri -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label for="gv" class="form-label">Gümrük Vergisi (%)</label>
-                                <input type="number" class="form-control" id="gv" value="10" step="0.1">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="igv" class="form-label">İlave GV (%)</label>
-                                <input type="number" class="form-control" id="igv" value="15" step="0.1">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="kdv" class="form-label">KDV Oranı (%)</label>
-                                <div class="input-group">
-                                <input type="number" class="form-control" id="kdv" value="20" step="0.1">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                            </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Yurt Dışı Gider <span class="badge-7846">7846</span></label>
+                            <input type="text" class="form-control amt-input" id="yurtDisi" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            <div class="form-text">Gözetim farkı (tevsik edilemeyen)</div>
                         </div>
-
-                        <button type="button" class="btn btn-success w-100 btn-lg" onclick="hesaplaIthalatKdv()">
-                            <i class="bi bi-calculator me-2"></i> Hesapla
-                        </button>
-
-                        <hr class="my-4">
-
-                        <!-- Sonuç Alanı -->
-                        <div id="sonucAlani" style="display:none;">
-                            <h5 class="fw-bold text-success mb-3">Hesaplama Sonucu</h5>
-                            
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <tbody>
-                                        <tr>
-                                            <th class="w-50 table-success">✅ İndirilebilecek KDV</th>
-                                            <td class="text-end fw-bold text-success fs-5" id="resIndirilebilir">0,00 ₺</td>
-                                        </tr>
-                                        <tr>
-                                            <th class="table-danger">❌ İndirilemeyecek KDV (Maliyete Atılacak)</th>
-                                            <td class="text-end fw-bold text-danger fs-5" id="resIndirilemez">0,00 ₺</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Detaylar -->
-                            <div class="accordion mt-3" id="accordionDetay">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingOne">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetay" aria-expanded="false" aria-controls="collapseDetay">
-                                            Hesaplama Detayları (Tebliğ III/C-2.6)
-                                        </button>
-                                    </h2>
-                                    <div id="collapseDetay" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionDetay">
-                                        <div class="accordion-body small">
-                                            <ul class="list-group list-group-flush">
-                                                <li class="list-group-item d-flex justify-content-between">
-                                                    <span>Gözetim Farkı (Tevsik Edilemeyen Tutar)</span>
-                                                    <strong id="detayGozetim">0,00 ₺</strong>
-                                                </li>
-                                                <li class="list-group-item d-flex justify-content-between">
-                                                    <span>Gözetim Farkına İsabet Eden GV</span>
-                                                    <strong id="detayGV">0,00 ₺</strong>
-                                                </li>
-                                                <li class="list-group-item d-flex justify-content-between">
-                                                    <span>Gözetim Farkına İsabet Eden İGV</span>
-                                                    <strong id="detayIGV">0,00 ₺</strong>
-                                                </li>
-                                                <li class="list-group-item d-flex justify-content-between text-danger">
-                                                    <span>İndirilemez KDV Matrahı Toplamı</span>
-                                                    <strong id="detayMatrah">0,00 ₺</strong>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- İkazlar -->
-                            <div id="ymmUyari" class="alert alert-warning mt-3 d-none">
-                                <!-- JS ile dolacak -->
-                            </div>
-
-                        </div>
-
-                    </form>
-
-                    <div class="mt-3">
-                        <div class="alert alert-light border small text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Bilgi:</strong> 7846 sayılı Cumhurbaşkanı Kararı ve KDV Genel Uygulama Tebliği kapsamında; gözetim, korunma önlemleri ve haksız rekabet uygulamaları nedeniyle ödenen KDV’nin indirimi kısıtlanmıştır.
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">GV Matrahı</label>
+                            <input type="text" class="form-control amt-input bg-light" id="gvMatrahi" readonly>
+                            <div class="form-text">Otomatik: Mal Bedeli + Yurt Dışı</div>
                         </div>
                     </div>
 
+                    <!-- BÖLÜM 2: Gümrük Vergileri -->
+                    <div class="section-title"><i class="bi bi-bank me-2"></i>Gümrük Vergileri</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Gümrük Vergisi (GV)</label>
+                            <input type="text" class="form-control amt-input" id="gv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">İlave GV</label>
+                            <input type="text" class="form-control amt-input" id="igv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Damga Vergisi (DV)</label>
+                            <input type="text" class="form-control amt-input" id="dv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">KDV Oranı (%)</label>
+                            <input type="number" class="form-control amt-input" id="kdvOran" value="20" step="1">
+                        </div>
+                    </div>
+
+                    <!-- BÖLÜM 3: 7846 Kapsamı Vergiler -->
+                    <div class="section-title"><i class="bi bi-shield-exclamation me-2"></i>7846 Sayılı Karar Kapsamı Vergiler <span class="badge-7846">İNDİRİLEMEZ</span></div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Dampinge Karşı Vergi</label>
+                            <input type="text" class="form-control amt-input border-danger" id="dkv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Telafi Edici Vergi</label>
+                            <input type="text" class="form-control amt-input border-danger" id="tev" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Korunma Önlemi GV</label>
+                            <input type="text" class="form-control amt-input border-danger" id="korunmaGV" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Ek Mali Mükellefiyet</label>
+                            <input type="text" class="form-control amt-input border-danger" id="ekMali" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                    </div>
+
+                    <!-- BÖLÜM 4: Diğer Giderler -->
+                    <div class="section-title"><i class="bi bi-receipt me-2"></i>Diğer Giderler (İndirilebilir)</div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Dep. Gid.</label>
+                            <input type="text" class="form-control amt-input" id="depGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Tahm-Tahl</label>
+                            <input type="text" class="form-control amt-input" id="tahmTahl" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Banka Mas.</label>
+                            <input type="text" class="form-control amt-input" id="bankaMas" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Liman Gid.</label>
+                            <input type="text" class="form-control amt-input" id="limanGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Diğer</label>
+                            <input type="text" class="form-control amt-input" id="diger" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">KDV Matrahı</label>
+                            <input type="text" class="form-control amt-input bg-light" id="kdvMatrahi" readonly>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn w-100 btn-lg fw-bold text-white" style="background:var(--calc-grad);border:none;border-radius:14px;padding:.9rem" onclick="hesapla()">
+                        <i class="bi bi-calculator me-2"></i>Hesapla
+                    </button>
+                </form>
+
+                <!-- SONUÇLAR -->
+                <div id="sonucAlani" style="display:none" class="mt-4">
+                    <hr>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="result-card bg-light border">
+                                <h6 class="text-muted">Toplam KDV</h6>
+                                <div class="val text-dark" id="resToplam">0,00 ₺</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="result-card" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">
+                                <h6 class="text-success">✅ İndirilecek KDV</h6>
+                                <div class="val text-success" id="resIndirilecek">0,00 ₺</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="result-card" style="background:linear-gradient(135deg,#fee2e2,#fecaca)">
+                                <h6 class="text-danger">❌ İndirilemeyecek KDV</h6>
+                                <div class="val text-danger" id="resIndirilemez">0,00 ₺</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detay Accordion -->
+                    <div class="accordion" id="accDetay">
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#detay1">
+                                    <i class="bi bi-list-ul me-2"></i>İndirilemez KDV Detayı (7846 Kapsamı)
+                                </button>
+                            </h2>
+                            <div id="detay1" class="accordion-collapse collapse" data-bs-parent="#accDetay">
+                                <div class="accordion-body" id="detayBody"></div>
+                            </div>
+                        </div>
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#detay2">
+                                    <i class="bi bi-check-circle me-2"></i>İndirilecek KDV Detayı
+                                </button>
+                            </h2>
+                            <div id="detay2" class="accordion-collapse collapse" data-bs-parent="#accDetay">
+                                <div class="accordion-body" id="detayIndirilecek"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YMM Uyarısı -->
+                    <div id="ymmUyari" class="alert mt-3 d-none"></div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <div class="alert alert-light border small text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Yasal Dayanak:</strong> 7846 sayılı Cumhurbaşkanı Kararı, KDV Genel Uygulama Tebliği III/C-2.6. Gözetim, korunma önlemleri ve haksız rekabet uygulamaları nedeniyle ödenen KDV'nin indirimi kısıtlanmıştır.
                 </div>
             </div>
         </div>
     </div>
-    <div class="mt-4">
-        {% include "partials/tax_disclaimer.html" %}
-    </div>
+    <div class="mt-3">{% include "partials/tax_disclaimer.html" %}</div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function hesaplaIthalatKdv() {
-        const cif = parseFloat(document.getElementById("cif").value) || 0;
-        const gumruk = parseFloat(document.getElementById("gumruk").value) || 0;
-        
-        const gvOran = parseFloat(document.getElementById("gv").value) / 100 || 0;
-        const igvOran = parseFloat(document.getElementById("igv").value) / 100 || 0;
-        const kdvOran = parseFloat(document.getElementById("kdv").value) / 100 || 0;
+// TR Sayı Formatı: 1.234.567,89
+function parseTR(s) {
+    if (!s) return 0;
+    s = String(s).replace(/\./g, '').replace(',', '.');
+    return parseFloat(s) || 0;
+}
+function fmtTR(n) {
+    return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function formatTR(el) {
+    let v = el.value.replace(/[^0-9,]/g, '');
+    el.value = v;
+}
+function gv(id) { return parseTR(document.getElementById(id).value); }
+function sv(id, v) { document.getElementById(id).value = fmtTR(v); }
 
-        if (gumruk < cif) {
-            Swal.fire({
-                icon: "error",
-                title: "Hatalı Giriş",
-                text: "Toplam gümrük kıymeti CIF bedelinden küçük olamaz.",
-            });
-            return;
-        }
+function autoCalc() {
+    const mal = gv('malBedeli'), yd = gv('yurtDisi');
+    sv('gvMatrahi', mal + yd);
+    // KDV Matrahı
+    const gvM = mal + yd;
+    const vergiler = gv('gv') + gv('igv') + gv('dv') + gv('dkv') + gv('tev') + gv('korunmaGV') + gv('ekMali');
+    const giderler = gv('depGid') + gv('tahmTahl') + gv('bankaMas') + gv('limanGid') + gv('diger');
+    sv('kdvMatrahi', gvM + vergiler + giderler);
+}
 
-        // 🔴 Gözetim farkı
-        const gozetimFarki = gumruk - cif;
+function hesapla() {
+    const mal = gv('malBedeli');
+    const yd = gv('yurtDisi');
+    const gvTutar = gv('gv');
+    const igvTutar = gv('igv');
+    const dvTutar = gv('dv');
+    const dkvTutar = gv('dkv');
+    const tevTutar = gv('tev');
+    const korunma = gv('korunmaGV');
+    const ekMali = gv('ekMali');
+    const depGid = gv('depGid');
+    const tahmTahl = gv('tahmTahl');
+    const bankaMas = gv('bankaMas');
+    const limanGid = gv('limanGid');
+    const diger = gv('diger');
+    const kdvOran = (parseFloat(document.getElementById('kdvOran').value) || 20) / 100;
 
-        // Vergiler (Yurt dışı kaynaklı farka isabet eden)
-        const gvYurtDisi = gozetimFarki * gvOran;
-        const igvYurtDisi = gozetimFarki * igvOran;
-
-        const gvCif = cif * gvOran;
-        const igvCif = cif * igvOran;
-
-        // ❌ İndirilemeyecek KDV
-        const indirilemezMatrah = gozetimFarki + gvYurtDisi + igvYurtDisi;
-        const indirilemezKdv = indirilemezMatrah * kdvOran;
-
-        // ✅ İndirilebilecek KDV (Gerçek mal bedeli üzerinden)
-        const indirilebilirMatrah = cif + gvCif + igvCif;
-        const indirilebilirKdv = indirilebilirMatrah * kdvOran;
-
-        // Sonuçları Yaz
-        document.getElementById("sonucAlani").style.display = "block";
-        document.getElementById("resIndirilebilir").textContent = indirilebilirKdv.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-        document.getElementById("resIndirilemez").textContent = indirilemezKdv.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-
-        // Detaylar
-        document.getElementById("detayGozetim").textContent = gozetimFarki.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-        document.getElementById("detayGV").textContent = gvYurtDisi.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-        document.getElementById("detayIGV").textContent = igvYurtDisi.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-        document.getElementById("detayMatrah").textContent = indirilemezMatrah.toLocaleString("tr-TR", { minimumFractionDigits: 2 }) + " ₺";
-
-        // YMM Uyarısı
-        // YMM Sınırı (güncel tutar)
-        const YMM_SINIR = 2600000; 
-        const uyariEl = document.getElementById("ymmUyari");
-        
-        if (gumruk > YMM_SINIR) {
-            uyariEl.innerHTML = `
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Dikkat:</strong> İthalat bedeli yasal sınırı (${YMM_SINIR.toLocaleString('tr-TR')} TL) aştığından, KDV indirimlerinin teyidi için <strong>Özel Amaçlı YMM Raporu</strong> ibraz edilmesi gerekir. (Tam Tasdik Sözleşmesi varsa rapor aranmaz.)
-            `;
-            uyariEl.classList.remove("d-none");
-            uyariEl.className = "alert alert-warning mt-3";
-        } else {
-             uyariEl.innerHTML = `
-                <i class="bi bi-info-circle-fill me-2"></i>
-                İthalat bedeli sınırın altında olduğundan, YMM raporu aranmaz ancak indirim durumu vergi dairesine bildirilmelidir.
-            `;
-            uyariEl.classList.remove("d-none");
-            uyariEl.className = "alert alert-info mt-3";
-        }
+    if (mal <= 0) {
+        Swal.fire({icon:'warning', title:'Uyarı', text:'Mal Bedeli (CIF) giriniz.'});
+        return;
     }
+
+    const gvMatrahi = mal + yd;
+
+    // GV ve İGV oranlarını tutardan hesapla
+    const gvRate = gvMatrahi > 0 ? gvTutar / gvMatrahi : 0;
+    const igvRate = gvMatrahi > 0 ? igvTutar / gvMatrahi : 0;
+
+    // === İNDİRİLEMEZ KDV HESABI ===
+    // 1. Gözetim farkına isabet eden GV ve İGV
+    const gozetimGV = yd * gvRate;
+    const gozetimIGV = yd * igvRate;
+    const gozetimMatrah = yd + gozetimGV + gozetimIGV;
+
+    // 2. Dampinge karşı vergi, telafi edici vergi, korunma önlemi GV, ek mali mükellefiyet
+    const karar7846Toplam = dkvTutar + tevTutar + korunma + ekMali;
+
+    // 3. Toplam indirilemez KDV matrahı
+    const indirilemezMatrah = gozetimMatrah + karar7846Toplam;
+    const indirilemezKDV = indirilemezMatrah * kdvOran;
+
+    // === KDV MATRAHI ===
+    const vergilerToplam = gvTutar + igvTutar + dvTutar + dkvTutar + tevTutar + korunma + ekMali;
+    const giderlerToplam = depGid + tahmTahl + bankaMas + limanGid + diger;
+    const kdvMatrahiToplam = gvMatrahi + vergilerToplam + giderlerToplam;
+    const toplamKDV = kdvMatrahiToplam * kdvOran;
+
+    // === İNDİRİLECEK KDV ===
+    const indirilecekKDV = toplamKDV - indirilemezKDV;
+
+    // Sonuçları göster
+    document.getElementById('sonucAlani').style.display = 'block';
+    document.getElementById('resToplam').textContent = fmtTR(toplamKDV) + ' ₺';
+    document.getElementById('resIndirilecek').textContent = fmtTR(indirilecekKDV) + ' ₺';
+    document.getElementById('resIndirilemez').textContent = fmtTR(indirilemezKDV) + ' ₺';
+
+    // Detay: İndirilemez
+    let d = '';
+    if (yd > 0) {
+        d += `<div class="detail-row"><span>Yurt Dışı Gider (Gözetim Farkı)</span><span class="detail-val text-danger">${fmtTR(yd)} ₺</span></div>`;
+        d += `<div class="detail-row"><span>↳ Gözetim Farkına İsabet Eden GV (%${(gvRate*100).toFixed(2)})</span><span class="detail-val text-danger">${fmtTR(gozetimGV)} ₺</span></div>`;
+        d += `<div class="detail-row"><span>↳ Gözetim Farkına İsabet Eden İlave GV (%${(igvRate*100).toFixed(2)})</span><span class="detail-val text-danger">${fmtTR(gozetimIGV)} ₺</span></div>`;
+        d += `<div class="detail-row" style="background:#fef2f2"><span><strong>Gözetim Kaynaklı İndirilemez Matrah</strong></span><span class="detail-val text-danger">${fmtTR(gozetimMatrah)} ₺</span></div>`;
+    }
+    if (dkvTutar > 0) d += `<div class="detail-row"><span>Dampinge Karşı Vergi</span><span class="detail-val text-danger">${fmtTR(dkvTutar)} ₺</span></div>`;
+    if (tevTutar > 0) d += `<div class="detail-row"><span>Telafi Edici Vergi</span><span class="detail-val text-danger">${fmtTR(tevTutar)} ₺</span></div>`;
+    if (korunma > 0) d += `<div class="detail-row"><span>Korunma Önlemi GV</span><span class="detail-val text-danger">${fmtTR(korunma)} ₺</span></div>`;
+    if (ekMali > 0) d += `<div class="detail-row"><span>Ek Mali Mükellefiyet</span><span class="detail-val text-danger">${fmtTR(ekMali)} ₺</span></div>`;
+    d += `<div class="detail-row" style="background:#fee2e2;border-radius:8px;padding:.8rem"><span><strong>Toplam İndirilemez KDV Matrahı</strong></span><span class="detail-val text-danger">${fmtTR(indirilemezMatrah)} ₺</span></div>`;
+    d += `<div class="detail-row" style="background:#fee2e2;border-radius:8px;padding:.8rem;margin-top:4px"><span><strong>İndirilemeyecek KDV (%${(kdvOran*100).toFixed(0)})</strong></span><span class="detail-val text-danger fs-5">${fmtTR(indirilemezKDV)} ₺</span></div>`;
+
+    if (indirilemezMatrah === 0) {
+        d = '<div class="text-center text-muted py-3"><i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i>Bu beyannamede 7846 sayılı Karar kapsamında indirilemeyecek KDV bulunmamaktadır.</div>';
+    }
+    document.getElementById('detayBody').innerHTML = d;
+
+    // Detay: İndirilecek
+    const cifGV = gvTutar - gozetimGV;
+    const cifIGV = igvTutar - gozetimIGV;
+    const indirilecekMatrah = kdvMatrahiToplam - indirilemezMatrah;
+    let d2 = '';
+    d2 += `<div class="detail-row"><span>CIF Bedeli</span><span class="detail-val">${fmtTR(mal)} ₺</span></div>`;
+    d2 += `<div class="detail-row"><span>CIF'e İsabet Eden GV</span><span class="detail-val">${fmtTR(cifGV)} ₺</span></div>`;
+    d2 += `<div class="detail-row"><span>CIF'e İsabet Eden İlave GV</span><span class="detail-val">${fmtTR(cifIGV)} ₺</span></div>`;
+    if (dvTutar > 0) d2 += `<div class="detail-row"><span>Damga Vergisi</span><span class="detail-val">${fmtTR(dvTutar)} ₺</span></div>`;
+    if (depGid > 0) d2 += `<div class="detail-row"><span>Depolama Gideri</span><span class="detail-val">${fmtTR(depGid)} ₺</span></div>`;
+    if (tahmTahl > 0) d2 += `<div class="detail-row"><span>Tahmil-Tahliye</span><span class="detail-val">${fmtTR(tahmTahl)} ₺</span></div>`;
+    if (bankaMas > 0) d2 += `<div class="detail-row"><span>Banka Masrafı</span><span class="detail-val">${fmtTR(bankaMas)} ₺</span></div>`;
+    if (limanGid > 0) d2 += `<div class="detail-row"><span>Liman Gideri</span><span class="detail-val">${fmtTR(limanGid)} ₺</span></div>`;
+    if (diger > 0) d2 += `<div class="detail-row"><span>Diğer</span><span class="detail-val">${fmtTR(diger)} ₺</span></div>`;
+    d2 += `<div class="detail-row" style="background:#dcfce7;border-radius:8px;padding:.8rem"><span><strong>İndirilecek KDV Matrahı</strong></span><span class="detail-val text-success">${fmtTR(indirilecekMatrah)} ₺</span></div>`;
+    d2 += `<div class="detail-row" style="background:#dcfce7;border-radius:8px;padding:.8rem;margin-top:4px"><span><strong>İndirilecek KDV (%${(kdvOran*100).toFixed(0)})</strong></span><span class="detail-val text-success fs-5">${fmtTR(indirilecekKDV)} ₺</span></div>`;
+    document.getElementById('detayIndirilecek').innerHTML = d2;
+
+    // YMM Uyarısı (altışar aylık dönemler itibarıyla)
+    const YMM_SINIR = 2600000;
+    const uyari = document.getElementById('ymmUyari');
+    if (gvMatrahi > YMM_SINIR) {
+        uyari.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Özel Amaçlı YMM Raporu Gerekli:</strong> Takvim yılının altışar aylık dönemleri itibarıyla ithalat bedeli ${YMM_SINIR.toLocaleString('tr-TR')} TL'yi aştığından, KDV indirimlerinin doğruluğu <strong>Özel Amaçlı YMM Raporu</strong> ile tevsik edilmelidir. (Tam tasdik sözleşmesi varsa ayrıca rapor gerekmez.)`;
+        uyari.className = 'alert alert-warning mt-3';
+    } else {
+        uyari.innerHTML = `<i class="bi bi-info-circle-fill me-2"></i>İthalat bedeli ${YMM_SINIR.toLocaleString('tr-TR')} TL sınırının altındadır. YMM raporu gerekmez ancak indirim durumu altışar aylık dönemleri izleyen ayın sonuna kadar vergi dairesine bildirilmelidir.`;
+        uyari.className = 'alert alert-info mt-3';
+    }
+    uyari.classList.remove('d-none');
+
+    // Sonuca kaydır
+    document.getElementById('sonucAlani').scrollIntoView({behavior:'smooth', block:'start'});
+}
 </script>
 <script type="application/ld+json">
 {
@@ -216,12 +338,8 @@
   "name": "İthalatta KDV İndirimi Hesaplama Aracı",
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
-  "description": "7846 sayılı Karar kapsamında ithalatta gözetim farkı nedeniyle kısıtlanan KDV indirim tutarını hesaplayın.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "TRY"
-  }
+  "description": "7846 sayılı Karar kapsamında ithalatta gözetim, dampinge karşı vergi, telafi edici vergi ve korunma önlemleri nedeniyle kısıtlanan KDV indirim tutarını hesaplayın.",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "TRY"}
 }
 </script>
 {% endblock %}

@@ -237,19 +237,19 @@
                     <h3 class="fw-bold mb-5"><i class="bi bi-link-45deg text-primary me-2"></i>Resmi Mevzuat ve Kaynaklar</h3>
                     <div class="row g-4">
                         <div class="col-6 col-md-3">
-                            <a href="https://www.resmigazete.gov.tr/eskiler/2023/12/20231230M2-13.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                            <a href="{{ url_for('static', filename='pdf/mevzuat/ED - 555 NOLU VUK TEBLİĞİ.pdf') }}" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
                                 <i class="bi bi-file-earmark-pdf text-danger display-6 mb-3"></i>
                                 <h6 class="fw-bold mb-0">555 No'lu Tebliğ</h6>
                             </a>
                         </div>
                         <div class="col-6 col-md-3">
-                            <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/user_upload/sirkuler/vuk_165_sirkuler.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                            <a href="{{ url_for('static', filename='pdf/mevzuat/ED - 165 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
                                 <i class="bi bi-file-earmark-text text-primary display-6 mb-3"></i>
                                 <h6 class="fw-bold mb-0">VUK Sirküleri / 165</h6>
                             </a>
                         </div>
                         <div class="col-6 col-md-3">
-                            <a href="https://cdn.gib.gov.tr/api/gibportal-file/file/getFileResources?objectKey=arsiv/fileadmin/mevzuatek/vuksirku176_01112024.pdf" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
+                            <a href="{{ url_for('static', filename='pdf/mevzuat/ED - 176 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank" class="text-decoration-none p-4 d-block border rounded-4 hover-card">
                                 <i class="bi bi-file-earmark-text text-success display-6 mb-3"></i>
                                 <h6 class="fw-bold mb-0">VUK Sirküleri / 176</h6>
                             </a>
@@ -297,6 +297,20 @@
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const hash = window.location.hash;
+        if (hash) {
+            if (hash === "#t-adımlar" || hash === "#t-formül" || hash === "#t-detaylar") {
+                showSection('tebligSection', document.getElementById('btnTeblig'));
+                // Küçük bir gecikme ile anchor'a kaydır
+                setTimeout(() => {
+                    const el = document.querySelector(hash);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+    });
 </script>
 
 <style>
