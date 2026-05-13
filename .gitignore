@@ -44,7 +44,12 @@ __MACOSX/
 # PDF / Excel / geçici çıktı dosyaları
 *.xlsx
 *.xls
+
+# Otomatik oluşan PDF'leri ignore et
 *.pdf
+
+# Ama mevzuat PDF'lerini dahil et
+!static/pdf/mevzuat/*.pdf
 
 # HTML export, rapor çıktıları (eğer otomatik üretiliyorsa)
 /reports/
