@@ -2,17 +2,17 @@
 
 {% block title %}
 {% if selected_item %}
-{{ selected_item.title }} - KDV Genel Uygulama Tebliği (2026 Güncel)
+{{ selected_item.title }} - 2026 Güncel KDV Genel Uygulama Tebliği
 {% else %}
-KDV Genel Uygulama Tebliği - Madde Madde Arama ve Açıklamalı Rehber (2026)
+2026 Güncel KDV Genel Uygulama Tebliği | Madde Madde & AI Destekli Arama
 {% endif %}
 {% endblock %}
 
 {% block description %}
 {% if selected_item %}
-KDV Tebliği {{ selected_item.title }} bölümü: {{ selected_item.content[:160] | striptags | replace("\n", " ") }}... Güncel, aranabilir ve not alınabilir tam metin.
+2026 Güncel KDV Tebliği {{ selected_item.title }} bölümü tam metni. Aranabilir, not alınabilir ve güncel KDV mevzuat rehberi.
 {% else %}
-KDV Genel Uygulama Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik yapı içerisinde kolayca arayın, inceleyin, favorilerinize ekleyin ve notlar alın.
+KDV Genel Uygulama Tebliği 2026 güncel tam metni. Madde madde hızlı arama, AI destekli mevzuat asistanı ve not alma özellikli dijital rehber.
 {% endif %}
 {% endblock %}
 
