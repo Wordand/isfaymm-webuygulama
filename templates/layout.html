@@ -9,9 +9,9 @@
     <meta name="description"
         content="{% block description %}İstanbul ve Konya'da profesyonel YMM hizmetleri. Mall of İstanbul ofisimizde KDV iadesi, tam tasdik ve indirimli kurumlar vergisi hesaplama çözümleri.{% endblock %}">
     <meta name="keywords"
-        content="İstanbul YMM, Başakşehir Yeminli Mali Müşavir, İSFA YMM, Mall of İstanbul YMM, KDV iadesi İstanbul, Konya YMM, yatırım teşvik belgesi, vergi danışmanlığı İstanbul, işfa, ısfa, is ymm, 2025/9903, KDV Genel Uygulama Tebliği">
+        content="{% block keywords %}İstanbul YMM, Başakşehir Yeminli Mali Müşavir, İSFA YMM, Mall of İstanbul YMM, KDV iadesi İstanbul, Konya YMM, yatırım teşvik belgesi, vergi danışmanlığı İstanbul, işfa, ısfa, is ymm, 2025/9903, KDV Genel Uygulama Tebliği{% endblock %}">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="{{ request.url }}">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.base_url }}{% endblock %}">
 
     {# --- Sosyal Medya (OpenGraph) --- #}
     <meta property="og:type" content="website">

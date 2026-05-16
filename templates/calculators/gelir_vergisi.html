@@ -1,13 +1,30 @@
 {% extends "layout.html" %}
-{% block title %}Gelir Vergisi Hesaplama | İSFA YMM{% endblock %}
+{% block title %}Gelir Vergisi Hesaplama 2026 | İSFA YMM{% endblock %}
 
-{% block description %}Yeni yıl verilerine göre ücret ve diğer gelirleriniz için güncel oranlarla gelir verginizi (dilimlerle beraber) hemen hesaplayın.{% endblock %}
-{% block og_desc %}Yeni yıl verilerine göre ücret ve diğer gelirleriniz için güncel oranlarla gelir verginizi (dilimlerle beraber) hemen hesaplayın.{% endblock %}
+{% block description %}2026 gelir vergisi hesaplama aracı ile ücret, maaş ve ücret dışı gelirler için kümülatif vergi matrahına göre gelir vergisi tutarını hızlıca hesaplayın.{% endblock %}
+{% block keywords %}gelir vergisi hesaplama, gelir vergisi hesaplama 2026, maaş gelir vergisi hesaplama, kümülatif vergi matrahı, gelir vergisi dilimleri, ücret gelir vergisi, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gelir-vergisi{% endblock %}
+{% block og_title %}Gelir Vergisi Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block og_desc %}Ücret, maaş ve diğer gelirler için 2026 gelir vergisi dilimlerine göre kümülatif matrah üzerinden hesaplama yapın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-9">
+            <header class="mb-4">
+                <nav aria-label="breadcrumb" class="small mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Gelir Vergisi Hesaplama</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-bold text-dark mb-2">Gelir Vergisi Hesaplama 2026</h1>
+                <p class="lead text-muted mb-0">
+                    Ücret, maaş ve ücret dışı gelirler için gelir vergisi dilimlerine göre kümülatif vergi matrahı üzerinden hızlı hesaplama yapın.
+                </p>
+            </header>
+
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="card-header bg-dark text-white p-4">
                     <div class="d-flex justify-content-between align-items-center">
@@ -64,6 +81,10 @@
                             <label class="form-check-label text-muted" for="asgariIstisna">
                                 Asgari Ücret İstisnası Uygulansın
                             </label>
+                        </div>
+
+                        <div class="alert alert-light border small mb-4" role="note">
+                            <strong>Kümülatif vergi matrahı</strong>, yıl içinde ilgili aya kadar oluşan ve gelir vergisine esas alınan toplam matrahtır. Ücret hesaplamalarında doğru sonuç için ilgili ay ve önceki dönem matrahı birlikte dikkate alınır.
                         </div>
 
                         <button type="submit" class="btn btn-danger w-100 btn-lg rounded-pill py-3 shadow-sm hover-glow">
@@ -140,6 +161,75 @@
                     </table>
                 </div>
             </div>
+
+            <section class="mt-5" aria-labelledby="gelir-vergisi-rehber">
+                <h2 id="gelir-vergisi-rehber" class="h4 fw-bold text-dark mb-3">Gelir Vergisi Nasıl Hesaplanır?</h2>
+                <p class="text-muted">
+                    Gelir vergisi hesaplamasında vergiye tabi matrah, ilgili yılın gelir vergisi tarifesindeki dilimlere ayrılır. Her dilime karşılık gelen oran uygulanır ve toplam vergi bulunur. Ücret gelirlerinde asgari ücret gelir vergisi istisnası ve yıl içindeki kümülatif matrah dikkate alınır.
+                </p>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h3 class="h6 fw-bold">Ücret Geliri</h3>
+                            <p class="small text-muted mb-0">Maaş ve ücret gelirlerinde kümülatif matrah, ay seçimi ve asgari ücret istisnası birlikte değerlendirilir.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h3 class="h6 fw-bold">Ücret Dışı Gelir</h3>
+                            <p class="small text-muted mb-0">Kira, değer artışı veya benzeri gelirlerde ücret dışı gelir vergisi tarifesi esas alınır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h3 class="h6 fw-bold">Sonuç Raporu</h3>
+                            <p class="small text-muted mb-0">Hesaplanan vergi, istisna ve ödenecek net vergi tutarı aynı ekranda görüntülenir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-5" aria-labelledby="gelir-vergisi-sss">
+                <h2 id="gelir-vergisi-sss" class="h4 fw-bold text-dark mb-3">Gelir Vergisi Hesaplama Hakkında Sık Sorulan Sorular</h2>
+                <div class="accordion" id="gelirVergisiFaq">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true" aria-controls="faq1">
+                                Gelir vergisi hesaplama aracı ne işe yarar?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#gelirVergisiFaq">
+                            <div class="accordion-body text-muted">
+                                İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                                Kümülatif vergi matrahı nedir?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#gelirVergisiFaq">
+                            <div class="accordion-body text-muted">
+                                Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                                Asgari ücret istisnası ne zaman uygulanır?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#gelirVergisiFaq">
+                            <div class="accordion-body text-muted">
+                                Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
         </div>
     </div>
@@ -328,7 +418,45 @@ document.addEventListener("DOMContentLoaded", () => {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "TRY"
+  },
+  "url": "https://www.isfaymm.com/hesaplama-araclari/gelir-vergisi",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM",
+    "url": "https://www.isfaymm.com"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Gelir vergisi hesaplama aracı ne işe yarar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kümülatif vergi matrahı nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Asgari ücret istisnası ne zaman uygulanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır."
+      }
+    }
+  ]
 }
 </script>
 {% endblock %}

@@ -334,10 +334,16 @@ def sitemap_xml():
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.tdhp', {}),
         ('indirimlikurumlar.index', {}),
     ]
+    priority_map = {
+        'main.home': '1.0',
+        'calculators.gelir_vergisi': '0.9',
+        'calculators.index': '0.8',
+        'indirimlikurumlar.index': '0.8',
+    }
     for rule, kw in static_endpoints:
         try:
             url = url_for(rule, _external=True, **kw)
-            urls.append({"loc": url, "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": "0.5"})
+            urls.append({"loc": url, "lastmod": datetime.now().strftime("%Y-%m-%d"), "priority": priority_map.get(rule, "0.5")})
         except Exception: pass
             
     def parse_links(items, base_route):
