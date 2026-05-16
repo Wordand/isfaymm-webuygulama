@@ -332,13 +332,14 @@ def sitemap_xml():
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}),
-        ('indirimlikurumlar.index', {}),
+        ('indirimlikurumlar.index', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
     ]
     priority_map = {
         'main.home': '1.0',
         'calculators.gelir_vergisi': '0.9',
         'calculators.index': '0.8',
         'indirimlikurumlar.index': '0.8',
+        'indirimlikurumlar_seo.mevzuat_rehberi': '0.8',
     }
     for rule, kw in static_endpoints:
         try:

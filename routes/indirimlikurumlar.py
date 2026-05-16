@@ -23,6 +23,11 @@ from auth import login_required
 from types import SimpleNamespace
 
 bp = Blueprint("indirimlikurumlar", __name__, url_prefix="/indirimlikurumlar")
+seo_bp = Blueprint(
+    "indirimlikurumlar_seo",
+    __name__,
+    url_prefix="/hesaplama-araclari/indirimli-kurumlar-vergisi"
+)
 
 
 
@@ -499,8 +504,27 @@ def new_tesvik():
 
 @bp.route("/", methods=["GET", "POST"])
 def index():
+    return render_indirimlikurumlar()
+
+
+@seo_bp.route("/mevzuat")
+def mevzuat_rehberi():
+    return render_indirimlikurumlar(
+        sekme_override="mevzuat",
+        seo_context={
+            "page_title": "İndirimli Kurumlar Vergisi Mevzuatı | KVK 32/A ve 2025/9903 | İSFA YMM",
+            "page_description": "KVK 32/A, 2025/9903 sayılı karar, özelgeler ve yatırım teşvik mevzuatı kapsamında indirimli kurumlar vergisi uygulama rehberi.",
+            "page_keywords": "indirimli kurumlar vergisi mevzuatı, KVK 32/A, 2025/9903 teşvik, yatırım teşvik belgesi vergi indirimi, yatırıma katkı tutarı, İSFA YMM",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat",
+            "page_og_title": "İndirimli Kurumlar Vergisi Mevzuatı | İSFA YMM",
+            "page_og_desc": "KVK 32/A, 2025/9903, özelgeler ve teşvik kararları için indirimli kurumlar vergisi mevzuat rehberi.",
+        },
+    )
+
+
+def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     (" . ")
-    sekme = request.args.get("sekme", "form")
+    sekme = sekme_override or request.args.get("sekme", "form")
     is_logged_in = session.get("logged_in", False)
     user_id = session.get("user_id") if is_logged_in else None
     aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
@@ -644,6 +668,8 @@ def index():
         rows=rows,
         hide_ui=hide_ui,
     )
+    if seo_context:
+        ctx.update(seo_context)
 
     if sekme == "mukellef":
         return redirect(url_for("mukellef.index"))
