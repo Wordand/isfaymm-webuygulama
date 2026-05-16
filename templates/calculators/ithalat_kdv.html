@@ -226,8 +226,16 @@ function fmtTR(n) {
     return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function formatTR(el) {
-    let v = el.value.replace(/[^0-9,]/g, '');
-    el.value = v;
+    let v = el.value.replace(/[^\d]/g, '');
+    if (!v) {
+        el.value = '';
+        return;
+    }
+    const number = parseFloat(v) / 100;
+    el.value = number.toLocaleString('tr-TR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 function gv(id) { return parseTR(document.getElementById(id).value); }
 function sv(id, v) { document.getElementById(id).value = fmtTR(v); }

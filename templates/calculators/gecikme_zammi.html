@@ -45,7 +45,7 @@
                             <div class="col-md-6">
                                 <label for="borc" class="form-label fw-bold">Borç Tutarı (TL)</label>
                                 <div class="input-group">
-                                    <input type="number" id="borc" class="form-control" placeholder="0.00" step="0.01" required>
+                                    <input type="text" inputmode="decimal" id="borc" class="form-control" placeholder="0,00" required>
                                     <span class="input-group-text">₺</span>
                                 </div>
                             </div>
@@ -148,6 +148,26 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const borcTuruSelect = document.getElementById("borcTuru");
+    const borcInput = document.getElementById("borc");
+
+    function parseMoneyInput(value) {
+        return parseFloat(String(value || "").replace(/\./g, "").replace(",", ".")) || 0;
+    }
+
+    function formatMoneyInput(input) {
+        let val = input.value.replace(/[^\d]/g, "");
+        if (!val) {
+            input.value = "";
+            return;
+        }
+        const number = parseFloat(val) / 100;
+        input.value = number.toLocaleString("tr-TR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    borcInput.addEventListener("input", () => formatMoneyInput(borcInput));
     
     // Varsayılan tarihleri ayarla
     const today = new Date().toISOString().split('T')[0];
@@ -156,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("gecikmeForm").addEventListener("submit", async function(e) {
         e.preventDefault();
 
-        const borc = parseFloat(document.getElementById("borc").value);
+        const borc = parseMoneyInput(borcInput.value);
         const borcTuru = borcTuruSelect.value;
         const vade = document.getElementById("vade").value;
         const odeme = document.getElementById("odeme").value;
