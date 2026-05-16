@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, jsonify
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from config import tarifeler, asgari_ucretler, GECIKME_ZAMMI_ORANLARI
-from auth import login_required
 
 bp = Blueprint("tools", __name__)
 
