@@ -514,7 +514,7 @@ def hesaplama_araci():
             "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırıma Katkı Tutarı | İSFA YMM",
             "page_description": "Yatırım teşvik belgesi kapsamında indirimli kurumlar vergisi, yatırıma katkı tutarı ve vergi avantajınızı 2026 güncel verileriyle hesaplayın.",
             "page_keywords": "indirimli kurumlar vergisi hesaplama, yatırıma katkı tutarı hesaplama, yatırım teşvik belgesi hesaplama, KVK 32/A hesaplama, 2025/9903 teşvik, İSFA YMM",
-            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/",
             "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama | İSFA YMM",
             "page_og_desc": "Yatırım teşvik belgesi kapsamında indirimli kurumlar vergisi ve yatırıma katkı tutarı hesabı yapın.",
         },
