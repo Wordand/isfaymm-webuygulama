@@ -189,14 +189,16 @@ def asgari_istisna_api():
         return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400
 
 @bp.route("/gecikme-zammi-hesapla", methods=["POST"])
-@login_required
 def gecikme_zammi_hesapla_api():
     try:
-        data = request.get_json(silent=True)
+        data = request.get_json(force=True) or {}
         borc = Decimal(str(data["borc"]))
         vade = datetime.strptime(data["vade"], "%Y-%m-%d").date()
         odeme = datetime.strptime(data["odeme"], "%Y-%m-%d").date()
         borc_turu = data["borc_turu"]
+
+        if borc <= 0:
+            return jsonify({"error": "Borç tutarı 0'dan büyük olmalıdır."}), 400
 
         zam = gecikme_zammi_hesapla(borc, vade, odeme, borc_turu)
 
@@ -206,6 +208,4 @@ def gecikme_zammi_hesapla_api():
         })
 
     except Exception as e:
-        ("  ", ())
-        # Keep 500 or 400? app.py raised, which causes 500 usually
-        raise e
+        return jsonify({"error": f"Hesaplama hatası: {str(e)}"}), 400

@@ -331,7 +331,7 @@ def sitemap_xml():
         ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
-        ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.tdhp', {}),
+        ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}),
         ('indirimlikurumlar.index', {}),
     ]
     priority_map = {

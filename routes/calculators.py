@@ -32,6 +32,12 @@ def gecikme_zammi():
     return render_template("calculators/gecikme_zammi.html")
 
 
+# 🧾 Serbest Meslek Makbuzu
+@calculators_bp.route("/serbest-meslek")
+def serbest_meslek():
+    return render_template("calculators/serbest_meslek.html")
+
+
 # 📚 Tek Düzen Hesap Planı
 @calculators_bp.route("/tek-duzen-hesap-plani")
 def tdhp():
