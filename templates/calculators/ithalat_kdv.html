@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
-{% block title %}İthalatta KDV İndirimi Hesaplama | İSFA YMM{% endblock %}
-{% block description %}7846 sayılı CB Kararı kapsamında ithalat işlemlerinde indirilebilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
-{% block og_desc %}7846 sayılı CB Kararı kapsamında ithalat işlemlerinde indirilebilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
+{% block title %}İthalatta KDV Hesaplama 2026 | İndirilecek ve İndirilemeyecek KDV | İSFA YMM{% endblock %}
+{% block description %}İthalatta KDV hesaplama aracı ile 7846 sayılı Karar kapsamında gözetim, dampinge karşı vergi ve korunma önlemlerinden kaynaklanan indirilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
+{% block keywords %}ithalatta KDV hesaplama, indirilemeyecek KDV hesaplama, 7846 sayılı karar KDV, gözetim KDV hesaplama, ithalat KDV indirimi, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/ithalat-kdv{% endblock %}
+{% block og_title %}İthalatta KDV Hesaplama | İSFA YMM{% endblock %}
+{% block og_desc %}7846 sayılı Karar kapsamında ithalatta indirilecek ve indirilemeyecek KDV tutarını hesaplayın.{% endblock %}
 
 {% block content %}
 <style>
@@ -20,12 +23,19 @@
 </style>
 
 <div class="container py-4">
-    <div class="text-center mb-4">
-        <h3 style="font-weight:800;font-size:2rem;background:var(--calc-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+    <header class="text-center mb-4">
+        <nav aria-label="breadcrumb" class="small mb-2">
+            <ol class="breadcrumb justify-content-center mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+                <li class="breadcrumb-item active" aria-current="page">İthalatta KDV</li>
+            </ol>
+        </nav>
+        <h1 style="font-weight:800;font-size:2rem;background:var(--calc-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
             İthalatta KDV İndirimi Hesaplama
-        </h3>
+        </h1>
         <p class="text-muted">7846 sayılı CB Kararı & KDV Genel Uygulama Tebliği (III/C-2.6)</p>
-    </div>
+    </header>
 
     <div class="row justify-content-center">
         <div class="col-xl-10">
@@ -187,6 +197,17 @@
                     <strong>Yasal Dayanak:</strong> 7846 sayılı Cumhurbaşkanı Kararı, KDV Genel Uygulama Tebliği III/C-2.6. Gözetim, korunma önlemleri ve haksız rekabet uygulamaları nedeniyle ödenen KDV'nin indirimi kısıtlanmıştır.
                 </div>
             </div>
+            <section class="mt-4" aria-labelledby="ithalat-kdv-rehber">
+                <h2 id="ithalat-kdv-rehber" class="h4 fw-bold text-dark mb-3">İthalatta KDV Hesabı Nasıl Yapılır?</h2>
+                <p class="text-muted">
+                    İthalatta KDV matrahı; mal bedeli, yurt dışı giderler, gümrük vergileri ve ithalatla ilgili diğer giderlerin toplamından oluşur. 7846 sayılı Karar kapsamındaki bazı vergilere isabet eden KDV ise indirim konusu yapılamayabilir.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">Toplam KDV</h3><p class="small text-muted mb-0">KDV matrahı üzerinden hesaplanan toplam ithalat KDV tutarıdır.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">İndirilecek KDV</h3><p class="small text-muted mb-0">Genel esaslara göre indirim konusu yapılabilecek KDV tutarıdır.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">İndirilemeyecek KDV</h3><p class="small text-muted mb-0">Gözetim ve koruma önlemleri gibi kalemlere isabet eden kısıtlı KDV tutarıdır.</p></div></div>
+                </div>
+            </section>
         </div>
     </div>
     <div class="mt-3">{% include "partials/tax_disclaimer.html" %}</div>
@@ -339,6 +360,7 @@ function hesapla() {
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
   "description": "7846 sayılı Karar kapsamında ithalatta gözetim, dampinge karşı vergi, telafi edici vergi ve korunma önlemleri nedeniyle kısıtlanan KDV indirim tutarını hesaplayın.",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/ithalat-kdv",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "TRY"}
 }
 </script>
