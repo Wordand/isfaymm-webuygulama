@@ -1,13 +1,30 @@
 {% extends "layout.html" %}
-{% block title %}Gecikme Zammı Hesaplama | İSFA YMM{% endblock %}
+{% block title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Zammı | İSFA YMM{% endblock %}
 
-{% block description %}Vergi aslı, vergi ziyaı ve diğer borçlar için güncel gecikme zammını ücretsiz ve saniyeler içinde hesaplayın.{% endblock %}
-{% block og_desc %}Vergi aslı, vergi ziyaı ve diğer borçlar için güncel gecikme zammını ücretsiz ve saniyeler içinde hesaplayın.{% endblock %}
+{% block description %}Gecikme zammı hesaplama aracı ile vergi borcu, vergi ziyaı ve diğer amme alacakları için vade ve ödeme tarihine göre güncel gecikme zammını hesaplayın.{% endblock %}
+{% block keywords %}gecikme zammı hesaplama, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, 6183 gecikme zammı, gecikme zammı oranı, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi{% endblock %}
+{% block og_title %}Gecikme Zammı Hesaplama | İSFA YMM{% endblock %}
+{% block og_desc %}Vergi borçları için vade ve ödeme tarihine göre gecikme zammını hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <header class="mb-4">
+                <nav aria-label="breadcrumb" class="small mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Gecikme Zammı</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-bold text-dark mb-2">Gecikme Zammı Hesaplama 2026</h1>
+                <p class="lead text-muted mb-0">
+                    Vergi borcu ve amme alacakları için vade tarihi ile ödeme tarihine göre gecikme zammı tutarını hesaplayın.
+                </p>
+            </header>
+
             <div class="card shadow-sm">
                 <div class="card-header bg-danger text-white">
                     <h4 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Gecikme Zammı Hesaplama</h4>
@@ -81,6 +98,18 @@
 
                 </div>
             </div>
+
+            <section class="mt-5" aria-labelledby="gecikme-rehber">
+                <h2 id="gecikme-rehber" class="h4 fw-bold text-dark mb-3">Gecikme Zammı Nasıl Hesaplanır?</h2>
+                <p class="text-muted">
+                    Gecikme zammı, vadesinde ödenmeyen amme alacakları için ödeme tarihine kadar geçen süre ve yürürlükteki oranlar dikkate alınarak hesaplanır. Borç türüne göre bazı cezalar için oran farklı uygulanabilir veya gecikme zammı doğmayabilir.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Vade Tarihi</h3><p class="small text-muted mb-0">Borcun kanuni ödeme süresinin son gününü ifade eder.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Ödeme Tarihi</h3><p class="small text-muted mb-0">Gecikme zammının hesaplanacağı fiili ödeme tarihidir.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Toplam Tutar</h3><p class="small text-muted mb-0">Ana borç ve hesaplanan gecikme zammının toplamıdır.</p></div></div>
+                </div>
+            </section>
 
             <!-- Geçmiş Hesaplamalar -->
             <div class="card shadow-sm mt-4">
@@ -195,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
   "description": "Vergi borçları, vergi ziyaı ve diğer amme alacakları için güncel oranlarla gecikme zammı hesaplama aracı.",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi",
   "offers": {
     "@type": "Offer",
     "price": "0",
