@@ -1,13 +1,30 @@
 {% extends "layout.html" %}
-{% block title %}Serbest Meslek Makbuzu Hesaplama | İSFA YMM{% endblock %}
+{% block title %}Serbest Meslek Makbuzu Hesaplama 2026 | SMM Stopaj ve KDV | İSFA YMM{% endblock %}
 
-{% block description %}Netten brüte, brütten nete veya ele geçen tutar üzerinden Serbest Meslek Makbuzu (SMM) vergi kesintilerini güncel oranlarla hesaplayın.{% endblock %}
-{% block og_desc %}Netten brüte, brütten nete veya ele geçen tutar üzerinden Serbest Meslek Makbuzu (SMM) vergi kesintilerini güncel oranlarla hesaplayın.{% endblock %}
+{% block description %}Serbest meslek makbuzu hesaplama aracı ile brütten nete, netten brüte ve tahsil edilen tutara göre SMM stopaj, KDV ve toplam tahsilat tutarını hesaplayın.{% endblock %}
+{% block keywords %}serbest meslek makbuzu hesaplama, SMM hesaplama, brütten nete serbest meslek makbuzu, netten brüte SMM, stopaj KDV hesaplama, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/serbest-meslek{% endblock %}
+{% block og_title %}Serbest Meslek Makbuzu Hesaplama | İSFA YMM{% endblock %}
+{% block og_desc %}Brütten nete, netten brüte veya tahsil edilen tutara göre SMM stopaj ve KDV hesabı yapın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <header class="mb-4">
+                <nav aria-label="breadcrumb" class="small mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Serbest Meslek Makbuzu</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-bold text-dark mb-2">Serbest Meslek Makbuzu Hesaplama</h1>
+                <p class="lead text-muted mb-0">
+                    SMM stopajı, KDV tutarı, net ücret ve toplam tahsilat tutarını seçtiğiniz hesaplama yöntemine göre hızlıca bulun.
+                </p>
+            </header>
+
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="bi bi-calculator me-2"></i>Serbest Meslek Makbuzu Hesaplama</h4>
@@ -99,6 +116,18 @@
 
                 </div>
             </div>
+
+            <section class="mt-5" aria-labelledby="smm-rehber">
+                <h2 id="smm-rehber" class="h4 fw-bold text-dark mb-3">Serbest Meslek Makbuzu Nasıl Hesaplanır?</h2>
+                <p class="text-muted">
+                    Serbest meslek makbuzu hesabında brüt tutar üzerinden gelir vergisi stopajı ve KDV ayrı ayrı dikkate alınır. Stopaj brüt tutardan düşülür, KDV ise brüt tutar üzerinden hesaplanarak tahsil edilecek toplam tutara eklenir.
+                </p>
+                <div class="row g-3">
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Brütten Nete</h3><p class="small text-muted mb-0">Brüt hizmet bedelinden stopaj düşülür, KDV eklenerek tahsil edilecek tutar bulunur.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Netten Brüte</h3><p class="small text-muted mb-0">Elde edilmek istenen net tutardan hareketle brüt SMM matrahı hesaplanır.</p></div></div>
+                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Tahsil Edilenden</h3><p class="small text-muted mb-0">KDV dahil elde geçen tutardan brüt, stopaj, net ve KDV ayrıştırılır.</p></div></div>
+                </div>
+            </section>
         </div>
     </div>
     <div class="mt-4">
@@ -169,6 +198,7 @@
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
   "description": "Brütten nete, netten brüte veya tahsil edilen tutara göre Serbest Meslek Makbuzu KDV ve Stopaj kesintilerini kolayca hesaplayın.",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/serbest-meslek",
   "offers": {
     "@type": "Offer",
     "price": "0",
