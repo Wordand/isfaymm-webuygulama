@@ -265,6 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Chart & PDF Logic ---
     let resultChart = null;
+    let lastCalculation = null;
 
     function updateChart(vergi, matrah) {
         const ctx = document.getElementById('resultChart').getContext('2d');
@@ -294,30 +295,136 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function formatPdfMoney(value) {
+        return `${Number(value || 0).toLocaleString("tr-TR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} TL`;
+    }
+
+    function periodLabel(ay) {
+        const aylar = ["Yıllık Toplam", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        return aylar[ay] || "Yıllık Toplam";
+    }
+
     window.exportToPDF = async function() {
+        if (!lastCalculation) {
+            Swal.fire("Bilgi", "PDF raporu almak için önce hesaplama yapın.", "info");
+            return;
+        }
+
         const { jsPDF } = window.jspdf;
-        const element = document.getElementById('exportArea');
-        
-        // Hide button during capture
-        const btn = element.querySelector('button');
-        btn.style.display = 'none';
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const margin = 16;
+        const red = [220, 38, 38];
+        const dark = [31, 41, 55];
+        const muted = [107, 114, 128];
+        const light = [249, 250, 251];
+
+        const drawLabelValue = (label, value, y) => {
+            pdf.setTextColor(...muted);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(9);
+            pdf.text(label, margin + 5, y);
+            pdf.setTextColor(...dark);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(11);
+            pdf.text(value, pageWidth - margin - 5, y, { align: "right" });
+        };
+
+        const drawSummaryCard = (x, y, w, title, value, color) => {
+            pdf.setDrawColor(229, 231, 235);
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(x, y, w, 28, 3, 3, "FD");
+            pdf.setTextColor(...muted);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(8);
+            pdf.text(title, x + 5, y + 9);
+            pdf.setTextColor(...color);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(13);
+            pdf.text(value, x + 5, y + 21);
+        };
 
         try {
-            const canvas = await html2canvas(element, { scale: 2 });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.setFillColor(...dark);
+            pdf.rect(0, 0, pageWidth, 34, "F");
+            pdf.setFillColor(...red);
+            pdf.rect(0, 0, 5, 34, "F");
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(20);
+            pdf.text("ISFA YMM", margin, 15);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            pdf.text("Gelir Vergisi Hesaplama Raporu", margin, 24);
+            pdf.text(new Date().toLocaleDateString("tr-TR"), pageWidth - margin, 15, { align: "right" });
+            pdf.text("www.isfaymm.com", pageWidth - margin, 24, { align: "right" });
 
-            pdf.setFontSize(18);
-            pdf.text("İSFA YMM - Vergi Hesaplama Raporu", 105, 15, { align: "center" });
-            pdf.addImage(imgData, 'PNG', 0, 25, pdfWidth, pdfHeight);
-            pdf.save(`ISFA_YMM_Gelir_Vergisi_Raporu_${new Date().getTime()}.pdf`);
+            pdf.setFillColor(...light);
+            pdf.roundedRect(margin, 44, pageWidth - (margin * 2), 42, 4, 4, "F");
+            pdf.setTextColor(...dark);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text("Hesaplama Bilgileri", margin + 5, 55);
+            drawLabelValue("Yil", String(lastCalculation.yil), 66);
+            drawLabelValue("Gelir turu", lastCalculation.gelirTuru === "ucret" ? "Ucret / Maas" : "Ucret disi gelir", 74);
+            drawLabelValue("Donem", periodLabel(lastCalculation.ay), 82);
+
+            drawSummaryCard(margin, 98, 55, "Vergi matrahi", formatPdfMoney(lastCalculation.brut), dark);
+            drawSummaryCard(margin + 62, 98, 55, "Hesaplanan vergi", formatPdfMoney(lastCalculation.hesaplananVergi), red);
+            drawSummaryCard(margin + 124, 98, 54, "Odenecek net vergi", formatPdfMoney(lastCalculation.vergi), dark);
+
+            pdf.setDrawColor(229, 231, 235);
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(margin, 140, pageWidth - (margin * 2), 48, 4, 4, "FD");
+            pdf.setTextColor(...dark);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(13);
+            pdf.text("Vergi Ozeti", margin + 5, 152);
+            pdf.setFontSize(10);
+            drawLabelValue("Hesaplanan gelir vergisi", formatPdfMoney(lastCalculation.hesaplananVergi), 165);
+            drawLabelValue("Asgari ucret istisnasi", formatPdfMoney(lastCalculation.istisnaTutari), 174);
+            drawLabelValue("Efektif vergi orani", `%${lastCalculation.effectiveRate}`, 183);
+
+            const chartCanvas = document.getElementById("resultChart");
+            if (chartCanvas) {
+                const chartImage = chartCanvas.toDataURL("image/png", 1.0);
+                pdf.setFillColor(...light);
+                pdf.roundedRect(margin, 198, 78, 56, 4, 4, "F");
+                pdf.addImage(chartImage, "PNG", margin + 8, 203, 62, 42);
+                pdf.setTextColor(...muted);
+                pdf.setFont("helvetica", "normal");
+                pdf.setFontSize(8);
+                pdf.text("Matrah dagilimi", margin + 39, 250, { align: "center" });
+            }
+
+            pdf.setFillColor(254, 242, 242);
+            pdf.roundedRect(margin + 88, 198, pageWidth - margin * 2 - 88, 56, 4, 4, "F");
+            pdf.setTextColor(...red);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(12);
+            pdf.text("Bilgilendirme", margin + 94, 211);
+            pdf.setTextColor(...dark);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(9);
+            const note = "Bu rapor bilgilendirme amaciyla hazirlanmistir. Isleme ve mukellefin durumuna gore farkli vergisel sonuclar dogabilir. Kesin islem oncesinde YMM gorusu alinmasi tavsiye edilir.";
+            pdf.splitTextToSize(note, pageWidth - margin * 2 - 100).forEach((line, index) => {
+                pdf.text(line, margin + 94, 222 + (index * 5));
+            });
+
+            pdf.setDrawColor(...red);
+            pdf.line(margin, 276, pageWidth - margin, 276);
+            pdf.setTextColor(...muted);
+            pdf.setFontSize(8);
+            pdf.text("ISFA YMM - Gelir Vergisi Hesaplama", margin, 284);
+            pdf.text("Rapor no: GV-" + Date.now(), pageWidth - margin, 284, { align: "right" });
+
+            pdf.save(`ISFA_YMM_Gelir_Vergisi_Raporu_${Date.now()}.pdf`);
         } catch (err) {
             console.error(err);
-        } finally {
-            btn.style.display = 'block';
+            Swal.fire("Hata", "PDF raporu oluşturulamadı.", "error");
         }
     }
 
@@ -368,8 +475,19 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('resIstisna').textContent = istisnaTutari.toLocaleString("tr-TR",{minimumFractionDigits:2}) + ' ₺';
             document.getElementById('resOdenecek').textContent = vergi.toLocaleString("tr-TR",{minimumFractionDigits:2}) + ' ₺';
 
-            const effectiveRate = ((vergi / brut) * 100).toFixed(2);
+            const effectiveRate = brut > 0 ? ((vergi / brut) * 100).toFixed(2) : "0.00";
             document.getElementById('effectiveRate').textContent = `%${effectiveRate}`;
+
+            lastCalculation = {
+                yil,
+                ay,
+                gelirTuru,
+                brut,
+                vergi,
+                istisnaTutari,
+                hesaplananVergi,
+                effectiveRate
+            };
 
             updateChart(vergi, brut);
             logToTable(yil, gelirTuru, brut, vergi);
