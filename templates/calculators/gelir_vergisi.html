@@ -344,14 +344,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const dark = [31, 41, 55];
         const muted = [107, 114, 128];
         const light = [249, 250, 251];
+        let pdfFont = "helvetica";
 
         const drawLabelValue = (label, value, y) => {
             pdf.setTextColor(...muted);
-            pdf.setFont("helvetica", "normal");
+            pdf.setFont(pdfFont, "normal");
             pdf.setFontSize(9);
             pdf.text(label, margin + 5, y);
             pdf.setTextColor(...dark);
-            pdf.setFont("helvetica", "bold");
+            pdf.setFont(pdfFont, "bold");
             pdf.setFontSize(11);
             pdf.text(value, pageWidth - margin - 5, y, { align: "right" });
         };
@@ -361,17 +362,17 @@ document.addEventListener("DOMContentLoaded", () => {
             pdf.setFillColor(255, 255, 255);
             pdf.roundedRect(x, y, w, 28, 3, 3, "FD");
             pdf.setTextColor(...muted);
-            pdf.setFont("helvetica", "normal");
+            pdf.setFont(pdfFont, "normal");
             pdf.setFontSize(8);
             pdf.text(title, x + 5, y + 9);
             pdf.setTextColor(...color);
-            pdf.setFont("helvetica", "bold");
+            pdf.setFont(pdfFont, "bold");
             pdf.setFontSize(13);
             pdf.text(value, x + 5, y + 21);
         };
 
         try {
-            const pdfFont = await loadPdfFont(pdf);
+            pdfFont = await loadPdfFont(pdf);
 
             pdf.setFillColor(...dark);
             pdf.rect(0, 0, pageWidth, 34, "F");
