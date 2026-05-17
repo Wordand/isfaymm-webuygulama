@@ -540,7 +540,7 @@ body, html { background: #fff !important; }
       <div class="mb-3">
         <label>Dönem Seçiniz</label>
         <select name="donem" id="donem" class="form-select" required onchange="setOranlar(); updateRejimTespiti();">
-          {% for yil in range(2025, 2014, -1) %}
+          {% for yil in range(2027, 2014, -1) %}
           <optgroup label="{{ yil }}">
             <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
             <option value="{{ yil }} - 2. GEÇİCİ">{{ yil }} - 2. GEÇİCİ</option>
