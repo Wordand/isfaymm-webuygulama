@@ -325,7 +325,7 @@ body, html { background: #fff !important; }
 
   {% elif sekme == 'form' %}
   <form id="form-giris" method="POST" action="{{ url_for('indirimlikurumlar.form_kaydet') }}" novalidate class="mx-auto"
-    style="max-width: 600px;">
+    style="max-width: 1100px;">
 
     <input type="hidden" name="mukellef_id" id="mukellef_id" value="{{ session.get('aktif_mukellef_id', '') }}">
 
@@ -346,28 +346,29 @@ body, html { background: #fff !important; }
 
 
     <!-- 🧰 Form İşlem Butonları -->
-    <div class="mb-3 d-flex flex-wrap justify-content-end align-items-center gap-2">
+    <div class="mb-3 d-flex flex-wrap justify-content-center align-items-center gap-2">
       <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('kvUploadInput').click()">
-        📂 PDF’den İçe Aktar
+        PDF’den İçe Aktar
       </button>
       <div class="btn-group">
         <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          🧪 Örnekler
+          Örnekler
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek2')">2025/9903 - Örnek 2 (Diğer Faaliyet)</button></li>
           <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek3')">2025/9903 - Örnek 3 (Diğer Faaliyet / Düşük Fiili Harcama)</button></li>
           <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek4')">2025/9903 - Örnek 4 (Yatırım + Diğer Faaliyet Birlikte)</button></li>
-          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek1')">2012/3305 - Örnek 1 (Yatırımdan Kazanç)</button></li>
-          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_1')">2012/3305 - Örnek 1 (Diğer Faaliyet - Üst Sınır)</button></li>
-          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_2')">2012/3305 - Örnek 2 (Diğer Faaliyet - Fiili Harcama Sınırı)</button></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek1')">2012/3305 - 32.2.3 Örnek 2 (Yatırımdan Kazanç)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_1')">2012/3305 - 32.2.5 Örnek 1 (Diğer Faaliyet)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_2')">2012/3305 - 32.2.5 Örnek 2 (Diğer Faaliyet)</button></li>
         </ul>
       </div>
       <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearAllFormData()">
-        🗑️ Verileri Temizle
+        Verileri Temizle
       </button>
       <a href="{{ url_for('mukellef.index') }}" class="btn btn-outline-secondary btn-sm">
-        ↩️ Mükellef Yönetimine Dön
+        Mükellef Yönetimi
       </a>
     </div>
 
