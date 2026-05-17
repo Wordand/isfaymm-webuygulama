@@ -735,6 +735,10 @@ def form_kaydet():
     belge_tarihi = request.form.get("belge_tarihi") \
                or request.form.get("belge_tarihi_hidden") \
                or ""
+    basvuru_tarihi = request.form.get("basvuru_tarihi", "").strip()
+    belge_alinma_tarihi = request.form.get("belge_alinma_tarihi", "").strip()
+    ilk_indirim_yili_raw = request.form.get("ilk_indirim_yili", "").strip()
+    ilk_indirim_yili = int(ilk_indirim_yili_raw) if ilk_indirim_yili_raw.isdigit() else None
 
     bolge = request.form.get("bolge") \
             or request.form.get("bolge_hidden")
@@ -816,6 +820,8 @@ def form_kaydet():
         'tesvik_id': tesvik_id, 'user_id': user_id, 'mukellef_id': mukellef_id, 
         'karar': karar, 'belge_no': belge_no, 'toplam_tutar': toplam_tutar, 
         'katki_orani': katki_orani, 'vergi_orani': vergi_orani, 'belge_tarihi': belge_tarihi,
+        'basvuru_tarihi': basvuru_tarihi, 'belge_alinma_tarihi': belge_alinma_tarihi,
+        'ilk_indirim_yili': ilk_indirim_yili,
         'vize_durumu': vize_durumu, 'cari_toplam_katki': cari_toplam_katki, 'brut_satis': brut_satis,
         'program_turu': program_turu, 'il': il, 'osb': osb, 'bolge': bolge
         # Diğer kritik alanları buraya ekleyebilirsiniz
@@ -834,7 +840,9 @@ def form_kaydet():
                 # 🔥 KRİTİK: UPDATE sorgusuna RETURNING id ekle (Hata kontrolü için)
                 c.execute("""
                     UPDATE tesvik_belgeleri
-                    SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s, karar=%s,
+                    SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s,
+                        basvuru_tarihi=%s, belge_alinma_tarihi=%s, ilk_indirim_yili=%s,
+                        karar=%s,
                         program_turu=%s, yatirim_turu1=%s, yatirim_turu2=%s,
                         vize_durumu=%s, donem=%s, il=%s, osb=%s, bolge=%s,
                         katki_orani=%s, vergi_orani=%s, diger_oran=%s,
@@ -847,7 +855,9 @@ def form_kaydet():
                     WHERE id=%s AND user_id=%s AND mukellef_id=%s
                     RETURNING id
                 """, (
-                    mukellef_id, belge_no, belge_tarihi, karar,
+                    mukellef_id, belge_no, belge_tarihi,
+                    basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
+                    karar,
                     program_turu, yatirim_turu1, yatirim_turu2,
                     vize_durumu, donem, il, osb, bolge,
                     katki_orani, vergi_orani, diger_oran,
@@ -874,6 +884,7 @@ def form_kaydet():
                 c.execute("""
                     INSERT INTO tesvik_belgeleri (
                         user_id, mukellef_id, belge_no, belge_tarihi,
+                        basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
                         karar, program_turu, yatirim_turu1, yatirim_turu2,
                         vize_durumu, donem, il, osb, bolge,
                         katki_orani, vergi_orani, diger_oran,
@@ -884,10 +895,11 @@ def form_kaydet():
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios, olusturan_id
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING id
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
+                    basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
                     vize_durumu, donem, il, osb, bolge,
                     katki_orani, vergi_orani, diger_oran,

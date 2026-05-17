@@ -81,6 +81,9 @@ if DATABASE_URL.startswith("sqlite:///"):
         -- Tarih ve Karar Bilgileri
         yukleme_tarihi TEXT DEFAULT CURRENT_TIMESTAMP,
         belge_tarihi TEXT,
+        basvuru_tarihi TEXT,
+        belge_alinma_tarihi TEXT,
+        ilk_indirim_yili INTEGER,
         karar TEXT,
         program_turu TEXT,
         yatirim_turu1 TEXT,
@@ -271,6 +274,9 @@ CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
     -- Tarih ve Karar Bilgileri
     yukleme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     belge_tarihi TEXT,
+    basvuru_tarihi TEXT,
+    belge_alinma_tarihi TEXT,
+    ilk_indirim_yili INTEGER,
     karar TEXT,
     program_turu TEXT,
     yatirim_turu1 TEXT,

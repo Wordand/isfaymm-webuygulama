@@ -403,13 +403,25 @@ body, html { background: #fff !important; }
       </div>
 
       <div class="mb-3">
+        <label>Teşvik Belgesi Başvuru Tarihi</label>
+        <input type="date" id="basvuru_tarihi" name="basvuru_tarihi" class="form-control" value="{{ current_belge.basvuru_tarihi if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
+        <small class="text-muted">2025/9903 geçiş hükmü için 16/6/2025 öncesi başvurular ayrı değerlendirilir.</small>
+      </div>
+
+      <div class="mb-3">
+        <label>Teşvik Belgesi Alınma Tarihi</label>
+        <input type="date" id="belge_alinma_tarihi" name="belge_alinma_tarihi" class="form-control" value="{{ current_belge.belge_alinma_tarihi if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
+        <small class="text-muted">24/7/2025 ve sonrası belgelerde yeni 7555/2025 rejimi kontrol edilir.</small>
+      </div>
+
+      <div class="mb-3">
         <label>Yatırıma Başlama Tarihi</label>
         <input type="date" id="baslangic_yili" name="belge_tarihi" class="form-control" required>
       </div>
 
       <div class="mb-3">
         <label>Teşvik Belgesi Hangi Karara Göre Düzenlendi</label>
-        <select id="karar" name="karar" onchange="handleKarar9903()" class="form-select" required>
+        <select id="karar" name="karar" onchange="handleKarar9903(); updateRejimTespiti();" class="form-select" required>
           <option value="">Seçiniz</option>
           <option value="2009/15199">2009/15199</option>
           <option value="2012/3305">2012/3305</option>
@@ -424,6 +436,17 @@ body, html { background: #fff !important; }
           </option>
           <option value="2025/9903">2025/9903</option>
         </select>
+      </div>
+
+      <div class="mb-3">
+        <label>İlk İndirim Hakkının Kullanılabileceği Hesap Yılı</label>
+        <input type="number" id="ilk_indirim_yili" name="ilk_indirim_yili" class="form-control" min="2009" max="2100" placeholder="Örn. 2025" value="{{ current_belge.ilk_indirim_yili if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
+        <small class="text-muted">2025/9903 için 4 ve 10 hesap dönemi sınırları bu yıldan itibaren izlenir.</small>
+      </div>
+
+      <div id="rejim-tespiti-box" class="alert alert-secondary small mb-3" style="display: none;">
+        <div class="fw-bold mb-1">Rejim Tespiti</div>
+        <div id="rejim-tespiti-text"></div>
       </div>
 
 
@@ -1544,6 +1567,63 @@ body, html { background: #fff !important; }
     }
   }
 
+  window.updateRejimTespiti = function () {
+    const karar = (document.getElementById("karar")?.value || "").trim();
+    const basvuruTarihi = document.getElementById("basvuru_tarihi")?.value || "";
+    const belgeAlinmaTarihi = document.getElementById("belge_alinma_tarihi")?.value || "";
+    const ilkIndirimYili = parseInt(document.getElementById("ilk_indirim_yili")?.value || "", 10);
+    const box = document.getElementById("rejim-tespiti-box");
+    const text = document.getElementById("rejim-tespiti-text");
+
+    if (!box || !text) return;
+
+    const basvuru = basvuruTarihi ? new Date(`${basvuruTarihi}T00:00:00`) : null;
+    const belge = belgeAlinmaTarihi ? new Date(`${belgeAlinmaTarihi}T00:00:00`) : null;
+    const basvuruEsik = new Date("2025-06-16T00:00:00");
+    const belgeEsik = new Date("2025-07-24T00:00:00");
+
+    box.style.display = "block";
+    box.className = "alert alert-secondary small mb-3";
+
+    if (!karar) {
+      text.textContent = "Karar seçilince uygulanacak rejim burada gösterilir.";
+      return;
+    }
+
+    if (karar !== "2025/9903") {
+      box.className = "alert alert-info small mb-3";
+      text.innerHTML = "Bu belge klasik/eski sistem kapsamında izlenir. Diğer faaliyet kullanımı yatırım dönemiyle, endeksleme ise tamamlanma sonrası kurallarla değerlendirilir.";
+      return;
+    }
+
+    if (!basvuru || !belge) {
+      box.className = "alert alert-warning small mb-3";
+      text.innerHTML = "2025/9903 için başvuru tarihi ve belge alınma tarihi girilmeden eski/yeni rejim kesinleştirilemez.";
+      return;
+    }
+
+    const eskiBasvuruIstisnasi = basvuru < basvuruEsik;
+    const belgeYeniDonem = belge >= belgeEsik;
+
+    if (eskiBasvuruIstisnasi) {
+      box.className = "alert alert-info small mb-3";
+      text.innerHTML = "Başvuru 16/6/2025 öncesi olduğu için belge reddedilmemişse eski 32/A hükümleri dikkate alınır.";
+      return;
+    }
+
+    if (!belgeYeniDonem) {
+      box.className = "alert alert-info small mb-3";
+      text.innerHTML = "Belge 24/7/2025 öncesi alındığı için eski 32/A hükümleri dikkate alınır.";
+      return;
+    }
+
+    box.className = "alert alert-success small mb-3";
+    const sureMetni = Number.isInteger(ilkIndirimYili)
+      ? ` Diğer faaliyetler için son yıl ${ilkIndirimYili + 3}, toplam 10 hesap dönemi için son yıl ${ilkIndirimYili + 9} olarak izlenir.`
+      : " İlk indirim yılı girilirse 4 ve 10 hesap dönemi bitiş yılları otomatik gösterilir.";
+    text.innerHTML = `Yeni 2025/9903 rejimi uygulanır: %60 vergi indirimi, diğer faaliyetlerde %50 sınırı, 4 hesap dönemi ve toplam 10 hesap dönemi takibi yapılır.${sureMetni}`;
+  }
+
   window.handleKarar9903 = function () {
 
     const kararSelect = document.getElementById("karar");
@@ -2427,7 +2507,8 @@ body, html { background: #fff !important; }
 
     // 3️⃣ Kazançlar ve Zaman Sınırı
     const donemYil = parseInt((document.getElementById("donem")?.value || "").split(" - ")[0]) || 0;
-    const baslangicYil = parseInt(document.getElementById("baslangic_yili")?.value || "0");
+    const ilkIndirimYili = parseInt(document.getElementById("ilk_indirim_yili")?.value || "", 10);
+    const baslangicYil = ilkIndirimYili || parseInt(document.getElementById("baslangic_yili")?.value || "0");
     const donemFarki = (baslangicYil && donemYil) ? (donemYil - baslangicYil) : 0;
 
     let yatirimKazanci = 0;
@@ -3664,6 +3745,10 @@ body, html { background: #fff !important; }
     const karar = document.getElementById("karar")?.value.trim();
     const programTuru = document.getElementById("program_turu")?.value.trim();
     const vizeDurumu = (document.getElementById("vize_durumu")?.value || "").trim();
+    const basvuruTarihi = document.getElementById("basvuru_tarihi")?.value || "";
+    const belgeAlinmaTarihi = document.getElementById("belge_alinma_tarihi")?.value || "";
+    const yatirimaBaslamaTarihi = document.getElementById("baslangic_yili")?.value || "";
+    const ilkIndirimYili = document.getElementById("ilk_indirim_yili")?.value || "";
 
     // 🔹 Genel zorunlu kontroller
     if (!karar) {
@@ -3686,12 +3771,32 @@ body, html { background: #fff !important; }
       return;
     }
 
+    if (!yatirimaBaslamaTarihi) {
+      Swal.fire({
+        icon: "warning",
+        title: "Eksik Bilgi",
+        text: "Lütfen 'Yatırıma Başlama Tarihi' alanını giriniz.",
+        confirmButtonText: "Tamam"
+      });
+      return;
+    }
+
     // 🔹 2025/9903 için ek zorunluluk
     if (karar === "2025/9903" && !programTuru) {
       Swal.fire({
         icon: "warning",
         title: "Eksik Bilgi",
         text: "Bu karar için 'Program Türü' seçimi zorunludur.",
+        confirmButtonText: "Tamam"
+      });
+      return;
+    }
+
+    if (karar === "2025/9903" && (!basvuruTarihi || !belgeAlinmaTarihi || !ilkIndirimYili)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Eksik Bilgi",
+        text: "2025/9903 için başvuru tarihi, belge alınma tarihi ve ilk indirim hakkı yılı girilmelidir.",
         confirmButtonText: "Tamam"
       });
       return;
@@ -4301,6 +4406,9 @@ body, html { background: #fff !important; }
         if (typeof handleKarar9903 === "function") {
           handleKarar9903();
         }
+        if (typeof updateRejimTespiti === "function") {
+          updateRejimTespiti();
+        }
       }, 50);
     }
 
@@ -4570,8 +4678,12 @@ body, html { background: #fff !important; }
         const formattedDate = convertToInputDateFormat(currentBelgeJSData.belge_tarihi);
         smartSet('belge_tarihi', formattedDate);
         smartSet('karar', currentBelgeJSData.karar);
+        smartSet('basvuru_tarihi', convertToInputDateFormat(currentBelgeJSData.basvuru_tarihi));
+        smartSet('belge_alinma_tarihi', convertToInputDateFormat(currentBelgeJSData.belge_alinma_tarihi));
+        smartSet('ilk_indirim_yili', currentBelgeJSData.ilk_indirim_yili);
         
         if (typeof handleKarar9903 === "function") handleKarar9903();
+        if (typeof updateRejimTespiti === "function") updateRejimTespiti();
 
         smartSet('program_turu', currentBelgeJSData.program_turu);
         smartSet('yatirim_turu1', currentBelgeJSData.yatirim_turu1);
