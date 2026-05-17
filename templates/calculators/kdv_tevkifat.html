@@ -34,9 +34,9 @@
     <div class="container d-flex justify-content-between align-items-center">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Ana Sayfa</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Dijital Çözümler</a></li>
-                <li class="breadcrumb-item active fw-bold text-warning-emphasis" aria-current="page">KDV Tevkifat Hesapla</li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+                <li class="breadcrumb-item active" aria-current="page">KDV Tevkifat Hesaplama</li>
             </ol>
         </nav>
         <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()" title="Sayfayı Yazdır">

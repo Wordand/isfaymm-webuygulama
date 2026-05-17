@@ -356,7 +356,11 @@ body, html { background: #fff !important; }
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek2')">2025/9903 - Örnek 2 (Diğer Faaliyet)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek3')">2025/9903 - Örnek 3 (Diğer Faaliyet / Düşük Fiili Harcama)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek4')">2025/9903 - Örnek 4 (Yatırım + Diğer Faaliyet Birlikte)</button></li>
           <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek1')">2012/3305 - Örnek 1 (Yatırımdan Kazanç)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_1')">2012/3305 - Örnek 1 (Diğer Faaliyet - Üst Sınır)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek_diger_2')">2012/3305 - Örnek 2 (Diğer Faaliyet - Fiili Harcama Sınırı)</button></li>
         </ul>
       </div>
       <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
@@ -4326,30 +4330,68 @@ body, html { background: #fff !important; }
   }
 
   function applyIKVExamplePreset(key) {
-    const presets = {
-      // 24 Seri No.lu KVK Genel Tebligi - 2025/9903 aciklamalari icindeki Ornek 2 (D A.S. - diger faaliyetlerden yararlanma)
-      "9903_ornek2": {
-        belge_no: "Ornek-9903-2",
-        karar: "2025/9903",
-        program_turu: "Stratejik Hamle Programı", // katkı oranı 40
-        vize_durumu: "Hayır - Yatırım Döneminde",
-        basvuru_tarihi: "2025-06-23",
-        belge_alinma_tarihi: "2025-07-17",
-        belge_tarihi: "2025-09-02",
-        ilk_indirim_yili: "2025",
-        donem: "2025 - KURUMLAR",
-        toplam_tutar: "21000000",
-        cari_harcama_tutari: "12000000",
-        toplam_harcama_tutari: "12000000",
-        yatirimdan_elde_edilen_kazanc: "0",
-        diger_faaliyet: "30000000",
-        kv_matrah: "30000000",
-        gelir_uygulama_tipi: "diger"
-      },
-      // Basit bir 2012/3305 yatirim kazanci ornegi (sablon)
-      "3305_ornek1": {
-        belge_no: "Ornek-3305-1",
-        karar: "2012/3305",
+      const presets = {
+        // 24 Seri No.lu KVK Genel Tebligi - 2025/9903 aciklamalari icindeki Ornek 2 (D A.S. - diger faaliyetlerden yararlanma)
+        "9903_ornek2": {
+          belge_no: "Ornek-9903-2",
+          karar: "2025/9903",
+          program_turu: "Stratejik Hamle Programı", // katkı oranı 40
+          vize_durumu: "Hayır - Yatırım Döneminde",
+          basvuru_tarihi: "2025-06-23",
+          belge_alinma_tarihi: "2025-07-17",
+          belge_tarihi: "2025-09-02",
+          ilk_indirim_yili: "2025",
+          donem: "2025 - KURUMLAR",
+          toplam_tutar: "21000000",
+          cari_harcama_tutari: "12000000",
+          toplam_harcama_tutari: "12000000",
+          yatirimdan_elde_edilen_kazanc: "0",
+          diger_faaliyet: "30000000",
+          kv_matrah: "30000000",
+          gelir_uygulama_tipi: "diger"
+        },
+        // 24 Seri No.lu KVK Genel Tebligi - 2025/9903 aciklamalari icindeki Örnek 3 (E A.Ş. - diğer faaliyetlerden yararlanma, fiili harcama düşük)
+        "9903_ornek3": {
+          belge_no: "Ornek-9903-3",
+          karar: "2025/9903",
+          program_turu: "Stratejik Hamle Programı", // katkı oranı 40
+          vize_durumu: "Hayır - Yatırım Döneminde",
+          basvuru_tarihi: "2025-08-18",
+          belge_alinma_tarihi: "2025-08-18",
+          belge_tarihi: "2025-08-18",
+          ilk_indirim_yili: "2025",
+          donem: "2025 - KURUMLAR",
+          toplam_tutar: "35000000",
+          cari_harcama_tutari: "2800000",
+          toplam_harcama_tutari: "2800000",
+          yatirimdan_elde_edilen_kazanc: "0",
+          diger_faaliyet: "25000000",
+          kv_matrah: "25000000",
+          gelir_uygulama_tipi: "diger"
+        },
+        // 24 Seri No.lu KVK Genel Tebligi - 2025/9903 aciklamalari icindeki Örnek 4 (F A.Ş. - yatırım kazancı + diğer faaliyet bir arada)
+        "9903_ornek4": {
+          belge_no: "Ornek-9903-4",
+          karar: "2025/9903",
+          program_turu: "Stratejik Hamle Programı", // katkı oranı 40
+          vize_durumu: "Hayır - Yatırım Döneminde",
+          basvuru_tarihi: "2025-07-24",
+          belge_alinma_tarihi: "2025-07-24",
+          belge_tarihi: "2025-07-24",
+          ilk_indirim_yili: "2025",
+          donem: "2025 - KURUMLAR",
+          toplam_tutar: "12000000",
+          cari_harcama_tutari: "6000000",
+          toplam_harcama_tutari: "6000000",
+          yatirimdan_elde_edilen_kazanc: "2000000",
+          diger_faaliyet: "20000000",
+          kv_matrah: "22000000",
+          gelir_uygulama_tipi: "herikisi"
+        },
+        // Basit bir 2012/3305 yatirim kazanci ornegi (sablon)
+        "3305_ornek1": {
+          belge_no: "Ornek-3305-1",
+          karar: "2012/3305",
         vize_durumu: "Hayır - Yatırım Döneminde",
         basvuru_tarihi: "2014-01-01",
         belge_alinma_tarihi: "2014-01-02",
@@ -4363,10 +4405,50 @@ body, html { background: #fff !important; }
         katki_orani: "40",
         vergi_orani: "60",
         yatirimdan_elde_edilen_kazanc: "300000",
-        kv_matrah: "300000",
-        gelir_uygulama_tipi: "yatirim"
-      }
-    };
+          kv_matrah: "300000",
+          gelir_uygulama_tipi: "yatirim"
+        },
+        // 2012/3305 - Tebliğ Örnek 1 benzeri (D A.Ş. - yatırım döneminde diğer faaliyetlerden yararlanma, 1. sınır baskın)
+        "3305_ornek_diger_1": {
+          belge_no: "Ornek-3305-Diger-1",
+          karar: "2012/3305",
+          vize_durumu: "Hayır - Yatırım Döneminde",
+          belge_tarihi: "2013-03-02",
+          yatirim_turu1: "Komple",
+          yatirim_turu2: "Bölgesel",
+          donem: "2013 - KURUMLAR",
+          toplam_tutar: "20000000",
+          cari_harcama_tutari: "12000000",
+          toplam_harcama_tutari: "12000000",
+          katki_orani: "40",
+          vergi_orani: "80",
+          diger_oran: "50",
+          yatirimdan_elde_edilen_kazanc: "0",
+          diger_faaliyet: "28000000",
+          kv_matrah: "28000000",
+          gelir_uygulama_tipi: "diger"
+        },
+        // 2012/3305 - Tebliğ Örnek 2 benzeri (E A.Ş. - yatırım döneminde diğer faaliyet, 2. sınır (fiili harcama) baskın)
+        "3305_ornek_diger_2": {
+          belge_no: "Ornek-3305-Diger-2",
+          karar: "2012/3305",
+          vize_durumu: "Hayır - Yatırım Döneminde",
+          belge_tarihi: "2013-03-18",
+          yatirim_turu1: "Komple",
+          yatirim_turu2: "Bölgesel",
+          donem: "2013 - KURUMLAR",
+          toplam_tutar: "35000000",
+          cari_harcama_tutari: "2800000",
+          toplam_harcama_tutari: "2800000",
+          katki_orani: "30",
+          vergi_orani: "70",
+          diger_oran: "30",
+          yatirimdan_elde_edilen_kazanc: "0",
+          diger_faaliyet: "25000000",
+          kv_matrah: "25000000",
+          gelir_uygulama_tipi: "diger"
+        }
+      };
 
     const p = presets[key];
     if (!p) return;
