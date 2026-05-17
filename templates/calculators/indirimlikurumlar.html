@@ -923,6 +923,11 @@ body, html { background: #fff !important; }
       </div>
 
       <div class="mb-3">
+        <label>Ödenecek Toplam Kurumlar Vergisi</label>
+        <input type="text" id="odenecek_toplam_kv" name="odenecek_toplam_kv" class="form-control" readonly>
+      </div>
+
+      <div class="mb-3">
         <label>İndirimli Kurumlar Vergisi Oranı %</label>
         <input type="text" id="indirimli_kv_oran" name="indirimli_kv_oran" class="form-control" readonly>
       </div>
@@ -931,8 +936,11 @@ body, html { background: #fff !important; }
       <div class="d-flex justify-content-start gap-2 mt-4">
         <button type="button" class="btn btn-secondary" onclick="goToStep6()">← Geri</button>
 
-        <button type="submit" class="btn btn-primary" onclick="submitFullFormAndDonem()">
+        <button type="button" class="btn btn-primary" onclick="submitFullFormAndDonem()">
           💾 Kaydet / Güncelle
+        </button>
+        <button type="button" class="btn btn-outline-danger" onclick="generateIKVPdfReport()">
+          📄 PDF Çıktısı Al
         </button>
       </div>
 
@@ -1096,6 +1104,7 @@ body, html { background: #fff !important; }
     "genel_toplam_katki": "none",
     "indirimli_matrah": "none",
     "indirimli_kv": "none",
+    "odenecek_toplam_kv": "none",
     "indirimli_kv_oran": "none",
   };
 
@@ -1113,6 +1122,7 @@ body, html { background: #fff !important; }
   const initialRatios = {{ initial_ayrintili_ratios | tojson }};
   const bolgeMap9903 = {{ BOLGE_MAP_9903 | tojson | safe }};
   const katkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }};
+  window.IS_LOGGED_IN = {{ is_logged_in | tojson }};
   const yenidenDegerlemeOranlari = {
     "2025 - KURUMLAR": 25.49,
     "2025 - 4. GEÇİCİ": 25.49,
@@ -2644,10 +2654,14 @@ body, html { background: #fff !important; }
     
     const indirimliMatrah = matrahYatirim + matrahDiger;
     const indirimliKV = (matrahYatirim + matrahDiger) * (kvOranDiger * (1 - vergiIndirimOrani));
+    const genelMatrah = Math.max(0, kvMatrah - indirimliMatrah);
+    const genelKV = genelMatrah * (ihrOran * kvOranIhracat + imlOran * kvOranImalat + digOran * kvOranDiger);
+    const odenecekToplamKV = indirimliKV + genelKV;
     const indirimliKVOran = (indirimliMatrah > 0) ? (indirimliKV / indirimliMatrah) * 100 : 0;
 
     safeSet("indirimli_matrah", indirimliMatrah);
     safeSet("indirimli_kv", indirimliKV);
+    safeSet("odenecek_toplam_kv", odenecekToplamKV);
     safeSet("indirimli_kv_oran", indirimliKVOran);
 
     console.log("✅ 9903 Hesaplama Tamam:", {
@@ -2924,9 +2938,13 @@ body, html { background: #fff !important; }
       (bespuan_matrah * rIhrGen) +
       (birpuan_matrah * rImlGen) +
       (normal_matrah * rDigGen);
+    const genelMatrah = Math.max(0, getVal("kv_matrah") - matrah);
+    const genelKV = genelMatrah * ((pIhr * rIhrGen) + (pIml * rImlGen) + (pDig * rDigGen));
+    const toplamKV = ikvAmount + genelKV;
 
     // 🔹 UI YAZ (IMask uyumlu)
     safeSet("indirimli_kv", ikvAmount);
+    safeSet("odenecek_toplam_kv", toplamKV);
     safeSet("indirimli_kv_oran", effRate * 100);
 
     const kvOlsaydiEl = document.getElementById('kv_olsaydi');
@@ -4104,12 +4122,140 @@ body, html { background: #fff !important; }
       indirimli_matrah: parseFormattedNumber(document.getElementById("indirimli_matrah")?.value),
       indirimli_kv: parseFormattedNumber(document.getElementById("indirimli_kv")?.value),
       indirimli_kv_oran: parseFormattedNumber(document.getElementById("indirimli_kv_oran")?.value),
+      odenecek_toplam_kv: parseFormattedNumber(document.getElementById("odenecek_toplam_kv")?.value),
     };
+  }
+
+  function getFieldValue(id) {
+    const el = document.getElementById(id);
+    return el?.value || "";
+  }
+
+  function getSelectedText(id) {
+    const el = document.getElementById(id);
+    return el?.options?.[el.selectedIndex]?.text?.trim() || el?.value || "";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[ch]));
+  }
+
+  function generateIKVPdfReport() {
+    const rows = [
+      ["Belge No", getFieldValue("belge_no") || "-"],
+      ["Karar", getSelectedText("karar") || "-"],
+      ["Dönem", getSelectedText("donem") || "-"],
+      ["Program Türü", getSelectedText("program_turu") || "-"],
+      ["Yatırıma Katkı Oranı", `%${getFieldValue("katki_orani") || "0"}`],
+      ["Vergi İndirim Oranı", `%${getFieldValue("vergi_orani") || "0"}`],
+      ["Toplam Yatırım Tutarı", `${getFieldValue("toplam_tutar") || "0,00"} TL`],
+      ["Toplam Harcama Tutarı", `${getFieldValue("toplam_harcama_tutari") || "0,00"} TL`],
+      ["Cari Dönem Yatırım Katkısı", `${getFieldValue("cari_yatirim_katki") || "0,00"} TL`],
+      ["Cari Dönem Diğer Faaliyet Katkısı", `${getFieldValue("cari_diger_katki") || "0,00"} TL`],
+      ["Toplam Yararlanılan Katkı", `${getFieldValue("cari_toplam_katki") || "0,00"} TL`],
+      ["İndirimli KV Matrahı", `${getFieldValue("indirimli_matrah") || "0,00"} TL`],
+      ["İndirimli Kurumlar Vergisi", `${getFieldValue("indirimli_kv") || "0,00"} TL`],
+      ["Ödenecek Toplam Kurumlar Vergisi", `${getFieldValue("odenecek_toplam_kv") || "0,00"} TL`],
+      ["İndirimli KV Oranı", `%${getFieldValue("indirimli_kv_oran") || "0"}`]
+    ];
+
+    const reportNo = `IKV-${Date.now()}`;
+    const today = new Date().toLocaleDateString("tr-TR");
+    const html = `
+      <!doctype html>
+      <html lang="tr">
+      <head>
+        <meta charset="utf-8">
+        <title>İSFA YMM - İndirimli Kurumlar Vergisi Raporu</title>
+        <style>
+          @page { size: A4; margin: 18mm; }
+          * { box-sizing: border-box; }
+          body { font-family: Arial, sans-serif; color: #172033; margin: 0; background: #fff; }
+          .header { border-left: 10px solid #dc2626; background: #172033; color: #fff; padding: 24px 30px; display: flex; justify-content: space-between; align-items: flex-start; }
+          .brand { font-size: 24px; font-weight: 700; letter-spacing: .5px; }
+          .sub { margin-top: 10px; font-size: 13px; color: #d8dee9; }
+          .meta { text-align: right; font-size: 12px; line-height: 1.8; }
+          .section { padding: 28px 34px; }
+          h1 { font-size: 20px; margin: 0 0 18px; color: #172033; }
+          table { width: 100%; border-collapse: collapse; border: 1px solid #d9dee8; }
+          td { padding: 12px 14px; border-bottom: 1px solid #e7ebf2; font-size: 13px; }
+          td:first-child { color: #5c667a; width: 44%; background: #f8fafc; }
+          td:last-child { text-align: right; font-weight: 700; color: #172033; }
+          .total td { background: #fff7ed; color: #9a3412; font-size: 15px; }
+          .note { margin-top: 24px; padding: 16px; background: #fff1f2; color: #7f1d1d; font-size: 12px; line-height: 1.6; border-radius: 8px; }
+          .footer { position: fixed; left: 18mm; right: 18mm; bottom: 10mm; border-top: 1px solid #dc2626; padding-top: 10px; display: flex; justify-content: space-between; font-size: 10px; color: #64748b; }
+          @media print { .no-print { display: none; } }
+          .no-print { padding: 14px 34px; text-align: right; }
+          button { background: #172033; color: #fff; border: 0; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <div class="no-print"><button onclick="window.print()">PDF Olarak Kaydet</button></div>
+        <div class="header">
+          <div>
+            <div class="brand">İSFA YMM</div>
+            <div class="sub">İndirimli Kurumlar Vergisi Hesaplama Raporu</div>
+          </div>
+          <div class="meta">
+            <div>${escapeHtml(today)}</div>
+            <div>www.isfaymm.com</div>
+            <div>Rapor No: ${escapeHtml(reportNo)}</div>
+          </div>
+        </div>
+        <div class="section">
+          <h1>Hesaplama Sonuçları</h1>
+          <table>
+            ${rows.map(([label, value]) => `
+              <tr class="${label.includes("Ödenecek Toplam") ? "total" : ""}">
+                <td>${escapeHtml(label)}</td>
+                <td>${escapeHtml(value)}</td>
+              </tr>
+            `).join("")}
+          </table>
+          <div class="note">
+            Bu rapor bilgilendirme amacıyla hazırlanmıştır. İşleme ve mükellefin durumuna göre farklı vergisel sonuçlar doğabilir. Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
+          </div>
+        </div>
+        <div class="footer">
+          <span>İSFA YMM - İndirimli Kurumlar Vergisi Hesaplama</span>
+          <span>${escapeHtml(reportNo)}</span>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank", "width=900,height=1100");
+    if (!printWindow) {
+      Swal.fire("PDF penceresi açılamadı", "Tarayıcınız yeni pencereyi engellemiş olabilir. Lütfen açılır pencere iznini kontrol edin.", "warning");
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 300);
   }
 
 
 
   async function submitFullFormAndDonem() {
+    if (!window.IS_LOGGED_IN) {
+      Swal.fire({
+        icon: "info",
+        title: "Kayıt İçin Giriş Gerekli",
+        html: "Hesaplamayı kullanmaya ve PDF çıktısı almaya devam edebilirsiniz.<br><br>Kaydetmek ve daha sonra tekrar erişmek için giriş yapmanız gerekir. İsterseniz İSFA YMM ile irtibata geçebilirsiniz.",
+        confirmButtonText: "Tamam"
+      });
+      return;
+    }
+
     const form = document.getElementById('form-giris');
 
     Swal.fire({

@@ -172,6 +172,7 @@ if DATABASE_URL.startswith("sqlite:///"):
         -- 🔹 İndirimli KV Bilgileri
         indirimli_matrah REAL DEFAULT 0.0,
         indirimli_kv REAL DEFAULT 0.0,
+        odenecek_toplam_kv REAL DEFAULT 0.0,
         indirimli_kv_oran REAL DEFAULT 0.0,
 
         -- 🔹 Sistem Alanı
@@ -349,6 +350,7 @@ CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     -- 🔹 İndirimli KV Bilgileri
     indirimli_matrah DOUBLE PRECISION DEFAULT 0.0,
     indirimli_kv DOUBLE PRECISION DEFAULT 0.0,
+    odenecek_toplam_kv DOUBLE PRECISION DEFAULT 0.0,
     indirimli_kv_oran DOUBLE PRECISION DEFAULT 0.0,
 
     -- 🔹 Sistem Alanı

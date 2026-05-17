@@ -681,6 +681,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
         rows=rows,
         hide_ui=hide_ui,
+        is_logged_in=is_logged_in,
     )
     if seo_context:
         ctx.update(seo_context)
@@ -1298,6 +1299,7 @@ def save_tesvik_kullanim():
             # İndirimli KV Bilgileri (init_db'de mevcut)
             "indirimli_matrah", 
             "indirimli_kv", 
+            "odenecek_toplam_kv",
             "indirimli_kv_oran",
             
             # NOT: Frontend'den gelen 'kalan_katki' ve Aşama 4 verileri 

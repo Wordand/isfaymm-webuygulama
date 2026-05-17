@@ -432,6 +432,7 @@ def migrate_tesvik_kullanim_table():
 
                 indirimli_matrah REAL DEFAULT 0.0,
                 indirimli_kv REAL DEFAULT 0.0,
+                odenecek_toplam_kv REAL DEFAULT 0.0,
                 indirimli_kv_oran REAL DEFAULT 0.0,
 
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -460,6 +461,7 @@ def migrate_tesvik_kullanim_table():
 
                 indirimli_matrah DOUBLE PRECISION DEFAULT 0.0,
                 indirimli_kv DOUBLE PRECISION DEFAULT 0.0,
+                odenecek_toplam_kv DOUBLE PRECISION DEFAULT 0.0,
                 indirimli_kv_oran DOUBLE PRECISION DEFAULT 0.0,
 
                 kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -485,7 +487,7 @@ def migrate_tesvik_kullanim_table():
                 "yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "diger_faaliyet",
                 "cari_yatirim_katki", "cari_diger_katki", "cari_toplam_katki",
                 "genel_toplam_katki", "kalan_katki_tutari",
-                "indirimli_matrah", "indirimli_kv", "indirimli_kv_oran"
+                "indirimli_matrah", "indirimli_kv", "odenecek_toplam_kv", "indirimli_kv_oran"
             ]
 
             for col in required_cols:
