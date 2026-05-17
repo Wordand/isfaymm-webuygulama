@@ -235,55 +235,55 @@
                         </div>
 
                         <!-- FATURA GÖRÜNÜMÜ -->
-                        <div class="card border-0 bg-slate-dark text-white rounded-4 shadow-lg overflow-hidden mb-2">
-                            <div class="card-header bg-white bg-opacity-10 py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+                        <div class="card border border-secondary border-opacity-25 bg-white rounded-4 shadow-sm overflow-hidden mb-2">
+                            <div class="card-header bg-slate-dark text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-receipt text-warning fs-4 me-2"></i>
                                     <h6 class="fw-bold text-white mb-0 fs-6">Örnek Tevkifatlı Fatura Düzeni & Gösterim Formatı</h6>
                                 </div>
-                                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill small">Resmi Format</span>
+                                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill small shadow-xs">Resmi Format</span>
                             </div>
-                            <div class="card-body p-4 p-lg-5">
-                                <div class="row g-4 justify-content-between align-items-center mb-4 pb-4 border-bottom border-light border-opacity-10">
+                            <div class="card-body p-4 p-lg-5 bg-white text-slate-dark">
+                                <div class="row g-4 justify-content-between align-items-center mb-4 pb-4 border-bottom border-secondary border-opacity-25">
                                     <div class="col-md-6">
-                                        <span class="text-white-50 small d-block mb-1">SATICI FİRMASI</span>
-                                        <h5 class="fw-bold text-white mb-0 fs-5">Örnek Satıcı Ltd. Şti.</h5>
+                                        <span class="text-muted small d-block mb-1 fw-semibold">SATICI FİRMASI</span>
+                                        <h5 class="fw-bold text-dark mb-0 fs-5">Örnek Satıcı Ltd. Şti.</h5>
                                     </div>
                                     <div class="col-md-6 text-md-end">
-                                        <span class="text-white-50 small d-block mb-1">ALICI FİRMASI / KURUMLAR</span>
-                                        <h5 class="fw-bold text-warning mb-0 fs-5">Tevkifat Uygulayan Kurum / Şirket</h5>
+                                        <span class="text-muted small d-block mb-1 fw-semibold">ALICI FİRMASI / KURUMLAR</span>
+                                        <h5 class="fw-bold text-primary mb-0 fs-5">Tevkifat Uygulayan Kurum / Şirket</h5>
                                     </div>
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table table-borderless text-white mb-0 align-middle">
+                                    <table class="table table-borderless bg-transparent mb-0 align-middle">
                                         <tbody>
                                             <tr>
-                                                <td class="text-white-50 fw-semibold ps-0" style="width: 320px;">İşlem Bedeli (KDV Hariç Matrah)</td>
-                                                <td class="fw-bold text-end pe-0 fs-5" id="fatMatrah">25.000,00 TL</td>
+                                                <td class="text-muted fw-semibold ps-2" style="width: 320px;">İşlem Bedeli (KDV Hariç Matrah)</td>
+                                                <td class="fw-bold text-dark text-end pe-2 fs-5" id="fatMatrah">25.000,00 TL</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-white-50 fw-semibold ps-0">Hesaplanan KDV (%20)</td>
-                                                <td class="fw-bold text-end pe-0 fs-5" id="fatKdv">5.000,00 TL</td>
+                                                <td class="text-muted fw-semibold ps-2">Hesaplanan KDV (%20)</td>
+                                                <td class="fw-bold text-dark text-end pe-2 fs-5" id="fatKdv">5.000,00 TL</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-white-50 fw-semibold ps-0">Tevkifat Oranı</td>
-                                                <td class="fw-bold text-warning text-end pe-0 fs-5" id="fatOran">5/10</td>
+                                                <td class="text-muted fw-semibold ps-2">Tevkifat Oranı</td>
+                                                <td class="fw-bold text-primary text-end pe-2 fs-5" id="fatOran">5/10</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-white-50 fw-semibold ps-0">Alıcı Tarafından Tevkif Edilecek KDV (2 No.lu)</td>
-                                                <td class="fw-bold text-warning text-end pe-0 fs-5" id="fatTevkifat">2.500,00 TL</td>
+                                                <td class="text-muted fw-semibold ps-2">Alıcı Tarafından Tevkif Edilecek KDV (2 No.lu)</td>
+                                                <td class="fw-bold text-danger text-end pe-2 fs-5" id="fatTevkifat">2.500,00 TL</td>
                                             </tr>
-                                            <tr class="border-top border-light border-opacity-25">
-                                                <td class="text-white-50 fw-semibold ps-0 pt-3">Tevkifat Dahil Toplam Tutar</td>
-                                                <td class="fw-bold text-end pe-0 fs-5 pt-3" id="fatDahil">30.000,00 TL</td>
+                                            <tr class="border-top border-secondary border-opacity-25">
+                                                <td class="text-dark fw-bold ps-2 pt-3">Tevkifat Dahil Toplam Tutar</td>
+                                                <td class="fw-bold text-dark text-end pe-2 fs-5 pt-3" id="fatDahil">30.000,00 TL</td>
                                             </tr>
-                                            <tr class="bg-white bg-opacity-10 rounded-3">
-                                                <td class="text-warning fw-black ps-3 py-3 fs-5 rounded-start">Tevkifattan Sonra Tahsil Edilecek Tutar</td>
+                                            <tr class="bg-primary bg-opacity-10 rounded-3">
+                                                <td class="text-primary fw-black ps-3 py-3 fs-5 rounded-start">Tevkifattan Sonra Tahsil Edilecek Tutar</td>
                                                 <td class="fw-black text-success text-end pe-3 py-3 fs-4 rounded-end" id="fatTahsil">27.500,00 TL</td>
                                             </tr>
                                             <tr>
-                                                <td colspan="2" class="text-white-50 fst-italic text-end small pt-3 pe-0" id="fatYazi">Yalnız YirmiyedibinbeşyüzTLdir.</td>
+                                                <td colspan="2" class="text-muted fst-italic text-end small pt-3 pe-2" id="fatYazi">Yalnız YirmiyedibinbeşyüzTLdir.</td>
                                             </tr>
                                         </tbody>
                                     </table>

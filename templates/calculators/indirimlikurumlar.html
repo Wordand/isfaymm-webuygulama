@@ -3049,6 +3049,16 @@ body, html { background: #fff !important; }
     const kvOranImalat = 0.24;
     const kvOranDiger = 0.25;
 
+    // Bu ekranlarda "Yatırıma katkı" = indirimli KV uygulanması nedeniyle
+    // tahsilinden vazgeçilen vergi (normal vergi - indirimli vergi).
+    // Dolayısıyla katkı hesabı, indirimli verginin kendisi değil vergi farkıdır.
+    const baseWeightedRate =
+      (ihracatOraniFinal * kvOranIhracat) +
+      (imalatOraniFinal * kvOranImalat) +
+      (digerOraniFinal * kvOranDiger);
+    const discountedWeightedRate = baseWeightedRate * (1 - vergiIndirimOrani);
+    const deltaRate = Math.max(0, baseWeightedRate - discountedWeightedRate); // = baseWeightedRate * vergiIndirimOrani
+
     let cariYatirimKatkisi = 0;
     let cariDigerKatkisi = 0;
     let indirimliKurumlarVergisiMatrahi = 0;
@@ -3058,14 +3068,12 @@ body, html { background: #fff !important; }
     // ============================================================
     if (vizeDurumuTercihi.includes("Evet")) {
 
-      indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
-
-      cariYatirimKatkisi =
-        tevsiYatirimKazanci *
-        (ihracatOraniFinal * kvOranIhracat +
-          imalatOraniFinal * kvOranImalat +
-          digerOraniFinal * kvOranDiger) *
-        vergiIndirimOrani;
+      const kalanKatki = getVal("kalan_katki_tutari");
+      // Bu dönemde indirimli orana konu olabilecek azami katkı (vergi farkı)
+      const maxDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
+      cariYatirimKatkisi = Math.max(0, Math.min(kalanKatki, maxDelta));
+      // Katkıya karşılık gelen indirimli matrah
+      indirimliKurumlarVergisiMatrahi = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
 
       cariDigerKatkisi = 0;
     }
@@ -3089,29 +3097,23 @@ body, html { background: #fff !important; }
 
         const mevzuatTavani = kucukOlanDigerFaaliyetTutari;
 
-        const effRate =
-          ihracatOraniFinal * kvOranIhracat * (1 - vergiIndirimOrani) +
-          imalatOraniFinal * kvOranImalat * (1 - vergiIndirimOrani) +
-          digerOraniFinal * kvOranDiger * (1 - vergiIndirimOrani);
+        // Diğer faaliyetlerde katkı tavanı da "vergi farkı" üzerinden değerlendirilir.
+        const kvTavanKatki = Math.max(0, digerFaaliyetMatrahi * deltaRate);
 
-        const kvTavanVergi = effRate > 0 ? digerFaaliyetMatrahi * effRate : 0;
-
-        const cariDigerHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
+        const cariDigerHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanKatki);
 
         cariDigerKatkisi = Math.max(0, cariDigerHesap);
 
         indirimliKurumlarVergisiMatrahi =
-          effRate > 0 ? cariDigerKatkisi / effRate : 0;
+          deltaRate > 0 ? (cariDigerKatkisi / deltaRate) : 0;
 
         if (gelirTipi === "herikisi") {
-          cariYatirimKatkisi =
-            tevsiYatirimKazanci *
-            (ihracatOraniFinal * kvOranIhracat +
-              imalatOraniFinal * kvOranImalat +
-              digerOraniFinal * kvOranDiger) *
-            vergiIndirimOrani;
-
-          indirimliKurumlarVergisiMatrahi += tevsiYatirimKazanci;
+          // Aynı dönemde yatırım kazancı da varsa, kalan katkıdan arta kalan kısmı kadar kullanılabilir.
+          const kalanSonraDiger = Math.max(0, kalanKatki - cariDigerKatkisi);
+          const maxYatirimDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
+          cariYatirimKatkisi = Math.max(0, Math.min(kalanSonraDiger, maxYatirimDelta));
+          const yatirimIndMatrah = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
+          indirimliKurumlarVergisiMatrahi += yatirimIndMatrah;
         } else {
           cariYatirimKatkisi = 0;
         }
@@ -3121,14 +3123,10 @@ body, html { background: #fff !important; }
       // B) Diğer faaliyet kullanılmayacak
       // -------------------------
       else {
-        indirimliKurumlarVergisiMatrahi = tevsiYatirimKazanci;
-
-        cariYatirimKatkisi =
-          tevsiYatirimKazanci *
-          (ihracatOraniFinal * kvOranIhracat +
-            imalatOraniFinal * kvOranImalat +
-            digerOraniFinal * kvOranDiger) *
-          vergiIndirimOrani;
+        const kalanKatki = getVal("kalan_katki_tutari");
+        const maxDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
+        cariYatirimKatkisi = Math.max(0, Math.min(kalanKatki, maxDelta));
+        indirimliKurumlarVergisiMatrahi = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
 
         cariDigerKatkisi = 0;
       }
