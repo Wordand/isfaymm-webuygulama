@@ -330,6 +330,7 @@ def sitemap_xml():
         ('main.home', {}), ('main.about', {}), ('main.team', {}), ('main.mevzuat', {}),
         ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
+        ('main.kdv_tevkifat', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),

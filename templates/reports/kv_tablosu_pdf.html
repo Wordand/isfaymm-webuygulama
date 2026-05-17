@@ -6,49 +6,104 @@
     body {
       font-family: DejaVu Sans, sans-serif;
       font-size: 12pt;
-      margin: 25px;
+      margin: 0;
       color: #111;
     }
-    .header-container {
-      width: 100%;
+    .page {
+      padding: 22px 26px;
+    }
+    .header {
+      border-left: 10px solid #dc2626;
+      background: #172033;
+      color: #fff;
+      padding: 18px 22px;
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin: -22px -26px 18px;
+    }
+    .brand {
+      display: flex;
       align-items: center;
-      border-bottom: 2px solid #444;
-      padding-bottom: 8px;
-      margin-bottom: 16px;
+      gap: 12px;
     }
-    .logo { height: 55px; }
-    .header-text { text-align: right; font-size: 10pt; color: #555; }
-    .header-title {
-      text-align: center;
-      font-weight: bold;
-      font-size: 14pt;
-      margin-bottom: 10px;
+    .logo { height: 40px; }
+    .brand-text .name {
+      font-weight: 700;
+      font-size: 16pt;
+      letter-spacing: 0.3px;
+      line-height: 1.1;
+    }
+    .brand-text .sub {
+      margin-top: 4px;
+      font-size: 10pt;
+      color: rgba(255,255,255,0.78);
+    }
+    .meta {
+      text-align: right;
+      font-size: 9.5pt;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.82);
+      white-space: nowrap;
+    }
+    .title {
+      font-weight: 800;
+      font-size: 12.5pt;
       text-transform: uppercase;
-      color: #222;
+      color: #172033;
+      margin: 10px 0 12px;
+      letter-spacing: 0.4px;
     }
-    table { width: 100%; border-collapse: collapse; margin: 0 auto; }
-    th, td { padding: 6px 8px; vertical-align: top; }
-    .label { width: 55%; font-weight: bold; color: #222; }
-    .value { width: 45%; text-align: right; color: #000; }
-    tr:nth-child(odd) { background-color: #f8f8f8; }
-    .footer { text-align: center; font-size: 10pt; margin-top: 40px; color: #666; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #d9dee8;
+    }
+    th, td { padding: 8px 10px; vertical-align: top; }
+    .label {
+      width: 58%;
+      font-weight: 700;
+      color: #374151;
+      background: #f8fafc;
+      border-bottom: 1px solid #e7ebf2;
+    }
+    .value {
+      width: 42%;
+      text-align: right;
+      font-weight: 700;
+      color: #111827;
+      border-bottom: 1px solid #e7ebf2;
+    }
+    .footer {
+      margin-top: 18px;
+      border-top: 1px solid #dc2626;
+      padding-top: 10px;
+      font-size: 9.5pt;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
-
-  <div class="header-container">
-    <div>
-      <img src="{{ url_for('static', filename='images/logo1.png', _external=True) }}" alt="Logo" class="logo">
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/logo1.png', _external=True) }}" alt="İSFA" class="logo">
+        <div class="brand-text">
+          <div class="name">İSFA YMM</div>
+          <div class="sub">İndirimli Kurumlar Vergisi Raporu</div>
+        </div>
+      </div>
+      <div class="meta">
+        <div><strong>Tarih:</strong> {{ now().strftime("%d.%m.%Y") }}</div>
+        <div><strong>Rapor No:</strong> {{ data.belge_no or '' }}</div>
+        <div><strong>Web:</strong> www.isfaymm.com</div>
+      </div>
     </div>
-    <div class="header-text">
-      <div><strong>Tarih:</strong> {{ now().strftime("%d.%m.%Y") }}</div>
-      <div><strong>Rapor No:</strong> {{ data.belge_no or '' }}</div>
-    </div>
-  </div>
 
-  <div class="header-title">İNDİRİMLİ KURUMLAR VERGİSİ TABLOSU</div>
+    <div class="title">Indirimli Kurumlar Vergisi Tablosu</div>
 
   {# 🔧 Makrolar #}
   {% macro row(label, value) %}
@@ -110,9 +165,9 @@
   </table>
 
   <div class="footer">
-    Bu tablo {{ now().strftime("%d.%m.%Y") }} tarihinde otomatik olarak oluşturulmuştur.<br>
-    © {{ now().year }} İSFA Yeminli Mali Müşavirlik Denetim Danışmanlık
+    <span>Bu rapor {{ now().strftime("%d.%m.%Y") }} tarihinde otomatik oluşturulmuştur.</span>
+    <span>© {{ now().year }} İSFA Yeminli Mali Müşavirlik</span>
   </div>
-
+  </div>
 </body>
 </html>

@@ -62,7 +62,11 @@
                 <div class="summary-item">
                     <span class="summary-label">Tür</span>
                     <span class="summary-value text-truncate" title="{{ doc.yatirim_turu1 }} - {{ doc.yatirim_turu2 }}">
-                        {{ doc.yatirim_turu1 }}
+                        {% if doc.karar == '2025/9903' %}
+                          {{ doc.program_turu or '2025/9903' }}
+                        {% else %}
+                          {{ doc.yatirim_turu1 }}
+                        {% endif %}
                     </span>
                 </div>
                 <div class="summary-item">
@@ -371,7 +375,11 @@
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire('Hata', 'Bağlantı hatası oluştu veya sunucu yanıt vermiyor.', 'error');
+                // Bazı ortamlarda yanıt okunamasa bile silme işlemi gerçekleşmiş olabiliyor.
+                // Kullanıcı deneyimi için optimistik davranıp listeyi yenileyelim.
+                try { $(`#doc-sheet-${id}`).fadeOut(200, function() { $(this).remove(); }); } catch (e) {}
+                Swal.fire('Bilgi', 'İşlem tamamlanmış olabilir. Liste yenileniyor...', 'info');
+                setTimeout(() => window.location.reload(), 700);
             });
     }
 
@@ -395,7 +403,9 @@
             })
              .catch(err => {
                 console.error(err);
-                Swal.fire('Hata', 'Silme işlemi sırasında bir hata oluştu.', 'error');
+                try { $(`#period-row-${id}`).fadeOut(150, function() { $(this).remove(); }); } catch (e) {}
+                Swal.fire('Bilgi', 'İşlem tamamlanmış olabilir. Liste yenileniyor...', 'info');
+                setTimeout(() => window.location.reload(), 700);
             });
     }
 </script>

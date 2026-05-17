@@ -4276,7 +4276,7 @@ body, html { background: #fff !important; }
         belge_no: "Ornek-9903-2",
         karar: "2025/9903",
         program_turu: "Stratejik Hamle Programı", // katkı oranı 40
-        vize_durumu: "Hayır",
+        vize_durumu: "Hayır - Yatırım Döneminde",
         basvuru_tarihi: "2025-06-23",
         belge_alinma_tarihi: "2025-07-17",
         belge_tarihi: "2025-09-02",
@@ -4294,7 +4294,7 @@ body, html { background: #fff !important; }
       "3305_ornek1": {
         belge_no: "Ornek-3305-1",
         karar: "2012/3305",
-        vize_durumu: "Hayır",
+        vize_durumu: "Hayır - Yatırım Döneminde",
         basvuru_tarihi: "2014-01-01",
         belge_alinma_tarihi: "2014-01-02",
         belge_tarihi: "2013-03-02",
@@ -5172,7 +5172,7 @@ body, html { background: #fff !important; }
         // Belge yüklendikten sonra türe göre hesaplat (özellikle edit/donem ve view modlarında)
         setTimeout(() => {
           try {
-            const karar = refs.kararSelect?.value || "";
+            const karar = document.getElementById("karar")?.value || "";
             if (karar === "2025/9903") {
               if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
               if (typeof calculateRatios === "function") calculateRatios();
