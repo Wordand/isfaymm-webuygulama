@@ -417,6 +417,9 @@ def kv_tebligi(bolum_id=None):
 @bp.route("/mevzuat-degisiklikleri")
 def mevzuat_degisiklikleri(): return render_template("pages/mevzuat_degisiklikleri.html")
 
+@bp.route("/mevzuat/kdv-tevkifat")
+def kdv_tevkifat(): return render_template("pages/kdv_tevkifat.html")
+
 
 
 @bp.route("/indirim")

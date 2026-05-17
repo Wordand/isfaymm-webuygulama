@@ -3937,6 +3937,22 @@ body, html { background: #fff !important; }
     }
 
     _updateStepDisplay(3);
+
+    // Step 3 görünür olunca bağlı hesapları bir kez koştur
+    setTimeout(() => {
+      try {
+        const karar = (document.getElementById("karar")?.value || "").trim();
+        if (karar === "2025/9903") {
+          if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
+        } else {
+          if (typeof hesaplaKatkiTutari === "function") hesaplaKatkiTutari();
+          if (typeof hesaplaDigerKatkiTutari === "function") hesaplaDigerKatkiTutari();
+          if (typeof hesaplaFiiliKatkiTutari === "function") hesaplaFiiliKatkiTutari();
+        }
+      } catch (e) {
+        console.warn("Step 3 otomatik hesaplama hatası:", e);
+      }
+    }, 50);
   }
 
   function goToStep4() { _updateStepDisplay(4); }
