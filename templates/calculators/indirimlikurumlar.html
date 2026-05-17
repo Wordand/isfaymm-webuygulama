@@ -1710,9 +1710,10 @@ body, html { background: #fff !important; }
 
       [tur1, tur2].forEach(el => {
         if (!el) return;
-        el.readOnly = false;
-        el.style.pointerEvents = "auto";
-        el.classList.remove("bg-light");
+        el.readOnly = true;
+        el.style.pointerEvents = "none";
+        el.classList.add("bg-light");
+        el.value = "";
       });
 
       safeSet("vergi_orani", 60);
