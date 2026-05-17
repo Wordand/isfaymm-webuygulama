@@ -6,7 +6,7 @@
             <h1 class="fw-bold text-dark mb-1">Teşvik Yönetim Merkezi</h1>
             <p class="text-muted mb-0">Toplam <b>{{ docs|length }}</b> kayıtlı yatırım teşvik belgesi bulundu.</p>
         </div>
-        <a href="/indirimlikurumlar/?sekme=form" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+        <a href="/indirimlikurumlar/?sekme=form&new=1" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
             <i class="bi bi-plus-lg me-2"></i>Yeni Belge Ekle
         </a>
     </div>
@@ -111,7 +111,7 @@
                         </div>
 
                         <div class="action-center">
-                            <button class="btn-action-icon btn-action-edit" onclick="goToEditPeriod({{ doc.id }}, '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
+                            <button class="btn-action-icon btn-action-edit" onclick="goToEditPeriod('{{ doc.belge_no }}', '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
                                 <i class="bi bi-pencil-square"></i>
                             </button>
                             <button class="btn-action-icon btn-action-view" onclick="openPeriodModal(this)" data-period='{{ d | tojson | safe }}' title="Verileri İncele">
@@ -304,8 +304,9 @@
     }
 
     // ✏️ Dönem Düzenle (Forma Gitmek Zorunda - Mantık Orada)
-    function goToEditPeriod(docId, yil, donemTuru) {
-        window.location.href = `/indirimlikurumlar/?sekme=form&view=${docId}&year=${yil}&type=${donemTuru}`;
+    function goToEditPeriod(belgeNo, yil, donemTuru) {
+        // Sunucu tarafinda donem verisini session'a koyan route'u kullan
+        window.location.href = `/indirimlikurumlar/edit_tesvik_kullanim/${encodeURIComponent(belgeNo)}/${yil}/${encodeURIComponent(donemTuru)}`;
     }
 
     // ➕ Dönem Ekle (Forma gider)
@@ -355,7 +356,10 @@
         fetch(`/indirimlikurumlar/delete/${id}`, { method: 'POST' })
             .then(async res => {
                 if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
-                return res.json();
+                const ct = res.headers.get("content-type") || "";
+                if (ct.includes("application/json")) return res.json();
+                // JSON gelmezse de silme gerçekleşmiş olabilir (ör. redirect/html)
+                return { status: "success" };
             })
             .then(data => {
                 if(data.status === 'success') {
@@ -377,7 +381,9 @@
         fetch(`/indirimlikurumlar/delete_tesvik_kullanim/${id}`, { method: 'POST' })
             .then(async res => {
                  if (!res.ok) throw new Error("Sunucu hatası: " + res.status);
-                 return res.json();
+                 const ct = res.headers.get("content-type") || "";
+                 if (ct.includes("application/json")) return res.json();
+                 return { status: "success" };
             })
             .then(data => {
                 if(data.status === 'success') {

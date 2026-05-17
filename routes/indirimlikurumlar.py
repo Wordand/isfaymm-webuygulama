@@ -577,6 +577,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             mukellefler = c.fetchall()
 
     docs, user_df, current_belge = [], None, None
+    current_kullanim = None
     edit_doc = None
 
     if aktif_mukellef_id:
@@ -606,6 +607,17 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
 
             if current_belge:
                 ("     ")
+
+            # Dönem düzenleme modunda, seçili dönem verisini de template'e taşı
+            if request.args.get("editdonem") == "1":
+                try:
+                    bno = session.get("current_belge_no")
+                    yil = session.get("current_hesap_donemi")
+                    turu = session.get("current_donem_turu")
+                    if bno and yil and turu:
+                        current_kullanim, _ = _fetch_and_prepare_kullanim(user_id, bno, int(yil), str(turu))
+                except Exception:
+                    current_kullanim = None
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
@@ -675,6 +687,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         initial_ayrintili_ratios=initial_ayrintili_ratios,
         docs=docs,
         current_belge=current_belge,
+        current_kullanim=current_kullanim,
         edit_doc=edit_doc,
         kullanimlar=kullanimlar,
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}),
@@ -1142,7 +1155,7 @@ def download_tesvik_pdf(doc_id):
     # 3️⃣ HTML Oluştur
     try:
         rendered_html = render_template(
-            "kv_tablosu_pdf.html",
+            "reports/kv_tablosu_pdf.html",
             data=data,
             now=datetime.now
         )

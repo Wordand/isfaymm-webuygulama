@@ -3991,17 +3991,22 @@ body, html { background: #fff !important; }
 
 
   const currentBelgeJSData = {{ current_belge | tojson | safe if current_belge else 'null' }};
+  const currentKullanimJSData = {{ current_kullanim | tojson | safe if current_kullanim else 'null' }};
 
   function clearAllFormData() {
     Swal.fire({
-      title: "Tüm veriler temizlensin mi?",
-      text: "Belge numarası ve belge tarihi korunacaktır.",
+      title: "Veriler temizlensin mi?",
+      text: "Belge numarası ve belge tarihi kalsın mı?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Evet, temizle",
+      showDenyButton: true,
+      confirmButtonText: "Kalsın (Önerilen)",
+      denyButtonText: "Hepsi silinsin",
       cancelButtonText: "Vazgeç",
     }).then((result) => {
-      if (!result.isConfirmed) return;
+      if (!result.isConfirmed && !result.isDenied) return;
+
+      const keepHeader = result.isConfirmed;
 
       // 🛑 Önce korunacak değerleri al
       const belgeNoVal =
@@ -4013,9 +4018,14 @@ body, html { background: #fff !important; }
         document.getElementById("belge_tarihi_hidden")?.value ||
         "";
 
-      // 🔒 SessionStorage'da da saklıyoruz ki restore sırasında kaybolmasın
-      sessionStorage.setItem("KEEP_belge_no", belgeNoVal);
-      sessionStorage.setItem("KEEP_belge_tarihi", belgeTarihiVal);
+      if (keepHeader) {
+        // 🔒 SessionStorage'da da saklıyoruz ki restore sırasında kaybolmasın
+        sessionStorage.setItem("KEEP_belge_no", belgeNoVal);
+        sessionStorage.setItem("KEEP_belge_tarihi", belgeTarihiVal);
+      } else {
+        sessionStorage.removeItem("KEEP_belge_no");
+        sessionStorage.removeItem("KEEP_belge_tarihi");
+      }
 
       // 🔄 Tüm inputları temizle ama belge no + tarihi HARİÇ
       document.querySelectorAll("input, select, textarea").forEach(el => {
@@ -4024,15 +4034,16 @@ body, html { background: #fff !important; }
         const name = el.name || el.id;
         if (!name) return;
 
-        const safeNames = [
-          "belge_no",
-          "belge_no_hidden",
-          "belge_tarihi",
-          "belge_tarihi_hidden"
-        ];
-
-        if (safeNames.includes(name) || safeNames.includes(el.id)) {
-          return; // dokunma
+        if (keepHeader) {
+          const safeNames = [
+            "belge_no",
+            "belge_no_hidden",
+            "belge_tarihi",
+            "belge_tarihi_hidden"
+          ];
+          if (safeNames.includes(name) || safeNames.includes(el.id)) {
+            return; // dokunma
+          }
         }
 
         // ✔️ Diğer alanları temizle
@@ -4061,7 +4072,7 @@ body, html { background: #fff !important; }
 
       Swal.fire({
         icon: "success",
-        title: "Form temizlendi (Belge No ve Tarihi korundu)",
+        title: keepHeader ? "Form temizlendi (Belge No ve Tarih korundu)" : "Form tamamen temizlendi",
         showConfirmButton: false,
         timer: 1200,
         toast: true,
@@ -4265,20 +4276,31 @@ body, html { background: #fff !important; }
         belge_no: "Ornek-9903-2",
         karar: "2025/9903",
         program_turu: "Stratejik Hamle Programı", // katkı oranı 40
+        vize_durumu: "Hayır",
+        basvuru_tarihi: "2025-06-23",
+        belge_alinma_tarihi: "2025-07-17",
         belge_tarihi: "2025-09-02",
         ilk_indirim_yili: "2025",
+        donem: "2025 - KURUMLAR",
         toplam_tutar: "21000000",
         cari_harcama_tutari: "12000000",
         toplam_harcama_tutari: "12000000",
         yatirimdan_elde_edilen_kazanc: "0",
         diger_faaliyet: "30000000",
         kv_matrah: "30000000",
+        gelir_uygulama_tipi: "diger"
       },
       // Basit bir 2012/3305 yatirim kazanci ornegi (sablon)
       "3305_ornek1": {
         belge_no: "Ornek-3305-1",
         karar: "2012/3305",
+        vize_durumu: "Hayır",
+        basvuru_tarihi: "2014-01-01",
+        belge_alinma_tarihi: "2014-01-02",
         belge_tarihi: "2013-03-02",
+        yatirim_turu1: "Komple",
+        yatirim_turu2: "Bölgesel",
+        donem: "2015 - KURUMLAR",
         toplam_tutar: "8000000",
         cari_harcama_tutari: "1000000",
         toplam_harcama_tutari: "1000000",
@@ -4286,6 +4308,7 @@ body, html { background: #fff !important; }
         vergi_orani: "60",
         yatirimdan_elde_edilen_kazanc: "300000",
         kv_matrah: "300000",
+        gelir_uygulama_tipi: "yatirim"
       }
     };
 
@@ -4316,11 +4339,17 @@ body, html { background: #fff !important; }
       };
 
       setVal("belge_no", p.belge_no || "");
+      if (p.basvuru_tarihi) setVal("basvuru_tarihi", p.basvuru_tarihi);
+      if (p.belge_alinma_tarihi) setVal("belge_alinma_tarihi", p.belge_alinma_tarihi);
       if (p.belge_tarihi) setVal("baslangic_yili", p.belge_tarihi);
       if (p.ilk_indirim_yili) setVal("ilk_indirim_yili", p.ilk_indirim_yili);
 
       if (p.karar) setVal("karar", p.karar);
       if (p.program_turu) setVal("program_turu", p.program_turu);
+      if (p.vize_durumu) setVal("vize_durumu", p.vize_durumu);
+      if (p.yatirim_turu1) setVal("yatirim_turu1", p.yatirim_turu1);
+      if (p.yatirim_turu2) setVal("yatirim_turu2", p.yatirim_turu2);
+      if (p.donem) setVal("donem", p.donem);
 
       if (p.katki_orani != null) setVal("katki_orani", p.katki_orani);
       if (p.vergi_orani != null) setVal("vergi_orani", p.vergi_orani);
@@ -4341,7 +4370,10 @@ body, html { background: #fff !important; }
         }
       }
 
-      if (p.karar === "2025/9903") {
+      if (p.gelir_uygulama_tipi) {
+        sessionStorage.setItem("gelir_uygulama_tipi", p.gelir_uygulama_tipi);
+        sessionStorage.setItem("diger_kazanc_uygulama", (p.gelir_uygulama_tipi === "diger" || p.gelir_uygulama_tipi === "herikisi") ? "evet" : "hayir");
+      } else if (p.karar === "2025/9903") {
         sessionStorage.setItem("gelir_uygulama_tipi", "diger");
         sessionStorage.setItem("diger_kazanc_uygulama", "evet");
       }
@@ -4763,6 +4795,22 @@ body, html { background: #fff !important; }
     function initRestoreSystem() {
       const params = new URLSearchParams(window.location.search);
       const isViewMode = params.has("view") || params.has("id") || params.get("sekme") === "form" && currentBelgeJSData;
+      const isNew = params.get("new") === "1";
+
+      // Yeni belge ekleme modunda (giriş yapılmışsa) eski form state'i taşımayalım
+      if (isNew && window.IS_LOGGED_IN) {
+        Object.keys(sessionStorage).forEach(k => {
+          if (k.startsWith("form_")) sessionStorage.removeItem(k);
+        });
+        sessionStorage.removeItem("current_tesvik_id");
+        sessionStorage.removeItem("last_step");
+        sessionStorage.removeItem("manual_katki");
+        sessionStorage.removeItem("manual_katki_value");
+        sessionStorage.removeItem("manual_vergi");
+        sessionStorage.removeItem("manual_vergi_value");
+        sessionStorage.removeItem("manual_kv_matrah");
+        sessionStorage.removeItem("manual_kv_matrah_value");
+      }
 
       // 1) input – select restore (VIEW MODUNDA DEĞİLSEK YAP)
       if (!isViewMode) {
@@ -4810,6 +4858,35 @@ body, html { background: #fff !important; }
           safeSet("diger_oran", getVal("diger_oran"));
         }
       }, 200);
+
+      // Ziyaretçi modunda sayfa yenilenince sonuçlar (özellikle Aşama 7) boş kalmasın diye tekrar hesaplat
+      if (!isViewMode) {
+        setTimeout(() => {
+          try {
+            const karar = refs.kararSelect?.value;
+            if (typeof handleKarar9903 === "function") handleKarar9903();
+            if (typeof updateRejimTespiti === "function") updateRejimTespiti();
+
+            if (karar === "2025/9903") {
+              if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
+              if (typeof calculateRatios === "function") calculateRatios();
+              if (typeof calculateKVMatrah === "function") calculateKVMatrah();
+            } else {
+              if (typeof setBolge === "function") setBolge();
+              if (typeof setOranlar === "function") setOranlar();
+              if (typeof hesaplaKatkiTutari === "function") hesaplaKatkiTutari();
+              if (typeof hesaplaDigerKatkiTutari === "function") hesaplaDigerKatkiTutari();
+              if (typeof hesaplaFiiliKatkiTutari === "function") hesaplaFiiliKatkiTutari();
+              if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
+              if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
+              if (typeof calculateKVMatrah === "function") calculateKVMatrah();
+              if (typeof calculateRatios === "function") calculateRatios();
+            }
+          } catch (e) {
+            console.warn("Restore sonrası otomatik hesaplama hatası:", e);
+          }
+        }, 350);
+      }
     }
 
 
@@ -5066,6 +5143,54 @@ body, html { background: #fff !important; }
         });
         
         if (typeof toggleDetailedProfitInput === "function") toggleDetailedProfitInput();
+
+        // Edit-dönem modunda dönem verilerini de bas
+        const params = new URLSearchParams(window.location.search);
+        const isEditingDonem = params.get("editdonem") === "1";
+        if (isEditingDonem && currentKullanimJSData) {
+          // Donem secimi
+          if (currentKullanimJSData.hesap_donemi && currentKullanimJSData.donem_turu) {
+            smartSet('donem', `${currentKullanimJSData.hesap_donemi} - ${String(currentKullanimJSData.donem_turu).toUpperCase()}`);
+          }
+
+          // Kazanc alanlari (girdi)
+          smartSet('yatirimdan_elde_edilen_kazanc', currentKullanimJSData.yatirimdan_elde_edilen_kazanc);
+          smartSet('tevsi_yatirim_kazanci', currentKullanimJSData.tevsi_yatirim_kazanci);
+          smartSet('diger_faaliyet', currentKullanimJSData.diger_faaliyet);
+
+          // Gelir tipi secimini tahmin et
+          const y = Number(currentKullanimJSData.yatirimdan_elde_edilen_kazanc || 0) + Number(currentKullanimJSData.tevsi_yatirim_kazanci || 0);
+          const d = Number(currentKullanimJSData.diger_faaliyet || 0);
+          let choice = "yatirim";
+          if (y > 0 && d > 0) choice = "herikisi";
+          else if (d > 0) choice = "diger";
+          sessionStorage.setItem("gelir_uygulama_tipi", choice);
+          sessionStorage.setItem("diger_kazanc_uygulama", (choice === "diger" || choice === "herikisi") ? "evet" : "hayir");
+          if (typeof toggleInvestmentIncomeInputs === "function") toggleInvestmentIncomeInputs();
+        }
+
+        // Belge yüklendikten sonra türe göre hesaplat (özellikle edit/donem ve view modlarında)
+        setTimeout(() => {
+          try {
+            const karar = refs.kararSelect?.value || "";
+            if (karar === "2025/9903") {
+              if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
+              if (typeof calculateRatios === "function") calculateRatios();
+              if (typeof calculateKVMatrah === "function") calculateKVMatrah();
+            } else {
+              if (typeof hesaplaKatkiTutari === "function") hesaplaKatkiTutari();
+              if (typeof hesaplaDigerKatkiTutari === "function") hesaplaDigerKatkiTutari();
+              if (typeof hesaplaFiiliKatkiTutari === "function") hesaplaFiiliKatkiTutari();
+              if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
+              if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
+              if (typeof calculateRatios === "function") calculateRatios();
+              if (typeof calculateKVMatrah === "function") calculateKVMatrah();
+              if (typeof calculateCariAndNext === "function") calculateCariAndNext();
+            }
+          } catch (e) {
+            console.warn("Belge yükleme sonrası otomatik hesaplama hatası:", e);
+          }
+        }, 250);
         
         console.log("✅ Belge verileri başarıyla yüklendi.");
       } catch (err) {
