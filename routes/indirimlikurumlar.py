@@ -1808,28 +1808,30 @@ def get_onceki_katki(tesvik_id: int):
     }
     cur_order = order_map.get(turu.upper(), 99)
 
-    conn = get_db()
-    cur = conn.cursor()
+    with get_conn() as conn:
+        cur = conn.cursor()
 
-    # Yetki kontrolü
-    cur.execute(
-        "SELECT 1 FROM tesvik_docs WHERE id=%s AND user_id=%s",
-        (tesvik_id, user_id),
-    )
-    if not cur.fetchone():
-        return jsonify({"status": "error", "message": "Yetkisiz erişim."}), 403
+        # Yetki kontrolü + belge_no bul
+        cur.execute(
+            "SELECT belge_no FROM tesvik_belgeleri WHERE id=%s AND user_id=%s",
+            (tesvik_id, user_id),
+        )
+        row = cur.fetchone()
+        if not row:
+            return jsonify({"status": "error", "message": "Yetkisiz erişim."}), 403
+        belge_no = row[0] if not isinstance(row, dict) else row.get("belge_no")
 
-    cur.execute(
-        """
-        SELECT donem_yil, donem_turu,
-               COALESCE(cari_yatirim_katki,0) AS cy,
-               COALESCE(cari_diger_katki,0) AS cd
-        FROM tesvik_kullanim
-        WHERE user_id=%s AND tesvik_id=%s
-        """,
-        (user_id, tesvik_id),
-    )
-    rows = cur.fetchall() or []
+        cur.execute(
+            """
+            SELECT hesap_donemi, donem_turu,
+                   COALESCE(cari_yatirim_katki,0) AS cy,
+                   COALESCE(cari_diger_katki,0) AS cd
+            FROM tesvik_kullanim
+            WHERE user_id=%s AND belge_no=%s
+            """,
+            (user_id, belge_no),
+        )
+        rows = cur.fetchall() or []
 
     onceki_yatirim = 0.0
     onceki_diger = 0.0
