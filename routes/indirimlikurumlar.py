@@ -637,6 +637,50 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     if bno not in kullanimlar:
                         kullanimlar[bno] = []
                     kullanimlar[bno].append(item)
+
+    # -------------------------------------------------------------
+    # Kümülatif devreden hesapları (display için normalize et)
+    # -------------------------------------------------------------
+    def _float0(x):
+        try:
+            return float(x or 0)
+        except Exception:
+            return 0.0
+
+    def _period_rank(turu: str) -> int:
+        s = (turu or "").upper()
+        if "1" in s:
+            return 1
+        if "2" in s:
+            return 2
+        if "3" in s:
+            return 3
+        if "4" in s:
+            return 4
+        return 9  # KURUMLAR / diğer
+
+    total_katki_by_bno = {}
+    for d in (docs or []):
+        bno = d.get("belge_no")
+        if not bno:
+            continue
+        total = _float0(d.get("katki_tutari"))
+        if total <= 0:
+            total = _float0(d.get("toplam_tutar")) * (_float0(d.get("katki_orani")) / 100.0)
+        total_katki_by_bno[bno] = total
+
+    for bno, items in (kullanimlar or {}).items():
+        total = total_katki_by_bno.get(bno, 0.0)
+        # ASC sırala ki devreden doğru yürüsün
+        items.sort(key=lambda r: (int(r.get("hesap_donemi") or 0), _period_rank(r.get("donem_turu"))))
+        cum_used = 0.0
+        for r in items:
+            r["onceki_katki_tutari"] = cum_used
+            cari = _float0(r.get("cari_toplam_katki"))
+            cum_used = cum_used + max(cari, 0.0)
+            r["kalan_katki_tutari"] = max(total - cum_used, 0.0)
+        # UI genelde DESC göstermek istediği için tekrar DESC sırala
+        items.sort(key=lambda r: (int(r.get("hesap_donemi") or 0), _period_rank(r.get("donem_turu"))), reverse=True)
     # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
     rows = []
     if sekme == "ayrintili" and is_logged_in and user_id:
@@ -1313,6 +1357,48 @@ def save_tesvik_kullanim():
 
         if not belge_no:
             return jsonify({"status": "error", "message": "Belge no eksik."}), 400
+
+        # -------------------------------------------------------------
+        # 2025/9903 için dönem doğrulaması (kronoloji / geçersiz yıl engeli)
+        # -------------------------------------------------------------
+        try:
+            with get_conn() as _conn_chk:
+                _c = _conn_chk.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                _c.execute(
+                    """
+                    SELECT karar, belge_tarihi, ilk_indirim_yili
+                    FROM tesvik_belgeleri
+                    WHERE user_id = %s AND belge_no = %s
+                    LIMIT 1
+                    """,
+                    (user_id, belge_no),
+                )
+                _doc = _c.fetchone()
+
+            if _doc and (_doc.get("karar") == "2025/9903"):
+                allowed_year = None
+                if _doc.get("ilk_indirim_yili"):
+                    try:
+                        allowed_year = int(_doc.get("ilk_indirim_yili"))
+                    except Exception:
+                        allowed_year = None
+                if not allowed_year and _doc.get("belge_tarihi"):
+                    try:
+                        # belge_tarihi string olabilir (YYYY-MM-DD / DD.MM.YYYY vb.)
+                        bt = str(_doc.get("belge_tarihi"))
+                        allowed_year = int(bt[:4]) if bt[:4].isdigit() else None
+                    except Exception:
+                        allowed_year = None
+
+                if allowed_year and hesap_donemi < allowed_year:
+                    return jsonify({
+                        "status": "error",
+                        "title": "Geçersiz Dönem",
+                        "message": f"2025/9903 belgesi için {allowed_year} öncesi dönem kaydı oluşturulamaz."
+                    }), 400
+        except Exception:
+            # doğrulama çalışmazsa kaydı tamamen engellemeyelim
+            pass
         
         # ⚠️ TABLO ŞEMANIZDA KESİNLİKLE VAR OLAN SÜTUNLAR İLE EŞLEŞTİRİLDİ
         # Hata veren 'onceki_yatirim_katki_tutari', 'onceki_katki_tutari' gibi alanlar çıkarıldı.

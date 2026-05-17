@@ -1,0 +1,652 @@
+{% extends "layout.html" %}
+
+{% block title %}KDV Tevkifat Hesaplama Aracı (Tam ve Kısmi) | İSFA YMM{% endblock %}
+{% block description %}2026 güncel KDV tevkifat oranları ile tam ve kısmi tevkifat faturası hesaplama, tevkifatlı fatura düzeni ve mahsuben/nakden KDV iadesi şartları.{% endblock %}
+
+{% block content %}
+<!-- ⭐ HERO SECTION -->
+<section class="hero-section py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100 hero-bg-mesh" style="opacity: 0.05;"></div>
+    <div class="container position-relative z-1" data-aos="fade-up">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-warning bg-opacity-25 text-warning rounded-pill mb-3 fw-bold small border border-warning border-opacity-50">
+                    <i class="bi bi-calculator-fill"></i> 2026 KDV Genel Uygulama Tebliği Uyumlu
+                </div>
+                <h1 class="display-5 fw-black mb-3 lh-tight text-white">
+                    KDV Tevkifat <span class="text-warning-gradient">Hesaplama Aracı</span>
+                </h1>
+                <p class="lead text-light mb-0 fw-normal" style="max-width: 700px;">
+                    Tam veya kısmi tevkifat türünü seçin, oranlar otomatik dolsun. Tevkifatlı fatura tutarlarını ve işleme özel <b>mahsuben/nakden iade</b> şartlarını anında görüntüleyin.
+                </p>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-end">
+                <a href="{{ url_for('main.kdv_tevkifat') }}" class="btn btn-outline-warning btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale">
+                    <i class="bi bi-journal-text me-2"></i> Tevkifat Mevzuat Rehberi
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ⭐ BREADCRUMB -->
+<div class="bg-white border-bottom py-3 shadow-sm mb-5">
+    <div class="container d-flex justify-content-between align-items-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Dijital Çözümler</a></li>
+                <li class="breadcrumb-item active fw-bold text-warning-emphasis" aria-current="page">KDV Tevkifat Hesapla</li>
+            </ol>
+        </nav>
+        <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()" title="Sayfayı Yazdır">
+            <i class="bi bi-printer-fill text-primary me-1"></i> Yazdır
+        </button>
+    </div>
+</div>
+
+<div class="container pb-5" id="mainCalcWrapper">
+    <div class="row g-5 justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-5">
+                <div class="card-body p-4 p-lg-5">
+                    
+                    <form id="advancedTevkifatForm" onsubmit="event.preventDefault(); calculateAdvancedTevkifat();">
+                        
+                        <!-- 1. ADIM: TEVKİFAT KAPSAMI SEÇİMİ -->
+                        <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-light">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-xs" style="width: 52px; height: 52px;">
+                                <i class="bi bi-1-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-black text-dark mb-1 fs-5">Tevkifat Kapsamı ve Mevzuat Konusu</h5>
+                                <p class="text-muted small mb-0">İşleminizin tabi olduğu tevkifat türünü ve mevzuat alanını seçiniz</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mb-5">
+                            <div class="col-lg-5">
+                                <label class="form-label fw-bold text-slate-dark small mb-3">Tevkifat Kapsamı Seçimi</label>
+                                <div class="d-flex gap-3">
+                                    <label class="form-check-label flex-grow-1 mb-0 w-100" for="kapsamKismi">
+                                        <input class="form-check-input d-none" type="radio" name="tevkifatKapsam" id="kapsamKismi" value="kismi" checked onchange="updateTevkifatTurleri()">
+                                        <div class="kapsam-card p-4 rounded-4 text-center h-100 shadow-xs bg-white d-flex flex-column justify-content-center align-items-center">
+                                            <i class="bi bi-pie-chart-fill fs-2 mb-2 d-block kapsam-icon text-warning"></i>
+                                            <span class="fw-bold d-block kapsam-title text-dark fs-6">Kısmi Tevkifat</span>
+                                            <span class="small text-muted d-block mt-1">Belirli Oranlarda Kesinti</span>
+                                        </div>
+                                    </label>
+
+                                    <label class="form-check-label flex-grow-1 mb-0 w-100" for="kapsamTam">
+                                        <input class="form-check-input d-none" type="radio" name="tevkifatKapsam" id="kapsamTam" value="tam" onchange="updateTevkifatTurleri()">
+                                        <div class="kapsam-card p-4 rounded-4 text-center h-100 shadow-xs bg-white d-flex flex-column justify-content-center align-items-center">
+                                            <i class="bi bi-shield-lock-fill fs-2 mb-2 d-block kapsam-icon text-primary"></i>
+                                            <span class="fw-bold d-block kapsam-title text-dark fs-6">Tam Tevkifat (%100)</span>
+                                            <span class="small text-muted d-block mt-1">Tam Kesinti Uygulaması</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <label class="form-label fw-bold text-slate-dark small mb-3">İşlem Türü / Mevzuat Konusu</label>
+                                <div class="position-relative h-100" style="max-height: 116px;">
+                                    <select class="form-select premium-select w-100 fs-6 shadow-xs h-100 py-3" id="calcTevkifatTuru" onchange="onTevkifatTuruChange()" style="cursor: pointer; min-height: 116px; white-space: normal;">
+                                        <!-- Dinamik olarak JS ile doldurulacak -->
+                                    </select>
+                                    <div class="position-absolute top-0 end-0 h-100 pe-4 d-flex align-items-center pointer-events-none">
+                                        <i class="bi bi-chevron-down text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. ADIM: MATRAH VE ORANLAR -->
+                        <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-light">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3 d-flex align-items-center justify-content-center shadow-xs" style="width: 52px; height: 52px;">
+                                <i class="bi bi-2-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-black text-dark mb-1 fs-5">İşlem Bedeli ve Oran Parametreleri</h5>
+                                <p class="text-muted small mb-0">Fatura matrahını girin, KDV ve tevkifat oranlarını belirleyin</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 align-items-end mb-5">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-slate-dark small mb-2">İşlem Bedeli (KDV Hariç Matrah)</label>
+                                <div class="input-group shadow-xs">
+                                    <input type="number" class="form-control premium-input fs-5" id="calcMatrah" value="25000" min="0" step="0.01" required oninput="calculateAdvancedTevkifat()">
+                                    <span class="input-group-text premium-addon fs-6">TL</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-slate-dark small mb-2">KDV Oranı</label>
+                                <select class="form-select premium-select fs-5 shadow-xs" id="calcKdvOran" onchange="calculateAdvancedTevkifat()" style="padding: 0.75rem 1.25rem;">
+                                    <option value="20" selected>%20 (Genel Oran)</option>
+                                    <option value="10">%10</option>
+                                    <option value="1">%1</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-slate-dark small mb-2">Tevkifat Oranı (Mevzuat Değeri)</label>
+                                <div class="input-group shadow-xs">
+                                    <input type="text" class="form-control premium-input fs-5 bg-slate-dark text-warning fw-black border-slate-dark text-center" id="calcTevkifatOranGosterim" value="5/10" readonly style="letter-spacing: 2px;">
+                                    <input type="hidden" id="calcTevkifatOranVal" value="0.5">
+                                    <span class="input-group-text bg-slate-dark text-white border-slate-dark small px-3"><i class="bi bi-lock-fill text-warning me-1"></i> Otomatik</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HESAPLAMA SONUÇLARI -->
+                        <div class="row g-4 mb-5" id="calcResults">
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card summary-card h-100 border-0 bg-slate-soft p-4 shadow-sm border-bottom border-secondary">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small text-muted fw-bold text-uppercase tracking-wider">Hesaplanan KDV</span>
+                                        <i class="bi bi-receipt-cutoff fs-4 text-secondary opacity-50"></i>
+                                    </div>
+                                    <h3 class="fw-black text-slate-dark mb-0 fs-4 lh-1" id="resHesaplananKdv">5.000,00 TL</h3>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card summary-card h-100 border-0 bg-amber-soft p-4 shadow-sm border-bottom border-warning">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small text-warning-emphasis fw-bold text-uppercase tracking-wider">Alıcı Tevkifatı (2 No.lu)</span>
+                                        <i class="bi bi-shield-lock-fill fs-4 text-warning"></i>
+                                    </div>
+                                    <h3 class="fw-black text-warning-emphasis mb-0 fs-4 lh-1" id="resAliciTevkifat">2.500,00 TL</h3>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card summary-card h-100 border-0 bg-blue-soft p-4 shadow-sm border-bottom border-primary">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small text-primary fw-bold text-uppercase tracking-wider">Satıcı Beyanı (1 No.lu)</span>
+                                        <i class="bi bi-file-earmark-bar-graph-fill fs-4 text-primary"></i>
+                                    </div>
+                                    <h3 class="fw-black text-primary mb-0 fs-4 lh-1" id="resSaticiKdv">2.500,00 TL</h3>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card summary-card h-100 border-0 bg-emerald-soft p-4 shadow-sm border-bottom border-success">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small text-success fw-bold text-uppercase tracking-wider">Tahsil Edilecek Tutar</span>
+                                        <i class="bi bi-check2-circle fs-4 text-success"></i>
+                                    </div>
+                                    <h3 class="fw-black text-success mb-0 fs-4 lh-1" id="resTahsilEdilecek">27.500,00 TL</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ⭐ 3. ADIM: İADE PROSEDÜRÜ VE BİLGİLENDİRME ALANI -->
+                        <div class="card border-0 bg-primary-soft p-4 p-lg-5 rounded-4 shadow-sm mb-5 border-start border-primary border-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center shadow-xs" style="width: 44px; height: 44px;">
+                                    <i class="bi bi-info-circle-fill fs-5"></i>
+                                </div>
+                                <h5 class="fw-bold text-primary mb-0 fs-5">Seçilen İşleme İlişkin KDV İade Prosedürü & Şartları</h5>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-white rounded-4 shadow-2xs h-100 border border-light d-flex flex-column justify-content-between position-relative overflow-hidden">
+                                        <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
+                                        <div>
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                </div>
+                                                <h6 class="fw-bold text-dark mb-0">Mahsuben İade Şartları</h6>
+                                            </div>
+                                            <p class="small text-muted mb-0 lh-base" id="infoMahsuben">
+                                                Kısmi tevkifat uygulamasından doğan KDV alacaklarının mükellefin kendisinin veya ortaklarının vergi/SGK borçlarına mahsuben iadesinde miktar sınırlaması olmaksızın YMM tasdik raporu, VİR veya teminat aranmaz. Standart iade dilekçesi ve listelerin verilmesi yeterlidir.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-4 bg-white rounded-4 shadow-2xs h-100 border border-light d-flex flex-column justify-content-between position-relative overflow-hidden">
+                                        <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
+                                        <div>
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-cash-coin"></i>
+                                                </div>
+                                                <h6 class="fw-bold text-dark mb-0">Nakden İade Şartları</h6>
+                                            </div>
+                                            <p class="small text-muted mb-0 lh-base" id="infoNakden">
+                                                Nakden iade taleplerinde 50.000 TL'ye kadar olan kısım teminatsız ve YMM raporsuz iade edilir. 50.000 TL'yi aşan nakden iade talepleri ise YMM Tasdik Raporu, Vergi İnceleme Raporu (VİR) veya Teminat mektubu karşılığında yerine getirilir.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-white rounded-4 border-start border-danger border-4 shadow-2xs d-flex align-items-center gap-3 small text-dark">
+                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-black text-danger d-block mb-1 fs-6">Önemli Kural (35 Seri No.lu KDV Tebliği Değişikliği - Yürürlük: 01.03.2021):</span> 
+                                    <span class="text-muted">Tevkifat uygulamasından doğan KDV alacaklarının iade edilebilmesi için, alıcı tarafından 2 No.lu KDV Beyannamesi ile beyan edilen ve tahakkuk ettirilen KDV’nin <b>ödenmiş olması şarttır</b>. <i>(Genel bütçe kapsamındaki idarelere yapılan işlemlerde ise hakedişin harcama yetkilisince onaylanmış olması yeterlidir, ödeme şartı aranmaz).</i></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FATURA GÖRÜNÜMÜ -->
+                        <div class="card border-0 bg-slate-dark text-white rounded-4 shadow-lg overflow-hidden mb-2">
+                            <div class="card-header bg-white bg-opacity-10 py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-receipt text-warning fs-4 me-2"></i>
+                                    <h6 class="fw-bold text-white mb-0 fs-6">Örnek Tevkifatlı Fatura Düzeni & Gösterim Formatı</h6>
+                                </div>
+                                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill small">Resmi Format</span>
+                            </div>
+                            <div class="card-body p-4 p-lg-5">
+                                <div class="row g-4 justify-content-between align-items-center mb-4 pb-4 border-bottom border-light border-opacity-10">
+                                    <div class="col-md-6">
+                                        <span class="text-white-50 small d-block mb-1">SATICI FİRMASI</span>
+                                        <h5 class="fw-bold text-white mb-0 fs-5">Örnek Satıcı Ltd. Şti.</h5>
+                                    </div>
+                                    <div class="col-md-6 text-md-end">
+                                        <span class="text-white-50 small d-block mb-1">ALICI FİRMASI / KURUMLAR</span>
+                                        <h5 class="fw-bold text-warning mb-0 fs-5">Tevkifat Uygulayan Kurum / Şirket</h5>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-borderless text-white mb-0 align-middle">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-white-50 fw-semibold ps-0" style="width: 320px;">İşlem Bedeli (KDV Hariç Matrah)</td>
+                                                <td class="fw-bold text-end pe-0 fs-5" id="fatMatrah">25.000,00 TL</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-white-50 fw-semibold ps-0">Hesaplanan KDV (%20)</td>
+                                                <td class="fw-bold text-end pe-0 fs-5" id="fatKdv">5.000,00 TL</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-white-50 fw-semibold ps-0">Tevkifat Oranı</td>
+                                                <td class="fw-bold text-warning text-end pe-0 fs-5" id="fatOran">5/10</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-white-50 fw-semibold ps-0">Alıcı Tarafından Tevkif Edilecek KDV (2 No.lu)</td>
+                                                <td class="fw-bold text-warning text-end pe-0 fs-5" id="fatTevkifat">2.500,00 TL</td>
+                                            </tr>
+                                            <tr class="border-top border-light border-opacity-25">
+                                                <td class="text-white-50 fw-semibold ps-0 pt-3">Tevkifat Dahil Toplam Tutar</td>
+                                                <td class="fw-bold text-end pe-0 fs-5 pt-3" id="fatDahil">30.000,00 TL</td>
+                                            </tr>
+                                            <tr class="bg-white bg-opacity-10 rounded-3">
+                                                <td class="text-warning fw-black ps-3 py-3 fs-5 rounded-start">Tevkifattan Sonra Tahsil Edilecek Tutar</td>
+                                                <td class="fw-black text-success text-end pe-3 py-3 fs-4 rounded-end" id="fatTahsil">27.500,00 TL</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="text-white-50 fst-italic text-end small pt-3 pe-0" id="fatYazi">Yalnız YirmiyedibinbeşyüzTLdir.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ⭐ ÖZEL STİLLER & JAVASCRIPT FONKSİYONLARI -->
+<style>
+    .fw-black { font-weight: 900; }
+    .lh-tight { line-height: 1.2; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .text-warning-gradient {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .bg-primary-soft { background-color: #eff6ff; }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .shadow-2xs { box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .hover-scale { transition: transform 0.2s ease; }
+    .hover-scale:hover { transform: translateY(-3px); }
+    
+    /* Kurumsal Premium Renk Paleti ve Kart Stilleri */
+    .bg-slate-dark { background-color: #0f172a; }
+    .bg-slate-light { background-color: #f1f5f9; }
+    .text-slate-dark { color: #1e293b; }
+    .bg-amber-soft { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #f59e0b !important; }
+    .bg-blue-soft { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #3b82f6 !important; }
+    .bg-emerald-soft { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: #10b981 !important; }
+    .bg-slate-soft { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-color: #64748b !important; }
+    
+    .kapsam-card {
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid #e2e8f0;
+    }
+    .kapsam-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+    }
+    input[type="radio"]:checked + .kapsam-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-color: #f59e0b;
+        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2);
+    }
+    input[type="radio"]:checked + .kapsam-card .kapsam-title {
+        color: #ffffff !important;
+    }
+    input[type="radio"]:checked + .kapsam-card .kapsam-icon {
+        color: #f59e0b !important;
+    }
+    
+    .premium-select {
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.85rem 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+    }
+    .premium-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+    
+    .premium-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.85rem 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        transition: all 0.2s;
+    }
+    .premium-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+    
+    .premium-addon {
+        background-color: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-left: none;
+        color: #64748b;
+        font-weight: 700;
+    }
+    
+    .summary-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 1rem;
+        border-bottom-width: 5px !important;
+    }
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+</style>
+
+<script>
+    // TEVKİFAT VERİ SETİ (İşlem Türleri, Oranlar ve İade Kuralları)
+    const tevkifatData = {
+        kismi: [
+            { 
+                id: "yapim", 
+                text: "Yapım İşleri ile Mühendislik-Mimarlık ve Etüt-Proje Hizmetleri", 
+                oranGosterim: "4/10", oranVal: 0.4, 
+                mahsuben: "50.000 TL'yi aşmayan mahsuben iade talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri VİR veya YMM Raporuna göre yerine getirilir (Teminat verilirse YMM raporu ile çözülür).", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "etut", 
+                text: "Etüt, Plan-Proje, Danışmanlık, Denetim ve Benzeri Hizmetler", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "bakim", 
+                text: "Makine, Teçhizat, Demirbaş ve Taşıtlara Ait Bakım ve Onarım Hizmetleri", 
+                oranGosterim: "7/10", oranVal: 0.7, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "yemek", 
+                text: "Yemek Servis ve Organizasyon Hizmetleri", 
+                oranGosterim: "5/10", oranVal: 0.5, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "isgucu", 
+                text: "İşgücü Temin Hizmetleri & Özel Güvenlik Hizmetleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "denetim", 
+                text: "Yapı Denetim Hizmetleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "fason", 
+                text: "Fason Tekstil, Konfeksiyon, Çanta/Ayakkabı Dikim ve Aracılık İşleri", 
+                oranGosterim: "7/10", oranVal: 0.7, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "turistik", 
+                text: "Turistik Mağazalara Verilen Müşteri Bulma / Götürme Hizmetleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "spor", 
+                text: "Spor Kulüplerinin Yayın, Reklâm ve İsim Hakkı Gelirleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsuben iade talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri VİR veya YMM Raporuna göre yerine getirilir (Teminat verilirse YMM raporu ile çözülür).", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "temizlik", 
+                text: "Temizlik, Çevre ve Bahçe Bakım Hizmetleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "servis", 
+                text: "Servis Taşımacılığı Hizmetleri (Personel / Öğrenci Servisi)", 
+                oranGosterim: "5/10", oranVal: 0.5, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "tasima", 
+                text: "Karayolu Yük Taşımacılığı Hizmetleri (Kargo İşletmeciliği Hariç)", 
+                oranGosterim: "2/10", oranVal: 0.2, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "baski", 
+                text: "Her Türlü Baskı ve Basım Hizmetleri", 
+                oranGosterim: "7/10", oranVal: 0.7, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "reklam", 
+                text: "Ticari Reklam Hizmetleri (Danışmanlık, Tasarım ve Yayın Dahil)", 
+                oranGosterim: "3/10", oranVal: 0.3, 
+                mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+            },
+            { 
+                id: "diger_hiz", 
+                text: "Diğer Hizmetler (Tebliğde Özel Olarak Belirlenmeyen Tüm Hizmetler)", 
+                oranGosterim: "5/10", oranVal: 0.5, 
+                mahsuben: "50.000 TL'yi aşmayan mahsuben iade talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri VİR veya YMM Raporuna göre yerine getirilir (Teminat verilirse YMM raporu ile çözülür).", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "kulce", 
+                text: "Külçe Metal Teslimleri (Bakır, Çinko, Alüminyum, Kurşun, Demir-Çelik)", 
+                oranGosterim: "7/10", oranVal: 0.7, 
+                mahsuben: "Mahsuben iade talepleri miktarına bakılmaksızın (sınır olmaksızın) Vergi İnceleme Raporu (VİR), YMM Raporu ve Teminat aranmadan yerine getirilir.", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "hurda", 
+                text: "Hurda ve Atık Teslimleri ile Metal/Plastik/Kâğıt Hammadde Teslimleri", 
+                oranGosterim: "9/10", oranVal: 0.9, 
+                mahsuben: "Mahsuben iade talepleri miktarına bakılmaksızın (sınır olmaksızın) Vergi İnceleme Raporu (VİR), YMM Raporu ve Teminat aranmadan yerine getirilir.", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "agac", 
+                text: "Ağaç ve Orman Ürünleri Teslimi (Tomruk, Kereste, Talaş vb.)", 
+                oranGosterim: "5/10", oranVal: 0.5, 
+                mahsuben: "Mahsuben iade talepleri miktarına bakılmaksızın (sınır olmaksızın) Vergi İnceleme Raporu (VİR), YMM Raporu ve Teminat aranmadan yerine getirilir.", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "demir_celik", 
+                text: "Demir-Çelik Ürünlerinin Teslimi (Çubuk, Profil, Sac, Boru vb.)", 
+                oranGosterim: "5/10", oranVal: 0.5, 
+                mahsuben: "Mahsuben iade talepleri miktarına bakılmaksızın (sınır olmaksızın) Vergi İnceleme Raporu (VİR), YMM Raporu ve Teminat aranmadan yerine getirilir.", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            },
+            { 
+                id: "diger_tes", 
+                text: "Diğer Teslimler (Devlet Malzeme Ofisine Yapılan Teslimler)", 
+                oranGosterim: "2/10", oranVal: 0.2, 
+                mahsuben: "Mahsuben iade talepleri miktarına bakılmaksızın (sınır olmaksızın) Vergi İnceleme Raporu (VİR), YMM Raporu ve Teminat aranmadan yerine getirilir.", 
+                nakden: "50.000 TL'yi aşmayan nakden iade talepleri Teminat, VİR ve YMM raporu aranılmadan yerine getirilir. 50.000 TL ve üzerindeki nakden iade talepleri ise VİR veya YMM Raporu ile yerine getirilir (Aşan kısım için teminat verilirse VİR veya YMM raporu ile çözülür)." 
+            }
+        ],
+        tam: [
+            { 
+                id: "yurtdisi", 
+                text: "İkametgâhı, İşyeri, Kanuni Merkezi Türkiye'de Bulunmayanların Hizmetleri", 
+                oranGosterim: "10/10 (%100)", oranVal: 1.0, 
+                mahsuben: "Tam tevkifat kapsamındaki mahsuben iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir.", 
+                nakden: "Tam tevkifat kapsamındaki nakden iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir." 
+            },
+            { 
+                id: "serbest", 
+                text: "Serbest Meslek Faaliyeti Çerçevesinde Yapılan Teslim ve Hizmetler (GVK Madde 18)", 
+                oranGosterim: "10/10 (%100)", oranVal: 1.0, 
+                mahsuben: "Tam tevkifat kapsamındaki mahsuben iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir.", 
+                nakden: "Tam tevkifat kapsamındaki nakden iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir." 
+            },
+            { 
+                id: "kiralama", 
+                text: "Kiralama ve Reklâm Verme İşlemleri", 
+                oranGosterim: "10/10 (%100)", oranVal: 1.0, 
+                mahsuben: "Tam tevkifat kapsamındaki mahsuben iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir.", 
+                nakden: "Tam tevkifat kapsamındaki nakden iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir." 
+            },
+            { 
+                id: "istege", 
+                text: "İsteğe Bağlı Tam Tevkifat Uygulaması (1 Yıllık Sözleşmeli)", 
+                oranGosterim: "10/10 (%100)", oranVal: 1.0, 
+                mahsuben: "İsteğe bağlı tam tevkifat kapsamındaki mahsuben iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir.", 
+                nakden: "İsteğe bağlı tam tevkifat kapsamındaki nakden iade talepleri, alıcı tarafından 2 No.lu KDV beyannamesi ile tevkif edilen verginin ödenmiş olması şartıyla genel iade esasları çerçevesinde yerine getirilir." 
+            }
+        ]
+    };
+
+    // Kapsam Değiştiğinde Açılır Menüyü Güncelle
+    function updateTevkifatTurleri() {
+        const isKismi = document.getElementById('kapsamKismi').checked;
+        const select = document.getElementById('calcTevkifatTuru');
+        select.innerHTML = '';
+        
+        const items = isKismi ? tevkifatData.kismi : tevkifatData.tam;
+        items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = item.text;
+            select.appendChild(opt);
+        });
+        
+        onTevkifatTuruChange();
+    }
+
+    // Seçilen Tür Değiştiğinde Oranları ve İade Açıklamalarını Güncelle
+    function onTevkifatTuruChange() {
+        const isKismi = document.getElementById('kapsamKismi').checked;
+        const selectedId = document.getElementById('calcTevkifatTuru').value;
+        const items = isKismi ? tevkifatData.kismi : tevkifatData.tam;
+        
+        const currentItem = items.find(i => i.id === selectedId);
+        if (!currentItem) return;
+        
+        // Oranları Güncelle
+        document.getElementById('calcTevkifatOranGosterim').value = currentItem.oranGosterim;
+        document.getElementById('calcTevkifatOranVal').value = currentItem.oranVal;
+        
+        // İade Bilgilerini Güncelle
+        document.getElementById('infoMahsuben').innerText = currentItem.mahsuben;
+        document.getElementById('infoNakden').innerText = currentItem.nakden;
+        
+        calculateAdvancedTevkifat();
+    }
+
+    // Ana Hesaplama Fonksiyonu
+    function calculateAdvancedTevkifat() {
+        const matrahInput = document.getElementById('calcMatrah');
+        const kdvOranSelect = document.getElementById('calcKdvOran');
+        const tevkifatOranValInput = document.getElementById('calcTevkifatOranVal');
+        
+        if (!matrahInput || !kdvOranSelect || !tevkifatOranValInput) return;
+        
+        const matrah = parseFloat(matrahInput.value) || 0;
+        const kdvOran = parseFloat(kdvOranSelect.value) / 100;
+        const tevkifatOran = parseFloat(tevkifatOranValInput.value);
+        
+        const hesaplananKdv = matrah * kdvOran;
+        const aliciTevkifat = hesaplananKdv * tevkifatOran;
+        const saticiKdv = hesaplananKdv - aliciTevkifat;
+        const tahsilEdilecek = matrah + saticiKdv;
+        const tevkifatDahil = matrah + hesaplananKdv;
+        
+        const formatTL = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+        
+        // Kartları Güncelle
+        document.getElementById('resHesaplananKdv').innerText = formatTL(hesaplananKdv);
+        document.getElementById('resAliciTevkifat').innerText = formatTL(aliciTevkifat);
+        document.getElementById('resSaticiKdv').innerText = formatTL(saticiKdv);
+        document.getElementById('resTahsilEdilecek').innerText = formatTL(tahsilEdilecek);
+        
+        // Fatura Tablosunu Güncelle
+        document.getElementById('fatMatrah').innerText = formatTL(matrah);
+        document.getElementById('fatKdv').innerText = formatTL(hesaplananKdv);
+        document.getElementById('fatOran').innerText = document.getElementById('calcTevkifatOranGosterim').value.split(' ')[0];
+        document.getElementById('fatTevkifat').innerText = formatTL(aliciTevkifat);
+        document.getElementById('fatDahil').innerText = formatTL(tevkifatDahil);
+        document.getElementById('fatTahsil').innerText = formatTL(tahsilEdilecek);
+        
+        // Yalnız Yazısı
+        document.getElementById('fatYazi').innerText = `Yalnız ${new Intl.NumberFormat('tr-TR').format(Math.floor(tahsilEdilecek))} TLdir.`;
+    }
+
+    // Sayfa Yüklendiğinde Başlat
+    document.addEventListener("DOMContentLoaded", () => {
+        updateTevkifatTurleri();
+    });
+</script>
+{% endblock %}

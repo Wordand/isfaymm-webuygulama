@@ -122,4 +122,10 @@ def tdhp():
     )
 
 
+# 🧮 KDV Tevkifat Hesaplama Aracı
+@calculators_bp.route("/kdv-tevkifat")
+def kdv_tevkifat():
+    return render_template("calculators/kdv_tevkifat.html")
+
+
 # deploy trigger – no functional change

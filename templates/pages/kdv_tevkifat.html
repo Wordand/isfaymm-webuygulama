@@ -214,186 +214,104 @@ KDV Tevkifat Oranları (9/10, 7/10, 5/10, 4/10, 3/10, 2/10), Belirlenmiş Alıc�
                 </div>
             </section>
 
-            <!-- ⭐ 2️⃣ İNTERAKTİF TEVKİFAT HESAPLAMA MOTORU (Kullanıcı İçin Çok Faydalı Alan) -->
+            <!-- ⭐ 2️⃣ İNTERAKTİF TEVKİFAT HESAPLAMA MOTORU YÖNLENDİRMESİ -->
             <section id="hesaplamaMotoru" class="mb-5 searchable-section">
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
                     <div class="card-header p-4 bg-warning bg-opacity-25 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <div class="d-flex align-items-center gap-3">
                             <div class="feature-icon bg-warning text-dark fs-4 shadow-sm"><i class="bi bi-calculator-fill"></i></div>
                             <div>
-                                <h3 class="fw-bold mb-0 text-dark">KDV Tevkifat Hesaplama Aracı</h3>
-                                <p class="small text-muted mb-0">Fatura matrahını ve tevkifat oranını seçin, tüm tutarları anında görüntüleyin.</p>
+                                <h3 class="fw-bold mb-0 text-dark">KDV Tevkifat Hesaplama & İade Analiz Motoru</h3>
+                                <p class="small text-muted mb-0">Tam ve Kısmi tevkifat faturası oluşturun, otomatik oranları ve iade şartlarını inceleyin.</p>
                             </div>
                         </div>
-                        <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-xs">2026 Uyumlu</span>
+                        <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-xs">2026 Yapay Zeka Destekli</span>
                     </div>
-                    <div class="card-body p-4 p-lg-5">
-                        <form id="tevkifatForm" onsubmit="event.preventDefault(); calculateTevkifat();">
-                            <div class="row g-4 align-items-end mb-4">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark small mb-2">İşlem Bedeli (KDV Hariç Matrah - TL)</label>
-                                    <div class="input-group input-group-lg shadow-xs">
-                                        <input type="number" class="form-control border-light fw-bold text-primary" id="calcMatrah" value="10000" min="0" step="0.01" required oninput="calculateTevkifat()">
-                                        <span class="input-group-text bg-light border-light fw-bold">TL</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark small mb-2">KDV Oranı</label>
-                                    <select class="form-select form-select-lg border-light fw-bold shadow-xs" id="calcKdvOran" onchange="calculateTevkifat()">
-                                        <option value="20" selected>%20 (Genel Oran)</option>
-                                        <option value="10">%10</option>
-                                        <option value="1">%1</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold text-dark small mb-2">Tevkifat Oranı / Türü</label>
-                                    <select class="form-select form-select-lg border-light fw-bold shadow-xs text-primary" id="calcTevkifatOran" onchange="calculateTevkifat()">
-                                        <option value="0.9">9/10 (Örn: İşgücü, Yapı Denetim, Danışmanlık)</option>
-                                        <option value="0.7">7/10 (Örn: Fason Tekstil, Bakım Onarım, Baskı)</option>
-                                        <option value="0.5" selected>5/10 (Örn: Diğer Hizmetler, Yemek, Demir Çelik, Kereste)</option>
-                                        <option value="0.4">4/10 (Örn: Yapım İşleri / İnşaat Taahhüt)</option>
-                                        <option value="0.3">3/10 (Örn: Ticari Reklam Hizmetleri)</option>
-                                        <option value="0.2">2/10 (Örn: Karayolu Yük Taşıma, DMO Teslimleri)</option>
-                                        <option value="1.0">10/10 (Tam Tevkifat)</option>
-                                        <option value="0">Tevkifatsız (0/10)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Dinamik Sonuç Kartları -->
-                            <div class="row g-4 mt-2" id="calcResults">
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="card h-100 border-0 bg-light p-3 rounded-4 shadow-xs text-center border-bottom border-secondary border-4">
-                                        <span class="small text-muted fw-bold mb-1">Hesaplanan KDV</span>
-                                        <h4 class="fw-bold text-dark mb-0" id="resHesaplananKdv">2.000,00 TL</h4>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="card h-100 border-0 bg-warning bg-opacity-10 p-3 rounded-4 shadow-xs text-center border-bottom border-warning border-4">
-                                        <span class="small text-warning-emphasis fw-bold mb-1">Alıcı Tevkifatı (2 No.lu KDV)</span>
-                                        <h4 class="fw-bold text-warning-emphasis mb-0" id="resAliciTevkifat">1.000,00 TL</h4>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="card h-100 border-0 bg-primary bg-opacity-10 p-3 rounded-4 shadow-xs text-center border-bottom border-primary border-4">
-                                        <span class="small text-primary fw-bold mb-1">Satıcı Beyanı (1 No.lu KDV)</span>
-                                        <h4 class="fw-bold text-primary mb-0" id="resSaticiKdv">1.000,00 TL</h4>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="card h-100 border-0 bg-success bg-opacity-10 p-3 rounded-4 shadow-xs text-center border-bottom border-success border-4">
-                                        <span class="small text-success fw-bold mb-1">Tahsil Edilecek Toplam Tutar</span>
-                                        <h4 class="fw-bold text-success mb-0" id="resTahsilEdilecek">11.000,00 TL</h4>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fatura Görünümü / Belge Düzeni -->
-                            <div class="mt-5 p-4 bg-light rounded-4 border border-light shadow-xs">
-                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-file-earmark-text-fill text-primary me-2"></i>Örnek Fatura Düzeni & Gösterim Formatı</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-borderless small mb-0 align-middle">
-                                        <tbody>
-                                            <tr><td class="text-muted fw-semibold" style="width: 250px;">İşlem Bedeli (KDV Hariç)</td><td class="fw-bold text-dark text-end" id="fatMatrah">10.000,00 TL</td></tr>
-                                            <tr><td class="text-muted fw-semibold">Hesaplanan KDV</td><td class="fw-bold text-dark text-end" id="fatKdv">2.000,00 TL</td></tr>
-                                            <tr><td class="text-muted fw-semibold">Tevkifat Oranı</td><td class="fw-bold text-primary text-end" id="fatOran">5/10</td></tr>
-                                            <tr><td class="text-muted fw-semibold">Alıcı Tarafından Tevkif Edilecek KDV</td><td class="fw-bold text-warning-emphasis text-end" id="fatTevkifat">1.000,00 TL</td></tr>
-                                            <tr class="border-top border-secondary border-opacity-25"><td class="text-muted fw-semibold">Tevkifat Dahil Toplam Tutar</td><td class="fw-bold text-dark text-end" id="fatDahil">12.000,00 TL</td></tr>
-                                            <tr><td class="text-primary fw-bold fs-6">Tevkifattan Sonra Tahsil Edilecek Tutar</td><td class="fw-bold text-success text-end fs-6" id="fatTahsil">11.000,00 TL</td></tr>
-                                            <tr><td colspan="2" class="text-muted fst-italic text-end small pt-2" id="fatYazi">Yalnız OnbirbinTLdir.</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </form>
+                    <div class="card-body p-4 p-lg-5 text-center bg-light bg-opacity-50">
+                        <i class="bi bi-display text-warning mb-3 d-inline-block" style="font-size: 3.5rem;"></i>
+                        <h4 class="fw-bold text-dark mb-3">Gelişmiş Tevkifat Hesaplama Motoru Yayında!</h4>
+                        <p class="text-muted mb-4 mx-auto" style="max-width: 650px;">
+                            İşlem türünü seçtiğinizde tevkifat oranını otomatik dolduran, <b>Mahsuben İade</b> ve <b>Nakden İade</b> limitlerini anında hesaplayan yeni nesil aracımızı hemen deneyin.
+                        </p>
+                        <a href="{{ url_for('calculators.kdv_tevkifat') }}" class="btn btn-warning btn-lg rounded-pill fw-bold px-5 py-3 shadow hover-scale text-dark">
+                            <i class="bi bi-calculator me-2"></i> Hesaplama Aracına Git
+                        </a>
                     </div>
                 </div>
             </section>
 
-            <!-- 3️⃣ TAM TEVKİFAT UYGULAMASI -->
+            <!-- 3️⃣ TAM TEVKİFAT UYGULAMASI (Yenilenmiş Modern Grid Kart Tasarımı) -->
             <section id="tamTevkifat" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-shield-lock-fill"></i></div>
                     <h2 class="fw-bold mb-0 text-dark">3. Tam Tevkifat Uygulaması (%100 Kesinti)</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
-                    <p class="lead text-dark fw-normal">
+                    <p class="lead text-dark fw-normal mb-4">
                         Bu bölüm kapsamındaki işlemlerde, işlem bedeli üzerinden hesaplanan KDV'nin <b>tamamı (%100'ü)</b>, mal veya hizmetin alıcıları tarafından tevkifata tabi tutulur.
                     </p>
 
-                    <div class="accordion shadow-xs rounded-4 overflow-hidden mt-4" id="accordionTamTevkifat">
+                    <div class="row g-4 mt-2">
                         <!-- 1. Yurt Dışı Hizmetler -->
-                        <div class="accordion-item border-0 border-bottom">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button fw-bold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#tam1">
-                                    <i class="bi bi-globe me-2 text-primary"></i> 3.1. İkametgâhı, İşyeri, Kanuni Merkezi ve İş Merkezi Türkiye'de Bulunmayanlar
-                                </button>
-                            </h2>
-                            <div id="tam1" class="accordion-collapse collapse show" data-bs-parent="#accordionTamTevkifat">
-                                <div class="accordion-body p-4 small text-muted">
-                                    <p class="mb-3 text-dark">
-                                        İkametgâhı, işyeri, kanuni merkezi ve iş merkezi Türkiye'de bulunmayanların Türkiye'de yaptığı hizmetler ile bunların yurt dışında yaptığı ancak Türkiye'de faydalanılan hizmetler KDV'ye tabidir. KDV'nin tamamı, hizmetten faydalanan yurt içindeki muhatap tarafından sorumlu sıfatıyla beyan edilip ödenecektir.
-                                    </p>
-                                    <h6 class="fw-bold text-dark mb-2">Önemli Örnekler:</h6>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="mb-2">• Türkiye'de inşa edilecek bir AVM için yurt dışında çizilip gönderilen mimari proje hizmeti.</li>
-                                        <li class="mb-2">• Türkiye'de faaliyette bulunan enerji santralinin işletilmesine ilişkin yurt dışından verilen danışmanlık.</li>
-                                        <li class="mb-2">• KDV mükellefiyeti olmayan genel bütçeli bir idareye yurt dışından verilen bilgisayar yazılım hizmeti.</li>
-                                        <li>• KDV mükellefi olmayan gerçek kişilere elektronik ortamda sunulan hizmetler (3 No.lu KDV Beyannamesi ile elektronik hizmet sunucuları tarafından beyan edilir).</li>
-                                    </ul>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-xs border-top border-primary border-4">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-globe text-primary fs-4"></i>
+                                    <h5 class="fw-bold text-dark mb-0">3.1. Yurt Dışı Hizmetler</h5>
+                                </div>
+                                <p class="small text-muted mb-3">
+                                    İkametgâhı, işyeri, kanuni merkezi ve iş merkezi Türkiye'de bulunmayanların Türkiye'de yaptığı hizmetler ile bunların yurt dışında yaptığı ancak Türkiye'de faydalanılan hizmetler KDV'ye tabidir ve KDV'nin tamamı alıcı tarafından ödenir.
+                                </p>
+                                <div class="mt-auto p-3 bg-white rounded-3 shadow-2xs border-start border-primary border-3 small text-muted">
+                                    <b class="text-dark">Örnekler:</b> Mimari çizimler, yurt dışı danışmanlık, genel bütçeli kurumlara yazılım hizmeti.
                                 </div>
                             </div>
                         </div>
 
                         <!-- 2. Serbest Meslek -->
-                        <div class="accordion-item border-0 border-bottom">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-bold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#tam2">
-                                    <i class="bi bi-pen-fill me-2 text-primary"></i> 3.2. Serbest Meslek Faaliyeti Çerçevesinde Yapılan Teslim ve Hizmetler (GVK Madde 18)
-                                </button>
-                            </h2>
-                            <div id="tam2" class="accordion-collapse collapse" data-bs-parent="#accordionTamTevkifat">
-                                <div class="accordion-body p-4 small text-muted">
-                                    <p class="mb-3 text-dark">
-                                        193 sayılı Gelir Vergisi Kanununun 18 inci maddesi kapsamına giren teslim ve hizmetleri (müellif, tercüman, heykeltraş, hattat, ressam, bestekâr vb.) münhasıran aynı Kanunun 94 üncü maddesinde belirtilen kişi, kurum ve kuruluşlara yapanların hesaplayacağı KDV'nin tamamı, bu kişi veya kuruluşlar tarafından sorumlu sıfatıyla beyan edilir.
-                                    </p>
-                                    <div class="p-3 bg-light rounded-3 border-start border-primary border-4 mb-0">
-                                        <h6 class="fw-bold text-dark mb-1">Hesaplama Örneği (Telif Ödemesi):</h6>
-                                        <p class="small mb-0">Net 200 TL telif ödemesi için GV Stopajı (%17) ve KDV (%20) hesabı: Brüt Tutar = 200 / 0.83 = 240,96 TL. GV Stopajı = 40,96 TL. KDV = 240,96 x 0.20 = 48,19 TL. Sorumlu dergi işletmesi 48,19 TL KDV'yi 2 No.lu KDV beyannamesi ile beyan edip ödeyecektir.</p>
-                                    </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-xs border-top border-warning border-4">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-pen-fill text-warning fs-4"></i>
+                                    <h5 class="fw-bold text-dark mb-0">3.2. Serbest Meslek (GVK Madde 18)</h5>
+                                </div>
+                                <p class="small text-muted mb-3">
+                                    GVK 18. madde kapsamına giren teslim ve hizmetleri (müellif, tercüman, heykeltraş, ressam vb.) GVK 94. maddede sayılan kişi ve kurumlara yapanların hesaplayacağı KDV'nin tamamı alıcılar tarafından beyan edilir.
+                                </p>
+                                <div class="mt-auto p-3 bg-white rounded-3 shadow-2xs border-start border-warning border-3 small text-muted">
+                                    <b class="text-dark">Örnek Hesaplama:</b> 200 TL net telif için %20 KDV (48,19 TL) sorumlu yayınevi tarafından beyan edilir.
                                 </div>
                             </div>
                         </div>
 
                         <!-- 3. Kiralama & Reklam -->
-                        <div class="accordion-item border-0 border-bottom">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-bold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#tam3">
-                                    <i class="bi bi-building me-2 text-primary"></i> 3.3. Kiralama ve Reklâm Verme İşlemleri
-                                </button>
-                            </h2>
-                            <div id="tam3" class="accordion-collapse collapse" data-bs-parent="#accordionTamTevkifat">
-                                <div class="accordion-body p-4 small text-muted">
-                                    <h6 class="fw-bold text-dark mb-2">Kiralama İşlemleri (GVK Madde 70):</h6>
-                                    <p class="mb-3">Kiraya verenin başka faaliyetleri nedeniyle KDV mükellefiyetinin bulunmaması ve kiracının KDV mükellefi (veya belirlenmiş alıcı) olması şartlarının birlikte var olması halinde, kiralama hizmetine ait KDV kiracı tarafından sorumlu sıfatıyla beyan edilir.</p>
-                                    <h6 class="fw-bold text-dark mb-2">Reklâm Verme İşlemleri:</h6>
-                                    <p class="mb-0">KDV mükellefi olan gerçek/tüzel kişilerin, KDV mükellefiyeti olmayan amatör spor kulüplerine (forma reklamı), şahıslara ait binalara (duvar/pano reklamı) veya dergi/kitaplara verdikleri reklamlar dolayısıyla hesaplanan KDV, reklamı verenler tarafından tam tevkifata tabi tutulur.</p>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-xs border-top border-info border-4">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-building text-info fs-4"></i>
+                                    <h5 class="fw-bold text-dark mb-0">3.3. Kiralama ve Reklam Verme</h5>
+                                </div>
+                                <p class="small text-muted mb-3">
+                                    KDV mükellefiyeti bulunmayanlardan yapılan kiralama işlemleri ile amatör spor kulüplerine veya şahıslara ait binalara (duvar/pano) verilen reklam hizmetlerine ait KDV'nin tamamı kiracı/reklam veren tarafından tevkif edilir.
+                                </p>
+                                <div class="mt-auto p-3 bg-white rounded-3 shadow-2xs border-start border-info border-3 small text-muted">
+                                    <b class="text-dark">Kapsam:</b> GVK 70. madde kiralamaları ve forma/pano reklam bedelleri.
                                 </div>
                             </div>
                         </div>
 
                         <!-- 4. İsteğe Bağlı Tam Tevkifat -->
-                        <div class="accordion-item border-0">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-bold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#tam4">
-                                    <i class="bi bi-sliders me-2 text-primary"></i> 3.4. İsteğe Bağlı Tam Tevkifat Uygulaması
-                                </button>
-                            </h2>
-                            <div id="tam4" class="accordion-collapse collapse" data-bs-parent="#accordionTamTevkifat">
-                                <div class="accordion-body p-4 small text-muted">
-                                    <p class="mb-0 text-dark">
-                                        Mükellefler, yazılı bir sözleşme düzenleyerek <b>bir yıl süreyle</b> anlaştıkları satıcı mükelleflerden, kısmi tevkifat kapsamındaki işlemlere (yapım işlerinden bağımsız etüt-proje, diğer hizmetler ve diğer teslimler hariç) ilişkin alımlarında hesaplanan KDV'nin tamamını sorumlu sıfatıyla beyan edip ödeyebilirler. Sözleşmenin vergi dairesine bildirilmesi zorunludur.
-                                    </p>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light p-4 rounded-4 shadow-xs border-top border-success border-4">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-sliders text-success fs-4"></i>
+                                    <h5 class="fw-bold text-dark mb-0">3.4. İsteğe Bağlı Tam Tevkifat</h5>
+                                </div>
+                                <p class="small text-muted mb-3">
+                                    Mükellefler, yazılı bir sözleşme düzenleyerek <b>1 yıl süreyle</b> anlaştıkları satıcılardan kısmi tevkifat kapsamındaki alımlarında hesaplanan KDV'nin tamamını sorumlu sıfatıyla beyan edip ödeyebilirler.
+                                </p>
+                                <div class="mt-auto p-3 bg-white rounded-3 shadow-2xs border-start border-success border-3 small text-muted">
+                                    <b class="text-dark">Şart:</b> 1 yıllık yazılı sözleşme ve vergi dairesine bildirim zorunluluğu.
                                 </div>
                             </div>
                         </div>
@@ -476,9 +394,11 @@ KDV Tevkifat Oranları (9/10, 7/10, 5/10, 4/10, 3/10, 2/10), Belirlenmiş Alıc�
                         <table class="table table-hover align-middle mb-0" id="tevkifatTable">
                             <thead class="table-light text-dark fw-bold small text-uppercase">
                                 <tr>
-                                    <th class="ps-4 py-3" style="width: 45%;">İşlem Türü / Mevzuat Konusu</th>
-                                    <th class="py-3" style="width: 20%;">Tevkifat Oranı</th>
-                                    <th class="py-3" style="width: 35%;">Tevkifat Uygulayacak Alıcılar</th>
+                                    <th class="ps-4 py-3" style="width: 30%;">İşlem Türü / Mevzuat Konusu</th>
+                                    <th class="py-3" style="width: 12%;">Tevkifat Oranı</th>
+                                    <th class="py-3" style="width: 28%;">Tevkifat Uygulayacak Alıcılar</th>
+                                    <th class="py-3" style="width: 15%;">Mahsuben İade</th>
+                                    <th class="py-3" style="width: 15%;">Nakden İade</th>
                                 </tr>
                             </thead>
                             <tbody class="small text-muted">
@@ -487,118 +407,164 @@ KDV Tevkifat Oranları (9/10, 7/10, 5/10, 4/10, 3/10, 2/10), Belirlenmiş Alıc�
                                     <td class="ps-4 fw-bold text-dark">Yapım İşleri ile Mühendislik-Mimarlık ve Etüt-Proje Hizmetleri</td>
                                     <td><span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">4/10</span></td>
                                     <td>Belirlenmiş Alıcılar ile KDV dahil 5 Milyon TL üzeri işlerde tüm KDV Mükellefleri</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Etüt, Plan-Proje, Danışmanlık, Denetim ve Benzeri Hizmetler</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Yalnızca Belirlenmiş Alıcılar (B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Makine, Teçhizat, Demirbaş ve Taşıtlara Ait Bakım ve Onarım Hizmetleri</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Yalnızca Belirlenmiş Alıcılar (B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Yemek Servis ve Organizasyon Hizmetleri</td>
                                     <td><span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">5/10</span></td>
                                     <td>Yalnızca Belirlenmiş Alıcılar (B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">İşgücü Temin Hizmetleri & Özel Güvenlik Hizmetleri</td>
                                     <td><span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Yapı Denetim Hizmetleri</td>
                                     <td><span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Fason Tekstil, Konfeksiyon, Çanta/Ayakkabı Dikim ve Aracılık İşleri</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Turistik Mağazalara Verilen Müşteri Bulma / Götürme Hizmetleri</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri (A Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Spor Kulüplerinin Yayın, Reklâm ve İsim Hakkı Gelirleri</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Temizlik, Çevre ve Bahçe Bakım Hizmetleri</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Servis Taşımacılığı Hizmetleri (Personel / Öğrenci Servisi)</td>
                                     <td><span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">5/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Karayolu Yük Taşımacılığı Hizmetleri (Kargo İşletmeciliği Hariç)</td>
                                     <td><span class="badge bg-success fs-6 px-3 py-2 rounded-pill">2/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Her Türlü Baskı ve Basım Hizmetleri</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Yalnızca Belirlenmiş Alıcılar (B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Ticari Reklam Hizmetleri (Danışmanlık, Tasarım ve Yayın Dahil)</td>
                                     <td><span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">3/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Diğer Hizmetler (Tebliğde Özel Olarak Belirlenmeyen Tüm Hizmetler)</td>
                                     <td><span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">5/10</span></td>
                                     <td>5018 s. Kanun ekindeki idareler, Kamu Kurumları, KİT'ler, Bankalar, Sigorta Şirketleri, Borsalar ve Kalkınma Ajansları</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <!-- Teslimler -->
-                                <tr class="table-light fw-bold text-dark"><td colspan="3" class="ps-4 py-2 small">KISMİ TEVKİFAT UYGULANACAK TESLİMLER</td></tr>
+                                <tr class="table-light fw-bold text-dark"><td colspan="5" class="ps-4 py-2 small">KISMİ TEVKİFAT UYGULANACAK TESLİMLER</td></tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Külçe Metal Teslimleri (Bakır, Çinko, Alüminyum, Kurşun, Demir-Çelik)</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (İthalatçı ve İlk Üretici Teslimleri Hariç)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Bakır, Çinko, Alüminyum ve Kurşun Ürünlerinin Teslimi (Tel, Levha, Boru vb.)</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (İthalatçı ve İlk Üretici Teslimleri Hariç)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Hurda ve Atık Teslimleri (İstisnadan Vazgeçen Mükelleflerce Yapılanlar)</td>
                                     <td><span class="badge bg-info text-dark fs-6 px-3 py-2 rounded-pill">7/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Metal, Plastik, Lastik, Kauçuk, Kâğıt, Cam Hurda/Atıklarından Elde Edilen Hammadde</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (İthalatçı Teslimleri Hariç)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Pamuk, Tiftik, Yün ve Yapağı ile Ham Post ve Deri Teslimleri</td>
                                     <td><span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">9/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (A ve B Grubu)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Ağaç ve Orman Ürünleri Teslimi (Tomruk, Kereste, Talaş, Kırpıntı vb.)</td>
                                     <td><span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">5/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (İthalatçı ve 5018 Alımları Hariç)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Demir-Çelik Ürünlerinin Teslimi (Çubuk, Profil, Tel, Sac, Boru, Lama vb.)</td>
                                     <td><span class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">5/10</span></td>
                                     <td>Tüm KDV Mükellefleri ve Belirlenmiş Alıcılar (İthalatçı ve İlk Üretici Teslimleri Hariç)</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">Diğer Teslimler (Devlet Malzeme Ofisi Genel Müdürlüğüne Yapılan Tüm Teslimler)</td>
                                     <td><span class="badge bg-success fs-6 px-3 py-2 rounded-pill">2/10</span></td>
                                     <td>Yalnızca Devlet Malzeme Ofisi (DMO) Genel Müdürlüğü</td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-1 px-2">Limit Yok / YMM Aranmaz</span></td>
+                                    <td><span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 py-1 px-2">50.000 TL Üzeri YMM Raporu</span></td>
                                 </tr>
                             </tbody>
                         </table>

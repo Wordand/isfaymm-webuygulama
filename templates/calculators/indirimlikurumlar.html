@@ -1744,6 +1744,7 @@ body, html { background: #fff !important; }
       }
 
       toggleInvestmentIncomeInputs();
+      enforceDonemOptionsFor9903();
       return;
     }
 
@@ -1784,6 +1785,7 @@ body, html { background: #fff !important; }
     if (typeof setOranlar === 'function') setOranlar();
 
     toggleInvestmentIncomeInputs();
+    enforceDonemOptionsFor9903();
   };
 
 
@@ -4009,6 +4011,46 @@ body, html { background: #fff !important; }
   const currentBelgeJSData = {{ current_belge | tojson | safe if current_belge else 'null' }};
   const currentKullanimJSData = {{ current_kullanim | tojson | safe if current_kullanim else 'null' }};
 
+  function getAllowedYearFor9903() {
+    // Öncelik: ilk_indirim_yili, yoksa belge_tarihi yılı
+    const iy = Number(document.getElementById("ilk_indirim_yili")?.value || 0);
+    if (iy && !Number.isNaN(iy)) return iy;
+    const bt = document.getElementById("baslangic_yili")?.value || "";
+    if (bt && bt.length >= 4 && /^\d{4}/.test(bt)) return Number(bt.slice(0, 4));
+    return null;
+  }
+
+  function enforceDonemOptionsFor9903() {
+    const karar = (document.getElementById("karar")?.value || "").trim();
+    const donemSel = document.getElementById("donem");
+    if (!donemSel) return;
+
+    // sadece 9903'te kısıtla
+    if (karar !== "2025/9903") {
+      Array.from(donemSel.options).forEach(o => { o.disabled = false; });
+      return;
+    }
+
+    const allowedYear = getAllowedYearFor9903();
+    if (!allowedYear) return;
+
+    Array.from(donemSel.options).forEach(o => {
+      const m = String(o.value || "").match(/^(\d{4})\s*-\s*/);
+      if (!m) return;
+      const y = Number(m[1]);
+      o.disabled = y < allowedYear;
+    });
+
+    // seçili değer geçersizse allowedYear'ın KURUMLAR'ına çek
+    const current = String(donemSel.value || "");
+    const cm = current.match(/^(\d{4})\s*-\s*/);
+    if (cm && Number(cm[1]) < allowedYear) {
+      const target = `${allowedYear} - KURUMLAR`;
+      const opt = Array.from(donemSel.options).find(x => x.value === target);
+      if (opt) donemSel.value = target;
+    }
+  }
+
   function clearAllFormData() {
     Swal.fire({
       title: "Veriler temizlensin mi?",
@@ -4799,6 +4841,7 @@ body, html { background: #fff !important; }
         if (typeof updateRejimTespiti === "function") {
           updateRejimTespiti();
         }
+        enforceDonemOptionsFor9903();
       }, 50);
     }
 
