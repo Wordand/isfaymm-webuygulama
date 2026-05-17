@@ -4258,6 +4258,110 @@ body, html { background: #fff !important; }
     setTimeout(() => printWindow.print(), 300);
   }
 
+  function applyIKVExamplePreset(key) {
+    const presets = {
+      // 24 Seri No.lu KVK Genel Tebligi - 2025/9903 aciklamalari icindeki Ornek 2 (D A.S. - diger faaliyetlerden yararlanma)
+      "9903_ornek2": {
+        belge_no: "Ornek-9903-2",
+        karar: "2025/9903",
+        program_turu: "Stratejik Hamle Programı", // katkı oranı 40
+        belge_tarihi: "2025-09-02",
+        ilk_indirim_yili: "2025",
+        toplam_tutar: "21000000",
+        cari_harcama_tutari: "12000000",
+        toplam_harcama_tutari: "12000000",
+        yatirimdan_elde_edilen_kazanc: "0",
+        diger_faaliyet: "30000000",
+        kv_matrah: "30000000",
+      },
+      // Basit bir 2012/3305 yatirim kazanci ornegi (sablon)
+      "3305_ornek1": {
+        belge_no: "Ornek-3305-1",
+        karar: "2012/3305",
+        belge_tarihi: "2013-03-02",
+        toplam_tutar: "8000000",
+        cari_harcama_tutari: "1000000",
+        toplam_harcama_tutari: "1000000",
+        katki_orani: "40",
+        vergi_orani: "60",
+        yatirimdan_elde_edilen_kazanc: "300000",
+        kv_matrah: "300000",
+      }
+    };
+
+    const p = presets[key];
+    if (!p) return;
+
+    Swal.fire({
+      icon: "question",
+      title: "Örnek veriler yüklensin mi?",
+      text: "Mevcut form alanları örnek değerlerle doldurulacak.",
+      showCancelButton: true,
+      confirmButtonText: "Evet",
+      cancelButtonText: "Vazgeç"
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+
+      // Yeni kayıt gibi davran
+      sessionStorage.removeItem("current_tesvik_id");
+      const tesvikIdEl = document.getElementById("tesvik_id");
+      if (tesvikIdEl) tesvikIdEl.value = "";
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = val;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      };
+
+      setVal("belge_no", p.belge_no || "");
+      if (p.belge_tarihi) setVal("baslangic_yili", p.belge_tarihi);
+      if (p.ilk_indirim_yili) setVal("ilk_indirim_yili", p.ilk_indirim_yili);
+
+      if (p.karar) setVal("karar", p.karar);
+      if (p.program_turu) setVal("program_turu", p.program_turu);
+
+      if (p.katki_orani != null) setVal("katki_orani", p.katki_orani);
+      if (p.vergi_orani != null) setVal("vergi_orani", p.vergi_orani);
+      if (p.toplam_tutar != null) setVal("toplam_tutar", p.toplam_tutar);
+      if (p.cari_harcama_tutari != null) setVal("cari_harcama_tutari", p.cari_harcama_tutari);
+      if (p.toplam_harcama_tutari != null) setVal("toplam_harcama_tutari", p.toplam_harcama_tutari);
+
+      if (p.yatirimdan_elde_edilen_kazanc != null) setVal("yatirimdan_elde_edilen_kazanc", p.yatirimdan_elde_edilen_kazanc);
+      if (p.tevsi_yatirim_kazanci != null) setVal("tevsi_yatirim_kazanci", p.tevsi_yatirim_kazanci);
+      if (p.diger_faaliyet != null) setVal("diger_faaliyet", p.diger_faaliyet);
+
+      if (p.kv_matrah != null) {
+        const mOut = document.getElementById("kv_matrah");
+        if (mOut) {
+          mOut.value = p.kv_matrah;
+          sessionStorage.setItem("manual_kv_matrah", "true");
+          sessionStorage.setItem("manual_kv_matrah_value", String(p.kv_matrah));
+        }
+      }
+
+      if (p.karar === "2025/9903") {
+        sessionStorage.setItem("gelir_uygulama_tipi", "diger");
+        sessionStorage.setItem("diger_kazanc_uygulama", "evet");
+      }
+
+      if (typeof handleKarar9903 === "function") handleKarar9903();
+      if (typeof updateRejimTespiti === "function") updateRejimTespiti();
+
+      Swal.fire({
+        icon: "success",
+        title: "Örnek yüklendi",
+        timer: 1200,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end"
+      });
+
+      if (typeof _updateStepDisplay === "function") _updateStepDisplay(1);
+    });
+  }
+
 
 
   async function submitFullFormAndDonem() {
