@@ -1852,6 +1852,12 @@ def get_onceki_katki(tesvik_id: int):
             "onceki_yatirim_katki_tutari": onceki_yatirim,
             "onceki_diger_katki_tutari": onceki_diger,
             "onceki_katki_tutari": onceki_yatirim + onceki_diger,
+            # debug (front'ta console'da görebilmek için)
+            "_debug": {
+                "belge_no": belge_no,
+                "donem": donem,
+                "rows_count": len(rows),
+            },
         }
     ), 200
 

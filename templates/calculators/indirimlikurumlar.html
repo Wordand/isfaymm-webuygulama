@@ -1615,15 +1615,19 @@ body, html { background: #fff !important; }
       });
       if (!resp.ok) return;
       const data = await resp.json();
+      console.log("🔎 onceki_katki api:", { tesvikId, donem, data });
       if (!data || data.status !== "success") return;
 
-      safeSet("onceki_yatirim_katki_tutari", data.onceki_yatirim_katki_tutari || 0);
-      safeSet("onceki_diger_katki_tutari", data.onceki_diger_katki_tutari || 0);
+      const oyVal = Number(data.onceki_yatirim_katki_tutari || 0) || 0;
+      const odVal = Number(data.onceki_diger_katki_tutari || 0) || 0;
+      safeSet("onceki_yatirim_katki_tutari", oyVal);
+      safeSet("onceki_diger_katki_tutari", odVal);
+      console.log("✅ onceki_katki set:", { oyVal, odVal });
       // Toplam ve kalan alanları yeniden hesaplat
       if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
       if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
     } catch (e) {
-      // sessiz geç
+      console.warn("maybeAutofillOncekiFromDB hata:", e);
     }
   }
 
