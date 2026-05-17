@@ -420,6 +420,18 @@ body, html { background: #fff !important; }
       </div>
 
       <div class="mb-3">
+        <label>Fiili Tamamlanma Tarihi</label>
+        <input type="date" id="fiili_tamamlanma_tarihi" name="fiili_tamamlanma_tarihi" class="form-control" value="{{ current_belge.fiili_tamamlanma_tarihi if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
+        <small class="text-muted">2012/3305 için yatırım döneminin bitişini belirler.</small>
+      </div>
+
+      <div class="mb-3">
+        <label>Tamamlama Vizesi Başvuru Tarihi</label>
+        <input type="date" id="vize_basvuru_tarihi" name="vize_basvuru_tarihi" class="form-control" value="{{ current_belge.vize_basvuru_tarihi if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
+        <small class="text-muted">Fiili tamamlanma tarihi yoksa yatırım dönemi bu başvurunun bulunduğu dönem sonunda biter.</small>
+      </div>
+
+      <div class="mb-3">
         <label>Teşvik Belgesi Hangi Karara Göre Düzenlendi</label>
         <select id="karar" name="karar" onchange="handleKarar9903(); updateRejimTespiti();" class="form-select" required>
           <option value="">Seçiniz</option>
@@ -518,7 +530,7 @@ body, html { background: #fff !important; }
 
       <div class="mb-3">
         <label>Dönem Seçiniz</label>
-        <select name="donem" id="donem" class="form-select" required onchange="setOranlar()">
+        <select name="donem" id="donem" class="form-select" required onchange="setOranlar(); updateRejimTespiti();">
           {% for yil in range(2025, 2014, -1) %}
           <optgroup label="{{ yil }}">
             <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
@@ -1404,18 +1416,8 @@ body, html { background: #fff !important; }
       return; 
     }
 
-    // 🟥 9903 → TEVSİ YOK! SADECE yatırım kazancı açık
-    if (karar === "2025/9903") {
-      yatirimKazanciInput.removeAttribute("readonly");
-      yatirimKazanciInput.classList.remove("disabled-input");
-
-      const m = maskMap["yatirimdan_elde_edilen_kazanc"];
-      if (m) m.updateOptions({ readonly: false });
-
-      return; // kesin blokaj → tevsi asla çalışmasın
-    }
-
-    // 🟦 Klasik karar → Tevsi türünde Tevsi kazancı aktif
+    // Tevsi türünde tevsi kazancı aktif. 2025/9903 için de aynı girişler kullanılır;
+    // farkı süre ve katkı sınırları hesaplama tarafında uygulanır.
     if (yatirimTuru === "tevsi") {
       // Tevsi kazancı aktif
       tevsiKazanciInput.removeAttribute("readonly");
@@ -1436,7 +1438,7 @@ body, html { background: #fff !important; }
       return;
     }
 
-    // 🟩 Klasik → tevsi değil → sadece yatırım kazancı açık
+    // Tevsi değilse sadece yatırımdan elde edilen kazanç açık
     yatirimKazanciInput.removeAttribute("readonly");
     yatirimKazanciInput.classList.remove("disabled-input");
 
@@ -1567,10 +1569,21 @@ body, html { background: #fff !important; }
     }
   }
 
+  function getSeciliDonemYil() {
+    return parseInt((document.getElementById("donem")?.value || "").split(" - ")[0], 10) || null;
+  }
+
+  function getYilFromDateValue(value) {
+    return value ? parseInt(value.slice(0, 4), 10) : null;
+  }
+
   window.updateRejimTespiti = function () {
     const karar = (document.getElementById("karar")?.value || "").trim();
     const basvuruTarihi = document.getElementById("basvuru_tarihi")?.value || "";
     const belgeAlinmaTarihi = document.getElementById("belge_alinma_tarihi")?.value || "";
+    const yatirimaBaslamaTarihi = document.getElementById("baslangic_yili")?.value || "";
+    const fiiliTamamlanmaTarihi = document.getElementById("fiili_tamamlanma_tarihi")?.value || "";
+    const vizeBasvuruTarihi = document.getElementById("vize_basvuru_tarihi")?.value || "";
     const ilkIndirimYili = parseInt(document.getElementById("ilk_indirim_yili")?.value || "", 10);
     const box = document.getElementById("rejim-tespiti-box");
     const text = document.getElementById("rejim-tespiti-text");
@@ -1592,7 +1605,22 @@ body, html { background: #fff !important; }
 
     if (karar !== "2025/9903") {
       box.className = "alert alert-info small mb-3";
-      text.innerHTML = "Bu belge klasik/eski sistem kapsamında izlenir. Diğer faaliyet kullanımı yatırım dönemiyle, endeksleme ise tamamlanma sonrası kurallarla değerlendirilir.";
+      const donemYil = getSeciliDonemYil();
+      const baslamaYil = getYilFromDateValue(yatirimaBaslamaTarihi);
+      const bitisKaynak = fiiliTamamlanmaTarihi || vizeBasvuruTarihi;
+      const bitisYil = getYilFromDateValue(bitisKaynak);
+      let yatirimDonemiMetni = " Yatırım dönemi için yatırıma başlama tarihi ile fiili tamamlanma/vize başvuru tarihi birlikte izlenir.";
+
+      if (baslamaYil && bitisYil) {
+        yatirimDonemiMetni = ` Diğer faaliyet kullanımı ${baslamaYil}-${bitisYil} yatırım dönemiyle sınırlı izlenir.`;
+        if (donemYil) {
+          yatirimDonemiMetni += donemYil <= bitisYil
+            ? " Seçili dönem yatırım dönemi içinde görünüyor."
+            : " Seçili dönem yatırım dönemi dışında görünüyor; diğer faaliyet kazancı için indirim uygulanmamalıdır.";
+        }
+      }
+
+      text.innerHTML = `Bu belge klasik/eski sistem kapsamında izlenir.${yatirimDonemiMetni} Endeksleme tamamlanma sonrası kurallarla değerlendirilir.`;
       return;
     }
 
@@ -1680,13 +1708,11 @@ body, html { background: #fff !important; }
       programSelect.style.pointerEvents = "auto";
       programSelect.classList.remove("bg-light");
 
-      // tur1 ve tur2 (Yatırım Türleri) kilitli olsun (Sadece Program Türü aktif)
       [tur1, tur2].forEach(el => {
-          if (!el) return;
-          el.readOnly = true;
-          el.style.pointerEvents = "none";
-          el.classList.add("bg-light");
-          el.value = ""; // Seçimi temizle
+        if (!el) return;
+        el.readOnly = false;
+        el.style.pointerEvents = "auto";
+        el.classList.remove("bg-light");
       });
 
       safeSet("vergi_orani", 60);
@@ -3510,6 +3536,9 @@ body, html { background: #fff !important; }
 
     // Bağımlı hesaplamayı tetikle
     if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
+    if (document.getElementById("karar")?.value === "2025/9903" && typeof hesaplaKatkiTutari9903 === "function") {
+      hesaplaKatkiTutari9903();
+    }
   }
 
 
@@ -3748,6 +3777,8 @@ body, html { background: #fff !important; }
     const basvuruTarihi = document.getElementById("basvuru_tarihi")?.value || "";
     const belgeAlinmaTarihi = document.getElementById("belge_alinma_tarihi")?.value || "";
     const yatirimaBaslamaTarihi = document.getElementById("baslangic_yili")?.value || "";
+    const fiiliTamamlanmaTarihi = document.getElementById("fiili_tamamlanma_tarihi")?.value || "";
+    const vizeBasvuruTarihi = document.getElementById("vize_basvuru_tarihi")?.value || "";
     const ilkIndirimYili = document.getElementById("ilk_indirim_yili")?.value || "";
 
     // 🔹 Genel zorunlu kontroller
@@ -3776,6 +3807,16 @@ body, html { background: #fff !important; }
         icon: "warning",
         title: "Eksik Bilgi",
         text: "Lütfen 'Yatırıma Başlama Tarihi' alanını giriniz.",
+        confirmButtonText: "Tamam"
+      });
+      return;
+    }
+
+    if (karar !== "2025/9903" && vizeDurumu.includes("Evet") && !fiiliTamamlanmaTarihi && !vizeBasvuruTarihi) {
+      Swal.fire({
+        icon: "warning",
+        title: "Eksik Bilgi",
+        text: "2012/3305 ve eski sistemde işletme dönemine geçildiyse fiili tamamlanma tarihi veya tamamlama vizesi başvuru tarihi girilmelidir.",
         confirmButtonText: "Tamam"
       });
       return;
@@ -4351,6 +4392,10 @@ body, html { background: #fff !important; }
             if (karar === "2025/9903") {
               if (t === "katki") hesaplaKatkiTutari9903();
               if (t === "ratios") calculateRatios();
+              if (t === "tevsi") {
+                calculateTevsiKazancAutomatically();
+                hesaplaKatkiTutari9903();
+              }
               if (t === "kv") calculateKVMatrah();
               return;
             }
@@ -4680,6 +4725,8 @@ body, html { background: #fff !important; }
         smartSet('karar', currentBelgeJSData.karar);
         smartSet('basvuru_tarihi', convertToInputDateFormat(currentBelgeJSData.basvuru_tarihi));
         smartSet('belge_alinma_tarihi', convertToInputDateFormat(currentBelgeJSData.belge_alinma_tarihi));
+        smartSet('fiili_tamamlanma_tarihi', convertToInputDateFormat(currentBelgeJSData.fiili_tamamlanma_tarihi));
+        smartSet('vize_basvuru_tarihi', convertToInputDateFormat(currentBelgeJSData.vize_basvuru_tarihi));
         smartSet('ilk_indirim_yili', currentBelgeJSData.ilk_indirim_yili);
         
         if (typeof handleKarar9903 === "function") handleKarar9903();

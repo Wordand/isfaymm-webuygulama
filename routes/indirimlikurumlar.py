@@ -737,6 +737,8 @@ def form_kaydet():
                or ""
     basvuru_tarihi = request.form.get("basvuru_tarihi", "").strip()
     belge_alinma_tarihi = request.form.get("belge_alinma_tarihi", "").strip()
+    fiili_tamamlanma_tarihi = request.form.get("fiili_tamamlanma_tarihi", "").strip()
+    vize_basvuru_tarihi = request.form.get("vize_basvuru_tarihi", "").strip()
     ilk_indirim_yili_raw = request.form.get("ilk_indirim_yili", "").strip()
     ilk_indirim_yili = int(ilk_indirim_yili_raw) if ilk_indirim_yili_raw.isdigit() else None
 
@@ -821,6 +823,7 @@ def form_kaydet():
         'karar': karar, 'belge_no': belge_no, 'toplam_tutar': toplam_tutar, 
         'katki_orani': katki_orani, 'vergi_orani': vergi_orani, 'belge_tarihi': belge_tarihi,
         'basvuru_tarihi': basvuru_tarihi, 'belge_alinma_tarihi': belge_alinma_tarihi,
+        'fiili_tamamlanma_tarihi': fiili_tamamlanma_tarihi, 'vize_basvuru_tarihi': vize_basvuru_tarihi,
         'ilk_indirim_yili': ilk_indirim_yili,
         'vize_durumu': vize_durumu, 'cari_toplam_katki': cari_toplam_katki, 'brut_satis': brut_satis,
         'program_turu': program_turu, 'il': il, 'osb': osb, 'bolge': bolge
@@ -841,7 +844,9 @@ def form_kaydet():
                 c.execute("""
                     UPDATE tesvik_belgeleri
                     SET mukellef_id=%s, belge_no=%s, belge_tarihi=%s,
-                        basvuru_tarihi=%s, belge_alinma_tarihi=%s, ilk_indirim_yili=%s,
+                        basvuru_tarihi=%s, belge_alinma_tarihi=%s,
+                        fiili_tamamlanma_tarihi=%s, vize_basvuru_tarihi=%s,
+                        ilk_indirim_yili=%s,
                         karar=%s,
                         program_turu=%s, yatirim_turu1=%s, yatirim_turu2=%s,
                         vize_durumu=%s, donem=%s, il=%s, osb=%s, bolge=%s,
@@ -856,7 +861,9 @@ def form_kaydet():
                     RETURNING id
                 """, (
                     mukellef_id, belge_no, belge_tarihi,
-                    basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
+                    basvuru_tarihi, belge_alinma_tarihi,
+                    fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                    ilk_indirim_yili,
                     karar,
                     program_turu, yatirim_turu1, yatirim_turu2,
                     vize_durumu, donem, il, osb, bolge,
@@ -884,7 +891,9 @@ def form_kaydet():
                 c.execute("""
                     INSERT INTO tesvik_belgeleri (
                         user_id, mukellef_id, belge_no, belge_tarihi,
-                        basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
+                        basvuru_tarihi, belge_alinma_tarihi,
+                        fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                        ilk_indirim_yili,
                         karar, program_turu, yatirim_turu1, yatirim_turu2,
                         vize_durumu, donem, il, osb, bolge,
                         katki_orani, vergi_orani, diger_oran,
@@ -895,11 +904,13 @@ def form_kaydet():
                         cari_yatirim_katki, cari_diger_katki, cari_toplam_katki, genel_toplam_katki,
                         brut_satis, ihracat, imalat, diger_faaliyet, use_detailed_profit_ratios, olusturan_id
                     )
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     RETURNING id
                 """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
-                    basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili,
+                    basvuru_tarihi, belge_alinma_tarihi,
+                    fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                    ilk_indirim_yili,
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
                     vize_durumu, donem, il, osb, bolge,
                     katki_orani, vergi_orani, diger_oran,

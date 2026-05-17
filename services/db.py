@@ -352,6 +352,8 @@ def migrate_tesvik_columns():
             "belge_tarihi": "TEXT",
             "basvuru_tarihi": "TEXT",
             "belge_alinma_tarihi": "TEXT",
+            "fiili_tamamlanma_tarihi": "TEXT",
+            "vize_basvuru_tarihi": "TEXT",
             "ilk_indirim_yili": "INTEGER",
             "karar": "TEXT",
             "yatirim_turu1": "TEXT",
