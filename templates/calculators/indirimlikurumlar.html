@@ -467,7 +467,8 @@ body, html { background: #fff !important; }
       <div class="mb-3">
         <label>İlk İndirim Hakkının Kullanılabileceği Hesap Yılı</label>
         <input type="number" id="ilk_indirim_yili" name="ilk_indirim_yili" class="form-control" min="2009" max="2100" placeholder="Örn. 2025" value="{{ current_belge.ilk_indirim_yili if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
-        <small class="text-muted">2025/9903 için 4 ve 10 hesap dönemi sınırları bu yıldan itibaren izlenir.</small>
+        <small id="ilk-indirim-help-9903" class="text-muted" style="display:none;">2025/9903 için 4 ve 10 hesap dönemi sınırları bu yıldan itibaren izlenir.</small>
+        <small id="ilk-indirim-help-klasik" class="text-muted" style="display:none;">İndirimli vergi uygulamasına başlanabilecek ilk hesap dönemini belirtir.</small>
       </div>
 
       <div id="rejim-tespiti-box" class="alert alert-secondary small mb-3" style="display: none;">
@@ -544,7 +545,7 @@ body, html { background: #fff !important; }
 
       <div class="mb-3">
         <label>Dönem Seçiniz</label>
-        <select name="donem" id="donem" class="form-select" required onchange="setOranlar(); updateRejimTespiti();">
+        <select name="donem" id="donem" class="form-select" required onchange="setOranlar(); updateRejimTespiti(); maybeAutofillOncekiFromDB();">
           {% for yil in range(2027, 2014, -1) %}
           <optgroup label="{{ yil }}">
             <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
@@ -1597,6 +1598,35 @@ body, html { background: #fff !important; }
     return parseInt((document.getElementById("donem")?.value || "").split(" - ")[0], 10) || null;
   }
 
+  async function maybeAutofillOncekiFromDB() {
+    try {
+      const tesvikId = (document.getElementById("tesvik_id")?.value || "").trim();
+      const donem = (document.getElementById("donem")?.value || "").trim();
+      if (!tesvikId || !donem) return;
+
+      // Kullanıcı elle bir şey girdiyse üstüne yazmayalım.
+      const oy = parseFormattedNumber(document.getElementById("onceki_yatirim_katki_tutari")?.value || "0") || 0;
+      const od = parseFormattedNumber(document.getElementById("onceki_diger_katki_tutari")?.value || "0") || 0;
+      if (oy !== 0 || od !== 0) return;
+
+      const resp = await fetch(`/indirimlikurumlar/api/get_onceki_katki/${encodeURIComponent(tesvikId)}?donem=${encodeURIComponent(donem)}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (!data || data.status !== "success") return;
+
+      safeSet("onceki_yatirim_katki_tutari", data.onceki_yatirim_katki_tutari || 0);
+      safeSet("onceki_diger_katki_tutari", data.onceki_diger_katki_tutari || 0);
+      // Toplam ve kalan alanları yeniden hesaplat
+      if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
+      if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
+    } catch (e) {
+      // sessiz geç
+    }
+  }
+
   function getYilFromDateValue(value) {
     return value ? parseInt(value.slice(0, 4), 10) : null;
   }
@@ -1743,6 +1773,11 @@ body, html { background: #fff !important; }
       safeSet("vergi_orani", 60);
       safeSet("diger_oran", 50);
 
+      const help9903 = document.getElementById("ilk-indirim-help-9903");
+      const helpKlasik = document.getElementById("ilk-indirim-help-klasik");
+      if (help9903) help9903.style.display = "block";
+      if (helpKlasik) helpKlasik.style.display = "none";
+
       const program = programSelect.value;
       if (katkilar9903) {
         safeSet("katki_orani", katkilar9903[program] || 0);
@@ -1757,6 +1792,11 @@ body, html { background: #fff !important; }
     //            KLASİK TEŞVİK MODU
     // ======================================================
     console.log("→ Normal teşvik modu aktif");
+
+    const help9903 = document.getElementById("ilk-indirim-help-9903");
+    const helpKlasik = document.getElementById("ilk-indirim-help-klasik");
+    if (help9903) help9903.style.display = "none";
+    if (helpKlasik) helpKlasik.style.display = "block";
 
     // 9903 için özel kutuyu gizle
     const infoBox9903 = document.getElementById("info-9903-limits");
@@ -3960,7 +4000,11 @@ body, html { background: #fff !important; }
     }, 50);
   }
 
-  function goToStep4() { _updateStepDisplay(4); }
+  function goToStep4() {
+    _updateStepDisplay(4);
+    // Yeni dönem eklerken önceki katkıları DB'den otomatik getir (varsa)
+    setTimeout(() => { maybeAutofillOncekiFromDB(); }, 50);
+  }
 
   async function goToStep5(source) {
     if (source === 'from6') {

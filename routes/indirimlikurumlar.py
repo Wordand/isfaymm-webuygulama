@@ -1778,6 +1778,81 @@ def get_tesvik_kullanim_data(belge_no, yil, turu):
         "html": html_content
     }), 200
 
+
+@bp.route("/api/get_onceki_katki/<int:tesvik_id>")
+@login_required
+def get_onceki_katki(tesvik_id: int):
+    """
+    Form ekranında (Aşama 4) otomatik "Önceki Dönemler" alanlarını doldurmak için:
+    Seçilen dönemin (yıl + tür) öncesindeki dönemlerde kullanılan katkıları toplar.
+    """
+    from flask import jsonify
+
+    user_id = session.get("user_id")
+    donem = (request.args.get("donem") or "").strip()
+    if not donem or " - " not in donem:
+        return jsonify({"status": "error", "message": "donem parametresi gerekli."}), 400
+
+    yil_str, turu = [x.strip() for x in donem.split(" - ", 1)]
+    try:
+        yil = int(yil_str)
+    except Exception:
+        return jsonify({"status": "error", "message": "donem yil formatı geçersiz."}), 400
+
+    order_map = {
+        "1. GEÇİCİ": 1,
+        "2. GEÇİCİ": 2,
+        "3. GEÇİCİ": 3,
+        "4. GEÇİCİ": 4,
+        "KURUMLAR": 5,
+    }
+    cur_order = order_map.get(turu.upper(), 99)
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Yetki kontrolü
+    cur.execute(
+        "SELECT 1 FROM tesvik_docs WHERE id=%s AND user_id=%s",
+        (tesvik_id, user_id),
+    )
+    if not cur.fetchone():
+        return jsonify({"status": "error", "message": "Yetkisiz erişim."}), 403
+
+    cur.execute(
+        """
+        SELECT donem_yil, donem_turu,
+               COALESCE(cari_yatirim_katki,0) AS cy,
+               COALESCE(cari_diger_katki,0) AS cd
+        FROM tesvik_kullanim
+        WHERE user_id=%s AND tesvik_id=%s
+        """,
+        (user_id, tesvik_id),
+    )
+    rows = cur.fetchall() or []
+
+    onceki_yatirim = 0.0
+    onceki_diger = 0.0
+    for (ry, rt, cy, cd) in rows:
+        try:
+            ry_i = int(ry)
+        except Exception:
+            continue
+        rt_u = str(rt or "").strip().upper()
+        ro = order_map.get(rt_u, 99)
+        if (ry_i < yil) or (ry_i == yil and ro < cur_order):
+            onceki_yatirim += float(cy or 0)
+            onceki_diger += float(cd or 0)
+
+    return jsonify(
+        {
+            "status": "success",
+            "onceki_yatirim_katki_tutari": onceki_yatirim,
+            "onceki_diger_katki_tutari": onceki_diger,
+            "onceki_katki_tutari": onceki_yatirim + onceki_diger,
+        }
+    ), 200
+
 # ----------------------------------------------------
 # 🗑️ SİLME İŞLEMLERİ (YENİ EKLENEN)
 # ----------------------------------------------------
