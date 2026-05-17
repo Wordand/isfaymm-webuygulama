@@ -2545,8 +2545,14 @@ body, html { background: #fff !important; }
     }
 
     const kvMatrah = val("kv_matrah");
-    const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi"); // 'yatirim', 'diger', 'karma'
-    let digerFaaliyetKazanci = (gelirTipi === "yatirim") ? 0 : kvMatrah;
+    const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi"); // 'yatirim', 'diger', 'herikisi'
+    let digerFaaliyetKazanci = 0;
+
+    if (gelirTipi === "diger") {
+      digerFaaliyetKazanci = kvMatrah;
+    } else if (gelirTipi === "herikisi") {
+      digerFaaliyetKazanci = Math.max(0, kvMatrah - yatirimKazanci);
+    }
 
     // 4️⃣ Vergi Farkları (KV Oranı - İndirimli Oran)
     const kvOranIhracat = safe(val("kv_oran_ihracat") / 100) || 0.20;
@@ -2632,7 +2638,7 @@ body, html { background: #fff !important; }
     // Matrah = Kullanılan Katkı / Efektif Vergi Avantajı
     const efektifFark = (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
     
-    const matrahYatirim = yatirimKazanci; // Yatırım kazancı zaten matrahın kendisidir (indirimli orana tabi olan kısım)
+    const matrahYatirim = efektifFark > 0 ? Math.min(yatirimKazanci, cariYatirimKatkisi / efektifFark) : 0;
     const matrahDiger = efektifFark > 0 ? (cariDigerKatkisi / efektifFark) : 0;
     
     const indirimliMatrah = matrahYatirim + matrahDiger;
@@ -3045,6 +3051,10 @@ body, html { background: #fff !important; }
       if (digerKazancUygulama === "evet") {
 
         const kvMatrah = getVal("kv_matrah");
+        const gelirTipi = sessionStorage.getItem("gelir_uygulama_tipi");
+        const digerFaaliyetMatrahi = gelirTipi === "herikisi"
+          ? Math.max(0, kvMatrah - tevsiYatirimKazanci)
+          : kvMatrah;
         const kalanKatki = getVal("kalan_katki_tutari");
 
         const mevzuatTavani = kucukOlanDigerFaaliyetTutari;
@@ -3054,7 +3064,7 @@ body, html { background: #fff !important; }
           imalatOraniFinal * kvOranImalat * (1 - vergiIndirimOrani) +
           digerOraniFinal * kvOranDiger * (1 - vergiIndirimOrani);
 
-        const kvTavanVergi = effRate > 0 ? kvMatrah * effRate : 0;
+        const kvTavanVergi = effRate > 0 ? digerFaaliyetMatrahi * effRate : 0;
 
         const cariDigerHesap = Math.min(kalanKatki, mevzuatTavani, kvTavanVergi);
 
@@ -3063,7 +3073,18 @@ body, html { background: #fff !important; }
         indirimliKurumlarVergisiMatrahi =
           effRate > 0 ? cariDigerKatkisi / effRate : 0;
 
-        cariYatirimKatkisi = 0;
+        if (gelirTipi === "herikisi") {
+          cariYatirimKatkisi =
+            tevsiYatirimKazanci *
+            (ihracatOraniFinal * kvOranIhracat +
+              imalatOraniFinal * kvOranImalat +
+              digerOraniFinal * kvOranDiger) *
+            vergiIndirimOrani;
+
+          indirimliKurumlarVergisiMatrahi += tevsiYatirimKazanci;
+        } else {
+          cariYatirimKatkisi = 0;
+        }
       }
 
       // -------------------------
