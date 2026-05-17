@@ -784,6 +784,29 @@ def form_kaydet():
     il = request.form.get("il")
     osb = request.form.get("osb")
 
+    # ---------------------------------------------------
+    #  Güvenlik: Yanlış belgeyi ezmeyi engelle
+    # ---------------------------------------------------
+    # Frontend bazen sessionStorage/current_tesvik_id veya ?view=... taşırken,
+    # kullanıcı yeni bir "belge_no" yazarak yeni kayıt bekleyebiliyor.
+    # Eğer gelen tesvik_id'nin mevcut belge_no'su, formdaki belge_no'dan farklıysa
+    # UPDATE yerine INSERT moduna geçiyoruz.
+    if tesvik_id and belge_no and belge_no not in ("(otomatik)", ""):
+        try:
+            with get_conn() as _conn_chk:
+                _cchk = _conn_chk.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                _cchk.execute(
+                    "SELECT belge_no FROM tesvik_belgeleri WHERE id=%s AND user_id=%s AND mukellef_id=%s",
+                    (tesvik_id, user_id, mukellef_id),
+                )
+                _rowchk = _cchk.fetchone()
+                if _rowchk and (_rowchk.get("belge_no") or "").strip() != belge_no.strip():
+                    tesvik_id = None
+                    session.pop("current_tesvik_id", None)
+        except Exception:
+            # Kontrol başarısız olursa mevcut akışı bozmayalım
+            pass
+
 
     if karar == "2025/9903":
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")

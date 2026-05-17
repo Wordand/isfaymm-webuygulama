@@ -27,6 +27,9 @@
                     <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold shadow-sm">
                         {{ doc.karar }}
                     </span>
+                    <a class="btn btn-action-delete" href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=doc.id) }}" title="PDF Çıktısı Al">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </a>
                     <button class="btn btn-action-delete" onclick="confirmDeleteDoc({{ doc.id }})" title="Belgeyi Tamamen Sil">
                         <i class="bi bi-trash3-fill"></i>
                     </button>

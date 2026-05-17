@@ -350,6 +350,15 @@ body, html { background: #fff !important; }
       <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('kvUploadInput').click()">
         📂 PDF’den İçe Aktar
       </button>
+      <div class="btn-group ms-2">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          🧪 Örnekler
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('9903_ornek2')">2025/9903 - Örnek 2 (Diğer Faaliyet)</button></li>
+          <li><button class="dropdown-item" type="button" onclick="applyIKVExamplePreset('3305_ornek1')">2012/3305 - Örnek 1 (Yatırımdan Kazanç)</button></li>
+        </ul>
+      </div>
       <button type="button" class="btn btn-outline-danger ms-2" onclick="clearAllFormData()">
         🗑️ Verileri Temizle
       </button>
@@ -4036,6 +4045,8 @@ body, html { background: #fff !important; }
 
       // 🔄 SessionStorage'dan tüm aşama verilerini sil
       sessionStorage.removeItem("last_step");
+      // ✅ Yeni belge kaydı için seçili teşvik id'yi sıfırla (aksi halde yanlış belge güncellenebilir)
+      sessionStorage.removeItem("current_tesvik_id");
       sessionStorage.removeItem("manual_katki");
       sessionStorage.removeItem("manual_katki_value");
       sessionStorage.removeItem("manual_vergi");
@@ -4043,6 +4054,10 @@ body, html { background: #fff !important; }
       sessionStorage.removeItem("manual_kv_matrah");
       sessionStorage.removeItem("manual_kv_matrah_value");
       sessionStorage.removeItem("use_detailed_profit_ratios");
+
+      // Gizli tesvik_id input'u varsa temizle
+      const tesvikIdEl = document.getElementById("tesvik_id");
+      if (tesvikIdEl) tesvikIdEl.value = "";
 
       Swal.fire({
         icon: "success",
@@ -4271,7 +4286,16 @@ body, html { background: #fff !important; }
     const tesvikFromInput = document.getElementById("tesvik_id")?.value?.trim();
     const tesvikFromSession = sessionStorage.getItem("current_tesvik_id");
 
-    const tesvikId = tesvikFromInput || tesvikFromSession;
+    const currentBelgeNo = (getBelgeNo() || "").trim();
+    const loadedBelgeNo = (currentBelgeJSData?.belge_no || "").trim();
+    const sameBelge = !!(currentBelgeNo && loadedBelgeNo && currentBelgeNo === loadedBelgeNo);
+
+    // Sadece gerçekten aynı belge üzerinde çalışıyorsak UPDATE moduna girelim.
+    // Aksi halde eski tesvik_id taşınmış olabilir; yeni kayıt olarak davran.
+    let tesvikId = (sameBelge ? (tesvikFromInput || tesvikFromSession) : (tesvikFromInput || ""));
+    if (!sameBelge && tesvikFromSession) {
+      sessionStorage.removeItem("current_tesvik_id");
+    }
 
     // Tesvik ID yoksa (yeni kayıt) devam etmeli, backend oluşturacak.
     if (!tesvikId) {
@@ -4285,7 +4309,8 @@ body, html { background: #fff !important; }
     const formData = new FormData(form);
 
     try {
-      const res = await fetch(form.action + `?view=${tesvikId}`, {
+      const saveUrl = tesvikId ? (form.action + `?view=${encodeURIComponent(tesvikId)}`) : form.action;
+      const res = await fetch(saveUrl, {
         method: "POST",
         body: formData
       });
