@@ -4670,6 +4670,10 @@ body, html { background: #fff !important; }
       });
 
       const result = await donemRes.json();
+      if (!donemRes.ok || !result || result.status !== "success") {
+        Swal.fire(result?.title || "Hata", result?.message || "Dönem kaydı sırasında bir hata oluştu.", "error");
+        return;
+      }
 
       Swal.fire({
         icon: "success",

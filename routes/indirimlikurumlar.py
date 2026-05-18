@@ -17,7 +17,7 @@ from flask import Blueprint, render_template, request, session, flash, redirect,
 from werkzeug.utils import secure_filename
 
 
-from services.db import get_conn
+from services.db import get_conn, USE_SQLITE
 from config import ILLER, BOLGE_MAP, BOLGE_MAP_9903, TESVIK_KATKILAR, TESVIK_VERGILER, TESVIK_KATKILAR_9903
 from auth import login_required
 from types import SimpleNamespace
@@ -1420,7 +1420,7 @@ def save_tesvik_kullanim():
             
             # İndirimli KV Bilgileri (init_db'de mevcut)
             "indirimli_matrah", 
-            "indirimli_kv", 
+            "indirimli_kv",
             "odenecek_toplam_kv",
             "indirimli_kv_oran",
             
@@ -1433,8 +1433,29 @@ def save_tesvik_kullanim():
         # ve her ikisi de tabloda yoksa, en az hata verecek olan 'kalan_katki_tutari' tercih edilir.
         # Ancak buradaki listeye sadece 'kalan_katki_tutari' dahil edilmiştir (init_db'de olduğu için).
         
-        # Sayısal değerleri çek ve sadece fields listesindekileri kullan
-        values = [float(data.get(f, 0)) for f in fields]
+        # -------------------------------------------------------------
+        # Şema uyumluluğu: SQLite ortamında bazı sütunlar eski DB'de olmayabilir.
+        # Bu durumda insert'in patlamaması için alanları DB'de mevcut olanlarla sınırla.
+        # -------------------------------------------------------------
+        effective_fields = list(fields)
+        try:
+            with get_conn() as _conn_cols:
+                _c = _conn_cols.cursor()
+                if USE_SQLITE:
+                    _c.execute("PRAGMA table_info(tesvik_kullanim)")
+                    existing = {r[1] if not isinstance(r, dict) else r.get("name") for r in _c.fetchall()}
+                else:
+                    _c.execute("""
+                        SELECT column_name FROM information_schema.columns
+                        WHERE table_name = 'tesvik_kullanim';
+                    """)
+                    existing = {r[0] if not isinstance(r, dict) else r.get("column_name") for r in _c.fetchall()}
+                effective_fields = [f for f in fields if f in existing]
+        except Exception:
+            effective_fields = list(fields)
+
+        # Sayısal değerleri çek ve sadece effective_fields listesindekileri kullan
+        values = [float(data.get(f, 0) or 0) for f in effective_fields]
 
         with get_conn() as conn:
             cur = conn.cursor()
@@ -1443,15 +1464,15 @@ def save_tesvik_kullanim():
             cur.execute(f"""
                 INSERT INTO tesvik_kullanim (
                     user_id, belge_no, hesap_donemi, donem_turu,
-                    {", ".join(fields)}
+                    {", ".join(effective_fields)}
                 )
                 VALUES (
                     %s, %s, %s, %s,
-                    {", ".join(["%s"] * len(fields))}
+                    {", ".join(["%s"] * len(effective_fields))}
                 )
                 ON CONFLICT (user_id, belge_no, hesap_donemi, donem_turu)
                 DO UPDATE SET
-                    {", ".join([f"{col} = EXCLUDED.{col}" for col in fields])},
+                    {", ".join([f"{col} = EXCLUDED.{col}" for col in effective_fields])},
                     kayit_tarihi = CURRENT_TIMESTAMP;
             """, (user_id, belge_no, hesap_donemi, donem_turu, *values))
 
