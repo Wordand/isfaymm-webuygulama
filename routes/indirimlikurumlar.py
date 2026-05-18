@@ -1871,11 +1871,22 @@ def get_onceki_katki(tesvik_id: int):
 
     onceki_yatirim = 0.0
     onceki_diger = 0.0
-    for (ry, rt, cy, cd) in rows:
+
+    for r in (rows or []):
+        # sqlite -> tuple, postgres RealDictCursor -> dict
+        if isinstance(r, dict):
+            ry = r.get("hesap_donemi") or r.get("donem_yil")
+            rt = r.get("donem_turu")
+            cy = r.get("cy") if ("cy" in r) else r.get("cari_yatirim_katki")
+            cd = r.get("cd") if ("cd" in r) else r.get("cari_diger_katki")
+        else:
+            ry, rt, cy, cd = r[0], r[1], r[2], r[3]
+
         try:
             ry_i = int(ry)
         except Exception:
             continue
+
         rt_u = str(rt or "").strip().upper()
         ro = order_map.get(rt_u, 99)
         if (ry_i < yil) or (ry_i == yil and ro < cur_order):
