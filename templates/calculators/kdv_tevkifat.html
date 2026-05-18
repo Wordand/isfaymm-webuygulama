@@ -292,6 +292,206 @@
                         </div>
 
                     </form>
+
+                    <!-- ⭐ 4. ADIM: DÜZELTME İŞLEMLERİ HESAPLAYICI (KDV TEBLİĞİ BÖLÜM 2.1.4) -->
+                    <div class="card border border-primary border-opacity-25 bg-white rounded-4 shadow-sm overflow-hidden mt-5 mb-2">
+                        <div class="card-header bg-slate-dark text-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-arrow-left-right text-warning fs-4 me-2"></i>
+                                <h6 class="fw-bold text-white mb-0 fs-6">Düzeltme İşlemleri Hesaplayıcı (Mal/Hizmet İadeleri & Matrah Değişiklikleri)</h6>
+                            </div>
+                            <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill small shadow-xs">Tebliğ Bölüm 2.1.4 Uyumlu</span>
+                        </div>
+                        <div class="card-body p-4 p-lg-5 bg-white text-slate-dark">
+                            
+                            <div class="alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25 text-slate-dark p-4 rounded-4 mb-5 shadow-2xs">
+                                <h6 class="fw-bold text-primary mb-2"><i class="bi bi-info-circle-fill me-2"></i>Düzeltme İşlemlerinin Temel Kuralı (50 Seri No.lu Tebliğ ile Güncel)</h6>
+                                <p class="small mb-0 lh-base">
+                                    Tevkifat kapsamına alınan işlemlerde ortaya çıkan mal iadeleri ve matrah azalmalarında düzeltme, <b>sadece tevkifata tabi tutulmayan (satıcıya ödenen) KDV kısmı</b> üzerinden gerçekleştirilir. Alıcı tarafından sorumlu sıfatıyla 2 No.lu KDV beyannamesi ile ödenen ve 1 No.lu beyannamede indirim konusu yapılan tevkifat tutarı için düzeltme işlemi yapılmaz.
+                                </p>
+                            </div>
+
+                            <!-- DÜZELTME TÜRÜ SEÇİMİ -->
+                            <label class="form-label fw-bold text-slate-dark small mb-3">Düzeltme Türü Seçimi</label>
+                            <div class="row g-3 mb-5">
+                                <div class="col-md-4">
+                                    <label class="form-check-label w-100" for="duzTurIade">
+                                        <input class="form-check-input d-none duz-radio" type="radio" name="duzTur" id="duzTurIade" value="iade" checked onchange="onDuzTurChange()">
+                                        <div class="duz-card p-3 rounded-4 text-center h-100 border border-2 d-flex flex-column justify-content-center align-items-center bg-white shadow-2xs">
+                                            <i class="bi bi-cart-x-fill fs-3 mb-2 text-danger duz-icon"></i>
+                                            <span class="fw-bold fs-6 text-dark duz-title">Mal/Hizmet İadesi (Matrah Azalması)</span>
+                                            <span class="small text-muted mt-1">Mal İadesi, Fiyat İndirimi, Kısmi İptal</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-check-label w-100" for="duzTurArtis">
+                                        <input class="form-check-input d-none duz-radio" type="radio" name="duzTur" id="duzTurArtis" value="artis" onchange="onDuzTurChange()">
+                                        <div class="duz-card p-3 rounded-4 text-center h-100 border border-2 d-flex flex-column justify-content-center align-items-center bg-white shadow-2xs">
+                                            <i class="bi bi-graph-up-arrow fs-3 mb-2 text-success duz-icon"></i>
+                                            <span class="fw-bold fs-6 text-dark duz-title">Matrahta Artış / Fiyat Farkı</span>
+                                            <span class="small text-muted mt-1">Fiyat Farkı, Satıcı Lehine Kur Farkı</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-check-label w-100" for="duzTurYersiz">
+                                        <input class="form-check-input d-none duz-radio" type="radio" name="duzTur" id="duzTurYersiz" value="yersiz" onchange="onDuzTurChange()">
+                                        <div class="duz-card p-3 rounded-4 text-center h-100 border border-2 d-flex flex-column justify-content-center align-items-center bg-white shadow-2xs">
+                                            <i class="bi bi-arrow-repeat fs-3 mb-2 text-warning duz-icon"></i>
+                                            <span class="fw-bold fs-6 text-dark duz-title">Fazla / Yersiz Tevkifat İadesi</span>
+                                            <span class="small text-muted mt-1">Hatalı Tevkifat Uygulaması</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- GİRDİ ALANI (İade/Artış için) -->
+                            <div id="duzInputContainer" class="row g-4 align-items-end mb-5">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-slate-dark small mb-2" id="duzMatrahLabel">İade Edilen Mal Bedeli / Matrah Azalması (KDV Hariç TL)</label>
+                                    <div class="input-group shadow-xs">
+                                        <input type="text" class="form-control premium-input fs-5 fw-black text-primary" id="duzMatrahFormatted" value="5.000" required oninput="onDuzMatrahInput(event)">
+                                        <input type="hidden" id="duzMatrah" value="5000">
+                                        <span class="input-group-text premium-addon fs-6">TL</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-slate-light rounded-4 border d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="small text-muted d-block fw-bold mb-1">ASIL İŞLEMDEN ALINAN ORANLAR</span>
+                                            <span class="fw-bold text-slate-dark fs-6" id="duzOranOzet">KDV: %20 | Tevkifat: 5/10</span>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-2xs" onclick="syncDuzWithMainCalc()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i> Oranları Güncelle
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SONUÇ GÖSTERİM ALANLARI -->
+                            <!-- 1. İADE / MATRAH AZALMASI SONUÇLARI -->
+                            <div id="duzResultIade" class="duz-result-box">
+                                <div class="p-4 bg-slate-soft rounded-4 border border-secondary border-opacity-25 mb-4">
+                                    <h6 class="fw-bold text-slate-dark mb-4 pb-3 border-bottom border-secondary border-opacity-25"><i class="bi bi-calculator-fill text-primary me-2"></i>İade / Matrah Azalması Düzeltme Hesaplaması Sonuçları</h6>
+                                    
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-muted d-block mb-1 fw-semibold">İADE EDİLEN MATRAH BEDELİ</span>
+                                            <h4 class="fw-black text-slate-dark mb-0 fs-5" id="duzResIadeMatrah">5.000,00 TL</h4>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-muted d-block mb-1 fw-semibold">İADEYE İSABET EDEN KDV</span>
+                                            <h4 class="fw-black text-slate-dark mb-0 fs-5" id="duzResIadeKdv">1.000,00 TL</h4>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-danger d-block mb-1 fw-bold">TEVKİF EDİLEN (DÜZELTİLMEYECEK)</span>
+                                            <h4 class="fw-black text-danger mb-0 fs-5" id="duzResIadeTevkifat">500,00 TL</h4>
+                                            <span class="d-block small text-muted mt-1" style="font-size: 0.7rem;">(Alıcı indirim konusu yaptığı için iade edilmez)</span>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-success d-block mb-1 fw-bold">SATICIYA İADE EDİLECEK KDV</span>
+                                            <h4 class="fw-black text-success mb-0 fs-5" id="duzResIadeSaticiKdv">500,00 TL</h4>
+                                            <span class="d-block small text-muted mt-1" style="font-size: 0.7rem;">(Sadece tevkifatsız kısım düzeltilir)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-4 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <span class="small text-primary fw-bold d-block mb-1">ALICININ SATICIDAN GERİ ALACAĞI TOPLAM BEDEL</span>
+                                            <h3 class="fw-black text-primary mb-0 fs-4" id="duzResIadeToplamGeri">5.500,00 TL</h3>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="small text-muted d-block">Hesaplama Formülü:</span>
+                                            <span class="fw-bold text-dark small">İade Matrahı + Tevkifata Tabi Tutulmayan KDV</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BEYAN REHBERİ -->
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="p-4 bg-white rounded-4 border border-secondary border-opacity-25 h-100 shadow-2xs">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="bi bi-building-fill text-primary fs-4 me-2"></i>
+                                                <h6 class="fw-bold text-dark mb-0">Alıcı Firması (İadeyi Yapan) Kayıt Rehberi</h6>
+                                            </div>
+                                            <p class="small text-muted mb-0 lh-base">
+                                                Alıcı, satıcıya düzenleyeceği iade faturasında işlem bedelini (<span id="rehberAliciMatrah" class="fw-bold text-dark">5.000,00 TL</span>) ve KDV'nin sadece tevkifata tabi tutulmayan kısmını (<span id="rehberAliciKdv" class="fw-bold text-primary">500,00 TL</span>) gösterir. Bu KDV tutarını iadenin gerçekleştiği döneme ait <b>1 No.lu KDV Beyannamesinde "İlave Edilecek KDV"</b> satırında beyan eder.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-4 bg-white rounded-4 border border-secondary border-opacity-25 h-100 shadow-2xs">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="bi bi-shop text-success fs-4 me-2"></i>
+                                                <h6 class="fw-bold text-dark mb-0">Satıcı Firması (İadeyi Alan) Kayıt Rehberi</h6>
+                                            </div>
+                                            <p class="small text-muted mb-0 lh-base">
+                                                Satıcı, alıcının düzenlediği iade faturasındaki KDV tutarını (<span id="rehberSaticiKdv" class="fw-bold text-success">500,00 TL</span>) iadenin gerçekleştiği döneme ait <b>1 No.lu KDV Beyannamesinde indirim konusu</b> yapar. Tevkifatlı kısım alıcı tarafından daha önce 2 No.lu beyanname ile ödenip indirim konusu yapıldığından satıcının kayıtlarında hiçbir düzeltmeye konu edilmez.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. MATRAHTA ARTIŞ SONUÇLARI -->
+                            <div id="duzResultArtis" class="duz-result-box d-none">
+                                <div class="p-4 bg-slate-soft rounded-4 border border-secondary border-opacity-25 mb-4">
+                                    <h6 class="fw-bold text-slate-dark mb-4 pb-3 border-bottom border-secondary border-opacity-25"><i class="bi bi-graph-up-arrow text-success me-2"></i>Matrahta Artış / Fiyat Farkı Hesaplaması Sonuçları</h6>
+                                    
+                                    <div class="row g-4 mb-4">
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-muted d-block mb-1 fw-semibold">FİYAT FARKI MATRAHI</span>
+                                            <h4 class="fw-black text-slate-dark mb-0 fs-5" id="duzResArtisMatrah">5.000,00 TL</h4>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-muted d-block mb-1 fw-semibold">HESAPLANAN KDV</span>
+                                            <h4 class="fw-black text-slate-dark mb-0 fs-5" id="duzResArtisKdv">1.000,00 TL</h4>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-warning-emphasis d-block mb-1 fw-bold">ALICI TEVKİFATI (2 NO.LU)</span>
+                                            <h4 class="fw-black text-warning-emphasis mb-0 fs-5" id="duzResArtisTevkifat">500,00 TL</h4>
+                                            <span class="d-block small text-muted mt-1" style="font-size: 0.7rem;">(Alt sınır aranmaksızın tevkifat yapılır)</span>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-3">
+                                            <span class="small text-primary d-block mb-1 fw-bold">SATICININ BEYANI (1 NO.LU)</span>
+                                            <h4 class="fw-black text-primary mb-0 fs-5" id="duzResArtisSaticiKdv">500,00 TL</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-4 bg-success bg-opacity-10 rounded-4 border border-success border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <span class="small text-success fw-bold d-block mb-1">SATICIYA ÖDENECEK FİYAT FARKI TOPLAM TUTARI</span>
+                                            <h3 class="fw-black text-success mb-0 fs-4" id="duzResArtisTahsil">5.500,00 TL</h3>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="small text-muted d-block">Mevzuat Kuralı (Tebliğ 2.1.4.2):</span>
+                                            <span class="fw-bold text-dark small">Asıl işlem alt sınırı geçtiği için ek faturada alt sınır aranmaz.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. YERSİZ TEVKİFAT REHBERİ -->
+                            <div id="duzResultYersiz" class="duz-result-box d-none">
+                                <div class="p-4 bg-amber-soft rounded-4 border border-warning mb-4 shadow-2xs">
+                                    <h6 class="fw-bold text-warning-emphasis mb-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>Fazla veya Yersiz Tevkif Edilen Vergilerin İadesi (Tebliğ Bölüm 2.1.4.3)</h6>
+                                    <p class="small text-slate-dark mb-4 lh-base">
+                                        Fazla veya yersiz tevkif edilerek ödenen vergi bulunması halinde, gerek alıcı gerekse satıcının beyanlarının düzeltilmesi suretiyle işlemin tevkifat uygulanmadan önceki hale döndürülmesi gerekir. Fazla veya yersiz tevkif edilen vergi, öncelikle tevkifatı yapan alıcı tarafından satıcıya iade edilir. Alıcı, ödeme belgesi ve satıcının düzeltme yazısı ile vergi dairesinden iadesini alır. Bu iadelerde teminat, YMM raporu veya VİR aranmaz.
+                                    </p>
+                                    <div class="p-4 bg-white rounded-4 border border-warning border-opacity-50">
+                                        <h6 class="fw-bold text-dark mb-2 fs-6">Önemli Kolaylık Hükmü (Örnek Uygulama):</h6>
+                                        <p class="small text-muted mb-0 lh-base">
+                                            <b>Örnek:</b> (A) Ltd. Şti., (B) İnşaat A.Ş.'nden aldığı hizmette hesaplanan 400 TL KDV üzerinden tevkifata tabi olmadığı halde 4/10 oranında (160 TL) tevkifat yapmış, 2 No.lu beyanname ile ödemiştir. (B) İnşaat A.Ş. ise kalan 240 TL'yi 1 No.lu beyannamede beyan etmiştir.<br><br>
+                                            <b>Kural:</b> Tevkifat yapılmaması gerektiğinin sonradan anlaşılması durumunda, tarafların talep etmesi ve satıcının bu yersiz tevkifata ilişkin KDV iadesi almamış olması kaydıyla, beyannamelerde ve kayıtlarda <b>hiçbir düzeltme yapılmasına gerek bulunmamaktadır</b>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -361,28 +561,7 @@
     }
     
     .premium-input {
-        border: 2px solid #e2e8f0;
-        border-radius: 0.75rem;
-        padding: 0.85rem 1.25rem;
-        font-weight: 700;
-        color: #0f172a;
-        transition: all 0.2s;
-    }
-    .premium-input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-        outline: none;
-    }
-    
-    .premium-addon {
-        background-color: #f8fafc;
-        border: 2px solid #e2e8f0;
-        border-left: none;
-        color: #64748b;
-        font-weight: 700;
-    }
-    
-    .summary-card {
+      .summary-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border-radius: 1rem;
         border-bottom-width: 5px !important;
@@ -390,6 +569,25 @@
     .summary-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    /* Düzeltme İşlemleri Kart Stilleri */
+    .duz-card {
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border-color: #e2e8f0;
+    }
+    .duz-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+    }
+    input[type="radio"]:checked + .duz-card {
+        border-color: #3b82f6 !important;
+        background-color: #eff6ff !important;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.15);
+    }
+    input[type="radio"]:checked + .duz-card .duz-title {
+        color: #1d4ed8 !important;
     }
 </style>
 
@@ -495,7 +693,7 @@
                 text: "Karayolu Yük Taşımacılığı Hizmetleri (Kargo İşletmeciliği Hariç)", 
                 oranGosterim: "2/10", oranVal: 0.2, 
                 mahsuben: "50.000 TL'yi aşmayan mahsup talepleri VİR, YMM Raporu ve Teminat aranılmaksızın yerine getirilir. 50.000 TL ve üzerindeki mahsuben iade talepleri Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile de yerine getirilebilir).", 
-                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM raporu ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
+                nakden: "Miktarına bakılmaksızın nakden iade talepleri münhasıran Teminat ve/veya Vergi İnceleme Raporu (VİR) ile yerine getirilir (Mükellefin o yılda süresinde düzenlenmiş Tam Tasdik Sözleşmesi varsa YMM uppercase ile yerine getirilebilir veya teminat YMM raporu ile çözülebilir)." 
             },
             { 
                 id: "baski", 
@@ -659,11 +857,100 @@
         
         // Yalnız Yazısı
         document.getElementById('fatYazi').innerText = `Yalnız ${new Intl.NumberFormat('tr-TR').format(Math.floor(tahsilEdilecek))} TLdir.`;
+        
+        // Düzeltme İşlemleri Senkronizasyonu
+        syncDuzWithMainCalc();
+    }
+
+    // --- DÜZELTME İŞLEMLERİ JAVASCRIPT FONKSİYONLARI ---
+    function onDuzTurChange() {
+        const val = document.querySelector('input[name="duzTur"]:checked').value;
+        document.getElementById('duzResultIade').classList.add('d-none');
+        document.getElementById('duzResultArtis').classList.add('d-none');
+        document.getElementById('duzResultYersiz').classList.add('d-none');
+        document.getElementById('duzInputContainer').classList.remove('d-none');
+
+        if (val === 'iade') {
+            document.getElementById('duzResultIade').classList.remove('d-none');
+            document.getElementById('duzMatrahLabel').innerText = "İade Edilen Mal Bedeli / Matrah Azalması (KDV Hariç TL)";
+        } else if (val === 'artis') {
+            document.getElementById('duzResultArtis').classList.remove('d-none');
+            document.getElementById('duzMatrahLabel').innerText = "Artış Bedeli / Fiyat Farkı Matrahı (KDV Hariç TL)";
+        } else {
+            document.getElementById('duzResultYersiz').classList.remove('d-none');
+            document.getElementById('duzInputContainer').classList.add('d-none');
+        }
+        calculateDuzletme();
+    }
+
+    function onDuzMatrahInput(e) {
+        let input = e.target;
+        let clean = input.value.replace(/\D/g, '');
+        if (!clean) {
+            document.getElementById('duzMatrah').value = 0;
+            input.value = '';
+            calculateDuzletme();
+            return;
+        }
+        let val = parseInt(clean, 10);
+        document.getElementById('duzMatrah').value = val;
+        input.value = new Intl.NumberFormat('tr-TR').format(val);
+        calculateDuzletme();
+    }
+
+    function syncDuzWithMainCalc() {
+        const kdvOranSelect = document.getElementById('calcKdvOran');
+        const tevkifatOranValInput = document.getElementById('calcTevkifatOranVal');
+        const gosterimInput = document.getElementById('calcTevkifatOranGosterim');
+        
+        if (kdvOranSelect && gosterimInput) {
+            document.getElementById('duzOranOzet').innerText = `KDV: %${kdvOranSelect.value} | Tevkifat: ${gosterimInput.value.split(' ')[0]}`;
+        }
+        calculateDuzletme();
+    }
+
+    function calculateDuzletme() {
+        const matrahInput = document.getElementById('duzMatrah');
+        const kdvOranSelect = document.getElementById('calcKdvOran');
+        const tevkifatOranValInput = document.getElementById('calcTevkifatOranVal');
+        
+        if (!matrahInput || !kdvOranSelect || !tevkifatOranValInput) return;
+        
+        const matrah = parseFloat(matrahInput.value) || 0;
+        const kdvOran = parseFloat(kdvOranSelect.value) / 100;
+        const tevkifatOran = parseFloat(tevkifatOranValInput.value);
+        
+        const toplamKdv = matrah * kdvOran;
+        const tevkifatKdv = toplamKdv * tevkifatOran;
+        const saticiKdv = toplamKdv - tevkifatKdv;
+        const iadeToplamGeri = matrah + saticiKdv;
+        const artisToplamTahsil = matrah + saticiKdv;
+        
+        const formatTL = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val);
+        
+        // İade Sonuçları
+        document.getElementById('duzResIadeMatrah').innerText = formatTL(matrah);
+        document.getElementById('duzResIadeKdv').innerText = formatTL(toplamKdv);
+        document.getElementById('duzResIadeTevkifat').innerText = formatTL(tevkifatKdv);
+        document.getElementById('duzResIadeSaticiKdv').innerText = formatTL(saticiKdv);
+        document.getElementById('duzResIadeToplamGeri').innerText = formatTL(iadeToplamGeri);
+        
+        document.getElementById('rehberAliciMatrah').innerText = formatTL(matrah);
+        document.getElementById('rehberAliciKdv').innerText = formatTL(saticiKdv);
+        document.getElementById('rehberSaticiKdv').innerText = formatTL(saticiKdv);
+        
+        // Artış Sonuçları
+        document.getElementById('duzResArtisMatrah').innerText = formatTL(matrah);
+        document.getElementById('duzResArtisKdv').innerText = formatTL(toplamKdv);
+        document.getElementById('duzResArtisTevkifat').innerText = formatTL(tevkifatKdv);
+        document.getElementById('duzResArtisSaticiKdv').innerText = formatTL(saticiKdv);
+        document.getElementById('duzResArtisTahsil').innerText = formatTL(artisToplamTahsil);
     }
 
     // Sayfa Yüklendiğinde Başlat
     document.addEventListener("DOMContentLoaded", () => {
         updateTevkifatTurleri();
+        syncDuzWithMainCalc();
     });
 </script>
 {% endblock %}
