@@ -1842,17 +1842,32 @@ def get_onceki_katki(tesvik_id: int):
             return jsonify({"status": "error", "message": "Yetkisiz erişim."}), 403
         belge_no = row[0] if not isinstance(row, dict) else row.get("belge_no")
 
-        cur.execute(
-            """
-            SELECT hesap_donemi, donem_turu,
-                   COALESCE(cari_yatirim_katki,0) AS cy,
-                   COALESCE(cari_diger_katki,0) AS cd
-            FROM tesvik_kullanim
-            WHERE user_id=%s AND belge_no=%s
-            """,
-            (user_id, belge_no),
-        )
-        rows = cur.fetchall() or []
+        # Ortamlar arası sütun farklarını tolere et (eski şemalarda donem_yil/donem_turu olabilir)
+        rows = []
+        try:
+            cur.execute(
+                """
+                SELECT hesap_donemi, donem_turu,
+                       COALESCE(cari_yatirim_katki,0) AS cy,
+                       COALESCE(cari_diger_katki,0) AS cd
+                FROM tesvik_kullanim
+                WHERE user_id=%s AND belge_no=%s
+                """,
+                (user_id, belge_no),
+            )
+            rows = cur.fetchall() or []
+        except Exception:
+            cur.execute(
+                """
+                SELECT donem_yil, donem_turu,
+                       COALESCE(cari_yatirim_katki,0) AS cy,
+                       COALESCE(cari_diger_katki,0) AS cd
+                FROM tesvik_kullanim
+                WHERE user_id=%s AND belge_no=%s
+                """,
+                (user_id, belge_no),
+            )
+            rows = cur.fetchall() or []
 
     onceki_yatirim = 0.0
     onceki_diger = 0.0
@@ -1867,6 +1882,27 @@ def get_onceki_katki(tesvik_id: int):
             onceki_yatirim += float(cy or 0)
             onceki_diger += float(cd or 0)
 
+    # Debug: ilk birkaç satırı döndür (sadece sayısal özet)
+    debug_rows = []
+    try:
+        for r in (rows[:10] if isinstance(rows, list) else []):
+            if isinstance(r, dict):
+                debug_rows.append({
+                    "yil": r.get("hesap_donemi") or r.get("donem_yil"),
+                    "turu": r.get("donem_turu"),
+                    "cy": float(r.get("cy") or 0),
+                    "cd": float(r.get("cd") or 0),
+                })
+            else:
+                debug_rows.append({
+                    "yil": r[0],
+                    "turu": r[1],
+                    "cy": float(r[2] or 0),
+                    "cd": float(r[3] or 0),
+                })
+    except Exception:
+        debug_rows = []
+
     return jsonify(
         {
             "status": "success",
@@ -1878,6 +1914,7 @@ def get_onceki_katki(tesvik_id: int):
                 "belge_no": belge_no,
                 "donem": donem,
                 "rows_count": len(rows),
+                "rows_sample": debug_rows,
             },
         }
     ), 200

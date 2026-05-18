@@ -10,9 +10,9 @@ print("tables", [r["name"] for r in cur.fetchall()])
 cur.execute("PRAGMA table_info(tesvik_kullanim)")
 print("tesvik_kullanim cols", [r[1] for r in cur.fetchall()])
 
-cur.execute("select * from tesvik_kullanim where belge_no=? order by hesap_donemi, donem_turu", ("test-3305",))
-rows = cur.fetchall()
-print("kullanim count", len(rows))
-for r in rows:
-    print(dict(r))
-
+for bno in ("test-3305", "test-3305_deneme"):
+    cur.execute("select * from tesvik_kullanim where belge_no=? order by hesap_donemi, donem_turu", (bno,))
+    rows = cur.fetchall()
+    print("belge_no", bno, "kullanim count", len(rows))
+    for r in rows:
+        print(dict(r))
