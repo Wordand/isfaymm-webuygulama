@@ -1616,6 +1616,7 @@ body, html { background: #fff !important; }
       if (!resp.ok) return;
       const data = await resp.json();
       console.log("🔎 onceki_katki api:", { tesvikId, donem, data });
+      try { console.log("🔎 onceki_katki _debug:", data?._debug); } catch (_) {}
       if (!data || data.status !== "success") return;
 
       const oyVal = Number(data.onceki_yatirim_katki_tutari || 0) || 0;
