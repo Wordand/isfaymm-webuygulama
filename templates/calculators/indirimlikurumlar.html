@@ -5319,8 +5319,8 @@ body, html { background: #fff !important; }
         smartSet('toplam_harcama_tutari', currentBelgeJSData.toplam_harcama_tutari);
 
         // Step 4
-        smartSet('onceki_yatirim_katki_tutari', currentBelgeJSData.onceki_yatirim_katki_tutari);
-        smartSet('onceki_diger_katki_tutari', currentBelgeJSData.onceki_diger_katki_tutari);
+        // Not: "Önceki dönemler" alanları dönem bazlıdır; editdonem akışında DB'den otomatik getirileceği için
+        // burada ana belge üzerinden 0 basıp kullanıcıyı yanıltmayalım.
 
         // Step 6
         const chk = document.getElementById('useDetailedProfitRatios');
@@ -5378,6 +5378,8 @@ body, html { background: #fff !important; }
           } catch (e) {
             console.warn("Belge yükleme sonrası otomatik hesaplama hatası:", e);
           }
+          // Dönem bazlı "önceki katkı" otomatik getir (en sonda kalsın ki başka set'ler ezmesin)
+          try { maybeAutofillOncekiFromDB(); } catch (_) {}
         }, 250);
         
         console.log("✅ Belge verileri başarıyla yüklendi.");
