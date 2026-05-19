@@ -26,9 +26,7 @@
     <div class="col-lg-5">
       <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold">1) Dönem Matrahı</div>
-          <span class="badge border"
-                style="background:#111827; color:#ffffff; border-color:#111827;">Havuz</span>
+          <div class="fw-bold">Dönem Matrahı</div>
         </div>
 
         <div class="mb-3">
@@ -94,7 +92,7 @@
     <div class="col-lg-7">
       <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold">2) Belgelere Matrah Dağıtımı</div>
+          <div class="fw-bold">Belgelere Matrah Dağıtımı</div>
           <span class="badge bg-light text-dark border">{{ docs|length }} belge</span>
         </div>
 
@@ -170,6 +168,9 @@
           <div class="d-flex justify-content-end gap-2 mt-3">
             <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearAllocations()">
               <i class="bi bi-eraser me-1"></i>Temizle
+            </button>
+            <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
+              <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
             </button>
             <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAll()">
               <i class="bi bi-save2 me-1"></i>Bu Dönemi Kaydet
@@ -519,6 +520,59 @@
       window.location.href = '?sekme=tesvik';
     } catch (e) {
       alert('Kaydetme sırasında bağlantı hatası oluştu.');
+    }
+  }
+
+  async function poolSaveMatrahOnly() {
+    const isLoggedIn = !!window.IS_LOGGED_IN;
+    if (!isLoggedIn) {
+      alert('Kaydetmek için giriş yapmalısınız.');
+      return;
+    }
+
+    const donemText = document.getElementById('pool_donem').value || '';
+    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
+    const yil = m ? Number(m[1]) : null;
+    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
+    if (!yil) {
+      alert('Dönem seçimi geçersiz.');
+      return;
+    }
+
+    const genelOran = _getGenelOran();
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+
+    const poolPayload = {
+      donem_text: donemText,
+      hesap_donemi: yil,
+      donem_turu: turu,
+      ticari_bilanco_kari: tic,
+      kkeg: kkeg,
+      indirim_istisna: ind,
+      gecmis_yil_zarari: zarar,
+      kv_matrah: matrah,
+      genel_oran: genelOran
+    };
+
+    try {
+      const poolRes = await fetch('/indirimlikurumlar/donem_matrah/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(poolPayload)
+      });
+      if (!poolRes.ok) {
+        const t = await poolRes.text();
+        alert('Dönem matrahı kaydedilemedi: ' + t);
+        return;
+      }
+      // Listeyi görmek için sayfayı yenileyelim (en basit ve sağlam yol)
+      window.location.reload();
+    } catch (e) {
+      alert('Dönem matrahı kaydedilemedi (bağlantı hatası).');
     }
   }
 

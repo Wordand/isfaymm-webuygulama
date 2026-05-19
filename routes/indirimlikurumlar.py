@@ -654,7 +654,9 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                         session["flash_donem_matrah_required"] = True
                         return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
             except Exception:
-                pass
+                # Tablo henüz yoksa / bağlantı sorunu varsa formu açıp kullanıcıyı yanıltmayalım.
+                session["flash_donem_matrah_required"] = True
+                return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
