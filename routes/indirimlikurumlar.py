@@ -639,7 +639,6 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
 
         # Form sekmesine girilmek istendiğinde: önce dönem matrah kaydı zorunlu olsun
         if sekme == "form":
-            # Dönem seçimi session'da yoksa veya kayıt yoksa, dönem ekranına yönlendir
             try:
                 active_donem = session.get("active_donem_text")
                 if not active_donem:
@@ -655,7 +654,6 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                         session["flash_donem_matrah_required"] = True
                         return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
             except Exception:
-                # kayıt kontrolü çalışmazsa formu tamamen kilitlemeyelim
                 pass
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
@@ -2067,3 +2065,118 @@ def delete_tesvik_kullanim(id):
             "status": "error",
             "message": f"Silme işlemi başarısız: {str(e)}"
         }), 500
+
+
+@bp.route("/donem_matrah/save", methods=["POST"])
+@login_required
+def save_donem_matrah():
+    """Dönem matrah havuzu kaydını oluşturur/günceller ve aktif dönem olarak işaretler."""
+    try:
+        user_id = session.get("user_id")
+        mukellef_id = session.get("aktif_mukellef_id")
+        if not user_id or not mukellef_id:
+            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
+
+        data = request.get_json(force=True) or {}
+        donem_text = (data.get("donem_text") or "").strip()
+        hesap_donemi = int(data.get("hesap_donemi") or 0)
+        donem_turu = (data.get("donem_turu") or "KURUMLAR").strip().upper()
+
+        ticari = float(data.get("ticari_bilanco_kari") or 0)
+        kkeg = float(data.get("kkeg") or 0)
+        ind = float(data.get("indirim_istisna") or 0)
+        zarar = float(data.get("gecmis_yil_zarari") or 0)
+        matrah = float(data.get("kv_matrah") or 0)
+        genel_oran = float(data.get("genel_oran") or 25)
+
+        if not donem_text or not hesap_donemi:
+            return jsonify({"status": "error", "message": "Dönem bilgisi eksik."}), 400
+
+        with get_conn() as conn:
+            try:
+                cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            except Exception:
+                cur = conn.cursor()
+
+            is_sqlite = ("sqlite3" in str(type(conn)).lower()) or ("sqlite" in str(type(conn)).lower())
+
+            if is_sqlite:
+                cur.execute(
+                    """
+                    INSERT INTO donem_matrah (
+                        user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
+                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(user_id, mukellef_id, donem_text)
+                    DO UPDATE SET
+                        hesap_donemi=excluded.hesap_donemi,
+                        donem_turu=excluded.donem_turu,
+                        ticari_bilanco_kari=excluded.ticari_bilanco_kari,
+                        kkeg=excluded.kkeg,
+                        indirim_istisna=excluded.indirim_istisna,
+                        gecmis_yil_zarari=excluded.gecmis_yil_zarari,
+                        kv_matrah=excluded.kv_matrah,
+                        genel_oran=excluded.genel_oran
+                    """,
+                    (
+                        user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
+                        ticari, kkeg, ind, zarar, matrah, genel_oran,
+                    ),
+                )
+                conn.commit()
+                cur.execute(
+                    "SELECT id FROM donem_matrah WHERE user_id=? AND mukellef_id=? AND donem_text=? LIMIT 1",
+                    (user_id, mukellef_id, donem_text),
+                )
+                row = cur.fetchone()
+                pool_id = row["id"] if isinstance(row, dict) else row[0]
+            else:
+                cur.execute(
+                    """
+                    INSERT INTO donem_matrah (
+                        user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
+                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    ON CONFLICT (user_id, mukellef_id, donem_text)
+                    DO UPDATE SET
+                        hesap_donemi=EXCLUDED.hesap_donemi,
+                        donem_turu=EXCLUDED.donem_turu,
+                        ticari_bilanco_kari=EXCLUDED.ticari_bilanco_kari,
+                        kkeg=EXCLUDED.kkeg,
+                        indirim_istisna=EXCLUDED.indirim_istisna,
+                        gecmis_yil_zarari=EXCLUDED.gecmis_yil_zarari,
+                        kv_matrah=EXCLUDED.kv_matrah,
+                        genel_oran=EXCLUDED.genel_oran
+                    RETURNING id
+                    """,
+                    (
+                        user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
+                        ticari, kkeg, ind, zarar, matrah, genel_oran,
+                    ),
+                )
+                pool_id = cur.fetchone()["id"]
+                conn.commit()
+
+        session["active_donem_text"] = donem_text
+        return jsonify({"status": "success", "id": pool_id, "donem_text": donem_text})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@bp.route("/donem_matrah/delete/<int:id>", methods=["POST"])
+@login_required
+def delete_donem_matrah(id):
+    try:
+        user_id = session.get("user_id")
+        mukellef_id = session.get("aktif_mukellef_id")
+        with get_conn() as conn:
+            c = conn.cursor()
+            c.execute(
+                "DELETE FROM donem_matrah WHERE id = %s AND user_id = %s AND mukellef_id = %s",
+                (id, user_id, mukellef_id),
+            )
+            conn.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

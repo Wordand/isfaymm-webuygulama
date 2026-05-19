@@ -1,5 +1,15 @@
 {# Dönem bazlı matrah havuzu ve belge dağıtımı (İndirimli KV) #}
 <div class="container-fluid py-3" style="max-width: 1200px;">
+  {% if session.get('flash_donem_matrah_required') %}
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>
+        <div class="fw-bold">Önce dönem matrahını girin</div>
+        <div class="small mb-0">Form Girişi’ne geçmeden önce ilgili dönem için dönem matrah verilerinizi kaydetmeniz gerekiyor.</div>
+      </div>
+    </div>
+    {% set _ = session.pop('flash_donem_matrah_required') %}
+  {% endif %}
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
     <div>
       <h2 class="fw-bold mb-1">Dönem Hesabı</h2>
@@ -173,6 +183,62 @@
       </div>
     </div>
   </div>
+
+  {% if donem_matrah_list is defined %}
+  <div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+      <div class="fw-bold">Kaydedilen Dönem Matrahları</div>
+      <div class="text-muted small">Form Girişi’ne geçmeden önce burada en az bir dönem kaydı oluşturmalısınız.</div>
+    </div>
+    <div class="table-responsive bg-white border rounded-4 shadow-sm">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Dönem</th>
+            <th class="text-end">Ticari</th>
+            <th class="text-end">KKEG</th>
+            <th class="text-end">İnd/İst</th>
+            <th class="text-end">Zarar</th>
+            <th class="text-end">Matrah</th>
+            <th class="text-end">Genel Oran</th>
+            <th class="text-end">İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in donem_matrah_list %}
+          <tr id="pool-row-{{ r.id }}"
+              data-donem="{{ r.donem_text }}"
+              data-ticari="{{ r.ticari_bilanco_kari }}"
+              data-kkeg="{{ r.kkeg }}"
+              data-ind="{{ r.indirim_istisna }}"
+              data-zarar="{{ r.gecmis_yil_zarari }}"
+              data-matrah="{{ r.kv_matrah }}"
+              data-oran="{{ r.genel_oran }}">
+            <td class="fw-bold">{{ r.donem_text }}</td>
+            <td class="text-end">{{ r.ticari_bilanco_kari|tlformat }} TL</td>
+            <td class="text-end">{{ r.kkeg|tlformat }} TL</td>
+            <td class="text-end">{{ r.indirim_istisna|tlformat }} TL</td>
+            <td class="text-end">{{ r.gecmis_yil_zarari|tlformat }} TL</td>
+            <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
+            <td class="text-end">%{{ r.genel_oran }}</td>
+            <td class="text-end">
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="poolLoadSaved({{ r.id }})">
+                Düzenle
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="poolDeleteSaved({{ r.id }})">
+                Sil
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if (donem_matrah_list|length) == 0 %}
+          <tr><td colspan="8" class="text-center text-muted py-4">Henüz dönem matrah kaydı yok.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <script>
@@ -296,6 +362,54 @@
     poolCompute();
   }
 
+  function poolLoadSaved(id) {
+    const row = document.getElementById('pool-row-' + id);
+    if (!row) return;
+    const donem = row.getAttribute('data-donem') || '';
+    const tic = Number(row.getAttribute('data-ticari') || 0);
+    const kkeg = Number(row.getAttribute('data-kkeg') || 0);
+    const ind = Number(row.getAttribute('data-ind') || 0);
+    const zarar = Number(row.getAttribute('data-zarar') || 0);
+    const oran = Number(row.getAttribute('data-oran') || 25);
+
+    const sel = document.getElementById('pool_donem');
+    if (sel) sel.value = donem;
+
+    const setMasked = (id, val) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const m = _masks.get(id);
+      if (m) m.typedValue = val;
+      else el.value = String(val || 0);
+    };
+    setMasked('pool_ticari', tic);
+    setMasked('pool_kkeg', kkeg);
+    setMasked('pool_indirim', ind);
+    setMasked('pool_zarar', zarar);
+
+    const target = String(oran);
+    const radio = document.querySelector(`input[name="pool_genel_oran"][value="${target}"]`);
+    if (radio) radio.checked = true;
+
+    poolCompute();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function poolDeleteSaved(id) {
+    if (!confirm('Bu dönem matrah kaydı silinsin mi?')) return;
+    try {
+      const res = await fetch('/indirimlikurumlar/donem_matrah/delete/' + id, { method: 'POST' });
+      if (!res.ok) {
+        alert('Silme işlemi başarısız.');
+        return;
+      }
+      const row = document.getElementById('pool-row-' + id);
+      if (row) row.remove();
+    } catch (e) {
+      alert('Silme sırasında bağlantı hatası oluştu.');
+    }
+  }
+
   async function poolSaveAll() {
     const isLoggedIn = !!window.IS_LOGGED_IN;
     if (!isLoggedIn) {
@@ -313,6 +427,41 @@
     }
 
     const genelOran = _getGenelOran();
+
+    // 1) Önce dönem matrah kaydını kaydet (Form Girişi kilidi için gerekli)
+    try {
+      const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+      const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+      const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+      const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+      const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+
+      const poolPayload = {
+        donem_text: donemText,
+        hesap_donemi: yil,
+        donem_turu: turu,
+        ticari_bilanco_kari: tic,
+        kkeg: kkeg,
+        indirim_istisna: ind,
+        gecmis_yil_zarari: zarar,
+        kv_matrah: matrah,
+        genel_oran: genelOran
+      };
+
+      const poolRes = await fetch('/indirimlikurumlar/donem_matrah/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(poolPayload)
+      });
+      if (!poolRes.ok) {
+        const t = await poolRes.text();
+        alert('Dönem matrahı kaydedilemedi: ' + t);
+        return;
+      }
+    } catch (e) {
+      alert('Dönem matrahı kaydedilemedi (bağlantı hatası).');
+      return;
+    }
 
     const saves = [];
     document.querySelectorAll('#pool_doc_rows tr').forEach(tr => {
