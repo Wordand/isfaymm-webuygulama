@@ -72,16 +72,16 @@
           </div>
         </div>
 
-        <details class="mt-3" open>
-          <summary class="fw-semibold">Sabit Kiymet Detayi (Tevsi / Oranlama)</summary>
-          <div class="mt-2 p-3 bg-white border rounded-3">
+        <div class="mt-3 p-3 bg-white border rounded-3">
+          <div class="fw-semibold mb-2">Sabit Kiymet Detayi (Tevsi / Oranlama)</div>
+          <div class="text-muted small mb-2">Tevsi yatirimlarda oranlama yapacaksaniz doldurun. Diger durumlarda bos birakabilirsiniz.</div>
             <div class="row g-2">
               <div class="col-md-6">
                 <label class="form-label">250 - Arazi ve Arsalar</label>
                 <input id="pool_sabit_250" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">251 - YeraltÄ± ve YerÃ¼stÃ¼ DÃ¼zenleri</label>
+                <label class="form-label">251 - Yeralti ve Yerustu Duzenleri</label>
                 <input id="pool_sabit_251" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
@@ -93,19 +93,19 @@
                 <input id="pool_sabit_253" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">254 - TaÅŸÄ±tlar</label>
+                <label class="form-label">254 - Tasitlar</label>
                 <input id="pool_sabit_254" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">255 - DemirbaÅŸlar</label>
+                <label class="form-label">255 - Demirbaslar</label>
                 <input id="pool_sabit_255" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">256 - DiÄŸer Maddi Duran VarlÄ±klar</label>
+                <label class="form-label">256 - Diger Maddi Duran Varliklar</label>
                 <input id="pool_sabit_256" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">258 - YapÄ±lmakta Olan YatÄ±rÄ±mlar</label>
+                <label class="form-label">258 - Yapilmakta Olan Yatirimlar</label>
                 <input id="pool_sabit_258" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
@@ -113,23 +113,23 @@
                 <input id="pool_sabit_260" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">264 - Ã–zel Maliyetler</label>
+                <label class="form-label">264 - Ozel Maliyetler</label>
                 <input id="pool_sabit_264" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
               <div class="col-md-6">
-                <label class="form-label">267 - DiÄŸer Maddi Olmayan Duran VarlÄ±klar</label>
+                <label class="form-label">267 - Diger Maddi Olmayan Duran Varliklar</label>
                 <input id="pool_sabit_267" type="text" class="form-control pool-sabit-input" placeholder="0,00">
               </div>
             </div>
             <div class="mt-3 p-3 bg-light border rounded-3">
               <div class="d-flex justify-content-between">
-                <div class="text-muted">Toplam Sabit KÄ±ymet (Oranlama iÃ§in)</div>
+                <div class="text-muted">Toplam Sabit Kiymet (Oranlama icin)</div>
                 <div class="fw-bold" id="pool_sabit_total_label">0,00 TL</div>
               </div>
-              <div class="text-muted small mt-1">Bu toplam, tevsi yatÄ±rÄ±mlarda â€œtoplam sabit kÄ±ymet tutarÄ±â€ olarak kullanÄ±lÄ±r.</div>
+              <div class="text-muted small mt-1">Bu toplam, tevsi yatirimlarda \"toplam sabit kiymet tutari\" olarak kullanilir.</div>
             </div>
           </div>
-        </details>
+        
 
         <div class="mt-3">
           <label class="form-label">Genel Vergi Oranı</label>
@@ -169,31 +169,6 @@
             Henuz kayitli tesvik belgesi yok. Once “Tesvik Belgelerim” bolumunden belge ekleyin.
           </div>
         {% else %}
-          {% set pool_matrah = (active_donem_matrah.kv_matrah if active_donem_matrah else 0) %}
-          {% set used_matrah = (donem_usage_totals.used_matrah if donem_usage_totals is defined else 0) %}
-          {% set rem_matrah = (pool_matrah - used_matrah) %}
-
-          <div class="mt-2 p-3 bg-light border rounded-3">
-            <div class="row g-2">
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Secili Donem Matrahi</span>
-                <span class="fw-bold">{{ pool_matrah|tlformat }} TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Bu Donemde Kullanilan Ind. Matrah</span>
-                <span class="fw-bold">{{ used_matrah|tlformat }} TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Kalan Matrah</span>
-                <span class="fw-bold">{{ (rem_matrah if rem_matrah>0 else 0)|tlformat }} TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Bu Donem Ind. KV</span>
-                <span class="fw-bold">{{ (donem_usage_totals.ind_kv if donem_usage_totals is defined else 0)|tlformat }} TL</span>
-              </div>
-            </div>
-          </div>
-
           <div class="table-responsive mt-3">
             <table class="table table-sm align-middle">
               <thead class="table-light">
@@ -700,6 +675,7 @@
   }
 
   (function initPool() {
+    if (!document.getElementById('pool_donem')) return;
     _initPoolMasks();
     document.getElementById('pool_ticari')?.addEventListener('input', poolCompute);
     document.getElementById('pool_kkeg')?.addEventListener('input', poolCompute);
@@ -707,7 +683,6 @@
     document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
     document.querySelectorAll('.pool-sabit-input').forEach(el => el.addEventListener('input', poolComputeSabitTotal));
     document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
-    document.querySelectorAll('.pool-matrah-input').forEach(el => el.addEventListener('input', poolCompute));
     // Kaydedilen dönem matrahlarında geçici satırlarını gizle/göster
     try {
       const toggle = document.getElementById('toggle_gecici_rows');

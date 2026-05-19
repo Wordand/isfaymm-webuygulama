@@ -696,6 +696,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
+    donem_usage_by_belge = {}
+    donem_usage_totals = {"used_matrah": 0.0, "ind_kv": 0.0}
     if docs:
         with get_conn() as conn_k:
             cur_k = conn_k.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -712,6 +714,44 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     if bno not in kullanimlar:
                         kullanimlar[bno] = []
                     kullanimlar[bno].append(item)
+
+                # Donem Hesabi sekmesi icin: belge bazinda toplam indirimli matrah ve
+                # secili donem icin kullanilan toplam indirimli matrah / indirimli KV
+                try:
+                    import re as _re
+
+                    active_text = session.get("active_donem_text")
+                    active_yil = None
+                    active_turu = None
+                    if active_text:
+                        m = _re.match(r"^(\\d{4})\\s*-\\s*(.+)$", str(active_text).strip())
+                        if m:
+                            active_yil = int(m.group(1))
+                            active_turu = str(m.group(2)).strip().upper()
+
+                    def _f0(x):
+                        try:
+                            return float(x or 0)
+                        except Exception:
+                            return 0.0
+
+                    for it in all_k:
+                        bno2 = it.get("belge_no")
+                        if not bno2:
+                            continue
+                        drec = donem_usage_by_belge.get(bno2)
+                        if not drec:
+                            drec = {"total_matrah": 0.0}
+                            donem_usage_by_belge[bno2] = drec
+                        drec["total_matrah"] = drec.get("total_matrah", 0.0) + _f0(it.get("indirimli_matrah"))
+
+                        if active_yil is not None and active_turu:
+                            if int(it.get("hesap_donemi") or 0) == active_yil and str(it.get("donem_turu") or "").upper() == active_turu:
+                                donem_usage_totals["used_matrah"] += _f0(it.get("indirimli_matrah"))
+                                donem_usage_totals["ind_kv"] += _f0(it.get("indirimli_kv"))
+                except Exception:
+                    # Bu ozet veriler kritik degil; hata olursa tablo 0 gosterir.
+                    pass
 
     # -------------------------------------------------------------
     # Kümülatif devreden hesapları (display için normalize et)
@@ -809,6 +849,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         current_kullanim=current_kullanim,
         edit_doc=edit_doc,
         kullanimlar=kullanimlar, 
+        donem_usage_by_belge=donem_usage_by_belge,
+        donem_usage_totals=donem_usage_totals,
         donem_matrah_list=donem_matrah_list,
         active_donem_matrah=active_donem_matrah,
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}), 
