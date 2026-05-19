@@ -516,6 +516,20 @@
                         }
                     }, 800);
 
+                    // Skip Button Logic
+                    const skipBtn = document.getElementById('skip-intro-btn');
+                    if (skipBtn) {
+                        skipBtn.addEventListener('click', () => {
+                            clearInterval(loadingInterval);
+                            clearInterval(sloganInterval);
+                            loader.classList.add("fade-out");
+                            sessionStorage.setItem("isfa_intro_v3", "true");
+                            setTimeout(() => {
+                                if(document.body.contains(loader)) loader.remove();
+                            }, 800);
+                        });
+                    }
+
                     // Progress
                     const loadingInterval = setInterval(() => {
                         progress += increment;
