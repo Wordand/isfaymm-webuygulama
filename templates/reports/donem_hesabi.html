@@ -195,7 +195,13 @@
   <div class="mt-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
       <div class="fw-bold">Kaydedilen Dönem Matrahları</div>
-      <div class="text-muted small">Form Girişi’ne geçmeden önce burada en az bir dönem kaydı oluşturmalısınız.</div>
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="form-check form-switch m-0">
+          <input class="form-check-input" type="checkbox" role="switch" id="toggle_gecici_rows">
+          <label class="form-check-label small text-muted" for="toggle_gecici_rows">Geçici Vergi Dönemlerini Göster</label>
+        </div>
+        <div class="text-muted small">Form Girişi’ne geçmeden önce burada en az bir dönem kaydı oluşturmalısınız.</div>
+      </div>
     </div>
     <div class="table-responsive bg-white border rounded-4 shadow-sm">
       <table class="table table-sm align-middle mb-0">
@@ -215,6 +221,7 @@
           {% for r in donem_matrah_list %}
           <tr id="pool-row-{{ r.id }}"
               data-donem="{{ r.donem_text }}"
+              data-donem-turu="{{ r.donem_turu }}"
               data-ticari="{{ r.ticari_bilanco_kari }}"
               data-kkeg="{{ r.kkeg }}"
               data-ind="{{ r.indirim_istisna }}"
@@ -608,6 +615,30 @@
     document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
     document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
     document.querySelectorAll('.pool-matrah-input').forEach(el => el.addEventListener('input', poolCompute));
+    // Kaydedilen dönem matrahlarında geçici satırlarını gizle/göster
+    try {
+      const toggle = document.getElementById('toggle_gecici_rows');
+      const KEY = 'ikv_show_gecici_donem_matrah';
+      const apply = (showGecici) => {
+        document.querySelectorAll('tr[id^="pool-row-"]').forEach(tr => {
+          const turu = String(tr.getAttribute('data-donem-turu') || '').toUpperCase();
+          const isGecici = (turu.includes('GEÇİCİ') || turu.includes('GECICI'));
+          if (isGecici) tr.style.display = showGecici ? '' : 'none';
+        });
+      };
+      if (toggle) {
+        const saved = localStorage.getItem(KEY);
+        const show = saved === '1';
+        toggle.checked = show;
+        apply(show);
+        toggle.addEventListener('change', () => {
+          const v = toggle.checked;
+          localStorage.setItem(KEY, v ? '1' : '0');
+          apply(v);
+        });
+      }
+    } catch (e) {}
+
     poolCompute();
   })();
 </script>
