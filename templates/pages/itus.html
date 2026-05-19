@@ -1,0 +1,413 @@
+{% extends "layout.html" %}
+
+{% block title %}
+İndirimli Teminat Uygulaması Sistemi (İTUS) Rehberi | İSFA YMM
+{% endblock %}
+
+{% block description %}
+KDV iadelerinde indirimli teminat uygulaması sistemi (İTUS) 2026 güncel rehberi. İTUS sertifikası alma şartları, genel ve özel şartlar, iade prosedürleri ve sertifikanın iptali.
+{% endblock %}
+
+{% block content %}
+<!-- ⭐ SEO STRUCTURED DATA (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "İndirimli Teminat Uygulaması Sistemi (İTUS) Rehberi",
+      "description": "KDV Genel Uygulama Tebliği kapsamında İndirimli Teminat Uygulaması Sistemi (İTUS) genel ve özel şartları, İTUS sertifikası alma süreci ve iade işlemleri.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.isfaymm.com/static/images/logo.png"
+        }
+      },
+      "mainEntityOfPage": "https://www.isfaymm.com/mevzuat/itus"
+    }
+  ]
+}
+</script>
+
+<!-- ⭐ HERO SECTION (Premium & SEO Optimized H1) -->
+<section class="hero-section py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100 hero-bg-mesh" style="opacity: 0.1;"></div>
+    <div class="container position-relative z-1" data-aos="fade-up">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8 text-center text-lg-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-success bg-opacity-25 text-success rounded-pill mb-3 fw-bold small border border-success border-opacity-50">
+                    <i class="bi bi-shield-check-fill animate-bounce"></i> KDV Genel Uygulama Tebliği | İTUS
+                </div>
+                <h1 class="display-4 fw-black mb-3 lh-tight text-white">
+                    İndirimli Teminat Uygulaması <span class="text-success-gradient">Sistemi (İTUS)</span>
+                </h1>
+                <p class="lead text-light mb-4 fw-normal" style="max-width: 700px;">
+                    Mükelleflerin KDV iade taleplerinde indirimli teminat oranlarından yararlanmasını sağlayan İTUS sertifikası genel şartları, sektörel özel koşullar ve iptal prosedürleri.
+                </p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+                    <a href="#genelSartlar" class="btn btn-success btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale text-white">
+                        <i class="bi bi-file-earmark-check-fill me-2"></i> Genel Şartlar
+                    </a>
+                    <a href="#ozelSartlar" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-award me-2"></i> Özel Şartlar
+                    </a>
+                    <a href="#iadeTalepleri" class="btn btn-outline-info btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-cash-coin me-2"></i> İade Uygulaması
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block">
+                <div class="glass-card p-4 rounded-4 shadow-lg border-light border-opacity-25 text-center">
+                    <div class="icon-glow mb-3">
+                        <i class="bi bi-award text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">İTUS Sertifikası</h4>
+                    <p class="small text-light mb-0">
+                        Bağlı bulunulan Vergi Dairesi Başkanlığı veya Defterdarlık tarafından belirli finansal ve vergisel uyum kriterlerini sağlayan mükelleflere verilen özel bir belgedir.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ⭐ BREADCRUMB & KONTROL ÇUBUĞU -->
+<div class="bg-white border-bottom py-3 sticky-subnav shadow-sm">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted">Mevzuat</a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">İTUS Rehberi</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs" style="width: 250px;">
+                <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-0" id="quickSearchInput" placeholder="Sayfada terim ara..." onkeyup="filterPageContent(this.value)">
+            </div>
+            <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()" title="Sayfayı Yazdır">
+                <i class="bi bi-printer-fill text-primary me-1"></i> Yazdır
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5" id="mainWrapper">
+    <div class="row g-5">
+        
+        <!-- 📂 SOL MENÜ & HIZLI ERİŞİM -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="sticky-top" style="top: 100px; z-index: 10;">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                    <div class="card-header bg-success text-white p-3 fw-bold">
+                        <i class="bi bi-list-nested me-2"></i> İçindekiler
+                    </div>
+                    <div class="list-group list-group-flush small fw-semibold" id="tocNav">
+                        <a href="#genelSartlar" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-success"></i> 1. Genel Şartlar</a>
+                        <a href="#ozelSartlar" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-success"></i> 2. Özel Şartlar</a>
+                        <a href="#iadeTalepleri" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-success"></i> 3. İade Uygulaması</a>
+                        <a href="#sertifikaIptal" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-success"></i> 4. Sertifikanın İptali</a>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-success-soft text-center">
+                    <h6 class="fw-bold text-success mb-3">Mevzuat Danışmanlığı</h6>
+                    <p class="small text-muted mb-3">İTUS sertifikası başvuruları, YMM olumlu raporları ve teminat çözümleri için uzman ekibimizle iletişime geçin.</p>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-success btn-sm rounded-pill fw-bold px-4 shadow-sm text-white">Bize Ulaşın</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📄 SAĞ ANA İÇERİK ALANI -->
+        <div class="col-lg-9">
+            
+            <!-- 1️⃣ GENEL ŞARTLAR -->
+            <section id="genelSartlar" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-success text-white fs-4 shadow-sm"><i class="bi bi-check-circle"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">1. İTUS Sertifikası Genel Şartları</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
+                    <p class="lead text-dark fw-normal">
+                        Aşağıdaki şartları taşıyan mükelleflere bağlı oldukları Vergi Dairesi Başkanlığı (bulunmayan yerlerde Defterdarlık) tarafından <b>İTUS sertifikası (EK: 20)</b> verilir.
+                    </p>
+                    
+                    <h5 class="fw-bold text-success mt-4 mb-3"><i class="bi bi-calendar3 me-2"></i>Son Üç Takvim Yılı Şartları</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">A) Vergi Mükellefiyeti</div>
+                                <div class="small text-muted">Başvuru tarihinden önceki son üç takvim yılı içinde vergi mükellefiyetinin kesintisiz bulunması gerekir.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">B) Defter ve Belge İbrazı</div>
+                                <div class="small text-muted">Mücbir sebep sayılan haller dışındaki nedenlerle, defter ve belgelerin ibrazından imtina edilmemiş olması zorunludur.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">C) Beyanname Ödevleri</div>
+                                <div class="small text-muted">Gelir/Kurumlar, Geçici Vergi, Stopaj, ÖTV ve KDV (tevkifat hariç) beyanname verme ödevinin her bir vergi türü itibarıyla <b>ikiden fazla aksatılmamış</b> olması (süresinden sonra verilenler hariç).</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">Ç) Sahte Belge / Vergi İncelemesi</div>
+                                <div class="small text-muted">Sahte belge veya muhteviyatı itibarıyla yanıltıcı belge düzenleme/kullanma fiili nedeniyle vergi incelemesine tabi olmaması veya tabi tutulmuşsa belirlenmiş diğer usullere dönmüş olması. <span class="badge bg-secondary font-monospace">Y.T: 31/10/2024</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="fw-bold text-dark mb-1">D) Tam Tasdik Sözleşmesi</div>
+                                <div class="small text-muted">Cari takvim yılı da dâhil olmak üzere <b>son iki takvim yılına</b> ilişkin YMM Tam Tasdik Sözleşmesi bulunmalıdır.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-success mt-4 mb-3"><i class="bi bi-clock-history me-2"></i>Başvuru Tarihi İtibarıyla Şartlar</h5>
+                    <ul class="list-group list-group-flush small text-muted mb-4">
+                        <li class="list-group-item py-3 px-0"><i class="bi bi-caret-right-fill text-success me-2"></i> KDV iade taleplerinde Tebliğin (IV/A2) bölümündeki usul ve esaslara tabi olmayı gerektiren bir durumunun bulunmaması gerekir.</li>
+                        <li class="list-group-item py-3 px-0"><i class="bi bi-caret-right-fill text-success me-2"></i> Ödenmesi gereken vergi borcunun bulunmaması şarttır (borçların tecil edilmiş olması bu şartın ihlali sayılmaz).</li>
+                    </ul>
+
+                    <h5 class="fw-bold text-success mt-4 mb-3"><i class="bi bi-file-earmark-text me-2"></i>YMM / Vergi İnceleme Raporu Uyumluluğu</h5>
+                    <p class="small text-muted">
+                        Sertifika başvurusundan önceki, iade talebinin bulunduğu birbirini izleyen <b>son beş vergilendirme dönemi</b> itibarıyla haklarında yazılmış YMM ve/veya vergi inceleme raporlarının <b>olumlu</b> olması gerekir.
+                    </p>
+                    <div class="alert alert-info border-0 shadow-xs rounded-4 p-4 mb-0">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill text-info me-2"></i>Rapor Dönemleri Detayı</h6>
+                        <p class="small mb-0">
+                            YMM’lerle süresinde düzenlenmiş tam tasdik sözleşmesi bulunan mükellefler hakkında iade hakkı doğuran işlemlerin bulunduğu birbirini izleyen son beş vergilendirme dönemine ait olumlu YMM raporu bulunması halinde de bu şart gerçekleşmiş sayılır. İade hakkı doğuran işlem bulunmayan dönemler, bu 5 dönemin hesabında dikkate alınmaz.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2️⃣ ÖZEL ŞARTLAR -->
+            <section id="ozelSartlar" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-success text-white fs-4 shadow-sm"><i class="bi bi-award"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">2. İTUS Sertifikası Özel Şartları</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
+                    <p class="lead text-dark fw-normal mb-4">
+                        Genel şartlar ile birlikte, mükelleflerin faaliyet kollarına göre kendileri için öngörülen aşağıdaki özel şartları da taşımaları gerekir.
+                    </p>
+
+                    <!-- 2.1 İhracat İstisnası -->
+                    <div class="card border-0 bg-light p-4 rounded-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-truck text-success me-2"></i>2.1. İhracat İstisnası Kapsamındaki İade Talepleri</h5>
+                        
+                        <h6 class="fw-bold text-success small mb-2">2.1.1. İmalatçılar ve İmalatçı-İhracatçılar:</h6>
+                        <ul class="small text-muted mb-4">
+                            <li>İlgili sicile kayıtlı olmak,</li>
+                            <li>Ödenmiş sermayelerinin veya son bilançolarında kayıtlı ATİK'lerinin (gayrimenkuller hariç) amortisman düşülmeden önceki toplam tutarı <b>100.000 TL’yi</b> aşması,</li>
+                            <li>Üretim kapasitesinin kapasite raporuyla teyit edilmesi,</li>
+                            <li>İmalat işinde <b>20 veya daha fazla işçi</b> çalıştırması (son 12 aylık ortalama esas alınır; büro, yönetim ve muhasebe personeli hariç).</li>
+                        </ul>
+                        <p class="small text-muted italic">Bu şartları taşıyan imalatçılara, başvuru tarihini izleyen 15 gün içinde sertifika verilir.</p>
+
+                        <h6 class="fw-bold text-success small mb-2">2.1.2. Diğer İhracatçılar (Hizmet İhracatı Hariç):</h6>
+                        <p class="small text-muted mb-0">
+                            Son üç takvim yılı itibarıyla yıllık <b>4 milyon ABD Doları</b> veya son beş takvim yılı itibarıyla yıllık <b>2 milyon ABD Doları</b> ve üzerinde ihracat yapanlara, takip eden yılbaşından itibaren sertifika verilir.
+                        </p>
+                    </div>
+
+                    <!-- 2.2 Diğer İade Hakkı Doğuran İşlemler -->
+                    <div class="card border-0 bg-light p-4 rounded-4 mb-0">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid-3x3-gap text-success me-2"></i>2.2. Diğer İade Hakkı Doğuran İşlemler</h5>
+                        <p class="small text-muted mb-3">
+                            İhracat istisnası kapsamı dışında kalan mükelleflerden, son yıllık kurumlar/gelir vergisi beyannamesi bilançosuna göre aşağıdaki limitlerden <b>en az birini</b> ve çalışan şartını sağlayanlara İTUS verilebilir:
+                        </p>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered align-middle small mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Finansal Kriter</th>
+                                        <th>Asgari Tutar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-dark">Aktif Toplamı</td>
+                                        <td>100.000.000 TL</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">Maddi Duran Varlıklar (Gayrimenkuller hariç, amortisman öncesi)</td>
+                                        <td>25.000.000 TL</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">Öz Sermaye Tutarı</td>
+                                        <td>50.000.000 TL</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-dark">Net Satışlar</td>
+                                        <td>125.000.000 TL</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            <b>Çalışan Şartı:</b> Başvuru tarihinden önceki takvim yılında muhtasar beyannamelere göre <b>aylık ortalama en az 50 çalışan</b> istihdam edilmesi gerekir (son 12 aylık ortalama).
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3️⃣ İADE UYGULAMASI -->
+            <section id="iadeTalepleri" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-success text-white fs-4 shadow-sm"><i class="bi bi-cash-coin"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">3. İTUS Sertifikası ile KDV İadelerinin Yapılması</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
+                    <p class="lead text-dark fw-normal mb-4">
+                        İTUS sertifikasına sahip mükelleflerin iade talepleri, Tebliğ'de belirlenen indirimli teminat oranlarıyla yerine getirilir.
+                    </p>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-success-soft p-4 rounded-4 text-center">
+                                <div class="display-4 fw-bold text-success mb-2">%8</div>
+                                <h6 class="fw-bold text-dark mb-2">Standart İTUS Teminat Oranı</h6>
+                                <p class="small text-muted mb-0">
+                                    İade miktarının Tebliğ sınırlarını aşan kısmının sadece <b>%8'i</b> kadar teminat alınır.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-primary-soft p-4 rounded-4 text-center">
+                                <div class="display-4 fw-bold text-primary mb-2">%4</div>
+                                <h6 class="fw-bold text-dark mb-2">Dış Ticaret Şirketleri Oranı</h6>
+                                <p class="small text-muted mb-0">
+                                    Dış Ticaret Sermaye Şirketleri (DTSŞ) ve Sektörel Dış Ticaret Şirketleri (SDTŞ) için oran <b>%4</b> olarak uygulanır.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-success me-2"></i>Teminat Çözüm Süresi</h5>
+                    <p class="small text-muted mb-0">
+                        Alınan indirimli teminatlar, iadenin yapıldığı tarihten itibaren <b>altı ay içinde</b> ibraz edilecek <b>YMM Raporu</b> ile çözülür. Bu süre içinde YMM raporu ibraz edilmezse veya mükellefin talebi halinde teminat Vergi İnceleme Raporu (VİR) sonucuna göre çözülür.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 4️⃣ SERTİFİKANIN İPTALİ -->
+            <section id="sertifikaIptal" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-danger text-white fs-4 shadow-sm"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">4. İTUS Sertifikasının İptal Edilmesi</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-0 bg-white">
+                    <p class="lead text-dark fw-normal mb-4">
+                        Aşağıdaki durumlardan birinin tespiti halinde mükelleflerin İTUS sertifikaları iptal edilir ve iptal tarihini içine alan dönemden itibaren indirimli teminat uygulanmaz.
+                    </p>
+
+                    <div class="row g-3 small text-muted mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">A) Şartların Kaybedilmesi</b><br>
+                                Limitler dışındaki şartların kaybedilmesi veya bilanço tutarları/işçi sayılarında <b>%25'i aşan</b> azalma meydana gelmesi.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">B) Defter ve Belge İbraz Etmeme</b><br>
+                                Defter ve belgelerin yasal süreleri içinde vergi dairesine ibraz edilmemesi (sürenin dolduğu günü izleyen gün iptal edilir).
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">C) Vergi Borçlarının Ödenmemesi</b><br>
+                                Vadesinde ödenmeyen borçlar için ödeme emri tebliğ tarihinden itibaren <b>15 gün içinde</b> ödeme yapılmaması.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">Ç) Olumsuz Rapor İntikali</b><br>
+                                Sahte veya yanıltıcı belge düzenleme/kullanma konusunda vergi dairesine <b>"olumsuz rapor"</b> ulaşması.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-0 shadow-xs rounded-4 p-4 mb-0">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-arrow-counterclockwise text-warning me-2"></i>Yargı Kararları ve Yeniden Sertifika Edinimi</h6>
+                        <p class="small mb-0">
+                            Olumsuz rapora dayalı tarhiyatın yargı kararı ile terkin edilmesi halinde mükellefe tekrar sertifika verilir. Yargı kararından önce mükellefin diğer usullere geçmesi durumunda ise, bu geçiş tarihinden itibaren 24 ay süresince usul ihlali yapmaması ve genel şartları sağlaması kaydıyla 24 ayın sonunda yeniden sertifika düzenlenebilir.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<!-- ⭐ ÖZEL STİLLER & JAVASCRIPT FONKSİYONLARI -->
+<style>
+    .fw-black { font-weight: 900; }
+    .lh-tight { line-height: 1.2; }
+    
+    .text-success-gradient {
+        background: linear-gradient(90deg, #10b981, #34d399);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .bg-success-soft { background-color: #ecfdf5; }
+    .bg-primary-soft { background-color: #eff6ff; }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    
+    .feature-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .hover-scale { transition: transform 0.2s ease; }
+    .hover-scale:hover { transform: translateY(-3px); }
+    
+    .sticky-subnav {
+        position: sticky; top: 80px; z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .animate-bounce { animation: bounce 2s infinite; }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-4px);}
+        60% {transform: translateY(-2px);}
+    }
+</style>
+
+<script>
+    // Sayfa İçi Hızlı Arama
+    function filterPageContent(query) {
+        query = query.toLowerCase().trim();
+        const sections = document.querySelectorAll('.searchable-section');
+        sections.forEach(sec => {
+            const text = sec.innerText.toLowerCase();
+            if (text.includes(query)) {
+                sec.style.display = 'block';
+            } else {
+                sec.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

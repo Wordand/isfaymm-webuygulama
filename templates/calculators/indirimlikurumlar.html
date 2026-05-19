@@ -298,6 +298,9 @@ body, html { background: #fff !important; }
         <a href="?sekme=form" class="ikv-tab {% if sekme == 'form' %}active{% endif %}">
           <i class="bi bi-pencil-square"></i>Form Girişi
         </a>
+        <a href="?sekme=donem" class="ikv-tab {% if sekme == 'donem' %}active{% endif %}">
+          <i class="bi bi-calculator"></i>Dönem Hesabı
+        </a>
         <a href="?sekme=ayrintili" class="ikv-tab {% if sekme == 'ayrintili' %}active{% endif %}">
           <i class="bi bi-bar-chart-line"></i>Ayrıntılı Kazanç
         </a>
@@ -320,12 +323,15 @@ body, html { background: #fff !important; }
   {% if sekme == 'tesvik' %}
   {% include 'reports/tesvik.html' %}
 
-  {% elif sekme == 'mevzuat' %}
-  {% include 'calculators/indirimlikurumlar_mevzuat.html' %}
+  {% elif sekme == 'mevzuat' %} 
+  {% include 'calculators/indirimlikurumlar_mevzuat.html' %} 
 
-  {% elif sekme == 'form' %}
-  <form id="form-giris" method="POST" action="{{ url_for('indirimlikurumlar.form_kaydet') }}" novalidate class="mx-auto"
-    style="max-width: 1100px;">
+  {% elif sekme == 'donem' %}
+  {% include 'reports/donem_hesabi.html' %}
+ 
+  {% elif sekme == 'form' %} 
+  <form id="form-giris" method="POST" action="{{ url_for('indirimlikurumlar.form_kaydet') }}" novalidate class="mx-auto" 
+    style="max-width: 1100px;"> 
 
     <input type="hidden" name="mukellef_id" id="mukellef_id" value="{{ session.get('aktif_mukellef_id', '') }}">
 

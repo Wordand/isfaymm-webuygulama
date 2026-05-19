@@ -1,0 +1,368 @@
+{# Dönem bazlı matrah havuzu ve belge dağıtımı (İndirimli KV) #}
+<div class="container-fluid py-3" style="max-width: 1200px;">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Dönem Hesabı</h2>
+      <div class="text-muted small">Tek bir dönem matrahını girin, belgeler arasında paylaştırın, kalan matrahı genel oranda vergileyin.</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="?sekme=tesvik" class="btn btn-outline-secondary rounded-pill px-3">
+        <i class="bi bi-folder2-open me-1"></i>Teşvik Belgelerim
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">1) Dönem Matrahı</div>
+          <span class="badge bg-light text-dark border">Havuz</span>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Dönem</label>
+          <select id="pool_donem" class="form-select">
+            {% for yil in range(2027, 2014, -1) %}
+            <optgroup label="{{ yil }}">
+              <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
+              <option value="{{ yil }} - 2. GEÇİCİ">{{ yil }} - 2. GEÇİCİ</option>
+              <option value="{{ yil }} - 3. GEÇİCİ">{{ yil }} - 3. GEÇİCİ</option>
+              {% if yil >= 2025 %}
+              <option value="{{ yil }} - 4. GEÇİCİ">{{ yil }} - 4. GEÇİCİ</option>
+              {% endif %}
+              <option value="{{ yil }} - KURUMLAR">{{ yil }} - KURUMLAR</option>
+            </optgroup>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Ticari Bilanço Karı (TL)</label>
+            <input id="pool_ticari" type="text" class="form-control" placeholder="0,00">
+          </div>
+          <div class="col-12">
+            <label class="form-label">KKEG (TL)</label>
+            <input id="pool_kkeg" type="text" class="form-control" placeholder="0,00">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Geçmiş Yıl Zararı (TL)</label>
+            <input id="pool_zarar" type="text" class="form-control" placeholder="0,00">
+          </div>
+        </div>
+
+        <div class="mt-3 p-3 bg-light border rounded-3">
+          <div class="d-flex justify-content-between">
+            <div class="text-muted">KV Matrahı</div>
+            <div class="fw-bold" id="pool_matrah_label">0,00 TL</div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="form-label">Genel Vergi Oranı</label>
+          <div class="btn-group w-100" role="group" aria-label="Genel vergi oranı">
+            <input type="radio" class="btn-check" name="pool_genel_oran" id="pool_oran_25" autocomplete="off" checked value="25">
+            <label class="btn btn-outline-dark" for="pool_oran_25">%25</label>
+
+            <input type="radio" class="btn-check" name="pool_genel_oran" id="pool_oran_24" autocomplete="off" value="24">
+            <label class="btn btn-outline-dark" for="pool_oran_24">%24 (İmalat)</label>
+
+            <input type="radio" class="btn-check" name="pool_genel_oran" id="pool_oran_20" autocomplete="off" value="20">
+            <label class="btn btn-outline-dark" for="pool_oran_20">%20 (İhracat)</label>
+          </div>
+          <div class="text-muted small mt-2">Bu oran “kalan matrah” ve “indirimli oran hesabı” için baz alınır.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">2) Belgelere Matrah Dağıtımı</div>
+          <span class="badge bg-light text-dark border">{{ docs|length }} belge</span>
+        </div>
+
+        {% if not docs %}
+          <div class="text-center text-muted py-5">
+            Henüz kayıtlı teşvik belgesi yok. Önce “Teşvik Belgelerim” bölümünden belge ekleyin.
+          </div>
+        {% else %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Belge</th>
+                  <th>Karar</th>
+                  <th class="text-end">Vergi İndir. %</th>
+                  <th class="text-end">İnd. KV Oranı</th>
+                  <th style="min-width: 190px;" class="text-end">Ayrılan İnd. Matrah</th>
+                  <th class="text-end">İnd. KV</th>
+                  <th class="text-end">Katkı</th>
+                </tr>
+              </thead>
+              <tbody id="pool_doc_rows">
+                {% for d in docs %}
+                <tr data-belge-no="{{ d.belge_no }}">
+                  <td class="fw-bold">{{ d.belge_no }}</td>
+                  <td><span class="badge bg-primary-subtle text-primary border">{{ d.karar }}</span></td>
+                  <td class="text-end">%{{ d.vergi_orani }}</td>
+                  <td class="text-end"><span class="text-muted" data-field="ind_rate">-</span></td>
+                  <td class="text-end">
+                    <input type="text"
+                           class="form-control form-control-sm text-end pool-matrah-input"
+                           data-field="alloc"
+                           placeholder="0,00">
+                  </td>
+                  <td class="text-end"><span class="text-muted" data-field="tax">0,00 TL</span></td>
+                  <td class="text-end"><span class="text-muted" data-field="katki">0,00 TL</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-2 p-3 bg-light border rounded-3">
+            <div class="row g-2">
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Toplam Ayrılan Matrah</span>
+                <span class="fw-bold" id="pool_alloc_sum">0,00 TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Kalan Matrah</span>
+                <span class="fw-bold" id="pool_remaining">0,00 TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">İndirimli KV (Toplam)</span>
+                <span class="fw-bold" id="pool_tax_discounted">0,00 TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Genel KV (Kalan Matrah)</span>
+                <span class="fw-bold" id="pool_tax_general">0,00 TL</span>
+              </div>
+              <div class="col-12 d-flex justify-content-between border-top pt-2 mt-1">
+                <span class="text-muted">Ödenecek Toplam KV</span>
+                <span class="fw-bold text-primary" id="pool_tax_total">0,00 TL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearAllocations()">
+              <i class="bi bi-eraser me-1"></i>Temizle
+            </button>
+            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAll()">
+              <i class="bi bi-save2 me-1"></i>Bu Dönemi Kaydet
+            </button>
+          </div>
+
+          <div class="text-muted small mt-2">
+            Not: Bu ekran, her belge için bu dönemde kullanılacak “indirimli matrah”ı belirlemenizi sağlar. Belgelerin katkı üst sınırları (detaylı) ayrı adım olarak genişletilebilir.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Helpers (TR number parsing/formatting) ----
+  function _parseTrNumber(s) {
+    if (s == null) return 0;
+    const str = String(s).trim();
+    if (!str) return 0;
+    // remove thousand sep ".", convert "," to "."
+    const cleaned = str.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function _fmtTr(n) {
+    const v = Number(n || 0);
+    return v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
+  }
+  function _getGenelOran() {
+    const el = document.querySelector('input[name="pool_genel_oran"]:checked');
+    return el ? Number(el.value) : 25;
+  }
+
+  // Apply IMask if available (same style as other pages)
+  function _tryMask(el) {
+    try {
+      if (window.IMask && el) {
+        return IMask(el, {
+          mask: Number,
+          scale: 2,
+          thousandsSeparator: '.',
+          radix: ',',
+          mapToRadix: [','],
+          normalizeZeros: false,
+          padFractionalZeros: false
+        });
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  const _masks = new Map();
+  function _initPoolMasks() {
+    ['pool_ticari','pool_kkeg','pool_zarar'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) _masks.set(id, _tryMask(el));
+    });
+    document.querySelectorAll('.pool-matrah-input').forEach((el, idx) => {
+      const key = 'alloc_' + idx;
+      _masks.set(key, _tryMask(el));
+      el.dataset.maskKey = key;
+    });
+  }
+
+  function _getMaskedValue(el) {
+    if (!el) return 0;
+    const key = el.dataset.maskKey;
+    if (key && _masks.get(key) && _masks.get(key).unmaskedValue != null) {
+      return Number(_masks.get(key).unmaskedValue) || 0;
+    }
+    return _parseTrNumber(el.value);
+  }
+
+  function poolCompute() {
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    const matrah = Math.max(0, (tic + kkeg - zarar));
+    document.getElementById('pool_matrah_label').textContent = _fmtTr(matrah);
+
+    const genelOran = _getGenelOran();
+    let allocSum = 0;
+    let taxDiscSum = 0;
+    let katkiSum = 0;
+
+    document.querySelectorAll('#pool_doc_rows tr').forEach(tr => {
+      const vergiIndTxt = tr.children[2]?.textContent || '';
+      const vergiInd = _parseTrNumber(vergiIndTxt.replace('%',''));
+      const allocEl = tr.querySelector('input[data-field="alloc"]');
+      const alloc = Math.max(0, _getMaskedValue(allocEl));
+
+      const indOran = genelOran * (1 - (vergiInd/100));
+      const taxNormal = alloc * (genelOran/100);
+      const taxDisc = alloc * (indOran/100);
+      const katki = Math.max(0, taxNormal - taxDisc);
+
+      allocSum += alloc;
+      taxDiscSum += taxDisc;
+      katkiSum += katki;
+
+      tr.querySelector('[data-field="ind_rate"]').textContent = '%' + indOran.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      tr.querySelector('[data-field="tax"]').textContent = _fmtTr(taxDisc);
+      tr.querySelector('[data-field="katki"]').textContent = _fmtTr(katki);
+    });
+
+    const remaining = Math.max(0, matrah - allocSum);
+    const taxGeneral = remaining * (_getGenelOran()/100);
+    const totalTax = taxDiscSum + taxGeneral;
+
+    document.getElementById('pool_alloc_sum').textContent = _fmtTr(allocSum);
+    document.getElementById('pool_remaining').textContent = _fmtTr(remaining);
+    document.getElementById('pool_tax_discounted').textContent = _fmtTr(taxDiscSum);
+    document.getElementById('pool_tax_general').textContent = _fmtTr(taxGeneral);
+    document.getElementById('pool_tax_total').textContent = _fmtTr(totalTax);
+  }
+
+  function poolClearAllocations() {
+    document.querySelectorAll('.pool-matrah-input').forEach(el => {
+      const key = el.dataset.maskKey;
+      if (key && _masks.get(key)) _masks.get(key).unmaskedValue = '0';
+      el.value = '';
+    });
+    poolCompute();
+  }
+
+  async function poolSaveAll() {
+    const isLoggedIn = !!window.IS_LOGGED_IN;
+    if (!isLoggedIn) {
+      alert('Kaydetmek için giriş yapmalısınız. İsterseniz yine de bu ekranı hesaplama amaçlı kullanabilirsiniz.');
+      return;
+    }
+
+    const donemText = document.getElementById('pool_donem').value || '';
+    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
+    const yil = m ? Number(m[1]) : null;
+    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
+    if (!yil) {
+      alert('Dönem seçimi geçersiz.');
+      return;
+    }
+
+    const genelOran = _getGenelOran();
+
+    const saves = [];
+    document.querySelectorAll('#pool_doc_rows tr').forEach(tr => {
+      const belgeNo = tr.getAttribute('data-belge-no');
+      const allocEl = tr.querySelector('input[data-field="alloc"]');
+      const alloc = Math.max(0, _getMaskedValue(allocEl));
+      if (!belgeNo || alloc <= 0) return;
+
+      const vergiIndTxt = tr.children[2]?.textContent || '';
+      const vergiInd = _parseTrNumber(vergiIndTxt.replace('%',''));
+      const indOran = genelOran * (1 - (vergiInd/100));
+      const taxDisc = alloc * (indOran/100);
+      const taxNormal = alloc * (genelOran/100);
+      const katki = Math.max(0, taxNormal - taxDisc);
+
+      const payload = {
+        belge_no: belgeNo,
+        hesap_donemi: yil,
+        donem_turu: turu,
+        // Bu ekran “yatırım kazancı üzerinden indirimli matrah” dağıtımı yapar:
+        yatirimdan_elde_edilen_kazanc: 0,
+        tevsi_yatirim_kazanci: 0,
+        diger_faaliyet: 0,
+        indirimli_matrah: alloc,
+        indirimli_kv: taxDisc,
+        // katkıyı “cari_yatirim_katki” altında izliyoruz (dönem bazlı vergi avantajı):
+        cari_yatirim_katki: katki,
+        cari_diger_katki: 0,
+        cari_toplam_katki: katki,
+        genel_toplam_katki: 0,
+        kalan_katki_tutari: 0,
+        odenecek_toplam_kv: taxDisc,
+        indirimli_kv_oran: indOran
+      };
+
+      saves.push(fetch('/indirimlikurumlar/save_tesvik_kullanim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }));
+    });
+
+    if (!saves.length) {
+      alert('Kaydedilecek belge bulunamadı. En az bir belgeye matrah ayırın.');
+      return;
+    }
+
+    try {
+      const res = await Promise.all(saves);
+      const bad = res.find(r => !r.ok);
+      if (bad) {
+        const t = await bad.text();
+        alert('Kaydetme sırasında bir hata oluştu: ' + t);
+        return;
+      }
+      window.location.href = '?sekme=tesvik';
+    } catch (e) {
+      alert('Kaydetme sırasında bağlantı hatası oluştu.');
+    }
+  }
+
+  (function initPool() {
+    _initPoolMasks();
+    document.getElementById('pool_ticari')?.addEventListener('input', poolCompute);
+    document.getElementById('pool_kkeg')?.addEventListener('input', poolCompute);
+    document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
+    document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
+    document.querySelectorAll('.pool-matrah-input').forEach(el => el.addEventListener('input', poolCompute));
+    poolCompute();
+  })();
+</script>
+
