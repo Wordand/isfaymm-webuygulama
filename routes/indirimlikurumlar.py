@@ -2208,3 +2208,29 @@ def delete_donem_matrah(id):
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@bp.route("/donem_matrah/select/<int:id>", methods=["POST"])
+@login_required
+def select_donem_matrah(id):
+    """Kaydedilen dönem matrah kaydını aktif dönem olarak seçer (session)."""
+    try:
+        user_id = session.get("user_id")
+        mukellef_id = session.get("aktif_mukellef_id")
+        if not user_id or not mukellef_id:
+            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
+
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(
+                "SELECT id, donem_text FROM donem_matrah WHERE id=%s AND user_id=%s AND mukellef_id=%s LIMIT 1",
+                (id, user_id, mukellef_id),
+            )
+            row = cur.fetchone()
+            if not row:
+                return jsonify({"status": "error", "message": "Kayıt bulunamadı."}), 404
+
+        session["active_donem_text"] = row["donem_text"]
+        return jsonify({"status": "success", "donem_text": row["donem_text"]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

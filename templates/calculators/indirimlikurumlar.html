@@ -1142,10 +1142,11 @@ body, html { background: #fff !important; }
   const katkilar = {{ katkilar_json | tojson }};
   const vergiler = {{ vergiler_json | tojson }};
   const initialRatios = {{ initial_ayrintili_ratios | tojson }};
-  const bolgeMap9903 = {{ BOLGE_MAP_9903 | tojson | safe }};
-  const katkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }};
-  window.IS_LOGGED_IN = {{ is_logged_in | tojson }};
-  const yenidenDegerlemeOranlari = {
+  const bolgeMap9903 = {{ BOLGE_MAP_9903 | tojson | safe }}; 
+  const katkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }}; 
+  window.IS_LOGGED_IN = {{ is_logged_in | tojson }}; 
+  window.ACTIVE_DONEM_TEXT = {{ session.get('active_donem_text') | tojson }};
+  const yenidenDegerlemeOranlari = { 
     "2025 - KURUMLAR": 25.49,
     "2025 - 4. GEÇİCİ": 25.49,
     "2025 - 3. GEÇİCİ": 16.60,
@@ -4721,8 +4722,48 @@ body, html { background: #fff !important; }
         return false;
       }
       return true;
-    }
-    if (!initGuard()) return;
+    } 
+    if (!initGuard()) return; 
+
+    // ============================================================
+    // 0.5) DÖNEM HAVUZU → FORM'DA DÖNEM KİLİTLEME
+    // ============================================================
+    (function lockDonemFromPool() {
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        const isEditDonem = params.get("editdonem") === "1";
+        const activeDonem = window.ACTIVE_DONEM_TEXT;
+        const donemSelect = document.getElementById("donem");
+        const formEl = document.getElementById("form-giris");
+        if (!formEl || !donemSelect) return;
+
+        if (!isEditDonem && activeDonem) {
+          // select değerini havuzdan set et
+          donemSelect.value = activeDonem;
+          // kilitle (disabled) ama value submit edilsin diye hidden alan ekle
+          donemSelect.disabled = true;
+          let hidden = document.getElementById("donem_locked_hidden");
+          if (!hidden) {
+            hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "donem";
+            hidden.id = "donem_locked_hidden";
+            formEl.appendChild(hidden);
+          }
+          hidden.value = activeDonem;
+
+          // oran/box gibi bağlı alanlar güncellensin
+          try { setOranlar(); } catch (e) {}
+          try { updateRejimTespiti(); } catch (e) {}
+          try { maybeAutofillOncekiFromDB(); } catch (e) {}
+        } else {
+          // edit modda serbest bırak
+          donemSelect.disabled = false;
+          const hidden = document.getElementById("donem_locked_hidden");
+          if (hidden) hidden.remove();
+        }
+      } catch (e) {}
+    })();
 
 
 

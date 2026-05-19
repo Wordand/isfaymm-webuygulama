@@ -228,7 +228,12 @@
               data-zarar="{{ r.gecmis_yil_zarari }}"
               data-matrah="{{ r.kv_matrah }}"
               data-oran="{{ r.genel_oran }}">
-            <td class="fw-bold">{{ r.donem_text }}</td>
+            <td class="fw-bold">
+              {{ r.donem_text }}
+              {% if session.get('active_donem_text') == r.donem_text %}
+                <span class="badge bg-success-subtle text-success border ms-2">Aktif</span>
+              {% endif %}
+            </td>
             <td class="text-end">{{ r.ticari_bilanco_kari|tlformat }} TL</td>
             <td class="text-end">{{ r.kkeg|tlformat }} TL</td>
             <td class="text-end">{{ r.indirim_istisna|tlformat }} TL</td>
@@ -236,6 +241,9 @@
             <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
             <td class="text-end">%{{ r.genel_oran }}</td>
             <td class="text-end">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="poolSelectSaved({{ r.id }})">
+                Seç
+              </button>
               <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="poolLoadSaved({{ r.id }})">
                 Düzenle
               </button>
@@ -439,6 +447,20 @@
       if (row) row.remove();
     } catch (e) {
       alert('Silme sırasında bağlantı hatası oluştu.');
+    }
+  }
+
+  async function poolSelectSaved(id) {
+    try {
+      const res = await fetch('/indirimlikurumlar/donem_matrah/select/' + id, { method: 'POST' });
+      if (!res.ok) {
+        alert('Dönem seçilemedi.');
+        return;
+      }
+      // Aktif dönem değişti: sayfayı yenile (etiket/lock mantığı güncellensin)
+      window.location.reload();
+    } catch (e) {
+      alert('Dönem seçilemedi (bağlantı hatası).');
     }
   }
 
