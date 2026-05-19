@@ -72,8 +72,8 @@
           </div>
         </div>
 
-        <details class="mt-3">
-          <summary class="fw-semibold">Sabit KÄ±ymet DetayÄ± (Tevsi / Oranlama)</summary>
+        <details class="mt-3" open>
+          <summary class="fw-semibold">Sabit Kiymet Detayi (Tevsi / Oranlama)</summary>
           <div class="mt-2 p-3 bg-white border rounded-3">
             <div class="row g-2">
               <div class="col-md-6">
@@ -160,90 +160,74 @@
     <div class="col-lg-7">
       <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold">Belgelere Matrah Dağıtımı</div>
+          <div class="fw-bold">Belge Ozeti</div>
           <span class="badge bg-light text-dark border">{{ docs|length }} belge</span>
         </div>
 
         {% if not docs %}
           <div class="text-center text-muted py-5">
-            Henüz kayıtlı teşvik belgesi yok. Önce “Teşvik Belgelerim” bölümünden belge ekleyin.
+            Henuz kayitli tesvik belgesi yok. Once “Tesvik Belgelerim” bolumunden belge ekleyin.
           </div>
         {% else %}
-          <div class="table-responsive">
+          {% set pool_matrah = (active_donem_matrah.kv_matrah if active_donem_matrah else 0) %}
+          {% set used_matrah = (donem_usage_totals.used_matrah if donem_usage_totals is defined else 0) %}
+          {% set rem_matrah = (pool_matrah - used_matrah) %}
+
+          <div class="mt-2 p-3 bg-light border rounded-3">
+            <div class="row g-2">
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Secili Donem Matrahi</span>
+                <span class="fw-bold">{{ pool_matrah|tlformat }} TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Bu Donemde Kullanilan Ind. Matrah</span>
+                <span class="fw-bold">{{ used_matrah|tlformat }} TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Kalan Matrah</span>
+                <span class="fw-bold">{{ (rem_matrah if rem_matrah>0 else 0)|tlformat }} TL</span>
+              </div>
+              <div class="col-md-6 d-flex justify-content-between">
+                <span class="text-muted">Bu Donem Ind. KV</span>
+                <span class="fw-bold">{{ (donem_usage_totals.ind_kv if donem_usage_totals is defined else 0)|tlformat }} TL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive mt-3">
             <table class="table table-sm align-middle">
               <thead class="table-light">
                 <tr>
-                  <th>Belge</th>
+                  <th>Belge No</th>
                   <th>Karar</th>
-                  <th class="text-end">Vergi İndir. %</th>
-                  <th class="text-end">İnd. KV Oranı</th>
-                  <th style="min-width: 190px;" class="text-end">Ayrılan İnd. Matrah</th>
-                  <th class="text-end">İnd. KV</th>
-                  <th class="text-end">Katkı</th>
+                  <th class="text-end">Katki Orani</th>
+                  <th class="text-end">Vergi Ind. Orani</th>
+                  <th class="text-end">Toplam Ind. Matrah</th>
                 </tr>
               </thead>
-              <tbody id="pool_doc_rows">
+              <tbody>
                 {% for d in docs %}
-                <tr data-belge-no="{{ d.belge_no }}" data-vergi-ind="{{ d.vergi_orani }}">
-                  <td class="fw-bold">{{ d.belge_no }}</td>
-                  <td>
-                    <span class="badge border"
-                          style="background:#2563eb; color:#ffffff; border-color:#1d4ed8;">
-                      {{ d.karar }}
-                    </span>
-                  </td>
-                  <td class="text-end">%{{ d.vergi_orani }}</td>
-                  <td class="text-end"><span class="text-muted" data-field="ind_rate">-</span></td>
-                  <td class="text-end">
-                    <input type="text"
-                           class="form-control form-control-sm text-end pool-matrah-input"
-                           data-field="alloc"
-                           placeholder="0,00">
-                  </td>
-                  <td class="text-end"><span class="text-muted" data-field="tax">0,00 TL</span></td>
-                  <td class="text-end"><span class="text-muted" data-field="katki">0,00 TL</span></td>
-                </tr>
+                  {% set u = (donem_usage_by_belge.get(d.belge_no) if donem_usage_by_belge is defined else None) %}
+                  <tr>
+                    <td class="fw-bold">{{ d.belge_no }}</td>
+                    <td>
+                      <span class="badge border" style="background:#2563eb; color:#ffffff; border-color:#1d4ed8;">
+                        {{ d.karar }}
+                      </span>
+                    </td>
+                    <td class="text-end">%{{ d.katki_orani }}</td>
+                    <td class="text-end">%{{ d.vergi_orani }}</td>
+                    <td class="text-end fw-semibold">{{ (u.total_matrah if u else 0)|tlformat }} TL</td>
+                  </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
 
-          <div class="mt-2 p-3 bg-light border rounded-3">
-            <div class="row g-2">
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Toplam Ayrılan Matrah</span>
-                <span class="fw-bold" id="pool_alloc_sum">0,00 TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Kalan Matrah</span>
-                <span class="fw-bold" id="pool_remaining">0,00 TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">İndirimli KV (Toplam)</span>
-                <span class="fw-bold" id="pool_tax_discounted">0,00 TL</span>
-              </div>
-              <div class="col-md-6 d-flex justify-content-between">
-                <span class="text-muted">Genel KV (Kalan Matrah)</span>
-                <span class="fw-bold" id="pool_tax_general">0,00 TL</span>
-              </div>
-              <div class="col-12 d-flex justify-content-between border-top pt-2 mt-1">
-                <span class="text-muted">Ödenecek Toplam KV</span>
-                <span class="fw-bold text-primary" id="pool_tax_total">0,00 TL</span>
-              </div>
-            </div>
-          </div>
-
           <div class="d-flex justify-content-end gap-2 mt-3">
-            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearAllocations()">
-              <i class="bi bi-eraser me-1"></i>Temizle
-            </button>
-            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAll()">
-              <i class="bi bi-save2 me-1"></i>Bu Dönemi Kaydet
-            </button>
-          </div>
-
-          <div class="text-muted small mt-2">
-            Not: Bu ekran, her belge için bu dönemde kullanılacak “indirimli matrah”ı belirlemenizi sağlar. Belgelerin katkı üst sınırları (detaylı) ayrı adım olarak genişletilebilir.
+            <a class="btn btn-outline-dark rounded-pill px-4" href="?sekme=tesvik">
+              Tesvik Belgelerim
+            </a>
           </div>
         {% endif %}
       </div>
@@ -381,11 +365,6 @@
       const el = document.getElementById(id);
       if (el) _masks.set(id, _tryMask(el));
     });
-    document.querySelectorAll('.pool-matrah-input').forEach((el, idx) => {
-      const key = 'alloc_' + idx;
-      _masks.set(key, _tryMask(el));
-      el.dataset.maskKey = key;
-    });
   }
 
   function _getMaskedValue(el) {
@@ -405,54 +384,6 @@
     const matrah = Math.max(0, (tic + kkeg - ind - zarar)); 
     const matrahLabel = document.getElementById('pool_matrah_label'); 
     if (matrahLabel) matrahLabel.textContent = _fmtTr(matrah); 
-
-    const genelOran = _getGenelOran();
-    let allocSum = 0;
-    let taxDiscSum = 0;
-    let katkiSum = 0;
-
-    document.querySelectorAll('#pool_doc_rows tr').forEach(tr => {
-      const vergiInd = _parsePercent(tr.getAttribute('data-vergi-ind') || (tr.children[2]?.textContent || '0'));
-      const allocEl = tr.querySelector('input[data-field="alloc"]');
-      const alloc = Math.max(0, _getMaskedValue(allocEl));
-
-      const indOran = genelOran * (1 - (vergiInd/100));
-      const taxNormal = alloc * (genelOran/100);
-      const taxDisc = alloc * (indOran/100);
-      const katki = Math.max(0, taxNormal - taxDisc);
-
-      allocSum += alloc;
-      taxDiscSum += taxDisc;
-      katkiSum += katki;
-
-      tr.querySelector('[data-field="ind_rate"]').textContent = '%' + indOran.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      tr.querySelector('[data-field="tax"]').textContent = _fmtTr(taxDisc);
-      tr.querySelector('[data-field="katki"]').textContent = _fmtTr(katki);
-    });
-
-    const remaining = Math.max(0, matrah - allocSum);
-    const taxGeneral = remaining * (_getGenelOran()/100);
-    const totalTax = taxDiscSum + taxGeneral;
-
-    const s1 = document.getElementById('pool_alloc_sum'); 
-    if (s1) s1.textContent = _fmtTr(allocSum); 
-    const s2 = document.getElementById('pool_remaining'); 
-    if (s2) s2.textContent = _fmtTr(remaining); 
-    const s3 = document.getElementById('pool_tax_discounted'); 
-    if (s3) s3.textContent = _fmtTr(taxDiscSum); 
-    const s4 = document.getElementById('pool_tax_general'); 
-    if (s4) s4.textContent = _fmtTr(taxGeneral); 
-    const s5 = document.getElementById('pool_tax_total'); 
-    if (s5) s5.textContent = _fmtTr(totalTax); 
-  } 
-
-  function poolClearAllocations() { 
-    document.querySelectorAll('.pool-matrah-input').forEach(el => {
-      const key = el.dataset.maskKey;
-      if (key && _masks.get(key)) _masks.get(key).unmaskedValue = '0';
-      el.value = '';
-    });
-    poolCompute();
   } 
 
   function poolClearMatrahInputs() { 
