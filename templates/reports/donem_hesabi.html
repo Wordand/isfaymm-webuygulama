@@ -17,7 +17,8 @@
       <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div class="fw-bold">1) Dönem Matrahı</div>
-          <span class="badge bg-light text-dark border">Havuz</span>
+          <span class="badge border"
+                style="background:#111827; color:#ffffff; border-color:#111827;">Havuz</span>
         </div>
 
         <div class="mb-3">
@@ -45,6 +46,10 @@
           <div class="col-12">
             <label class="form-label">KKEG (TL)</label>
             <input id="pool_kkeg" type="text" class="form-control" placeholder="0,00">
+          </div>
+          <div class="col-12">
+            <label class="form-label">İndirim / İstisna (TL)</label>
+            <input id="pool_indirim" type="text" class="form-control" placeholder="0,00">
           </div>
           <div class="col-12">
             <label class="form-label">Geçmiş Yıl Zararı (TL)</label>
@@ -103,9 +108,14 @@
               </thead>
               <tbody id="pool_doc_rows">
                 {% for d in docs %}
-                <tr data-belge-no="{{ d.belge_no }}">
+                <tr data-belge-no="{{ d.belge_no }}" data-vergi-ind="{{ d.vergi_orani }}">
                   <td class="fw-bold">{{ d.belge_no }}</td>
-                  <td><span class="badge bg-primary-subtle text-primary border">{{ d.karar }}</span></td>
+                  <td>
+                    <span class="badge border"
+                          style="background:#2563eb; color:#ffffff; border-color:#1d4ed8;">
+                      {{ d.karar }}
+                    </span>
+                  </td>
                   <td class="text-end">%{{ d.vergi_orani }}</td>
                   <td class="text-end"><span class="text-muted" data-field="ind_rate">-</span></td>
                   <td class="text-end">
@@ -176,6 +186,15 @@
     const n = Number(cleaned);
     return Number.isFinite(n) ? n : 0;
   }
+  function _parsePercent(v) {
+    if (v == null) return 0;
+    const str = String(v).replace('%','').trim();
+    if (!str) return 0;
+    // percent values may include "." as decimal separator in UI (%60.0)
+    const cleaned = str.replace(',', '.').replace(/[^\d.-]/g, '');
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  }
   function _fmtTr(n) {
     const v = Number(n || 0);
     return v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' TL';
@@ -205,7 +224,7 @@
 
   const _masks = new Map();
   function _initPoolMasks() {
-    ['pool_ticari','pool_kkeg','pool_zarar'].forEach(id => {
+    ['pool_ticari','pool_kkeg','pool_indirim','pool_zarar'].forEach(id => {
       const el = document.getElementById(id);
       if (el) _masks.set(id, _tryMask(el));
     });
@@ -228,8 +247,9 @@
   function poolCompute() {
     const tic = _getMaskedValue(document.getElementById('pool_ticari'));
     const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
     const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
-    const matrah = Math.max(0, (tic + kkeg - zarar));
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
     document.getElementById('pool_matrah_label').textContent = _fmtTr(matrah);
 
     const genelOran = _getGenelOran();
@@ -238,8 +258,7 @@
     let katkiSum = 0;
 
     document.querySelectorAll('#pool_doc_rows tr').forEach(tr => {
-      const vergiIndTxt = tr.children[2]?.textContent || '';
-      const vergiInd = _parseTrNumber(vergiIndTxt.replace('%',''));
+      const vergiInd = _parsePercent(tr.getAttribute('data-vergi-ind') || (tr.children[2]?.textContent || '0'));
       const allocEl = tr.querySelector('input[data-field="alloc"]');
       const alloc = Math.max(0, _getMaskedValue(allocEl));
 
@@ -302,8 +321,7 @@
       const alloc = Math.max(0, _getMaskedValue(allocEl));
       if (!belgeNo || alloc <= 0) return;
 
-      const vergiIndTxt = tr.children[2]?.textContent || '';
-      const vergiInd = _parseTrNumber(vergiIndTxt.replace('%',''));
+      const vergiInd = _parsePercent(tr.getAttribute('data-vergi-ind') || (tr.children[2]?.textContent || '0'));
       const indOran = genelOran * (1 - (vergiInd/100));
       const taxDisc = alloc * (indOran/100);
       const taxNormal = alloc * (genelOran/100);
@@ -359,10 +377,10 @@
     _initPoolMasks();
     document.getElementById('pool_ticari')?.addEventListener('input', poolCompute);
     document.getElementById('pool_kkeg')?.addEventListener('input', poolCompute);
+    document.getElementById('pool_indirim')?.addEventListener('input', poolCompute);
     document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
     document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
     document.querySelectorAll('.pool-matrah-input').forEach(el => el.addEventListener('input', poolCompute));
     poolCompute();
   })();
 </script>
-

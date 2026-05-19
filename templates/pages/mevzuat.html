@@ -23,22 +23,17 @@
 <!-- ⭐ ANA KATEGORİ KARTLARI -->
 <section class="py-5">
     <div class="container">
-        <div class="row g-4">
-
-
-
-
-
+        <div class="row g-4 justify-content-center">
 
             <!-- 1️⃣ KDV TEBLİĞİ -->
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-5">
                 <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-4">
+                        <div class="card-body text-center p-5">
                             <i class="bi bi-file-earmark-ruled text-warning fs-1"></i>
-                            <h5 class="fw-bold mt-3 text-dark">KDV Genel Tebliği</h5>
-                            <p class="text-muted small mb-0">
-                                KDV mevzuatının tamamı, hiyerarşik ve açıklamalı olarak
+                            <h4 class="fw-bold mt-3 text-dark">KDV Genel Tebliği</h4>
+                            <p class="text-muted mb-0">
+                                KDV mevzuatının tamamı, hiyerarşik ve açıklamalı olarak.
                             </p>
                         </div>
                     </div>
@@ -46,88 +41,20 @@
             </div>
 
             <!-- 2️⃣ KURUMLAR VERGİSİ TEBLİĞİ -->
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-5">
                 <a href="{{ url_for('main.kv_tebligi') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-4">
+                        <div class="card-body text-center p-5">
                             <i class="bi bi-book-half text-primary fs-1"></i>
-                            <h5 class="fw-bold mt-3 text-dark">Kurumlar Vergisi Tebliği</h5>
-                            <p class="text-muted small mb-0">
-                                Kurumlar vergisi mevzuatı, hiyerarşik ve açıklamalı olarak
+                            <h4 class="fw-bold mt-3 text-dark">Kurumlar Vergisi Tebliği</h4>
+                            <p class="text-muted mb-0">
+                                Kurumlar vergisi mevzuatı, hiyerarşik ve açıklamalı olarak.
                             </p>
                         </div>
                     </div>
                 </a>
             </div>
 
-            <!-- 3️⃣ PRATİK BİLGİLER -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm border-0 h-100 bg-light">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge text-warning me-2"></i>Pratik Bilgiler</h5>
-                        <ul class="list-unstyled small mb-0">
-                            <li class="mb-2">
-                                <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none text-secondary">
-                                    <i class="bi bi-dot"></i> KDV Matrahına Dahil Olanlar
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="{{ url_for('main.kv_tebligi') }}" class="text-decoration-none text-secondary">
-                                    <i class="bi bi-dot"></i> Enflasyon Düzeltmesi (VUK 298/555)
-                                </a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-decoration-none text-secondary">
-                                    <i class="bi bi-dot"></i> 2026 Tam Tasdik Sınırları
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<!-- ⭐ 2026 LİMİTLERİ & ÖZEL KONULAR (Yeni SEO Alanı) -->
-<section class="py-5 bg-light">
-    <div class="container" data-aos="fade-up">
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <h3 class="fw-bold mb-4">2026 Yılı YMM Tasdik ve KDV İade Sınırları</h3>
-                <div class="table-responsive bg-white p-3 rounded-4 shadow-sm">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>İşlem Türü</th>
-                                <th>2026 Sınırı (Tahmini/Güncel)</th>
-                                <th>YMM Raporu</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Tam Tasdik Zorunluluğu</td>
-                                <td><span class="badge bg-primary">Güncelleniyor</span></td>
-                                <td>Zorunlu</td>
-                            </tr>
-                            <tr>
-                                <td>KDV İadesi (YMM Raporu Olmadan)</td>
-                                <td><span class="badge bg-secondary">Tebliğ Bekleniyor</span></td>
-                                <td>Belirli Limit Üzeri</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="alert alert-info border-0 shadow-sm rounded-4">
-                    <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Önemli: 2025/9903 Sayılı Karar</h5>
-                    <p class="small mb-0">
-                        Yeni yatırım teşvik sistemi (2025/9903) ile getirilen vergi indirim oranları ve bölgeler arası geçişler hakkındaki güncel notlarımızı <b>Yatırım Teşvik</b> bölümünden inceleyebilirsiniz.
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 </section>
