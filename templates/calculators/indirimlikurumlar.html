@@ -1146,6 +1146,7 @@ body, html { background: #fff !important; }
   const katkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }}; 
   window.IS_LOGGED_IN = {{ is_logged_in | tojson }}; 
   window.ACTIVE_DONEM_TEXT = {{ session.get('active_donem_text') | tojson }};
+  window.ACTIVE_DONEM_MATRAH = {{ active_donem_matrah | tojson }};
   const yenidenDegerlemeOranlari = { 
     "2025 - KURUMLAR": 25.49,
     "2025 - 4. GEÇİCİ": 25.49,
@@ -3746,6 +3747,19 @@ body, html { background: #fff !important; }
 
 
   async function promptTicariKariVeKKEGThenGoTo6() {
+    // Dönem Hesabı akışı aktifse bu popup'a ihtiyaç yok.
+    // Matrah verilerini dönem havuzundan form alanlarına taşıyıp devam ediyoruz.
+    try {
+      if (window.ACTIVE_DONEM_TEXT && window.ACTIVE_DONEM_MATRAH) {
+        const r = window.ACTIVE_DONEM_MATRAH;
+        const tic = Number((r && r.ticari_bilanco_kari) || 0);
+        const kkeg = Number((r && r.kkeg) || 0);
+        safeSet('ticari_bilanco_kari', tic);
+        safeSet('kkeg', kkeg);
+        try { calculateKVMatrah(); } catch (e) {}
+        return;
+      }
+    } catch (e) {}
     // 🔹 Türk formatında TL yazdıran fonksiyon (Python'daki tlformat eşdeğeri)
     const formatTL = (num) => {
       if (isNaN(num) || num === null) return "0,00";

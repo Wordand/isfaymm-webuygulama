@@ -580,6 +580,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     current_kullanim = None 
     edit_doc = None 
     donem_matrah_list = []
+    active_donem_matrah = None
 
     if aktif_mukellef_id: 
         docs = get_all_tesvik_docs(user_id, aktif_mukellef_id) 
@@ -625,8 +626,17 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                 ),
                 reverse=True,
             )
+
+            # Aktif dönem matrah kaydı (Form sekmesi otomatik doldursun diye)
+            try:
+                _active_text = session.get("active_donem_text")
+                if _active_text:
+                    active_donem_matrah = next((x for x in donem_matrah_list if x.get("donem_text") == _active_text), None)
+            except Exception:
+                active_donem_matrah = None
         except Exception:
             donem_matrah_list = []
+            active_donem_matrah = None
         
         
 
@@ -800,6 +810,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         edit_doc=edit_doc,
         kullanimlar=kullanimlar, 
         donem_matrah_list=donem_matrah_list,
+        active_donem_matrah=active_donem_matrah,
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}), 
         TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
         rows=rows,
