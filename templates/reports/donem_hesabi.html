@@ -288,7 +288,7 @@
                data-matrah="{{ r.kv_matrah }}"
                data-oran="{{ r.genel_oran }}"
                data-sabit-toplam="{{ r.sabit_kiymet_toplam or 0 }}"
-               data-sabit-json='{{ (r.sabit_kiymet_json or \"{}\") | tojson }}'>
+               data-sabit-json="{{ (r.sabit_kiymet_json or '{}') | e }}">
             <td class="fw-bold">
               {{ r.donem_text }}
               {% if session.get('active_donem_text') == r.donem_text %}
@@ -507,9 +507,8 @@
 
     // sabit kÄ±ymet detayı
     try {
-      const raw = row.getAttribute('data-sabit-json') || '"{}"';
-      const jsonText = JSON.parse(raw); // attribute -> JSON string
-      const obj = JSON.parse(jsonText || "{}");
+      const raw = row.getAttribute('data-sabit-json') || '{}';
+      const obj = JSON.parse(raw || "{}");
       const map = {
         "250": "pool_sabit_250",
         "251": "pool_sabit_251",
