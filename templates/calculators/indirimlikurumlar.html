@@ -1261,7 +1261,14 @@ body, html { background: #fff !important; }
     const mask = maskMap[id];
 
     // Numerik güvenlik
-    let numVal = Number(val);
+    let numVal = 0;
+    if (typeof val === "string") {
+      numVal = parseFormattedNumber(val);
+    } else if (typeof val === "number") {
+      numVal = val;
+    } else {
+      numVal = Number(val);
+    }
     if (isNaN(numVal)) numVal = 0;
 
     // 1) Eğer IMask varsa -> typedValue üzerinden set et
@@ -1910,6 +1917,9 @@ body, html { background: #fff !important; }
 
     // ---- STEP 4: Önceki katkı + endeks hesaplamaları
     if (stepNum === 4) {
+      if (typeof maybeAutofillOncekiFromDB === "function") {
+        setTimeout(() => maybeAutofillOncekiFromDB(), 0);
+      }
       hesaplaOncekiKatkiTutari();
       hesaplaKalanVeEndeks();
     }
@@ -4540,13 +4550,18 @@ body, html { background: #fff !important; }
       const tesvikIdEl = document.getElementById("tesvik_id");
       if (tesvikIdEl) tesvikIdEl.value = "";
 
-      const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.value = val;
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-      };
+      const setVal = (id, val) => { 
+        const el = document.getElementById(id); 
+        if (!el) return; 
+        // IMask varsa doğrudan value set etmek maskeyi bozuyor ve hesaplamaları tetiklemiyor.
+        if (typeof maskMap !== "undefined" && maskMap[id]) { 
+          safeSet(id, val); 
+        } else { 
+          el.value = val; 
+        } 
+        el.dispatchEvent(new Event("input", { bubbles: true })); 
+        el.dispatchEvent(new Event("change", { bubbles: true })); 
+      }; 
 
       setVal("belge_no", p.belge_no || "");
       if (p.basvuru_tarihi) setVal("basvuru_tarihi", p.basvuru_tarihi);
@@ -4770,6 +4785,28 @@ body, html { background: #fff !important; }
           try { setOranlar(); } catch (e) {}
           try { updateRejimTespiti(); } catch (e) {}
           try { maybeAutofillOncekiFromDB(); } catch (e) {}
+
+          // DÃ¶nem havuzu varsa KV matrah bileÅŸenlerini burada kilitle (form iÃ§inde tekrar/manuel istenmesin).
+          try {
+            if (window.ACTIVE_DONEM_MATRAH) {
+              const r = window.ACTIVE_DONEM_MATRAH || {};
+              safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
+              safeSet("kkeg", r.kkeg ?? 0);
+              safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+
+              const btnManual = document.getElementById("btn-manual-matrah");
+              if (btnManual) btnManual.style.display = "none";
+
+              ["ticari_bilanco_kari", "kkeg", "kv_matrah"].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.setAttribute("readonly", "readonly");
+                el.classList.add("disabled-input");
+                const m = maskMap[id];
+                if (m) m.updateOptions({ readonly: true });
+              });
+            }
+          } catch (e) {}
         } else {
           // edit modda serbest bırak
           donemSelect.disabled = false;
