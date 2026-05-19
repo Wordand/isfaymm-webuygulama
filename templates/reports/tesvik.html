@@ -59,16 +59,25 @@
                     </div>
                 </div>
 
-                <div class="summary-item">
-                    <span class="summary-label">Tür</span>
-                    <span class="summary-value text-truncate" title="{{ doc.yatirim_turu1 }} - {{ doc.yatirim_turu2 }}">
-                        {% if doc.karar == '2025/9903' %}
-                          {{ doc.program_turu or '2025/9903' }}
-                        {% else %}
-                          {{ doc.yatirim_turu1 }}
-                        {% endif %}
-                    </span>
-                </div>
+                <div class="summary-item"> 
+                    {% set _katki_orani_f = (doc.katki_orani|float) / 100 %} 
+                    {% set _belge_toplam_hak = (doc.toplam_tutar|float) * _katki_orani_f %} 
+                    {% set _hak_edilen = (doc.toplam_harcama_tutari|float) * _katki_orani_f %} 
+                    {% set _donemler = kullanimlar.get(doc.belge_no, []) %} 
+                    <span class="summary-label">Katkı Hakları</span> 
+                    <span class="summary-value text-truncate" title="Belge toplam katkı hakkı"> 
+                        {{ _belge_toplam_hak|tlformat }} TL 
+                    </span> 
+                    <small class="text-muted d-block mt-1">Hak edilen: {{ _hak_edilen|tlformat }} TL</small> 
+                    <button type="button"
+                            class="btn btn-sm btn-outline-dark rounded-pill px-3 mt-2"
+                            onclick="openKatkiModal(this)"
+                            data-doc='{{ doc | tojson | safe }}'
+                            data-periods='{{ _donemler | tojson | safe }}'
+                            title="Toplam haklar, kullanılan ve kalan katkıları görüntüle">
+                        <i class="bi bi-pie-chart-fill me-1"></i>Detay
+                    </button>
+                </div> 
                 <div class="summary-item"> 
                     <span class="summary-label">Vize Durumu</span> 
                     <span class="summary-value"> 
@@ -80,18 +89,7 @@
                     </span> 
                 </div> 
 
-                <div class="summary-item summary-item-actions"> 
-                    <span class="summary-label">Katkı</span> 
-                    {% set donemler = kullanimlar.get(doc.belge_no, []) %} 
-                    <button type="button"
-                            class="btn btn-sm btn-outline-dark rounded-pill px-3 mt-1"
-                            onclick="openKatkiModal(this)"
-                            data-doc='{{ doc | tojson | safe }}'
-                            data-periods='{{ donemler | tojson | safe }}'
-                            title="Toplam haklar, kullanılan ve kalan katkıları görüntüle">
-                        <i class="bi bi-pie-chart-fill me-1"></i>Katkı Tutarlarını Gör
-                    </button>
-                </div>
+                
             </div> 
  
             <!-- Body: Dönem Kullanımları (Table-Like but Modern) --> 

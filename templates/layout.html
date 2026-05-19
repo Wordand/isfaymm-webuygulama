@@ -242,6 +242,35 @@
             font-weight: 500;
         }
 
+        /* --- Skip Button --- */
+        .skip-intro-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.5rem 1.25rem;
+            background: #ffffff;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            border-radius: 30px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10000;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards 0.5s;
+        }
+
+        .skip-intro-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+
         /* --- Generic Animations --- */
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
         @keyframes expandWidth { 0% { width: 0; opacity: 0; } 100% { width: 40px; opacity: 1; } }
