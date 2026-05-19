@@ -86,6 +86,15 @@
           </div>
           <div class="text-muted small mt-2">Bu oran “kalan matrah” ve “indirimli oran hesabı” için baz alınır.</div>
         </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearMatrahInputs()">
+            <i class="bi bi-eraser me-1"></i>Temizle
+          </button>
+          <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
+            <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
+          </button>
+        </div>
       </div>
     </div>
 
@@ -168,9 +177,6 @@
           <div class="d-flex justify-content-end gap-2 mt-3">
             <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearAllocations()">
               <i class="bi bi-eraser me-1"></i>Temizle
-            </button>
-            <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
-              <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
             </button>
             <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAll()">
               <i class="bi bi-save2 me-1"></i>Bu Dönemi Kaydet
@@ -311,13 +317,14 @@
     return _parseTrNumber(el.value);
   }
 
-  function poolCompute() {
+  function poolCompute() { 
     const tic = _getMaskedValue(document.getElementById('pool_ticari'));
     const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
     const ind = _getMaskedValue(document.getElementById('pool_indirim'));
     const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
-    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
-    document.getElementById('pool_matrah_label').textContent = _fmtTr(matrah);
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar)); 
+    const matrahLabel = document.getElementById('pool_matrah_label'); 
+    if (matrahLabel) matrahLabel.textContent = _fmtTr(matrah); 
 
     const genelOran = _getGenelOran();
     let allocSum = 0;
@@ -347,21 +354,38 @@
     const taxGeneral = remaining * (_getGenelOran()/100);
     const totalTax = taxDiscSum + taxGeneral;
 
-    document.getElementById('pool_alloc_sum').textContent = _fmtTr(allocSum);
-    document.getElementById('pool_remaining').textContent = _fmtTr(remaining);
-    document.getElementById('pool_tax_discounted').textContent = _fmtTr(taxDiscSum);
-    document.getElementById('pool_tax_general').textContent = _fmtTr(taxGeneral);
-    document.getElementById('pool_tax_total').textContent = _fmtTr(totalTax);
-  }
+    const s1 = document.getElementById('pool_alloc_sum'); 
+    if (s1) s1.textContent = _fmtTr(allocSum); 
+    const s2 = document.getElementById('pool_remaining'); 
+    if (s2) s2.textContent = _fmtTr(remaining); 
+    const s3 = document.getElementById('pool_tax_discounted'); 
+    if (s3) s3.textContent = _fmtTr(taxDiscSum); 
+    const s4 = document.getElementById('pool_tax_general'); 
+    if (s4) s4.textContent = _fmtTr(taxGeneral); 
+    const s5 = document.getElementById('pool_tax_total'); 
+    if (s5) s5.textContent = _fmtTr(totalTax); 
+  } 
 
-  function poolClearAllocations() {
+  function poolClearAllocations() { 
     document.querySelectorAll('.pool-matrah-input').forEach(el => {
       const key = el.dataset.maskKey;
       if (key && _masks.get(key)) _masks.get(key).unmaskedValue = '0';
       el.value = '';
     });
     poolCompute();
-  }
+  } 
+
+  function poolClearMatrahInputs() { 
+    const ids = ['pool_ticari', 'pool_kkeg', 'pool_indirim', 'pool_zarar']; 
+    ids.forEach(id => { 
+      const el = document.getElementById(id); 
+      if (!el) return; 
+      const m = _masks.get(id); 
+      if (m) m.unmaskedValue = '0'; 
+      el.value = ''; 
+    }); 
+    poolCompute(); 
+  } 
 
   function poolLoadSaved(id) {
     const row = document.getElementById('pool-row-' + id);
