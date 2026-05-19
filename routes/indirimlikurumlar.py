@@ -538,7 +538,7 @@ def mevzuat_rehberi():
 
 def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     (" . ")
-    sekme = sekme_override or request.args.get("sekme", "form")
+    sekme = sekme_override or request.args.get("sekme", "donem") 
     is_logged_in = session.get("logged_in", False)
     user_id = session.get("user_id") if is_logged_in else None
     aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
@@ -576,13 +576,31 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             )
             mukellefler = c.fetchall()
 
-    docs, user_df, current_belge = [], None, None
-    current_kullanim = None
-    edit_doc = None
+    docs, user_df, current_belge = [], None, None 
+    current_kullanim = None 
+    edit_doc = None 
+    donem_matrah_list = []
 
-    if aktif_mukellef_id:
-        docs = get_all_tesvik_docs(user_id, aktif_mukellef_id)
-        user_df = get_user_profit_df(user_id)
+    if aktif_mukellef_id: 
+        docs = get_all_tesvik_docs(user_id, aktif_mukellef_id) 
+        user_df = get_user_profit_df(user_id) 
+
+        # Dönem matrah kayıtlarını çek (Dönem Hesabı sekmesi için)
+        try:
+            with get_conn() as _conn_dm:
+                _cur_dm = _conn_dm.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                _cur_dm.execute(
+                    """
+                    SELECT *
+                    FROM donem_matrah
+                    WHERE user_id = %s AND mukellef_id = %s
+                    ORDER BY hesap_donemi DESC, donem_turu DESC, id DESC
+                    """,
+                    (user_id, aktif_mukellef_id),
+                )
+                donem_matrah_list = _cur_dm.fetchall() or []
+        except Exception:
+            donem_matrah_list = []
         
         
 
@@ -595,29 +613,50 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             if edit_doc:
                 ("    ")
 
-        elif sekme == "form" and view_id:
-            with get_conn() as conn_form:
-                cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-                cur.execute("""
-                    SELECT *
+        elif sekme == "form" and view_id: 
+            with get_conn() as conn_form: 
+                cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor) 
+                cur.execute(""" 
+                    SELECT * 
                     FROM tesvik_belgeleri
                     WHERE id = %s AND user_id = %s AND mukellef_id = %s
                 """, (view_id, user_id, aktif_mukellef_id))
                 current_belge = cur.fetchone()
 
-            if current_belge:
-                ("     ")
+            if current_belge: 
+                ("     ") 
 
             # Dönem düzenleme modunda, seçili dönem verisini de template'e taşı
-            if request.args.get("editdonem") == "1":
-                try:
+            if request.args.get("editdonem") == "1": 
+                try: 
                     bno = session.get("current_belge_no")
                     yil = session.get("current_hesap_donemi")
                     turu = session.get("current_donem_turu")
                     if bno and yil and turu:
                         current_kullanim, _ = _fetch_and_prepare_kullanim(user_id, bno, int(yil), str(turu))
-                except Exception:
-                    current_kullanim = None
+                except Exception: 
+                    current_kullanim = None 
+
+        # Form sekmesine girilmek istendiğinde: önce dönem matrah kaydı zorunlu olsun
+        if sekme == "form":
+            # Dönem seçimi session'da yoksa veya kayıt yoksa, dönem ekranına yönlendir
+            try:
+                active_donem = session.get("active_donem_text")
+                if not active_donem:
+                    session["flash_donem_matrah_required"] = True
+                    return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
+                with get_conn() as _conn_chk:
+                    _cur = _conn_chk.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                    _cur.execute(
+                        "SELECT id FROM donem_matrah WHERE user_id=%s AND mukellef_id=%s AND donem_text=%s LIMIT 1",
+                        (user_id, aktif_mukellef_id, active_donem),
+                    )
+                    if not _cur.fetchone():
+                        session["flash_donem_matrah_required"] = True
+                        return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
+            except Exception:
+                # kayıt kontrolü çalışmazsa formu tamamen kilitlemeyelim
+                pass
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
@@ -720,8 +759,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     # Mobil App için UI gizleme tespiti
     hide_ui = request.args.get("source") == "mobile"
 
-    ctx = dict(
-        sekme=sekme,
+    ctx = dict( 
+        sekme=sekme, 
         mukellefler=mukellefler,
         aktif_mukellef_id=aktif_mukellef_id,
         iller = globals().get("ILLER", []),
@@ -733,13 +772,14 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         current_belge=current_belge,
         current_kullanim=current_kullanim,
         edit_doc=edit_doc,
-        kullanimlar=kullanimlar,
-        BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}),
+        kullanimlar=kullanimlar, 
+        donem_matrah_list=donem_matrah_list,
+        BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}), 
         TESVIK_KATKILAR_9903 = globals().get("TESVIK_KATKILAR_9903", {}),
         rows=rows,
         hide_ui=hide_ui,
-        is_logged_in=is_logged_in,
-    )
+        is_logged_in=is_logged_in, 
+    ) 
     if seo_context:
         ctx.update(seo_context)
 

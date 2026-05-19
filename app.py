@@ -20,7 +20,7 @@ import config
 from extensions import limiter, fernet
 from services.db import (
     migrate_users_table, migrate_login_logs_table, migrate_tesvik_columns, 
-    migrate_tesvik_kullanim_table, migrate_profit_data_table, migrate_kdv_tables,
+    migrate_tesvik_kullanim_table, migrate_donem_matrah_table, migrate_profit_data_table, migrate_kdv_tables,
     migrate_mukellef_table, migrate_kdv_mukellef_table, migrate_kdv_documents_table,
     migrate_kdv_notes_table, get_conn
 )
@@ -164,6 +164,7 @@ with app.app_context():
         migrate_login_logs_table()
         migrate_tesvik_columns()
         migrate_tesvik_kullanim_table()
+        migrate_donem_matrah_table()
         migrate_profit_data_table()
         migrate_kdv_mukellef_table()
         migrate_kdv_tables()

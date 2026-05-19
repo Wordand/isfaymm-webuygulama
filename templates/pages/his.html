@@ -1,0 +1,397 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Hızlandırılmış İade Sistemi (HİS) Rehberi | İSFA YMM
+{% endblock %}
+
+{% block description %}
+KDV iadelerinde Hızlandırılmış İade Sistemi (HİS) 2026 güncel rehberi. HİS sertifikası alma şartları, başvuru belgeleri, limitler, iade süreçleri ve sertifikanın iptali.
+{% endblock %}
+
+{% block content %}
+<!-- ⭐ SEO STRUCTURED DATA (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Hızlandırılmış İade Sistemi (HİS) Rehberi",
+      "description": "KDV Genel Uygulama Tebliği kapsamında Hızlandırılmış İade Sistemi (HİS) şartları, HİS sertifikası alma süreci, finansal limitler ve iade taleplerinin yerine getirilmesi.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.isfaymm.com/static/images/logo.png"
+        }
+      },
+      "mainEntityOfPage": "https://www.isfaymm.com/mevzuat/his"
+    }
+  ]
+}
+</script>
+
+<!-- ⭐ HERO SECTION (Premium & SEO Optimized H1) -->
+<section class="hero-section py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0b1528 0%, #1e293b 100%);">
+    <div class="position-absolute top-0 start-0 w-100 h-100 hero-bg-mesh" style="opacity: 0.1;"></div>
+    <div class="container position-relative z-1" data-aos="fade-up">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8 text-center text-lg-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 bg-primary bg-opacity-25 text-info rounded-pill mb-3 fw-bold small border border-primary border-opacity-50">
+                    <i class="bi bi-lightning-charge-fill animate-bounce"></i> KDV Genel Uygulama Tebliği | HİS
+                </div>
+                <h1 class="display-4 fw-black mb-3 lh-tight text-white">
+                    Hızlandırılmış İade <span class="text-primary-gradient">Sistemi (HİS)</span>
+                </h1>
+                <p class="lead text-light mb-4 fw-normal" style="max-width: 700px;">
+                    Mükelleflerin KDV iade taleplerinin teminat, vergi inceleme raporu veya YMM raporu aranılmaksızın yerine getirilmesini sağlayan HİS sertifikası alma şartları, mali limitleri ve güncel tüzük kuralları.
+                </p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+                    <a href="#genelSartlar" class="btn btn-primary btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale text-white">
+                        <i class="bi bi-file-earmark-check-fill me-2"></i> Başvuru Şartları
+                    </a>
+                    <a href="#iadeTalepleri" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-cash-coin me-2"></i> İade Uygulaması
+                    </a>
+                    <a href="#sertifikaIptal" class="btn btn-outline-danger btn-lg rounded-pill fw-bold px-4 hover-scale text-white">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Sertifikanın İptali
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block">
+                <div class="glass-card p-4 rounded-4 shadow-lg border-light border-opacity-25 text-center">
+                    <div class="icon-glow mb-3">
+                        <i class="bi bi-lightning-charge-fill text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-2">HİS Sertifikası</h4>
+                    <p class="small text-light mb-0">
+                        Bağlı bulunulan Vergi Dairesi Başkanlığı veya Defterdarlık tarafından yüksek ölçekli ve vergisel uyumu tam olan mükelleflere verilen ayrıcalıklı bir belgedir.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ⭐ BREADCRUMB & KONTROL ÇUBUĞU -->
+<div class="bg-white border-bottom py-3 sticky-subnav shadow-sm">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}" class="text-decoration-none text-muted">Mevzuat</a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">HİS Rehberi</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs" style="width: 250px;">
+                <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-0" id="quickSearchInput" placeholder="Sayfada terim ara..." onkeyup="filterPageContent(this.value)">
+            </div>
+            <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()" title="Sayfayı Yazdır">
+                <i class="bi bi-printer-fill text-primary me-1"></i> Yazdır
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5" id="mainWrapper">
+    <div class="row g-5">
+        
+        <!-- 📂 SOL MENÜ & HIZLI ERİŞİM -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="sticky-top" style="top: 100px; z-index: 10;">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                    <div class="card-header bg-primary text-white p-3 fw-bold">
+                        <i class="bi bi-list-nested me-2"></i> İçindekiler
+                    </div>
+                    <div class="list-group list-group-flush small fw-semibold" id="tocNav">
+                        <a href="#genelSartlar" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 1. Başvuru Şartları</a>
+                        <a href="#iadeTalepleri" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 2. İade Uygulaması</a>
+                        <a href="#sertifikaIptal" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 3. Sertifikanın İptali</a>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-primary-soft text-center">
+                    <h6 class="fw-bold text-primary mb-3">Mevzuat Danışmanlığı</h6>
+                    <p class="small text-muted mb-3">HİS sertifikası alımı, finansal limit denetimleri ve KDVİRA rapor analizleri için YMM kadromuzla iletişime geçebilirsiniz.</p>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-primary btn-sm rounded-pill fw-bold px-4 shadow-sm text-white">Bize Ulaşın</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📄 SAĞ ANA İÇERİK ALANI -->
+        <div class="col-lg-9">
+            
+            <!-- 1️⃣ BAŞVURU ŞARTLARI -->
+            <section id="genelSartlar" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-check-circle-fill"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">1. HİS Sertifikası Kapsamına Giren Mükellefler</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
+                    <p class="lead text-dark fw-normal">
+                        Aşağıdaki şartları taşıyan mükelleflere talep etmeleri ve belirtilen belgeleri ibraz etmeleri halinde bağlı oldukları Vergi Dairesi Başkanlığı (bulunmayan yerlerde Defterdarlık) tarafından <b>HİS sertifikası (EK: 21)</b> verilir.
+                    </p>
+                    
+                    <h5 class="fw-bold text-primary mt-4 mb-3"><i class="bi bi-calendar3 me-2"></i>Genel Uyum ve Süre Şartları</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">A) 5 Yıllık Mükellefiyet</div>
+                                <div class="small text-muted">Başvuru tarihinden önceki son beş takvim yılı itibarıyla vergi mükellefiyetinin bulunması gerekir.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">B) Çalışan İstihdamı</div>
+                                <div class="small text-muted">Başvurudan önceki takvim yılında vergi dairesine vermiş olduğu muhtasar beyannamelere göre aylık ortalama çalıştırılan kişi sayısının <b>250 veya daha fazla</b> olması şarttır.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mt-4 mb-3"><i class="bi bi-graph-up me-2"></i>Finansal Raporlama ve Limit Şartları</h5>
+                    <p class="small text-muted mb-3">
+                        Başvuru tarihinden önce vergi dairesine verilmiş son yıllık kurumlar vergisi beyannamesinin ekinde yer alan bilânçoya göre aşağıdaki 4 koşuldan <b>en az üç tanesinin</b> sağlanmış olması yeterlidir (52 Seri No.lu Tebliğ ile güncellenen 31/10/2024 limitleri):
+                    </p>
+                    
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered align-middle small mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Bilanço Kalemi</th>
+                                    <th>Asgari Limit</th>
+                                    <th>Açıklama / Tebliğ Notu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-dark">Aktif Toplamı</td>
+                                    <td class="fw-bold text-primary">500.000.000 TL</td>
+                                    <td>52 Seri No.lu Tebliğ öncesi 200.000.000 TL idi.</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Maddi Duran Varlıklar (Gayrimenkuller hariç)</td>
+                                    <td class="fw-bold text-primary">125.000.000 TL</td>
+                                    <td>Amortisman düşülmeden önceki toplam tutar (eski limit: 50.000.000 TL).</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Öz Sermaye Tutarı</td>
+                                    <td class="fw-bold text-primary">250.000.000 TL</td>
+                                    <td>Net öz kaynak toplam tutarı (eski limit: 100.000.000 TL).</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-dark">Net Satışlar</td>
+                                    <td class="fw-bold text-primary">625.000.000 TL</td>
+                                    <td>Son yıllık gelir tablosundaki net satış toplamı (eski limit: 250.000.000 TL).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mt-4 mb-3"><i class="bi bi-shield-exclamation me-2"></i>Son 5 Yıllık Vergi ve Defter İnceleme Şartları</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">Defter İbrazı</div>
+                                <div class="small text-muted" style="font-size:0.8rem;">Mücbir sebep dışındaki nedenlerle defter ve belgelerin ibrazından imtina edilmemiş olması gerekir.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">Beyanname Ödevleri</div>
+                                <div class="small text-muted" style="font-size:0.8rem;">Gelir/Kurumlar, ÖTV ve KDV uygulamalarından her birine ait beyanname verme ödevinin her bir vergi türü itibarıyla <b>birden fazla aksatılmamış</b> olması gerekir.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-bold text-dark mb-1">Sahte Belge İncelemesi</div>
+                                <div class="small text-muted" style="font-size:0.8rem;">Sahte/yanıltıcı belge düzenleme/kullanma fiili nedeniyle iade yönünden vergi incelemesinde olmaması veya genel esaslara dönmüş olması gerekir.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mt-4 mb-3"><i class="bi bi-check2-square me-2"></i>Başvuru Anı İtibarıyla Durum</h5>
+                    <ul class="list-group list-group-flush small text-muted mb-0">
+                        <li class="list-group-item py-3 px-0"><i class="bi bi-arrow-right-short text-primary fs-5 align-middle"></i> KDV iade taleplerinde Tebliğin (IV/A2) bölümündeki usul ve esaslara tabi olmayı gerektiren bir durumunun (özel esaslar vb.) bulunmaması gerekmektedir.</li>
+                        <li class="list-group-item py-3 px-0"><i class="bi bi-arrow-right-short text-primary fs-5 align-middle"></i> Vergi dairesine vadesi geçmiş vergi borcunun bulunmaması şarttır (borçların tecil/taksitlendirilmiş olması bu şartın ihlali sayılmaz).</li>
+                    </ul>
+
+                    <div class="alert alert-info border-0 shadow-xs rounded-4 p-4 mt-4 mb-0">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill text-info me-2"></i>Başvuru Süresi ve Sonuçlandırma</h6>
+                        <p class="small mb-0">
+                            Bu şartları birlikte taşıyan mükelleflerin bağlı oldukları Vergi Dairesi Başkanlığına/Defterdarlığa bir dilekçe ile başvurması halinde, başvuru tarihini izleyen <b>15 gün içinde</b> “HİS Sertifikası” düzenlenir.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2️⃣ İADE UYGULAMASI -->
+            <section id="iadeTalepleri" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-cash-coin"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">2. HİS Uygulamasına Göre İade Taleplerinin Yerine Getirilmesi</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
+                    <div class="card h-100 border-0 bg-primary-soft p-4 rounded-4 text-center mb-4">
+                        <div class="display-5 fw-bold text-primary mb-2"><i class="bi bi-shield-slash-fill"></i> Teminatsız ve Raporsuz İade</div>
+                        <p class="small text-muted mb-0">
+                            HİS sertifikası sahibi mükelleflerin iade talepleri tutarına bakılmaksızın; <b>teminat, Vergi İnceleme Raporu (VİR) veya YMM Raporu aranılmadan</b> doğrudan yerine getirilir.
+                        </p>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-primary me-2"></i>5 İş Gününde Nakden İade Süreci</h5>
+                    <p class="small text-muted mb-4">
+                        Nakden iade taleplerinde, ibraz edilen belgelere ilişkin olarak <b>KDVİRA sistemi</b> tarafından yapılan sorgulama neticesinde olumsuzluk tespit edilmeyen tutarlar, KDVİRA raporunun tamamlanma sürecini izleyen <b>beş iş günü içinde</b> mükellefe ödenir. Mahsuben iade talepleri ise gerekli belgelerin tamamlandığı tarih itibarıyla yerine getirilmiş sayılır.
+                    </p>
+
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-exclamation-octagon text-primary me-2"></i>Belge Eksiklikleri ve Süreler</h5>
+                    <p class="small text-muted mb-3">
+                        İade belgelerinde eksiklik/yanlışlık tespit edilirse, iade yerine getirilmekle birlikte bu husus <b>15 gün içinde</b> mükellefe tebliğ edilir:
+                    </p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-primary border-3">
+                                <b class="text-dark">3 Ay Standart Süre</b><br>
+                                <span class="small text-muted">Tebliğ tarihinden itibaren eksikliklerin 3 ay içinde tamamlanması istenir.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-primary border-3">
+                                <b class="text-dark">+3 Ay Ek Süre</b><br>
+                                <span class="small text-muted">Gerekçeli talep üzerine Vergi Dairesi Başkanlığı tarafından 3 aya kadar ek süre verilebilir.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning border-0 shadow-xs rounded-4 p-4 mb-4">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Eksikliğin Giderilmemesi ve Sevk Hükmü</h6>
+                        <p class="small mb-0">
+                            Verilen süreler sonunda eksikliklerin tamamlanmaması halinde, eksikliğe rağmen iade edilen KDV tutarları <b>vergi incelemesine sevk edilir</b>. Eksik iade tutarı kadar nakit teminat, banka teminat mektubu veya sigorta kefalet senedi verilmezse <b>HİS Sertifikası iptal edilir</b>.
+                        </p>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard-x text-primary me-2"></i>Olumsuz Tespitler ve 4 Kat Teminat Uygulaması</h5>
+                    <p class="small text-muted mb-0">
+                        Hakkında olumsuz rapor olmamakla birlikte, "olumsuz tespit" ortaya çıkan veya olumsuz raporlu mükelleflerden mal/hizmet aldığı tespit edilen mükelleflerden, bu alımları Tebliğin (IV/A2) kapsamında izah etmeleri, aksi halde tutarları iadeden çıkarmaları veya <b>4 katı tutarında teminat</b> göstermeleri istenir. Aksi takdirde bu kısımların iadesi ancak vergi inceleme raporuna göre yapılır.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 3️⃣ SERTİFİKANIN İPTALİ -->
+            <section id="sertifikaIptal" class="mb-5 searchable-section">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="feature-icon bg-danger text-white fs-4 shadow-sm"><i class="bi bi-x-circle-fill"></i></div>
+                    <h2 class="fw-bold mb-0 text-dark">3. HİS Sertifikasının İptal Edilmesi</h2>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-0 bg-white">
+                    <p class="lead text-dark fw-normal mb-4">
+                        Aşağıdaki durumlardan birinin tespiti halinde mükelleflerin HİS sertifikaları derhal iptal edilir ve iptal tarihini içine alan dönemden itibaren HİS iade usulleri uygulanmaz.
+                    </p>
+
+                    <div class="row g-3 small text-muted mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">A) Finansal Limitlerin Kaybedilmesi</b><br>
+                                Belirtilen mali limitlerin kaybedilmesi veya çalışan sayısında <b>%25'i aşan</b> bir azalma meydana gelmesi.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">B) Defter ve Belgelerin İbraz Edilmemesi</b><br>
+                                Defter ve belgelerin yasal süreleri içinde vergi dairesine ibraz edilmemesi (sürenin dolduğu gün sertifika iptal edilir).
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">C) Vergi Borçlarının Ödenmemesi</b><br>
+                                Ödeme emri tebliğ tarihinden itibaren <b>15 gün içinde</b> vergi borçlarının ödenmemesi (57 Seri No.lu Tebliğ ile 7 günden 15 güne çıkarılmıştır).
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100 border-start border-danger border-3">
+                                <b class="text-dark">Ç) Olumsuz Rapor İntikali</b><br>
+                                Sahte veya yanıltıcı belge düzenleme/kullanma fiiline dair vergi dairesine <b>"olumsuz rapor"</b> ulaşması.
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded-3 border-start border-danger border-3">
+                                <b class="text-dark">D) Yıllık Periyodik İnceleme ve %5 Sınırı</b><br>
+                                HİS sahipleri her takvim yılında en az bir dönem yönünden KDV iadeleri kapsamında incelenir. İncelemede haksız alınan iadelerin, ilgili dönem KDV iadelerine oranının <b>%5'i aşması</b> halinde sertifika iptal edilir ve <b>5 yıl boyunca</b> tekrar HİS sertifikası verilmez.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-0 shadow-xs rounded-4 p-4 mb-0">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-arrow-counterclockwise text-warning me-2"></i>Yeniden Sertifika Edinimi Kuralları</h6>
+                        <p class="small mb-0">
+                            Olumsuz rapora dayalı tarhiyatın yargı kararı ile terkin edilmesi halinde mükellefe tekrar sertifika verilir. Yargı kararından önce mükellefin genel esaslara geçmesi durumunda ise, genel esaslara geçiş tarihinden itibaren 24 ay süresince usul ihlali yapmaması kaydıyla 24 ayın sonunda yeniden sertifika düzenlenebilir.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<!-- ⭐ ÖZEL STİLLER & JAVASCRIPT FONKSİYONLARI -->
+<style>
+    .fw-black { font-weight: 900; }
+    .lh-tight { line-height: 1.2; }
+    
+    .text-primary-gradient {
+        background: linear-gradient(90deg, #3b82f6, #06b6d4);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .bg-primary-soft { background-color: #f0f6ff; }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    
+    .feature-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .hover-scale { transition: transform 0.2s ease; }
+    .hover-scale:hover { transform: translateY(-3px); }
+    
+    .sticky-subnav {
+        position: sticky; top: 80px; z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .animate-bounce { animation: bounce 2s infinite; }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-4px);}
+        60% {transform: translateY(-2px);}
+    }
+</style>
+
+<script>
+    // Sayfa İçi Hızlı Arama
+    function filterPageContent(query) {
+        query = query.toLowerCase().trim();
+        const sections = document.querySelectorAll('.searchable-section');
+        sections.forEach(sec => {
+            const text = sec.innerText.toLowerCase();
+            if (text.includes(query)) {
+                sec.style.display = 'block';
+            } else {
+                sec.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

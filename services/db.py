@@ -520,13 +520,69 @@ def migrate_tesvik_kullanim_table():
             except Exception as e:
                 print(f"UNIQUE constraint hatasi: {e}")
 
-        conn.commit()
-        print("Tesvik_kullanim tablosu kontrol edildi.")
+        conn.commit() 
+        print("Tesvik_kullanim tablosu kontrol edildi.") 
 
 
+def migrate_donem_matrah_table():
+    """
+    Dönem bazlı matrah havuzu kayıtları.
+    (Tek dönem matrahını gir → belgeler arasında paylaştır)
+    """
+    with get_conn() as conn:
+        cur = conn.cursor()
+        try:
+            if USE_SQLITE:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS donem_matrah (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    mukellef_id INTEGER NOT NULL,
+                    donem_text TEXT NOT NULL,
+                    hesap_donemi INTEGER NOT NULL,
+                    donem_turu TEXT DEFAULT 'KURUMLAR',
 
+                    ticari_bilanco_kari REAL DEFAULT 0.0,
+                    kkeg REAL DEFAULT 0.0,
+                    indirim_istisna REAL DEFAULT 0.0,
+                    gecmis_yil_zarari REAL DEFAULT 0.0,
+                    kv_matrah REAL DEFAULT 0.0,
+                    genel_oran REAL DEFAULT 25.0,
 
-def migrate_profit_data_table():
+                    kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, mukellef_id, donem_text)
+                );
+                """)
+            else:
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS donem_matrah (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    mukellef_id INTEGER NOT NULL REFERENCES mukellef(id) ON DELETE CASCADE,
+                    donem_text TEXT NOT NULL,
+                    hesap_donemi INT NOT NULL,
+                    donem_turu TEXT DEFAULT 'KURUMLAR',
+
+                    ticari_bilanco_kari DOUBLE PRECISION DEFAULT 0.0,
+                    kkeg DOUBLE PRECISION DEFAULT 0.0,
+                    indirim_istisna DOUBLE PRECISION DEFAULT 0.0,
+                    gecmis_yil_zarari DOUBLE PRECISION DEFAULT 0.0,
+                    kv_matrah DOUBLE PRECISION DEFAULT 0.0,
+                    genel_oran DOUBLE PRECISION DEFAULT 25.0,
+
+                    kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(user_id, mukellef_id, donem_text)
+                );
+                """)
+            conn.commit()
+            print("donem_matrah tablosu kontrol edildi.")
+        except Exception as e:
+            print(f"migrate_donem_matrah_table hatasi: {e}")
+ 
+ 
+ 
+ 
+def migrate_profit_data_table(): 
     """profit_data tablosuna (user_id, aciklama_index) için benzersiz kısıt ekler.
     Hem SQLite hem PostgreSQL için uyumlu çalışır.
     """

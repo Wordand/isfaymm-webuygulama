@@ -330,7 +330,7 @@ def sitemap_xml():
         ('main.home', {}), ('main.about', {}), ('main.team', {}), ('main.mevzuat', {}),
         ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
-        ('main.kdv_tevkifat', {}), ('main.itus', {}),
+        ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
@@ -422,6 +422,9 @@ def kdv_tevkifat(): return render_template("pages/kdv_tevkifat.html")
 
 @bp.route("/mevzuat/itus")
 def itus(): return render_template("pages/itus.html")
+
+@bp.route("/mevzuat/his")
+def his(): return render_template("pages/his.html")
 
 
 
