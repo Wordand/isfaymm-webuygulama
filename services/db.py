@@ -548,6 +548,8 @@ def migrate_donem_matrah_table():
                     gecmis_yil_zarari REAL DEFAULT 0.0,
                     kv_matrah REAL DEFAULT 0.0,
                     genel_oran REAL DEFAULT 25.0,
+                    sabit_kiymet_toplam REAL DEFAULT 0.0,
+                    sabit_kiymet_json TEXT,
 
                     kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(user_id, mukellef_id, donem_text)
@@ -569,12 +571,48 @@ def migrate_donem_matrah_table():
                     gecmis_yil_zarari DOUBLE PRECISION DEFAULT 0.0,
                     kv_matrah DOUBLE PRECISION DEFAULT 0.0,
                     genel_oran DOUBLE PRECISION DEFAULT 25.0,
+                    sabit_kiymet_toplam DOUBLE PRECISION DEFAULT 0.0,
+                    sabit_kiymet_json TEXT,
 
                     kayit_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(user_id, mukellef_id, donem_text)
                 );
                 """)
             conn.commit()
+
+            # ===========================
+            # Eksik Sutun Kontrolu
+            # ===========================
+            try:
+                if USE_SQLITE:
+                    cur.execute("PRAGMA table_info(donem_matrah)")
+                    existing_cols = {r["name"] if isinstance(r, dict) else r[1] for r in cur.fetchall()}
+                else:
+                    cur.execute("""
+                        SELECT column_name FROM information_schema.columns
+                        WHERE table_name = 'donem_matrah';
+                    """)
+                    existing_cols = {r["column_name"] if isinstance(r, dict) else r[0] for r in cur.fetchall()}
+
+                required_cols = [
+                    "sabit_kiymet_toplam",
+                    "sabit_kiymet_json",
+                ]
+
+                for col in required_cols:
+                    if col not in existing_cols:
+                        if col == "sabit_kiymet_json":
+                            col_type = "TEXT"
+                            default_sql = ""
+                        else:
+                            col_type = "REAL" if USE_SQLITE else "DOUBLE PRECISION"
+                            default_sql = " DEFAULT 0.0"
+                        cur.execute(f"ALTER TABLE donem_matrah ADD COLUMN {col} {col_type}{default_sql};")
+                        print(f"'{col}' sutunu eklendi.")
+                conn.commit()
+            except Exception as e:
+                print(f"donem_matrah eksik sutun kontrolu hatasi: {e}")
+
             print("donem_matrah tablosu kontrol edildi.")
         except Exception as e:
             print(f"migrate_donem_matrah_table hatasi: {e}")

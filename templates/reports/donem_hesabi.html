@@ -72,6 +72,65 @@
           </div>
         </div>
 
+        <details class="mt-3">
+          <summary class="fw-semibold">Sabit KÄ±ymet DetayÄ± (Tevsi / Oranlama)</summary>
+          <div class="mt-2 p-3 bg-white border rounded-3">
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label">250 - Arazi ve Arsalar</label>
+                <input id="pool_sabit_250" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">251 - YeraltÄ± ve YerÃ¼stÃ¼ DÃ¼zenleri</label>
+                <input id="pool_sabit_251" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">252 - Binalar</label>
+                <input id="pool_sabit_252" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">253 - Tesis, Makine ve Cihazlar</label>
+                <input id="pool_sabit_253" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">254 - TaÅŸÄ±tlar</label>
+                <input id="pool_sabit_254" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">255 - DemirbaÅŸlar</label>
+                <input id="pool_sabit_255" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">256 - DiÄŸer Maddi Duran VarlÄ±klar</label>
+                <input id="pool_sabit_256" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">258 - YapÄ±lmakta Olan YatÄ±rÄ±mlar</label>
+                <input id="pool_sabit_258" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">260 - Haklar</label>
+                <input id="pool_sabit_260" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">264 - Ã–zel Maliyetler</label>
+                <input id="pool_sabit_264" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">267 - DiÄŸer Maddi Olmayan Duran VarlÄ±klar</label>
+                <input id="pool_sabit_267" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+            </div>
+            <div class="mt-3 p-3 bg-light border rounded-3">
+              <div class="d-flex justify-content-between">
+                <div class="text-muted">Toplam Sabit KÄ±ymet (Oranlama iÃ§in)</div>
+                <div class="fw-bold" id="pool_sabit_total_label">0,00 TL</div>
+              </div>
+              <div class="text-muted small mt-1">Bu toplam, tevsi yatÄ±rÄ±mlarda â€œtoplam sabit kÄ±ymet tutarÄ±â€ olarak kullanÄ±lÄ±r.</div>
+            </div>
+          </div>
+        </details>
+
         <div class="mt-3">
           <label class="form-label">Genel Vergi Oranı</label>
           <div class="btn-group w-100" role="group" aria-label="Genel vergi oranı">
@@ -219,15 +278,17 @@
         </thead>
         <tbody>
           {% for r in donem_matrah_list %}
-          <tr id="pool-row-{{ r.id }}"
-              data-donem="{{ r.donem_text }}"
-              data-donem-turu="{{ r.donem_turu }}"
-              data-ticari="{{ r.ticari_bilanco_kari }}"
-              data-kkeg="{{ r.kkeg }}"
-              data-ind="{{ r.indirim_istisna }}"
-              data-zarar="{{ r.gecmis_yil_zarari }}"
-              data-matrah="{{ r.kv_matrah }}"
-              data-oran="{{ r.genel_oran }}">
+           <tr id="pool-row-{{ r.id }}"
+               data-donem="{{ r.donem_text }}"
+               data-donem-turu="{{ r.donem_turu }}"
+               data-ticari="{{ r.ticari_bilanco_kari }}"
+               data-kkeg="{{ r.kkeg }}"
+               data-ind="{{ r.indirim_istisna }}"
+               data-zarar="{{ r.gecmis_yil_zarari }}"
+               data-matrah="{{ r.kv_matrah }}"
+               data-oran="{{ r.genel_oran }}"
+               data-sabit-toplam="{{ r.sabit_kiymet_toplam or 0 }}"
+               data-sabit-json='{{ (r.sabit_kiymet_json or \"{}\") | tojson }}'>
             <td class="fw-bold">
               {{ r.donem_text }}
               {% if session.get('active_donem_text') == r.donem_text %}
@@ -316,6 +377,10 @@
       const el = document.getElementById(id);
       if (el) _masks.set(id, _tryMask(el));
     });
+    ['pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) _masks.set(id, _tryMask(el));
+    });
     document.querySelectorAll('.pool-matrah-input').forEach((el, idx) => {
       const key = 'alloc_' + idx;
       _masks.set(key, _tryMask(el));
@@ -391,7 +456,9 @@
   } 
 
   function poolClearMatrahInputs() { 
-    const ids = ['pool_ticari', 'pool_kkeg', 'pool_indirim', 'pool_zarar']; 
+    const ids = ['pool_ticari', 'pool_kkeg', 'pool_indirim', 'pool_zarar',
+      'pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'
+    ]; 
     ids.forEach(id => { 
       const el = document.getElementById(id); 
       if (!el) return; 
@@ -401,6 +468,17 @@
     }); 
     poolCompute(); 
   } 
+
+  function poolComputeSabitTotal() {
+    const ids = ['pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'];
+    let sum = 0;
+    ids.forEach((id) => {
+      sum += _getMaskedValue(document.getElementById(id));
+    });
+    const label = document.getElementById('pool_sabit_total_label');
+    if (label) label.textContent = _fmtTr(sum);
+    return sum;
+  }
 
   function poolLoadSaved(id) {
     const row = document.getElementById('pool-row-' + id);
@@ -427,11 +505,41 @@
     setMasked('pool_indirim', ind);
     setMasked('pool_zarar', zarar);
 
+    // sabit kÄ±ymet detayı
+    try {
+      const raw = row.getAttribute('data-sabit-json') || '"{}"';
+      const jsonText = JSON.parse(raw); // attribute -> JSON string
+      const obj = JSON.parse(jsonText || "{}");
+      const map = {
+        "250": "pool_sabit_250",
+        "251": "pool_sabit_251",
+        "252": "pool_sabit_252",
+        "253": "pool_sabit_253",
+        "254": "pool_sabit_254",
+        "255": "pool_sabit_255",
+        "256": "pool_sabit_256",
+        "258": "pool_sabit_258",
+        "260": "pool_sabit_260",
+        "264": "pool_sabit_264",
+        "267": "pool_sabit_267",
+      };
+      Object.keys(map).forEach((k) => {
+        const id2 = map[k];
+        const el = document.getElementById(id2);
+        if (!el) return;
+        const m = _masks.get(id2);
+        const v = Number(obj[k] || 0) || 0;
+        if (m) m.typedValue = v;
+        else el.value = String(v || 0);
+      });
+    } catch (e) {}
+
     const target = String(oran);
     const radio = document.querySelector(`input[name="pool_genel_oran"][value="${target}"]`);
     if (radio) radio.checked = true;
 
     poolCompute();
+    poolComputeSabitTotal();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -489,6 +597,20 @@
       const ind = _getMaskedValue(document.getElementById('pool_indirim'));
       const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
       const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+      const sabitToplam = poolComputeSabitTotal();
+      const sabitJson = {
+        "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
+        "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
+        "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
+        "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
+        "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
+        "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
+        "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
+        "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
+        "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
+        "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
+        "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
+      };
 
       const poolPayload = {
         donem_text: donemText,
@@ -499,7 +621,9 @@
         indirim_istisna: ind,
         gecmis_yil_zarari: zarar,
         kv_matrah: matrah,
-        genel_oran: genelOran
+        genel_oran: genelOran,
+        sabit_kiymet_toplam: sabitToplam,
+        sabit_kiymet_json: sabitJson
       };
 
       const poolRes = await fetch('/indirimlikurumlar/donem_matrah/save', {
@@ -598,6 +722,20 @@
     const ind = _getMaskedValue(document.getElementById('pool_indirim'));
     const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
     const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const sabitToplam = poolComputeSabitTotal();
+    const sabitJson = {
+      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
+      "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
+      "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
+      "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
+      "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
+      "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
+      "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
+      "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
+      "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
+      "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
+      "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
+    };
 
     const poolPayload = {
       donem_text: donemText,
@@ -608,7 +746,9 @@
       indirim_istisna: ind,
       gecmis_yil_zarari: zarar,
       kv_matrah: matrah,
-      genel_oran: genelOran
+      genel_oran: genelOran,
+      sabit_kiymet_toplam: sabitToplam,
+      sabit_kiymet_json: sabitJson
     };
 
     try {
@@ -635,6 +775,7 @@
     document.getElementById('pool_kkeg')?.addEventListener('input', poolCompute);
     document.getElementById('pool_indirim')?.addEventListener('input', poolCompute);
     document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
+    document.querySelectorAll('.pool-sabit-input').forEach(el => el.addEventListener('input', poolComputeSabitTotal));
     document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
     document.querySelectorAll('.pool-matrah-input').forEach(el => el.addEventListener('input', poolCompute));
     // Kaydedilen dönem matrahlarında geçici satırlarını gizle/göster
@@ -662,5 +803,6 @@
     } catch (e) {}
 
     poolCompute();
+    poolComputeSabitTotal();
   })();
 </script>

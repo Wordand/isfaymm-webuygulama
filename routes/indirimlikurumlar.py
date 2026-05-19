@@ -2127,6 +2127,13 @@ def save_donem_matrah():
         zarar = float(data.get("gecmis_yil_zarari") or 0)
         matrah = float(data.get("kv_matrah") or 0)
         genel_oran = float(data.get("genel_oran") or 25)
+        sabit_toplam = float(data.get("sabit_kiymet_toplam") or 0)
+        sabit_json = data.get("sabit_kiymet_json")
+        if sabit_json is not None and not isinstance(sabit_json, str):
+            try:
+                sabit_json = json.dumps(sabit_json, ensure_ascii=False)
+            except Exception:
+                sabit_json = None
 
         if not donem_text or not hesap_donemi:
             return jsonify({"status": "error", "message": "Dönem bilgisi eksik."}), 400
@@ -2144,8 +2151,9 @@ def save_donem_matrah():
                     """
                     INSERT INTO donem_matrah (
                         user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
-                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran,
+                        sabit_kiymet_toplam, sabit_kiymet_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(user_id, mukellef_id, donem_text)
                     DO UPDATE SET
                         hesap_donemi=excluded.hesap_donemi,
@@ -2155,11 +2163,14 @@ def save_donem_matrah():
                         indirim_istisna=excluded.indirim_istisna,
                         gecmis_yil_zarari=excluded.gecmis_yil_zarari,
                         kv_matrah=excluded.kv_matrah,
-                        genel_oran=excluded.genel_oran
+                        genel_oran=excluded.genel_oran,
+                        sabit_kiymet_toplam=excluded.sabit_kiymet_toplam,
+                        sabit_kiymet_json=excluded.sabit_kiymet_json
                     """,
                     (
                         user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
                         ticari, kkeg, ind, zarar, matrah, genel_oran,
+                        sabit_toplam, sabit_json,
                     ),
                 )
                 conn.commit()
@@ -2174,8 +2185,9 @@ def save_donem_matrah():
                     """
                     INSERT INTO donem_matrah (
                         user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
-                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran
-                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        ticari_bilanco_kari, kkeg, indirim_istisna, gecmis_yil_zarari, kv_matrah, genel_oran,
+                        sabit_kiymet_toplam, sabit_kiymet_json
+                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     ON CONFLICT (user_id, mukellef_id, donem_text)
                     DO UPDATE SET
                         hesap_donemi=EXCLUDED.hesap_donemi,
@@ -2185,12 +2197,15 @@ def save_donem_matrah():
                         indirim_istisna=EXCLUDED.indirim_istisna,
                         gecmis_yil_zarari=EXCLUDED.gecmis_yil_zarari,
                         kv_matrah=EXCLUDED.kv_matrah,
-                        genel_oran=EXCLUDED.genel_oran
+                        genel_oran=EXCLUDED.genel_oran,
+                        sabit_kiymet_toplam=EXCLUDED.sabit_kiymet_toplam,
+                        sabit_kiymet_json=EXCLUDED.sabit_kiymet_json
                     RETURNING id
                     """,
                     (
                         user_id, mukellef_id, donem_text, hesap_donemi, donem_turu,
                         ticari, kkeg, ind, zarar, matrah, genel_oran,
+                        sabit_toplam, sabit_json,
                     ),
                 )
                 pool_id = cur.fetchone()["id"]

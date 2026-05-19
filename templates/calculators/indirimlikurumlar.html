@@ -177,7 +177,7 @@
     white-space: nowrap;
 }
 /* --- MOBILE APP OVERRIDES --- */
-{% if hide_ui %}
+  {% if hide_ui %}
 .ikv-header {
     background: #1e2a47;
     padding: 1rem 1rem 0 1rem !important;
@@ -203,7 +203,18 @@
 .mb-3.text-end { display: flex; flex-direction: column; gap: 0.35rem; text-align: left !important; }
 .mb-3.text-end > button, .mb-3.text-end > a { font-size: 0.75rem; padding: 0.4rem; width: 100%; margin: 0 !important; justify-content: center; }
 body, html { background: #fff !important; }
-{% endif %}
+  {% endif %}
+
+  /* Stepper tıklanabilirlik */
+  .stepper-item {
+    cursor: pointer;
+    user-select: none;
+  }
+  .stepper-item:focus-visible {
+    outline: 2px solid rgba(13, 110, 253, 0.6);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
 </style>
 
 <div class="container py-4">
@@ -1953,6 +1964,34 @@ body, html { background: #fff !important; }
 
     // Global CURRENT_STEP güncelle
     CURRENT_STEP = stepNum;
+  }
+
+  function initStepperNavigation() {
+    for (let i = 1; i <= 7; i++) {
+      const el = document.getElementById(`step-i-${i}`);
+      if (!el) continue;
+
+      // klavye ile de tiklanabilsin
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+
+      const go = () => {
+        // Sonuc ekranina atlarken hesaplari tazele
+        if (i === 7 && typeof calculateCariAndNext === "function") {
+          try { calculateCariAndNext(); } catch (_) {}
+        } else {
+          try { _updateStepDisplay(i); } catch (_) {}
+        }
+      };
+
+      el.addEventListener("click", go);
+      el.addEventListener("keydown", (evt) => {
+        if (evt.key === "Enter" || evt.key === " ") {
+          evt.preventDefault();
+          go();
+        }
+      });
+    }
   }
 
 
@@ -4740,6 +4779,7 @@ body, html { background: #fff !important; }
 
 
   document.addEventListener("DOMContentLoaded", () => {
+    try { initStepperNavigation(); } catch (_) {}
 
     // ============================================================
     // 0) MODÜL 0 — FORM MODU GUARD
@@ -4813,6 +4853,32 @@ body, html { background: #fff !important; }
           const hidden = document.getElementById("donem_locked_hidden");
           if (hidden) hidden.remove();
         }
+        // DÃ¶nem havuzu aktifse KV matrah alanÄ± her durumda havuzdan gelsin (edit modda da).
+        try {
+          if (window.ACTIVE_DONEM_MATRAH) {
+            const r = window.ACTIVE_DONEM_MATRAH || {};
+            safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
+            safeSet("kkeg", r.kkeg ?? 0);
+            safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+
+            if (r.sabit_kiymet_toplam != null) {
+              safeSet("toplam_sabit_kiymet_tutari", r.sabit_kiymet_toplam);
+            }
+
+            const btnManual = document.getElementById("btn-manual-matrah");
+            if (btnManual) btnManual.style.display = "none";
+
+            // Havuz varken bu alanlar form tarafÄ±nda deÄŸiÅŸtirilmemeli.
+            ["ticari_bilanco_kari", "kkeg", "kv_matrah"].forEach((id) => {
+              const el = document.getElementById(id);
+              if (!el) return;
+              el.setAttribute("readonly", "readonly");
+              el.classList.add("disabled-input");
+              const m = maskMap[id];
+              if (m) m.updateOptions({ readonly: true });
+            });
+          }
+        } catch (e) {}
       } catch (e) {}
     })();
 
