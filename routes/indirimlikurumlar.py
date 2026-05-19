@@ -586,6 +586,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         user_df = get_user_profit_df(user_id) 
 
         # Dönem matrah kayıtlarını çek (Dönem Hesabı sekmesi için)
+        # Sıralama: daima "yeniden eskiye" (en yeni -> en eski). DB farklarından etkilenmemek için
+        # Python tarafında stabil sıralıyoruz.
         try:
             with get_conn() as _conn_dm:
                 _cur_dm = _conn_dm.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -594,11 +596,35 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     SELECT *
                     FROM donem_matrah
                     WHERE user_id = %s AND mukellef_id = %s
-                    ORDER BY hesap_donemi DESC, donem_turu DESC, id DESC
                     """,
                     (user_id, aktif_mukellef_id),
                 )
-                donem_matrah_list = _cur_dm.fetchall() or []
+                _rows_dm = _cur_dm.fetchall() or []
+
+            def _donem_rank(turu: str) -> int:
+                s = (turu or "").upper()
+                # büyük rank = daha yeni göster
+                if "KURUMLAR" in s:
+                    return 5
+                if "4" in s:
+                    return 4
+                if "3" in s:
+                    return 3
+                if "2" in s:
+                    return 2
+                if "1" in s:
+                    return 1
+                return 0
+
+            donem_matrah_list = sorted(
+                _rows_dm,
+                key=lambda r: (
+                    int(r.get("hesap_donemi") or 0),
+                    _donem_rank(r.get("donem_turu")),
+                    int(r.get("id") or 0),
+                ),
+                reverse=True,
+            )
         except Exception:
             donem_matrah_list = []
         
