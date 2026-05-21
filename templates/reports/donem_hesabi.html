@@ -171,9 +171,6 @@
             <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
               <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
             </button>
-            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAndGoForm()">
-              <i class="bi bi-arrow-right-circle me-1"></i>Kaydet ve Form Girişine Geç
-            </button>
           </div>
         </div>
       </div>
@@ -512,70 +509,6 @@
     _poolDraftTimer = setTimeout(poolDraftSaveNow, 800);
   }
 
-  async function poolSaveAndGoForm() {
-    const isLoggedIn = !!window.IS_LOGGED_IN;
-    if (!isLoggedIn) {
-      alert('Kaydetmek icin giris yapmalisiniz.');
-      return;
-    }
-    const donemText = (document.getElementById('pool_donem')?.value || '').trim();
-    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
-    const yil = m ? Number(m[1]) : null;
-    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
-    if (!yil) { alert('Donem secimi gecersiz.'); return; }
-
-    const genelOran = _getGenelOran();
-    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
-    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
-    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
-    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
-    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
-    const sabitToplam = poolComputeSabitTotal();
-    const sabitJson = {
-      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
-      "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
-      "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
-      "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
-      "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
-      "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
-      "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
-      "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
-      "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
-      "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
-      "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
-    };
-
-    const payload = {
-      donem_text: donemText,
-      hesap_donemi: yil,
-      donem_turu: turu,
-      ticari_bilanco_kari: tic,
-      kkeg: kkeg,
-      indirim_istisna: ind,
-      gecmis_yil_zarari: zarar,
-      kv_matrah: matrah,
-      genel_oran: genelOran,
-      sabit_kiymet_toplam: sabitToplam,
-      sabit_kiymet_json: sabitJson
-    };
-
-    try {
-      const res = await fetch('/indirimlikurumlar/donem_matrah/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        alert('Kaydedilemedi: ' + t);
-        return;
-      }
-      window.location.href = '?sekme=form';
-    } catch (e) {
-      alert('Kaydedilemedi (baglanti hatasi).');
-    }
-  }
-
   function poolLoadSaved(id) {
     const row = document.getElementById('pool-row-' + id);
     if (!row) return;
@@ -663,8 +596,8 @@
         alert('Dönem seçilemedi.');
         return;
       }
-      // Aktif dönem değişti: sayfayı yenile (etiket/lock mantığı güncellensin)
-      window.location.reload();
+      // Aktif donemi secip dogrudan Form Girisine gec
+      window.location.href = '?sekme=form';
     } catch (e) {
       alert('Dönem seçilemedi (bağlantı hatası).');
     }
