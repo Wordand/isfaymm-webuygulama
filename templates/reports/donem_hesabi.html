@@ -31,6 +31,12 @@
 
         <div class="mb-3">
           <label class="form-label">Dönem</label>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('THISYEAR - KURUMLAR')">Bu yıl - KURUMLAR</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('THISYEAR - 1. GEÇİCİ')">Bu yıl - 1. GEÇİCİ</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('PREVYEAR - KURUMLAR')">Önceki yıl - KURUMLAR</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('PREVYEAR - 1. GEÇİCİ')">Önceki yıl - 1. GEÇİCİ</button>
+          </div>
           <select id="pool_donem" class="form-select">
             {% for yil in range(2027, 2014, -1) %}
             <optgroup label="{{ yil }}">
@@ -55,6 +61,15 @@
             <label class="form-label">KKEG (TL)</label>
             <input id="pool_kkeg" type="text" class="form-control" placeholder="0,00">
           </div>
+        </div>
+
+        <div class="mt-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="pool_toggle_optional" onclick="poolToggleOptional()">
+            Detaylı alanları göster
+          </button>
+        </div>
+
+        <div class="row g-2 mt-2" id="pool_optional_wrap" style="display:none;">
           <div class="col-12">
             <label class="form-label">İndirim / İstisna (TL)</label>
             <input id="pool_indirim" type="text" class="form-control" placeholder="0,00">
@@ -72,7 +87,14 @@
           </div>
         </div>
 
-        <div class="mt-3 p-3 bg-white border rounded-3">
+        <div class="mt-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="pool_toggle_sabit" onchange="poolToggleSabit()">
+            <label class="form-check-label" for="pool_toggle_sabit">Tevsi oranlama yapacagim (sabit kiymet gir)</label>
+          </div>
+        </div>
+
+        <div class="mt-2 p-3 bg-white border rounded-3" id="pool_sabit_wrap" style="display:none;">
           <div class="fw-semibold mb-2">Sabit Kiymet Detayi (Tevsi / Oranlama)</div>
           <div class="text-muted small mb-2">Tevsi yatirimlarda oranlama yapacaksaniz doldurun. Diger durumlarda bos birakabilirsiniz.</div>
             <div class="row g-2">
@@ -146,13 +168,19 @@
           <div class="text-muted small mt-2">Bu oran “kalan matrah” ve “indirimli oran hesabı” için baz alınır.</div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-3">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearMatrahInputs()">
-            <i class="bi bi-eraser me-1"></i>Temizle
-          </button>
-          <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
-            <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
-          </button>
+        <div class="d-flex justify-content-between align-items-center gap-2 mt-3 flex-wrap">
+          <div class="text-muted small" id="pool_autosave_status"></div>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="poolClearMatrahInputs()">
+              <i class="bi bi-eraser me-1"></i>Temizle
+            </button>
+            <button type="button" class="btn btn-outline-dark rounded-pill px-4" onclick="poolSaveMatrahOnly()">
+              <i class="bi bi-check2-circle me-1"></i>Dönem Matrahını Kaydet
+            </button>
+            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="poolSaveAndGoForm()">
+              <i class="bi bi-arrow-right-circle me-1"></i>Kaydet ve Form Girişine Geç
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -236,18 +264,21 @@
           </tr>
         </thead>
         <tbody>
-          {% for r in donem_matrah_list %}
-           <tr id="pool-row-{{ r.id }}"
-               data-donem="{{ r.donem_text }}"
-               data-donem-turu="{{ r.donem_turu }}"
-               data-ticari="{{ r.ticari_bilanco_kari }}"
-               data-kkeg="{{ r.kkeg }}"
-               data-ind="{{ r.indirim_istisna }}"
-               data-zarar="{{ r.gecmis_yil_zarari }}"
-               data-matrah="{{ r.kv_matrah }}"
-               data-oran="{{ r.genel_oran }}"
-               data-sabit-toplam="{{ r.sabit_kiymet_toplam or 0 }}"
-               data-sabit-json="{{ (r.sabit_kiymet_json or '{}') | e }}">
+           {% for r in donem_matrah_list %}
+            <tr id="pool-row-{{ r.id }}"
+                data-donem="{{ r.donem_text }}"
+                data-donem-turu="{{ r.donem_turu }}"
+                data-ticari="{{ r.ticari_bilanco_kari }}"
+                data-kkeg="{{ r.kkeg }}"
+                data-ind="{{ r.indirim_istisna }}"
+                data-zarar="{{ r.gecmis_yil_zarari }}"
+                data-matrah="{{ r.kv_matrah }}"
+                data-oran="{{ r.genel_oran }}"
+                data-sabit-toplam="{{ r.sabit_kiymet_toplam or 0 }}"
+                data-sabit-json="{{ (r.sabit_kiymet_json or '{}') | e }}"
+                role="button"
+                style="cursor:pointer;"
+                onclick="poolLoadSaved({{ r.id }})">
             <td class="fw-bold">
               {{ r.donem_text }}
               {% if session.get('active_donem_text') == r.donem_text %}
@@ -261,13 +292,13 @@
             <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
             <td class="text-end">%{{ r.genel_oran }}</td>
             <td class="text-end">
-              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="poolSelectSaved({{ r.id }})">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="event.stopPropagation(); poolSelectSaved({{ r.id }})">
                 Seç
               </button>
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="poolLoadSaved({{ r.id }})">
-                Düzenle
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="event.stopPropagation(); poolLoadSaved({{ r.id }})">
+                Yükle
               </button>
-              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="poolDeleteSaved({{ r.id }})">
+              <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="event.stopPropagation(); poolDeleteSaved({{ r.id }})">
                 Sil
               </button>
             </td>
@@ -327,6 +358,12 @@
         });
       }
     } catch (e) {}
+
+    // sabit kiymet alani: toplam > 0 ise otomatik goster
+    try {
+      const sabitTop = Number(row.getAttribute('data-sabit-toplam') || 0) || 0;
+      poolSetSabitVisible(sabitTop > 0);
+    } catch (e) {}
     return null;
   }
 
@@ -372,7 +409,10 @@
       if (m) m.unmaskedValue = '0'; 
       el.value = ''; 
     }); 
+    poolSetOptionalVisible(false);
+    poolSetSabitVisible(false);
     poolCompute(); 
+    poolComputeSabitTotal();
   } 
 
   function poolComputeSabitTotal() {
@@ -384,6 +424,172 @@
     const label = document.getElementById('pool_sabit_total_label');
     if (label) label.textContent = _fmtTr(sum);
     return sum;
+  }
+
+  function poolSetOptionalVisible(visible) {
+    const wrap = document.getElementById('pool_optional_wrap');
+    const btn = document.getElementById('pool_toggle_optional');
+    if (wrap) wrap.style.display = visible ? '' : 'none';
+    if (btn) btn.textContent = visible ? 'Detaylı alanları gizle' : 'Detaylı alanları göster';
+  }
+
+  function poolToggleOptional() {
+    const wrap = document.getElementById('pool_optional_wrap');
+    const isOpen = wrap && wrap.style.display !== 'none';
+    poolSetOptionalVisible(!isOpen);
+  }
+
+  function poolSetSabitVisible(visible) {
+    const wrap = document.getElementById('pool_sabit_wrap');
+    const chk = document.getElementById('pool_toggle_sabit');
+    if (wrap) wrap.style.display = visible ? '' : 'none';
+    if (chk) chk.checked = !!visible;
+  }
+
+  function poolToggleSabit() {
+    const chk = document.getElementById('pool_toggle_sabit');
+    poolSetSabitVisible(!!(chk && chk.checked));
+    poolComputeSabitTotal();
+    poolScheduleDraftSave();
+  }
+
+  function poolQuickDonem(key) {
+    const nowYear = new Date().getFullYear();
+    const year = key.startsWith('PREVYEAR') ? (nowYear - 1) : nowYear;
+    const suffix = key.replace('THISYEAR - ', '').replace('PREVYEAR - ', '');
+    const val = `${year} - ${suffix}`;
+    const sel = document.getElementById('pool_donem');
+    if (!sel) return;
+    sel.value = val;
+    poolCompute();
+    poolScheduleDraftSave();
+  }
+
+  let _poolDraftTimer = null;
+  async function poolDraftSaveNow() {
+    const isLoggedIn = !!window.IS_LOGGED_IN;
+    if (!isLoggedIn) return;
+    const donemText = (document.getElementById('pool_donem')?.value || '').trim();
+    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
+    const yil = m ? Number(m[1]) : null;
+    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
+    if (!yil) return;
+
+    const genelOran = _getGenelOran();
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const sabitToplam = poolComputeSabitTotal();
+    const sabitJson = {
+      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
+      "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
+      "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
+      "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
+      "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
+      "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
+      "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
+      "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
+      "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
+      "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
+      "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
+    };
+
+    const payload = {
+      donem_text: donemText,
+      hesap_donemi: yil,
+      donem_turu: turu,
+      ticari_bilanco_kari: tic,
+      kkeg: kkeg,
+      indirim_istisna: ind,
+      gecmis_yil_zarari: zarar,
+      kv_matrah: matrah,
+      genel_oran: genelOran,
+      sabit_kiymet_toplam: sabitToplam,
+      sabit_kiymet_json: sabitJson
+    };
+
+    try {
+      const res = await fetch('/indirimlikurumlar/donem_matrah/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const el = document.getElementById('pool_autosave_status');
+        if (el) el.textContent = 'Taslak kaydedildi.';
+      }
+    } catch (e) {}
+  }
+
+  function poolScheduleDraftSave() {
+    if (_poolDraftTimer) clearTimeout(_poolDraftTimer);
+    _poolDraftTimer = setTimeout(poolDraftSaveNow, 800);
+  }
+
+  async function poolSaveAndGoForm() {
+    const isLoggedIn = !!window.IS_LOGGED_IN;
+    if (!isLoggedIn) {
+      alert('Kaydetmek icin giris yapmalisiniz.');
+      return;
+    }
+    const donemText = (document.getElementById('pool_donem')?.value || '').trim();
+    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
+    const yil = m ? Number(m[1]) : null;
+    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
+    if (!yil) { alert('Donem secimi gecersiz.'); return; }
+
+    const genelOran = _getGenelOran();
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const sabitToplam = poolComputeSabitTotal();
+    const sabitJson = {
+      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
+      "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
+      "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
+      "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
+      "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
+      "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
+      "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
+      "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
+      "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
+      "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
+      "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
+    };
+
+    const payload = {
+      donem_text: donemText,
+      hesap_donemi: yil,
+      donem_turu: turu,
+      ticari_bilanco_kari: tic,
+      kkeg: kkeg,
+      indirim_istisna: ind,
+      gecmis_yil_zarari: zarar,
+      kv_matrah: matrah,
+      genel_oran: genelOran,
+      sabit_kiymet_toplam: sabitToplam,
+      sabit_kiymet_json: sabitJson
+    };
+
+    try {
+      const res = await fetch('/indirimlikurumlar/donem_matrah/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        alert('Kaydedilemedi: ' + t);
+        return;
+      }
+      window.location.href = '?sekme=form';
+    } catch (e) {
+      alert('Kaydedilemedi (baglanti hatasi).');
+    }
   }
 
   function poolLoadSaved(id) {
@@ -410,6 +616,9 @@
     setMasked('pool_kkeg', kkeg);
     setMasked('pool_indirim', ind);
     setMasked('pool_zarar', zarar);
+
+    // optional alanlar: indirim/zarar varsa otomatik goster
+    poolSetOptionalVisible((ind || 0) !== 0 || (zarar || 0) !== 0);
 
     // sabit kÄ±ymet detayı
     try {
@@ -677,12 +886,27 @@
   (function initPool() {
     if (!document.getElementById('pool_donem')) return;
     _initPoolMasks();
-    document.getElementById('pool_ticari')?.addEventListener('input', poolCompute);
-    document.getElementById('pool_kkeg')?.addEventListener('input', poolCompute);
-    document.getElementById('pool_indirim')?.addEventListener('input', poolCompute);
-    document.getElementById('pool_zarar')?.addEventListener('input', poolCompute);
-    document.querySelectorAll('.pool-sabit-input').forEach(el => el.addEventListener('input', poolComputeSabitTotal));
-    document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', poolCompute));
+    poolSetOptionalVisible(false);
+    poolSetSabitVisible(false);
+
+    const bindCompute = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', () => { poolCompute(); poolScheduleDraftSave(); });
+      el.addEventListener('blur', poolScheduleDraftSave);
+    };
+    bindCompute('pool_ticari');
+    bindCompute('pool_kkeg');
+    bindCompute('pool_indirim');
+    bindCompute('pool_zarar');
+
+    document.getElementById('pool_donem')?.addEventListener('change', () => { poolCompute(); poolScheduleDraftSave(); });
+
+    document.querySelectorAll('.pool-sabit-input').forEach(el => {
+      el.addEventListener('input', () => { poolComputeSabitTotal(); poolScheduleDraftSave(); });
+      el.addEventListener('blur', poolScheduleDraftSave);
+    });
+    document.querySelectorAll('input[name=\"pool_genel_oran\"]').forEach(el => el.addEventListener('change', () => { poolCompute(); poolScheduleDraftSave(); }));
     // Kaydedilen dönem matrahlarında geçici satırlarını gizle/göster
     try {
       const toggle = document.getElementById('toggle_gecici_rows');
