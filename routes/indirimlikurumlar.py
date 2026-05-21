@@ -551,7 +551,6 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     else:
         # Giriş yapılmış kullanıcı için mükellef seçimi zorunlu
         if not aktif_mukellef_id:
-            from flask import url_for
             return redirect(url_for("mukellef.index", next=url_for("indirimlikurumlar.index")))
 
         # Unvan oturumda yoksa DB'den çek
@@ -651,8 +650,13 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
 
         elif sekme == "form":
             # Form sekmesi:
+            # - Once aktif donem matrah kaydi secilmeli; form her zaman secili donem uzerinden calisir.
             # - Normal akista: aktif belge secilmeden forma girilmez (aktif_tesvik_id session'da tutulur)
             # - new=1: belge ekleme icin form acilabilir (yine de aktif donem zorunlu)
+            if not session.get("active_donem_text"):
+                session["flash_donem_matrah_required"] = True
+                return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
+
             is_new_doc = request.args.get("new") == "1"
             active_tesvik_id = session.get("active_tesvik_id")
 
