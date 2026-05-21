@@ -31,12 +31,6 @@
 
         <div class="mb-3">
           <label class="form-label">Dönem</label>
-          <div class="d-flex gap-2 flex-wrap mb-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('THISYEAR - KURUMLAR')">Bu yıl - KURUMLAR</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('THISYEAR - 1. GEÇİCİ')">Bu yıl - 1. GEÇİCİ</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('PREVYEAR - KURUMLAR')">Önceki yıl - KURUMLAR</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="poolQuickDonem('PREVYEAR - 1. GEÇİCİ')">Önceki yıl - 1. GEÇİCİ</button>
-          </div>
           <select id="pool_donem" class="form-select">
             {% for yil in range(2027, 2014, -1) %}
             <optgroup label="{{ yil }}">
@@ -450,18 +444,6 @@
     const chk = document.getElementById('pool_toggle_sabit');
     poolSetSabitVisible(!!(chk && chk.checked));
     poolComputeSabitTotal();
-    poolScheduleDraftSave();
-  }
-
-  function poolQuickDonem(key) {
-    const nowYear = new Date().getFullYear();
-    const year = key.startsWith('PREVYEAR') ? (nowYear - 1) : nowYear;
-    const suffix = key.replace('THISYEAR - ', '').replace('PREVYEAR - ', '');
-    const val = `${year} - ${suffix}`;
-    const sel = document.getElementById('pool_donem');
-    if (!sel) return;
-    sel.value = val;
-    poolCompute();
     poolScheduleDraftSave();
   }
 
