@@ -275,7 +275,7 @@
             <td class="fw-bold">
               {{ r.donem_text }}
               {% if session.get('active_donem_text') == r.donem_text %}
-                <span class="badge bg-success-subtle text-success border ms-2">Aktif</span>
+                <span class="badge ms-2" style="background:#16a34a; color:#ffffff; border:1px solid #15803d;">Aktif</span>
               {% endif %}
             </td>
             <td class="text-end">{{ r.ticari_bilanco_kari|tlformat }} TL</td>
