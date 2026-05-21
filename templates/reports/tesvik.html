@@ -1,5 +1,15 @@
 {# This file is included in indirimlikurumlar.html, do NOT extend layout.html again #}
 <div class="container-fluid py-4">
+    {% if session.get('flash_tesvik_required') %}
+      <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div>
+          <div class="fw-bold">Önce teşvik belgesi seçin</div>
+          <div class="small mb-0">Form Girişi'ne geçmeden önce bu sayfadan bir teşvik belgesi seçmelisiniz.</div>
+        </div>
+      </div>
+      {% set _ = session.pop('flash_tesvik_required') %}
+    {% endif %}
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
@@ -27,6 +37,9 @@
                     <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold shadow-sm">
                         {{ doc.karar }}
                     </span>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="selectDocAndGoForm({{ doc.id }})" title="Bu belge ile devam et">
+                        <i class="bi bi-play-fill me-1"></i>Devam
+                    </button>
                     <a class="btn btn-action-delete" href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=doc.id) }}" title="PDF Çıktısı Al">
                         <i class="bi bi-file-earmark-pdf-fill"></i>
                     </a>
@@ -472,7 +485,22 @@
 
     // ➕ Dönem Ekle (Forma gider)
     function goToStep2(docId) {
-        window.location.href = `/indirimlikurumlar/?sekme=form&view=${docId}#step2`;
+        // Dönem eklemek icin once belgeyi secip form'a git
+        selectDocAndGoForm(docId, "#step2");
+    }
+
+    async function selectDocAndGoForm(docId, hash) {
+        try {
+            const res = await fetch(`/indirimlikurumlar/tesvik/select/${docId}`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data || data.status !== "success") {
+                Swal.fire({ icon: "error", title: "Hata", text: (data && data.message) ? data.message : "Belge seçilemedi." });
+                return;
+            }
+            window.location.href = `/indirimlikurumlar/?sekme=form${hash || ""}`;
+        } catch (e) {
+            Swal.fire({ icon: "error", title: "Hata", text: "Bağlantı hatası oluştu." });
+        }
     }
 
     // 🗑️ Belge Silme Onayı

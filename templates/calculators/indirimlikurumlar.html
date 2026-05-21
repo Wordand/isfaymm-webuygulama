@@ -561,8 +561,9 @@ body, html { background: #fff !important; }
       <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-gear-fill me-2"></i>Aşama 2 - Detaylar</h5>
 
       <div class="mb-3">
-        <label>Dönem Seçiniz</label>
-        <select name="donem" id="donem" class="form-select" required onchange="setOranlar(); updateRejimTespiti(); maybeAutofillOncekiFromDB();">
+        <label>Aktif Dönem</label>
+        <input type="text" id="donem_display" class="form-control" value="{{ session.get('active_donem_text','') }}" readonly>
+        <select name="donem" id="donem" class="form-select" required style="display:none;" onchange="setOranlar(); updateRejimTespiti(); maybeAutofillOncekiFromDB();">
           {% for yil in range(2027, 2014, -1) %}
           <optgroup label="{{ yil }}">
             <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>

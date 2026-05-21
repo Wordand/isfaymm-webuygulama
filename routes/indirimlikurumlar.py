@@ -649,15 +649,33 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             if edit_doc:
                 ("    ")
 
-        elif sekme == "form" and view_id: 
-            with get_conn() as conn_form: 
-                cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor) 
-                cur.execute(""" 
-                    SELECT * 
-                    FROM tesvik_belgeleri
-                    WHERE id = %s AND user_id = %s AND mukellef_id = %s
-                """, (view_id, user_id, aktif_mukellef_id))
-                current_belge = cur.fetchone()
+        elif sekme == "form":
+            # Form sekmesi:
+            # - Normal akista: aktif belge secilmeden forma girilmez (aktif_tesvik_id session'da tutulur)
+            # - new=1: belge ekleme icin form acilabilir (yine de aktif donem zorunlu)
+            is_new_doc = request.args.get("new") == "1"
+            active_tesvik_id = session.get("active_tesvik_id")
+
+            # Eger ?view=... ile gelindiyse, onu aktif belge olarak kabul et (tesvik sayfasindan gecislerde kolaylik)
+            if view_id and not active_tesvik_id:
+                active_tesvik_id = view_id
+                session["active_tesvik_id"] = view_id
+
+            if not is_new_doc:
+                if not active_tesvik_id:
+                    session["flash_tesvik_required"] = True
+                    return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
+
+                with get_conn() as conn_form:
+                    cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                    cur.execute("""
+                        SELECT *
+                        FROM tesvik_belgeleri
+                        WHERE id = %s AND user_id = %s AND mukellef_id = %s
+                    """, (active_tesvik_id, user_id, aktif_mukellef_id))
+                    current_belge = cur.fetchone()
+            else:
+                current_belge = None
 
             if current_belge: 
                 ("     ") 
@@ -693,6 +711,12 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                 # Tablo henüz yoksa / bağlantı sorunu varsa formu açıp kullanıcıyı yanıltmayalım.
                 session["flash_donem_matrah_required"] = True
                 return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
+
+            # Aktif belge secimi zorunlu (new=1 haric)
+            if request.args.get("new") != "1":
+                if not session.get("active_tesvik_id") and not request.args.get("view"):
+                    session["flash_tesvik_required"] = True
+                    return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
 
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
@@ -2300,5 +2324,30 @@ def select_donem_matrah(id):
 
         session["active_donem_text"] = row["donem_text"]
         return jsonify({"status": "success", "donem_text": row["donem_text"]})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@bp.route("/tesvik/select/<int:id>", methods=["POST"])
+@login_required
+def select_tesvik_doc(id):
+    """Teşvik belgesini aktif belge olarak seçer (session) ve form akışında kullanır."""
+    try:
+        user_id = session.get("user_id")
+        mukellef_id = session.get("aktif_mukellef_id")
+        if not user_id or not mukellef_id:
+            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
+
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(
+                "SELECT id FROM tesvik_belgeleri WHERE id=%s AND user_id=%s AND mukellef_id=%s LIMIT 1",
+                (id, user_id, mukellef_id),
+            )
+            if not cur.fetchone():
+                return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+
+        session["active_tesvik_id"] = id
+        return jsonify({"status": "success", "id": id})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
