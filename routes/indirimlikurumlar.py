@@ -655,6 +655,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             # - new=1: belge ekleme icin form acilabilir (yine de aktif donem zorunlu)
             if not session.get("active_donem_text"):
                 session["flash_donem_matrah_required"] = True
+                if not session.get("active_tesvik_id") and not request.args.get("view") and request.args.get("new") != "1":
+                    session["flash_tesvik_required"] = True
                 return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
 
             is_new_doc = request.args.get("new") == "1"

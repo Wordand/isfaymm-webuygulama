@@ -1,5 +1,16 @@
 {# Dönem bazlı matrah havuzu ve belge dağıtımı (İndirimli KV) #}
 <div class="container-fluid py-3" style="max-width: 1200px;">
+  {% if session.get('flash_donem_matrah_required') and session.get('flash_tesvik_required') %}
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>
+        <div class="fw-bold">Önce dönem ve teşvik belgesi seçin</div>
+        <div class="small mb-0">Form Girişi'ne geçmeden önce dönem matrahını kaydedip bir teşvik belgesi seçmelisiniz.</div>
+      </div>
+    </div>
+    {% set _ = session.pop('flash_donem_matrah_required') %}
+    {% set _ = session.pop('flash_tesvik_required') %}
+  {% endif %}
   {% if session.get('flash_donem_matrah_required') %}
     <div class="alert alert-warning d-flex align-items-center gap-2">
       <i class="bi bi-exclamation-triangle-fill"></i>
