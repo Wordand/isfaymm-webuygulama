@@ -459,8 +459,6 @@
 
   let _poolDraftTimer = null;
   async function poolDraftSaveNow() {
-    const isLoggedIn = !!window.IS_LOGGED_IN;
-    if (!isLoggedIn) return;
     const donemText = (document.getElementById('pool_donem')?.value || '').trim();
     const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
     const yil = m ? Number(m[1]) : null;
@@ -615,12 +613,6 @@
   }
 
   async function poolSaveAll() {
-    const isLoggedIn = !!window.IS_LOGGED_IN;
-    if (!isLoggedIn) {
-      alert('Kaydetmek için giriş yapmalısınız. İsterseniz yine de bu ekranı hesaplama amaçlı kullanabilirsiniz.');
-      return;
-    }
-
     const donemText = document.getElementById('pool_donem').value || '';
     const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
     const yil = m ? Number(m[1]) : null;
@@ -743,12 +735,6 @@
   }
 
   async function poolSaveMatrahOnly() {
-    const isLoggedIn = !!window.IS_LOGGED_IN;
-    if (!isLoggedIn) {
-      alert('Kaydetmek için giriş yapmalısınız.');
-      return;
-    }
-
     const donemText = document.getElementById('pool_donem').value || '';
     const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
     const yil = m ? Number(m[1]) : null;

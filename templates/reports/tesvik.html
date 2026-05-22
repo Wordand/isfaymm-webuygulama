@@ -16,9 +16,9 @@
             <h1 class="fw-bold text-dark mb-1">Teşvik Yönetim Merkezi</h1>
             <p class="text-muted mb-0">Toplam <b>{{ docs|length }}</b> kayıtlı yatırım teşvik belgesi bulundu.</p>
         </div>
-        <a href="/indirimlikurumlar/?sekme=form&new=1" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-            <i class="bi bi-plus-lg me-2"></i>Yeni Belge Ekle
-        </a>
+        <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4" onclick="openBelgeBaslatModal()">
+            <i class="bi bi-plus-lg me-2"></i>Yeni Belge Başlat
+        </button>
     </div>
 
     <!-- Ledger List -->
@@ -178,9 +178,150 @@
     <div class="display-1 text-muted opacity-25 mb-4"><i class="bi bi-file-earmark-x"></i></div>
     <h3 class="fw-bold text-dark">Henüz Bir Teşvik Belgeniz Yok</h3>
     <p class="text-muted">Hemen bir belge ekleyerek hesaplamalara başlayabilirsiniz.</p>
-    <a href="/indirimlikurumlar/?sekme=form" class="btn btn-primary rounded-pill px-5 py-2 mt-3">Yeni Belge Başlat</a>
+    <button type="button" class="btn btn-primary rounded-pill px-5 py-2 mt-3" onclick="openBelgeBaslatModal()">Yeni Belge Başlat</button>
 </div>
 {% endif %}
+
+<style>
+  a[href="/indirimlikurumlar/?sekme=form"].btn-primary.rounded-pill.px-5.py-2.mt-3 { display: none !important; }
+</style>
+
+<!-- BELGE BASLAT MODALI -->
+<div class="modal fade" id="belgeBaslatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light border-bottom-0">
+        <div>
+          <h5 class="modal-title fw-bold text-primary"><i class="bi bi-file-earmark-plus me-2"></i>Yeni Teşvik Belgesi Başlat</h5>
+          <div class="text-muted small">Bu bilgiler ana belge kaydıdır. Cari dönem hesabında tekrar sorulmaz.</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="belgeBaslatForm" class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Karar</label>
+            <select name="karar" id="bb_karar" class="form-select" required onchange="syncBelgeBaslatKarar()">
+              <option value="">Seçiniz</option>
+              <option value="2012/3305">2012/3305</option>
+              <option value="2025/9903">2025/9903</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tamamlama Vizesi Yapıldı mı?</label>
+            <select name="vize_durumu" id="bb_vize_durumu" class="form-select" required>
+              <option value="">Seçiniz</option>
+              <option value="Evet - İşletme Döneminde">Evet - İşletme Döneminde</option>
+              <option value="Hayır - Yatırım Döneminde">Hayır - Yatırım Döneminde</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Yatırım Teşvik Belgesi Numarası</label>
+            <input type="text" name="belge_no" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Yatırıma Başlama Tarihi</label>
+            <input type="date" name="belge_tarihi" class="form-control" required onchange="syncBelgeBaslatKarar()">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teşvik Belgesi Başvuru Tarihi</label>
+            <input type="date" name="basvuru_tarihi" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teşvik Belgesi Alınma Tarihi</label>
+            <input type="date" name="belge_alinma_tarihi" class="form-control" onchange="syncBelgeBaslatKarar()">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Fiili Tamamlanma Tarihi</label>
+            <input type="date" name="fiili_tamamlanma_tarihi" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tamamlama Vizesi Başvuru Tarihi</label>
+            <input type="date" name="vize_basvuru_tarihi" class="form-control">
+          </div>
+          <div class="col-md-6 bb-9903-only">
+            <label class="form-label">İlk İndirim Hakkının Kullanılabileceği Hesap Yılı</label>
+            <input type="number" name="ilk_indirim_yili" class="form-control" min="2009" max="2100" placeholder="Örn. 2025">
+          </div>
+          <div class="col-md-4 bb-3305-only">
+            <label class="form-label">Yatırım Türü (1)</label>
+            <select name="yatirim_turu1" class="form-select" required>
+              <option value="">Seçiniz</option>
+              <option value="Komple">Komple</option>
+              <option value="Tevsi">Tevsi</option>
+              <option value="Modernizasyon">Modernizasyon</option>
+              <option value="Entegrasyon">Entegrasyon</option>
+              <option value="Ürün Geliştirme">Ürün Geliştirme</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+          <div class="col-md-4 bb-3305-only">
+            <label class="form-label">Yatırım Türü (2)</label>
+            <select name="yatirim_turu2" class="form-select" required>
+              <option value="">Seçiniz</option>
+              <option value="Bölgesel">Bölgesel</option>
+              <option value="Büyük Ölçekli">Büyük Ölçekli</option>
+              <option value="Stratejik">Stratejik</option>
+              <option value="Öncelikli Yatırım">Öncelikli Yatırım</option>
+              <option value="Proje Bazında Desteklenen Yatırımlar (6745 Sayılı Kanun)">Proje Bazında Desteklenen Yatırımlar</option>
+            </select>
+          </div>
+          <div class="col-md-4 bb-3305-only">
+            <label class="form-label">OSB Durumu</label>
+            <select name="osb" id="bb_osb" class="form-select" onchange="syncBelgeBaslatKarar()">
+              <option value="OSB Dışında">OSB Dışında</option>
+              <option value="OSB İçinde">OSB İçinde</option>
+            </select>
+          </div>
+          <div class="col-md-6 bb-9903-only">
+            <label class="form-label">Program Türü</label>
+            <select name="program_turu" id="bb_program_turu" class="form-select" onchange="syncBelgeBaslatKarar()">
+              <option value="">Seçiniz</option>
+              <option value="Teknoloji Hamlesi Programı">Teknoloji Hamlesi Programı</option>
+              <option value="Yerel Kalkınma Hamlesi Programı">Yerel Kalkınma Hamlesi Programı</option>
+              <option value="Stratejik Hamle Programı">Stratejik Hamle Programı</option>
+              <option value="Öncelikli Yatırımlar Teşvik Sistemi">Öncelikli Yatırımlar Teşvik Sistemi</option>
+              <option value="Hedef Yatırımlar Teşvik Sistemi">Hedef Yatırımlar Teşvik Sistemi</option>
+            </select>
+          </div>
+          <div class="col-md-6 bb-3305-only">
+            <label class="form-label">İl</label>
+            <select name="il" id="bb_il" class="form-select" onchange="syncBelgeBaslatKarar()">
+              <option value="">Seçiniz</option>
+              {% for il in iller %}
+              <option value="{{ il }}">{{ il }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 bb-3305-only">
+            <label class="form-label">Bölge</label>
+            <input type="text" name="bolge" id="bb_bolge" class="form-control" readonly>
+          </div>
+          <div id="bb_oranlar" class="col-12">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Yatırıma Katkı Oranı (%)</label>
+                <input type="text" name="katki_orani" id="bb_katki_orani" class="form-control" readonly>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Vergi İndirim Oranı (%)</label>
+                <input type="text" name="vergi_orani" id="bb_vergi_orani" class="form-control" readonly>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Diğer Faaliyet Oranı (%)</label>
+                <input type="text" name="diger_oran" id="bb_diger_oran" class="form-control" readonly>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-top-0 bg-light">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitBelgeBaslat()">Belgeyi Başlat</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 🟢 BELGE DETAY MODALI -->
 <div class="modal fade" id="docViewModal" tabindex="-1" aria-hidden="true">
@@ -237,7 +378,114 @@
 </div>
 
 
-<script> 
+<script>
+    const bbBolgeMap = {{ bolge_json | tojson | safe }};
+    const bbKatkilar = {{ katkilar_json | tojson | safe }};
+    const bbVergiler = {{ vergiler_json | tojson | safe }};
+    const bbKatkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }};
+
+    function openBelgeBaslatModal() {
+        const form = document.getElementById('belgeBaslatForm');
+        if (form) form.reset();
+        syncBelgeBaslatKarar();
+        new bootstrap.Modal(document.getElementById('belgeBaslatModal')).show();
+    }
+
+    function syncBelgeBaslatKarar() {
+        const karar = document.getElementById('bb_karar')?.value || '';
+        const is9903 = karar === '2025/9903';
+        const is3305 = karar === '2012/3305';
+
+        document.querySelectorAll('.bb-9903-only').forEach(el => {
+            el.style.display = is9903 ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = !is9903;
+                if (!is9903) input.value = '';
+            });
+        });
+        document.querySelectorAll('.bb-3305-only').forEach(el => {
+            el.style.display = is3305 ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = !is3305;
+                if (!is3305) input.value = '';
+            });
+        });
+
+        const setVal = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value == null || value === '' ? '' : String(value).replace('.', ',');
+        };
+
+        let katki = '';
+        let vergi = '';
+        let diger = '';
+        let bolge = '';
+
+        if (is9903) {
+            const program = document.getElementById('bb_program_turu')?.value || '';
+            katki = bbKatkilar9903[program] || '';
+            vergi = 60;
+            diger = 50;
+        } else if (is3305) {
+            const il = document.getElementById('bb_il')?.value || '';
+            const osb = document.getElementById('bb_osb')?.value || 'OSB Dışında';
+            bolge = bbBolgeMap[il] || '';
+            const key = `${bolge}|${osb}`;
+            katki = Number(bbKatkilar[key] || 0);
+            vergi = Number(bbVergiler[key] || 0);
+
+            const dateText = document.querySelector('#belgeBaslatForm [name="belge_alinma_tarihi"]')?.value
+                || document.querySelector('#belgeBaslatForm [name="belge_tarihi"]')?.value
+                || '';
+            const year = Number((dateText || '').slice(0, 4));
+            const boosted = year >= 2017 && year <= 2022;
+            if (boosted) {
+                katki += 15;
+                vergi += 15;
+            }
+            diger = boosted ? 100 : 80;
+        }
+
+        const bolgeEl = document.getElementById('bb_bolge');
+        if (bolgeEl) bolgeEl.value = bolge || '';
+        setVal('bb_katki_orani', katki);
+        setVal('bb_vergi_orani', vergi);
+        setVal('bb_diger_oran', diger);
+    }
+
+    async function submitBelgeBaslat() {
+        const form = document.getElementById('belgeBaslatForm');
+        if (!form) return;
+        if (!form.reportValidity()) return;
+
+        const payload = {};
+        new FormData(form).forEach((value, key) => { payload[key] = value; });
+
+        try {
+            const res = await fetch('/indirimlikurumlar/tesvik/baslat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok || data.status !== 'success') {
+                Swal.fire(data.title || 'Hata', data.message || 'Belge başlatılamadı.', data.status || 'error');
+                return;
+            }
+            await Swal.fire({
+                icon: 'success',
+                title: data.title || 'Belge Başlatıldı',
+                text: data.message || 'Belge oluşturuldu.',
+                timer: 1300,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            window.location.href = '/indirimlikurumlar/?sekme=tesvik';
+        } catch (err) {
+            Swal.fire('Bağlantı Hatası', 'Belge başlatılırken sunucuya ulaşılamadı.', 'error');
+        }
+    }
+
     // --- FORMATTERS --- 
     const formatCurrency = (n) => { 
         if (!n && n !== 0) return '-'; 

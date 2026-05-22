@@ -30,6 +30,47 @@ seo_bp = Blueprint(
 )
 
 
+def _guest_list(key):
+    value = session.get(key)
+    if isinstance(value, list):
+        return value
+    return []
+
+
+def _guest_next_id(key):
+    next_id = int(session.get(key, 0) or 0) + 1
+    session[key] = next_id
+    session.modified = True
+    return next_id
+
+
+def _donem_rank(turu: str) -> int:
+    s = (turu or "").upper()
+    if "KURUMLAR" in s:
+        return 5
+    if "4" in s:
+        return 4
+    if "3" in s:
+        return 3
+    if "2" in s:
+        return 2
+    if "1" in s:
+        return 1
+    return 0
+
+
+def _sort_donem_matrah(rows):
+    return sorted(
+        rows or [],
+        key=lambda r: (
+            int(r.get("hesap_donemi") or 0),
+            _donem_rank(r.get("donem_turu")),
+            int(r.get("id") or 0),
+        ),
+        reverse=True,
+    )
+
+
 
 
 explanations = [
@@ -500,6 +541,162 @@ def new_tesvik():
 
 
 
+@bp.route("/tesvik/baslat", methods=["POST"])
+def baslat_tesvik_belgesi():
+    """Teşvik Belgelerim ekranından ana belge bilgilerini oluşturur."""
+    try:
+        data = request.get_json(silent=True) or {}
+        user_id = session.get("user_id")
+        mukellef_id = session.get("aktif_mukellef_id")
+        def clean(key):
+            return str(data.get(key) or "").strip()
+
+        def num(key):
+            raw = str(data.get(key) or "0").strip().replace(".", "").replace(",", ".")
+            try:
+                return float(raw)
+            except Exception:
+                return 0.0
+
+        belge_no = clean("belge_no")
+        belge_tarihi = clean("belge_tarihi")
+        karar = clean("karar")
+        yatirim_turu1 = clean("yatirim_turu1")
+        yatirim_turu2 = clean("yatirim_turu2")
+        vize_durumu = clean("vize_durumu")
+        program_turu = clean("program_turu")
+        il = clean("il")
+        osb = clean("osb")
+        bolge = clean("bolge")
+        basvuru_tarihi = clean("basvuru_tarihi")
+        belge_alinma_tarihi = clean("belge_alinma_tarihi")
+        fiili_tamamlanma_tarihi = clean("fiili_tamamlanma_tarihi")
+        vize_basvuru_tarihi = clean("vize_basvuru_tarihi")
+        ilk_indirim_yili_raw = clean("ilk_indirim_yili")
+        ilk_indirim_yili = int(ilk_indirim_yili_raw) if ilk_indirim_yili_raw.isdigit() else None
+
+        if not belge_no or not belge_tarihi or not karar:
+            return jsonify({"status": "warning", "title": "Eksik Bilgi", "message": "Belge no, yatırıma başlama tarihi ve karar alanları zorunludur."}), 400
+
+        if karar == "2025/9903":
+            bolge = BOLGE_MAP_9903.get(il, bolge or "Bilinmiyor")
+            katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0) or 0)
+            vergi_orani = 60.0
+            diger_oran = 50.0
+            yatirim_turu1 = ""
+            yatirim_turu2 = ""
+            il = ""
+            osb = ""
+        elif karar == "2012/3305":
+            osb = osb or "OSB Dışında"
+            bolge = BOLGE_MAP.get(il, bolge or "")
+            key = (bolge, osb)
+            katki_orani = float(TESVIK_KATKILAR.get(key, num("katki_orani")) or 0)
+            vergi_orani = float(TESVIK_VERGILER.get(key, num("vergi_orani")) or 0)
+            try:
+                belge_yili = int((belge_alinma_tarihi or belge_tarihi or "")[:4])
+            except Exception:
+                belge_yili = 0
+            if 2017 <= belge_yili <= 2022:
+                katki_orani += 15.0
+                vergi_orani += 15.0
+                diger_oran = 100.0
+            else:
+                diger_oran = 80.0
+            program_turu = ""
+            ilk_indirim_yili = None
+        else:
+            katki_orani = num("katki_orani")
+            vergi_orani = num("vergi_orani")
+            diger_oran = num("diger_oran")
+
+        if not user_id or not mukellef_id:
+            docs = _guest_list("guest_tesvik_docs")
+            new_id = _guest_next_id("guest_tesvik_next_id")
+            doc = {
+                "id": new_id,
+                "belge_no": belge_no,
+                "belge_tarihi": belge_tarihi,
+                "basvuru_tarihi": basvuru_tarihi,
+                "belge_alinma_tarihi": belge_alinma_tarihi,
+                "fiili_tamamlanma_tarihi": fiili_tamamlanma_tarihi,
+                "vize_basvuru_tarihi": vize_basvuru_tarihi,
+                "ilk_indirim_yili": ilk_indirim_yili,
+                "karar": karar,
+                "program_turu": program_turu,
+                "yatirim_turu1": yatirim_turu1,
+                "yatirim_turu2": yatirim_turu2,
+                "vize_durumu": vize_durumu,
+                "il": il,
+                "osb": osb,
+                "bolge": bolge,
+                "katki_orani": katki_orani,
+                "vergi_orani": vergi_orani,
+                "diger_oran": diger_oran,
+                "toplam_tutar": num("toplam_tutar"),
+                "katki_tutari": num("katki_tutari"),
+                "diger_katki_tutari": num("diger_katki_tutari"),
+                "cari_harcama_tutari": num("cari_harcama_tutari"),
+                "toplam_harcama_tutari": num("toplam_harcama_tutari"),
+                "fiili_katki_tutari": num("fiili_katki_tutari"),
+                "endeks_katki_tutari": 0,
+                "gerceklesen_tevsi_yatirim_tutari": 0,
+                "use_detailed_profit_ratios": False,
+            }
+            docs = [d for d in docs if d.get("belge_no") != belge_no]
+            docs.append(doc)
+            session["guest_tesvik_docs"] = docs
+            session["active_tesvik_id"] = new_id
+            session["current_tesvik_id"] = new_id
+            session.modified = True
+            return jsonify({
+                "status": "success",
+                "title": "Belge Başlatıldı",
+                "message": "Teşvik belgesi ziyaretçi çalışma alanına kaydedildi.",
+                "id": new_id
+            })
+
+        with get_conn() as conn:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute("""
+                INSERT INTO tesvik_belgeleri (
+                    user_id, mukellef_id, belge_no, belge_tarihi,
+                    basvuru_tarihi, belge_alinma_tarihi,
+                    fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                    ilk_indirim_yili,
+                    karar, program_turu, yatirim_turu1, yatirim_turu2,
+                    vize_durumu, il, osb, bolge,
+                    katki_orani, vergi_orani, diger_oran,
+                    toplam_tutar, katki_tutari, diger_katki_tutari,
+                    cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari,
+                    olusturan_id
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING id
+            """, (
+                user_id, mukellef_id, belge_no, belge_tarihi,
+                basvuru_tarihi, belge_alinma_tarihi,
+                fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                ilk_indirim_yili,
+                karar, program_turu, yatirim_turu1, yatirim_turu2,
+                vize_durumu, il, osb, bolge,
+                katki_orani, vergi_orani, diger_oran,
+                num("toplam_tutar"), num("katki_tutari"), num("diger_katki_tutari"),
+                num("cari_harcama_tutari"), num("toplam_harcama_tutari"), num("fiili_katki_tutari"),
+                user_id,
+            ))
+            row = cur.fetchone()
+            conn.commit()
+
+        new_id = row["id"]
+        session["active_tesvik_id"] = new_id
+        session["current_tesvik_id"] = new_id
+        return jsonify({"status": "success", "title": "Belge Başlatıldı", "message": "Teşvik belgesi oluşturuldu. Şimdi cari dönem hesabına geçebilirsiniz.", "id": new_id})
+    except Exception as e:
+        current_app.logger.exception("baslat_tesvik_belgesi hatası")
+        return jsonify({"status": "error", "title": "Kayıt Hatası", "message": str(e)}), 500
+
+
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -738,11 +935,30 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     session["flash_tesvik_required"] = True
                     return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
 
+    else:
+        docs = _guest_list("guest_tesvik_docs")
+        donem_matrah_list = _sort_donem_matrah(_guest_list("guest_donem_matrah_list"))
+        active_text = session.get("active_donem_text")
+        if active_text:
+            active_donem_matrah = next((x for x in donem_matrah_list if x.get("donem_text") == active_text), None)
+
+        view_id = request.args.get("view", type=int)
+        if sekme == "tesvik" and view_id:
+            edit_doc = next((d for d in docs if int(d.get("id") or 0) == int(view_id)), None)
+
+        if sekme == "form":
+            active_tesvik_id = session.get("active_tesvik_id")
+            if view_id and not active_tesvik_id:
+                active_tesvik_id = view_id
+                session["active_tesvik_id"] = view_id
+            if active_tesvik_id:
+                current_belge = next((d for d in docs if int(d.get("id") or 0) == int(active_tesvik_id)), None)
+
     # 🔹 Yeni Nesil Tasarım İçin Kullanimlar Verisini Hazırla
     kullanimlar = {}
     donem_usage_by_belge = {}
     donem_usage_totals = {"used_matrah": 0.0, "ind_kv": 0.0}
-    if docs:
+    if docs and user_id:
         with get_conn() as conn_k:
             cur_k = conn_k.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             belge_nolar = [d["belge_no"] for d in docs if d.get("belge_no")]
@@ -2193,15 +2409,11 @@ def delete_tesvik_kullanim(id):
 
 
 @bp.route("/donem_matrah/save", methods=["POST"])
-@login_required
 def save_donem_matrah():
     """Dönem matrah havuzu kaydını oluşturur/günceller ve aktif dönem olarak işaretler."""
     try:
         user_id = session.get("user_id")
         mukellef_id = session.get("aktif_mukellef_id")
-        if not user_id or not mukellef_id:
-            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
-
         data = request.get_json(force=True) or {}
         donem_text = (data.get("donem_text") or "").strip()
         hesap_donemi = int(data.get("hesap_donemi") or 0)
@@ -2223,6 +2435,32 @@ def save_donem_matrah():
 
         if not donem_text or not hesap_donemi:
             return jsonify({"status": "error", "message": "Dönem bilgisi eksik."}), 400
+
+        if not user_id or not mukellef_id:
+            rows = _guest_list("guest_donem_matrah_list")
+            existing = next((r for r in rows if r.get("donem_text") == donem_text), None)
+            pool_id = int(existing.get("id")) if existing else _guest_next_id("guest_donem_next_id")
+            row = {
+                "id": pool_id,
+                "donem_text": donem_text,
+                "hesap_donemi": hesap_donemi,
+                "donem_turu": donem_turu,
+                "ticari_bilanco_kari": ticari,
+                "kkeg": kkeg,
+                "indirim_istisna": ind,
+                "gecmis_yil_zarari": zarar,
+                "kv_matrah": matrah,
+                "genel_oran": genel_oran,
+                "sabit_kiymet_toplam": sabit_toplam,
+                "sabit_kiymet_json": sabit_json or "{}",
+            }
+            rows = [r for r in rows if r.get("donem_text") != donem_text]
+            rows.append(row)
+            session["guest_donem_matrah_list"] = rows
+            session["active_donem_text"] = donem_text
+            session.pop("active_tesvik_id", None)
+            session.modified = True
+            return jsonify({"status": "success", "id": pool_id, "donem_text": donem_text})
 
         with get_conn() as conn:
             try:
@@ -2306,11 +2544,21 @@ def save_donem_matrah():
 
 
 @bp.route("/donem_matrah/delete/<int:id>", methods=["POST"])
-@login_required
 def delete_donem_matrah(id):
     try:
         user_id = session.get("user_id")
         mukellef_id = session.get("aktif_mukellef_id")
+        if not user_id or not mukellef_id:
+            rows = _guest_list("guest_donem_matrah_list")
+            removed = next((r for r in rows if int(r.get("id") or 0) == int(id)), None)
+            rows = [r for r in rows if int(r.get("id") or 0) != int(id)]
+            session["guest_donem_matrah_list"] = rows
+            if removed and session.get("active_donem_text") == removed.get("donem_text"):
+                session.pop("active_donem_text", None)
+                session.pop("active_tesvik_id", None)
+            session.modified = True
+            return jsonify({"status": "success"})
+
         with get_conn() as conn:
             c = conn.cursor()
             c.execute(
@@ -2324,14 +2572,19 @@ def delete_donem_matrah(id):
 
 
 @bp.route("/donem_matrah/select/<int:id>", methods=["POST"])
-@login_required
 def select_donem_matrah(id):
     """Kaydedilen dönem matrah kaydını aktif dönem olarak seçer (session)."""
     try:
         user_id = session.get("user_id")
         mukellef_id = session.get("aktif_mukellef_id")
         if not user_id or not mukellef_id:
-            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
+            row = next((r for r in _guest_list("guest_donem_matrah_list") if int(r.get("id") or 0) == int(id)), None)
+            if not row:
+                return jsonify({"status": "error", "message": "Kayıt bulunamadı."}), 404
+            session["active_donem_text"] = row["donem_text"]
+            session.pop("active_tesvik_id", None)
+            session.modified = True
+            return jsonify({"status": "success", "donem_text": row["donem_text"]})
 
         with get_conn() as conn:
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -2351,14 +2604,19 @@ def select_donem_matrah(id):
 
 
 @bp.route("/tesvik/select/<int:id>", methods=["POST"])
-@login_required
 def select_tesvik_doc(id):
     """Teşvik belgesini aktif belge olarak seçer (session) ve form akışında kullanır."""
     try:
         user_id = session.get("user_id")
         mukellef_id = session.get("aktif_mukellef_id")
         if not user_id or not mukellef_id:
-            return jsonify({"status": "error", "message": "Mükellef seçimi gerekli."}), 400
+            doc = next((d for d in _guest_list("guest_tesvik_docs") if int(d.get("id") or 0) == int(id)), None)
+            if not doc:
+                return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+            session["active_tesvik_id"] = id
+            session["current_tesvik_id"] = id
+            session.modified = True
+            return jsonify({"status": "success", "id": id})
 
         with get_conn() as conn:
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)

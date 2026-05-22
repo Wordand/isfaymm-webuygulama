@@ -314,7 +314,7 @@ body, html { background: #fff !important; }
         <a href="?sekme=donem" class="ikv-tab {% if sekme == 'donem' %}active{% endif %}"> 
           <i class="bi bi-calculator"></i>Dönem Hesabı 
         </a> 
-        <a href="?sekme=form" class="ikv-tab {% if sekme == 'form' %}active{% endif %}"> 
+        <a href="?sekme=form" id="ikv-form-tab-link" class="ikv-tab {% if sekme == 'form' %}active{% endif %}">
           <i class="bi bi-pencil-square"></i>Form Girişi 
         </a> 
         <a href="?sekme=ayrintili" class="ikv-tab {% if sekme == 'ayrintili' %}active{% endif %}"> 
@@ -1163,6 +1163,7 @@ body, html { background: #fff !important; }
   const katkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }}; 
   window.IS_LOGGED_IN = {{ is_logged_in | tojson }}; 
   window.ACTIVE_DONEM_TEXT = {{ session.get('active_donem_text') | tojson }};
+  window.ACTIVE_TESVIK_ID = {{ session.get('active_tesvik_id') | tojson }};
   window.ACTIVE_DONEM_MATRAH = {{ active_donem_matrah | tojson }};
   const yenidenDegerlemeOranlari = { 
     "2025 - KURUMLAR": 25.49,
@@ -1179,6 +1180,50 @@ body, html { background: #fff !important; }
     "2021 - KURUMLAR": 36.20,
     "2020 - KURUMLAR": 9.11
   };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const formTab = document.getElementById('ikv-form-tab-link');
+    if (!formTab) return;
+
+    formTab.addEventListener('click', function (event) {
+      const hasDonem = !!window.ACTIVE_DONEM_TEXT;
+      const hasTesvik = !!window.ACTIVE_TESVIK_ID;
+      let targetUrl = '';
+      let title = '';
+      let text = '';
+
+      if (!hasDonem) {
+        targetUrl = '?sekme=donem';
+        title = hasTesvik ? 'Önce dönem seçin' : 'Önce dönem ve teşvik belgesi seçin';
+        text = hasTesvik
+          ? 'Form girişine geçmeden önce dönem matrahınızı seçmeniz gerekiyor.'
+          : 'Form girişine geçmeden önce dönem matrahınızı ve teşvik belgenizi seçmeniz gerekiyor.';
+      } else if (!hasTesvik) {
+        targetUrl = '?sekme=tesvik';
+        title = 'Önce teşvik belgesi seçin';
+        text = 'Form girişine geçmeden önce kullanacağınız teşvik belgesini seçmeniz gerekiyor.';
+      }
+
+      if (!targetUrl) return;
+      event.preventDefault();
+
+      const go = () => { window.location.href = targetUrl; };
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'warning',
+          title,
+          text,
+          timer: 1600,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          didClose: go
+        });
+      } else {
+        alert(title);
+        go();
+      }
+    });
+  });
 
   let debounceTimeout = null;
   let isProgrammaticChange = false; // Yeni bayrak: Programatik değişiklik mi?
@@ -1976,6 +2021,7 @@ body, html { background: #fff !important; }
     for (let i = 1; i <= 7; i++) {
       const el = document.getElementById(`step-i-${i}`);
       if (!el) continue;
+      if (FORM_BELGE_BAZLI_AKIS && i <= 2) continue;
 
       // klavye ile de tiklanabilsin
       el.setAttribute("role", "button");
@@ -3943,9 +3989,19 @@ body, html { background: #fff !important; }
 
 
 
-  function goToStep1() { _updateStepDisplay(1); }
+  function goToStep1() {
+    if (FORM_BELGE_BAZLI_AKIS) {
+      _updateStepDisplay(3);
+      return;
+    }
+    _updateStepDisplay(1);
+  }
 
   function goToStep2() {
+    if (FORM_BELGE_BAZLI_AKIS) {
+      _updateStepDisplay(3);
+      return;
+    }
     // 🔹 Alanları al
     const karar = document.getElementById("karar")?.value.trim();
     const programTuru = document.getElementById("program_turu")?.value.trim();
@@ -4139,6 +4195,19 @@ body, html { background: #fff !important; }
 
   const currentBelgeJSData = {{ current_belge | tojson | safe if current_belge else 'null' }};
   const currentKullanimJSData = {{ current_kullanim | tojson | safe if current_kullanim else 'null' }};
+  const FORM_BELGE_BAZLI_AKIS = !!currentBelgeJSData;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!FORM_BELGE_BAZLI_AKIS) return;
+    [1, 2].forEach((stepNo) => {
+      const item = document.getElementById(`step-i-${stepNo}`);
+      if (item) item.style.display = 'none';
+    });
+    [3, 4, 5, 6, 7].forEach((stepNo, index) => {
+      const counter = document.querySelector(`#step-i-${stepNo} .step-counter`);
+      if (counter) counter.textContent = String(index + 1);
+    });
+  });
 
   function getAllowedYearFor9903() {
     // Öncelik: ilk_indirim_yili, yoksa belge_tarihi yılı
@@ -5385,6 +5454,9 @@ body, html { background: #fff !important; }
       const cameFromNewDoc = sessionStorage.getItem("belge_no") !== null;
 
       let targetStep = parseInt(sessionStorage.getItem("last_step") || "1");
+      if (currentBelgeJSData && !isEditingDonem) {
+        targetStep = Math.max(targetStep, 3);
+      }
 
       if (isEditingDonem || cameFromNewDoc) {
         targetStep = 1;
