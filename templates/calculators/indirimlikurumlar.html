@@ -686,7 +686,7 @@ body, html { background: #fff !important; }
 
 
     <div id="step3" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-cash-stack me-2"></i>Aşama 3 - Yatırım Bilgileri</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-cash-stack me-2"></i>{% if current_belge %}Aşama 1 - Yatırım Bilgileri{% else %}Aşama 3 - Yatırım Bilgileri{% endif %}</h5>
 
       <div class="mb-3">
         <label>Toplam Yatırım Tutarını Giriniz</label>
@@ -731,7 +731,7 @@ body, html { background: #fff !important; }
     </div>
 
     <div id="step4" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-calculator-fill me-2"></i>Aşama 4 - Önceki Dönem Verileri</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-calculator-fill me-2"></i>{% if current_belge %}Aşama 2 - Önceki Dönem Verileri{% else %}Aşama 4 - Önceki Dönem Verileri{% endif %}</h5>
 
       <div class="mb-3">
         <label>Önceki Dönemlerde Yararlanılan Yatırıma Katkı Tutarını Giriniz<br>
@@ -774,7 +774,7 @@ body, html { background: #fff !important; }
     </div>
 
     <div id="step5" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Aşama 5 - Cari Dönem Kazanç Bilgileri</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>{% if current_belge %}Aşama 3 - Cari Dönem Kazanç Bilgileri{% else %}Aşama 5 - Cari Dönem Kazanç Bilgileri{% endif %}</h5>
 
       <div class="mb-3">
         <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
@@ -851,7 +851,7 @@ body, html { background: #fff !important; }
     </div>
 
     <div id="step6" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-diagram-3-fill me-2"></i>Aşama 6 – Satış & Faaliyet Dağılımı</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-diagram-3-fill me-2"></i>{% if current_belge %}Aşama 4 - Satış & Faaliyet Dağılımı{% else %}Aşama 6 – Satış & Faaliyet Dağılımı{% endif %}</h5>
 
       <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" id="useDetailedProfitRatios" name="use_detailed_profit_ratios"
@@ -917,7 +917,7 @@ body, html { background: #fff !important; }
     </div>
 
     <div id="step7" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Aşama 7 - Sonuçlar & Kaydet</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-check-circle-fill me-2"></i>{% if current_belge %}Aşama 5 - Sonuçlar & Kaydet{% else %}Aşama 7 - Sonuçlar & Kaydet{% endif %}</h5>
 
 
       <div id="info-9903-limits" class="alert alert-warning small mb-3 shadow-sm" style="display: none; border-left: 5px solid #ffc107;">
@@ -5194,9 +5194,12 @@ body, html { background: #fff !important; }
             mask.on("accept", () => {
               if (RESTORE_MODE) return;
               if (programmaticMaskUpdate) return;
-              if (!userTyped[id]) return;
+              if (!userTyped[id] && document.activeElement !== field) return;
               runLogic();
             });
+
+            field.addEventListener("change", runLogic);
+            field.addEventListener("blur", runLogic);
 
           } catch (err) {
             console.warn(`IMask oluşturulamadı (#${id}), fallback input listener ekleniyor:`, err);
