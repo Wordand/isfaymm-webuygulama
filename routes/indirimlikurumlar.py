@@ -543,6 +543,10 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     user_id = session.get("user_id") if is_logged_in else None
     aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
 
+    if sekme == "donem" and not sekme_override:
+        session.pop("active_donem_text", None)
+        session.pop("active_tesvik_id", None)
+
     # Ziyaretçi modu — DB'ye gitme, sayfayı hemen yükle
     mukellefler = []
     if not is_logged_in:
@@ -2284,6 +2288,7 @@ def save_donem_matrah():
                 conn.commit()
 
         session["active_donem_text"] = donem_text
+        session.pop("active_tesvik_id", None)
         return jsonify({"status": "success", "id": pool_id, "donem_text": donem_text})
 
     except Exception as e:
@@ -2329,6 +2334,7 @@ def select_donem_matrah(id):
                 return jsonify({"status": "error", "message": "Kayıt bulunamadı."}), 404
 
         session["active_donem_text"] = row["donem_text"]
+        session.pop("active_tesvik_id", None)
         return jsonify({"status": "success", "donem_text": row["donem_text"]})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
