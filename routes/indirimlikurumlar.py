@@ -547,6 +547,16 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         session.pop("active_donem_text", None)
         session.pop("active_tesvik_id", None)
 
+    if sekme == "form" and not sekme_override:
+        if not session.get("active_donem_text"):
+            session["flash_donem_matrah_required"] = True
+            if not session.get("active_tesvik_id") and request.args.get("new") != "1":
+                session["flash_tesvik_required"] = True
+            return redirect(url_for("indirimlikurumlar.index", sekme="donem"))
+        if not session.get("active_tesvik_id") and not request.args.get("view") and request.args.get("new") != "1":
+            session["flash_tesvik_required"] = True
+            return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
+
     # Ziyaretçi modu — DB'ye gitme, sayfayı hemen yükle
     mukellefler = []
     if not is_logged_in:
