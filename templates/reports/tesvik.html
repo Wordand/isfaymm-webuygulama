@@ -383,6 +383,7 @@
     const bbKatkilar = {{ katkilar_json | tojson | safe }};
     const bbVergiler = {{ vergiler_json | tojson | safe }};
     const bbKatkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }};
+    const bbActiveDonemText = {{ session.get('active_donem_text') | tojson }};
 
     function openBelgeBaslatModal() {
         const form = document.getElementById('belgeBaslatForm');
@@ -434,11 +435,8 @@
             katki = Number(bbKatkilar[key] || 0);
             vergi = Number(bbVergiler[key] || 0);
 
-            const dateText = document.querySelector('#belgeBaslatForm [name="belge_alinma_tarihi"]')?.value
-                || document.querySelector('#belgeBaslatForm [name="belge_tarihi"]')?.value
-                || '';
-            const year = Number((dateText || '').slice(0, 4));
-            const boosted = year >= 2017 && year <= 2022;
+            const activeYear = Number(String(bbActiveDonemText || '').slice(0, 4));
+            const boosted = activeYear >= 2017 && activeYear <= 2022;
             if (boosted) {
                 katki += 15;
                 vergi += 15;

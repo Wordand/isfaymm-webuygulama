@@ -1597,6 +1597,7 @@ body, html { background: #fff !important; }
     const vize = vizeSelect.value;
     const donem = donemSelect.value;
     const donemYil = parseInt(donem.split(" - ")[0]);
+    const donemBoosted = donemYil >= 2017 && donemYil <= 2022;
 
     // ============================================================
     //   📌 2) SADECE ORAN DEĞERLERİNİ INPUTLARA YAZ (HESAP YOK!)
@@ -1622,6 +1623,7 @@ body, html { background: #fff !important; }
         safeSet("katki_orani", manualKatkiVal);
       } else {
         let v = katkilar[key] ?? "";
+        if (v !== "" && donemBoosted) v = Number(v) + 15;
         safeSet("katki_orani", v);
       }
     }
@@ -1635,7 +1637,8 @@ body, html { background: #fff !important; }
       if (manualVergi) {
         safeSet("vergi_orani", manualVergiVal);
       } else {
-        let v = (donemYil >= 2017 && donemYil <= 2022) ? 100 : (vergiler[key] ?? "");
+        let v = vergiler[key] ?? "";
+        if (v !== "" && donemBoosted) v = Number(v) + 15;
         safeSet("vergi_orani", v);
       }
     }
@@ -1646,7 +1649,7 @@ body, html { background: #fff !important; }
       if (vize.includes("Evet")) {
         safeSet("diger_oran", 0);
       } else {
-        safeSet("diger_oran", (donemYil >= 2017 && donemYil <= 2022) ? 100 : 80);
+        safeSet("diger_oran", donemBoosted ? 100 : 80);
       }
     }
 

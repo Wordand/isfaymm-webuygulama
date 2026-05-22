@@ -594,10 +594,10 @@ def baslat_tesvik_belgesi():
             katki_orani = float(TESVIK_KATKILAR.get(key, num("katki_orani")) or 0)
             vergi_orani = float(TESVIK_VERGILER.get(key, num("vergi_orani")) or 0)
             try:
-                belge_yili = int((belge_alinma_tarihi or belge_tarihi or "")[:4])
+                aktif_donem_yili = int(str(session.get("active_donem_text") or "")[:4])
             except Exception:
-                belge_yili = 0
-            if 2017 <= belge_yili <= 2022:
+                aktif_donem_yili = 0
+            if 2017 <= aktif_donem_yili <= 2022:
                 katki_orani += 15.0
                 vergi_orani += 15.0
                 diger_oran = 100.0
