@@ -37,8 +37,11 @@
                     <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold shadow-sm">
                         {{ doc.karar }}
                     </span>
-                    <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="selectDocAndGoForm({{ doc.id }})" title="Bu belge ile devam et">
-                        <i class="bi bi-play-fill me-1"></i>Devam
+                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            onclick="openBelgeDuzenleModal(this)"
+                            data-doc='{{ doc | tojson | safe }}'
+                            title="Belge bilgilerini düzenle">
+                        <i class="bi bi-pencil-square me-1"></i>Düzenle
                     </button>
                     <a class="btn btn-action-delete" href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=doc.id) }}" title="PDF Çıktısı Al">
                         <i class="bi bi-file-earmark-pdf-fill"></i>
@@ -155,9 +158,9 @@
                     <div class="text-center py-5 bg-light rounded-4 opacity-75">
                         <i class="bi bi-inbox text-muted display-6 mb-3 d-block"></i>
                         <p class="text-muted small fw-bold">Bu belgeye ait henüz bir kullanım kaydı bulunmuyor.</p>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="goToStep2({{ doc.id }})">
-                            <i class="bi bi-plus-lg me-1"></i>İlk Dönemi Ekle
-                        </button>
+                        <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="?sekme=donem">
+                            <i class="bi bi-arrow-left-circle me-1"></i>Dönem Hesabına Dön
+                        </a>
                     </div>
                 {% endif %}
             </div>
@@ -192,13 +195,14 @@
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header bg-light border-bottom-0">
         <div>
-          <h5 class="modal-title fw-bold text-primary"><i class="bi bi-file-earmark-plus me-2"></i>Yeni Teşvik Belgesi Başlat</h5>
+          <h5 class="modal-title fw-bold text-primary" id="belgeBaslatTitle"><i class="bi bi-file-earmark-plus me-2"></i>Yeni Teşvik Belgesi Başlat</h5>
           <div class="text-muted small">Bu bilgiler ana belge kaydıdır. Cari dönem hesabında tekrar sorulmaz.</div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
       </div>
       <div class="modal-body p-4">
         <form id="belgeBaslatForm" class="row g-3">
+          <input type="hidden" name="id" id="bb_doc_id">
           <div class="col-md-6">
             <label class="form-label">Karar</label>
             <select name="karar" id="bb_karar" class="form-select" required onchange="syncBelgeBaslatKarar()">
@@ -317,7 +321,7 @@
       </div>
       <div class="modal-footer border-top-0 bg-light">
         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitBelgeBaslat()">Belgeyi Başlat</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4" id="belgeBaslatSubmit" onclick="submitBelgeBaslat()">Belgeyi Başlat</button>
       </div>
     </div>
   </div>
@@ -388,6 +392,47 @@
     function openBelgeBaslatModal() {
         const form = document.getElementById('belgeBaslatForm');
         if (form) form.reset();
+        const idInput = document.getElementById('bb_doc_id');
+        if (idInput) idInput.value = '';
+        const title = document.getElementById('belgeBaslatTitle');
+        if (title) title.innerHTML = '<i class="bi bi-file-earmark-plus me-2"></i>Yeni Teşvik Belgesi Başlat';
+        const submit = document.getElementById('belgeBaslatSubmit');
+        if (submit) submit.textContent = 'Belgeyi Başlat';
+        syncBelgeBaslatKarar();
+        new bootstrap.Modal(document.getElementById('belgeBaslatModal')).show();
+    }
+
+    function openBelgeDuzenleModal(btn) {
+        const doc = JSON.parse(btn.getAttribute('data-doc') || '{}');
+        const form = document.getElementById('belgeBaslatForm');
+        if (!form) return;
+        form.reset();
+        const title = document.getElementById('belgeBaslatTitle');
+        if (title) title.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Teşvik Belgesini Düzenle';
+        const submit = document.getElementById('belgeBaslatSubmit');
+        if (submit) submit.textContent = 'Belgeyi Güncelle';
+
+        Object.entries({
+            id: doc.id,
+            karar: doc.karar,
+            vize_durumu: doc.vize_durumu,
+            belge_no: doc.belge_no,
+            belge_tarihi: doc.belge_tarihi,
+            basvuru_tarihi: doc.basvuru_tarihi,
+            belge_alinma_tarihi: doc.belge_alinma_tarihi,
+            fiili_tamamlanma_tarihi: doc.fiili_tamamlanma_tarihi,
+            vize_basvuru_tarihi: doc.vize_basvuru_tarihi,
+            ilk_indirim_yili: doc.ilk_indirim_yili,
+            yatirim_turu1: doc.yatirim_turu1,
+            yatirim_turu2: doc.yatirim_turu2,
+            osb: doc.osb,
+            program_turu: doc.program_turu,
+            il: doc.il
+        }).forEach(([name, value]) => {
+            const el = form.querySelector(`[name="${name}"]`);
+            if (el) el.value = value || '';
+        });
+
         syncBelgeBaslatKarar();
         new bootstrap.Modal(document.getElementById('belgeBaslatModal')).show();
     }

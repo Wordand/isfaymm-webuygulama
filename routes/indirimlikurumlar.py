@@ -548,6 +548,11 @@ def baslat_tesvik_belgesi():
         data = request.get_json(silent=True) or {}
         user_id = session.get("user_id")
         mukellef_id = session.get("aktif_mukellef_id")
+        edit_id_raw = data.get("id") or data.get("doc_id") or ""
+        try:
+            edit_id = int(edit_id_raw)
+        except Exception:
+            edit_id = 0
         def clean(key):
             return str(data.get(key) or "").strip()
 
@@ -612,7 +617,7 @@ def baslat_tesvik_belgesi():
 
         if not user_id or not mukellef_id:
             docs = _guest_list("guest_tesvik_docs")
-            new_id = _guest_next_id("guest_tesvik_next_id")
+            new_id = edit_id or _guest_next_id("guest_tesvik_next_id")
             doc = {
                 "id": new_id,
                 "belge_no": belge_no,
@@ -643,7 +648,7 @@ def baslat_tesvik_belgesi():
                 "gerceklesen_tevsi_yatirim_tutari": 0,
                 "use_detailed_profit_ratios": False,
             }
-            docs = [d for d in docs if d.get("belge_no") != belge_no]
+            docs = [d for d in docs if int(d.get("id") or 0) != new_id and d.get("belge_no") != belge_no]
             docs.append(doc)
             session["guest_tesvik_docs"] = docs
             session["active_tesvik_id"] = new_id
@@ -658,8 +663,56 @@ def baslat_tesvik_belgesi():
 
         with get_conn() as conn:
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute("""
-                INSERT INTO tesvik_belgeleri (
+            if edit_id:
+                cur.execute(
+                    "SELECT belge_no FROM tesvik_belgeleri WHERE id=%s AND user_id=%s AND mukellef_id=%s",
+                    (edit_id, user_id, mukellef_id),
+                )
+                old_doc = cur.fetchone()
+                if not old_doc:
+                    return jsonify({"status": "error", "title": "Kayıt Bulunamadı", "message": "Düzenlenecek belge bulunamadı."}), 404
+                cur.execute("""
+                    UPDATE tesvik_belgeleri
+                    SET belge_no=%s, belge_tarihi=%s, basvuru_tarihi=%s, belge_alinma_tarihi=%s,
+                        fiili_tamamlanma_tarihi=%s, vize_basvuru_tarihi=%s, ilk_indirim_yili=%s,
+                        karar=%s, program_turu=%s, yatirim_turu1=%s, yatirim_turu2=%s,
+                        vize_durumu=%s, il=%s, osb=%s, bolge=%s,
+                        katki_orani=%s, vergi_orani=%s, diger_oran=%s
+                    WHERE id=%s AND user_id=%s AND mukellef_id=%s
+                    RETURNING id
+                """, (
+                    belge_no, belge_tarihi, basvuru_tarihi, belge_alinma_tarihi,
+                    fiili_tamamlanma_tarihi, vize_basvuru_tarihi, ilk_indirim_yili,
+                    karar, program_turu, yatirim_turu1, yatirim_turu2,
+                    vize_durumu, il, osb, bolge,
+                    katki_orani, vergi_orani, diger_oran,
+                    edit_id, user_id, mukellef_id,
+                ))
+                row = cur.fetchone()
+                if not row:
+                    return jsonify({"status": "error", "title": "Kayıt Bulunamadı", "message": "Düzenlenecek belge bulunamadı."}), 404
+                if old_doc.get("belge_no") != belge_no:
+                    cur.execute(
+                        "UPDATE tesvik_kullanim SET belge_no=%s WHERE user_id=%s AND belge_no=%s",
+                        (belge_no, user_id, old_doc.get("belge_no")),
+                    )
+            else:
+                cur.execute("""
+                    INSERT INTO tesvik_belgeleri (
+                        user_id, mukellef_id, belge_no, belge_tarihi,
+                        basvuru_tarihi, belge_alinma_tarihi,
+                        fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
+                        ilk_indirim_yili,
+                        karar, program_turu, yatirim_turu1, yatirim_turu2,
+                        vize_durumu, il, osb, bolge,
+                        katki_orani, vergi_orani, diger_oran,
+                        toplam_tutar, katki_tutari, diger_katki_tutari,
+                        cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari,
+                        olusturan_id
+                    )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    RETURNING id
+                """, (
                     user_id, mukellef_id, belge_no, belge_tarihi,
                     basvuru_tarihi, belge_alinma_tarihi,
                     fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
@@ -667,25 +720,11 @@ def baslat_tesvik_belgesi():
                     karar, program_turu, yatirim_turu1, yatirim_turu2,
                     vize_durumu, il, osb, bolge,
                     katki_orani, vergi_orani, diger_oran,
-                    toplam_tutar, katki_tutari, diger_katki_tutari,
-                    cari_harcama_tutari, toplam_harcama_tutari, fiili_katki_tutari,
-                    olusturan_id
-                )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                RETURNING id
-            """, (
-                user_id, mukellef_id, belge_no, belge_tarihi,
-                basvuru_tarihi, belge_alinma_tarihi,
-                fiili_tamamlanma_tarihi, vize_basvuru_tarihi,
-                ilk_indirim_yili,
-                karar, program_turu, yatirim_turu1, yatirim_turu2,
-                vize_durumu, il, osb, bolge,
-                katki_orani, vergi_orani, diger_oran,
-                num("toplam_tutar"), num("katki_tutari"), num("diger_katki_tutari"),
-                num("cari_harcama_tutari"), num("toplam_harcama_tutari"), num("fiili_katki_tutari"),
-                user_id,
-            ))
-            row = cur.fetchone()
+                    num("toplam_tutar"), num("katki_tutari"), num("diger_katki_tutari"),
+                    num("cari_harcama_tutari"), num("toplam_harcama_tutari"), num("fiili_katki_tutari"),
+                    user_id,
+                ))
+                row = cur.fetchone()
             conn.commit()
 
         new_id = row["id"]
@@ -1466,10 +1505,20 @@ def get_all_tesvik_docs(user_id: int, mukellef_id: int = None):
 
 
 @bp.route('/delete/<int:doc_id>', methods=['POST'])
-@login_required
 def delete_tesvik(doc_id):
     """Bir teşvik belgesini ve ona bağlı dönem kayıtlarını güvenli şekilde siler."""
     user_id = session.get("user_id")
+    if not user_id:
+        docs = _guest_list("guest_tesvik_docs")
+        remaining = [d for d in docs if int(d.get("id") or 0) != int(doc_id)]
+        if len(remaining) == len(docs):
+            return jsonify({"status": "error", "title": "Bulunamadı", "message": "Belge bulunamadı."}), 404
+        session["guest_tesvik_docs"] = remaining
+        if int(session.get("active_tesvik_id") or 0) == int(doc_id):
+            session.pop("active_tesvik_id", None)
+            session.pop("current_tesvik_id", None)
+        session.modified = True
+        return jsonify({"status": "success", "title": "Silindi!", "message": "Belge silindi."})
 
     with get_conn() as conn:
         c = conn.cursor()
@@ -1499,6 +1548,8 @@ def delete_tesvik(doc_id):
             # ----------------------------------------------------------
             if session.get("current_tesvik_id") == doc_id:
                 session.pop("current_tesvik_id", None)
+            if session.get("active_tesvik_id") == doc_id:
+                session.pop("active_tesvik_id", None)
 
             # ----------------------------------------------------------
             # 3) Önce dönem kayıtlarını sil
