@@ -682,28 +682,7 @@
       window.location.href = '?sekme=donem';
       return;
     }
-
-    if (window.Swal) {
-      const result = await Swal.fire({
-        icon: 'question',
-        title: 'Hesaplamaya geçilsin mi?',
-        html: `
-          <div class="text-start">
-            <div class="mb-2"><strong>Dönem:</strong> ${donem}</div>
-            <div><strong>Belge:</strong> ${belge} Nolu Belge</div>
-          </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Evet, geç',
-        cancelButtonText: 'Hayır',
-        reverseButtons: true
-      });
-      window.location.href = result.isConfirmed ? '?sekme=form&start=1' : '?sekme=donem';
-      return;
-    }
-
-    const ok = confirm(`Hesaplamaya geçilsin mi?\nDönem: ${donem}\nBelge: ${belge} Nolu Belge`);
-    window.location.href = ok ? '?sekme=form&start=1' : '?sekme=donem';
+    window.location.href = '?sekme=form&start=1';
   }
 
   async function poolSelectSaved(id, donemLabel) {
