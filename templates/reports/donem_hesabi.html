@@ -33,20 +33,20 @@
       <div class="text-muted small">Tek bir dönem matrahını girin, belgeler arasında paylaştırın, kalan matrahı genel oranda vergileyin.</div>
       <div class="d-flex flex-wrap gap-2 mt-3">
         {% if session.get('active_donem_text') %}
-          <span class="badge rounded-pill px-3 py-2" style="background:#15803d; color:#fff; border:1px solid #166534; font-size:13px;">
+          <span class="ikv-status-badge ikv-status-ok">
             <i class="bi bi-check-circle-fill me-1"></i>Dönem seçildi: {{ session.get('active_donem_text') }}
           </span>
         {% else %}
-          <span class="badge rounded-pill px-3 py-2" style="background:#fff7ed; color:#9a3412; border:1px solid #ea580c; font-size:13px;">
+          <span class="ikv-status-badge ikv-status-warn">
             Dönem seçilmedi
           </span>
         {% endif %}
         {% if session.get('active_tesvik_id') %}
-          <span class="badge rounded-pill px-3 py-2" style="background:#15803d; color:#fff; border:1px solid #166534; font-size:13px;">
+          <span class="ikv-status-badge ikv-status-ok">
             <i class="bi bi-check-circle-fill me-1"></i>Teşvik belgesi seçildi{% if selected_doc.no %}: {{ selected_doc.no }}{% endif %}
           </span>
         {% else %}
-          <span class="badge rounded-pill px-3 py-2" style="background:#fff7ed; color:#9a3412; border:1px solid #ea580c; font-size:13px;">
+          <span class="ikv-status-badge ikv-status-warn">
             Teşvik belgesi seçilmedi
           </span>
         {% endif %}
@@ -261,7 +261,7 @@
                     <td class="text-end fw-semibold">{{ (u.total_matrah if u else 0)|tlformat }} TL</td>
                     <td class="text-end">
                       {% if is_active_doc %}
-                        <span class="badge rounded-pill" style="background:#15803d; color:#fff; border:1px solid #166534;">Seçili</span>
+                        <span class="ikv-status-badge ikv-status-ok py-1 px-2">Seçili</span>
                       {% else %}
                         <span class="text-muted small">-</span>
                       {% endif %}
@@ -269,7 +269,7 @@
                     <td class="text-end">
                       <button type="button"
                               class="btn btn-sm {% if is_active_doc %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill px-3"
-                              onclick="poolSelectDoc({{ d.id }})">
+                              onclick='poolSelectDoc({{ d.id }}, {{ d.belge_no|tojson }})'>
                         {% if is_active_doc %}Seçili{% else %}Seç{% endif %}
                       </button>
                     </td>
@@ -329,7 +329,7 @@
             <td class="fw-bold">
               {{ r.donem_text }}
               {% if session.get('active_donem_text') == r.donem_text %}
-                <span class="badge ms-2" style="background:#15803d; color:#ffffff; border:1px solid #166534;">Seçili</span>
+                <span class="ikv-status-badge ikv-status-ok py-1 px-2 ms-2">Seçili</span>
               {% endif %}
             </td>
             <td class="text-end">{{ r.ticari_bilanco_kari|tlformat }} TL</td>
@@ -339,7 +339,7 @@
             <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
             <td class="text-end">%{{ r.genel_oran }}</td>
             <td class="text-end">
-              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="event.stopPropagation(); poolSelectSaved({{ r.id }})">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick='event.stopPropagation(); poolSelectSaved({{ r.id }}, {{ r.donem_text|tojson }})'>
                 Seç
               </button>
               <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="event.stopPropagation(); poolLoadSaved({{ r.id }})">
@@ -361,7 +361,33 @@
   {% endif %}
 </div>
 
+<style>
+  .ikv-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.48rem 0.85rem;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .ikv-status-ok {
+    background: #047857 !important;
+    color: #ffffff !important;
+    border: 1px solid #065f46 !important;
+  }
+  .ikv-status-warn {
+    background: #fff7ed !important;
+    color: #9a3412 !important;
+    border: 1px solid #fb923c !important;
+  }
+</style>
+
 <script>
+  const poolActiveDonemText = {{ (session.get('active_donem_text') or '')|tojson }};
+  const poolActiveBelgeNo = {{ (selected_doc.no or '')|tojson }};
+
   // ---- Helpers (TR number parsing/formatting) ----
   function _parseTrNumber(s) {
     if (s == null) return 0;
@@ -641,27 +667,80 @@
     }
   }
 
-  async function poolSelectSaved(id) {
+  async function poolConfirmCalculation(donem, belge) {
+    if (!donem || !belge) {
+      window.location.href = '?sekme=donem';
+      return;
+    }
+
+    if (window.Swal) {
+      const result = await Swal.fire({
+        icon: 'question',
+        title: 'Hesaplamaya geçilsin mi?',
+        html: `
+          <div class="text-start">
+            <div class="mb-2"><strong>Dönem:</strong> ${donem}</div>
+            <div><strong>Belge:</strong> ${belge} Nolu Belge</div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Evet, geç',
+        cancelButtonText: 'Hayır',
+        reverseButtons: true
+      });
+      window.location.href = result.isConfirmed ? '?sekme=form' : '?sekme=donem';
+      return;
+    }
+
+    const ok = confirm(`Hesaplamaya geçilsin mi?\nDönem: ${donem}\nBelge: ${belge} Nolu Belge`);
+    window.location.href = ok ? '?sekme=form' : '?sekme=donem';
+  }
+
+  async function poolSelectSaved(id, donemLabel) {
     try {
       const res = await fetch('/indirimlikurumlar/donem_matrah/select/' + id, { method: 'POST' });
       if (!res.ok) {
         alert('Dönem seçilemedi.');
         return;
       }
-      window.location.href = '?sekme=donem';
+      const selectedDonem = donemLabel || '';
+      if (window.Swal) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Dönem seçildi',
+          text: selectedDonem ? `Dönem seçildi: ${selectedDonem}` : 'Dönem seçildi.',
+          timer: 1400,
+          showConfirmButton: false
+        });
+      } else {
+        alert(selectedDonem ? `Dönem seçildi: ${selectedDonem}` : 'Dönem seçildi.');
+      }
+      await poolConfirmCalculation(selectedDonem, poolActiveBelgeNo);
     } catch (e) {
       alert('Dönem seçilemedi (bağlantı hatası).');
     }
   }
 
-  async function poolSelectDoc(id) {
+  async function poolSelectDoc(id, belgeNo) {
     try {
       const res = await fetch('/indirimlikurumlar/tesvik/select/' + id, { method: 'POST' });
       if (!res.ok) {
         alert('Belge seçilemedi.');
         return;
       }
-      window.location.href = '?sekme=donem';
+      const selectedBelge = belgeNo || '';
+      if (window.Swal) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Belge seçildi',
+          text: selectedBelge ? `Belge seçildi: ${selectedBelge} Nolu Belge` : 'Belge seçildi.',
+          timer: 1400,
+          showConfirmButton: false
+        });
+      } else {
+        alert(selectedBelge ? `Belge seçildi: ${selectedBelge} Nolu Belge` : 'Belge seçildi.');
+      }
+      await poolConfirmCalculation(poolActiveDonemText, selectedBelge);
     } catch (e) {
       alert('Belge seçilemedi (bağlantı hatası).');
     }
