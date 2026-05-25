@@ -66,8 +66,8 @@
   </div>
 
   <div class="row g-3">
-    <div class="col-lg-5 ikv-left-stack">
-      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-donem-card">
+    <div class="col-lg-6">
+      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-donem-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div class="fw-bold">Dönem Matrahı</div>
         </div>
@@ -153,7 +153,10 @@
         </div>
       </div>
 
-      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-tevsi-card">
+    </div>
+
+    <div class="col-lg-6">
+      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-tevsi-card h-100">
         <div class="fw-bold mb-2">Tevsi Oranlama</div>
         <div class="ikv-tevsi-toggle">
           <div class="form-check form-switch mb-0">
@@ -222,10 +225,13 @@
       </div>
     </div>
 
-    <div class="col-lg-7">
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-12">
       <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="fw-bold">Belge Özeti</div>
+          <div class="fw-bold">Belge Seçimi</div>
           <span style="display:inline-flex; align-items:center; gap:6px; background:#e5e7eb; color:#111827; border:1px solid #cbd5e1; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600;">
             {{ docs|length }} belge
           </span>
@@ -407,8 +413,8 @@
   }
   @media (min-width: 992px) {
     .ikv-left-stack {
-      display: grid;
-      grid-template-rows: minmax(0, 3fr) minmax(140px, 1fr);
+      display: flex;
+      flex-direction: column;
       align-items: stretch;
     }
   }
@@ -433,6 +439,10 @@
   }
   .ikv-tevsi-toggle .form-check-label {
     color: #0f172a;
+  }
+  .ikv-left-stack.ikv-sabit-open .ikv-donem-card,
+  .ikv-left-stack.ikv-sabit-open .ikv-tevsi-card {
+    flex: 0 0 auto;
   }
   .ikv-start-calc-btn:not(:disabled) {
     box-shadow: 0 0 0 rgba(13, 110, 253, 0.45);
@@ -577,8 +587,10 @@
   function poolSetSabitVisible(visible) {
     const wrap = document.getElementById('pool_sabit_wrap');
     const chk = document.getElementById('pool_toggle_sabit');
+    const stack = document.querySelector('.ikv-left-stack');
     if (wrap) wrap.style.display = visible ? '' : 'none';
     if (chk) chk.checked = !!visible;
+    if (stack) stack.classList.toggle('ikv-sabit-open', !!visible);
   }
 
   function poolToggleSabit() {
