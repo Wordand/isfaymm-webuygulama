@@ -315,7 +315,7 @@ body, html { background: #fff !important; }
           <i class="bi bi-calculator"></i>Dönem Hesabı 
         </a> 
         <a href="?sekme=form" id="ikv-form-tab-link" class="ikv-tab {% if sekme == 'form' %}active{% endif %}">
-          <i class="bi bi-pencil-square"></i>Form Girişi 
+          <i class="bi bi-pencil-square"></i>Hesaplama
         </a> 
         <a href="?sekme=ayrintili" class="ikv-tab {% if sekme == 'ayrintili' %}active{% endif %}"> 
           <i class="bi bi-bar-chart-line"></i>Ayrıntılı Kazanç 
@@ -5471,7 +5471,7 @@ body, html { background: #fff !important; }
       }
 
       if (forceFreshStart) {
-        targetStep = currentBelgeJSData ? 3 : 1;
+        targetStep = 3;
         sessionStorage.removeItem("last_step");
       }
 
@@ -5620,6 +5620,8 @@ body, html { background: #fff !important; }
         // Belge yüklendikten sonra türe göre hesaplat (özellikle edit/donem ve view modlarında)
         setTimeout(() => {
           try {
+            const params = new URLSearchParams(window.location.search);
+            const freshStart = params.get("start") === "1";
             const karar = document.getElementById("karar")?.value || "";
             if (karar === "2025/9903") {
               if (typeof hesaplaKatkiTutari9903 === "function") hesaplaKatkiTutari9903();
@@ -5633,8 +5635,9 @@ body, html { background: #fff !important; }
               if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
               if (typeof calculateRatios === "function") calculateRatios();
               if (typeof calculateKVMatrah === "function") calculateKVMatrah();
-              if (typeof calculateCariAndNext === "function") calculateCariAndNext();
+              if (!freshStart && typeof calculateCariAndNext === "function") calculateCariAndNext();
             }
+            if (freshStart && typeof _updateStepDisplay === "function") _updateStepDisplay(3);
           } catch (e) {
             console.warn("Belge yükleme sonrası otomatik hesaplama hatası:", e);
           }

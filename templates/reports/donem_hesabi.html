@@ -5,7 +5,7 @@
       <i class="bi bi-exclamation-triangle-fill"></i>
       <div>
         <div class="fw-bold">Önce dönem ve teşvik belgesi seçin</div>
-        <div class="small mb-0">Form Girişi'ne geçmeden önce dönem matrahını kaydedip bir teşvik belgesi seçmelisiniz.</div>
+        <div class="small mb-0">Hesaplama'ya geçmeden önce dönem matrahını kaydedip bir teşvik belgesi seçmelisiniz.</div>
       </div>
     </div>
     {% set _ = session.pop('flash_donem_matrah_required') %}
@@ -16,7 +16,7 @@
       <i class="bi bi-exclamation-triangle-fill"></i>
       <div>
         <div class="fw-bold">Önce dönem matrahını girin</div>
-        <div class="small mb-0">Form Girişi’ne geçmeden önce ilgili dönem için dönem matrah verilerinizi kaydetmeniz gerekiyor.</div>
+        <div class="small mb-0">Hesaplama'ya geçmeden önce ilgili dönem için dönem matrah verilerinizi kaydetmeniz gerekiyor.</div>
       </div>
     </div>
     {% set _ = session.pop('flash_donem_matrah_required') %}
@@ -54,7 +54,7 @@
     </div>
     <div class="d-flex gap-2 flex-wrap justify-content-end">
       <button type="button"
-              class="btn btn-primary rounded-pill px-4"
+              class="btn btn-primary rounded-pill px-5 py-3 fw-bold ikv-start-calc-btn"
               {% if not session.get('active_donem_text') or not session.get('active_tesvik_id') %}disabled{% endif %}
               data-donem="{{ session.get('active_donem_text') or '' }}"
               data-belge="{{ selected_doc.no or '' }}"
@@ -293,7 +293,7 @@
           <input class="form-check-input" type="checkbox" role="switch" id="toggle_gecici_rows">
           <label class="form-check-label small text-muted" for="toggle_gecici_rows">Geçici Vergi Dönemlerini Göster</label>
         </div>
-        <div class="text-muted small">Form Girişi’ne geçmeden önce burada en az bir dönem kaydı oluşturmalısınız.</div>
+        <div class="text-muted small">Hesaplama'ya geçmeden önce burada en az bir dönem kaydı oluşturmalısınız.</div>
       </div>
     </div>
     <div class="table-responsive bg-white border rounded-4 shadow-sm">
@@ -381,6 +381,16 @@
     background: #fff7ed !important;
     color: #9a3412 !important;
     border: 1px solid #fb923c !important;
+  }
+  .ikv-start-calc-btn:not(:disabled) {
+    box-shadow: 0 0 0 rgba(13, 110, 253, 0.45);
+    animation: ikvStartPulse 1.6s ease-in-out infinite;
+    letter-spacing: .2px;
+  }
+  @keyframes ikvStartPulse {
+    0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.45); transform: translateY(0); }
+    55% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); transform: translateY(-1px); }
+    100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); transform: translateY(0); }
   }
 </style>
 
@@ -715,7 +725,7 @@
       } else {
         alert(selectedDonem ? `Dönem seçildi: ${selectedDonem}` : 'Dönem seçildi.');
       }
-      await poolConfirmCalculation(selectedDonem, poolActiveBelgeNo);
+      window.location.href = '?sekme=donem';
     } catch (e) {
       alert('Dönem seçilemedi (bağlantı hatası).');
     }
@@ -740,7 +750,7 @@
       } else {
         alert(selectedBelge ? `Belge seçildi: ${selectedBelge} Nolu Belge` : 'Belge seçildi.');
       }
-      await poolConfirmCalculation(poolActiveDonemText, selectedBelge);
+      window.location.href = '?sekme=donem';
     } catch (e) {
       alert('Belge seçilemedi (bağlantı hatası).');
     }
@@ -782,7 +792,7 @@
 
     const genelOran = _getGenelOran();
 
-    // 1) Önce dönem matrah kaydını kaydet (Form Girişi kilidi için gerekli)
+    // 1) Önce dönem matrah kaydını kaydet (Hesaplama kilidi için gerekli)
     try {
       const tic = _getMaskedValue(document.getElementById('pool_ticari'));
       const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));

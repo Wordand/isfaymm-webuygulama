@@ -1778,8 +1778,24 @@ def save_tesvik_kullanim():
         data = request.get_json(force=True)
 
         belge_no = data.get("belge_no")
-        hesap_donemi = int(data.get("hesap_donemi"))
+        hesap_donemi_raw = data.get("hesap_donemi")
         donem_turu = data.get("donem_turu", "KURUMLAR")
+
+        if not belge_no or hesap_donemi_raw in (None, ""):
+            return jsonify({
+                "status": "error",
+                "title": "Eksik Bilgi",
+                "message": "Belge numarası veya dönem bilgisi eksik."
+            }), 400
+
+        try:
+            hesap_donemi = int(hesap_donemi_raw)
+        except (TypeError, ValueError):
+            return jsonify({
+                "status": "error",
+                "title": "Geçersiz Dönem",
+                "message": "Dönem yılı geçerli değil."
+            }), 400
 
         if not belge_no:
             return jsonify({"status": "error", "message": "Belge no eksik."}), 400
