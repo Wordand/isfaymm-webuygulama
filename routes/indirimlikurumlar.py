@@ -2666,6 +2666,16 @@ def select_donem_matrah(id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@bp.route("/donem_matrah/clear", methods=["POST"])
+def clear_selected_donem_matrah():
+    """Aktif dönem seçimini kaldırır."""
+    session.pop("active_donem_text", None)
+    session.pop("active_tesvik_id", None)
+    session.pop("current_tesvik_id", None)
+    session.modified = True
+    return jsonify({"status": "success"})
+
+
 @bp.route("/tesvik/select/<int:id>", methods=["POST"])
 def select_tesvik_doc(id):
     """Teşvik belgesini aktif belge olarak seçer (session) ve form akışında kullanır."""
@@ -2694,3 +2704,12 @@ def select_tesvik_doc(id):
         return jsonify({"status": "success", "id": id})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@bp.route("/tesvik/clear", methods=["POST"])
+def clear_selected_tesvik_doc():
+    """Aktif teşvik belgesi seçimini kaldırır."""
+    session.pop("active_tesvik_id", None)
+    session.pop("current_tesvik_id", None)
+    session.modified = True
+    return jsonify({"status": "success"})

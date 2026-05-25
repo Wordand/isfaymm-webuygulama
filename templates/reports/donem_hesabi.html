@@ -30,21 +30,22 @@
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
     <div>
       <h2 class="fw-bold mb-1">Dönem Hesabı</h2>
-      <div class="text-muted small">Tek bir dönem matrahını girin, belgeler arasında paylaştırın, kalan matrahı genel oranda vergileyin.</div>
       <div class="d-flex flex-wrap gap-2 mt-3">
         {% if session.get('active_donem_text') %}
-          <span class="ikv-status-badge ikv-status-ok">
+          <button type="button" class="ikv-status-badge ikv-status-ok ikv-status-action" onclick="poolClearSelection('donem')">
             <i class="bi bi-check-circle-fill me-1"></i>Dönem seçildi: {{ session.get('active_donem_text') }}
-          </span>
+            <i class="bi bi-x-circle ms-2"></i>
+          </button>
         {% else %}
           <span class="ikv-status-badge ikv-status-warn">
             Dönem seçilmedi
           </span>
         {% endif %}
         {% if session.get('active_tesvik_id') %}
-          <span class="ikv-status-badge ikv-status-ok">
+          <button type="button" class="ikv-status-badge ikv-status-ok ikv-status-action" onclick="poolClearSelection('tesvik')">
             <i class="bi bi-check-circle-fill me-1"></i>Teşvik belgesi seçildi{% if selected_doc.no %}: {{ selected_doc.no }}{% endif %}
-          </span>
+            <i class="bi bi-x-circle ms-2"></i>
+          </button>
         {% else %}
           <span class="ikv-status-badge ikv-status-warn">
             Teşvik belgesi seçilmedi
@@ -123,10 +124,10 @@
           </div>
         </div>
 
-        <div class="mt-3">
-          <div class="form-check form-switch">
+        <div class="mt-3 ikv-tevsi-toggle">
+          <div class="form-check form-switch mb-0">
             <input class="form-check-input" type="checkbox" role="switch" id="pool_toggle_sabit" onchange="poolToggleSabit()">
-            <label class="form-check-label" for="pool_toggle_sabit">Tevsi oranlama yapacagim (sabit kiymet gir)</label>
+            <label class="form-check-label fw-semibold" for="pool_toggle_sabit">Tevsi oranlama yapacağım (sabit kıymet gir)</label>
           </div>
         </div>
 
@@ -381,6 +382,36 @@
     background: #fff7ed !important;
     color: #9a3412 !important;
     border: 1px solid #fb923c !important;
+  }
+  .ikv-status-action {
+    cursor: pointer;
+    gap: .2rem;
+  }
+  .ikv-status-action:hover {
+    filter: brightness(0.94);
+    transform: translateY(-1px);
+  }
+  .ikv-tevsi-toggle {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    border: 1px solid #93c5fd;
+    background: #eff6ff;
+    color: #0f172a;
+    border-radius: 10px;
+    padding: .85rem 1rem;
+  }
+  .ikv-tevsi-toggle .form-check-input {
+    width: 2.6rem;
+    height: 1.35rem;
+    border-color: #2563eb;
+  }
+  .ikv-tevsi-toggle .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  .ikv-tevsi-toggle .form-check-label {
+    color: #0f172a;
   }
   .ikv-start-calc-btn:not(:disabled) {
     box-shadow: 0 0 0 rgba(13, 110, 253, 0.45);
@@ -685,6 +716,29 @@
     window.location.href = '?sekme=form&start=1';
   }
 
+  async function poolClearSelection(type) {
+    const isDonem = type === 'donem';
+    const url = isDonem ? '/indirimlikurumlar/donem_matrah/clear' : '/indirimlikurumlar/tesvik/clear';
+    try {
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) {
+        alert(isDonem ? 'Dönem seçimi kaldırılamadı.' : 'Belge seçimi kaldırılamadı.');
+        return;
+      }
+      if (window.Swal) {
+        await Swal.fire({
+          icon: 'info',
+          title: isDonem ? 'Dönem seçimi kaldırıldı' : 'Belge seçimi kaldırıldı',
+          timer: 900,
+          showConfirmButton: false
+        });
+      }
+      window.location.href = '?sekme=donem';
+    } catch (e) {
+      alert('Seçim kaldırılamadı (bağlantı hatası).');
+    }
+  }
+
   async function poolSelectSaved(id, donemLabel) {
     try {
       const res = await fetch('/indirimlikurumlar/donem_matrah/select/' + id, { method: 'POST' });
@@ -948,6 +1002,7 @@
   window.poolSelectDoc = poolSelectDoc;
   window.poolGoCalculation = poolGoCalculation;
   window.poolConfirmCalculation = poolConfirmCalculation;
+  window.poolClearSelection = poolClearSelection;
 
   (function initPool() {
     if (!document.getElementById('pool_donem')) return;
