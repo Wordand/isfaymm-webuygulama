@@ -5458,6 +5458,7 @@ body, html { background: #fff !important; }
       const viewId = params.get("view");
       const hash = window.location.hash;
       const cameFromNewDoc = sessionStorage.getItem("belge_no") !== null;
+      const forceFreshStart = params.get("start") === "1";
 
       let targetStep = parseInt(sessionStorage.getItem("last_step") || "1");
       if (currentBelgeJSData && !isEditingDonem) {
@@ -5466,6 +5467,11 @@ body, html { background: #fff !important; }
 
       if (isEditingDonem || cameFromNewDoc) {
         targetStep = 1;
+        sessionStorage.removeItem("last_step");
+      }
+
+      if (forceFreshStart) {
+        targetStep = currentBelgeJSData ? 3 : 1;
         sessionStorage.removeItem("last_step");
       }
 

@@ -688,12 +688,12 @@
         cancelButtonText: 'Hayır',
         reverseButtons: true
       });
-      window.location.href = result.isConfirmed ? '?sekme=form' : '?sekme=donem';
+      window.location.href = result.isConfirmed ? '?sekme=form&start=1' : '?sekme=donem';
       return;
     }
 
     const ok = confirm(`Hesaplamaya geçilsin mi?\nDönem: ${donem}\nBelge: ${belge} Nolu Belge`);
-    window.location.href = ok ? '?sekme=form' : '?sekme=donem';
+    window.location.href = ok ? '?sekme=form&start=1' : '?sekme=donem';
   }
 
   async function poolSelectSaved(id, donemLabel) {
@@ -767,7 +767,7 @@
     } else {
       alert(`Hesaplamaya geçiliyor\nDönem: ${donem}\nBelge: ${belge} Nolu Belge`);
     }
-    window.location.href = '?sekme=form';
+    window.location.href = '?sekme=form&start=1';
   }
 
   async function poolSaveAll() {
