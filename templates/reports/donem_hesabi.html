@@ -74,17 +74,17 @@
 
         <div class="mb-3">
           <label class="form-label">Dönem</label>
-          {% set selected_pool_donem = session.get('active_donem_text') or '2026 - 1. GEÇİCİ' %}
+          {% set selected_pool_donem = session.get('active_donem_text') %}
           <select id="pool_donem" class="form-select">
             {% for yil in range(2027, 2014, -1) %}
             <optgroup label="{{ yil }}">
-              <option value="{{ yil }} - 1. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 1. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 1. GEÇİCİ</option>
-              <option value="{{ yil }} - 2. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 2. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 2. GEÇİCİ</option>
-              <option value="{{ yil }} - 3. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 3. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 3. GEÇİCİ</option>
+              <option value="{{ yil }} - 1. GEÇİCİ" {% if (selected_pool_donem and selected_pool_donem == (yil ~ ' - 1. GEÇİCİ')) or (not selected_pool_donem and yil == 2026) %}selected{% endif %}>{{ yil }} - 1. GEÇİCİ</option>
+              <option value="{{ yil }} - 2. GEÇİCİ" {% if selected_pool_donem and selected_pool_donem == (yil ~ ' - 2. GEÇİCİ') %}selected{% endif %}>{{ yil }} - 2. GEÇİCİ</option>
+              <option value="{{ yil }} - 3. GEÇİCİ" {% if selected_pool_donem and selected_pool_donem == (yil ~ ' - 3. GEÇİCİ') %}selected{% endif %}>{{ yil }} - 3. GEÇİCİ</option>
               {% if yil >= 2025 %}
-              <option value="{{ yil }} - 4. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 4. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 4. GEÇİCİ</option>
+              <option value="{{ yil }} - 4. GEÇİCİ" {% if selected_pool_donem and selected_pool_donem == (yil ~ ' - 4. GEÇİCİ') %}selected{% endif %}>{{ yil }} - 4. GEÇİCİ</option>
               {% endif %}
-              <option value="{{ yil }} - KURUMLAR" {% if selected_pool_donem == yil ~ ' - KURUMLAR' %}selected{% endif %}>{{ yil }} - KURUMLAR</option>
+              <option value="{{ yil }} - KURUMLAR" {% if selected_pool_donem and selected_pool_donem == (yil ~ ' - KURUMLAR') %}selected{% endif %}>{{ yil }} - KURUMLAR</option>
             </optgroup>
             {% endfor %}
           </select>

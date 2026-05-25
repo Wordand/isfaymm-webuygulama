@@ -2619,17 +2619,31 @@ def delete_donem_matrah(id):
             if removed and session.get("active_donem_text") == removed.get("donem_text"):
                 session.pop("active_donem_text", None)
                 session.pop("active_tesvik_id", None)
+                session.pop("current_tesvik_id", None)
             session.modified = True
-            return jsonify({"status": "success"})
+            return jsonify({"status": "success", "selection_cleared": bool(removed and session.get("active_donem_text") is None)})
 
         with get_conn() as conn:
             c = conn.cursor()
+            c.execute(
+                "SELECT donem_text FROM donem_matrah WHERE id = %s AND user_id = %s AND mukellef_id = %s",
+                (id, user_id, mukellef_id),
+            )
+            row = c.fetchone()
+            deleted_donem_text = row.get("donem_text") if isinstance(row, dict) else (row[0] if row else None)
             c.execute(
                 "DELETE FROM donem_matrah WHERE id = %s AND user_id = %s AND mukellef_id = %s",
                 (id, user_id, mukellef_id),
             )
             conn.commit()
-        return jsonify({"status": "success"})
+        selection_cleared = False
+        if deleted_donem_text and session.get("active_donem_text") == deleted_donem_text:
+            session.pop("active_donem_text", None)
+            session.pop("active_tesvik_id", None)
+            session.pop("current_tesvik_id", None)
+            session.modified = True
+            selection_cleared = True
+        return jsonify({"status": "success", "selection_cleared": selection_cleared})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
