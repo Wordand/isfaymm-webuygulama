@@ -779,10 +779,6 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     user_id = session.get("user_id") if is_logged_in else None
     aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
 
-    if sekme == "donem" and not sekme_override:
-        session.pop("active_donem_text", None)
-        session.pop("active_tesvik_id", None)
-
     if sekme == "form" and not sekme_override:
         if not session.get("active_donem_text"):
             session["flash_donem_matrah_required"] = True
