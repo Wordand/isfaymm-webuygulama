@@ -74,16 +74,17 @@
 
         <div class="mb-3">
           <label class="form-label">Dönem</label>
+          {% set selected_pool_donem = session.get('active_donem_text') or '2026 - 1. GEÇİCİ' %}
           <select id="pool_donem" class="form-select">
             {% for yil in range(2027, 2014, -1) %}
             <optgroup label="{{ yil }}">
-              <option value="{{ yil }} - 1. GEÇİCİ">{{ yil }} - 1. GEÇİCİ</option>
-              <option value="{{ yil }} - 2. GEÇİCİ">{{ yil }} - 2. GEÇİCİ</option>
-              <option value="{{ yil }} - 3. GEÇİCİ">{{ yil }} - 3. GEÇİCİ</option>
+              <option value="{{ yil }} - 1. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 1. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 1. GEÇİCİ</option>
+              <option value="{{ yil }} - 2. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 2. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 2. GEÇİCİ</option>
+              <option value="{{ yil }} - 3. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 3. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 3. GEÇİCİ</option>
               {% if yil >= 2025 %}
-              <option value="{{ yil }} - 4. GEÇİCİ">{{ yil }} - 4. GEÇİCİ</option>
+              <option value="{{ yil }} - 4. GEÇİCİ" {% if selected_pool_donem == yil ~ ' - 4. GEÇİCİ' %}selected{% endif %}>{{ yil }} - 4. GEÇİCİ</option>
               {% endif %}
-              <option value="{{ yil }} - KURUMLAR">{{ yil }} - KURUMLAR</option>
+              <option value="{{ yil }} - KURUMLAR" {% if selected_pool_donem == yil ~ ' - KURUMLAR' %}selected{% endif %}>{{ yil }} - KURUMLAR</option>
             </optgroup>
             {% endfor %}
           </select>
@@ -124,72 +125,6 @@
           </div>
         </div>
 
-        <div class="mt-3 ikv-tevsi-toggle">
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" role="switch" id="pool_toggle_sabit" onchange="poolToggleSabit()">
-            <label class="form-check-label fw-semibold" for="pool_toggle_sabit">Tevsi oranlama yapacağım (sabit kıymet gir)</label>
-          </div>
-        </div>
-
-        <div class="mt-2 p-3 bg-white border rounded-3" id="pool_sabit_wrap" style="display:none;">
-          <div class="fw-semibold mb-2">Sabit Kiymet Detayi (Tevsi / Oranlama)</div>
-          <div class="text-muted small mb-2">Tevsi yatirimlarda oranlama yapacaksaniz doldurun. Diger durumlarda bos birakabilirsiniz.</div>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label">250 - Arazi ve Arsalar</label>
-                <input id="pool_sabit_250" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">251 - Yeralti ve Yerustu Duzenleri</label>
-                <input id="pool_sabit_251" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">252 - Binalar</label>
-                <input id="pool_sabit_252" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">253 - Tesis, Makine ve Cihazlar</label>
-                <input id="pool_sabit_253" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">254 - Tasitlar</label>
-                <input id="pool_sabit_254" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">255 - Demirbaslar</label>
-                <input id="pool_sabit_255" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">256 - Diger Maddi Duran Varliklar</label>
-                <input id="pool_sabit_256" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">258 - Yapilmakta Olan Yatirimlar</label>
-                <input id="pool_sabit_258" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">260 - Haklar</label>
-                <input id="pool_sabit_260" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">264 - Ozel Maliyetler</label>
-                <input id="pool_sabit_264" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">267 - Diger Maddi Olmayan Duran Varliklar</label>
-                <input id="pool_sabit_267" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
-            </div>
-            <div class="mt-3 p-3 bg-light border rounded-3">
-              <div class="d-flex justify-content-between">
-                <div class="text-muted">Toplam Sabit Kiymet (Oranlama icin)</div>
-                <div class="fw-bold" id="pool_sabit_total_label">0,00 TL</div>
-              </div>
-              <div class="text-muted small mt-1">Bu toplam, tevsi yatirimlarda \"toplam sabit kiymet tutari\" olarak kullanilir.</div>
-            </div>
-          </div>
-        
-
         <div class="mt-3">
           <label class="form-label">Genel Vergi Oranı</label>
           <div class="btn-group w-100" role="group" aria-label="Genel vergi oranı">
@@ -216,6 +151,74 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <div class="p-3 bg-white border rounded-4 shadow-sm mt-3">
+        <div class="fw-bold mb-2">Tevsi Oranlama</div>
+        <div class="ikv-tevsi-toggle">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="pool_toggle_sabit" onchange="poolToggleSabit()">
+            <label class="form-check-label fw-semibold" for="pool_toggle_sabit">Tevsi oranlama yapacağım (sabit kıymet gir)</label>
+          </div>
+        </div>
+
+        <div class="mt-2 p-3 bg-white border rounded-3" id="pool_sabit_wrap" style="display:none;">
+          <div class="fw-semibold mb-2">Sabit Kıymet Detayı (Tevsi / Oranlama)</div>
+          <div class="text-muted small mb-2">Tevsi yatırımlarda oranlama yapacaksanız doldurun. Diğer durumlarda boş bırakabilirsiniz.</div>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label">250 - Arazi ve Arsalar</label>
+                <input id="pool_sabit_250" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">251 - Yeraltı ve Yerüstü Düzenleri</label>
+                <input id="pool_sabit_251" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">252 - Binalar</label>
+                <input id="pool_sabit_252" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">253 - Tesis, Makine ve Cihazlar</label>
+                <input id="pool_sabit_253" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">254 - Taşıtlar</label>
+                <input id="pool_sabit_254" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">255 - Demirbaşlar</label>
+                <input id="pool_sabit_255" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">256 - Diğer Maddi Duran Varlıklar</label>
+                <input id="pool_sabit_256" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">258 - Yapılmakta Olan Yatırımlar</label>
+                <input id="pool_sabit_258" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">260 - Haklar</label>
+                <input id="pool_sabit_260" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">264 - Özel Maliyetler</label>
+                <input id="pool_sabit_264" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">267 - Diğer Maddi Olmayan Duran Varlıklar</label>
+                <input id="pool_sabit_267" type="text" class="form-control pool-sabit-input" placeholder="0,00">
+              </div>
+            </div>
+            <div class="mt-3 p-3 bg-light border rounded-3">
+              <div class="d-flex justify-content-between">
+                <div class="text-muted">Toplam Sabit Kıymet (Oranlama için)</div>
+                <div class="fw-bold" id="pool_sabit_total_label">0,00 TL</div>
+              </div>
+              <div class="text-muted small mt-1">Bu toplam, tevsi yatırımlarda "toplam sabit kıymet tutarı" olarak kullanılır.</div>
+            </div>
+          </div>
       </div>
     </div>
 
@@ -694,17 +697,49 @@
   }
 
   async function poolDeleteSaved(id) {
-    if (!confirm('Bu dönem matrah kaydı silinsin mi?')) return;
+    if (window.Swal) {
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'Dönem matrahı silinsin mi?',
+        text: 'Bu dönem matrah kaydı kaldırılacak.',
+        showCancelButton: true,
+        confirmButtonText: 'Evet, sil',
+        cancelButtonText: 'Vazgeç',
+        confirmButtonColor: '#dc3545',
+        reverseButtons: true
+      });
+      if (!result.isConfirmed) return;
+    } else if (!confirm('Bu dönem matrah kaydı silinsin mi?')) {
+      return;
+    }
+
     try {
       const res = await fetch('/indirimlikurumlar/donem_matrah/delete/' + id, { method: 'POST' });
       if (!res.ok) {
-        alert('Silme işlemi başarısız.');
+        if (window.Swal) {
+          await Swal.fire({ icon: 'error', title: 'Silme başarısız', text: 'Dönem matrahı silinemedi.' });
+        } else {
+          alert('Silme işlemi başarısız.');
+        }
         return;
       }
       const row = document.getElementById('pool-row-' + id);
       if (row) row.remove();
+      if (window.Swal) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Silindi',
+          text: 'Dönem matrahı silindi.',
+          timer: 1100,
+          showConfirmButton: false
+        });
+      }
     } catch (e) {
-      alert('Silme sırasında bağlantı hatası oluştu.');
+      if (window.Swal) {
+        await Swal.fire({ icon: 'error', title: 'Bağlantı hatası', text: 'Silme sırasında bağlantı hatası oluştu.' });
+      } else {
+        alert('Silme sırasında bağlantı hatası oluştu.');
+      }
     }
   }
 
