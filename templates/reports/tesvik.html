@@ -24,19 +24,38 @@
     <!-- Ledger List -->
     <div class="ledger-container">
         {% for doc in docs %}
+        {% set _katki_orani_f = (doc.katki_orani|float) / 100 %}
+        {% set _belge_toplam_hak = (doc.toplam_tutar|float) * _katki_orani_f %}
+        {% set _hak_edilen = (doc.toplam_harcama_tutari|float) * _katki_orani_f %}
+        {% set _donemler = kullanimlar.get(doc.belge_no, []) %}
+        {% set _used = namespace(yatirim=0, diger=0, toplam=0) %}
+        {% for _d in _donemler %}
+          {% set _used.yatirim = _used.yatirim + (_d.cari_yatirim_katki|float) %}
+          {% set _used.diger = _used.diger + (_d.cari_diger_katki|float) %}
+          {% set _used.toplam = _used.toplam + (_d.cari_toplam_katki|float) %}
+        {% endfor %}
+        {% set _kalan_katki = _hak_edilen - _used.toplam if _hak_edilen > _used.toplam else 0 %}
         <div class="ledger-sheet" id="doc-sheet-{{ doc.id }}">
             <!-- Header: Belge Kimliği -->
             <div class="ledger-header">
                 <div class="ledger-title-group">
                     <span class="ledger-no">{{ doc.belge_no }}</span>
-                    <span class="ledger-date text-uppercase">
-                        <i class="bi bi-calendar3 me-1"></i> Başlangıç: {{ doc.belge_tarihi }}
-                    </span>
+                    <div class="ledger-meta-chips">
+                        <span><i class="bi bi-calendar3 me-1"></i>Başlangıç: {{ doc.belge_tarihi }}</span>
+                        <span>{{ doc.karar }}</span>
+                        {% if 'Evet' in doc.vize_durumu %}
+                          <span class="text-success"><i class="bi bi-patch-check-fill me-1"></i>Vize Yapıldı</span>
+                        {% else %}
+                          <span class="text-warning"><i class="bi bi-clock-history me-1"></i>Yatırım Devam</span>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="d-flex gap-3 align-items-center">
-                    <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold shadow-sm">
-                        {{ doc.karar }}
-                    </span>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3"
+                            onclick='selectDocForCalculation({{ doc.id }}, {{ doc.belge_no|tojson }})'
+                            title="Bu belgeyle hesaplama yap">
+                        <i class="bi bi-calculator me-1"></i>Bu Belgeyle Hesapla
+                    </button>
                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
                             onclick="openBelgeDuzenleModal(this)"
                             data-doc='{{ doc | tojson | safe }}'
@@ -61,30 +80,22 @@
                 </div> 
                 
                 <div class="summary-item">
-                    <span class="summary-label">Uygulanan Oranlar</span>
-                    <div class="d-flex flex-column gap-1 mt-1">
-                        <span class="badge bg-secondary fw-normal text-start px-2 py-1">
-                           Katkı Oranı: %{{ doc.katki_orani }}
-                        </span>
-                        <span class="badge bg-primary fw-normal text-start px-2 py-1">
-                           Vergi İndirimi: %{{ doc.vergi_orani }}
-                        </span>
-                        <span class="badge bg-success fw-normal text-start px-2 py-1">
-                           Diğer Faaliyet: %{{ doc.diger_oran }}
-                        </span>
+                    <span class="summary-label">Oranlar</span>
+                    <div class="ikv-rate-chips">
+                        <span>Katkı %{{ doc.katki_orani }}</span>
+                        <span>Vergi indirimi %{{ doc.vergi_orani }}</span>
+                        <span>Diğer faaliyet %{{ doc.diger_oran }}</span>
                     </div>
                 </div>
 
                 <div class="summary-item"> 
-                    {% set _katki_orani_f = (doc.katki_orani|float) / 100 %} 
-                    {% set _belge_toplam_hak = (doc.toplam_tutar|float) * _katki_orani_f %} 
-                    {% set _hak_edilen = (doc.toplam_harcama_tutari|float) * _katki_orani_f %} 
-                    {% set _donemler = kullanimlar.get(doc.belge_no, []) %} 
-                    <span class="summary-label">Katkı Hakları</span> 
-                    <span class="summary-value text-truncate" title="Belge toplam katkı hakkı"> 
-                        {{ _belge_toplam_hak|tlformat }} TL 
-                    </span> 
-                    <small class="text-muted d-block mt-1">Hak edilen: {{ _hak_edilen|tlformat }} TL</small> 
+                    <span class="summary-label">Katkı Durumu</span>
+                    <div class="ikv-contribution-lines">
+                        <div><span>Belge toplam hakkı</span><strong>{{ _belge_toplam_hak|tlformat }} TL</strong></div>
+                        <div><span>Hak edilen</span><strong>{{ _hak_edilen|tlformat }} TL</strong></div>
+                        <div><span>Kullanılan</span><strong>{{ _used.toplam|tlformat }} TL</strong></div>
+                        <div><span>Kalan</span><strong class="text-success">{{ _kalan_katki|tlformat }} TL</strong></div>
+                    </div>
                     <button type="button"
                             class="btn btn-sm btn-outline-dark rounded-pill px-3 mt-2"
                             onclick="openKatkiModal(this)"
@@ -110,20 +121,20 @@
  
             <!-- Body: Dönem Kullanımları (Table-Like but Modern) --> 
             <div class="ledger-body"> 
-                <div class="period-table-header" style="grid-template-columns: 0.8fr 1fr 1fr 1fr 1fr 1fr 0.5fr;"> 
+                <div class="period-table-header" style="grid-template-columns: 0.8fr 1fr 1fr 1.25fr 1.35fr 1.1fr 1.65fr;">
                     <span>Yıl / Dönem</span>
                     <span>Dönem Türü</span>
-                    <span>İnd. Vergi Matrahı</span>
-                    <span>C. Yatırım Katkı</span>
-                    <span>C. Diğer Katkı</span>
-                    <span>C. Toplam Katkı</span>
+                    <span>İndirimli Matrah</span>
+                    <span>Yatırımdan Kullanılan</span>
+                    <span>Diğer Faaliyetten Kullanılan</span>
+                    <span>Toplam Kullanılan</span>
                     <span class="text-end">İşlemler</span>
                 </div>
                 
                 {% set donemler = kullanimlar.get(doc.belge_no, []) %} 
                 {% if donemler %} 
                     {% for d in donemler %} 
-                    <div class="period-row" id="period-row-{{ d.id }}" style="grid-template-columns: 0.8fr 1fr 1fr 1fr 1fr 1fr 0.5fr;"> 
+                    <div class="period-row" id="period-row-{{ d.id }}" style="grid-template-columns: 0.8fr 1fr 1fr 1.25fr 1.35fr 1.1fr 1.65fr;">
                         <div class="period-year-badge">{{ d.hesap_donemi }}</div> 
                         <div>
                             <span class="period-type-pill">{{ d.donem_turu }}</span>
@@ -142,14 +153,14 @@
                         </div>
 
                         <div class="action-center">
-                            <button class="btn-action-icon btn-action-edit" onclick="goToEditPeriod('{{ doc.belge_no }}', '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
-                                <i class="bi bi-pencil-square"></i>
+                            <button class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="goToEditPeriod('{{ doc.belge_no }}', '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
+                                <i class="bi bi-pencil-square me-1"></i>Düzenle
                             </button>
-                            <button class="btn-action-icon btn-action-view" onclick="openPeriodModal(this)" data-period='{{ d | tojson | safe }}' title="Verileri İncele">
-                                <i class="bi bi-eye-fill"></i>
+                            <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="openPeriodModal(this)" data-period='{{ d | tojson | safe }}' title="Verileri İncele">
+                                <i class="bi bi-eye-fill me-1"></i>Detay
                             </button>
-                            <button class="btn-action-icon btn-action-delete" onclick="confirmDeletePeriod({{ d.id }})" title="Dönemi Sil">
-                                <i class="bi bi-x-lg"></i>
+                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="confirmDeletePeriod({{ d.id }})" title="Dönemi Sil">
+                                <i class="bi bi-x-lg me-1"></i>Sil
                             </button>
                         </div>
                     </div>
@@ -166,9 +177,12 @@
             </div>
 
             <!-- Footer: Global Belge Aksiyonu -->
-            <div class="p-4 bg-white border-top d-flex justify-content-end">
-                <button class="btn-ledger-inspect" onclick="openDocModal(this)" data-doc='{{ doc | tojson | safe }}'>
-                    <i class="bi bi-file-earmark-ruled-fill"></i> ANA BELGEYİ VE TÜM VERİLERİ İNCELE
+            <div class="p-4 bg-white border-top d-flex justify-content-end gap-2 flex-wrap">
+                <button class="btn btn-outline-dark rounded-pill px-4" onclick="openDocModal(this)" data-doc='{{ doc | tojson | safe }}'>
+                    <i class="bi bi-file-earmark-ruled-fill me-1"></i>Belge Detayı
+                </button>
+                <button class="btn btn-primary rounded-pill px-4" onclick='selectDocForCalculation({{ doc.id }}, {{ doc.belge_no|tojson }})'>
+                    <i class="bi bi-calculator me-1"></i>Bu Belgeyle Hesapla
                 </button>
             </div>
         </div>
@@ -789,6 +803,39 @@
                 return;
             }
             window.location.href = `/indirimlikurumlar/?sekme=form${hash || ""}`;
+        } catch (e) {
+            Swal.fire({ icon: "error", title: "Hata", text: "Bağlantı hatası oluştu." });
+        }
+    }
+
+    async function selectDocForCalculation(docId, belgeNo) {
+        try {
+            const res = await fetch(`/indirimlikurumlar/tesvik/select/${docId}`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data || data.status !== "success") {
+                Swal.fire({ icon: "error", title: "Hata", text: (data && data.message) ? data.message : "Belge seçilemedi." });
+                return;
+            }
+            if (!bbActiveDonemText) {
+                await Swal.fire({
+                    icon: "info",
+                    title: "Belge seçildi",
+                    text: `${belgeNo || "Seçili"} nolu belge seçildi. Şimdi dönem matrahını seçin veya kaydedin.`,
+                    timer: 1700,
+                    showConfirmButton: false
+                });
+                window.location.href = "/indirimlikurumlar/?sekme=donem";
+                return;
+            }
+            await Swal.fire({
+                icon: "success",
+                title: "Hesaplamaya geçiliyor",
+                html: `<div class="text-start"><div><strong>Dönem:</strong> ${bbActiveDonemText}</div><div><strong>Belge:</strong> ${belgeNo || "-"} Nolu Belge</div></div>`,
+                timer: 1800,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+            window.location.href = "/indirimlikurumlar/?sekme=form&start=1";
         } catch (e) {
             Swal.fire({ icon: "error", title: "Hata", text: "Bağlantı hatası oluştu." });
         }

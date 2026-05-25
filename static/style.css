@@ -2161,6 +2161,8 @@ th {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .ledger-title-group {
@@ -2180,6 +2182,25 @@ th {
     font-size: 0.9rem;
     color: #718096;
     font-weight: 600;
+}
+
+.ledger-meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.ledger-meta-chips span {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    border-radius: 999px;
+    padding: 0.28rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 /* Summary Bar */
@@ -2214,6 +2235,59 @@ th {
     font-size: 1.05rem;
     font-weight: 700;
     color: #2d3748;
+}
+
+.ikv-rate-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+}
+
+.ikv-rate-chips span {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1e40af;
+    border-radius: 999px;
+    padding: 0.32rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.ikv-rate-chips span:nth-child(2) {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.ikv-rate-chips span:nth-child(3) {
+    border-color: #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+}
+
+.ikv-contribution-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+
+.ikv-contribution-lines div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.86rem;
+}
+
+.ikv-contribution-lines span {
+    color: #64748b;
+}
+
+.ikv-contribution-lines strong {
+    color: #0f172a;
+    white-space: nowrap;
 }
 
 /* Period Section */
@@ -2278,7 +2352,8 @@ th {
 /* Action Center */
 .action-center {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.45rem;
+    flex-wrap: wrap;
     justify-content: flex-end;
 }
 
