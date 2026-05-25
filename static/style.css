@@ -2136,13 +2136,13 @@ th {
 .ledger-container {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
-    padding: 1rem 0;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
 }
 
 .ledger-sheet {
     background: #ffffff;
-    border-radius: 24px;
+    border-radius: 18px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.04);
     border: 1px solid rgba(0,0,0,0.06);
     overflow: hidden;
@@ -2156,8 +2156,8 @@ th {
 /* Ledger Header */
 .ledger-header {
     background: #fcfdfe;
-    padding: 2rem;
-    border-bottom: 3px solid #f1f4f8;
+    padding: 1.35rem 1.5rem;
+    border-bottom: 2px solid #f1f4f8;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -2172,7 +2172,7 @@ th {
 }
 
 .ledger-no {
-    font-size: 1.5rem;
+    font-size: 1.22rem;
     font-weight: 800;
     color: #1a202c;
     font-family: 'JetBrains Mono', monospace;
@@ -2198,21 +2198,21 @@ th {
     background: #f8fafc;
     color: #475569;
     border-radius: 999px;
-    padding: 0.28rem 0.65rem;
-    font-size: 0.82rem;
+    padding: 0.24rem 0.58rem;
+    font-size: 0.78rem;
     font-weight: 700;
 }
 
 /* Summary Bar */
 .ledger-summary-bar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 0.9fr 1.2fr;
     background: #fff;
     border-bottom: 2px solid #f8f9fa;
 }
 
 .summary-item {
-    padding: 1.25rem 2rem;
+    padding: 1rem 1.5rem;
     border-right: 1px solid #f1f4f8;
 }
 
@@ -2227,21 +2227,22 @@ th {
     color: #a0aec0;
     font-weight: 800;
     letter-spacing: 0.05em;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
 }
 
 .summary-value {
     display: block;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #2d3748;
 }
 
 .ikv-rate-chips {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-top: 0.35rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.38rem;
+    margin-top: 0.25rem;
 }
 
 .ikv-rate-chips span {
@@ -2251,7 +2252,7 @@ th {
     background: #eff6ff;
     color: #1e40af;
     border-radius: 999px;
-    padding: 0.32rem 0.65rem;
+    padding: 0.28rem 0.6rem;
     font-size: 0.8rem;
     font-weight: 700;
 }
@@ -2271,7 +2272,7 @@ th {
 .ikv-contribution-lines {
     display: flex;
     flex-direction: column;
-    gap: 0.28rem;
+    gap: 0.22rem;
 }
 
 .ikv-contribution-lines div {
@@ -2292,16 +2293,16 @@ th {
 
 /* Period Section */
 .ledger-body {
-    padding: 2rem;
+    padding: 1.35rem 1.5rem;
 }
 
 .period-table-header {
     display: grid;
     grid-template-columns: 120px 1fr 1fr 180px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.62rem 1.15rem;
     background: #f8fafc;
     border-radius: 12px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.65rem;
 }
 
 .period-table-header span {
@@ -2314,7 +2315,7 @@ th {
 .period-row {
     display: grid;
     grid-template-columns: 120px 1fr 1fr 180px;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.15rem;
     align-items: center;
     border-bottom: 1px solid #f1f5f9;
     transition: background 0.2s;
@@ -2329,7 +2330,7 @@ th {
 }
 
 .period-year-badge {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #3b82f6;
 }
@@ -2432,7 +2433,7 @@ th {
 }
 
 @media (max-width: 992px) {
-    .ledger-summary-bar { grid-template-columns: 1fr 1fr; }
+    .ledger-summary-bar { grid-template-columns: 1fr; }
     .period-table-header { display: none; }
     .period-row {
         grid-template-columns: 1fr;
