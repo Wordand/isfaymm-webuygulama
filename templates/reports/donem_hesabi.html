@@ -66,8 +66,8 @@
   </div>
 
   <div class="row g-3">
-    <div class="col-lg-5">
-      <div class="p-3 bg-white border rounded-4 shadow-sm h-100">
+    <div class="col-lg-5 ikv-left-stack">
+      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-donem-card">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div class="fw-bold">Dönem Matrahı</div>
         </div>
@@ -153,7 +153,7 @@
         </div>
       </div>
 
-      <div class="p-3 bg-white border rounded-4 shadow-sm mt-3">
+      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-tevsi-card">
         <div class="fw-bold mb-2">Tevsi Oranlama</div>
         <div class="ikv-tevsi-toggle">
           <div class="form-check form-switch mb-0">
@@ -393,6 +393,24 @@
   .ikv-status-action:hover {
     filter: brightness(0.94);
     transform: translateY(-1px);
+  }
+  .ikv-left-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .ikv-donem-card {
+    min-height: 0;
+  }
+  .ikv-tevsi-card {
+    min-height: 140px;
+  }
+  @media (min-width: 992px) {
+    .ikv-left-stack {
+      display: grid;
+      grid-template-rows: minmax(0, 3fr) minmax(140px, 1fr);
+      align-items: stretch;
+    }
   }
   .ikv-tevsi-toggle {
     display: inline-flex;
