@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 
-{% block title %}KDV Tevkifat Hesaplama Aracı (Tam ve Kısmi) | İSFA YMM{% endblock %}
-{% block description %}2026 güncel KDV tevkifat oranları ile tam ve kısmi tevkifat faturası hesaplama, tevkifatlı fatura düzeni ve mahsuben/nakden KDV iadesi şartları.{% endblock %}
+{% block title %}KDV Tevkifat Hesaplama 2026 | Tevkifatlı Fatura ve Matrah | İSFA YMM{% endblock %}
+{% block description %}KDV tevkifat hesaplama aracı ile 2/10, 4/10, 5/10, 7/10 ve tam tevkifatlı fatura için matrah, KDV, alıcı tevkifatı ve tahsil edilecek tutarı hesaplayın.{% endblock %}
+{% block keywords %}kdv tevkifat hesaplama, tevkifatlı fatura hesaplama, tevkifat hesaplama, kdv hesaplama tevkifatlı, 4/10 tevkifat hesaplama, 5/10 tevkifat hesaplama, 2/10 tevkifat hesaplama, İSFA YMM{% endblock %}
 
 {% block content %}
 <!-- ⭐ HERO SECTION -->
@@ -14,10 +15,10 @@
                     <i class="bi bi-calculator-fill"></i> 2026 KDV Genel Uygulama Tebliği Uyumlu
                 </div>
                 <h1 class="display-5 fw-black mb-3 lh-tight text-white">
-                    KDV Tevkifat <span class="text-warning-gradient">Hesaplama Aracı</span>
+                    KDV Tevkifat <span class="text-warning-gradient">Hesaplama 2026</span>
                 </h1>
                 <p class="lead text-light mb-0 fw-normal" style="max-width: 700px;">
-                    Tam veya kısmi tevkifat türünü seçin, oranlar otomatik dolsun. Tevkifatlı fatura tutarlarını ve işleme özel <b>mahsuben/nakden iade</b> şartlarını anında görüntüleyin.
+                    2/10, 4/10, 5/10, 7/10 ve tam tevkifatlı fatura için matrah, KDV, alıcı tevkifatı, satıcı KDV'si ve tahsil edilecek tutarı anında hesaplayın.
                 </p>
             </div>
             <div class="col-lg-4 d-none d-lg-block text-end">
@@ -495,6 +496,39 @@
                 </div>
             </div>
 
+            <section class="mb-5" aria-labelledby="kdv-tevkifat-sss">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge rounded-pill text-bg-warning">SSS</span>
+                    <h2 id="kdv-tevkifat-sss" class="h4 fw-black text-dark mb-0">KDV Tevkifat Hesaplama Hakkında Sık Sorulan Sorular</h2>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">Tevkifatlı fatura nasıl hesaplanır?</h3>
+                            <p class="small text-muted mb-0">Önce KDV hariç matrah üzerinden KDV hesaplanır. Daha sonra seçilen tevkifat oranına göre alıcının 2 No.lu KDV beyannamesiyle beyan edeceği tutar ve satıcının tahsil edeceği KDV ayrıştırılır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">4/10 veya 5/10 tevkifat ne anlama gelir?</h3>
+                            <p class="small text-muted mb-0">4/10 tevkifatta hesaplanan KDV'nin yüzde 40'ı, 5/10 tevkifatta yüzde 50'si alıcı tarafından tevkif edilir. Kalan KDV satıcı tarafından 1 No.lu KDV beyannamesinde beyan edilir.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">KDV tevkifat matrahı KDV dahil tutardan mı hesaplanır?</h3>
+                            <p class="small text-muted mb-0">Tevkifat hesabında esas alınan matrah KDV hariç işlem bedelidir. Araç, KDV'yi ve tevkif edilecek kısmı bu matrah üzerinden otomatik ayırır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">Tam tevkifat ile kısmi tevkifat farkı nedir?</h3>
+                            <p class="small text-muted mb-0">Tam tevkifatta KDV'nin tamamı alıcı tarafından beyan edilir. Kısmi tevkifatta ise KDV'nin yalnızca belirlenen oran kadarı alıcı, kalan kısmı satıcı tarafından beyan edilir.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
     </div>
 </div>
@@ -952,5 +986,45 @@
         updateTevkifatTurleri();
         syncDuzWithMainCalc();
     });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Tevkifatlı fatura nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Önce KDV hariç matrah üzerinden KDV hesaplanır. Seçilen tevkifat oranına göre alıcının 2 No.lu KDV beyannamesiyle beyan edeceği tutar ve satıcının tahsil edeceği KDV ayrıştırılır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "4/10 veya 5/10 tevkifat ne anlama gelir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "4/10 tevkifatta hesaplanan KDV'nin yüzde 40'ı, 5/10 tevkifatta yüzde 50'si alıcı tarafından tevkif edilir. Kalan KDV satıcı tarafından beyan edilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "KDV tevkifat matrahı KDV dahil tutardan mı hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tevkifat hesabında esas alınan matrah KDV hariç işlem bedelidir. KDV ve tevkif edilecek kısım bu matrah üzerinden hesaplanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tam tevkifat ile kısmi tevkifat farkı nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tam tevkifatta KDV'nin tamamı alıcı tarafından beyan edilir. Kısmi tevkifatta ise KDV'nin belirlenen oran kadarı alıcı, kalan kısmı satıcı tarafından beyan edilir."
+      }
+    }
+  ]
+}
 </script>
 {% endblock %}

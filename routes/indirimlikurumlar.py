@@ -747,12 +747,12 @@ def index():
 def hesaplama_araci():
     return render_indirimlikurumlar(
         seo_context={
-            "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırıma Katkı Tutarı | İSFA YMM",
-            "page_description": "Yatırım teşvik belgesi kapsamında indirimli kurumlar vergisi, yatırıma katkı tutarı ve vergi avantajınızı 2026 güncel verileriyle hesaplayın.",
-            "page_keywords": "indirimli kurumlar vergisi hesaplama, yatırıma katkı tutarı hesaplama, yatırım teşvik belgesi hesaplama, KVK 32/A hesaplama, 2025/9903 teşvik, İSFA YMM",
+            "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Excel Tablo ve Yatırım Teşvik | İSFA YMM",
+            "page_description": "2012/3305 ve 2025/9903 kararlarına göre indirimli kurumlar vergisi, yatırıma katkı tutarı, yatırım teşvik vergi indirimi ve Excel tablo ihtiyacını canlı hesaplama aracıyla hesaplayın.",
+            "page_keywords": "indirimli kurumlar vergisi hesaplama, indirimli kurumlar vergisi hesaplama tablosu excel, yatırım teşvik belgesi kurumlar vergisi indirimi hesaplama excel, yatırım teşvik hesaplama tablosu excel 2025, yatırıma katkı tutarı hesaplama, KVK 32/A hesaplama, 2025/9903 teşvik, İSFA YMM",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/",
-            "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama | İSFA YMM",
-            "page_og_desc": "Yatırım teşvik belgesi kapsamında indirimli kurumlar vergisi ve yatırıma katkı tutarı hesabı yapın.",
+            "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Excel Tablo ve Yatırım Teşvik",
+            "page_og_desc": "Yatırım teşvik belgeleri için yatırıma katkı tutarı, vergi indirimi ve dönem bazlı indirimli kurumlar vergisi hesaplama aracı.",
         },
     )
 

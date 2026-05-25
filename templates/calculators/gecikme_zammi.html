@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Zammı | İSFA YMM{% endblock %}
 
-{% block description %}Gecikme zammı hesaplama aracı ile vergi borcu, vergi ziyaı ve diğer amme alacakları için vade ve ödeme tarihine göre güncel gecikme zammını hesaplayın.{% endblock %}
-{% block keywords %}gecikme zammı hesaplama, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, 6183 gecikme zammı, gecikme zammı oranı, İSFA YMM{% endblock %}
+{% block description %}Gecikme zammı hesaplama aracı ile vergi borcu, vergi ziyaı cezası ve 6183 sayılı Kanun kapsamındaki amme alacakları için vade ve ödeme tarihine göre tutarı hesaplayın.{% endblock %}
+{% block keywords %}gecikme zammı hesaplama, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, gecikme zammı hesaplama 2026, 6183 gecikme zammı, gecikme faizi hesaplama, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi{% endblock %}
 {% block og_title %}Gecikme Zammı Hesaplama | İSFA YMM{% endblock %}
 {% block og_desc %}Vergi borçları için vade ve ödeme tarihine göre gecikme zammını hesaplayın.{% endblock %}
@@ -21,7 +21,7 @@
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">Gecikme Zammı Hesaplama 2026</h1>
                 <p class="lead text-muted mb-0">
-                    Vergi borcu ve amme alacakları için vade tarihi ile ödeme tarihine göre gecikme zammı tutarını hesaplayın.
+                    Vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade tarihi ile ödeme tarihine göre gecikme zammı tutarını hesaplayın.
                 </p>
             </header>
 
@@ -132,6 +132,36 @@
                     <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Vade Tarihi</h3><p class="small text-muted mb-0">Borcun kanuni ödeme süresinin son gününü ifade eder.</p></div></div>
                     <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Ödeme Tarihi</h3><p class="small text-muted mb-0">Gecikme zammının hesaplanacağı fiili ödeme tarihidir.</p></div></div>
                     <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Toplam Tutar</h3><p class="small text-muted mb-0">Ana borç ve hesaplanan gecikme zammının toplamıdır.</p></div></div>
+                </div>
+            </section>
+
+            <section class="mt-5" aria-labelledby="gecikme-sss">
+                <h2 id="gecikme-sss" class="h4 fw-bold text-dark mb-3">Gecikme Zammı Hesaplama Hakkında Sık Sorulan Sorular</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold">Gecikme zammı aylık mı günlük mü hesaplanır?</h3>
+                            <p class="small text-muted mb-0">Oranlar aylık olarak ilan edilir; hesaplamada vade ile ödeme tarihi arasındaki süre dikkate alınır ve ay kesirleri için gün hesabı yapılır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold">Vergi gecikme zammı hangi tutar üzerinden hesaplanır?</h3>
+                            <p class="small text-muted mb-0">Hesaplama ana borç tutarı üzerinden yapılır. Borç türüne göre bazı cezalar için gecikme zammı doğmayabilir; araç bu ayrımı dikkate alır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold">Gecikme faizi ile gecikme zammı aynı şey midir?</h3>
+                            <p class="small text-muted mb-0">Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat ve tahakkuk süreçlerine bağlı farklı durumlarda uygulanır.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold">30.000 TL vergi borcunun gecikme zammı nasıl bulunur?</h3>
+                            <p class="small text-muted mb-0">30.000 TL borç tutarı, vade tarihi ve ödeme tarihi girildiğinde araç ilgili dönem oranlarını dikkate alarak gecikme zammını ve toplam ödenecek tutarı gösterir.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -250,6 +280,46 @@ document.addEventListener("DOMContentLoaded", () => {
     "price": "0",
     "priceCurrency": "TRY"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Gecikme zammı aylık mı günlük mü hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oranlar aylık olarak ilan edilir; hesaplamada vade ile ödeme tarihi arasındaki süre dikkate alınır ve ay kesirleri için gün hesabı yapılır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Vergi gecikme zammı hangi tutar üzerinden hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hesaplama ana borç tutarı üzerinden yapılır. Borç türüne göre bazı cezalar için gecikme zammı doğmayabilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Gecikme faizi ile gecikme zammı aynı şey midir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat ve tahakkuk süreçlerine bağlı farklı durumlarda uygulanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "30.000 TL vergi borcunun gecikme zammı nasıl bulunur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "30.000 TL borç tutarı, vade tarihi ve ödeme tarihi girildiğinde ilgili dönem oranlarına göre gecikme zammı ve toplam ödenecek tutar hesaplanır."
+      }
+    }
+  ]
 }
 </script>
 {% endblock %}

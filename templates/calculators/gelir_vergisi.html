@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
-{% block title %}Gelir Vergisi Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block title %}Gelir Vergisi Hesaplama 2026 | Ücret ve Kümülatif Matrah | İSFA YMM{% endblock %}
 
-{% block description %}2026 gelir vergisi hesaplama aracı ile ücret, maaş ve ücret dışı gelirler için kümülatif vergi matrahına göre gelir vergisi tutarını hızlıca hesaplayın.{% endblock %}
-{% block keywords %}gelir vergisi hesaplama, gelir vergisi hesaplama 2026, maaş gelir vergisi hesaplama, kümülatif vergi matrahı, gelir vergisi dilimleri, ücret gelir vergisi, İSFA YMM{% endblock %}
+{% block description %}2026 gelir vergisi hesaplama aracı ile ücret, maaş, ücret dışı gelir ve kümülatif vergi matrahına göre hesaplanan gelir vergisi ve ödenecek net vergiyi hesaplayın.{% endblock %}
+{% block keywords %}gelir vergisi hesaplama, gelir vergisi hesaplama 2026, ücret gelir vergisi hesaplama, maaş gelir vergisi hesaplama, kümülatif gelir vergisi hesaplama, gelir vergisi dilimleri, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gelir-vergisi{% endblock %}
-{% block og_title %}Gelir Vergisi Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block og_title %}Gelir Vergisi Hesaplama 2026 | Ücret ve Kümülatif Matrah{% endblock %}
 {% block og_desc %}Ücret, maaş ve diğer gelirler için 2026 gelir vergisi dilimlerine göre kümülatif matrah üzerinden hesaplama yapın.{% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">Gelir Vergisi Hesaplama 2026</h1>
                 <p class="lead text-muted mb-0">
-                    Ücret, maaş ve ücret dışı gelirler için gelir vergisi dilimlerine göre kümülatif vergi matrahı üzerinden hızlı hesaplama yapın.
+                    Ücret, maaş, ücret dışı gelir ve kümülatif vergi matrahı için gelir vergisi dilimlerine göre hızlı hesaplama yapın.
                 </p>
             </header>
 
@@ -213,6 +213,30 @@
                             <h3 class="h6 fw-bold mb-2">Asgari ücret istisnası ne zaman uygulanır?</h3>
                             <p class="small text-muted mb-0">
                                 Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold mb-2">2026 gelir vergisi nasıl hesaplanır?</h3>
+                            <p class="small text-muted mb-0">
+                                Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold mb-2">Ücret gelir vergisinde kümülatif matrah neden gerekir?</h3>
+                            <p class="small text-muted mb-0">
+                                Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold mb-2">Maaş ve ücret dışı gelir hesabı aynı mı?</h3>
+                            <p class="small text-muted mb-0">
+                                Gelir vergisi tarifesi aynı yapıya sahip olsa da ücret gelirlerinde asgari ücret istisnası ve aylık kümülatif matrah etkisi ayrıca değerlendirilir.
                             </p>
                         </div>
                     </div>
@@ -586,6 +610,30 @@ document.addEventListener("DOMContentLoaded", () => {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "2026 gelir vergisi nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ücret gelir vergisinde kümülatif matrah neden gerekir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Maaş ve ücret dışı gelir hesabı aynı mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gelir vergisi tarifesi aynı yapıya sahip olsa da ücret gelirlerinde asgari ücret istisnası ve aylık kümülatif matrah etkisi ayrıca değerlendirilir."
       }
     }
   ]
