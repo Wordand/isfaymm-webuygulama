@@ -2614,14 +2614,15 @@ def delete_donem_matrah(id):
         if not user_id or not mukellef_id:
             rows = _guest_list("guest_donem_matrah_list")
             removed = next((r for r in rows if int(r.get("id") or 0) == int(id)), None)
+            was_active_selection = bool(removed and session.get("active_donem_text") == removed.get("donem_text"))
             rows = [r for r in rows if int(r.get("id") or 0) != int(id)]
             session["guest_donem_matrah_list"] = rows
-            if removed and session.get("active_donem_text") == removed.get("donem_text"):
+            if was_active_selection:
                 session.pop("active_donem_text", None)
                 session.pop("active_tesvik_id", None)
                 session.pop("current_tesvik_id", None)
             session.modified = True
-            return jsonify({"status": "success", "selection_cleared": bool(removed and session.get("active_donem_text") is None)})
+            return jsonify({"status": "success", "selection_cleared": was_active_selection})
 
         with get_conn() as conn:
             c = conn.cursor()

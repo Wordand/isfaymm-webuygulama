@@ -439,6 +439,7 @@
   }
   .ikv-tevsi-toggle .form-check-label {
     color: #0f172a;
+    margin-left: 2ch;
   }
   .ikv-left-stack.ikv-sabit-open .ikv-donem-card,
   .ikv-left-stack.ikv-sabit-open .ikv-tevsi-card {
@@ -753,7 +754,10 @@
         }
         return;
       }
+      const data = await res.json().catch(() => ({}));
       const row = document.getElementById('pool-row-' + id);
+      const deletedDonem = row ? (row.getAttribute('data-donem') || '') : '';
+      const shouldRefreshSelection = !!data.selection_cleared || (!!deletedDonem && deletedDonem === poolActiveDonemText);
       if (row) row.remove();
       if (window.Swal) {
         await Swal.fire({
@@ -763,6 +767,9 @@
           timer: 1100,
           showConfirmButton: false
         });
+      }
+      if (shouldRefreshSelection) {
+        window.location.href = '?sekme=donem';
       }
     } catch (e) {
       if (window.Swal) {
@@ -857,6 +864,10 @@
   async function poolGoCalculation(btn) {
     const donem = btn?.dataset?.donem || '';
     const belge = btn?.dataset?.belge || '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Hazırlanıyor...';
+    }
     const html = `
       <div class="text-start">
         <div class="mb-2"><strong>Dönem:</strong> ${donem || '-'}</div>
@@ -868,12 +879,14 @@
         icon: 'info',
         title: 'Hesaplamaya geçiliyor',
         html,
-        confirmButtonText: 'Devam et',
-        timer: 1800,
-        timerProgressBar: true
+        timer: 5000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
       });
     } else {
-      alert(`Hesaplamaya geçiliyor\nDönem: ${donem}\nBelge: ${belge} Nolu Belge`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
     window.location.href = '?sekme=form&start=1';
   }
