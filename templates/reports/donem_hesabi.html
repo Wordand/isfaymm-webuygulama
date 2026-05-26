@@ -224,6 +224,12 @@
                 <div class="fw-bold" id="pool_sabit_total_label">0,00 TL</div>
               </div>
               <div class="text-muted small mt-1">Bu toplam, tevsi yatırımlarda "toplam sabit kıymet tutarı" olarak kullanılır.</div>
+              <div class="d-flex justify-content-between align-items-center gap-2 mt-3 flex-wrap">
+                <div class="text-muted small" id="pool_sabit_save_status"></div>
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="poolSaveSabitOnly(this)">
+                  <i class="bi bi-check2-circle me-1"></i>Sabit Kıymetleri Kaydet
+                </button>
+              </div>
             </div>
           </div>
       </div>
@@ -1104,6 +1110,94 @@
       window.location.reload();
     } catch (e) {
       alert('Dönem matrahı kaydedilemedi (bağlantı hatası).');
+    }
+  }
+
+  async function poolSaveSabitOnly(btn) {
+    const donemText = document.getElementById('pool_donem').value || '';
+    const m = donemText.match(/^(\d{4})\s*-\s*(.+)$/);
+    const yil = m ? Number(m[1]) : null;
+    const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
+    if (!yil) {
+      if (window.Swal) Swal.fire('Eksik Bilgi', 'Sabit kıymetleri kaydetmeden önce dönem seçmelisiniz.', 'warning');
+      else alert('Sabit kıymetleri kaydetmeden önce dönem seçmelisiniz.');
+      return;
+    }
+
+    const oldHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Kaydediliyor...';
+    }
+
+    const genelOran = _getGenelOran();
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const sabitToplam = poolComputeSabitTotal();
+    const sabitJson = {
+      "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
+      "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
+      "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
+      "254": _getMaskedValue(document.getElementById('pool_sabit_254')),
+      "255": _getMaskedValue(document.getElementById('pool_sabit_255')),
+      "256": _getMaskedValue(document.getElementById('pool_sabit_256')),
+      "258": _getMaskedValue(document.getElementById('pool_sabit_258')),
+      "260": _getMaskedValue(document.getElementById('pool_sabit_260')),
+      "264": _getMaskedValue(document.getElementById('pool_sabit_264')),
+      "267": _getMaskedValue(document.getElementById('pool_sabit_267')),
+    };
+
+    const poolPayload = {
+      donem_text: donemText,
+      hesap_donemi: yil,
+      donem_turu: turu,
+      ticari_bilanco_kari: tic,
+      kkeg: kkeg,
+      indirim_istisna: ind,
+      gecmis_yil_zarari: zarar,
+      kv_matrah: matrah,
+      genel_oran: genelOran,
+      sabit_kiymet_toplam: sabitToplam,
+      sabit_kiymet_json: sabitJson
+    };
+
+    try {
+      const poolRes = await fetch('/indirimlikurumlar/donem_matrah/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(poolPayload)
+      });
+      if (!poolRes.ok) {
+        const t = await poolRes.text();
+        if (window.Swal) Swal.fire('Kayıt Hatası', 'Sabit kıymetler kaydedilemedi: ' + t, 'error');
+        else alert('Sabit kıymetler kaydedilemedi: ' + t);
+        return;
+      }
+
+      const status = document.getElementById('pool_sabit_save_status');
+      if (status) status.textContent = 'Kaydedildi.';
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Sabit kıymetler kaydedildi',
+          text: `${donemText} dönemi için sabit kıymet bilgileri kaydedildi.`,
+          timer: 1500,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
+      }
+    } catch (e) {
+      if (window.Swal) Swal.fire('Bağlantı Hatası', 'Sabit kıymetler kaydedilemedi.', 'error');
+      else alert('Sabit kıymetler kaydedilemedi.');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
+      }
     }
   }
 
