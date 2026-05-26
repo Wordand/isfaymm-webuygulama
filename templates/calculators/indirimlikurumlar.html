@@ -774,26 +774,27 @@ body, html { background: #fff !important; }
     </div>
 
     <div id="step5" class="hidden-step corporate-card">
-      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>{% if current_belge %}Aşama 3 - Cari Dönem Kazanç Bilgileri{% else %}Aşama 5 - Cari Dönem Kazanç Bilgileri{% endif %}</h5>
+      <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>{% if current_belge %}Aşama 3 - Cari Dönem Matrah ve Kazanç{% else %}Aşama 5 - Cari Dönem Matrah ve Kazanç{% endif %}</h5>
+
+      {% set _active_matrah = active_donem_matrah or {} %}
+      {% set _is_tevsi_belge = current_belge and ((current_belge.yatirim_turu1 or '')|lower == 'tevsi') %}
+      {% set _has_sabit_detail = (_active_matrah.sabit_kiymet_toplam or 0)|float > 0 %}
+      <div class="alert alert-light border d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div>
+          <div class="fw-bold text-primary">Seçili dönem verisi</div>
+          <div class="small text-muted">
+            {{ session.get('active_donem_text') or 'Dönem seçilmedi' }} dönemine ait matrah bilgileri Dönem Hesabı sayfasından alınır.
+          </div>
+        </div>
+        <a href="?sekme=donem" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+          <i class="bi bi-pencil-square me-1"></i>Dönem Hesabında Düzenle
+        </a>
+      </div>
 
       <div class="mb-3">
         <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
         <input type="text" name="yatirimdan_elde_edilen_kazanc" id="yatirimdan_elde_edilen_kazanc" class="form-control"
           placeholder="0,00 TL">
-      </div>
-
-
-
-
-      <div class="mb-3">
-        <label>Ticari Bilanço Karını Giriniz (TL):</label>
-        <input type="text" name="ticari_bilanco_kari" id="ticari_bilanco_kari" class="form-control"
-          placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically(); calculateKVMatrah();">
-      </div>
-
-      <div class="mb-3">
-        <label>KKEG Giriniz (TL):</label>
-        <input type="text" name="kkeg" id="kkeg" class="form-control" placeholder="0,00 TL" oninput="calculateKVMatrah();">
       </div>
 
       <div class="mb-3">
@@ -806,39 +807,61 @@ body, html { background: #fff !important; }
         </div>
       </div>
 
+      <div class="d-none" aria-hidden="true">
+        <input type="text" name="ticari_bilanco_kari" id="ticari_bilanco_kari" class="form-control"
+          placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically(); calculateKVMatrah();">
 
-
-
-      <div class="mb-3">
-        <label>Gerçekleşen Tevsi Yatırım Tutarını Giriniz (TL):</label>
         <input type="text" name="gerceklesen_tevsi_yatirim_tutari" id="gerceklesen_tevsi_yatirim_tutari"
-          class="form-control" placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+          class="form-control" placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()"
+          value="{{ current_belge.get('gerceklesen_tevsi_yatirim_tutari', 0) if current_belge else 0 }}">
+
+        <input type="text" name="toplam_sabit_kiymet_tutari" id="toplam_sabit_kiymet_tutari" class="form-control"
+          placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+
+        <input type="text" name="kkeg" id="kkeg" class="form-control" placeholder="0,00 TL" oninput="calculateKVMatrah();">
       </div>
 
-
-
-      <div class="mb-3">
-        <label>Toplam Sabit Kıymet Tutarını Giriniz (TL):</label>
-        <div class="input-group">
-          <span class="input-group-text info-icon-styled" onclick="showInfo('toplamSabitKiymetTutari')">
-            <i class="bi bi-info-circle"></i>
-          </span>
-          <input type="text" name="toplam_sabit_kiymet_tutari" id="toplam_sabit_kiymet_tutari" class="form-control"
-            placeholder="0,00 TL" oninput="calculateTevsiKazancAutomatically()">
+      {% if _is_tevsi_belge or _has_sabit_detail %}
+      <div class="border rounded-4 bg-light p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
+          <div>
+            <div class="fw-bold text-dark">Tevsi kazancı oranlama özeti</div>
+            <div class="small text-muted">Sabit kıymet bilgileri Dönem Hesabı sayfasından alınır; burada tekrar giriş yapılmaz.</div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="showInfo('toplamSabitKiymetTutari')">
+              <i class="bi bi-info-circle me-1"></i>Sabit kıymet
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="showInfo('tevsiYatirimdanEldeEdilenKazancTutari')">
+              <i class="bi bi-info-circle me-1"></i>Tevsi kazancı
+            </button>
+          </div>
+        </div>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <div class="p-3 bg-white border rounded-3 h-100">
+              <div class="small text-muted">Gerçekleşen Tevsi Yatırım</div>
+              <div class="fw-bold" id="tevsi_gerceklesen_summary">0,00 TL</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-white border rounded-3 h-100">
+              <div class="small text-muted">Toplam Sabit Kıymet</div>
+              <div class="fw-bold" id="tevsi_sabit_summary">0,00 TL</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-white border rounded-3 h-100">
+              <div class="small text-muted">Tevsi Kazancı</div>
+              <input type="text" name="tevsi_yatirim_kazanci" id="tevsi_yatirim_kazanci" class="form-control calculation-result fw-bold"
+                placeholder="0,00 TL" readonly>
+            </div>
+          </div>
         </div>
       </div>
-
-
-      <div class="mb-3">
-        <label>Tevsi Yatırımlardan Elde Edilen Kazanç Tutarı (TL):</label>
-        <div class="input-group">
-          <span class="input-group-text info-icon-styled" onclick="showInfo('tevsiYatirimdanEldeEdilenKazancTutari')">
-            <i class="bi bi-info-circle"></i>
-          </span>
-          <input type="text" name="tevsi_yatirim_kazanci" id="tevsi_yatirim_kazanci" class="form-control calculation-result"
-            placeholder="0,00 TL" readonly>
-        </div>
-      </div>
+      {% else %}
+        <input type="text" class="d-none" name="tevsi_yatirim_kazanci" id="tevsi_yatirim_kazanci" value="0" aria-hidden="true">
+      {% endif %}
 
       <div class="mt-4 d-flex justify-content-between">
         <button type="button" class="btn btn-modern btn-outline-secondary" onclick="goToStep4()">
@@ -1353,6 +1376,46 @@ body, html { background: #fff !important; }
     }
   }
 
+  function updateTevsiSummary() {
+    const setText = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = `${formatTL(Number(val || 0))} TL`;
+    };
+    setText("tevsi_gerceklesen_summary", getVal("gerceklesen_tevsi_yatirim_tutari"));
+    setText("tevsi_sabit_summary", getVal("toplam_sabit_kiymet_tutari"));
+  }
+
+  function applyActiveDonemMatrahToForm() {
+    const r = window.ACTIVE_DONEM_MATRAH || null;
+    if (!r) return;
+
+    safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
+    safeSet("kkeg", r.kkeg ?? 0);
+    safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+
+    if (r.sabit_kiymet_toplam != null) {
+      safeSet("toplam_sabit_kiymet_tutari", r.sabit_kiymet_toplam);
+    }
+    if (currentBelgeJSData && currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari != null) {
+      safeSet("gerceklesen_tevsi_yatirim_tutari", currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari);
+    }
+
+    const btnManual = document.getElementById("btn-manual-matrah");
+    if (btnManual) btnManual.style.display = "none";
+
+    ["ticari_bilanco_kari", "kkeg", "kv_matrah", "toplam_sabit_kiymet_tutari", "gerceklesen_tevsi_yatirim_tutari"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute("readonly", "readonly");
+      el.classList.add("disabled-input");
+      const m = maskMap[id];
+      if (m) m.updateOptions({ readonly: true });
+    });
+
+    try { calculateTevsiKazancAutomatically(); } catch (e) {}
+    updateTevsiSummary();
+  }
+
 
 
 
@@ -1429,18 +1492,18 @@ body, html { background: #fff !important; }
 
       case 'toplamSabitKiymetTutari':
         message = createJustifiedMessage(
-          "<b>Toplam Sabit Kıymet Tutarı</b> ifadesinden, Amortisman mevzuunu oluşturan iktisadi kıymetlerin anlaşılması gerekir.<br><br>" +
+          "<b>Toplam Sabit Kıymet Tutarı</b> ifadesinden, amortisman mevzuunu oluşturan iktisadi kıymetlerin anlaşılması gerekir.<br><br>" +
           "Dolayısıyla boş arazi-arsa ve amortismana tabi olmayan diğer kıymetlerle ilgili tutarlar bu hesaplamada dikkate alınmaz.<br><br>" +
-          "Sabit Kıymet tutarının hesabında bu kıymetlerin BİRİKMİŞ AMORTİSMAN DÜŞÜLMEDEN önceki brüt tutarlarının dikkate alınması gerekmektedir.<br><br>" +
-          "Bu hesaplama sırasında işletme aktifinde yer alan sabit kıymetlerin kayıtlı değeri olarak, yapılan ENFLASYON DÜZELTMESİ SONUCU oluşan değerleri dikkate alınacaktır."
+          "Sabit kıymet tutarının hesabında bu kıymetlerin <b>birikmiş amortisman düşülmeden önceki brüt tutarları</b> dikkate alınır.<br><br>" +
+          "Bu hesaplama sırasında işletme aktifinde yer alan sabit kıymetlerin kayıtlı değeri olarak, yapılan <b>enflasyon düzeltmesi sonucu oluşan değerler</b> dikkate alınacaktır."
         );
         break;
 
       case 'tevsiYatirimdanEldeEdilenKazancTutari':
         message = createJustifiedMessage(
-          "Tevsi yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmek suretiyle tespit edilebilmesi halinde, bu kazanca indirimli vergi oranı uygulanacaktır. <br><br>" +
-          "Kazancın ayrı bir şekilde tespit edilememesi halinde ise; <br><br>" +
-          "Tevsi yatırım dolayısıyla indirimli vergi oranı uygulanacak kazanç = (Gerçekleşen Tevsi Yatırım Tutarı / Toplam Sabit Kıymet Tutarı) X Ticari bilanço Karı <br><br>" +
+          "Tevsi yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmek suretiyle tespit edilebilmesi halinde, bu kazanca indirimli vergi oranı uygulanacaktır.<br><br>" +
+          "Kazancın ayrı bir şekilde tespit edilememesi halinde ise;<br><br>" +
+          "<b>Tevsi yatırım dolayısıyla indirimli vergi oranı uygulanacak kazanç</b> = (Gerçekleşen Tevsi Yatırım Tutarı / Toplam Sabit Kıymet Tutarı) x Ticari Bilanço Kârı<br><br>" +
           "Tevsi yatırımlardan elde edilen kazancın bu şekilde oranlama yapılmak suretiyle belirlenmesi seçimlik bir hak olmayıp, indirimli kurumlar vergisi uygulanacak kazancın ayrı hesaplarda izlenmek suretiyle mükellefçe tespit edilmesi esastır."
         );
         break;
@@ -3745,6 +3808,7 @@ body, html { background: #fff !important; }
         elTarget.value = kazanc.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
       }
     }
+    if (typeof updateTevsiSummary === 'function') updateTevsiSummary();
 
     // Bağımlı hesaplamayı tetikle
     if (typeof calculateKVMatrah === 'function') calculateKVMatrah();
@@ -3855,12 +3919,9 @@ body, html { background: #fff !important; }
     // Matrah verilerini dönem havuzundan form alanlarına taşıyıp devam ediyoruz.
     try {
       if (window.ACTIVE_DONEM_TEXT && window.ACTIVE_DONEM_MATRAH) {
-        const r = window.ACTIVE_DONEM_MATRAH;
-        const tic = Number((r && r.ticari_bilanco_kari) || 0);
-        const kkeg = Number((r && r.kkeg) || 0);
-        safeSet('ticari_bilanco_kari', tic);
-        safeSet('kkeg', kkeg);
-        try { calculateKVMatrah(); } catch (e) {}
+        if (typeof applyActiveDonemMatrahToForm === 'function') {
+          applyActiveDonemMatrahToForm();
+        }
         return;
       }
     } catch (e) {}
@@ -4957,6 +5018,7 @@ body, html { background: #fff !important; }
             });
           }
         } catch (e) {}
+        try { applyActiveDonemMatrahToForm(); } catch (e) {}
       } catch (e) {}
     })();
 
