@@ -786,15 +786,6 @@ body, html { background: #fff !important; }
             {{ session.get('active_donem_text') or 'Dönem seçilmedi' }} dönemine ait matrah bilgileri Dönem Hesabı sayfasından alınır.
           </div>
         </div>
-        <a href="?sekme=donem" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-          <i class="bi bi-pencil-square me-1"></i>Dönem Hesabında Düzenle
-        </a>
-      </div>
-
-      <div class="mb-3">
-        <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
-        <input type="text" name="yatirimdan_elde_edilen_kazanc" id="yatirimdan_elde_edilen_kazanc" class="form-control"
-          placeholder="0,00 TL">
       </div>
 
       <div class="mb-3">
@@ -805,6 +796,12 @@ body, html { background: #fff !important; }
             Manuel Belirle
           </button>
         </div>
+      </div>
+
+      <div class="mb-3" id="yatirim-kazanci-input-wrap">
+        <label>Yatırımdan Elde Edilen Kazanç (TL):</label>
+        <input type="text" name="yatirimdan_elde_edilen_kazanc" id="yatirimdan_elde_edilen_kazanc" class="form-control"
+          placeholder="0,00 TL">
       </div>
 
       <div class="d-none" aria-hidden="true">
@@ -822,25 +819,17 @@ body, html { background: #fff !important; }
       </div>
 
       {% if _is_tevsi_belge or _has_sabit_detail %}
-      <div class="border rounded-4 bg-light p-3 mb-3">
+      <div class="border rounded-4 bg-light p-3 mb-3" id="tevsi-oranlama-ozet-wrap">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
           <div>
             <div class="fw-bold text-dark">Tevsi kazancı oranlama özeti</div>
             <div class="small text-muted">Sabit kıymet bilgileri Dönem Hesabı sayfasından alınır; burada tekrar giriş yapılmaz.</div>
           </div>
-          <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="showInfo('toplamSabitKiymetTutari')">
-              <i class="bi bi-info-circle me-1"></i>Sabit kıymet
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="showInfo('tevsiYatirimdanEldeEdilenKazancTutari')">
-              <i class="bi bi-info-circle me-1"></i>Tevsi kazancı
-            </button>
-          </div>
         </div>
         <div class="row g-2">
           <div class="col-md-4">
             <div class="p-3 bg-white border rounded-3 h-100">
-              <div class="small text-muted">Gerçekleşen Tevsi Yatırım</div>
+              <div class="small text-muted">Başlangıçtan İtibaren Fiilen Gerçekleşen Yatırım Harcaması</div>
               <div class="fw-bold" id="tevsi_gerceklesen_summary">0,00 TL</div>
             </div>
           </div>
@@ -1385,6 +1374,23 @@ body, html { background: #fff !important; }
     setText("tevsi_sabit_summary", getVal("toplam_sabit_kiymet_tutari"));
   }
 
+  function updateInvestmentIncomeVisibility() {
+    const incomeChoice = sessionStorage.getItem("gelir_uygulama_tipi") || "";
+    const separateChoice = sessionStorage.getItem("yatirim_kazanci_ayri") || "";
+    const yatirimWrap = document.getElementById("yatirim-kazanci-input-wrap");
+    const tevsiWrap = document.getElementById("tevsi-oranlama-ozet-wrap");
+    const isTevsi = ((document.getElementById("yatirim_turu1")?.value || "").trim().toLowerCase() === "tevsi");
+
+    const showYatirimInput = incomeChoice !== "diger" && (!isTevsi || separateChoice !== "hayir");
+    const showTevsiSummary = incomeChoice !== "diger" && isTevsi && separateChoice === "hayir";
+
+    if (yatirimWrap) yatirimWrap.style.display = showYatirimInput ? "" : "none";
+    if (tevsiWrap) tevsiWrap.style.display = showTevsiSummary ? "" : "none";
+
+    if (!showYatirimInput) safeSet("yatirimdan_elde_edilen_kazanc", 0);
+    if (!showTevsiSummary) safeSet("tevsi_yatirim_kazanci", 0);
+  }
+
   function applyActiveDonemMatrahToForm() {
     const r = window.ACTIVE_DONEM_MATRAH || null;
     if (!r) return;
@@ -1396,8 +1402,9 @@ body, html { background: #fff !important; }
     if (r.sabit_kiymet_toplam != null) {
       safeSet("toplam_sabit_kiymet_tutari", r.sabit_kiymet_toplam);
     }
-    if (currentBelgeJSData && currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari != null) {
-      safeSet("gerceklesen_tevsi_yatirim_tutari", currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari);
+    if (currentBelgeJSData) {
+      const gerceklesenTevsi = currentBelgeJSData.toplam_harcama_tutari ?? currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari ?? 0;
+      safeSet("gerceklesen_tevsi_yatirim_tutari", gerceklesenTevsi);
     }
 
     const btnManual = document.getElementById("btn-manual-matrah");
@@ -1414,6 +1421,7 @@ body, html { background: #fff !important; }
 
     try { calculateTevsiKazancAutomatically(); } catch (e) {}
     updateTevsiSummary();
+    if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
   }
 
 
@@ -1557,6 +1565,7 @@ body, html { background: #fff !important; }
     const gerceklesenTevsiInput = document.getElementById('gerceklesen_tevsi_yatirim_tutari');
 
     if (!yatirimKazanciInput || !tevsiKazanciInput) return;
+    if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
 
     // 🔴 Önce HER ŞEYİ kapat
     const allInputs = [
@@ -1582,25 +1591,18 @@ body, html { background: #fff !important; }
       return; 
     }
 
+    const separateChoice = sessionStorage.getItem("yatirim_kazanci_ayri") || "";
+    if (yatirimTuru === "tevsi" && separateChoice === "hayir") {
+      return;
+    }
+
     // Tevsi türünde tevsi kazancı aktif. 2025/9903 için de aynı girişler kullanılır;
     // farkı süre ve katkı sınırları hesaplama tarafında uygulanır.
     if (yatirimTuru === "tevsi") {
-      // Tevsi kazancı aktif
-      tevsiKazanciInput.removeAttribute("readonly");
-      tevsiKazanciInput.classList.remove("disabled-input");
-
-      const m1 = maskMap["tevsi_yatirim_kazanci"];
-      if (m1) m1.updateOptions({ readonly: false });
-
-      // Tevsi girdileri aktif
-      [toplamSabitInput, gerceklesenTevsiInput].forEach(el => {
-        if (!el) return;
-        el.removeAttribute("readonly");
-        el.classList.remove("disabled-input");
-        const m = maskMap[el.id];
-        if (m) m.updateOptions({ readonly: false });
-      });
-
+      yatirimKazanciInput.removeAttribute("readonly");
+      yatirimKazanciInput.classList.remove("disabled-input");
+      const mY = maskMap["yatirimdan_elde_edilen_kazanc"];
+      if (mY) mY.updateOptions({ readonly: false });
       return;
     }
 
@@ -3525,12 +3527,9 @@ body, html { background: #fff !important; }
   async function handleInvestmentIncomeFlow() {
     const karar = (document.getElementById('karar')?.value || "").trim();
     const yatirimKazancInput = document.getElementById('yatirimdan_elde_edilen_kazanc');
-    
-    // Yardımcı fonksiyonlar main scope'tan gelir (formatTL, parseFormattedNumber, safeSet)
 
     console.log("🔹 handleInvestmentIncomeFlow() Step 1 Başlatıldı");
 
-    // 1️⃣ SORU: Ayrı Hesaplayabiliyor musunuz? (Her durumda sorulur)
     const result = await Swal.fire({
       title: 'Yatırım Kazancı Tespiti',
       html: '<div style="text-align: justify;">Yatırım kazancını ayrı bir şekilde belirleyebiliyor musunuz?</div>',
@@ -3541,8 +3540,10 @@ body, html { background: #fff !important; }
       reverseButtons: true
     });
 
-    // 2️⃣ EVET: Manuel Giriş
     if (result.isConfirmed) {
+      sessionStorage.setItem("yatirim_kazanci_ayri", "evet");
+      if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
+
       let popupTitle = 'Yatırımdan Elde Edilen Kazanç (TL)';
       if (karar === "2025/9903") popupTitle = 'Yatırımdan Elde Edilen Kazanç (2025/9903)';
 
@@ -3555,12 +3556,8 @@ body, html { background: #fff !important; }
         cancelButtonText: 'Vazgeç',
         reverseButtons: true,
         didOpen: () => {
-             // 1. Madde Çözümü: Manuel giriş popup'ında da cursor sorunu olmasın
              const input = Swal.getInput();
              if (input) {
-                 input.addEventListener('input', (e) => {
-                     // Anlık formatlama yapma, kullanıcının yazmasına izin ver
-                 });
                  input.addEventListener('blur', (e) => {
                      const val = parseFormattedNumber(e.target.value);
                      e.target.value = formatTL(val);
@@ -3571,188 +3568,28 @@ body, html { background: #fff !important; }
 
       if (inputResult.isConfirmed && inputResult.value && yatirimKazancInput) {
         const val = parseFormattedNumber(inputResult.value);
-        // Güvenli set (IMask varsa internal state güncellenir)
         safeSet('yatirimdan_elde_edilen_kazanc', val);
-        
-        // Tevsi alanlarını temizle (Çünkü manuel giriş yapıldı)
-        safeSet('gerceklesen_tevsi_yatirim_tutari', 0);
-        safeSet('toplam_sabit_kiymet_tutari', 0);
         safeSet('tevsi_yatirim_kazanci', 0); 
       }
       
-      // Evet diyenler için standart akış (Matrah/KKEG sorusu GELİR)
       if (typeof promptTicariKariVeKKEGThenGoTo6 === 'function') {
           promptTicariKariVeKKEGThenGoTo6();
       }
+      if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
       _updateStepDisplay(5);
       
     } 
-    // 3️⃣ HAYIR: Tevsi Hesaplama Popup (YENİ İSTEK)
     else if (result.dismiss === Swal.DismissReason.cancel) {
+       sessionStorage.setItem("yatirim_kazanci_ayri", "hayir");
+       safeSet('yatirimdan_elde_edilen_kazanc', 0);
 
-       // Bilgilendirme
-       await Swal.fire({
-          title: 'Bilgilendirme',
-          text: 'Yatırım kazancı ayrı hesaplanamadığı için oranlama yapılacaktır.',
-          icon: 'info',
-          timer: 2000,
-          showConfirmButton: false
-       });
+       const harcamaVal = getVal("toplam_harcama_tutari") || getVal("cari_harcama_tutari") || 0;
+       safeSet('gerceklesen_tevsi_yatirim_tutari', harcamaVal);
 
-       // Harcama Tutarını mantıklı bir sırayla bul
-       let harcamaEl = document.getElementById('toplam_harcama_tutari');
-       // Alternatif: Cari Harcama Tutarı (Step 3'teki diğer alan)
-       if (!harcamaEl || !harcamaEl.value) {
-            harcamaEl = document.getElementById('cari_harcama_tutari'); 
-       }
-       
-       let harcamaVal = 0;
-       if (harcamaEl) {
-           // Varsa maskeden ham veriyi çek (En güvenli yöntem)
-           if (typeof maskMap !== 'undefined' && maskMap[harcamaEl.id]) {
-               harcamaVal = parseFloat(maskMap[harcamaEl.id].unmaskedValue) || 0;
-           } else {
-               // Yoksa value parse et
-               harcamaVal = parseFormattedNumber(harcamaEl.value);
-           }
-       }
-       const harcamaStr = formatTL(harcamaVal);
-
-       const formResult = await Swal.fire({
-        title: 'Tevsi Kazanç Hesaplama Verileri',
-        html: `
-            <div style="text-align:left; font-size:14px;">
-                <div style="margin-bottom:10px;">
-                    <label>Ticari Bilanço Kârı (TL)</label>
-                    <input id="swal_new_ticari" class="swal2-input" placeholder="0,00" style="width:100%; margin:5px 0;">
-                </div>
-                
-                <div style="margin-bottom:10px;">
-                    <label>Toplam Sabit Kıymet Tutarı (TL)</label>
-                    <input id="swal_new_sabit" class="swal2-input" placeholder="0,00" style="width:100%; margin:5px 0;">
-                </div>
-                
-                <div style="margin-bottom:10px;">
-                    <label>Gerçekleşen Toplam Yatırım/Harcama (TL)</label>
-                    <div style="display:flex; gap:5px; align-items:center;">
-                       <input id="swal_new_harcama" class="swal2-input" value="${harcamaStr}" readonly style="width:100%; margin:0; background:#f0f0f0;">
-                       <button type="button" id="btn-edit-harcama" class="btn btn-sm btn-outline-secondary" title="Düzenle">
-                         <i class="bi bi-pencil-fill"></i>
-                       </button>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom:10px; padding:10px; background:#e8f5e9; border-radius:5px;">
-                    <label style="font-weight:bold; color:#2e7d32;">Tevsi Yatırımdan Elde Edilen Kazanç (TL)</label>
-                    <input id="swal_new_kazanc" class="swal2-input" placeholder="0,00" readonly style="width:100%; margin:5px 0; background:#fff; border-color:#2e7d32; font-weight:bold;">
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Kaydet ve İlerle',
-        cancelButtonText: 'Vazgeç',
-        customClass: {
-          popup: 'swal2-green-theme-popup'
-        },
-        didOpen: () => {
-            const popup = Swal.getPopup();
-            const tEl = popup.querySelector('#swal_new_ticari');
-            const sEl = popup.querySelector('#swal_new_sabit');
-            const hEl = popup.querySelector('#swal_new_harcama');
-            const kEl = popup.querySelector('#swal_new_kazanc');
-            const editBtn = popup.querySelector('#btn-edit-harcama');
-            
-            if (!tEl || !sEl || !kEl) return;
-
-            // IMask ile anlık format ve güvenli giriş
-            const maskOp = {
-                mask: Number,
-                scale: 2,
-                signed: false,
-                thousandsSeparator: '.',
-                padFractionalZeros: true,
-                normalizeZeros: true,
-                radix: ','
-            };
-
-            const tMask = IMask(tEl, maskOp);
-            const sMask = IMask(sEl, maskOp);
-            const hMask = IMask(hEl, maskOp);
-
-            // Düzenle butonu
-            if (editBtn) {
-                editBtn.addEventListener('click', () => {
-                   hEl.readOnly = false;
-                   hEl.style.backgroundColor = '#fff';
-                   hEl.focus();
-                });
-            }
-
-            const calc = () => {
-               // En güvenli ve kesin yöntem: IMask'ın sayısal değerini kullanmak
-               // (unmaskedValue nokta ondalıklı string döner: "80000.50")
-               const ticari = Number(tMask.unmaskedValue) || 0;
-               const sabit = Number(sMask.unmaskedValue) || 0;
-               const harcama = Number(hMask.unmaskedValue) || 0;
-               
-               let kazanc = 0;
-               if (sabit > 0) {
-                   // Formül: (Harcama / Sabit) * Ticari
-                   let oran = harcama / sabit;
-                   kazanc = oran * ticari;
-                   
-                   // Kazanç, Ticari Kardan büyük olamaz (Mantıken)
-                   if (kazanc > ticari) kazanc = ticari;
-                   if (kazanc < 0) kazanc = 0;
-                   
-                   kEl.value = formatTL(kazanc);
-               } else {
-                   kEl.value = "0,00";
-               }
-            };
-            
-            tMask.on("accept", calc);
-            sMask.on("accept", calc);
-            hMask.on("accept", calc);
-            
-            // İlk açılışta hesapla
-            tMask.updateValue();
-            sMask.updateValue();
-            
-            // Harcama değerini number olarak set et (String parse hatasını önlemek için)
-            if (typeof harcamaVal !== 'undefined') {
-                hMask.typedValue = Number(harcamaVal);
-            } else {
-                 hMask.updateValue();
-            }
-            
-            calc();
-        },
-        preConfirm: () => {
-            const popup = Swal.getPopup();
-            return {
-                ticari: popup.querySelector('#swal_new_ticari').value,
-                sabit: popup.querySelector('#swal_new_sabit').value,
-                kazanc: popup.querySelector('#swal_new_kazanc').value
-            };
-        }
-       });
-
-       if (formResult.isConfirmed) {
-           const { ticari, sabit, kazanc } = formResult.value;
-           
-           safeSet('ticari_bilanco_kari', parseFormattedNumber(ticari));
-           safeSet('toplam_sabit_kiymet_tutari', parseFormattedNumber(sabit));
-           safeSet('gerceklesen_tevsi_yatirim_tutari', harcamaVal); 
-           safeSet('tevsi_yatirim_kazanci', parseFormattedNumber(kazanc));
-           
-           if (yatirimKazancInput) yatirimKazancInput.value = "";
-
-           Swal.fire('✅ Hesaplandı', 'Tevsi kazancı başarıyla hesaplandı.', 'success');
-           
-           // DOĞRUDAN STEP 5'e GEÇ (Matrah/KKEG sorusu ATLANIR)
-           _updateStepDisplay(5);
-       }
+       if (typeof applyActiveDonemMatrahToForm === "function") applyActiveDonemMatrahToForm();
+       if (typeof calculateTevsiKazancAutomatically === "function") calculateTevsiKazancAutomatically();
+       if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
+       _updateStepDisplay(5);
     }
   }
 
@@ -4396,6 +4233,13 @@ body, html { background: #fff !important; }
       const tesvikIdEl = document.getElementById("tesvik_id");
       if (tesvikIdEl) tesvikIdEl.value = "";
 
+      if (FORM_BELGE_BAZLI_AKIS && typeof restoreCurrentBelgeFields === "function") {
+        restoreCurrentBelgeFields();
+      }
+      if (FORM_BELGE_BAZLI_AKIS && typeof applyActiveDonemMatrahToForm === "function") {
+        applyActiveDonemMatrahToForm();
+      }
+
       Swal.fire({
         icon: "success",
         title: keepHeader ? "Form temizlendi (Belge No ve Tarih korundu)" : "Form tamamen temizlendi",
@@ -4405,10 +4249,45 @@ body, html { background: #fff !important; }
         position: "top-end"
       });
 
-      // 📌 Temizleme sonrası Step 1'e dön
       if (typeof _updateStepDisplay === "function") {
-        _updateStepDisplay(1);
+        _updateStepDisplay(FORM_BELGE_BAZLI_AKIS ? 3 : 1);
       }
+    });
+  }
+
+  function restoreCurrentBelgeFields() {
+    if (!currentBelgeJSData) return;
+
+    const dataMap = {
+      karar: currentBelgeJSData.karar,
+      basvuru_tarihi: convertToInputDateFormat(currentBelgeJSData.basvuru_tarihi),
+      belge_alinma_tarihi: convertToInputDateFormat(currentBelgeJSData.belge_alinma_tarihi),
+      yatirim_baslama_tarihi: convertToInputDateFormat(currentBelgeJSData.belge_tarihi),
+      fiili_tamamlanma_tarihi: convertToInputDateFormat(currentBelgeJSData.fiili_tamamlanma_tarihi),
+      vize_basvuru_tarihi: convertToInputDateFormat(currentBelgeJSData.vize_basvuru_tarihi),
+      ilk_indirim_yili: currentBelgeJSData.ilk_indirim_yili,
+      yatirim_turu1: currentBelgeJSData.yatirim_turu1,
+      yatirim_turu2: currentBelgeJSData.yatirim_turu2,
+      program_turu: currentBelgeJSData.program_turu,
+      vize_durumu: currentBelgeJSData.vize_durumu,
+      il: currentBelgeJSData.il,
+      osb: currentBelgeJSData.osb,
+      bolge: currentBelgeJSData.bolge,
+      belge_no: currentBelgeJSData.belge_no,
+      belge_no_hidden: currentBelgeJSData.belge_no,
+      belge_tarihi: currentBelgeJSData.belge_tarihi,
+      belge_tarihi_hidden: currentBelgeJSData.belge_tarihi,
+      bolge_hidden: currentBelgeJSData.bolge,
+      katki_orani: currentBelgeJSData.katki_orani,
+      vergi_orani: currentBelgeJSData.vergi_orani,
+      diger_oran: currentBelgeJSData.diger_oran
+    };
+
+    Object.entries(dataMap).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (!el || value == null) return;
+      if (typeof safeSet === "function") safeSet(id, value);
+      else el.value = value;
     });
   }
 

@@ -164,15 +164,19 @@
             <label class="form-check-label fw-semibold" for="pool_toggle_sabit">Tevsi oranlama yapacağım (sabit kıymet gir)</label>
           </div>
         </div>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="poolShowTevsiInfo('sabit')">
+            <i class="bi bi-info-circle me-1"></i>Sabit kıymet
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="poolShowTevsiInfo('kazanc')">
+            <i class="bi bi-info-circle me-1"></i>Tevsi kazancı
+          </button>
+        </div>
 
         <div class="mt-2 p-3 bg-white border rounded-3" id="pool_sabit_wrap" style="display:none;">
           <div class="fw-semibold mb-2">Sabit Kıymet Detayı (Tevsi / Oranlama)</div>
           <div class="text-muted small mb-2">Tevsi yatırımlarda oranlama yapacaksanız doldurun. Diğer durumlarda boş bırakabilirsiniz.</div>
             <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label">250 - Arazi ve Arsalar</label>
-                <input id="pool_sabit_250" type="text" class="form-control pool-sabit-input" placeholder="0,00">
-              </div>
               <div class="col-md-6">
                 <label class="form-label">251 - Yeraltı ve Yerüstü Düzenleri</label>
                 <input id="pool_sabit_251" type="text" class="form-control pool-sabit-input" placeholder="0,00">
@@ -489,6 +493,18 @@
     return el ? Number(el.value) : 25;
   }
 
+  function poolShowTevsiInfo(type) {
+    const isSabit = type === 'sabit';
+    Swal.fire({
+      icon: 'info',
+      title: isSabit ? 'Toplam Sabit Kıymet Tutarı' : 'Tevsi Kazancı Oranlama',
+      html: isSabit
+        ? 'Toplam sabit kıymet tutarı, amortisman mevzuunu oluşturan iktisadi kıymetlerin <b>brüt tutarıdır</b>.<br><br>Boş arazi/arsa ve amortismana tabi olmayan kıymetler bu hesaplamaya dahil edilmez.'
+        : 'Tevsi kazancı ayrı hesaplarda izlenemiyorsa oranlama yapılır:<br><br><b>(Gerçekleşen Tevsi Yatırım Tutarı / Toplam Sabit Kıymet Tutarı) x Ticari Bilanço Kârı</b><br><br>Sabit kıymet değerlerinde birikmiş amortisman düşülmeden önceki, varsa enflasyon düzeltmesi sonrası değerler esas alınır.',
+      confirmButtonText: 'Tamam'
+    });
+  }
+
   // Apply IMask if available (same style as other pages)
   function _tryMask(el) {
     try {
@@ -519,7 +535,7 @@
       const el = document.getElementById(id);
       if (el) _masks.set(id, _tryMask(el));
     });
-    ['pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'].forEach(id => {
+    ['pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'].forEach(id => {
       const el = document.getElementById(id);
       if (el) _masks.set(id, _tryMask(el));
     });
@@ -546,7 +562,7 @@
 
   function poolClearMatrahInputs() { 
     const ids = ['pool_ticari', 'pool_kkeg', 'pool_indirim', 'pool_zarar',
-      'pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'
+      'pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'
     ]; 
     ids.forEach(id => { 
       const el = document.getElementById(id); 
@@ -562,7 +578,7 @@
   } 
 
   function poolComputeSabitTotal() {
-    const ids = ['pool_sabit_250','pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'];
+    const ids = ['pool_sabit_251','pool_sabit_252','pool_sabit_253','pool_sabit_254','pool_sabit_255','pool_sabit_256','pool_sabit_258','pool_sabit_260','pool_sabit_264','pool_sabit_267'];
     let sum = 0;
     ids.forEach((id) => {
       sum += _getMaskedValue(document.getElementById(id));
@@ -617,7 +633,6 @@
     const matrah = Math.max(0, (tic + kkeg - ind - zarar));
     const sabitToplam = poolComputeSabitTotal();
     const sabitJson = {
-      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
       "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
       "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
       "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
@@ -695,7 +710,6 @@
       const raw = row.getAttribute('data-sabit-json') || '{}';
       const obj = JSON.parse(raw || "{}");
       const map = {
-        "250": "pool_sabit_250",
         "251": "pool_sabit_251",
         "252": "pool_sabit_252",
         "253": "pool_sabit_253",
@@ -912,7 +926,6 @@
       const matrah = Math.max(0, (tic + kkeg - ind - zarar));
       const sabitToplam = poolComputeSabitTotal();
       const sabitJson = {
-        "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
         "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
         "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
         "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
@@ -1031,7 +1044,6 @@
     const matrah = Math.max(0, (tic + kkeg - ind - zarar));
     const sabitToplam = poolComputeSabitTotal();
     const sabitJson = {
-      "250": _getMaskedValue(document.getElementById('pool_sabit_250')),
       "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
       "252": _getMaskedValue(document.getElementById('pool_sabit_252')),
       "253": _getMaskedValue(document.getElementById('pool_sabit_253')),
