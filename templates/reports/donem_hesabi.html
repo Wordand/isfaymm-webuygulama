@@ -277,9 +277,9 @@
                     <td>
                       {% set _vize = (d.vize_durumu or '')|lower %}
                       {% if 'evet' in _vize or 'işletme' in _vize or 'isletme' in _vize %}
-                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Vize Yapıldı</span>
+                        <span class="badge rounded-pill" style="background:#0f7a3b; color:#ffffff; border:1px solid #0b5f2d;">Vize Yapıldı</span>
                       {% else %}
-                        <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle">Yatırım Döneminde</span>
+                        <span class="badge rounded-pill" style="background:#fff3cd; color:#7a4b00; border:1px solid #f0c36a;">Yatırım Döneminde</span>
                       {% endif %}
                     </td>
                     <td class="text-end">
