@@ -497,11 +497,21 @@
     const isSabit = type === 'sabit';
     Swal.fire({
       icon: 'info',
-      title: isSabit ? 'Toplam Sabit Kıymet Tutarı' : 'Tevsi Kazancı Oranlama',
+      title: 'Bilgilendirme',
       html: isSabit
-        ? 'Toplam sabit kıymet tutarı, amortisman mevzuunu oluşturan iktisadi kıymetlerin <b>brüt tutarıdır</b>.<br><br>Boş arazi/arsa ve amortismana tabi olmayan kıymetler bu hesaplamaya dahil edilmez.'
-        : 'Tevsi kazancı ayrı hesaplarda izlenemiyorsa oranlama yapılır:<br><br><b>(Gerçekleşen Tevsi Yatırım Tutarı / Toplam Sabit Kıymet Tutarı) x Ticari Bilanço Kârı</b><br><br>Sabit kıymet değerlerinde birikmiş amortisman düşülmeden önceki, varsa enflasyon düzeltmesi sonrası değerler esas alınır.',
-      confirmButtonText: 'Tamam'
+        ? '<div class="text-start">' +
+          '<p><b>Toplam Sabit Kıymet Tutarı</b> ifadesinden, amortisman mevzuunu oluşturan iktisadi kıymetlerin anlaşılması gerekir.</p>' +
+          '<p>Dolayısıyla boş arazi-arsa ve amortismana tabi olmayan diğer kıymetlerle ilgili tutarlar bu hesaplamada dikkate alınmaz.</p>' +
+          '<p>Sabit kıymet tutarının hesabında bu kıymetlerin <b>birikmiş amortisman düşülmeden önceki brüt tutarlarının</b> dikkate alınması gerekmektedir.</p>' +
+          '<p class="mb-0">Bu hesaplama sırasında işletme aktifinde yer alan sabit kıymetlerin kayıtlı değeri olarak, yapılan <b>enflasyon düzeltmesi sonucu</b> oluşan değerleri dikkate alınacaktır.</p>' +
+          '</div>'
+        : '<div class="text-start">' +
+          '<p>Tevsi yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmek suretiyle tespit edilebilmesi halinde, bu kazanca indirimli vergi oranı uygulanacaktır.</p>' +
+          '<p>Kazancın ayrı bir şekilde tespit edilememesi halinde ise;</p>' +
+          '<p>Tevsi yatırım dolayısıyla indirimli vergi oranı uygulanacak kazanç = <b>(Gerçekleşen Tevsi Yatırım Tutarı / Toplam Sabit Kıymet Tutarı) x Ticari bilanço Kârı</b></p>' +
+          '<p class="mb-0">Tevsi yatırımlardan elde edilen kazancın bu şekilde oranlama yapılmak suretiyle belirlenmesi seçimlik bir hak olmayıp, indirimli kurumlar vergisi uygulanacak kazancın ayrı hesaplarda izlenmek suretiyle mükellefçe tespit edilmesi esastır.</p>' +
+          '</div>',
+      confirmButtonText: 'OK'
     });
   }
 
