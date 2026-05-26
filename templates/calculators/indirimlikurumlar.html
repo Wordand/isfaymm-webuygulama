@@ -3121,6 +3121,12 @@ body, html { background: #fff !important; }
 
 
   function calculateKVMatrah() {
+    if (window.ACTIVE_DONEM_MATRAH) {
+      const r = window.ACTIVE_DONEM_MATRAH || {};
+      const aktifMatrah = Number(r.matrah ?? r.kv_matrah ?? 0) || 0;
+      safeSet("kv_matrah", aktifMatrah);
+      return;
+    }
 
     // getVal → hem masked hem unmasked alanları otomatik çözer
     const t = getVal("ticari_bilanco_kari");
