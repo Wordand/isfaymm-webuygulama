@@ -71,6 +71,38 @@ def _sort_donem_matrah(rows):
     )
 
 
+def _num_for_json(value):
+    try:
+        if isinstance(value, str):
+            v = value.strip().replace("TL", "").replace(" ", "")
+            if "," in v:
+                v = v.replace(".", "").replace(",", ".")
+            return float(v or 0)
+        return float(value or 0)
+    except Exception:
+        return 0.0
+
+
+def _normalize_donem_matrah(row):
+    if not row:
+        return None
+    data = dict(row)
+    numeric_keys = (
+        "ticari_bilanco_kari",
+        "kkeg",
+        "indirim_istisna",
+        "gecmis_yil_zarari",
+        "kv_matrah",
+        "genel_oran",
+        "sabit_kiymet_toplam",
+    )
+    for key in numeric_keys:
+        data[key] = _num_for_json(data.get(key))
+    data["ticari"] = data.get("ticari_bilanco_kari", 0.0)
+    data["matrah"] = data.get("kv_matrah", 0.0)
+    return data
+
+
 
 
 explanations = [
@@ -747,12 +779,12 @@ def index():
 def hesaplama_araci():
     return render_indirimlikurumlar(
         seo_context={
-            "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Excel Tablo ve Yatırım Teşvik | İSFA YMM",
-            "page_description": "2012/3305 ve 2025/9903 kararlarına göre indirimli kurumlar vergisi, yatırıma katkı tutarı, yatırım teşvik vergi indirimi ve Excel tablo ihtiyacını canlı hesaplama aracıyla hesaplayın.",
-            "page_keywords": "indirimli kurumlar vergisi hesaplama, indirimli kurumlar vergisi hesaplama tablosu excel, yatırım teşvik belgesi kurumlar vergisi indirimi hesaplama excel, yatırım teşvik hesaplama tablosu excel 2025, yatırıma katkı tutarı hesaplama, KVK 32/A hesaplama, 2025/9903 teşvik, İSFA YMM",
+            "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı | İSFA YMM",
+            "page_description": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini ücretsiz hesaplayın.",
+            "page_keywords": "indirimli kurumlar vergisi hesaplama, indirimli kurumlar vergisi hesaplama tablosu excel, yatırım teşvik belgesi vergi indirimi hesaplama, yatırım teşvik belgesi kurumlar vergisi indirimi hesaplama excel, yatırım teşvik hesaplama tablosu excel 2025, yatırıma katkı tutarı hesaplama, 2012/3305 indirimli kurumlar vergisi, 2025/9903 indirimli kurumlar vergisi, KVK 32/A hesaplama, İSFA YMM",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/",
-            "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Excel Tablo ve Yatırım Teşvik",
-            "page_og_desc": "Yatırım teşvik belgeleri için yatırıma katkı tutarı, vergi indirimi ve dönem bazlı indirimli kurumlar vergisi hesaplama aracı.",
+            "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı",
+            "page_og_desc": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini hesaplayın.",
         },
     )
 
@@ -877,6 +909,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                 _active_text = session.get("active_donem_text")
                 if _active_text:
                     active_donem_matrah = next((x for x in donem_matrah_list if x.get("donem_text") == _active_text), None)
+                    active_donem_matrah = _normalize_donem_matrah(active_donem_matrah)
             except Exception:
                 active_donem_matrah = None
         except Exception:
@@ -976,6 +1009,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         active_text = session.get("active_donem_text")
         if active_text:
             active_donem_matrah = next((x for x in donem_matrah_list if x.get("donem_text") == active_text), None)
+            active_donem_matrah = _normalize_donem_matrah(active_donem_matrah)
 
         view_id = request.args.get("view", type=int)
         if sekme == "tesvik" and view_id:
@@ -2521,7 +2555,6 @@ def save_donem_matrah():
             rows.append(row)
             session["guest_donem_matrah_list"] = rows
             session["active_donem_text"] = donem_text
-            session.pop("active_tesvik_id", None)
             session.modified = True
             return jsonify({"status": "success", "id": pool_id, "donem_text": donem_text})
 
@@ -2599,7 +2632,6 @@ def save_donem_matrah():
                 conn.commit()
 
         session["active_donem_text"] = donem_text
-        session.pop("active_tesvik_id", None)
         return jsonify({"status": "success", "id": pool_id, "donem_text": donem_text})
 
     except Exception as e:

@@ -4,7 +4,7 @@
 {% if selected_item %}
 {{ selected_item.title }} - 2026 Güncel KDV Genel Uygulama Tebliği
 {% else %}
-2026 Güncel KDV Genel Uygulama Tebliği | Madde Madde & AI Destekli Arama
+KDV Genel Uygulama Tebliği 2026 | Güncel Mevzuat ve Madde Arama | İSFA YMM
 {% endif %}
 {% endblock %}
 
@@ -12,7 +12,17 @@
 {% if selected_item %}
 2026 Güncel KDV Tebliği {{ selected_item.title }} bölümü tam metni. Aranabilir, not alınabilir ve güncel KDV mevzuat rehberi.
 {% else %}
-KDV Genel Uygulama Tebliği 2026 güncel tam metni. Madde madde hızlı arama, AI destekli mevzuat asistanı ve not alma özellikli dijital rehber.
+KDV Genel Uygulama Tebliği 2026 güncel tam metni. KDV tevkifat, iade, özel matrah, indirimli oran ve ithalatta KDV konularını madde madde inceleyin.
+{% endif %}
+{% endblock %}
+
+{% block canonical_url %}https://www.isfaymm.com/mevzuat/kdv-tebligi{% if selected_item %}/{{ selected_item.uid|replace('/', '-') }}{% endif %}{% endblock %}
+
+{% block og_title %}
+{% if selected_item %}
+{{ selected_item.title }} | KDV Genel Uygulama Tebliği | İSFA YMM
+{% else %}
+KDV Genel Uygulama Tebliği 2026 | Güncel Mevzuat ve Madde Arama | İSFA YMM
 {% endif %}
 {% endblock %}
 
@@ -20,7 +30,23 @@ KDV Genel Uygulama Tebliği 2026 güncel tam metni. Madde madde hızlı arama, A
 {% if selected_item %}
 KDV Tebliği: {{ selected_item.title }} detaylı açıklaması ve mevzuat rehberi.
 {% else %}
-KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
+KDV Genel Uygulama Tebliği 2026 güncel metni, tevkifat, iade, özel matrah ve indirimli oran uygulamaları için madde madde dijital rehber.
+{% endif %}
+{% endblock %}
+
+{% block twitter_title %}
+{% if selected_item %}
+{{ selected_item.title }} | KDV Tebliği
+{% else %}
+KDV Genel Uygulama Tebliği 2026 | İSFA YMM
+{% endif %}
+{% endblock %}
+
+{% block twitter_desc %}
+{% if selected_item %}
+KDV Genel Uygulama Tebliği {{ selected_item.title }} bölümü güncel metni ve açıklamalı mevzuat rehberi.
+{% else %}
+KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve indirimli oran başlıklarıyla madde madde arama.
 {% endif %}
 {% endblock %}
 
@@ -81,7 +107,7 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
                         <!-- Yükleniyor Spinner -->
                         <div class="text-center py-5" id="navSpinner">
                             <div class="spinner-grow text-primary" role="status"></div>
-                            <div class="small mt-2 text-muted fw-semibold">Mevzuat Hazırlanıyor...</div>
+                            <div class="small mt-2 text-muted fw-semibold">KDV madde listesi yükleniyor...</div>
                         </div>
                     </div>
                 </div>
@@ -145,11 +171,40 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
                             <h1 class="h2 fw-black text-dark mb-0" style="letter-spacing: -1px;">KDV Genel Uygulama <span class="text-primary-gradient">Tebliği</span></h1>
                         </div>
                         <p class="small text-muted mx-auto mb-0" style="max-width: 500px;">
-                            Modern, hızlı ve yapay zeka destekli mevzuat rehberiniz.
+                            2026 güncel KDV Genel Uygulama Tebliği tam metni, madde madde arama ve açıklamalı KDV mevzuat rehberi.
                         </p>
 
+                        <section class="kdv-static-intro text-start mx-auto mt-4">
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-lg-7">
+                                    <div class="kdv-intro-panel h-100">
+                                        <span class="kdv-intro-eyebrow">Güncel KDV Mevzuatı</span>
+                                        <h2>KDV Genel Uygulama Tebliği 2026</h2>
+                                        <p>
+                                            KDV tevkifat, KDV iadesi, özel matrah, indirimli oran, ithalatta KDV ve istisna uygulamalarını güncel KDV Genel Uygulama Tebliği kapsamında madde madde inceleyebilirsiniz.
+                                        </p>
+                                        <p class="mb-0">
+                                            Sol menüden ilgili bölüme geçebilir, madde numarasıyla arama yapabilir veya tebliğ metni içinde anahtar kelimeyle hızlıca sonuç bulabilirsiniz.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="kdv-topic-panel h-100">
+                                        <h3>Öne çıkan KDV başlıkları</h3>
+                                        <div class="kdv-topic-links">
+                                            <a href="/mevzuat/kdv-tevkifat">KDV Tevkifat Rehberi</a>
+                                            <a href="/hesaplama-araclari/kdv-tevkifat">KDV Tevkifat Hesaplama</a>
+                                            <a href="/hesaplama-araclari/ithalat-kdv">İthalatta KDV Hesaplama</a>
+                                            <a href="/mevzuat/kdv-tebligi/IV-A3-2-2.2">KDV İadesi Mahsup Sonrası Nakden İade</a>
+                                            <a href="/mevzuat/kdv-tebligi">KDV Genel Uygulama Tebliği Tam Metin</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Main Search Section (Visible after Intro) -->
-                        <div id="mainSearchSection" class="search-section mt-4 mx-auto" style="max-width: 1200px; opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+                        <div id="mainSearchSection" class="search-section mt-4 mx-auto" style="max-width: 1200px; opacity: 1; transform: translateY(0); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
                             
                             <!-- AI Akıllı Arama (Vurgulanan) -->
                             <div class="ai-search-card card border-0 shadow-lg rounded-4 p-3 p-md-4 mb-4 overflow-hidden">
@@ -209,43 +264,6 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- 🎭 Premium Intro Splash (Ayrı Gelen Kısım) -->
-<div id="onboardingSplash" class="onboarding-overlay">
-    <div class="onboarding-content text-center">
-        <div class="badge rounded-pill bg-primary px-3 py-2 mb-4 animate-bounce">YENİ NESİL MEVZUAT DENEYİMİ</div>
-        <h2 class="text-white fw-bold mb-5 fs-1">Neler Sunuyoruz?</h2>
-        
-        <div class="row g-4 justify-content-center mb-5" style="max-width: 1000px;">
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.1s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-robot text-primary"></i></div>
-                    <h5>Yapay Zeka</h5>
-                    <p>Mevzuatı günlük dille sorun, AI saniyeler içinde cevaplasın.</p>
-                </div>
-            </div>
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.3s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-lightning-charge-fill text-warning"></i></div>
-                    <h5>Hızlı Erişim</h5>
-                    <p>Maddeler arası hiyerarşik bağlar ve saniyelik geçişler.</p>
-                </div>
-            </div>
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.5s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-bookmarks-fill text-info"></i></div>
-                    <h5>Kişiselleştirme</h5>
-                    <p>Notlarınızı alın, favorilerinizi ekleyin ve vurgulamalar yapın.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="onboarding-progress mx-auto">
-            <div class="progress-bar-fill"></div>
-        </div>
-        <p class="text-white-50 mt-3 small">Mevzuat Hazırlanıyor...</p>
     </div>
 </div>
 
@@ -343,6 +361,69 @@ KDV Genel Uygulama Tebliği detaylı arama motoru ve rehberi.
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
+    }
+
+    .kdv-static-intro {
+        max-width: 1200px;
+    }
+
+    .kdv-intro-panel,
+    .kdv-topic-panel {
+        background: #ffffff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        padding: 1.15rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .kdv-intro-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #0f766e;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        border-radius: 999px;
+        padding: 0.25rem 0.7rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        margin-bottom: 0.65rem;
+    }
+
+    .kdv-intro-panel h2,
+    .kdv-topic-panel h3 {
+        color: #0f172a;
+        font-weight: 900;
+        font-size: 1.2rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .kdv-intro-panel p {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .kdv-topic-links {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .kdv-topic-links a {
+        color: #0f172a;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .kdv-topic-links a:hover {
+        color: #0d6efd;
+        border-color: #93c5fd;
+        background: #eff6ff;
     }
 
     /* Onboarding Overlay Styles */

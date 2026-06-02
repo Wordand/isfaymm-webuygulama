@@ -2354,8 +2354,16 @@ th {
 .action-center {
     display: flex;
     gap: 0.45rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.action-center .btn {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+    white-space: nowrap;
 }
 
 .btn-action-icon {

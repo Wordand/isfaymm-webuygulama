@@ -24,9 +24,9 @@
 
     {# --- Twitter Paylaşımı (Opsiyonel) --- #}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="İSFA YMM - İstanbul Yeminli Mali Müşavirlik">
+    <meta name="twitter:title" content="{% block twitter_title %}İSFA YMM - İstanbul Yeminli Mali Müşavirlik{% endblock %}">
     <meta name="twitter:description"
-        content="İstanbul ve Konya'da yatırım teşvik, indirimli kurumlar vergisi ve mali danışmanlıkta profesyonel çözümler.">
+        content="{% block twitter_desc %}İstanbul ve Konya'da yatırım teşvik, indirimli kurumlar vergisi ve mali danışmanlıkta profesyonel çözümler.{% endblock %}">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/isfa-og.jpg', _external=True) }}">
 
     {# --- Favicon --- #}

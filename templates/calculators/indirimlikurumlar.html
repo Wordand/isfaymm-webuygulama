@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
-{% block title %}{{ page_title|default('İndirimli Kurumlar Vergisi Hesaplama | İSFA YMM') }}{% endblock %}
+{% block title %}{{ page_title|default('İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı | İSFA YMM') }}{% endblock %}
 
-{% block description %}{{ page_description|default('Yatırım teşvik belgesi kapsamındaki yatırımlarınız için sağlanan indirimli kurumlar vergisi avantajını saniyeler içinde ücretsiz hesaplayın.') }}{% endblock %}
-{% block keywords %}{{ page_keywords|default('indirimli kurumlar vergisi hesaplama, yatırım teşvik belgesi, yatırıma katkı tutarı, KVK 32/A, 2025/9903 teşvik, İSFA YMM') }}{% endblock %}
+{% block description %}{{ page_description|default('2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini ücretsiz hesaplayın.') }}{% endblock %}
+{% block keywords %}{{ page_keywords|default('indirimli kurumlar vergisi hesaplama, indirimli kurumlar vergisi hesaplama tablosu excel, yatırım teşvik belgesi vergi indirimi hesaplama, yatırım teşvik belgesi kurumlar vergisi indirimi hesaplama excel, yatırıma katkı tutarı hesaplama, 2012/3305 indirimli kurumlar vergisi, 2025/9903 indirimli kurumlar vergisi, KVK 32/A hesaplama, İSFA YMM') }}{% endblock %}
 {% block canonical_url %}{{ page_canonical|default(request.base_url) }}{% endblock %}
-{% block og_title %}{{ page_og_title|default(page_title|default('İndirimli Kurumlar Vergisi Hesaplama | İSFA YMM')) }}{% endblock %}
-{% block og_desc %}{{ page_og_desc|default(page_description|default('Yatırım teşvik belgesi kapsamındaki yatırımlarınız için sağlanan indirimli kurumlar vergisi avantajını saniyeler içinde ücretsiz hesaplayın.')) }}{% endblock %}
+{% block og_title %}{{ page_og_title|default(page_title|default('İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı')) }}{% endblock %}
+{% block og_desc %}{{ page_og_desc|default(page_description|default('2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini ücretsiz hesaplayın.')) }}{% endblock %}
 
 {% block content %}
 <!-- IMask Library -->
@@ -14,15 +14,54 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "İndirimli Kurumlar Vergisi Hesaplama Aracı",
+  "name": "İndirimli Kurumlar Vergisi Hesaplama 2026",
+  "url": "https://www.isfaymm.com/indirimlikurumlar/",
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
-  "description": "Yatırım teşvik belgesi(YTB) kapsamındaki yatırımlarınız için indirimli kurumlar vergisini hesaplayıp avantajınızı ölçün.",
+  "description": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini hesaplayan ücretsiz araç.",
+  "featureList": [
+    "Yatırım teşvik belgesi vergi indirimi hesaplama",
+    "İndirimli kurumlar vergisi hesaplama tablosu",
+    "Yatırıma katkı tutarı ve kalan katkı takibi",
+    "2012/3305 ve 2025/9903 kararlarına göre dönem bazlı hesaplama"
+  ],
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "TRY"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "İndirimli kurumlar vergisi nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Önce yatırıma katkı tutarı, toplam yatırım tutarı ile yatırıma katkı oranının çarpılmasıyla bulunur. İndirimli KV oranı ise genel kurumlar vergisi oranından, genel oran ile vergi indirim oranının çarpımı düşülerek hesaplanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Yatırım teşvik belgesi vergi indirimi hesaplamasında hangi kararlar dikkate alınır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Uygulamada teşvik belgesinin düzenlendiği karara göre 2012/3305 veya 2025/9903 rejimi dikkate alınır. Belge tarihi, yatırım dönemi, tamamlama vizesi, katkı oranı ve vergi indirim oranı hesaplamayı etkiler."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "İndirimli kurumlar vergisi hesaplama tablosu Excel yerine kullanılabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Araç, belge ve dönem bazında indirimli KV matrahı, kullanılan katkı tutarı, kalan katkı ve ödenecek kurumlar vergisini kaydedilebilir şekilde izler. Bu nedenle Excel tablosu ihtiyacını pratik bir çevrim içi hesaplama akışına dönüştürür."
+      }
+    }
+  ]
 }
 </script>
 
@@ -110,6 +149,63 @@
 .ikv-banner.mukellef-warn {
     background: rgba(251,191,36,0.08);
     border: 1px solid rgba(251,191,36,0.2);
+}
+
+.ikv-seo-guide {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+}
+.ikv-seo-guide h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.45rem;
+}
+.ikv-seo-guide .lead-copy {
+    color: #475569;
+    max-width: 920px;
+    margin-bottom: 1rem;
+}
+.ikv-seo-grid,
+.ikv-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+.ikv-seo-item,
+.ikv-faq-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.9rem;
+    background: #f8fafc;
+}
+.ikv-seo-item h3,
+.ikv-faq-item h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.45rem;
+}
+.ikv-seo-item p,
+.ikv-faq-item p {
+    color: #475569;
+    font-size: 0.92rem;
+    margin-bottom: 0;
+}
+.ikv-formula {
+    display: block;
+    color: #0f766e;
+    font-weight: 800;
+    line-height: 1.45;
+}
+@media (max-width: 768px) {
+    .ikv-seo-grid,
+    .ikv-faq-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Tab Bar */
@@ -238,10 +334,10 @@ body, html { background: #fff !important; }
             </span>
           </div>
           <h1 class="text-white mb-1" style="font-size:1.75rem; font-weight:800; letter-spacing:-0.025em;">
-            İndirimli Kurumlar Vergisi Hesaplama & 2026 Rehberi
+            İndirimli Kurumlar Vergisi Hesaplama 2026
           </h1>
           <p class="mb-0" style="color:rgba(255,255,255,0.7); font-size:1rem; font-weight:400;">
-            Yatırım teşvik belgesi kapsamındaki avantajlarınızı saniyeler içinde hesaplayın, <strong>Excel tablosu</strong> olarak raporlayın.
+            2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini hesaplayın.
           </p>
         </div>
 
@@ -1064,6 +1160,43 @@ body, html { background: #fff !important; }
     </div>
   </form>
   {% endif %}
+
+  <section class="ikv-seo-guide" aria-labelledby="ikv-seo-title">
+    <h2 id="ikv-seo-title">İndirimli kurumlar vergisi nasıl hesaplanır?</h2>
+    <p class="lead-copy">
+      Bu araç, yatırım teşvik belgesi kapsamındaki yatırımlar için 2012/3305 ve 2025/9903 kararlarına göre indirimli kurumlar vergisi hesaplama yapar. Dönem matrahı, yatırımdan elde edilen kazanç, diğer faaliyet katkısı, kullanılan katkı tutarı ve kalan katkı bakiyesi belge bazında izlenebilir.
+    </p>
+
+    <div class="ikv-seo-grid mb-3">
+      <article class="ikv-seo-item">
+        <h3>Yatırıma katkı tutarı</h3>
+        <p><span class="ikv-formula">Yatırıma katkı tutarı = Toplam yatırım tutarı x Yatırıma katkı oranı</span></p>
+      </article>
+      <article class="ikv-seo-item">
+        <h3>İndirimli KV oranı</h3>
+        <p><span class="ikv-formula">İndirimli KV oranı = Genel KV oranı - (Genel KV oranı x Vergi indirim oranı)</span></p>
+      </article>
+      <article class="ikv-seo-item">
+        <h3>Dönem bazlı kullanım</h3>
+        <p>İndirimli KV matrahı, cari dönemde kullanılan katkı ve sonraki döneme devreden katkı tutarı ayrı ayrı takip edilir.</p>
+      </article>
+    </div>
+
+    <div class="ikv-faq-grid">
+      <article class="ikv-faq-item">
+        <h3>Excel hesaplama tablosu yerine kullanılabilir mi?</h3>
+        <p>Evet. Araç, indirimli kurumlar vergisi hesaplama tablosu Excel mantığını belge ve dönem bazlı kayıt akışına dönüştürür; PDF çıktısı da alınabilir.</p>
+      </article>
+      <article class="ikv-faq-item">
+        <h3>2012/3305 ile 2025/9903 farkı nedir?</h3>
+        <p>Belgenin kararına göre diğer faaliyet sınırları, süre takipleri, oranlar ve hak edilen katkı kontrolleri farklı uygulanır.</p>
+      </article>
+      <article class="ikv-faq-item">
+        <h3>Yatırım teşvik vergi indirimi nasıl izlenir?</h3>
+        <p>Toplam katkı hakkı, hak edilen katkı, kullanılan yatırım katkısı ve diğer faaliyet katkısı ayrı izlenerek kalan katkı bakiyesi hesaplanır.</p>
+      </article>
+    </div>
+  </section>
 </div>
 
 {% set extra_disclaimer = True %}
@@ -1391,16 +1524,29 @@ body, html { background: #fff !important; }
     if (!showTevsiSummary) safeSet("tevsi_yatirim_kazanci", 0);
   }
 
+  function activeDonemNumber(...keys) {
+    const r = window.ACTIVE_DONEM_MATRAH || null;
+    if (!r) return 0;
+    for (const key of keys) {
+      const value = r[key];
+      if (value === null || value === undefined || value === "") continue;
+      if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+      const parsed = parseFormattedNumber(String(value));
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return 0;
+  }
+
   function applyActiveDonemMatrahToForm() {
     const r = window.ACTIVE_DONEM_MATRAH || null;
     if (!r) return;
 
-    safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
-    safeSet("kkeg", r.kkeg ?? 0);
-    safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+    safeSet("ticari_bilanco_kari", activeDonemNumber("ticari_bilanco_kari", "ticari"));
+    safeSet("kkeg", activeDonemNumber("kkeg"));
+    safeSet("kv_matrah", activeDonemNumber("matrah", "kv_matrah"));
 
     if (r.sabit_kiymet_toplam != null) {
-      safeSet("toplam_sabit_kiymet_tutari", r.sabit_kiymet_toplam);
+      safeSet("toplam_sabit_kiymet_tutari", activeDonemNumber("sabit_kiymet_toplam"));
     }
     if (currentBelgeJSData) {
       const gerceklesenTevsi = currentBelgeJSData.toplam_harcama_tutari ?? currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari ?? 0;
@@ -3124,8 +3270,7 @@ body, html { background: #fff !important; }
 
   function calculateKVMatrah() {
     if (window.ACTIVE_DONEM_MATRAH) {
-      const r = window.ACTIVE_DONEM_MATRAH || {};
-      const aktifMatrah = Number(r.matrah ?? r.kv_matrah ?? 0) || 0;
+      const aktifMatrah = activeDonemNumber("matrah", "kv_matrah");
       safeSet("kv_matrah", aktifMatrah);
       return;
     }
@@ -3631,7 +3776,11 @@ body, html { background: #fff !important; }
 
     const gerceklesen = getV("gerceklesen_tevsi_yatirim_tutari");
     const sabit = getV("toplam_sabit_kiymet_tutari");
-    const kar = getV("ticari_bilanco_kari");
+    let kar = getV("ticari_bilanco_kari");
+    if (kar === 0 && window.ACTIVE_DONEM_MATRAH) {
+      kar = activeDonemNumber("ticari_bilanco_kari", "ticari");
+      if (kar > 0) safeSet("ticari_bilanco_kari", kar);
+    }
 
     console.log("Tevsi Hesap:", { gerceklesen, sabit, kar });
 
@@ -4853,10 +5002,9 @@ body, html { background: #fff !important; }
           // DÃ¶nem havuzu varsa KV matrah bileÅŸenlerini burada kilitle (form iÃ§inde tekrar/manuel istenmesin).
           try {
             if (window.ACTIVE_DONEM_MATRAH) {
-              const r = window.ACTIVE_DONEM_MATRAH || {};
-              safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
-              safeSet("kkeg", r.kkeg ?? 0);
-              safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+              safeSet("ticari_bilanco_kari", activeDonemNumber("ticari_bilanco_kari", "ticari"));
+              safeSet("kkeg", activeDonemNumber("kkeg"));
+              safeSet("kv_matrah", activeDonemNumber("matrah", "kv_matrah"));
 
               const btnManual = document.getElementById("btn-manual-matrah");
               if (btnManual) btnManual.style.display = "none";
@@ -4881,12 +5029,12 @@ body, html { background: #fff !important; }
         try {
           if (window.ACTIVE_DONEM_MATRAH) {
             const r = window.ACTIVE_DONEM_MATRAH || {};
-            safeSet("ticari_bilanco_kari", r.ticari_bilanco_kari ?? r.ticari ?? 0);
-            safeSet("kkeg", r.kkeg ?? 0);
-            safeSet("kv_matrah", r.matrah ?? r.kv_matrah ?? 0);
+            safeSet("ticari_bilanco_kari", activeDonemNumber("ticari_bilanco_kari", "ticari"));
+            safeSet("kkeg", activeDonemNumber("kkeg"));
+            safeSet("kv_matrah", activeDonemNumber("matrah", "kv_matrah"));
 
             if (r.sabit_kiymet_toplam != null) {
-              safeSet("toplam_sabit_kiymet_tutari", r.sabit_kiymet_toplam);
+              safeSet("toplam_sabit_kiymet_tutari", activeDonemNumber("sabit_kiymet_toplam"));
             }
 
             const btnManual = document.getElementById("btn-manual-matrah");

@@ -4,7 +4,7 @@
 {% if selected_item %}
 {{ selected_item.title }} - Kurumlar Vergisi Genel Tebliği (2026 Güncel)
 {% else %}
-Kurumlar Vergisi Genel Tebliği - Madde Madde Arama ve Açıklamalı Rehber (2026)
+Kurumlar Vergisi Genel Tebliği 2026 | Güncel Mevzuat ve Madde Arama | İSFA YMM
 {% endif %}
 {% endblock %}
 
@@ -12,7 +12,17 @@ Kurumlar Vergisi Genel Tebliği - Madde Madde Arama ve Açıklamalı Rehber (202
 {% if selected_item %}
 KV Tebliği {{ selected_item.title }} bölümü: {{ selected_item.content[:160] | striptags | replace("\n", " ") }}... Güncel, aranabilir ve not alınabilir tam metin.
 {% else %}
-Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik yapı içerisinde kolayca arayın, inceleyin, favorilerinize ekleyin ve notlar alın.
+Kurumlar Vergisi Genel Tebliği 2026 güncel tam metni. İstisnalar, indirimler, örtülü sermaye, transfer fiyatlandırması ve indirimli kurumlar vergisi konularını madde madde inceleyin.
+{% endif %}
+{% endblock %}
+
+{% block canonical_url %}https://www.isfaymm.com/mevzuat/kv-tebligi{% if selected_item %}/{{ selected_item.uid|default('')|replace('/', '-') }}{% endif %}{% endblock %}
+
+{% block og_title %}
+{% if selected_item %}
+{{ selected_item.title }} | Kurumlar Vergisi Genel Tebliği | İSFA YMM
+{% else %}
+Kurumlar Vergisi Genel Tebliği 2026 | Güncel Mevzuat ve Madde Arama | İSFA YMM
 {% endif %}
 {% endblock %}
 
@@ -20,7 +30,23 @@ Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik
 {% if selected_item %}
     KV Tebliği: {{ selected_item.title }} detaylı açıklaması ve mevzuat rehberi.
 {% else %}
-    Kurumlar Vergisi Tebliği detaylı arama motoru ve rehberi.
+    Kurumlar Vergisi Genel Tebliği 2026 güncel metni; istisnalar, indirimler, örtülü sermaye, transfer fiyatlandırması ve indirimli kurumlar vergisi başlıklarıyla dijital rehber.
+{% endif %}
+{% endblock %}
+
+{% block twitter_title %}
+{% if selected_item %}
+{{ selected_item.title }} | Kurumlar Vergisi Tebliği
+{% else %}
+Kurumlar Vergisi Genel Tebliği 2026 | İSFA YMM
+{% endif %}
+{% endblock %}
+
+{% block twitter_desc %}
+{% if selected_item %}
+Kurumlar Vergisi Genel Tebliği {{ selected_item.title }} bölümü güncel metni ve açıklamalı mevzuat rehberi.
+{% else %}
+Kurumlar Vergisi Genel Tebliği 2026 güncel metni; istisna, indirim, örtülü sermaye, transfer fiyatlandırması ve KVK 32/A başlıklarıyla madde madde arama.
 {% endif %}
 {% endblock %}
 
@@ -81,7 +107,7 @@ Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik
                         <!-- Yükleniyor Spinner -->
                         <div class="text-center py-5" id="navSpinner">
                             <div class="spinner-grow text-primary" role="status"></div>
-                            <div class="small mt-2 text-muted fw-semibold">Mevzuat Hazırlanıyor...</div>
+                            <div class="small mt-2 text-muted fw-semibold">KV madde listesi yükleniyor...</div>
                         </div>
                     </div>
                 </div>
@@ -145,11 +171,40 @@ Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik
                             <h1 class="h2 fw-black text-dark mb-0" style="letter-spacing: -1px;">Kurumlar Vergisi <span class="text-primary-gradient">Tebliği</span></h1>
                         </div>
                         <p class="small text-muted mx-auto mb-0" style="max-width: 500px;">
-                            Modern, hızlı ve yapay zeka destekli mevzuat rehberiniz.
+                            2026 güncel Kurumlar Vergisi Genel Tebliği tam metni, madde madde arama ve açıklamalı kurumlar vergisi mevzuat rehberi.
                         </p>
 
+                        <section class="kv-static-intro text-start mx-auto mt-4">
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-lg-7">
+                                    <div class="kv-intro-panel h-100">
+                                        <span class="kv-intro-eyebrow">Güncel Kurumlar Vergisi Mevzuatı</span>
+                                        <h2>Kurumlar Vergisi Genel Tebliği 2026</h2>
+                                        <p>
+                                            Kurumlar vergisi istisnaları, indirimler, örtülü sermaye, transfer fiyatlandırması, finansman gider kısıtlaması ve indirimli kurumlar vergisi uygulamalarını güncel Kurumlar Vergisi Genel Tebliği kapsamında madde madde inceleyebilirsiniz.
+                                        </p>
+                                        <p class="mb-0">
+                                            Sol menüden ilgili bölüme geçebilir, madde numarasıyla arama yapabilir veya tebliğ metni içinde anahtar kelimeyle hızlıca sonuç bulabilirsiniz.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="kv-topic-panel h-100">
+                                        <h3>Öne çıkan kurumlar vergisi başlıkları</h3>
+                                        <div class="kv-topic-links">
+                                            <a href="/indirim">İndirimli Kurumlar Vergisi Mevzuatı</a>
+                                            <a href="/indirimlikurumlar/">İndirimli Kurumlar Vergisi Hesaplama</a>
+                                            <a href="/finansman">Finansman Gider Kısıtlaması Hesaplama</a>
+                                            <a href="/sermaye">Nakdi Sermaye Artırımı İndirimi</a>
+                                            <a href="/mevzuat/kv-tebligi">Kurumlar Vergisi Genel Tebliği Tam Metin</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Main Search Section (Visible after Intro) -->
-                        <div id="mainSearchSection" class="search-section mt-4 mx-auto" style="max-width: 1200px; opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+                        <div id="mainSearchSection" class="search-section mt-4 mx-auto" style="max-width: 1200px; opacity: 1; transform: translateY(0); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
                             
                             <!-- AI Akıllı Arama (Vurgulanan) -->
                             <div class="ai-search-card card border-0 shadow-lg rounded-4 p-3 p-md-4 mb-4 overflow-hidden">
@@ -209,43 +264,6 @@ Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- 🎭 Premium Intro Splash -->
-<div id="onboardingSplash" class="onboarding-overlay">
-    <div class="onboarding-content text-center">
-        <div class="badge rounded-pill bg-primary px-3 py-2 mb-4 animate-bounce">YENİ NESİL MEVZUAT DENEYİMİ</div>
-        <h2 class="text-white fw-bold mb-5 fs-1">Neler Sunuyoruz?</h2>
-        
-        <div class="row g-4 justify-content-center mb-5" style="max-width: 1000px;">
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.1s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-robot text-primary"></i></div>
-                    <h5>Yapay Zeka</h5>
-                    <p>Mevzuatı günlük dille sorun, AI saniyeler içinde cevaplasın.</p>
-                </div>
-            </div>
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.3s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-lightning-charge-fill text-warning"></i></div>
-                    <h5>Hızlı Erişim</h5>
-                    <p>Maddeler arası hiyerarşik bağlar ve saniyelik geçişler.</p>
-                </div>
-            </div>
-            <div class="col-md-4 intro-card-wrapper" style="--delay: 0.5s">
-                <div class="glass-intro-card">
-                    <div class="intro-icon"><i class="bi bi-bookmarks-fill text-info"></i></div>
-                    <h5>Kişiselleştirme</h5>
-                    <p>Notlarınızı alın, favorilerinizi ekleyin ve vurgulamalar yapın.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="onboarding-progress mx-auto">
-            <div class="progress-bar-fill"></div>
-        </div>
-        <p class="text-white-50 mt-3 small">Mevzuat Hazırlanıyor...</p>
     </div>
 </div>
 
@@ -406,6 +424,69 @@ Kurumlar Vergisi Genel Tebliği'nin tüm güncel maddelerini (2026), hiyerarşik
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
+    }
+
+    .kv-static-intro {
+        max-width: 1200px;
+    }
+
+    .kv-intro-panel,
+    .kv-topic-panel {
+        background: #ffffff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        padding: 1.15rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .kv-intro-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #1d4ed8;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        padding: 0.25rem 0.7rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        margin-bottom: 0.65rem;
+    }
+
+    .kv-intro-panel h2,
+    .kv-topic-panel h3 {
+        color: #0f172a;
+        font-weight: 900;
+        font-size: 1.2rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .kv-intro-panel p {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .kv-topic-links {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .kv-topic-links a {
+        color: #0f172a;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .kv-topic-links a:hover {
+        color: #0d6efd;
+        border-color: #93c5fd;
+        background: #eff6ff;
     }
 
     /* Onboarding Overlay Styles */

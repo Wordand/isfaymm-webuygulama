@@ -262,7 +262,6 @@
                   <th class="text-end">Vergi Ind. Orani</th>
                   <th class="text-end">Toplam Ind. Matrah</th>
                   <th>Tamam. Vizesi</th>
-                  <th class="text-end">Durum</th>
                   <th class="text-end">İşlem</th>
                 </tr>
               </thead>
@@ -286,13 +285,6 @@
                         <span class="badge rounded-pill" style="background:#0f7a3b; color:#ffffff; border:1px solid #0b5f2d;">Vize Yapıldı</span>
                       {% else %}
                         <span class="badge rounded-pill" style="background:#fff3cd; color:#7a4b00; border:1px solid #f0c36a;">Yatırım Döneminde</span>
-                      {% endif %}
-                    </td>
-                    <td class="text-end">
-                      {% if is_active_doc %}
-                        <span class="ikv-status-badge ikv-status-ok py-1 px-2">Seçili</span>
-                      {% else %}
-                        <span class="text-muted small">-</span>
                       {% endif %}
                     </td>
                     <td class="text-end">
@@ -341,6 +333,7 @@
         </thead>
         <tbody>
            {% for r in donem_matrah_list %}
+            {% set is_active_donem = (session.get('active_donem_text') == r.donem_text) %}
             <tr id="pool-row-{{ r.id }}"
                 data-donem="{{ r.donem_text }}"
                 data-donem-turu="{{ r.donem_turu }}"
@@ -357,7 +350,7 @@
                 onclick="poolLoadSaved({{ r.id }})">
             <td class="fw-bold">
               {{ r.donem_text }}
-              {% if session.get('active_donem_text') == r.donem_text %}
+              {% if is_active_donem %}
                 <span class="ikv-status-badge ikv-status-ok py-1 px-2 ms-2">Seçili</span>
               {% endif %}
             </td>
@@ -368,8 +361,8 @@
             <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
             <td class="text-end">%{{ r.genel_oran }}</td>
             <td class="text-end">
-              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick='event.stopPropagation(); poolSelectSaved({{ r.id }}, {{ r.donem_text|tojson }})'>
-                Seç
+              <button type="button" class="btn btn-sm {% if is_active_donem %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill px-3" onclick='event.stopPropagation(); poolSelectSaved({{ r.id }}, {{ r.donem_text|tojson }})'>
+                {% if is_active_donem %}Seçili{% else %}Seç{% endif %}
               </button>
               <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="event.stopPropagation(); poolLoadSaved({{ r.id }})">
                 Yükle
