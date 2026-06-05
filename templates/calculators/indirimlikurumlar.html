@@ -1570,6 +1570,37 @@ body, html { background: #fff !important; }
     if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
   }
 
+  function getSelectedYatirimTuru1() {
+    const fromInput = (document.getElementById("yatirim_turu1")?.value || "").trim();
+    if (fromInput) return fromInput.toLowerCase();
+    return String(currentBelgeJSData?.yatirim_turu1 || "").trim().toLowerCase();
+  }
+
+  function redirectToSabitKiymetEntry() {
+    const target = new URL(window.location.href);
+    target.search = "?sekme=donem&return=form-step-3";
+    target.hash = "tevsi-oranlama";
+    window.location.href = target.toString();
+  }
+
+  async function requireSabitKiymetForTevsiOranlama() {
+    const yatirimTuru1 = getSelectedYatirimTuru1();
+    if (yatirimTuru1 !== "tevsi") return false;
+
+    if (typeof applyActiveDonemMatrahToForm === "function") applyActiveDonemMatrahToForm();
+    const sabitToplam = getVal("toplam_sabit_kiymet_tutari") || activeDonemNumber("sabit_kiymet_toplam");
+    if (sabitToplam > 0) return false;
+
+    await Swal.fire({
+      title: "Sabit kıymet verisi gerekli",
+      html: "Yatırım kazancı ayrı tespit edilemiyorsa tevsi oranlama yapılır.<br><br>Sabit kıymet verilerinizi girmeniz gerekmektedir. Sabit kıymet kısmına yönlendiriliyorsunuz.",
+      icon: "info",
+      confirmButtonText: "Tamam"
+    });
+    redirectToSabitKiymetEntry();
+    return true;
+  }
+
 
 
 
@@ -3727,6 +3758,8 @@ body, html { background: #fff !important; }
     else if (result.dismiss === Swal.DismissReason.cancel) {
        sessionStorage.setItem("yatirim_kazanci_ayri", "hayir");
        safeSet('yatirimdan_elde_edilen_kazanc', 0);
+
+       if (await requireSabitKiymetForTevsiOranlama()) return;
 
        const harcamaVal = getVal("toplam_harcama_tutari") || getVal("cari_harcama_tutari") || 0;
        safeSet('gerceklesen_tevsi_yatirim_tutari', harcamaVal);

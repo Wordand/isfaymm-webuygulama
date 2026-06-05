@@ -156,7 +156,7 @@
     </div>
 
     <div class="col-lg-6">
-      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-tevsi-card h-100">
+      <div class="p-3 bg-white border rounded-4 shadow-sm ikv-tevsi-card h-100" id="tevsi-oranlama">
         <div class="fw-bold mb-2">Tevsi Oranlama</div>
         <div class="ikv-tevsi-toggle">
           <div class="form-check form-switch mb-0">
@@ -328,6 +328,7 @@
             <th class="text-end">Zarar</th>
             <th class="text-end">Matrah</th>
             <th class="text-end">Genel Oran</th>
+            <th class="text-end">Sabit Kıymet</th>
             <th class="text-end">İşlem</th>
           </tr>
         </thead>
@@ -361,6 +362,13 @@
             <td class="text-end fw-bold">{{ r.kv_matrah|tlformat }} TL</td>
             <td class="text-end">%{{ r.genel_oran }}</td>
             <td class="text-end">
+              {% if (r.sabit_kiymet_toplam or 0) > 0 %}
+                <span class="fw-semibold text-success">{{ r.sabit_kiymet_toplam|tlformat }} TL</span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
               <button type="button" class="btn btn-sm {% if is_active_donem %}btn-primary{% else %}btn-outline-primary{% endif %} rounded-pill px-3" onclick='event.stopPropagation(); poolSelectSaved({{ r.id }}, {{ r.donem_text|tojson }})'>
                 {% if is_active_donem %}Seçili{% else %}Seç{% endif %}
               </button>
@@ -374,7 +382,7 @@
           </tr>
           {% endfor %}
           {% if (donem_matrah_list|length) == 0 %}
-          <tr><td colspan="8" class="text-center text-muted py-4">Henüz dönem matrah kaydı yok.</td></tr>
+          <tr><td colspan="9" class="text-center text-muted py-4">Henüz dönem matrah kaydı yok.</td></tr>
           {% endif %}
         </tbody>
       </table>
@@ -643,12 +651,13 @@
     const turu = m ? String(m[2]).trim().toUpperCase() : 'KURUMLAR';
     if (!yil) return;
 
-    const genelOran = _getGenelOran();
-    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
-    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
-    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
-    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
-    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const savedMatrah = poolCurrentOrSavedMatrahValues(donemText);
+    const genelOran = savedMatrah.genelOran;
+    const tic = savedMatrah.tic;
+    const kkeg = savedMatrah.kkeg;
+    const ind = savedMatrah.ind;
+    const zarar = savedMatrah.zarar;
+    const matrah = savedMatrah.matrah;
     const sabitToplam = poolComputeSabitTotal();
     const sabitJson = {
       "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
@@ -691,8 +700,9 @@
   }
 
   function poolScheduleDraftSave() {
+    // Dönem matrahını otomatik kaydetme.
+    // Boş ekrandaki değerler, seçili dönem kaydını ezmesin diye kayıt sadece açık butonlarla yapılır.
     if (_poolDraftTimer) clearTimeout(_poolDraftTimer);
-    _poolDraftTimer = setTimeout(poolDraftSaveNow, 800);
   }
 
   function poolLoadSaved(id) {
@@ -757,6 +767,40 @@
     poolCompute();
     poolComputeSabitTotal();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function poolFindRowByDonem(donemText) {
+    let found = null;
+    document.querySelectorAll('tr[id^="pool-row-"]').forEach((row) => {
+      if ((row.getAttribute('data-donem') || '') === donemText) found = row;
+    });
+    return found;
+  }
+
+  function poolCurrentOrSavedMatrahValues(donemText) {
+    const row = poolFindRowByDonem(donemText);
+    if (row) {
+      return {
+        tic: Number(row.getAttribute('data-ticari') || 0) || 0,
+        kkeg: Number(row.getAttribute('data-kkeg') || 0) || 0,
+        ind: Number(row.getAttribute('data-ind') || 0) || 0,
+        zarar: Number(row.getAttribute('data-zarar') || 0) || 0,
+        matrah: Number(row.getAttribute('data-matrah') || 0) || 0,
+        genelOran: Number(row.getAttribute('data-oran') || _getGenelOran() || 25) || 25
+      };
+    }
+    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
+    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
+    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
+    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
+    return {
+      tic,
+      kkeg,
+      ind,
+      zarar,
+      matrah: Math.max(0, (tic + kkeg - ind - zarar)),
+      genelOran: _getGenelOran()
+    };
   }
 
   async function poolDeleteSaved(id) {
@@ -1123,12 +1167,13 @@
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Kaydediliyor...';
     }
 
-    const genelOran = _getGenelOran();
-    const tic = _getMaskedValue(document.getElementById('pool_ticari'));
-    const kkeg = _getMaskedValue(document.getElementById('pool_kkeg'));
-    const ind = _getMaskedValue(document.getElementById('pool_indirim'));
-    const zarar = _getMaskedValue(document.getElementById('pool_zarar'));
-    const matrah = Math.max(0, (tic + kkeg - ind - zarar));
+    const savedMatrah = poolCurrentOrSavedMatrahValues(donemText);
+    const genelOran = savedMatrah.genelOran;
+    const tic = savedMatrah.tic;
+    const kkeg = savedMatrah.kkeg;
+    const ind = savedMatrah.ind;
+    const zarar = savedMatrah.zarar;
+    const matrah = savedMatrah.matrah;
     const sabitToplam = poolComputeSabitTotal();
     const sabitJson = {
       "251": _getMaskedValue(document.getElementById('pool_sabit_251')),
@@ -1172,6 +1217,7 @@
 
       const status = document.getElementById('pool_sabit_save_status');
       if (status) status.textContent = 'Kaydedildi.';
+      const shouldReturnToForm = new URLSearchParams(window.location.search).get('return') === 'form-step-3';
       if (window.Swal) {
         Swal.fire({
           icon: 'success',
@@ -1182,6 +1228,11 @@
           toast: true,
           position: 'top-end'
         });
+      }
+      if (shouldReturnToForm) {
+        setTimeout(() => {
+          window.location.href = '?sekme=form&start=1';
+        }, window.Swal ? 1300 : 0);
       }
     } catch (e) {
       if (window.Swal) Swal.fire('Bağlantı Hatası', 'Sabit kıymetler kaydedilemedi.', 'error');
@@ -1251,5 +1302,12 @@
 
     poolCompute();
     poolComputeSabitTotal();
+    if (window.location.hash === '#tevsi-oranlama') {
+      poolSetSabitVisible(true);
+      setTimeout(() => {
+        document.getElementById('tevsi-oranlama')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('pool_sabit_251')?.focus();
+      }, 250);
+    }
   })();
 </script>
