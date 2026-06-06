@@ -445,6 +445,7 @@ def migrate_tesvik_kullanim_table():
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 belge_no TEXT NOT NULL,
+                donem_text TEXT,
                 hesap_donemi INT NOT NULL,
                 donem_turu TEXT DEFAULT 'KURUMLAR',
 
@@ -482,6 +483,13 @@ def migrate_tesvik_kullanim_table():
                     WHERE table_name = 'tesvik_kullanim';
                 """)
                 existing_cols = {r["column_name"] if isinstance(r, dict) else r[0] for r in cur.fetchall()}
+
+            required_text_cols = ["donem_text"]
+
+            for col in required_text_cols:
+                if col not in existing_cols:
+                    cur.execute(f"ALTER TABLE tesvik_kullanim ADD COLUMN {col} TEXT;")
+                    print(f"'{col}' sutunu eklendi.")
 
             required_cols = [
                 "yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "diger_faaliyet",

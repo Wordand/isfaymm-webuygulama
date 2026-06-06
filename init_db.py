@@ -152,6 +152,7 @@ if DATABASE_URL.startswith("sqlite:///"):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         belge_no TEXT NOT NULL,
+        donem_text TEXT,
         hesap_donemi INTEGER NOT NULL,
         donem_turu TEXT DEFAULT 'KURUMLAR',
 
@@ -330,6 +331,7 @@ CREATE TABLE IF NOT EXISTS tesvik_kullanim (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     belge_no TEXT NOT NULL,
+    donem_text TEXT,
     hesap_donemi INT NOT NULL,
     donem_turu TEXT DEFAULT 'KURUMLAR',
 

@@ -81,10 +81,13 @@
                 
                 <div class="summary-item">
                     <span class="summary-label">Oranlar</span>
+                    {% set _diger_oran = (doc.diger_oran or 0)|float %}
                     <div class="ikv-rate-chips">
                         <span>Katkı %{{ doc.katki_orani }}</span>
                         <span>Vergi indirimi %{{ doc.vergi_orani }}</span>
+                        {% if _diger_oran > 0 %}
                         <span>Diğer faaliyet %{{ doc.diger_oran }}</span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -123,9 +126,9 @@
                 {% if donemler %} 
                     {% for d in donemler %} 
                     <div class="period-row" id="period-row-{{ d.id }}" style="grid-template-columns: 0.8fr 1fr 1fr 1.25fr 1.35fr 1.1fr 1.65fr;">
-                        <div class="period-year-badge">{{ d.hesap_donemi }}</div> 
+                        <div class="period-year-badge">{{ d.display_hesap_donemi or d.hesap_donemi }}</div>
                         <div>
-                            <span class="period-type-pill">{{ d.donem_turu }}</span>
+                            <span class="period-type-pill">{{ d.display_donem_turu or d.donem_turu }}</span>
                         </div>
                         <div class="period-amount text-dark fw-bold">
                             {{ d.indirimli_matrah|tlformat }} TL
@@ -612,8 +615,8 @@
             let usedYatirim = 0;
             let usedDiger = 0;
             const rows = (periods || []).map(p => {
-                const yil = String(p.hesap_donemi || '').trim();
-                const tur = String(p.donem_turu || '').trim();
+                const yil = String(p.display_hesap_donemi || p.hesap_donemi || '').trim();
+                const tur = String(p.display_donem_turu || p.donem_turu || '').trim();
                 const cy = _num(p.cari_yatirim_katki);
                 const cd = _num(p.cari_diger_katki);
                 const ct = _num(p.cari_toplam_katki);
@@ -726,7 +729,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th colspan="2" class="text-center text-primary fw-bold">
-                                    ${d.hesap_donemi} - ${d.donem_turu}
+                                    ${d.display_hesap_donemi || d.hesap_donemi} - ${d.display_donem_turu || d.donem_turu}
                                 </th>
                             </tr>
                         </thead>

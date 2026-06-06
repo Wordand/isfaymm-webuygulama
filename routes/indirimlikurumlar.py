@@ -1038,6 +1038,17 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     ORDER BY hesap_donemi DESC
                 """, (user_id, belge_nolar))
                 all_k = cur_k.fetchall()
+                import re as _usage_re
+                for item in all_k:
+                    item["display_hesap_donemi"] = item.get("hesap_donemi")
+                    item["display_donem_turu"] = item.get("donem_turu")
+                    m = _usage_re.match(r"^(\d{4})\s*-\s*(.+)$", str(item.get("donem_text") or "").strip())
+                    if m:
+                        try:
+                            item["display_hesap_donemi"] = int(m.group(1))
+                        except Exception:
+                            item["display_hesap_donemi"] = m.group(1)
+                        item["display_donem_turu"] = m.group(2).strip().upper()
                 for item in all_k:
                     bno = item["belge_no"]
                     if bno not in kullanimlar:
@@ -1814,6 +1825,7 @@ def save_tesvik_kullanim():
         belge_no = data.get("belge_no")
         hesap_donemi_raw = data.get("hesap_donemi")
         donem_turu = data.get("donem_turu", "KURUMLAR")
+        donem_text = (data.get("donem_text") or "").strip()
 
         if not belge_no or hesap_donemi_raw in (None, ""):
             return jsonify({
@@ -1833,6 +1845,9 @@ def save_tesvik_kullanim():
 
         if not belge_no:
             return jsonify({"status": "error", "message": "Belge no eksik."}), 400
+
+        if not donem_text:
+            donem_text = f"{hesap_donemi} - {donem_turu}"
 
         # -------------------------------------------------------------
         # 2025/9903 için dönem doğrulaması (kronoloji / geçersiz yıl engeli)
@@ -1914,6 +1929,7 @@ def save_tesvik_kullanim():
         # Bu durumda insert'in patlamaması için alanları DB'de mevcut olanlarla sınırla.
         # -------------------------------------------------------------
         effective_fields = list(fields)
+        existing = set()
         try:
             with get_conn() as _conn_cols:
                 _c = _conn_cols.cursor()
@@ -1951,6 +1967,19 @@ def save_tesvik_kullanim():
                     {", ".join([f"{col} = EXCLUDED.{col}" for col in effective_fields])},
                     kayit_tarihi = CURRENT_TIMESTAMP;
             """, (user_id, belge_no, hesap_donemi, donem_turu, *values))
+
+            if "donem_text" in existing:
+                cur.execute(
+                    """
+                    UPDATE tesvik_kullanim
+                    SET donem_text = %s
+                    WHERE user_id = %s
+                      AND belge_no = %s
+                      AND hesap_donemi = %s
+                      AND UPPER(donem_turu) = %s
+                    """,
+                    (donem_text, user_id, belge_no, hesap_donemi, str(donem_turu).upper()),
+                )
 
             conn.commit()
 
@@ -2284,26 +2313,36 @@ def get_onceki_katki(tesvik_id: int):
     Seçilen dönemin (yıl + tür) öncesindeki dönemlerde kullanılan katkıları toplar.
     """
     from flask import jsonify
+    import re
 
     user_id = session.get("user_id")
     donem = (request.args.get("donem") or "").strip()
     if not donem or " - " not in donem:
         return jsonify({"status": "error", "message": "donem parametresi gerekli."}), 400
 
-    yil_str, turu = [x.strip() for x in donem.split(" - ", 1)]
+    def _period_order(value):
+        text = str(value or "").strip().upper()
+        if "KURUMLAR" in text:
+            return 5
+        for idx in (1, 2, 3, 4):
+            if str(idx) in text:
+                return idx
+        return 99
+
+    def _parse_period(value, fallback_year=None, fallback_type=None):
+        text = str(value or "").strip()
+        match = re.match(r"^(\d{4})\s*-\s*(.+)$", text)
+        if match:
+            return match.group(1).strip(), match.group(2).strip()
+        return fallback_year, fallback_type
+
+    yil_str, turu = _parse_period(donem)
     try:
         yil = int(yil_str)
     except Exception:
         return jsonify({"status": "error", "message": "donem yil formatı geçersiz."}), 400
 
-    order_map = {
-        "1. GEÇİCİ": 1,
-        "2. GEÇİCİ": 2,
-        "3. GEÇİCİ": 3,
-        "4. GEÇİCİ": 4,
-        "KURUMLAR": 5,
-    }
-    cur_order = order_map.get(turu.upper(), 99)
+    cur_order = _period_order(turu)
 
     with get_conn() as conn:
         cur = conn.cursor()
@@ -2323,7 +2362,7 @@ def get_onceki_katki(tesvik_id: int):
         try:
             cur.execute(
                 """
-                SELECT hesap_donemi, donem_turu,
+                SELECT hesap_donemi, donem_turu, donem_text,
                        COALESCE(cari_yatirim_katki,0) AS cy,
                        COALESCE(cari_diger_katki,0) AS cd
                 FROM tesvik_kullanim
@@ -2333,9 +2372,13 @@ def get_onceki_katki(tesvik_id: int):
             )
             rows = cur.fetchall() or []
         except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
             cur.execute(
                 """
-                SELECT donem_yil, donem_turu,
+                SELECT donem_yil, donem_turu, NULL AS donem_text,
                        COALESCE(cari_yatirim_katki,0) AS cy,
                        COALESCE(cari_diger_katki,0) AS cd
                 FROM tesvik_kullanim
@@ -2351,20 +2394,24 @@ def get_onceki_katki(tesvik_id: int):
     for r in (rows or []):
         # sqlite -> tuple, postgres RealDictCursor -> dict
         if isinstance(r, dict):
-            ry = r.get("hesap_donemi") or r.get("donem_yil")
-            rt = r.get("donem_turu")
+            ry, rt = _parse_period(
+                r.get("donem_text"),
+                r.get("hesap_donemi") or r.get("donem_yil"),
+                r.get("donem_turu"),
+            )
             cy = r.get("cy") if ("cy" in r) else r.get("cari_yatirim_katki")
             cd = r.get("cd") if ("cd" in r) else r.get("cari_diger_katki")
         else:
-            ry, rt, cy, cd = r[0], r[1], r[2], r[3]
+            ry, rt = _parse_period(r[2] if len(r) > 4 else None, r[0], r[1])
+            cy = r[3] if len(r) > 4 else r[2]
+            cd = r[4] if len(r) > 4 else r[3]
 
         try:
             ry_i = int(ry)
         except Exception:
             continue
 
-        rt_u = str(rt or "").strip().upper()
-        ro = order_map.get(rt_u, 99)
+        ro = _period_order(rt)
         if (ry_i < yil) or (ry_i == yil and ro < cur_order):
             onceki_yatirim += float(cy or 0)
             onceki_diger += float(cd or 0)
@@ -2374,18 +2421,28 @@ def get_onceki_katki(tesvik_id: int):
     try:
         for r in (rows[:10] if isinstance(rows, list) else []):
             if isinstance(r, dict):
+                ry, rt = _parse_period(
+                    r.get("donem_text"),
+                    r.get("hesap_donemi") or r.get("donem_yil"),
+                    r.get("donem_turu"),
+                )
                 debug_rows.append({
-                    "yil": r.get("hesap_donemi") or r.get("donem_yil"),
-                    "turu": r.get("donem_turu"),
+                    "donem_text": r.get("donem_text"),
+                    "yil": ry,
+                    "turu": rt,
                     "cy": float(r.get("cy") or 0),
                     "cd": float(r.get("cd") or 0),
                 })
             else:
+                ry, rt = _parse_period(r[2] if len(r) > 4 else None, r[0], r[1])
+                cy = r[3] if len(r) > 4 else r[2]
+                cd = r[4] if len(r) > 4 else r[3]
                 debug_rows.append({
-                    "yil": r[0],
-                    "turu": r[1],
-                    "cy": float(r[2] or 0),
-                    "cd": float(r[3] or 0),
+                    "donem_text": r[2] if len(r) > 4 else None,
+                    "yil": ry,
+                    "turu": rt,
+                    "cy": float(cy or 0),
+                    "cd": float(cd or 0),
                 })
     except Exception:
         debug_rows = []

@@ -1482,6 +1482,8 @@ body, html { background: #fff !important; }
     if (mask) {
       programmaticMaskUpdate = true;
       mask.typedValue = numVal;
+      if (typeof mask.updateValue === "function") mask.updateValue();
+      if (mask.value !== undefined) el.value = mask.value;
       programmaticMaskUpdate = false;
     } else {
       // 2) Maskesiz Alanlar -> Yerel format (tr-TR)
@@ -1549,7 +1551,10 @@ body, html { background: #fff !important; }
       safeSet("toplam_sabit_kiymet_tutari", activeDonemNumber("sabit_kiymet_toplam"));
     }
     if (currentBelgeJSData) {
-      const gerceklesenTevsi = currentBelgeJSData.toplam_harcama_tutari ?? currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari ?? 0;
+      const gerceklesenTevsi = getVal("toplam_harcama_tutari")
+        || currentBelgeJSData.toplam_harcama_tutari
+        || currentBelgeJSData.gerceklesen_tevsi_yatirim_tutari
+        || 0;
       safeSet("gerceklesen_tevsi_yatirim_tutari", gerceklesenTevsi);
     }
 
@@ -1568,6 +1573,17 @@ body, html { background: #fff !important; }
     try { calculateTevsiKazancAutomatically(); } catch (e) {}
     updateTevsiSummary();
     if (typeof updateInvestmentIncomeVisibility === "function") updateInvestmentIncomeVisibility();
+  }
+
+  function syncTevsiGerceklesenFromInvestmentInput() {
+    const apply = () => {
+      const harcamaVal = getVal("toplam_harcama_tutari") || getVal("cari_harcama_tutari") || 0;
+      safeSet("gerceklesen_tevsi_yatirim_tutari", harcamaVal);
+      if (typeof calculateTevsiKazancAutomatically === "function") calculateTevsiKazancAutomatically();
+      if (typeof updateTevsiSummary === "function") updateTevsiSummary();
+    };
+    apply();
+    setTimeout(apply, 0);
   }
 
   function getSelectedYatirimTuru1() {
@@ -3473,6 +3489,12 @@ body, html { background: #fff !important; }
     let cariDigerKatkisi = 0;
     let indirimliKurumlarVergisiMatrahi = 0;
 
+    const yatirimKatkiBakiyesi = (kalanKatki) => {
+      const hakEdilenKatki = getVal("fiili_katki_tutari");
+      if (hakEdilenKatki <= 0) return kalanKatki;
+      return Math.max(0, Math.min(kalanKatki, hakEdilenKatki - oncekiToplamKatki));
+    };
+
     // ============================================================
     // 🟩 1) İşletme Dönemi — EVET
     // ============================================================
@@ -3481,7 +3503,7 @@ body, html { background: #fff !important; }
       const kalanKatki = getVal("kalan_katki_tutari");
       // Bu dönemde indirimli orana konu olabilecek azami katkı (vergi farkı)
       const maxDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
-      cariYatirimKatkisi = Math.max(0, Math.min(kalanKatki, maxDelta));
+      cariYatirimKatkisi = Math.max(0, Math.min(yatirimKatkiBakiyesi(kalanKatki), maxDelta));
       // Katkıya karşılık gelen indirimli matrah
       indirimliKurumlarVergisiMatrahi = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
 
@@ -3521,7 +3543,7 @@ body, html { background: #fff !important; }
           // Aynı dönemde yatırım kazancı da varsa, kalan katkıdan arta kalan kısmı kadar kullanılabilir.
           const kalanSonraDiger = Math.max(0, kalanKatki - cariDigerKatkisi);
           const maxYatirimDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
-          cariYatirimKatkisi = Math.max(0, Math.min(kalanSonraDiger, maxYatirimDelta));
+          cariYatirimKatkisi = Math.max(0, Math.min(yatirimKatkiBakiyesi(kalanSonraDiger), maxYatirimDelta));
           const yatirimIndMatrah = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
           indirimliKurumlarVergisiMatrahi += yatirimIndMatrah;
         } else {
@@ -3535,7 +3557,7 @@ body, html { background: #fff !important; }
       else {
         const kalanKatki = getVal("kalan_katki_tutari");
         const maxDelta = Math.max(0, tevsiYatirimKazanci * deltaRate);
-        cariYatirimKatkisi = Math.max(0, Math.min(kalanKatki, maxDelta));
+        cariYatirimKatkisi = Math.max(0, Math.min(yatirimKatkiBakiyesi(kalanKatki), maxDelta));
         indirimliKurumlarVergisiMatrahi = deltaRate > 0 ? (cariYatirimKatkisi / deltaRate) : 0;
 
         cariDigerKatkisi = 0;
@@ -4503,7 +4525,10 @@ body, html { background: #fff !important; }
 
   function collectDonemUsageData() {
     const belgeNo = getBelgeNo();
-    const donemSecimi = document.getElementById("donem")?.value || "";
+    const donemSecimi = window.ACTIVE_DONEM_TEXT
+      || document.getElementById("donem_display")?.value
+      || document.getElementById("donem")?.value
+      || "";
 
     let hesap_donemi = null;
     let donem_turu = null;
@@ -4516,6 +4541,7 @@ body, html { background: #fff !important; }
 
     return {
       belge_no: belgeNo || "",
+      donem_text: donemSecimi,
       hesap_donemi,
       donem_turu,
 
@@ -5206,6 +5232,18 @@ body, html { background: #fff !important; }
           const el = document.getElementById(id);
           if (el) el.addEventListener("input", calculateTevsiKazancAutomatically);
         });
+
+      ["toplam_harcama_tutari", "cari_harcama_tutari"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          ["input", "change", "keyup", "blur"].forEach(evt => {
+            el.addEventListener(evt, syncTevsiGerceklesenFromInvestmentInput);
+          });
+        }
+        if (typeof maskMap !== "undefined" && maskMap[id]) {
+          maskMap[id].on("accept", syncTevsiGerceklesenFromInvestmentInput);
+        }
+      });
 
       const tevsiInput = document.getElementById("tevsi_yatirim_kazanci");
       if (tevsiInput) {
@@ -5994,6 +6032,17 @@ body, html { background: #fff !important; }
                       if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
                   });
               }
+          }
+      });
+
+      ["toplam_harcama_tutari", "cari_harcama_tutari"].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          ["input", "change", "keyup", "blur"].forEach(evt => {
+              el.addEventListener(evt, syncTevsiGerceklesenFromInvestmentInput);
+          });
+          if (typeof maskMap !== "undefined" && maskMap[id]) {
+              maskMap[id].on("accept", syncTevsiGerceklesenFromInvestmentInput);
           }
       });
   });
