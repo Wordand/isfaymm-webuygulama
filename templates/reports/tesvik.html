@@ -21,6 +21,43 @@
         </button>
     </div>
 
+    {% if donem_summary_list %}
+    <div class="ledger-sheet mb-4">
+        <div class="ledger-header py-3">
+            <div class="ledger-title-group">
+                <span class="ledger-no">Dönem Toplamları</span>
+                <div class="ledger-meta-chips">
+                    <span>Belgelerin aynı dönemdeki toplam etkisi</span>
+                </div>
+            </div>
+        </div>
+        <div class="ledger-body pt-3">
+            <div class="period-table-header" style="grid-template-columns: 1.1fr 0.7fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;">
+                <span>Dönem</span>
+                <span>Belge</span>
+                <span>KV Matrahı</span>
+                <span>Toplam İnd. Matrah</span>
+                <span>Kalan Genel Matrah</span>
+                <span>İndirimli KV</span>
+                <span>Genel KV</span>
+                <span>Ödenecek Toplam KV</span>
+            </div>
+            {% for s in donem_summary_list %}
+            <div class="period-row" style="grid-template-columns: 1.1fr 0.7fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;">
+                <div class="period-year-badge">{{ s.donem_text }}</div>
+                <div><span class="period-type-pill">{{ s.belge_count }} belge</span></div>
+                <div class="period-amount fw-bold">{{ s.kv_matrah|tlformat }} TL</div>
+                <div class="period-amount text-primary fw-bold">{{ s.indirimli_matrah|tlformat }} TL</div>
+                <div class="period-amount">{{ s.kalan_matrah|tlformat }} TL</div>
+                <div class="period-amount">{{ s.indirimli_kv|tlformat }} TL</div>
+                <div class="period-amount">{{ s.genel_kv|tlformat }} TL</div>
+                <div class="period-amount text-success fw-bold">{{ s.odenecek_toplam_kv|tlformat }} TL</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Ledger List -->
     <div class="ledger-container">
         {% for doc in docs %}
@@ -34,7 +71,9 @@
           {% set _used.diger = _used.diger + (_d.cari_diger_katki|float) %}
           {% set _used.toplam = _used.toplam + (_d.cari_toplam_katki|float) %}
         {% endfor %}
-        {% set _kalan_katki = _hak_edilen - _used.toplam if _hak_edilen > _used.toplam else 0 %}
+        {% set _kalan_katki = _belge_toplam_hak - _used.toplam if _belge_toplam_hak > _used.toplam else 0 %}
+        {% set _hak_edilen_bakiye = _hak_edilen - _used.toplam if _hak_edilen > _used.toplam else 0 %}
+        {% set _avans_kullanilan = _used.toplam - _hak_edilen if _used.toplam > _hak_edilen else 0 %}
         <div class="ledger-sheet" id="doc-sheet-{{ doc.id }}">
             <!-- Header: Belge Kimliği -->
             <div class="ledger-header">
@@ -44,27 +83,19 @@
                         <span><i class="bi bi-calendar3 me-1"></i>Başlangıç: {{ doc.belge_tarihi }}</span>
                         <span>{{ doc.karar }}</span>
                         {% if 'Evet' in doc.vize_durumu %}
-                          <span class="text-success"><i class="bi bi-patch-check-fill me-1"></i>Tamamlama Vizesi yapıldı: İşletme Döneminde</span>
+                          <span class="vize-chip vize-chip-done"><i class="bi bi-patch-check-fill me-1"></i>Tamamlama Vizesi yapıldı: İşletme Döneminde</span>
                         {% else %}
-                          <span class="text-warning"><i class="bi bi-clock-history me-1"></i>Tamamlama Vizesi yapılmadı: Yatırım Döneminde</span>
+                          <span class="vize-chip vize-chip-pending"><i class="bi bi-clock-history me-1"></i>Tamamlama Vizesi yapılmadı: Yatırım Döneminde</span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
-                    <button class="btn btn-primary btn-sm rounded-pill px-3"
-                            onclick='selectDocForCalculation({{ doc.id }}, {{ doc.belge_no|tojson }})'
-                            title="Bu belgeyle hesaplama yap">
-                        <i class="bi bi-calculator me-1"></i>Bu Belgeyle Hesapla
-                    </button>
                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
                             onclick="openBelgeDuzenleModal(this)"
                             data-doc='{{ doc | tojson | safe }}'
                             title="Belge bilgilerini düzenle">
                         <i class="bi bi-pencil-square me-1"></i>Düzenle
                     </button>
-                    <a class="btn btn-action-delete" href="{{ url_for('indirimlikurumlar.download_tesvik_pdf', doc_id=doc.id) }}" title="PDF Çıktısı Al">
-                        <i class="bi bi-file-earmark-pdf-fill"></i>
-                    </a>
                     <button class="btn btn-action-delete" onclick="confirmDeleteDoc({{ doc.id }})" title="Belgeyi Tamamen Sil">
                         <i class="bi bi-trash3-fill"></i>
                     </button>
@@ -97,7 +128,13 @@
                         <div><span>Belge toplam hakkı</span><strong>{{ _belge_toplam_hak|tlformat }} TL</strong></div>
                         <div><span>Hak edilen</span><strong>{{ _hak_edilen|tlformat }} TL</strong></div>
                         <div><span>Kullanılan</span><strong>{{ _used.toplam|tlformat }} TL</strong></div>
-                        <div><span>Kalan</span><strong class="text-success">{{ _kalan_katki|tlformat }} TL</strong></div>
+                        {% if _avans_kullanilan > 0 %}
+                        <div><span>Avans kullanılan</span><strong class="text-warning">{{ _avans_kullanilan|tlformat }} TL</strong></div>
+                        {% endif %}
+                        <div><span>Belge hakkından kalan</span><strong class="text-success">{{ _kalan_katki|tlformat }} TL</strong></div>
+                        {% if _hak_edilen_bakiye > 0 %}
+                        <div><span>Hak edilen bakiye</span><strong>{{ _hak_edilen_bakiye|tlformat }} TL</strong></div>
+                        {% endif %}
                     </div>
                     <button type="button"
                             class="btn btn-sm btn-outline-dark rounded-pill px-3 mt-2"
@@ -147,9 +184,11 @@
                             <button class="btn btn-sm btn-outline-warning rounded-pill px-3" onclick="goToEditPeriod('{{ doc.belge_no }}', '{{ d.hesap_donemi }}', '{{ d.donem_turu }}')" title="Dönemi Düzenle">
                                 <i class="bi bi-pencil-square me-1"></i>Düzenle
                             </button>
-                            <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="openPeriodModal(this)" data-period='{{ d | tojson | safe }}' title="Verileri İncele">
-                                <i class="bi bi-eye-fill me-1"></i>Detay
-                            </button>
+                            <a class="btn btn-sm btn-outline-info rounded-pill px-3"
+                               href="{{ url_for('indirimlikurumlar.download_tesvik_donem_pdf', kullanim_id=d.id) }}"
+                               title="Dönem PDF Çıktısı Al">
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i>PDF
+                            </a>
                             <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="confirmDeletePeriod({{ d.id }})" title="Dönemi Sil">
                                 <i class="bi bi-x-lg me-1"></i>Sil
                             </button>
@@ -171,9 +210,6 @@
             <div class="p-3 bg-white border-top d-flex justify-content-end gap-2 flex-wrap">
                 <button class="btn btn-outline-dark rounded-pill px-4" onclick="openDocModal(this)" data-doc='{{ doc | tojson | safe }}'>
                     <i class="bi bi-file-earmark-ruled-fill me-1"></i>Belge Detayı
-                </button>
-                <button class="btn btn-primary rounded-pill px-4" onclick='selectDocForCalculation({{ doc.id }}, {{ doc.belge_no|tojson }})'>
-                    <i class="bi bi-calculator me-1"></i>Bu Belgeyle Hesapla
                 </button>
             </div>
         </div>
@@ -626,8 +662,10 @@
             });
 
             const usedToplam = usedYatirim + usedDiger;
-            const kalanGenel = Math.max(0, gercekleseneGoreKatkiHak - usedToplam);
-            const kalanDiger = digerOran > 0 ? Math.max(0, gercekleseneGoreDigerHak - usedDiger) : null;
+            const kalanGenel = Math.max(0, belgeToplamKatkiHak - usedToplam);
+            const kalanHakEdilen = Math.max(0, gercekleseneGoreKatkiHak - usedToplam);
+            const avansKullanilan = Math.max(0, usedToplam - gercekleseneGoreKatkiHak);
+            const kalanDiger = digerOran > 0 ? Math.max(0, belgeDigerHak - usedDiger) : null;
 
             const digerSectionVisible =
                 (digerOran > 0) &&
@@ -638,57 +676,80 @@
                 );
 
             const header = `
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div class="katki-modal-hero">
                   <div>
-                    <div class="fw-bold" style="font-size:1.05rem;">${doc.belge_no || '-'}</div>
-                    <div class="text-muted small">${doc.karar || '-'} • Başlangıç: ${doc.belge_tarihi || '-'}</div>
+                    <div class="katki-modal-title">${doc.belge_no || '-'} Nolu Teşvik Belgesi</div>
+                    <div class="katki-modal-subtitle">${doc.karar || '-'} • Başlangıç: ${doc.belge_tarihi || '-'}</div>
                   </div>
-                  <div class="text-end">
-                    <div class="small text-muted">Katkı Oranı</div>
-                    <div class="fw-bold">%${doc.katki_orani ?? '-'}</div>
+                  <div class="katki-modal-badges">
+                    <span>Katkı %${doc.katki_orani ?? '-'}</span>
+                    <span>Vergi indirimi %${doc.vergi_orani ?? '-'}</span>
+                    ${digerOran > 0 ? `<span>Diğer faaliyet %${doc.diger_oran ?? '-'}</span>` : ``}
                   </div>
                 </div>
             `;
 
             const cards = `
                 <div class="row g-3 mb-3">
-                  <div class="col-md-6">
-                    <div class="p-3 bg-white border rounded shadow-sm h-100">
-                      <div class="text-muted small fw-bold text-uppercase mb-2">Belge Toplam Haklar</div>
-                      <div class="d-flex justify-content-between"><span>Toplam Katkı Hakkı</span><span class="fw-bold">${formatCurrency(belgeToplamKatkiHak)}</span></div>
-                      ${digerSectionVisible ? `<div class="d-flex justify-content-between mt-1"><span>Diğer Faaliyet Katkı Hakkı</span><span class="fw-bold">${formatCurrency(belgeDigerHak)}</span></div>` : ``}
+                  <div class="col-md-4">
+                    <div class="katki-stat-card">
+                      <div class="katki-stat-label">Belge Toplam Hakkı</div>
+                      <div class="katki-stat-value">${formatCurrency(belgeToplamKatkiHak)}</div>
+                      ${digerSectionVisible ? `<div class="katki-stat-note">Diğer faaliyet hakkı: ${formatCurrency(belgeDigerHak)}</div>` : ``}
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="p-3 bg-white border rounded shadow-sm h-100">
-                      <div class="text-muted small fw-bold text-uppercase mb-2">Gerçekleşene Göre Hak Edilen</div>
-                      <div class="d-flex justify-content-between"><span>Hak Edilen Toplam Katkı</span><span class="fw-bold text-success">${formatCurrency(gercekleseneGoreKatkiHak)}</span></div>
-                      ${digerSectionVisible ? `<div class="d-flex justify-content-between mt-1"><span>Hak Edilen Diğer Faaliyet Üst Sınırı</span><span class="fw-bold text-success">${formatCurrency(gercekleseneGoreDigerHak)}</span></div>` : ``}
+                  <div class="col-md-4">
+                    <div class="katki-stat-card success">
+                      <div class="katki-stat-label">Hak Edilen Katkı</div>
+                      <div class="katki-stat-value">${formatCurrency(gercekleseneGoreKatkiHak)}</div>
+                      ${digerSectionVisible ? `<div class="katki-stat-note">Diğer faaliyet üst sınırı: ${formatCurrency(gercekleseneGoreDigerHak)}</div>` : ``}
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="katki-stat-card primary">
+                      <div class="katki-stat-label">Toplam Kullanılan</div>
+                      <div class="katki-stat-value">${formatCurrency(usedToplam)}</div>
+                      <div class="katki-stat-note">Yatırım: ${formatCurrency(usedYatirim)} • Diğer: ${formatCurrency(usedDiger)}</div>
                     </div>
                   </div>
                 </div>
             `;
 
             const totals = `
-                <div class="p-3 bg-light border rounded mb-3">
-                  <div class="row g-2">
-                    <div class="col-md-4 d-flex justify-content-between"><span class="text-muted">Kullanılan (Yatırım)</span><span class="fw-bold">${formatCurrency(usedYatirim)}</span></div>
-                    <div class="col-md-4 d-flex justify-content-between"><span class="text-muted">Kullanılan (Diğer)</span><span class="fw-bold">${formatCurrency(usedDiger)}</span></div>
-                    <div class="col-md-4 d-flex justify-content-between"><span class="text-muted">Kalan (Genel)</span><span class="fw-bold">${formatCurrency(kalanGenel)}</span></div>
-                    ${digerSectionVisible ? `<div class="col-md-4 d-flex justify-content-between"><span class="text-muted">Kalan (Diğer Üst Sınırı)</span><span class="fw-bold">${formatCurrency(kalanDiger)}</span></div>` : ``}
+                <div class="katki-balance-grid mb-3">
+                  <div>
+                    <span>Belge hakkından kalan</span>
+                    <strong class="text-success">${formatCurrency(kalanGenel)}</strong>
                   </div>
+                  ${kalanHakEdilen > 0 ? `
+                  <div>
+                    <span>Hak edilen bakiye</span>
+                    <strong>${formatCurrency(kalanHakEdilen)}</strong>
+                  </div>` : ``}
+                  ${digerSectionVisible ? `
+                  <div>
+                    <span>Diğer faaliyet kalan üst sınırı</span>
+                    <strong>${formatCurrency(kalanDiger)}</strong>
+                  </div>` : ``}
+                  ${avansKullanilan > 0 ? `
+                  <div class="warning">
+                    <span>Avans kullanılan</span>
+                    <strong>${formatCurrency(avansKullanilan)}</strong>
+                  </div>` : ``}
                 </div>
             `;
 
             const table = `
-                <div class="table-responsive">
+                <div class="katki-period-table">
+                  <div class="katki-section-title">Dönem Kullanımları</div>
+                  <div class="table-responsive">
                   <table class="table table-sm align-middle mb-0">
-                    <thead class="table-light">
+                    <thead>
                       <tr>
                         <th>Yıl</th>
                         <th>Dönem</th>
-                        <th class="text-end">Cari Yatırım Katkı</th>
-                        <th class="text-end">Cari Diğer Katkı</th>
+                        <th class="text-end">Yatırımdan Kullanılan</th>
+                        <th class="text-end">Diğer Faaliyetten Kullanılan</th>
                         <th class="text-end">Cari Toplam</th>
                       </tr>
                     </thead>
@@ -706,6 +767,7 @@
                       `}
                     </tbody>
                   </table>
+                  </div>
                 </div>
             `;
 

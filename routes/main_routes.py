@@ -330,7 +330,7 @@ def sitemap_xml():
         ('main.home', {}), ('main.about', {}), ('main.team', {}), ('main.mevzuat', {}),
         ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
-        ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}),
+        ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}), ('main.kv_istisna_indirimler', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
@@ -341,6 +341,7 @@ def sitemap_xml():
         'calculators.index': '0.8',
         'indirimlikurumlar_seo.hesaplama_araci': '0.9',
         'indirimlikurumlar_seo.mevzuat_rehberi': '0.8',
+        'main.kv_istisna_indirimler': '0.9',
     }
     for rule, kw in static_endpoints:
         try:
@@ -431,6 +432,9 @@ def his(): return render_template("pages/his.html")
 
 @bp.route("/indirim")
 def indirim(): return render_template("pages/indirim.html")
+
+@bp.route("/mevzuat/kv-istisna-indirimler")
+def kv_istisna_indirimler(): return render_template("pages/kv_istisna_indirim.html")
 
 
 

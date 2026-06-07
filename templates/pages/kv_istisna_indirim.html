@@ -1,0 +1,684 @@
+{% extends "layout.html" %}
+
+{% block title %}KV Beyanında İstisna ve İndirimler – Kazanç & Zarar Durumuna Göre | İSFA YMM{% endblock %}
+
+{% block description %}Kurumlar vergisi beyanında kazancın bulunması halinde ve zarar olsa dahi indirilecek tüm istisna ve indirimler. KVK Madde 5 ve Madde 10 kapsamında tam liste, yasal dayanak ve hesaplama aracı.{% endblock %}
+
+{% block content %}
+
+<!-- 🎯 BAŞLIK -->
+<section class="py-5 text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #1a3c5e 0%, #2563eb 100%);">
+  <div class="position-absolute top-0 start-0 w-100 h-100" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.07;"></div>
+  <div class="container position-relative" data-aos="fade-up">
+    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill mb-3 fw-bold" style="font-size:0.8rem;">KVK MADDE 5 & MADDE 10</span>
+    <h1 class="fw-bold display-6 mb-3">KV Beyanında İstisna ve İndirimler</h1>
+    <p class="lead text-white-50 mb-0 mx-auto" style="max-width:680px;">Kazancın bulunması halinde ve zarar olsa dahi indirilecek tüm istisna ve indirimler — tutar girin, toplamı anında görün.</p>
+  </div>
+</section>
+
+<!-- 🧭 SEKME MENÜ -->
+<section class="bg-white shadow-sm sticky-top" style="z-index:1020; top:0;">
+  <div class="container">
+    <div class="d-flex justify-content-center gap-3 py-3 flex-wrap">
+      <button class="kvi-tab-btn active" id="tabBtn1" onclick="switchTab('tab1', this)">
+        <span class="kvi-tab-dot bg-warning"></span>
+        <span>Kazancın Bulunması Halinde İndirilecekler</span>
+      </button>
+      <button class="kvi-tab-btn" id="tabBtn2" onclick="switchTab('tab2', this)">
+        <span class="kvi-tab-dot bg-success"></span>
+        <span>Zarar Olsa Dahi İndirilecek İstisnalar</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- 📋 ANA İÇERİK -->
+<section class="py-4 bg-light" style="min-height:80vh;">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- SOL: KALEM LİSTESİ -->
+      <div class="col-lg-10 mx-auto">
+
+        <!-- Arama -->
+        <div class="d-flex flex-column align-items-center mb-4">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden w-100" style="max-width:540px;">
+            <span class="input-group-text bg-white border-end-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="searchInput" class="form-control border-start-0 ps-0 py-2" placeholder="Kalem adı veya yasal madde ara…" oninput="filterItems()">
+          </div>
+          <span class="text-muted small mt-2" id="itemCount"></span>
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 1: KAZANCIN BULUNMASI HALİNDE     -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab1" class="kvi-tab-content">
+
+          <!-- GRUP: İSTİSNALAR (KVK Md.5) -->
+          <div class="kvi-group-header">
+            <i class="bi bi-shield-check text-warning me-2"></i>İSTİSNALAR — KVK Madde 5/1-i
+          </div>
+
+          {% set items_t1_g1 = [
+            ("Risturnlar", "K.V.K. Mad. 5/1-i", "warning"),
+          ] %}
+          {% for ad, madde, renk in items_t1_g1 %}
+          <div class="kvi-row" data-tab="tab1" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-{{ renk }}-subtle text-{{ renk }}-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: İNDİRİMLER — Ar-Ge & Tasarım -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-lightbulb text-primary me-2"></i>Ar-Ge, Tasarım ve Teknogirişim İndirimleri — KVK Madde 10
+          </div>
+
+          {% set items_t1_g2 = [
+            ("Ar-Ge İndirimi", "K.V.K. Mad. 10/1-a"),
+            ("Ar-Ge İndirimi (5746 sayılı Kanun Mad. 3)", "5746 s.K. Mad. 3"),
+            ("Ar-Ge İndirimi (5746 sayılı Kanun Mad. 3/A)", "5746 s.K. Mad. 3/A"),
+            ("Tasarım İndirimi", "5746 s.K. Mad. 3"),
+            ("Teknogirişim Sermaye Desteği İndirimi", "5746 s.K. Mad. 3/5"),
+            ("Teknokent Sermaye Desteği İndirimi", "4691 s.K. Geç. Mad. 4"),
+          ] %}
+          {% for ad, madde in items_t1_g2 %}
+          <div class="kvi-row" data-tab="tab1" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-primary-subtle text-primary-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Sponsorluk -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-trophy text-info me-2"></i>Sponsorluk Harcamaları — KVK Madde 10/1-b
+          </div>
+
+          {% set items_t1_g3 = [
+            ("Sponsorluk Harcamaları (Profesyonel spor dalları)", "K.V.K. Mad. 10/1-b"),
+            ("Sponsorluk Harcamaları (Amatör spor dalları)", "K.V.K. Mad. 10/1-b"),
+          ] %}
+          {% for ad, madde in items_t1_g3 %}
+          <div class="kvi-row" data-tab="tab1" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-info-subtle text-info-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Bağış ve Yardımlar -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-heart text-danger me-2"></i>Bağış ve Yardımlar — KVK Madde 10/1-c ve Devamı
+          </div>
+
+          {% set items_t1_g4 = [
+            ("Bağış ve Yardımlar", "K.V.K. Mad. 10/1-c"),
+            ("Aile ve Gençlik Fonuna yapılan bağış ve yardımlar", "7474 s.K. Mad. 6"),
+            ("Afet Yeniden İmar Fonuna yapılan bağış ve yardımlar", "7441 s.K. Mad. 7"),
+            ("Uludağ Alan Başkanlığına yapılan bağış, yardımlar ve sponsorluk harcamaları", "7432 s.K. Mad. 8"),
+            ("222 sayılı İlköğretim ve Eğitim Kanununa Göre Yapılan Bağışlar", "222 s.K."),
+            ("278 sayılı Türkiye Bilimsel ve Teknolojik Araştırma Kurumu Kanununa Göre Bağışlar", "278 s.K."),
+            ("2547 sayılı Yükseköğretim Kanununa Göre Yapılan Bağış ve Yardımlar", "2547 s.K."),
+            ("2828 sayılı Sosyal Hizmetler Kanununa Göre Yapılan Bağışlar", "2828 s.K."),
+            ("2876 sayılı Atatürk Kültür, Dil ve Tarih Yüksek Kurumu Kanununa Göre Yapılan Bağış ve Yardımlar", "2876 s.K."),
+            ("3294 sayılı Sosyal Yardımlaşma ve Dayanışmayı Teşvik Kanununa Göre Yapılan Bağış ve Yardımlar", "3294 s.K."),
+            ("3388 sayılı Türk Silahlı Kuvvetlerini Güçlendirme Vakfı Kanununa Göre Yapılan Bağış ve Yardımlar", "3388 s.K."),
+            ("3713 sayılı Terörle Mücadele Kanununa Göre Yapılan Bağışlar", "3713 s.K."),
+            ("4122 sayılı Milli Ağaçlandırma ve Erozyon Kontrolü Kanununa Göre Ormanlarda Ağaçlandırma, Bakım ve Koruma Masrafları", "4122 s.K."),
+            ("5434 sayılı Türkiye Cumhuriyeti Emekli Sandığı Kanununa Göre Yapılan Bağış ve Yardımlar", "5434 s.K."),
+            ("6569 sayılı Türkiye Sağlık Enstitüleri Başkanlığı İlişkin Kanuna Göre Yapılan Bağış ve Yardımlar", "6569 s.K."),
+            ("6546 sayılı Çanakkale Savaşları Gelibolu Tarihi Alanı Kanununa Göre Bağış, Yardımlar ve Sponsorluk Harcamaları", "6546 s.K."),
+            ("7034 sayılı Türk-Japon Bilim ve Teknoloji Üniversitesi Kanununa Göre Yapılan Bağış ve Yardımlar", "7034 s.K."),
+            ("7430 sayılı Antalya Diplomasi Forumu Vakfı Kanununa Göre Yapılan Bağış ve Yardımlar", "7430 s.K."),
+            ("7439 sayılı Türk Arkeoloji ve Kültürel Miras Vakfı Kanununa Göre Yapılan Bağış ve Yardımlar", "7439 s.K."),
+            ("7512 sayılı Dışişleri Teşkilatı Güçlendirme Vakfı Kanununa Göre Yapılan Bağış ve Yardımlar", "7512 s.K."),
+            ("2690 sayılı Türkiye Enerji, Nükleer ve Maden Araştırma Kurumu Kanununa Göre Yapılan Nakdî Bağış ve Yardımlar", "2690 s.K."),
+            ("Eğitim ve Sağlık Tesisleri, Gençlik ve İzci Kampları ile Yurt İnşaatlarına İlişkin Bağış ve Yardımlar", "K.V.K. Mad. 10/1-ç"),
+            ("İbadethanelere ve Dini Tesislere Yapılan Bağış ve Yardımlar", "KVK Mad. 10/1-ç"),
+            ("Kültür ve Turizm Amaçlı Bağış ve Yardımlar", "K.V.K. Mad. 10/1-d"),
+            ("Cumhurbaşkanınca Başlatılan Yardım Kampanyalarına Yapılan Bağış ve Yardımlar", "K.V.K. Mad. 10/1-e"),
+            ("Türkiye Kızılay Derneğine Yapılan Nakdî Bağış ve Yardımlar", "KVK Mad. 10/1-f"),
+            ("Türkiye Yeşilay Cemiyetine Yapılan Nakdî Bağış ve Yardımlar", "KVK Mad. 10/1-f"),
+            ("Kapadokya Alanı Başkanlığına Yapılan Bağış ve Yardımlar ile Sponsorluk Harcamaları", "Özel Kanun"),
+          ] %}
+          {% for ad, madde in items_t1_g4 %}
+          <div class="kvi-row" data-tab="tab1" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-danger-subtle text-danger-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Diğer İndirimler -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-plus-circle text-secondary me-2"></i>Diğer İndirimler — KVK Madde 10
+          </div>
+
+          {% set items_t1_g5 = [
+            ("VUK 325/A'ya Göre Girişim Sermayesi Fonu Olarak Ayrılan Tutarlar", "KVK Mad. 10/1-g"),
+            ("Sağlık Hizmetlerine İlişkin İndirim", "KVK Mad. 10/1-ğ"),
+            ("Eğitim Hizmetlerine İlişkin İndirim", "KVK Mad. 10/1-ğ"),
+            ("Diğer Hizmetlere İlişkin İndirim", "KVK Mad. 10/1-ğ"),
+            ("5378 Sayılı Engelliler Hakkında Kanuna Göre Kurulan Korumalı İşyeri İndirimi", "K.V.K. Mad. 10/1-h"),
+            ("Yatırım İndirimi İstisnası", "GVK Geç. Mad. 61"),
+            ("Nakdî Sermaye Artırışından Kaynaklanan Faiz İndirimi", "KVK Mad. 10/1-ı"),
+            ("İstanbul Finans Merkezi Bölgesinde Faaliyette Bulunan Kurumların Elde Ettikleri Kazançlarda İndirim", "KVK Mad. 10/1-i"),
+            ("Diğer İndirimler", "KVK Mad. 10"),
+          ] %}
+          {% for ad, madde in items_t1_g5 %}
+          <div class="kvi-row" data-tab="tab1" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-secondary-subtle text-secondary-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+        </div><!-- /tab1 -->
+
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 2: ZARAR OLSA DAHİ               -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab2" class="kvi-tab-content d-none">
+
+          <!-- GRUP: İştirak Kazançları -->
+          <div class="kvi-group-header">
+            <i class="bi bi-diagram-3 text-success me-2"></i>İştirak Kazançları — KVK Madde 5/1-a
+          </div>
+
+          {% set items_t2_g1 = [
+            ("İştirak Kazançları (Tam mükellef kurumlardan)", "K.V.K. Mad. 5/1-a-1-2"),
+            ("İştirak Kazançları — Diğer Fonların Katılma Paylarının Fona İadesinden Doğan Gelirler ile bu Fonların Katılma Paylarının Değerlenmesinden Kaynaklanan Değer Artış Kazançları", "K.V.K. Mad. 5/1-a-3"),
+            ("İştirak Kazançları — Diğer Yatırım Fonlarına Katılma Paylarının Değerlenmesinden Kaynaklanan Değer Artış Kazançları", "K.V.K. Mad. 5/1-a-4"),
+            ("İştirak Kazançları — Diğer Yatırım Fon ve Ortaklıklarının Kazançları", "K.V.K. Mad. 5/1-a-5"),
+            ("İştirak Kazançları İstisnası (K.V.K. Mad. 13'den kaynaklanmayan)", "K.V.K. Mad. 5/1-a"),
+            ("Yurtdışı İştirak Kazançları", "K.V.K. Mad. 5/1-b"),
+            ("Yurtdışı İştirak Kazançları — Ödenmiş Sermayenin En Az %50'sine Sahip Olmak Suretiyle İştirak Edilen Yurt Dışı Kurumlardan Elde Edilen Kazançlar", "K.V.K. Mad. 5/1-b"),
+            ("Tam Mükellef Anonim Şirketlerin Yurtdışı İştirak Hisseleri Satış Kazancı", "K.V.K. Mad. 5/1-b"),
+          ] %}
+          {% for ad, madde in items_t2_g1 %}
+          <div class="kvi-row" data-tab="tab2" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-success-subtle text-success-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Diğer Sermaye Piyasası İstisnaları -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-bar-chart-line text-primary me-2"></i>Sermaye Piyasası Araçları İstisnaları — KVK Madde 5/1-ç, 5/1-d
+          </div>
+
+          {% set items_t2_g2 = [
+            ("Emisyon Primi Kazancı", "K.V.K. Mad. 5/1-ç"),
+            ("Menkul Kıymetler Yatırım Fonu/Ortaklığı Portföy İşletmeciliği Kazançları (Taşınmazlardan elde edilenler hariç)", "K.V.K. Mad. 5/1-d-1"),
+            ("Menkul Kıymetler Yatırım Fonu/Ortaklığı Portföy İşletmeciliği Kazançları (Taşınmazlardan elde edilen)", "K.V.K. Mad. 5/1-d-1"),
+            ("Portföy Türkiye'de Kurulu Borsalarda İşlem Gören Altın ve Kıymetli Madenler Dayalı Yatırım Fonu/Ortaklığı Kazançları (Taşınmazlar hariç)", "K.V.K. Mad. 5/1-d-2"),
+            ("Portföy Türkiye'de Kurulu Borsalarda İşlem Gören Altın ve Kıymetli Madenler Dayalı Yatırım Fonu/Ortaklığı Kazançları (Taşınmazlar)", "K.V.K. Mad. 5/1-d-2"),
+            ("Girişim Sermayesi Yatırım Fonu/Ortaklığı Kazançları (Taşınmazlardan elde edilenler hariç)", "K.V.K. Mad. 5/1-d-3"),
+            ("Girişim Sermayesi Yatırım Fonu/Ortaklığı Kazançları (Taşınmazlar)", "K.V.K. Mad. 5/1-d-3"),
+            ("Gayrimenkul Yatırım Fonu/Ortaklığı Kazançları (Taşınmazlardan elde edilenler hariç)", "K.V.K. Mad. 5/1-d-4"),
+            ("Emeklilik Yatırım Fonlarının Kazançları (Taşınmazlardan elde edilenler hariç)", "K.V.K. Mad. 5/1-d-5"),
+            ("Konut Finansmanı ile Varlık Finansmanı Fonlarının Kazançları (Taşınmazlardan elde edilenler hariç)", "K.V.K. Mad. 5/1-d-6"),
+            ("Konut Finansmanı ile Varlık Finansmanı Fonlarının Kazançları (Taşınmazlar)", "K.V.K. Mad. 5/1-d-6"),
+          ] %}
+          {% for ad, madde in items_t2_g2 %}
+          <div class="kvi-row" data-tab="tab2" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-primary-subtle text-primary-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Satış Kazancı İstisnaları -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-house-check text-warning me-2"></i>Satış Kazancı İstisnaları — KVK Madde 5/1-e, 5/1-f
+          </div>
+
+          {% set items_t2_g3 = [
+            ("Taşınmaz Satış Kazancı İstisnası", "K.V.K. Mad. 5/1-e"),
+            ("İştirak Hisseleri Satış Kazancı İstisnası", "K.V.K. Mad. 5/1-e"),
+            ("Kurucu Senetleri, İntifa Senetleri, Rüçhan Hakları ve Yatırım Fonlarının Katılma Paylarının Satışından Kaynaklanan İstisna", "K.V.K. Mad. 5/1-e"),
+            ("Banka, Finans Kuruluşları veya TMSF'ye Borçlu Durumda Olan Kurumların Taşınmaz ve İştirak Hisseleri ile Kurucu Sen., İntifa Sen. ve Rüçhan Hakları Satış Kazancı", "K.V.K. Mad. 5/1-f"),
+          ] %}
+          {% for ad, madde in items_t2_g3 %}
+          <div class="kvi-row" data-tab="tab2" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-warning-subtle text-warning-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: Yurt Dışı & Özel Bölge İstisnaları -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-globe text-info me-2"></i>Yurt Dışı, Özel Bölge ve Diğer İstisnalar — KVK 5/1-g, h, ı, j, k
+          </div>
+
+          {% set items_t2_g4 = [
+            ("Yurtdışı Şube Kazançları", "K.V.K. Mad. 5/1-g"),
+            ("Yurt Dışı İnşaat, Onarma, Montaj ve Teknik Hizmetlerden Sağlanan Kazançlar", "KVK Mad. 5/1-h"),
+            ("Eğitim, Öğretim ile Özel Kreş, Gün. Bakım ve Rehabilitasyon Merkezi Kazançları", "K.V.K. Mad. 5/1-ı"),
+            ("Sat-Kirala-Geri Al İşlemlerinden Doğan Kazançlarda İstisna (Taşınmazlar)", "KVK Mad. 5/1-j"),
+            ("Sat-Kirala-Geri Al İşlemlerinden Doğan Kazançlarda İstisna (Diğer)", "KVK Mad. 5/1-k"),
+            ("Kira Sertifikası İhraç Amacıyla Varlık ve Hakların Satışından Doğan Kazançlarda İstisna (Taşınırlar)", "KVK Mad. 5/1-k"),
+            ("Kira Sertifikası İhraç Amacıyla Varlık ve Hakların Satışından Doğan Kazançlarda İstisna (Taşınmazlar)", "KVK Mad. 5/1-k"),
+            ("Kira Sertifikası İhraç Amacıyla Varlık ve Hakların Satışından Doğan Kazançlarda İstisna (Diğer)", "KVK Mad. 5/1-k"),
+            ("Serbest Bölgelerde Elde Edilen Kazançlar", "3218 s.K."),
+            ("Teknoloji Geliştirme Bölgelerinde Elde Edilen Kazançlar", "4691 s.K."),
+            ("Teknoloji Geliştirme Bölgelerinde Elde Edilen Kazançlar (Yönetici Şirketler)", "4691 s.K."),
+            ("Türk Uluslararası Gemi Siciline Kayıtlı Gemilerin İşletilmesinden ve Devrinden Sağlanan Kazançlar", "4490 s.K."),
+            ("Yabancı Kazançların Vergilendirmede Yönetici Şirketlerin İstisnası", "KVK Mad. 5/A/3"),
+            ("Sınai Mülkiyet Haklarında İstisna", "KVK Mad. 5/B"),
+            ("5300 sayılı Tarım Ürünleri Lisanslı Depoculuk Kanununa Göre Ürün Senetlerinin Elden Çıkarılmasından Doğan Kazanç İstisnası", "193 s.K. Geç. Mad. 76"),
+            ("Araştırma Altyapılarının Ar-Ge ve Yenilik Faaliyetlerinden Elde Ettikleri Kazançlarda İstisna", "6550 s.K."),
+          ] %}
+          {% for ad, madde in items_t2_g4 %}
+          <div class="kvi-row" data-tab="tab2" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-info-subtle text-info-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- GRUP: KVK Geçici Maddeler -->
+          <div class="kvi-group-header mt-2">
+            <i class="bi bi-clock-history text-secondary me-2"></i>Diğer İndirimler ve İstisnalar — KVK Geçici Madde 14
+          </div>
+
+          {% set items_t2_g5 = [
+            ("KVK Geç. Mad. 14/1-b kapsamında kur farkı kazanç istisnası", "KVK Geç. Mad. 14/1-b"),
+            ("KVK Geç. Mad. 14/1-b kapsamında dönem sonu değerlemesinden doğan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/1-b"),
+            ("KVK Geç. Mad. 14/1-b kapsamında vade sonunda oluşan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/1-b"),
+            ("KVK Geç. Mad. 14/1-b kapsamında vade sonunda oluşan diğer kazançlardan istisna", "KVK Geç. Mad. 14/1-b"),
+            ("KVK Geç. Mad. 14/2 kapsamında kur farkı kazanç istisnası", "KVK Geç. Mad. 14/2"),
+            ("KVK Geç. Mad. 14/2 kapsamında dönem sonu değerlemesinden doğan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/2"),
+            ("KVK Geç. Mad. 14/2 kapsamında dönem sonu değerlemesinden doğan diğer kazançlardan istisna", "KVK Geç. Mad. 14/2"),
+            ("KVK Geç. Mad. 14/2 kapsamında vade sonunda oluşan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/2"),
+            ("KVK Geç. Mad. 14/2 kapsamında vade sonunda oluşan diğer kazançlardan istisna", "KVK Geç. Mad. 14/2"),
+            ("KVK Geç. Mad. 14/3 kapsamında altın hesaplarının dönüştürülmesinden doğan kazanç istisnası", "KVK Geç. Mad. 14/3"),
+            ("KVK Geç. Mad. 14/3 kapsamında dönem sonu değerlemesinden doğan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/3"),
+            ("KVK Geç. Mad. 14/3 kapsamında vade sonunda oluşan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/3"),
+            ("KVK Geç. Mad. 14/3 kapsamında vade sonunda oluşan diğer kazançlardan istisna", "KVK Geç. Mad. 14/3"),
+            ("KVK Geç. Mad. 14/4 kapsamında dönem sonu değerlemesinden doğan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/4"),
+            ("KVK Geç. Mad. 14/4 kapsamında vade sonunda oluşan kar payı ve faiz istisnası", "KVK Geç. Mad. 14/4"),
+            ("KVK Geç. Mad. 14/4 kapsamında vade sonunda oluşan diğer kazançlardan istisna", "KVK Geç. Mad. 14/4"),
+            ("ÇYÖA istisna olarak beyan edilen istisna kazançlar", "ÇYÖA"),
+          ] %}
+          {% for ad, madde in items_t2_g5 %}
+          <div class="kvi-row" data-tab="tab2" onclick='toggleDescription(this, {{ ad|tojson }}, {{ madde|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper">
+                <div class="kvi-row-name">{{ ad }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="kvi-badge bg-secondary-subtle text-secondary-emphasis">{{ madde }}</span>
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+        </div><!-- /tab2 -->
+
+        <!-- Hiç sonuç yoksa -->
+        <div id="noResult" class="text-center py-5 text-muted d-none">
+          <i class="bi bi-search fs-1 opacity-25 d-block mb-2"></i>
+          Aradığınız kalem bulunamadı.
+        </div>
+
+      </div><!-- /sol panel -->
+
+    </div><!-- /row -->
+  </div>
+</section>
+
+<!-- ━━━━━━━━ SCRIPTS ━━━━━━━━ -->
+<script>
+  /* ── Tab geçişi ─────────────────────── */
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.kvi-tab-content').forEach(el => el.classList.add('d-none'));
+    document.getElementById(tabId).classList.remove('d-none');
+    document.querySelectorAll('.kvi-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('searchInput').value = '';
+    filterItems();
+  }
+
+  /* ── Filtreleme ─────────────────────── */
+  function filterItems() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const activeTab = document.querySelector('.kvi-tab-content:not(.d-none)');
+    let visible = 0;
+    let total = 0;
+
+    activeTab.querySelectorAll('.kvi-row').forEach(row => {
+      total++;
+      const text = row.querySelector('.kvi-row-name').textContent.toLowerCase()
+                 + ' ' + (row.querySelector('.kvi-badge')?.textContent || '').toLowerCase();
+      const show = !q || text.includes(q);
+      row.style.display = show ? '' : 'none';
+      
+      // Arama sonucunda gizlenen açık kutuları kapat
+      if (!show) {
+        const nextEl = row.nextElementSibling;
+        if (nextEl && nextEl.classList.contains('kvi-description-collapse') && nextEl.classList.contains('expanded')) {
+          nextEl.classList.remove('expanded');
+          nextEl.style.maxHeight = '0px';
+          row.classList.remove('active-row');
+          const icon = row.querySelector('.kvi-toggle-icon');
+          if (icon) icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        }
+      }
+
+      if (show) visible++;
+    });
+
+    // Grup başlıklarını kontrol et
+    activeTab.querySelectorAll('.kvi-group-header').forEach(header => {
+      let nextEl = header.nextElementSibling;
+      let hasVisible = false;
+      while (nextEl && !nextEl.classList.contains('kvi-group-header')) {
+        if (nextEl.classList.contains('kvi-row') && nextEl.style.display !== 'none') hasVisible = true;
+        nextEl = nextEl.nextElementSibling;
+      }
+      header.style.display = hasVisible ? '' : 'none';
+    });
+
+    document.getElementById('noResult').classList.toggle('d-none', visible > 0);
+
+    const countEl = document.getElementById('itemCount');
+    if (q) {
+      countEl.textContent = `${visible} / ${total} kalem bulundu`;
+    } else {
+      countEl.textContent = `Toplam ${total} kalem`;
+    }
+  }
+
+  /* ── Açıklama veri tabanı ── */
+  const EXPLANATIONS = {
+    "risturnlar": "Kooperatiflerin ortakları ile yaptıkları işlemlerden doğan risturnların (kefalet, kredi veya alışveriş iadelerinin) ortaklara dağıtılması kurumlar vergisinden istisnadır. (KVK Madde 5/1-i)",
+    "ar-ge indirimi": "Mükelleflerin işletmeleri bünyesinde gerçekleştirdikleri münhasıran yeni teknoloji ve bilgi arayışına yönelik araştırma ve geliştirme harcamalarının %100'ünün kurum kazancından indirilmesidir. (KVK Madde 10/1-a)",
+    "tasarım indirimi": "Mükelleflerin işletmeleri bünyesinde gerçekleştirdikleri yeni ürün tasarımı faaliyetlerine yönelik harcamalarının tamamının kurumlar vergisi matrahından indirilmesi imkanıdır. (5746 sayılı Kanun)",
+    "sponsorluk harcamaları": "Kurumlar Vergisi Kanunu uyarınca amatör spor dalları için yapılan sponsorluk harcamalarının %100'ü, profesyonel spor dalları için yapılan harcamaların ise %50'si kurum kazancından indirilebilir.",
+    "bağış ve yardımlar": "Genel ve özel bütçeli kamu idarelerine, il özel idarelerine, belediyelere, köylere, kamu yararına çalışan derneklere ve cumhurbaşkanınca vergi muafiyeti tanınan vakıflara yapılan bağışların, beyan edilen kurum kazancının %5'ine kadar olan kısmı kurum kazancından indirilebilir.",
+    "ibadethanelere ve dini tesislere yapılan bağış ve yardımlar": "İbadethanelerin ve dini tesislerin inşası, restorasyonu veya bu yerlerin işletilmesi için yapılan bağış ve yardımların tamamı kurumlar vergisi matrahından indirilebilir.",
+    "nakdî sermaye artırışından kaynaklanan faiz indirimi": "Sermaye şirketlerinin nakdi sermaye artışları üzerinden, TCMB tarafından açıklanan ticari krediler faiz oranı dikkate alınarak hesaplanan tutarın %50'sinin vergi matrahından indirilmesidir. <br><a href='/sermaye' class='btn btn-sm btn-outline-primary mt-2 rounded-pill px-3 py-1 fw-bold text-decoration-none d-inline-flex align-items-center gap-1'><i class='bi bi-calculator'></i> Nakdi Sermaye Artırımı İndirimi Hesaplama Aracı</a>",
+    "iştirak kazançları (tam mükellef kurumlardan)": "Kurumların, tam mükellef başka bir kurumun sermayesine katılmaları nedeniyle elde ettikleri temettü ve kar payı gelirleri çifte vergilendirmeyi önlemek amacıyla tamamen istisnadır. (KVK Madde 5/1-a)",
+    "emisyon primi kazancı": "Anonim şirketlerin kuruluşlarında veya sermayelerini artırdıkları sırada çıkardıkları hisse senetlerinin itibari değerlerini aşan satış bedelleri (primler) kurumlar vergisinden istisnadır. (KVK Madde 5/1-ç)",
+    "taşınmaz satış kazancı istisnası": "Kurumların aktifinde en az iki tam yıl süreyle yer alan taşınmazların satışından doğan kazançların ilgili kanun maddesi çerçevesinde belirlenen oranı (%50 veya taşınmazın durumuna göre değişen oran) vergi dışı bırakılmasıdır. (KVK Madde 5/1-e)",
+    "yurtdışı şube kazançları": "Kurumların yurt dışındaki iş yerleri veya daimi temsilcileri aracılığıyla elde ettikleri ve yurt dışında en az %15 oranında gelir veya kurumlar benzeri vergiye tabi tutulmuş şube kazançları kurumlar vergisinden istisnadır. (KVK Madde 5/1-g)",
+    "serbest bölgelerde elde edilen kazançlar": "3218 sayılı Serbest Bölgeler Kanunu kapsamında, serbest bölgelerde faaliyet gösteren kurumların özellikle imalat faaliyetlerinden elde ettikleri kazançlar kurumlar vergisinden istisnadır.",
+    "teknoloji geliştirme bölgelerinde elde edilen kazançlar": "4691 sayılı Teknoloji Geliştirme Bölgeleri Kanunu uyarınca, bölgede faaliyet gösteren mükelleflerin münhasıran yazılım, tasarım ve Ar-Ge faaliyetlerinden elde ettikleri kazançlar kurumlar vergisinden istisnadır.",
+    "sınai mülkiyet haklarında istisna": "Türkiye'de gerçekleştirilen araştırma, geliştirme ve yenilik faaliyetleri ile yazılım faaliyetleri neticesinde ortaya çıkan patentli veya faydalı model belgeli buluşlardan elde edilen kazançların %50'si kurumlar vergisinden istisnadır. (KVK Madde 5/B)"
+  };
+
+  function normalizeText(str) {
+    if (!str) return "";
+    return str.toLowerCase()
+      .replace(/i̇/g, 'i')
+      .replace(/[ıîíìï]/g, 'i')
+      .replace(/[şs]/g, 's')
+      .replace(/[ğg]/g, 'g')
+      .replace(/[çc]/g, 'c')
+      .replace(/[üu]/g, 'u')
+      .replace(/[öo]/g, 'o')
+      .replace(/[âa]/g, 'a')
+      .replace(/[^a-z0-9\s]/g, '')
+      .trim();
+  }
+
+  function getDescriptionText(name, madde) {
+    const normName = normalizeText(name);
+    let detail = "";
+    
+    for (let key in EXPLANATIONS) {
+      const normKey = normalizeText(key);
+      if (normName.includes(normKey) || normKey.includes(normName)) {
+        detail = EXPLANATIONS[key];
+        break;
+      }
+    }
+    
+    const lowerName = name.toLowerCase().trim();
+    if (!detail) {
+      if (lowerName.includes("bağış") || lowerName.includes("yardım")) {
+        detail = `${name} kapsamında yapılan bağış ve yardımlar, ilgili mevzuat çerçevesinde beyan edilen kurum kazancından indirim konusu yapılabilmektedir.`;
+      } else if (lowerName.includes("iştirak")) {
+        detail = `${name} kapsamında elde edilen iştirak kazancı ve değer artış gelirleri kurumlar vergisinden istisnadır.`;
+      } else if (lowerName.includes("indirim")) {
+        detail = `${name} kapsamında yapılan harcamalar veya ayrılan fonlar, kurumlar vergisi beyannamesinde indirim olarak dikkate alınabilir.`;
+      } else if (lowerName.includes("istisna")) {
+        detail = `${name} kapsamında elde edilen kazançlar, çifte vergilendirmeyi önlemek veya teşvik amacıyla kurumlar vergisinden istisna edilmiştir.`;
+      } else {
+        detail = `${name} işlemi, Kurumlar Vergisi Kanunu kapsamında beyannamede dikkate alınabilecek yasal indirim ve istisnalar arasında yer almaktadır.`;
+      }
+    }
+    
+    return `
+      <div class="d-flex align-items-start gap-2">
+        <i class="bi bi-info-circle-fill text-primary mt-1" style="font-size: 1.1rem;"></i>
+        <div>
+          <div class="fw-bold mb-1 text-dark">Açıklama &amp; Yasal Durum</div>
+          <div class="mb-2" style="font-size:0.8rem; line-height: 1.4;">${detail}</div>
+          <div class="text-muted small"><strong>Yasal Dayanak:</strong> ${madde}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ── Açıklama kutusunu göster/gizle ── */
+  function toggleDescription(row, name, madde) {
+    let nextEl = row.nextElementSibling;
+    
+    if (!nextEl || !nextEl.classList.contains('kvi-description-collapse')) {
+      const collapseDiv = document.createElement('div');
+      collapseDiv.className = 'kvi-description-collapse';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'kvi-description-content';
+      contentDiv.innerHTML = getDescriptionText(name, madde);
+      
+      collapseDiv.appendChild(contentDiv);
+      row.parentNode.insertBefore(collapseDiv, row.nextSibling);
+      nextEl = collapseDiv;
+    }
+    
+    const wasExpanded = nextEl.classList.contains('expanded');
+    const toggleIcon = row.querySelector('.kvi-toggle-icon');
+    
+    // Aktif tabdaki diğer tüm açık kutuları kapat
+    const activeTab = row.closest('.kvi-tab-content');
+    activeTab.querySelectorAll('.kvi-description-collapse.expanded').forEach(el => {
+      if (el !== nextEl) {
+        el.classList.remove('expanded');
+        el.style.maxHeight = '0px';
+        const siblingRow = el.previousElementSibling;
+        siblingRow.classList.remove('active-row');
+        const siblingIcon = siblingRow.querySelector('.kvi-toggle-icon');
+        if (siblingIcon) {
+          siblingIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        }
+      }
+    });
+    
+    if (!wasExpanded) {
+      nextEl.classList.add('expanded');
+      row.classList.add('active-row');
+      if (toggleIcon) {
+        toggleIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      }
+      nextEl.style.maxHeight = nextEl.scrollHeight + 'px';
+    } else {
+      nextEl.classList.remove('expanded');
+      row.classList.remove('active-row');
+      if (toggleIcon) {
+        toggleIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      }
+      nextEl.style.maxHeight = '0px';
+    }
+  }
+
+  // İlk yüklemede toplam kalem sayısını göster
+  document.addEventListener('DOMContentLoaded', () => {
+    filterItems();
+  });
+</script>
+
+<!-- ━━━━━━━━ STİLLER ━━━━━━━━ -->
+<style>
+/* Tab Butonları */
+.kvi-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50px;
+  background: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.kvi-tab-btn:hover { border-color: #2563eb; color: #2563eb; background-color: #f8fafc; }
+.kvi-tab-btn.active { border-color: #2563eb; background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+.kvi-tab-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.kvi-tab-btn.active .kvi-tab-dot { background-color: white !important; }
+
+/* Grup Başlığı */
+.kvi-group-header {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1e3a8a;
+  padding: 12px 24px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Kalem Satırı */
+.kvi-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kvi-row:hover { border-color: #93c5fd; background: #f8fafc; transform: translateX(2px); }
+.kvi-row.active-row { border-color: #2563eb; background: #f0f7ff; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; }
+
+.kvi-row-content { flex: 1; min-width: 0; }
+.kvi-row-header-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.kvi-row-name { font-size: 0.88rem; font-weight: 500; color: #1f2937; line-height: 1.4; }
+.kvi-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Açıklama Kutusu ve Butonlar */
+.kvi-description-collapse {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-left: 4px solid #2563eb;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  margin-top: 0;
+  margin-bottom: 8px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+}
+.kvi-description-collapse.expanded {
+  max-height: 500px;
+}
+.kvi-description-content {
+  padding: 16px 20px;
+  font-size: 0.82rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+.kvi-toggle-icon {
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+</style>
+
+{% endblock %}

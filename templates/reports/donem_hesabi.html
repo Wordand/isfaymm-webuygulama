@@ -261,7 +261,7 @@
                   <th class="text-end">Katki Orani</th>
                   <th class="text-end">Vergi Ind. Orani</th>
                   <th class="text-end">Toplam Ind. Matrah</th>
-                  <th>Tamam. Vizesi</th>
+                  <th class="text-center">Tamam. Vizesi</th>
                   <th class="text-end">İşlem</th>
                 </tr>
               </thead>
@@ -279,7 +279,7 @@
                     <td class="text-end">%{{ d.katki_orani }}</td>
                     <td class="text-end">%{{ d.vergi_orani }}</td>
                     <td class="text-end fw-semibold">{{ (u.total_matrah if u else 0)|tlformat }} TL</td>
-                    <td>
+                    <td class="text-center pool-vize-cell">
                       {% set _vize = (d.vize_durumu or '')|lower %}
                       {% if 'evet' in _vize or 'işletme' in _vize or 'isletme' in _vize %}
                         <span class="badge rounded-pill" style="background:#0f7a3b; color:#ffffff; border:1px solid #0b5f2d;">Vize Yapıldı</span>

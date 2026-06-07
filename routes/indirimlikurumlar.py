@@ -1027,6 +1027,15 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     kullanimlar = {}
     donem_usage_by_belge = {}
     donem_usage_totals = {"used_matrah": 0.0, "ind_kv": 0.0}
+    donem_summary_totals = {}
+    donem_summary_list = []
+
+    def _float0(x):
+        try:
+            return float(x or 0)
+        except Exception:
+            return 0.0
+
     if docs and user_id:
         with get_conn() as conn_k:
             cur_k = conn_k.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -1054,6 +1063,32 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                     if bno not in kullanimlar:
                         kullanimlar[bno] = []
                     kullanimlar[bno].append(item)
+
+                    donem_key = str(item.get("donem_text") or "").strip()
+                    if not donem_key:
+                        donem_key = f"{item.get('display_hesap_donemi') or item.get('hesap_donemi')} - {item.get('display_donem_turu') or item.get('donem_turu')}"
+                    rec = donem_summary_totals.get(donem_key)
+                    if not rec:
+                        rec = {
+                            "donem_text": donem_key,
+                            "hesap_donemi": item.get("display_hesap_donemi") or item.get("hesap_donemi"),
+                            "donem_turu": item.get("display_donem_turu") or item.get("donem_turu"),
+                            "belge_count": 0,
+                            "belgeler": set(),
+                            "indirimli_matrah": 0.0,
+                            "indirimli_kv": 0.0,
+                            "yatirim_katki": 0.0,
+                            "diger_katki": 0.0,
+                            "toplam_katki": 0.0,
+                        }
+                        donem_summary_totals[donem_key] = rec
+                    rec["belgeler"].add(str(bno))
+                    rec["belge_count"] = len(rec["belgeler"])
+                    rec["indirimli_matrah"] += _float0(item.get("indirimli_matrah"))
+                    rec["indirimli_kv"] += _float0(item.get("indirimli_kv"))
+                    rec["yatirim_katki"] += _float0(item.get("cari_yatirim_katki"))
+                    rec["diger_katki"] += _float0(item.get("cari_diger_katki"))
+                    rec["toplam_katki"] += _float0(item.get("cari_toplam_katki"))
 
                 # Donem Hesabi sekmesi icin: belge bazinda toplam indirimli matrah ve
                 # secili donem icin kullanilan toplam indirimli matrah / indirimli KV
@@ -1092,6 +1127,35 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                 except Exception:
                     # Bu ozet veriler kritik degil; hata olursa tablo 0 gosterir.
                     pass
+
+    try:
+        donem_matrah_by_text = {
+            str(r.get("donem_text") or "").strip(): _normalize_donem_matrah(r)
+            for r in (donem_matrah_list or [])
+            if str(r.get("donem_text") or "").strip()
+        }
+        for key, rec in donem_summary_totals.items():
+            matrah_row = donem_matrah_by_text.get(key) or {}
+            kv_matrah = _float0(matrah_row.get("kv_matrah"))
+            genel_oran = _float0(matrah_row.get("genel_oran")) or 25.0
+            kalan_matrah = max(kv_matrah - _float0(rec.get("indirimli_matrah")), 0.0)
+            genel_kv = kalan_matrah * (genel_oran / 100.0)
+            rec["kv_matrah"] = kv_matrah
+            rec["genel_oran"] = genel_oran
+            rec["kalan_matrah"] = kalan_matrah
+            rec["genel_kv"] = genel_kv
+            rec["odenecek_toplam_kv"] = _float0(rec.get("indirimli_kv")) + genel_kv
+            rec["belgeler"] = ", ".join(sorted(rec.get("belgeler") or []))
+        donem_summary_list = sorted(
+            donem_summary_totals.values(),
+            key=lambda r: (
+                int(r.get("hesap_donemi") or 0),
+                _donem_rank(r.get("donem_turu")),
+            ),
+            reverse=True,
+        )
+    except Exception:
+        donem_summary_list = []
 
     # -------------------------------------------------------------
     # Kümülatif devreden hesapları (display için normalize et)
@@ -1191,6 +1255,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         kullanimlar=kullanimlar, 
         donem_usage_by_belge=donem_usage_by_belge,
         donem_usage_totals=donem_usage_totals,
+        donem_summary_list=donem_summary_list,
         donem_matrah_list=donem_matrah_list,
         active_donem_matrah=active_donem_matrah,
         BOLGE_MAP_9903 = globals().get("BOLGE_MAP_9903", {}), 
@@ -1724,6 +1789,131 @@ def download_tesvik_pdf(doc_id):
         try:
             os.remove(tmp_path)
         except:
+            pass
+
+    return response
+
+
+@bp.route("/tesvik/donem/pdf/<int:kullanim_id>")
+@login_required
+def download_tesvik_donem_pdf(kullanim_id):
+    user_id = session.get("user_id")
+
+    with get_conn() as conn:
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        c.execute("""
+            SELECT
+                k.*,
+                b.id AS belge_id,
+                b.belge_tarihi AS doc_belge_tarihi,
+                b.karar AS doc_karar,
+                b.yatirim_turu1 AS doc_yatirim_turu1,
+                b.yatirim_turu2 AS doc_yatirim_turu2,
+                b.program_turu AS doc_program_turu,
+                b.bolge AS doc_bolge,
+                b.il AS doc_il,
+                b.osb AS doc_osb,
+                b.vize_durumu AS doc_vize_durumu,
+                b.toplam_tutar AS doc_toplam_tutar,
+                b.toplam_harcama_tutari AS doc_toplam_harcama_tutari,
+                b.katki_orani AS doc_katki_orani,
+                b.vergi_orani AS doc_vergi_orani,
+                b.diger_oran AS doc_diger_oran
+            FROM tesvik_kullanim k
+            LEFT JOIN tesvik_belgeleri b
+              ON b.user_id = k.user_id
+             AND b.belge_no = k.belge_no
+            WHERE k.id = %s AND k.user_id = %s
+        """, (kullanim_id, user_id))
+        row = c.fetchone()
+
+    if not row:
+        return jsonify({
+            "status": "error",
+            "title": "Bulunamadı",
+            "message": "Dönem kullanımı bulunamadı."
+        }), 404
+
+    data_dict = dict(row)
+    for key in (
+        "belge_tarihi", "karar", "yatirim_turu1", "yatirim_turu2",
+        "program_turu", "bolge", "il", "osb", "vize_durumu",
+        "toplam_tutar", "toplam_harcama_tutari", "katki_orani",
+        "vergi_orani", "diger_oran"
+    ):
+        if data_dict.get(key) in (None, ""):
+            data_dict[key] = data_dict.get(f"doc_{key}")
+
+    data = SimpleNamespace(**data_dict)
+
+    wkhtml_path = (
+        current_app.config.get("WKHTMLTOPDF_PATH")
+        or shutil.which("wkhtmltopdf")
+    )
+
+    if not wkhtml_path:
+        return jsonify({
+            "status": "error",
+            "title": "Eksik Araç",
+            "message": "wkhtmltopdf bulunamadı. Sunucu yapılandırmasını kontrol edin."
+        }), 500
+
+    config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+
+    try:
+        rendered_html = render_template(
+            "reports/kv_tablosu_pdf.html",
+            data=data,
+            now=datetime.now
+        )
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "title": "Şablon Hatası",
+            "message": f"PDF HTML şablonu oluşturulamadı: {e}"
+        }), 500
+
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+            pdfkit.from_string(
+                rendered_html,
+                tmpfile.name,
+                configuration=config,
+                options={
+                    "page-size": "A4",
+                    "encoding": "UTF-8",
+                    "enable-local-file-access": "",
+                    "margin-top": "15mm",
+                    "margin-bottom": "15mm",
+                    "margin-left": "12mm",
+                    "margin-right": "12mm",
+                    "dpi": 300,
+                },
+            )
+            tmp_path = tmpfile.name
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "title": "PDF Hatası",
+            "message": str(e)
+        }), 500
+
+    try:
+        yil = getattr(data, "display_hesap_donemi", None) or getattr(data, "hesap_donemi", "")
+        turu = getattr(data, "display_donem_turu", None) or getattr(data, "donem_turu", "")
+        donem_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", f"{yil}_{turu}".strip("_")) or kullanim_id
+        belge_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", str(getattr(data, "belge_no", "") or "tesvik"))
+        filename = f"tesvik_{belge_slug}_{donem_slug}.pdf"
+        response = send_file(
+            tmp_path,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename
+        )
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
             pass
 
     return response
