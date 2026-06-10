@@ -13,13 +13,41 @@ load_dotenv(override=True)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 FLASK_ENV = os.getenv("FLASK_ENV", "development").lower()
 DEBUG_MODE = (FLASK_ENV == "development") or (os.getenv("FLASK_DEBUG", "0") == "1")
-
-USE_SQLITE = DATABASE_URL.startswith("sqlite:///") or (
-    DEBUG_MODE and not DATABASE_URL.startswith("postgresql://")
+IS_RENDER = bool(
+    os.getenv("RENDER")
+    or os.getenv("RENDER_SERVICE_ID")
+    or os.getenv("RENDER_EXTERNAL_URL")
+)
+FORCE_POSTGRES = os.getenv("FORCE_POSTGRES", "0").lower() in ("1", "true", "yes", "on")
+LOCAL_FAST_MODE = os.getenv("LOCAL_FAST_MODE", "1" if not IS_RENDER else "0").lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
 )
 
+def _is_postgres_url(db_url):
+    return db_url.startswith("postgresql://") or db_url.startswith("postgres://")
+
+
+def _should_use_sqlite(db_url):
+    if FORCE_POSTGRES:
+        return False
+    if LOCAL_FAST_MODE and not IS_RENDER:
+        return True
+    return db_url.startswith("sqlite:///") or not _is_postgres_url(db_url)
+
+
+def _sqlite_path(db_url):
+    if db_url.startswith("sqlite:///"):
+        return db_url.replace("sqlite:///", "")
+    return "instance/local_fast.db"
+
+
+USE_SQLITE = _should_use_sqlite(DATABASE_URL)
+
 if USE_SQLITE:
-    DB_PATH = DATABASE_URL.replace("sqlite:///", "") or "instance/database.db"
+    DB_PATH = _sqlite_path(DATABASE_URL)
     print(f"Yerel ortam algılandı - SQLite kullanılacak ({DB_PATH})")
 else:
     print("Production ortamı algılandı - PostgreSQL kullanılacak")
@@ -40,13 +68,21 @@ class FakeCursor:
     def execute(self, query, params=None):
         # PostgreSQL sözdizimini SQLite uyumlu hale getir
         q = query.replace("%s", "?")
+        sqlite_params = list(params or ())
+
+        # PostgreSQL ANY(list) kullanan sorgulari SQLite IN (...) haline getir.
+        if "belge_no = ANY(?)" in q and len(sqlite_params) >= 2 and isinstance(sqlite_params[1], (list, tuple, set)):
+            values = list(sqlite_params[1])
+            placeholders = ",".join(["?"] * len(values)) or "NULL"
+            q = q.replace("belge_no = ANY(?)", f"belge_no IN ({placeholders})")
+            sqlite_params = [sqlite_params[0], *values, *sqlite_params[2:]]
 
         # Ek duzeltmeler (SQLite ile tam uyumluluk)
         q = q.replace("NOW()", "CURRENT_TIMESTAMP")
         q = q.replace("ILIKE", "LIKE")               # case-insensitive aramalarda sorun çıkmasın
         q = q.replace("TRUE", "1").replace("FALSE", "0")
 
-        self.sqlite_cursor.execute(q, params or ())
+        self.sqlite_cursor.execute(q, sqlite_params)
 
     def fetchall(self):
         return [dict(row) for row in self.sqlite_cursor.fetchall()]
@@ -103,12 +139,10 @@ def get_conn():
     # Her çağrıda .env'den taze oku (Flask watchdog yeniden başlatma sorunu için)
     load_dotenv(override=True)
     _db_url = os.getenv("DATABASE_URL", "").strip()
-    _use_sqlite = _db_url.startswith("sqlite:///") or (
-        not _db_url.startswith("postgresql://") and not _db_url.startswith("postgres://")
-    )
+    _use_sqlite = _should_use_sqlite(_db_url)
 
     if _use_sqlite:
-        _path = _db_url.replace("sqlite:///", "") or "instance/database.db"
+        _path = _sqlite_path(_db_url)
         os.makedirs(os.path.dirname(_path) if os.path.dirname(_path) else ".", exist_ok=True)
         conn = FakeConnection(_path)
         try:
@@ -340,6 +374,104 @@ def migrate_tesvik_columns():
         cur = conn.cursor()
 
         if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                mukellef_id INTEGER,
+                yukleme_tarihi TEXT,
+                belge_no TEXT,
+                belge_tarihi TEXT,
+                basvuru_tarihi TEXT,
+                belge_alinma_tarihi TEXT,
+                fiili_tamamlanma_tarihi TEXT,
+                vize_basvuru_tarihi TEXT,
+                ilk_indirim_yili INTEGER,
+                karar TEXT,
+                yatirim_turu1 TEXT,
+                yatirim_turu2 TEXT,
+                program_turu TEXT,
+                vize_durumu TEXT,
+                donem TEXT,
+                il TEXT,
+                osb TEXT,
+                bolge TEXT,
+                katki_orani REAL,
+                vergi_orani REAL,
+                diger_oran REAL,
+                toplam_tutar REAL,
+                katki_tutari REAL,
+                diger_katki_tutari REAL,
+                cari_harcama_tutari REAL,
+                toplam_harcama_tutari REAL,
+                fiili_katki_tutari REAL,
+                endeks_katki_tutari REAL,
+                onceki_yatirim_katki_tutari REAL,
+                onceki_diger_katki_tutari REAL,
+                onceki_katki_tutari REAL,
+                cari_yatirim_katki REAL,
+                cari_diger_katki REAL,
+                cari_toplam_katki REAL,
+                genel_toplam_katki REAL,
+                brut_satis REAL,
+                ihracat REAL,
+                imalat REAL,
+                diger_faaliyet REAL,
+                use_detailed_profit_ratios INTEGER DEFAULT 0,
+                olusturan_id INTEGER
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS tesvik_belgeleri (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER,
+                mukellef_id INTEGER,
+                yukleme_tarihi TEXT,
+                belge_no TEXT,
+                belge_tarihi TEXT,
+                basvuru_tarihi TEXT,
+                belge_alinma_tarihi TEXT,
+                fiili_tamamlanma_tarihi TEXT,
+                vize_basvuru_tarihi TEXT,
+                ilk_indirim_yili INTEGER,
+                karar TEXT,
+                yatirim_turu1 TEXT,
+                yatirim_turu2 TEXT,
+                program_turu TEXT,
+                vize_durumu TEXT,
+                donem TEXT,
+                il TEXT,
+                osb TEXT,
+                bolge TEXT,
+                katki_orani DOUBLE PRECISION,
+                vergi_orani DOUBLE PRECISION,
+                diger_oran DOUBLE PRECISION,
+                toplam_tutar DOUBLE PRECISION,
+                katki_tutari DOUBLE PRECISION,
+                diger_katki_tutari DOUBLE PRECISION,
+                cari_harcama_tutari DOUBLE PRECISION,
+                toplam_harcama_tutari DOUBLE PRECISION,
+                fiili_katki_tutari DOUBLE PRECISION,
+                endeks_katki_tutari DOUBLE PRECISION,
+                onceki_yatirim_katki_tutari DOUBLE PRECISION,
+                onceki_diger_katki_tutari DOUBLE PRECISION,
+                onceki_katki_tutari DOUBLE PRECISION,
+                cari_yatirim_katki DOUBLE PRECISION,
+                cari_diger_katki DOUBLE PRECISION,
+                cari_toplam_katki DOUBLE PRECISION,
+                genel_toplam_katki DOUBLE PRECISION,
+                brut_satis DOUBLE PRECISION,
+                ihracat DOUBLE PRECISION,
+                imalat DOUBLE PRECISION,
+                diger_faaliyet DOUBLE PRECISION,
+                use_detailed_profit_ratios INTEGER DEFAULT 0,
+                olusturan_id INTEGER
+            );
+            """)
+        conn.commit()
+
+        if USE_SQLITE:
             cur.execute("PRAGMA table_info(tesvik_belgeleri)")
             existing = {r["name"] for r in cur.fetchall()}
         else:
@@ -422,6 +554,10 @@ def migrate_tesvik_kullanim_table():
                 yatirimdan_elde_edilen_kazanc REAL DEFAULT 0.0,
                 tevsi_yatirim_kazanci REAL DEFAULT 0.0,
                 diger_faaliyet REAL DEFAULT 0.0,
+                haric_arsa_arazi REAL DEFAULT 0.0,
+                haric_royalti REAL DEFAULT 0.0,
+                haric_yedek_parca REAL DEFAULT 0.0,
+                haric_amortismana_tabi_olmayan REAL DEFAULT 0.0,
 
                 cari_yatirim_katki REAL DEFAULT 0.0,
                 cari_diger_katki REAL DEFAULT 0.0,
@@ -429,6 +565,7 @@ def migrate_tesvik_kullanim_table():
 
                 genel_toplam_katki REAL DEFAULT 0.0,
                 kalan_katki_tutari REAL DEFAULT 0.0,
+                yanan_katki_tutari REAL DEFAULT 0.0,
 
                 indirimli_matrah REAL DEFAULT 0.0,
                 indirimli_kv REAL DEFAULT 0.0,
@@ -452,6 +589,10 @@ def migrate_tesvik_kullanim_table():
                 yatirimdan_elde_edilen_kazanc DOUBLE PRECISION DEFAULT 0.0,
                 tevsi_yatirim_kazanci DOUBLE PRECISION DEFAULT 0.0,
                 diger_faaliyet DOUBLE PRECISION DEFAULT 0.0,
+                haric_arsa_arazi DOUBLE PRECISION DEFAULT 0.0,
+                haric_royalti DOUBLE PRECISION DEFAULT 0.0,
+                haric_yedek_parca DOUBLE PRECISION DEFAULT 0.0,
+                haric_amortismana_tabi_olmayan DOUBLE PRECISION DEFAULT 0.0,
 
                 cari_yatirim_katki DOUBLE PRECISION DEFAULT 0.0,
                 cari_diger_katki DOUBLE PRECISION DEFAULT 0.0,
@@ -459,6 +600,7 @@ def migrate_tesvik_kullanim_table():
 
                 genel_toplam_katki DOUBLE PRECISION DEFAULT 0.0,
                 kalan_katki_tutari DOUBLE PRECISION DEFAULT 0.0,
+                yanan_katki_tutari DOUBLE PRECISION DEFAULT 0.0,
 
                 indirimli_matrah DOUBLE PRECISION DEFAULT 0.0,
                 indirimli_kv DOUBLE PRECISION DEFAULT 0.0,
@@ -493,8 +635,9 @@ def migrate_tesvik_kullanim_table():
 
             required_cols = [
                 "yatirimdan_elde_edilen_kazanc", "tevsi_yatirim_kazanci", "diger_faaliyet",
+                "haric_arsa_arazi", "haric_royalti", "haric_yedek_parca", "haric_amortismana_tabi_olmayan",
                 "cari_yatirim_katki", "cari_diger_katki", "cari_toplam_katki",
-                "genel_toplam_katki", "kalan_katki_tutari",
+                "genel_toplam_katki", "kalan_katki_tutari", "yanan_katki_tutari",
                 "indirimli_matrah", "indirimli_kv", "odenecek_toplam_kv", "indirimli_kv_oran"
             ]
 

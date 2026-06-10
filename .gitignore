@@ -59,3 +59,6 @@ outputs/
 # Render özel
 # Render zaten kendi ortam değişkenlerini sağlar
 # Bu yüzden veritabanı erişim bilgilerini .env içine yaz, commit etme
+
+# Zip dosyalarını ignore et
+*.zip

@@ -80,7 +80,7 @@
                 <div class="ledger-title-group">
                     <span class="ledger-no">{{ doc.belge_no }} Nolu Teşvik Belgesi</span>
                     <div class="ledger-meta-chips">
-                        <span><i class="bi bi-calendar3 me-1"></i>Başlangıç: {{ doc.belge_tarihi }}</span>
+                        <span><i class="bi bi-calendar3 me-1"></i>Başlangıç: {{ doc.belge_tarihi|safe_date }}</span>
                         <span>{{ doc.karar }}</span>
                         {% if 'Evet' in doc.vize_durumu %}
                           <span class="vize-chip vize-chip-done"><i class="bi bi-patch-check-fill me-1"></i>Tamamlama Vizesi yapıldı: İşletme Döneminde</span>
@@ -254,7 +254,7 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Tamamlama Vizesi Yapıldı mı?</label>
-            <select name="vize_durumu" id="bb_vize_durumu" class="form-select" required>
+            <select name="vize_durumu" id="bb_vize_durumu" class="form-select" required onchange="syncBelgeBaslatKarar()">
               <option value="">Seçiniz</option>
               <option value="Evet - İşletme Döneminde">Evet - İşletme Döneminde</option>
               <option value="Hayır - Yatırım Döneminde">Hayır - Yatırım Döneminde</option>
@@ -430,6 +430,13 @@
     const bbKatkilar9903 = {{ TESVIK_KATKILAR_9903 | tojson | safe }};
     const bbActiveDonemText = {{ session.get('active_donem_text') | tojson }};
 
+    function formatDisplayDate(value) {
+        const raw = String(value || '').trim();
+        const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (m) return `${m[3]}.${m[2]}.${m[1]}`;
+        return raw || '-';
+    }
+
     function openBelgeBaslatModal() {
         const form = document.getElementById('belgeBaslatForm');
         if (form) form.reset();
@@ -482,6 +489,8 @@
         const karar = document.getElementById('bb_karar')?.value || '';
         const is9903 = karar === '2025/9903';
         const is3305 = karar === '2012/3305';
+        const vizeDurumu = document.getElementById('bb_vize_durumu')?.value || '';
+        const vizeYapildi = vizeDurumu.toLocaleLowerCase('tr-TR').includes('evet');
 
         document.querySelectorAll('.bb-9903-only').forEach(el => {
             el.style.display = is9903 ? '' : 'none';
@@ -502,6 +511,7 @@
             const el = document.getElementById(id);
             if (el) el.value = value == null || value === '' ? '' : String(value).replace('.', ',');
         };
+        const digerOranEl = document.getElementById('bb_diger_oran');
 
         let katki = '';
         let vergi = '';
@@ -527,7 +537,7 @@
                 katki += 15;
                 vergi += 15;
             }
-            diger = boosted ? 100 : 80;
+            diger = vizeYapildi ? '' : (boosted ? 100 : 80);
         }
 
         const bolgeEl = document.getElementById('bb_bolge');
@@ -535,6 +545,12 @@
         setVal('bb_katki_orani', katki);
         setVal('bb_vergi_orani', vergi);
         setVal('bb_diger_oran', diger);
+        if (digerOranEl) {
+            const shouldDisableDiger = is9903 || (is3305 && vizeYapildi);
+            digerOranEl.disabled = shouldDisableDiger;
+            digerOranEl.classList.toggle('bg-light', shouldDisableDiger);
+            digerOranEl.classList.toggle('text-muted', shouldDisableDiger);
+        }
     }
 
     async function submitBelgeBaslat() {
@@ -593,7 +609,7 @@
                             <h6 class="text-secondary fw-bold text-uppercase small mb-3">Temel Bilgiler</h6>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
                                 <li><strong>Belge No:</strong> ${doc.belge_no}</li>
-                                <li><strong>Tarih:</strong> ${doc.belge_tarihi}</li>
+                                <li><strong>Tarih:</strong> ${formatDisplayDate(doc.belge_tarihi)}</li>
                                 <li><strong>Karar:</strong> <span class="badge bg-primary">${doc.karar}</span></li>
                                 <li><strong>Yatırım Türü:</strong> ${doc.yatirim_turu1} / ${doc.yatirim_turu2}</li>
                                 <li><strong>Vize:</strong> ${doc.vize_durumu}</li>
@@ -679,7 +695,7 @@
                 <div class="katki-modal-hero">
                   <div>
                     <div class="katki-modal-title">${doc.belge_no || '-'} Nolu Teşvik Belgesi</div>
-                    <div class="katki-modal-subtitle">${doc.karar || '-'} • Başlangıç: ${doc.belge_tarihi || '-'}</div>
+                    <div class="katki-modal-subtitle">${doc.karar || '-'} • Başlangıç: ${formatDisplayDate(doc.belge_tarihi)}</div>
                   </div>
                   <div class="katki-modal-badges">
                     <span>Katkı %${doc.katki_orani ?? '-'}</span>

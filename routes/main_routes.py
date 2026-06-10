@@ -5,6 +5,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 
 from flask import Blueprint, render_template, request, make_response, jsonify, send_from_directory, url_for, current_app, redirect, flash
+from services.ozelge_service import load_ozelge_index
 from auth import login_required
 from datetime import datetime
 import logging
@@ -334,6 +335,7 @@ def sitemap_xml():
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
+        ('indirimlikurumlar_seo.ozelge_kutuphanesi', {}),
     ]
     priority_map = {
         'main.home': '1.0',
@@ -341,6 +343,7 @@ def sitemap_xml():
         'calculators.index': '0.8',
         'indirimlikurumlar_seo.hesaplama_araci': '0.9',
         'indirimlikurumlar_seo.mevzuat_rehberi': '0.8',
+        'indirimlikurumlar_seo.ozelge_kutuphanesi': '0.8',
         'main.kv_istisna_indirimler': '0.9',
     }
     for rule, kw in static_endpoints:
@@ -362,6 +365,16 @@ def sitemap_xml():
             if os.path.exists(path):
                 with open(path, 'r', encoding='utf-8') as f: parse_links(json.load(f), f'main.{t}_tebligi')
     except Exception: pass
+    try:
+        ozelge_data = load_ozelge_index(current_app.root_path)
+        for item in ozelge_data.get("items", []):
+            urls.append({
+                "loc": url_for("indirimlikurumlar_seo.ozelge_detay", slug=item["slug"], _external=True),
+                "lastmod": item.get("indexed_at") or datetime.now().strftime("%Y-%m-%d"),
+                "priority": "0.6",
+            })
+    except Exception:
+        pass
     response = make_response(render_template("sitemap.xml", urls=urls))
     response.headers["Content-Type"] = "application/xml"
     return response

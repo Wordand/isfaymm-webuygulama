@@ -11,13 +11,15 @@ import json
 import traceback
 import psycopg2
 import psycopg2.extras
+from fpdf import FPDF
 
 from datetime import datetime
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for, flash, make_response, current_app, send_file, jsonify
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, flash, make_response, current_app, send_file, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 
 
 from services.db import get_conn, USE_SQLITE
+from services.ozelge_service import POPULAR_TOPICS, get_ozelge_by_slug, load_ozelge_index, search_ozelgeler
 from config import ILLER, BOLGE_MAP, BOLGE_MAP_9903, TESVIK_KATKILAR, TESVIK_VERGILER, TESVIK_KATKILAR_9903
 from auth import login_required
 from types import SimpleNamespace
@@ -81,6 +83,82 @@ def _num_for_json(value):
         return float(value or 0)
     except Exception:
         return 0.0
+
+
+def _parse_date_any(value):
+    if not value:
+        return None
+    if hasattr(value, "year") and hasattr(value, "month") and hasattr(value, "day"):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%Y/%m/%d", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _is_vize_done(value):
+    return "evet" in str(value or "").strip().lower()
+
+
+def _is_9903_date_eligible(basvuru_tarihi=None, belge_alinma_tarihi=None):
+    """2025/9903 yeni rejim tarih kosullarini merkezi olarak kontrol eder."""
+    basvuru_dt = _parse_date_any(basvuru_tarihi)
+    belge_dt = _parse_date_any(belge_alinma_tarihi)
+    if not basvuru_dt or not belge_dt:
+        return False
+    return basvuru_dt.date() >= datetime(2025, 6, 16).date() and belge_dt.date() >= datetime(2025, 7, 24).date()
+
+
+def _payload_num(data, key):
+    return _num_for_json((data or {}).get(key))
+
+
+def _donem_key(year, turu):
+    try:
+        return (int(year), _donem_rank(turu))
+    except Exception:
+        return (0, 0)
+
+
+def _date_to_period_key(value):
+    dt = _parse_date_any(value)
+    if not dt:
+        return None
+    if dt.month <= 3:
+        rank = 1
+    elif dt.month <= 6:
+        rank = 2
+    elif dt.month <= 9:
+        rank = 3
+    else:
+        rank = 4
+    return (int(dt.year), rank)
+
+
+def _period_after_investment_end(hesap_donemi, donem_turu, doc):
+    end_keys = [
+        key for key in (
+            _date_to_period_key((doc or {}).get("fiili_tamamlanma_tarihi")),
+            _date_to_period_key((doc or {}).get("vize_basvuru_tarihi")),
+        )
+        if key
+    ]
+    if not end_keys:
+        return False
+    end_year, end_rank = min(end_keys)
+    current_year, current_rank = _donem_key(hesap_donemi, donem_turu)
+    if current_year > end_year:
+        return True
+    if current_year < end_year:
+        return False
+    if current_rank == 5:
+        return False
+    return current_rank > end_rank
 
 
 def _normalize_donem_matrah(row):
@@ -616,6 +694,12 @@ def baslat_tesvik_belgesi():
             return jsonify({"status": "warning", "title": "Eksik Bilgi", "message": "Belge no, yatırıma başlama tarihi ve karar alanları zorunludur."}), 400
 
         if karar == "2025/9903":
+            if not _is_9903_date_eligible(basvuru_tarihi, belge_alinma_tarihi):
+                return jsonify({
+                    "status": "error",
+                    "title": "2025/9903 Rejim Tespiti",
+                    "message": "2025/9903 olarak kayit icin basvuru tarihi 16.06.2025 veya sonrasi, belge alinma tarihi 24.07.2025 veya sonrasi olmalidir."
+                }), 400
             bolge = BOLGE_MAP_9903.get(il, bolge or "Bilinmiyor")
             katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0) or 0)
             vergi_orani = 60.0
@@ -640,6 +724,8 @@ def baslat_tesvik_belgesi():
                 diger_oran = 100.0
             else:
                 diger_oran = 80.0
+            if _is_vize_done(vize_durumu):
+                diger_oran = 0.0
             program_turu = ""
             ilk_indirim_yili = None
         else:
@@ -802,6 +888,59 @@ def mevzuat_rehberi():
             "page_og_desc": "KVK 32/A, 2025/9903, özelgeler ve teşvik kararları için indirimli kurumlar vergisi mevzuat rehberi.",
         },
     )
+
+
+@seo_bp.route("/ozelgeler")
+def ozelge_kutuphanesi():
+    data = load_ozelge_index(current_app.root_path)
+    q = (request.args.get("q") or "").strip().lower()
+    konu = (request.args.get("konu") or "").strip()
+    items = data.get("items", [])
+
+    if q:
+        items = search_ozelgeler(items, q)
+    if konu:
+        if konu.startswith("sc:"):
+            scenario_query = konu[3:]
+            items = search_ozelgeler(items, scenario_query)
+        else:
+            items = [item for item in items if konu in item.get("topics", [])]
+
+    topics = sorted({topic for item in data.get("items", []) for topic in item.get("topics", [])})
+    return render_template(
+        "calculators/indirimlikurumlar_ozelgeler.html",
+        data=data,
+        items=items,
+        topics=topics,
+        popular_topics=[topic for topic in POPULAR_TOPICS if topic in topics],
+        selected_topic=konu,
+        q=q,
+        page_title="İndirimli Kurumlar Vergisi Özelgeleri | İSFA YMM",
+        page_description="İndirimli kurumlar vergisi, yatırım teşvik belgesi, KVK 32/A, tevsi yatırım, diğer faaliyet ve yatırıma katkı tutarı konulu özelge arşivi.",
+        page_canonical="https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler",
+    )
+
+
+@seo_bp.route("/ozelgeler/<slug>")
+def ozelge_detay(slug):
+    item = get_ozelge_by_slug(current_app.root_path, slug)
+    if not item:
+        return redirect(url_for("indirimlikurumlar_seo.ozelge_kutuphanesi"))
+    return render_template(
+        "calculators/indirimlikurumlar_ozelge_detay.html",
+        item=item,
+        page_title=f"{item.get('title')} | İndirimli Kurumlar Vergisi Özelgesi | İSFA YMM",
+        page_description=f"{item.get('code')} sayılı özelge için indirimli kurumlar vergisi arşiv kaydı, konu etiketleri ve PDF bağlantısı.",
+        page_canonical=f"https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler/{slug}",
+    )
+
+
+@seo_bp.route("/ozelgeler/pdf/<path:filename>")
+def ozelge_pdf(filename):
+    pdf_dir = os.path.join(current_app.root_path, "services", "ozelgeler")
+    if not os.path.exists(os.path.join(pdf_dir, filename)):
+        pdf_dir = os.path.join(current_app.root_path, "ozelgeler")
+    return send_from_directory(pdf_dir, filename, as_attachment=False)
 
 
 def render_indirimlikurumlar(sekme_override=None, seo_context=None):
@@ -1390,6 +1529,12 @@ def form_kaydet():
 
 
     if karar == "2025/9903":
+        if not _is_9903_date_eligible(basvuru_tarihi, belge_alinma_tarihi):
+            return jsonify({
+                "status": "error",
+                "title": "2025/9903 Rejim Tespiti",
+                "message": "2025/9903 olarak kayit icin basvuru tarihi 16.06.2025 veya sonrasi, belge alinma tarihi 24.07.2025 veya sonrasi olmalidir."
+            }), 400
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
         katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0))
         vergi_orani = 60.0
@@ -1398,6 +1543,8 @@ def form_kaydet():
         katki_orani = parse_amount("katki_orani")
         vergi_orani = parse_amount("vergi_orani")
         diger_oran = parse_amount("diger_oran")
+        if karar == "2012/3305" and _is_vize_done(vize_durumu):
+            diger_oran = 0.0
 
     toplam_tutar = parse_amount("toplam_tutar")
     katki_tutari = parse_amount("katki_tutari")
@@ -1794,6 +1941,113 @@ def download_tesvik_pdf(doc_id):
     return response
 
 
+_PDF_CHAR_MAP = str.maketrans({
+    "İ": "I", "ı": "i", "Ş": "S", "ş": "s", "Ğ": "G", "ğ": "g",
+    "Ü": "U", "ü": "u", "Ö": "O", "ö": "o", "Ç": "C", "ç": "c",
+    "₺": "TL", "–": "-", "—": "-", "•": "-", "“": '"', "”": '"',
+})
+
+
+def _pdf_clean(value):
+    return str(value if value is not None else "-").translate(_PDF_CHAR_MAP)
+
+
+def _pdf_tl(value):
+    try:
+        amount = float(value or 0)
+    except Exception:
+        amount = 0.0
+    text = f"{amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{text} TL"
+
+
+def _pdf_add_row(pdf, label, value, value_color=(15, 23, 42)):
+    pdf.set_font("Arial", "", 9)
+    pdf.set_text_color(71, 85, 105)
+    pdf.cell(92, 8, _pdf_clean(label), border=0)
+    pdf.set_font("Arial", "B", 9)
+    pdf.set_text_color(*value_color)
+    pdf.cell(0, 8, _pdf_clean(value), border=0, ln=1, align="R")
+    pdf.set_draw_color(226, 232, 240)
+    pdf.line(12, pdf.get_y(), 198, pdf.get_y())
+
+
+def _build_tesvik_donem_pdf(data):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=14)
+    pdf.add_page()
+
+    yil = getattr(data, "display_hesap_donemi", None) or getattr(data, "hesap_donemi", "")
+    turu = getattr(data, "display_donem_turu", None) or getattr(data, "donem_turu", "")
+    karar = getattr(data, "karar", "") or "-"
+    belge_no = getattr(data, "belge_no", "") or "-"
+
+    pdf.set_fill_color(15, 23, 42)
+    pdf.rect(0, 0, 210, 30, "F")
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", "B", 15)
+    pdf.set_xy(12, 8)
+    pdf.cell(0, 8, _pdf_clean("Indirimli Kurumlar Vergisi Donem Raporu"), ln=1)
+    pdf.set_font("Arial", "", 9)
+    pdf.set_x(12)
+    pdf.cell(0, 6, _pdf_clean(f"Belge: {belge_no} | Donem: {yil} - {turu} | Karar: {karar}"), ln=1)
+
+    pdf.set_y(38)
+    pdf.set_text_color(15, 23, 42)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, _pdf_clean("Belge ve Donem Bilgileri"), ln=1)
+    pdf.set_draw_color(203, 213, 225)
+    pdf.line(12, pdf.get_y(), 198, pdf.get_y())
+    pdf.ln(2)
+
+    _pdf_add_row(pdf, "Belge No", belge_no)
+    _pdf_add_row(pdf, "Belge Tarihi", getattr(data, "belge_tarihi", "-"))
+    _pdf_add_row(pdf, "Karar", karar)
+    _pdf_add_row(pdf, "Donem", f"{yil} - {turu}")
+    _pdf_add_row(pdf, "Yatirima Katki Orani", f"%{getattr(data, 'katki_orani', '-')}")
+    _pdf_add_row(pdf, "Vergi Indirim Orani", f"%{getattr(data, 'vergi_orani', '-')}")
+    diger_oran = getattr(data, "diger_oran", None)
+    try:
+        if float(diger_oran or 0) > 0:
+            _pdf_add_row(pdf, "Diger Faaliyet Orani", f"%{diger_oran}")
+    except Exception:
+        pass
+
+    pdf.ln(7)
+    pdf.set_font("Arial", "B", 12)
+    pdf.set_text_color(15, 23, 42)
+    pdf.cell(0, 8, _pdf_clean("Hesaplama Sonuclari"), ln=1)
+    pdf.line(12, pdf.get_y(), 198, pdf.get_y())
+    pdf.ln(2)
+
+    _pdf_add_row(pdf, "Toplam Yatirim Tutari", _pdf_tl(getattr(data, "toplam_tutar", 0)))
+    _pdf_add_row(pdf, "Cari Donem Yatirim Harcamasi", _pdf_tl(getattr(data, "cari_harcama_tutari", 0)))
+    _pdf_add_row(pdf, "Toplam Gerceklesen Harcama", _pdf_tl(getattr(data, "toplam_harcama_tutari", 0)))
+    _pdf_add_row(pdf, "Indirimli Kurumlar Vergisi Matrahi", _pdf_tl(getattr(data, "indirimli_matrah", 0)), (37, 99, 235))
+    _pdf_add_row(pdf, "Yatirimdan Kullanilan Katki", _pdf_tl(getattr(data, "cari_yatirim_katki", 0)))
+    _pdf_add_row(pdf, "Diger Faaliyetten Kullanilan Katki", _pdf_tl(getattr(data, "cari_diger_katki", 0)))
+    _pdf_add_row(pdf, "Cari Donem Toplam Katki", _pdf_tl(getattr(data, "cari_toplam_katki", 0)), (5, 150, 105))
+    _pdf_add_row(pdf, "Indirimli Kurumlar Vergisi", _pdf_tl(getattr(data, "indirimli_kv", 0)))
+    _pdf_add_row(pdf, "Odenecek Toplam Kurumlar Vergisi", _pdf_tl(getattr(data, "odenecek_toplam_kv", 0)), (220, 38, 38))
+    _pdf_add_row(pdf, "Indirimli KV Orani", f"%{getattr(data, 'indirimli_kv_oran', 0) or 0}")
+
+    pdf.ln(8)
+    pdf.set_font("Arial", "", 8)
+    pdf.set_text_color(100, 116, 139)
+    pdf.multi_cell(
+        0,
+        5,
+        _pdf_clean("Bu rapor secilen donem kaydi esas alinarak otomatik uretilmistir. Diger belgeler ve donemler ayrica raporlanir.")
+    )
+
+    output = pdf.output(dest="S")
+    if isinstance(output, str):
+        output = output.encode("latin-1")
+    else:
+        output = bytes(output)
+    return io.BytesIO(output)
+
+
 @bp.route("/tesvik/donem/pdf/<int:kullanim_id>")
 @login_required
 def download_tesvik_donem_pdf(kullanim_id):
@@ -1846,77 +2100,28 @@ def download_tesvik_donem_pdf(kullanim_id):
 
     data = SimpleNamespace(**data_dict)
 
-    wkhtml_path = (
-        current_app.config.get("WKHTMLTOPDF_PATH")
-        or shutil.which("wkhtmltopdf")
-    )
-
-    if not wkhtml_path:
-        return jsonify({
-            "status": "error",
-            "title": "Eksik Araç",
-            "message": "wkhtmltopdf bulunamadı. Sunucu yapılandırmasını kontrol edin."
-        }), 500
-
-    config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
-
     try:
-        rendered_html = render_template(
-            "reports/kv_tablosu_pdf.html",
-            data=data,
-            now=datetime.now
-        )
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "title": "Şablon Hatası",
-            "message": f"PDF HTML şablonu oluşturulamadı: {e}"
-        }), 500
-
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
-            pdfkit.from_string(
-                rendered_html,
-                tmpfile.name,
-                configuration=config,
-                options={
-                    "page-size": "A4",
-                    "encoding": "UTF-8",
-                    "enable-local-file-access": "",
-                    "margin-top": "15mm",
-                    "margin-bottom": "15mm",
-                    "margin-left": "12mm",
-                    "margin-right": "12mm",
-                    "dpi": 300,
-                },
-            )
-            tmp_path = tmpfile.name
+        pdf_stream = _build_tesvik_donem_pdf(data)
     except Exception as e:
         return jsonify({
             "status": "error",
             "title": "PDF Hatası",
-            "message": str(e)
+            "message": f"Dönem PDF çıktısı oluşturulamadı: {e}"
         }), 500
 
-    try:
-        yil = getattr(data, "display_hesap_donemi", None) or getattr(data, "hesap_donemi", "")
-        turu = getattr(data, "display_donem_turu", None) or getattr(data, "donem_turu", "")
-        donem_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", f"{yil}_{turu}".strip("_")) or kullanim_id
-        belge_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", str(getattr(data, "belge_no", "") or "tesvik"))
-        filename = f"tesvik_{belge_slug}_{donem_slug}.pdf"
-        response = send_file(
-            tmp_path,
-            mimetype="application/pdf",
-            as_attachment=True,
-            download_name=filename
-        )
-    finally:
-        try:
-            os.remove(tmp_path)
-        except Exception:
-            pass
+    yil = getattr(data, "display_hesap_donemi", None) or getattr(data, "hesap_donemi", "")
+    turu = getattr(data, "display_donem_turu", None) or getattr(data, "donem_turu", "")
+    donem_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", f"{yil}_{turu}".strip("_")) or kullanim_id
+    belge_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", str(getattr(data, "belge_no", "") or "tesvik"))
+    filename = f"tesvik_{belge_slug}_{donem_slug}.pdf"
 
-    return response
+    pdf_stream.seek(0)
+    return send_file(
+        pdf_stream,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename
+    )
 
         
     
@@ -2047,7 +2252,7 @@ def save_tesvik_kullanim():
                 _c = _conn_chk.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
                 _c.execute(
                     """
-                    SELECT karar, belge_tarihi, ilk_indirim_yili
+                    SELECT karar, belge_tarihi, basvuru_tarihi, belge_alinma_tarihi, ilk_indirim_yili
                     FROM tesvik_belgeleri
                     WHERE user_id = %s AND belge_no = %s
                     LIMIT 1
@@ -2057,6 +2262,12 @@ def save_tesvik_kullanim():
                 _doc = _c.fetchone()
 
             if _doc and (_doc.get("karar") == "2025/9903"):
+                if not _is_9903_date_eligible(_doc.get("basvuru_tarihi"), _doc.get("belge_alinma_tarihi")):
+                    return jsonify({
+                        "status": "error",
+                        "title": "2025/9903 Rejim Tespiti",
+                        "message": "Bu belge tarihleri 2025/9903 rejimine uygun olmadigi icin donem kaydi olusturulamaz."
+                    }), 400
                 allowed_year = None
                 if _doc.get("ilk_indirim_yili"):
                     try:
@@ -2084,11 +2295,134 @@ def save_tesvik_kullanim():
         # ⚠️ TABLO ŞEMANIZDA KESİNLİKLE VAR OLAN SÜTUNLAR İLE EŞLEŞTİRİLDİ
         # Hata veren 'onceki_yatirim_katki_tutari', 'onceki_katki_tutari' gibi alanlar çıkarıldı.
         # Bunlar formda gösterilse bile tesvik_kullanim tablonuzda tanımlı değildir.
+        with get_conn() as _conn_chk:
+            _c = _conn_chk.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            _c.execute(
+                """
+                SELECT karar, belge_tarihi, basvuru_tarihi, belge_alinma_tarihi,
+                       ilk_indirim_yili, vize_durumu, fiili_tamamlanma_tarihi,
+                       vize_basvuru_tarihi, mukellef_id
+                FROM tesvik_belgeleri
+                WHERE user_id = %s AND belge_no = %s
+                LIMIT 1
+                """,
+                (user_id, belge_no),
+            )
+            _doc = _c.fetchone()
+
+        karar_kontrol = (_doc or {}).get("karar")
+        cari_yatirim_katki_chk = _payload_num(data, "cari_yatirim_katki")
+        cari_diger_katki_chk = _payload_num(data, "cari_diger_katki")
+        indirimli_matrah_chk = _payload_num(data, "indirimli_matrah")
+
+        if karar_kontrol == "2025/9903":
+            if not _is_9903_date_eligible((_doc or {}).get("basvuru_tarihi"), (_doc or {}).get("belge_alinma_tarihi")):
+                return jsonify({
+                    "status": "error",
+                    "title": "2025/9903 Rejim Tespiti",
+                    "message": "Bu belge tarihleri 2025/9903 rejimine uygun olmadigi icin donem kaydi olusturulamaz."
+                }), 400
+            allowed_year = None
+            if (_doc or {}).get("ilk_indirim_yili"):
+                try:
+                    allowed_year = int((_doc or {}).get("ilk_indirim_yili"))
+                except Exception:
+                    allowed_year = None
+            for tarih_key in ("belge_tarihi", "basvuru_tarihi", "belge_alinma_tarihi"):
+                if allowed_year:
+                    break
+                dt = _parse_date_any((_doc or {}).get(tarih_key))
+                if dt:
+                    allowed_year = int(dt.year)
+
+            if allowed_year and hesap_donemi < allowed_year:
+                return jsonify({
+                    "status": "error",
+                    "title": "Geçersiz Dönem",
+                    "message": f"2025/9903 belgesi için {allowed_year} öncesi dönem kaydı oluşturulamaz."
+                }), 400
+
+            if allowed_year and cari_diger_katki_chk > 0 and hesap_donemi >= allowed_year + 4:
+                return jsonify({
+                    "status": "error",
+                    "title": "2025/9903 Süre Sınırı",
+                    "message": "2025/9903 belgesinde diğer faaliyet kazançları için 4 hesap dönemi sınırı dolduktan sonra kullanım kaydedilemez."
+                }), 400
+
+            if allowed_year and (cari_yatirim_katki_chk > 0 or cari_diger_katki_chk > 0 or indirimli_matrah_chk > 0) and hesap_donemi >= allowed_year + 10:
+                return jsonify({
+                    "status": "error",
+                    "title": "2025/9903 Süre Sınırı",
+                    "message": "2025/9903 belgesinde ilk indirim hakkının kullanılabileceği hesap dönemi dahil 10 hesap dönemi sınırı aşılmıştır."
+                }), 400
+
+        if karar_kontrol == "2012/3305" and cari_diger_katki_chk > 0:
+            if _is_vize_done((_doc or {}).get("vize_durumu")):
+                return jsonify({
+                    "status": "error",
+                    "title": "2012/3305 İşletme Dönemi",
+                    "message": "Tamamlama vizesi yapılmış 2012/3305 belgelerinde diğer faaliyet kazancı üzerinden katkı kaydedilemez."
+                }), 400
+            if _period_after_investment_end(hesap_donemi, donem_turu, _doc):
+                return jsonify({
+                    "status": "error",
+                    "title": "2012/3305 Yatırım Dönemi",
+                    "message": "Diğer faaliyet kazançlarından yararlanma yalnızca yatırım dönemi içinde kaydedilebilir."
+                }), 400
+
+        # Ayni donemde birden fazla belge varsa, toplam indirimli matrah
+        # donem matrahini asamaz.
+        if indirimli_matrah_chk > 0:
+            mukellef_id_chk = (_doc or {}).get("mukellef_id")
+            donem_matrah_chk = 0.0
+            diger_belgeler_matrah = 0.0
+            with get_conn() as _conn_pool:
+                _p = _conn_pool.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                _p.execute(
+                    """
+                    SELECT kv_matrah
+                    FROM donem_matrah
+                    WHERE user_id = %s AND mukellef_id = %s AND donem_text = %s
+                    LIMIT 1
+                    """,
+                    (user_id, mukellef_id_chk, donem_text),
+                )
+                _pool_row = _p.fetchone()
+                donem_matrah_chk = _num_for_json((_pool_row or {}).get("kv_matrah"))
+                _p.execute(
+                    """
+                    SELECT COALESCE(SUM(k.indirimli_matrah), 0) AS toplam
+                    FROM tesvik_kullanim k
+                    JOIN tesvik_belgeleri b
+                      ON b.user_id = k.user_id AND b.belge_no = k.belge_no
+                    WHERE k.user_id = %s
+                      AND b.mukellef_id = %s
+                      AND k.hesap_donemi = %s
+                      AND UPPER(k.donem_turu) = %s
+                      AND k.belge_no <> %s
+                    """,
+                    (user_id, mukellef_id_chk, hesap_donemi, str(donem_turu).upper(), belge_no),
+                )
+                _sum_row = _p.fetchone()
+                diger_belgeler_matrah = _num_for_json((_sum_row or {}).get("toplam"))
+
+            if donem_matrah_chk > 0 and (diger_belgeler_matrah + indirimli_matrah_chk) > (donem_matrah_chk + 0.01):
+                kalan_matrah = max(0.0, donem_matrah_chk - diger_belgeler_matrah)
+                return jsonify({
+                    "status": "error",
+                    "title": "Donem Matrahi Asildi",
+                    "message": f"Bu donemde diger belgelerle birlikte indirimli matrah donem matrahini asiyor. Bu belge icin kullanilabilecek en fazla indirimli matrah {kalan_matrah:,.2f} TL'dir."
+                }), 400
+
         fields = [
             # Kazanç Tipleri (init_db'de mevcut)
             "yatirimdan_elde_edilen_kazanc",
             "tevsi_yatirim_kazanci",
             "diger_faaliyet", 
+            "haric_arsa_arazi",
+            "haric_royalti",
+            "haric_yedek_parca",
+            "haric_amortismana_tabi_olmayan",
             
             # Cari Dönem Katkıları (init_db'de mevcut)
             "cari_yatirim_katki",
@@ -2098,6 +2432,7 @@ def save_tesvik_kullanim():
             # Genel Sonuçlar (init_db'de mevcut)
             "genel_toplam_katki",
             "kalan_katki_tutari", # init_db'de var
+            "yanan_katki_tutari",
             
             # İndirimli KV Bilgileri (init_db'de mevcut)
             "indirimli_matrah", 

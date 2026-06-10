@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+{% block canonical_url %}{{ page_canonical }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_desc %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<style>
+  .oz-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 58%, #0f766e 100%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 34px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, .18);
+  }
+  .oz-count-pill {
+    background: #fff !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    font-weight: 800;
+  }
+  .oz-search-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    margin-top: -22px;
+    position: relative;
+    z-index: 2;
+  }
+  .oz-topic {
+    color: #0f172a !important;
+    background: #f8fafc !important;
+    border: 1px solid #94a3b8 !important;
+    font-weight: 800;
+  }
+  .oz-topic:hover,
+  .oz-topic.active {
+    color: #111827 !important;
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+  }
+  .oz-result-row {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+  .oz-result-row:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, .11);
+  }
+  .oz-title {
+    color: #0f172a;
+    line-height: 1.25;
+  }
+  .oz-meta {
+    color: #64748b;
+    font-size: .88rem;
+  }
+  .oz-field-label {
+    color: #1d4ed8;
+    font-weight: 800;
+    font-size: .86rem;
+    letter-spacing: .01em;
+  }
+  .oz-field-text {
+    color: #334155;
+    line-height: 1.55;
+  }
+  .oz-topic-mini {
+    color: #0f172a !important;
+    background: #e0f2fe !important;
+    border: 1px solid #7dd3fc !important;
+    font-weight: 700;
+  }
+  .oz-actions {
+    min-width: 170px;
+  }
+  .oz-scenario-btn {
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    background-color: #f8fafc;
+    transition: all 0.18s ease;
+    font-weight: 600;
+  }
+  .oz-scenario-btn:hover {
+    background-color: #1d4ed8;
+    color: #fff;
+    border-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+  }
+  .oz-result-box {
+    background: #f0fdf4 !important;
+    border-left: 4px solid #16a34a !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+  }
+  .oz-detail-panel {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+  }
+  @media (max-width: 767.98px) {
+    .oz-hero { padding: 24px; }
+    .oz-actions { min-width: 0; width: 100%; }
+  }
+</style>
+
+<section class="container py-5">
+
+  <div class="oz-hero mb-0">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <div class="small text-white-50 fw-semibold mb-2">İSFA YMM Özelge Arşivi</div>
+        <h1 class="display-6 fw-bold mb-3">İndirimli Kurumlar Vergisi Özelgeleri</h1>
+        <p class="lead mb-0">
+          Tevsi yatırım, diğer faaliyet kazancı, endeksleme, tamamlama vizesi ve yatırım teşvik belgesi uygulamalarında özelge görüşlerini hızlıca karşılaştırın.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <span class="badge rounded-pill oz-count-pill px-3 py-2">{{ data.count }} özelge</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="oz-search-panel p-3 p-lg-4 mb-4 mx-lg-4">
+    <form class="row g-2 align-items-end" method="get" id="ozelgeSearchForm">
+      <div class="col-lg-7">
+        <label class="form-label fw-semibold">Özelge içinde ara</label>
+        <input type="search" name="q" id="searchQueryInput" value="{{ q }}" class="form-control form-control-lg" placeholder="Örn. tevsi oranlama, diğer faaliyet, endeksleme">
+      </div>
+      <div class="col-lg-3">
+        <label class="form-label fw-semibold">Konu / Senaryo</label>
+        <select name="konu" class="form-select form-select-lg" onchange="this.form.submit()">
+          <option value="">Tüm Konular & Senaryolar</option>
+          <optgroup label="Hızlı Senaryolar">
+            <option value="sc:erp yazılım" {% if selected_topic == 'sc:erp yazılım' %}selected{% endif %}>ERP & Yazılım</option>
+            <option value="sc:arsa maliyeti" {% if selected_topic == 'sc:arsa maliyeti' %}selected{% endif %}>Arsa / OSB Bedelleri</option>
+            <option value="sc:finansal kiralama" {% if selected_topic == 'sc:finansal kiralama' %}selected{% endif %}>Leasing / Kiralama</option>
+            <option value="sc:süre bitiminden sonra" {% if selected_topic == 'sc:süre bitiminden sonra' %}selected{% endif %}>Belge Süre Aşımı</option>
+          </optgroup>
+          <optgroup label="Diğer Konular">
+            {% for topic in topics %}
+            <option value="{{ topic }}" {% if selected_topic == topic %}selected{% endif %}>{{ topic }}</option>
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
+      <div class="col-lg-2 d-grid">
+        <button class="btn btn-primary btn-lg"><i class="bi bi-search me-1"></i> Ara</button>
+      </div>
+    </form>
+  </div>
+
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-bold mb-0">Özelge Sonuçları</h2>
+    <div class="small text-muted">{{ items|length }} kayıt listeleniyor</div>
+  </div>
+
+  <div class="d-flex flex-column gap-3">
+    {% for item in items %}
+    <article class="oz-result-row p-3 p-lg-4">
+      <div class="d-flex flex-column flex-lg-row gap-3">
+        <div class="flex-grow-1">
+          <div class="oz-meta mb-2">
+            <i class="bi bi-calendar3 me-1"></i>{{ item.date or "Tarih yok" }}
+            {% if item.ozelge_no %}
+            <span class="mx-1">·</span>
+            <span>{{ item.ozelge_no }}</span>
+            {% endif %}
+          </div>
+          <h3 class="h5 fw-bold oz-title mb-2">{{ item.title }}</h3>
+          
+
+
+          <!-- Net Karar / Sonuç Vurgu Kutusu -->
+          {% if item.summary %}
+          <div class="oz-result-box p-3 mt-2 mb-3 rounded-3">
+            <div class="small fw-extrabold text-success text-uppercase mb-1">
+              <i class="bi bi-check-circle-fill me-1"></i>Nihai Sonuç / Karar
+            </div>
+            <div class="text-dark fw-bold" style="font-size:0.95rem; line-height: 1.5;">{{ item.summary }}</div>
+          </div>
+          {% endif %}
+
+          <!-- Satır İçi Detay (Collapse) -->
+          <div class="collapse" id="collapse-{{ item.slug }}">
+            <div class="p-3 bg-light rounded-3 border mb-3">
+              <div class="mb-3">
+                <div class="oz-field-label mb-1">Konu Özeti</div>
+                <div class="small oz-field-text text-dark">{{ item.konu_ozeti or item.title }}</div>
+              </div>
+              <div class="mb-3">
+                <div class="oz-field-label mb-1">Mükellef Sorusu</div>
+                <div class="small oz-field-text text-dark">{{ item.soru_ozeti or "Özelge talebindeki olay özeti PDF kaynağında yer alır." }}</div>
+              </div>
+              <div class="mb-0">
+                <div class="oz-field-label mb-1">Maliyenin Görüşü / Cevabı</div>
+                <div class="small oz-field-text text-dark">{{ item.cevap_ozeti or item.summary or "İdarenin görüşü PDF kaynağından incelenebilir." }}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- İşlem Butonları -->
+        <div class="oz-actions d-flex flex-row flex-lg-column gap-2 justify-content-lg-center align-self-start align-self-lg-center">
+          <button class="btn btn-outline-primary rounded-pill px-3 flex-fill" type="button" 
+                  data-bs-toggle="collapse" data-bs-target="#collapse-{{ item.slug }}" 
+                  aria-expanded="false" aria-controls="collapse-{{ item.slug }}"
+                  onclick="toggleCollapseBtnText(this)">
+            <i class="bi bi-eye me-1"></i>Hızlı İncele
+          </button>
+          
+          <a class="btn btn-primary rounded-pill px-3 flex-fill text-center" href="{{ url_for('indirimlikurumlar_seo.ozelge_detay', slug=item.slug) }}">
+            İncele
+          </a>
+          
+          <a class="btn btn-outline-danger rounded-pill px-3 flex-fill text-center" target="_blank" rel="noopener" href="{{ url_for('indirimlikurumlar_seo.ozelge_pdf', filename=item.filename) }}">
+            PDF
+          </a>
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <div class="text-center border rounded-3 p-5 text-muted">
+      Bu aramada özelge bulunamadı. Daha genel bir ifade deneyin: “tevsi”, “diğer faaliyet”, “endeksleme” gibi.
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+
+  function toggleCollapseBtnText(btn) {
+    setTimeout(function() {
+      var isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        btn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Kapat';
+      } else {
+        btn.innerHTML = '<i class="bi bi-eye me-1"></i>Hızlı İncele';
+      }
+    }, 150); // Small delay to let Bootstrap state transition
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,1341 @@
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.25.15.01-2011-KVK-7215-2-10",
+    "tarih": "02.11.2011",
+    "konu": "Kuzeydoğu Anadolu Kalkınma Ajansından sağlanan desteğin makine alımında kullanılması ve fon hesabında tutulması",
+    "mukellef_sorusu": "Kalkınma Ajansından alınan hibe desteğinin, yatırım teşvik belgesi kapsamındaki makine teçhizat alımında kullanılması halinde, bu hibe tutarının yatırıma katkı tutarı ve indirimli kurumlar vergisi hesabında nasıl dikkate alınacağı",
+    "maliyenin_cevabi": "Kalkınma ajanslarından sağlanan destekler, kurumlar vergisinden istisna edilerek özel bir fon hesabında tutulur. Bu desteklerle finanse edilen harcamalar, mükellefin kendi cebinden çıkan net bir yatırım harcaması olmadığından, hibe tutarına isabet eden kısım indirimli kurumlar vergisi hesaplamasında yatırım harcaması olarak dikkate alınamaz.",
+    "sonuc": "Kamu kurumlarından alınan hibe ve desteklerle finanse edilen makine-teçhizat tutarları, indirimli kurumlar vergisi matrahı ve yatırım harcaması hesabına dahil edilmez.",
+    "etiketler": [
+      "kalkınma ajansı",
+      "hibe desteği",
+      "özel fon hesabı",
+      "yatırım harcaması",
+      "net harcama"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2564",
+    "tarih": "30.12.2012",
+    "konu": "Yıllara sari inşaat ve onarma işlerinden elde edilen kazançlarda indirimli kurumlar vergisi uygulaması",
+    "mukellef_sorusu": "Şirketin üstlendiği yıllara sari inşaat ve onarım işlerinden elde ettiği kazançların, yatırım teşvik belgesi kapsamında 'diğer faaliyetlerden elde edilen kazanç' olarak kabul edilip edilmeyeceği ve indirimli vergiye tabi tutulup tutulamayacağı",
+    "maliyenin_cevabi": "Yıllara sari inşaat ve onarım işlerine ilişkin kazançlar, işin bittiği yılın genel matrahına dahil edilir. Bu kazançlar şirketin kendi esas ticari faaliyeti kapsamında doğan ticari kazanç niteliğinde olduğundan, yatırım döneminde 'diğer faaliyetlerden elde edilen kazanç' kısıtlamaları dahilinde indirimli kurumlar vergisine konu edilebilir.",
+    "sonuc": "Yıllara sari inşaat işlerinden elde edilen ve işin bittiği yıl beyan edilen kazançlar, yatırım dönemindeki diğer faaliyet kazancı teşviki kapsamında değerlendirilir.",
+    "etiketler": [
+      "yıllara sari inşaat",
+      "işin bitim tarihi",
+      "diğer faaliyet kazancı",
+      "ticari kazanç",
+      "yatırım dönemi"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.06.16.01-KV-2011-1-32/A-11",
+    "tarih": "15.03.2012",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmesi ve ortak giderlerin dağıtımı",
+    "mukellef_sorusu": "Teşvik belgesi kapsamındaki komple yeni yatırımdan elde edilen kazanç ile mevcut eski faaliyetlerden elde edilen kazancın nasıl ayrıştırılacağı ve ortak yönetim giderlerinin hangi kritere göre dağıtılacağı",
+    "maliyenin_cevabi": "Teşvikli yatırımdan elde edilen kazancın, muhasebe kayıtlarında ayrı hesaplarda izlenerek şeffaf bir şekilde tespit edilmesi esastır. Yatırıma ait hasılat ve maliyetler doğrudan ayrıştırılmalı; ayrıştırılamayan ortak genel yönetim giderleri ise teşvikli faaliyet ile diğer faaliyetlerin harcamaları veya hasılatları oranlanarak (anahtarlama yöntemiyle) dağıtılmalıdır.",
+    "sonuc": "Teşvikli kazançların muhasebede alt hesaplar bazında ayrı izlenmesi zorunludur; ortak giderler ise hasılat veya maliyet payına göre dağıtılır.",
+    "etiketler": [
+      "kazanç ayrımı",
+      "ortak giderler",
+      "muhasebe düzeni",
+      "anahtarlama yöntemi",
+      "hasılat oranı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-1102",
+    "tarih": "08.05.2013",
+    "konu": "Yatırım harcaması olarak kabul edilen harcamaların sınırı ve arsa payı maliyetlerinin durumu",
+    "mukellef_sorusu": "Fabrika binası inşası için satın alınan arsa bedeli ile arsanın hafriyat, tesviye ve çevre düzenlemesi için yapılan harcamaların yatırıma katkı tutarı hesabında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "İndirimli kurumlar vergisi uygulamasında, üzerine tesis inşa edilecek olsa dahi arsa ve arazi alım bedelleri yatırım harcaması olarak kabul edilmez. Ancak, arsanın üretime hazır hale getirilmesi için yapılan hafriyat, altyapı, yol ve çevre düzenleme giderleri binanın maliyetine eklendiği ölçüde yatırım harcaması sayılır.",
+    "sonuc": "Yatırım teşviklerinde çıplak arsa/arazi edinme maliyetleri kapsam dışıdır; arsa üzerindeki teknik altyapı ve bina inşaat harcamaları teşvike dahildir.",
+    "etiketler": [
+      "arsa maliyeti",
+      "hafriyat harcamaları",
+      "çevre düzenlemesi",
+      "bina maliyeti",
+      "altyapı yatırımı"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2014]-45",
+    "tarih": "11.02.2014",
+    "konu": "Yatırım teşvik belgesinin revize edilmesi durumunda indirimli vergi oranlarının geçmişe yönelik uygulanması",
+    "mukellef_sorusu": "Yatırım devam ederken Ekonomi Bakanlığına başvurularak teşvik belgesindeki yatırım bölgesi veya vergi indirim oranının lehe revize edilmesi halinde, önceki geçici vergi dönemlerinde normal oranda ödenen vergilerin düzeltilip düzeltilemeyeceği",
+    "maliyenin_cevabi": "Teşvik belgesinde yapılan revizeler, belgenin ilk düzenlendiği tarihten itibaren hüküm ifade eder. Mükellef lehine yapılan oran artışları veya bölge değişiklikleri sonrasında, ilgili hesap döneminin henüz kapanmamış geçici vergi dönemleri ile yıllık kurumlar vergisi beyannamesinde geçmiş dönemleri de kapsayacak şekilde (kümülatif matrah üzerinden) düzeltilerek uygulanabilir.",
+    "sonuc": "Teşvik belgesi revizeleri belgenin başlangıcından itibaren geçerli kabul edildiğinden, aynı hesap dönemi içindeki vergi hesaplamaları yeni oranlara göre kümülatif olarak düzeltilir.",
+    "etiketler": [
+      "belge revizesi",
+      "geçici vergi",
+      "kümülatif matrah",
+      "oran artışı",
+      "lehe uygulama"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2012/5-412",
+    "tarih": "22.06.2012",
+    "konu": "Yatırım teşvik belgesi kapsamında yurt dışından alınan kredilere ait kur farkı ve faiz giderlerinin yatırım harcaması karşısındaki durumu",
+    "mukellef_sorusu": "Yatırımın finansmanında kullanılmak üzere yurt dışından temin edilen dövizli kredilere ilişkin yatırım süresi boyunca oluşan kur farkları ile faiz ödemelerinin yatırım harcaması tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "VUK hükümleri uyarınca, yatırım aşamasında kullanılan kredilere ait faiz ve kur farklarının, iktisadi kıymetin aktife alındığı dönemin sonuna kadar maliyete intikal ettirilmesi zorunludur. Dolayısıyla, sabit kıymetler işletmeye alınana kadar oluşan bu finansman giderleri yatırım harcaması hesabına dahil edilir; aktife alındıktan sonraki dönemler ise gider yazıldığından dahil edilmez.",
+    "sonuc": "Sabit kıymetlerin aktife alınma tarihine kadar oluşan kredi faizleri ve kur farkları maliyet unsuru sayılarak yatırım harcamasına eklenir.",
+    "etiketler": [
+      "finansman giderleri",
+      "kredi faizi",
+      "kur farkı",
+      "aktife alma",
+      "maliyet unsuru"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2015-12]-885",
+    "tarih": "14.10.2015",
+    "konu": "Tevsi yatırımlarda kazancın işletme bütünlüğü içinde ayrı tespit edilememesi ve brüt sabit kıymet oranlaması",
+    "mukellef_sorusu": "Mevcut fabrikaya yapılan tevsi (genişletme) yatırımı neticesinde üretilen ürünlerin eski hatlarla aynı olması ve kazancın muhasebesel olarak ayrılamaması durumunda indirimli kurumlar vergisi matrahının nasıl hesaplanacağı",
+    "maliyenin_cevabi": "Tevsi yatırımlarda kazancın ayrı hesaplarda izlenerek tespit edilmesi asıldır. Ancak fiziki veya teknik imkansızlıklar nedeniyle kazanç ayrılamıyorsa, tevsi yatırım tutarının, dönem sonunda işletmenin toplam brüt sabit kıymet değerine (arsa, arazi ve amortismana tabi olmayanlar hariç) oranlanması suretiyle indirimli vergiye tabi matrah belirlenir.",
+    "sonuc": "Kazancın ayrılamadığı tevsi yatırımlarda, indirimli vergi uygulanacak matrah yasal olarak 'brüt sabit kıymet oranlaması' (oran yöntemi) ile hesaplanır.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "brüt sabit kıymet",
+      "oran yöntemi",
+      "matrah tespiti"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-13-10-52",
+    "tarih": "04.02.2014",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanmasında üst sınır",
+    "mukellef_sorusu": "Yatırım dönemi devam ederken diğer faaliyetlerden elde edilen kazançlara uygulanacak indirimli kurumlar vergisinde, o yıl yapılan yatırım harcamasının mı yoksa toplam yatırıma katkı tutarının mı sınır olarak baz alınacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirimli vergi uygulanabilmesi için, ilgili dönemde fiilen gerçekleştirilmiş bir yatırım harcamasının bulunması şarttır. Hak kazanılan ve indirim konusu yapılacak toplam vergi avantajı, o döneme kadar yapılan fiili yatırım harcaması tutarına isabet eden yatırıma katkı tutarını aşamaz.",
+    "sonuc": "Yatırım döneminde diğer faaliyet kazançlarına uygulanacak teşvikin tavan sınırı, o döneme kadar gerçekleştirilen fiili harcama tutarı ile sınırlıdır.",
+    "etiketler": [
+      "yatırım dönemi",
+      "diğer faaliyet kazancı",
+      "fiili harcama tutarı",
+      "teşvik tavanı",
+      "geçici vergi dönemi"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2018-19",
+    "tarih": "21.05.2018",
+    "konu": "Finansal kiralama (Leasing) yoluyla yapılan makine alımlarının yatırım harcaması içindeki yeri",
+    "mukellef_sorusu": "Yatırım teşvik belgesi kapsamında finansal kiralama şirketi aracılığıyla yurt dışından getirilen makineler için leasing şirketine ödenen taksitlerin ve yapılan harcamaların hangi dönemde yatırım harcaması sayılacağı",
+    "maliyenin_cevabi": "Finansal kiralama yoluyla iktisap edilen makine ve teçhizatlar, kiralama süresi boyunca mülkiyeti leasing şirketinde kalsa dahi, kiracı tarafından aktife alınarak amortismana tabi tutulur. Bu nedenle, teşvik belgesinde yer alan süreler dahilinde sözleşmeye bağlanan ve aktife kaydedilen leasing harcamalarının anapara kısımları fiili yatırım harcaması kabul edilir.",
+    "sonuc": "Leasing ile alınan teşvikli makineler, mülkiyet henüz devralınmasa bile aktife kaydedildikleri andan itibaren yatırım harcaması hesaplamasına dahil edilir.",
+    "etiketler": [
+      "finansal kiralama",
+      "leasing taksiti",
+      "anapara ödemesi",
+      "aktife alma",
+      "makine teçhizat"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-55",
+    "tarih": "12.01.2011",
+    "konu": "Yatırım teşvik belgesi tamamlama vizesi yapılmadan önce indirimli kurumlar vergisinden yararlanma şartları",
+    "mukellef_sorusu": "Yatırımı fiziken tamamlanan ancak henüz resmi kurumlara başvurularak 'Tamamlama Vizesi' (Kapanış Vizesi) yaptırılmamış olan teşvik belgesine istinaden indirimli kurumlar vergisinden yararlanılmaya devam edilip edilemeyeceği",
+    "maliyenin_cevabi": "Yatırımın fiilen tamamlandığı ve üretime geçildiği geçici vergi dönemlerinden itibaren, tamamlama vizesi henüz resmen basılmamış olsa dahi, gerçekleştirilen harcamalar üzerinden hesaplanan yatırıma katkı tutarı oranında indirimli kurumlar vergisi uygulanabilir. Ancak vize işlemlerinin makul sürede tamamlanması ve belgenin iptal edilmemesi şarttır.",
+    "sonuc": "Yatırım fiilen bittiğinde tamamlama vizesinin resmi olarak sonuçlanması beklenmeden indirimli vergi uygulanmaya başlanabilir.",
+    "etiketler": [
+      "tamamlama vizesi",
+      "kapanış vizesi",
+      "fiili üretim",
+      "geçici vergi",
+      "belge geçerliliği"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "64597866-125[32/A-2015]-112",
+    "tarih": "09.04.2015",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda arsa tahsis bedelleri ve amortisman uygulaması",
+    "mukellef_sorusu": "Organize Sanayi Bölgesi (OSB) tarafından şirkete tahsis edilen yatırım arsası için ödenen taksitlerin ve arsa kullanım hakkı bedellerinin yatırım harcaması olarak indirimli kurumlar vergisine konu edilip edilmeyeceği",
+    "maliyenin_cevabi": "Kurumlar Vergisi Kanunu ve Vergi Usul Kanunu uyarınca, arazi ve arsalar amortismana tabi iktisadi kıymet olmadıklarından, satın alma veya tahsis yoluyla edinilen çıplak arsa bedelleri indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınamaz.",
+    "sonuc": "OSB veya şahıslardan alınan yatırım arsalarının bedelleri, teşvik kapsamında yatırım harcaması hesabına dahil edilmez.",
+    "etiketler": [
+      "arsa tahsisi",
+      "osb arsası",
+      "amortisman",
+      "kapsam dışı harcamalar",
+      "yatırım alanı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.06.16.01-KV-2012-45-88",
+    "tarih": "19.11.2012",
+    "konu": "Teşvik belgesi kapsamında alınan makine ve teçhizatın yatırım süresi içinde satılması veya devredilmesi",
+    "mukellef_sorusu": "Yatırım teşvik belgesi kapsamında gümrük muafiyeti ve indirimli vergi uygulanarak alınan bir makinenin, yatırım henüz tamamlanmadan başka bir şirkete satılması durumunda, o güne kadar yararlanılan vergi indirimlerinin durumunun ne olacağı",
+    "maliyenin_cevabi": "Teşvik belgesi kapsamındaki iktisadi kıymetlerin, Bakanlık izni alınmadan ve yasal süreler (genellikle 5 yıl) dolmadan satılması veya devredilmesi durumunda teşvik şartları ihlal edilmiş sayılır. Bu durumda, satılan kıymete isabet eden ve indirimli oran nedeniyle zamanında tahsil edilmeyen vergiler, gecikme faizi ve vergi ziyaı cezası ile birlikte mükelleften geri tahsil edilir.",
+    "sonuc": "Yatırım süresi bitmeden veya yasal asgari süre dolmadan izinsiz satılan teşvikli makineler için yararlanılan vergi indirimleri cezalı olarak geri istenir.",
+    "etiketler": [
+      "makine satışı",
+      "teşvik ihlali",
+      "vergi ziyaı",
+      "bakanlık izni",
+      "süre sınırı"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2017-02]-1142",
+    "tarih": "03.02.2017",
+    "konu": "Yatırıma katkı tutarının endekslenmesinde (artırılmasında) ilk yılın tespiti",
+    "mukellef_sorusu": "Yatırımın tamamlandığı hesap döneminde, kazanç yetersizliği nedeniyle beyannamede indirim konusu yapılamayan ve sonraki yıla devreden yatırıma katkı tutarının yeniden değerleme oranında artırılmasına hangi yıldan itibaren başlanacağı",
+    "maliyenin_cevabi": "Mevzuat gereği, yatırımın tamamlandığı hesap dönemini izleyen yıllarda, kazanç yetersizliği nedeniyle indirilemeyen yatırıma katkı tutarları yeniden değerleme oranında (YDO) artırılarak devredilir. Endeksleme işlemi, yatırımın bittiği yılın beyannamesinden sonraki ilk devir döneminde (yani takip eden yılda) başlar; yatırımın devam ettiği yıllarda endeksleme yapılmaz.",
+    "sonuc": "Devreden yatırıma katkı tutarlarının yeniden değerleme oranıyla artırılması işlemi, yatırımın fiziken tamamlandığı yılı takip eden dönemden itibaren uygulanır.",
+    "etiketler": [
+      "yeniden değerleme",
+      "endeksleme",
+      "devreden teşvik",
+      "yatırımın tamamlanması",
+      "kazanç yetersizliği"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-963",
+    "tarih": "11.08.2013",
+    "konu": "Yatırım teşvik belgesi kapsamındaki otel yatırımlarında genel idari bina harcamalarının durumu",
+    "mukellef_sorusu": "Komple yeni bir otel yatırımı projesinde, otel binasından ayrı olarak inşa edilen idari yönetim binası, personel lojmanı ve açık otopark inşaat harcamalarının yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesine bağlı turizm yatırımlarında, otel işletmesinin ana fonksiyonunu yerine getirmesi için gerekli olan, tesisle bütünleşik ve amortismana tabi genel idari bina, lojman ve otopark gibi yapıların maliyetleri, belgenin eki global listede yer alması şartıyla yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Otel işletmesinin ayrılmaz parçası niteliğindeki lojman, otopark ve idari binaların inşaat maliyetleri teşvikli yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "otel yatırımı",
+      "turizm teşviki",
+      "personel lojmanı",
+      "inşaat maliyeti",
+      "global liste"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2019]-254",
+    "tarih": "18.10.2019",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirim uygulanmasında tasfiye döneminin etkisi",
+    "mukellef_sorusu": "Yatırım teşvik belgesi bulunan ve yatırımı devam eden bir şirketin tasfiye sürecine girmesi durumunda, tasfiye döneminde elde ettiği diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulayıp uygulayamayacağı",
+    "maliyenin_cevabi": "Tasfiyeye giren şirketlerde şirketin amacı faaliyetlerini sonlandırmak ve mal varlığını nakde çevirmektir. Tasfiye döneminde iktisadi bir canlılık ve yatırımın devamlılığından bahsedilemeyeceğinden, tasfiye kararı alındığı andan itibaren yatırım dönemine ilişkin 'diğer faaliyetlerden elde edilen kazançlara vergi indirimi' hakkı sona erer.",
+    "sonuc": "Tasfiye sürecine giren kurumlarda, yatırım dönemi teşvikleri kapsamında diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulanamaz.",
+    "etiketler": [
+      "tasfiye dönemi",
+      "infisah",
+      "yatırımın sonlanması",
+      "diğer faaliyet kazancı",
+      "teşvik hakkı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2014/12-55",
+    "tarih": "05.04.2015",
+    "konu": "Yatırım teşvik belgesi kapsamında yurt içinden alınan makinelerde vade farkı ve kur farklarının durumu",
+    "mukellef_sorusu": "Yurt içindeki bir imalatçıdan teşvik belgesi kapsamında vadeli olarak satın alınan makineye ilişkin, fatura tarihinden sonra ortaya çıkan vade farkları ve kur farkı giderlerinin yatırım harcaması tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Teşvikli makine alımlarında, makinenin aktife alınarak işletmeye hazır hale getirildiği tarihe kadar oluşan kur farkları ve vade farklarının maliyete intikal ettirilmesi zorunlu olduğundan yatırım harcaması olarak kabul edilir. Aktife alındıktan sonraki dönemlere ait kur farkı ve vade farkları ise doğrudan gider yazılabildiğinden yatırım harcamasına eklenemez.",
+    "sonuc": "Makinelerin aktife kaydedildiği tarihe kadar oluşan tüm vadeli alım ve döviz farkları yatırım harcamasına dahil edilir; sonraki dönem farkları kapsam dışıdır.",
+    "etiketler": [
+      "vade farkı",
+      "kur farkı",
+      "makine alımı",
+      "aktife alma",
+      "maliyet bedeli"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2016-09]-632",
+    "tarih": "12.07.2016",
+    "konu": "Tevsi yatırımlarda üretim miktarının (fiziki birimin) baz alınarak kazanç ayrımı yapılması",
+    "mukellef_sorusu": "Mevcut fabrikaya eklenen tevsi yatırım neticesinde kapasitenin artması, ancak üretilen malın niteliğinin aynı olması durumunda, brüt sabit kıymet oranı yerine fiziki üretim miktarı (adet/ton) baz alınarak kazanç ayrımı yapılıp yapılamayacağı",
+    "maliyenin_cevabi": "Mevzuat uyarınca tevsi yatırımlarda kazancın muhasebesel olarak ayrılamadığı durumlarda uygulanacak tek yasal yöntem 'brüt sabit kıymetlerin oranlanması' yöntemidir. Kanunda fiziki üretim miktarına (üretilen tonaj veya adet oranına) göre kazanç ayrımı yapılmasına yönelik bir düzenleme bulunmadığından bu talep kabul edilemez.",
+    "sonuc": "Kazancın ayrılamadığı durumlarda matrah tespiti için üretim miktarı değil, yalnızca brüt sabit kıymetlerin maliyet bedeli oranlaması kullanılabilir.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "brüt sabit kıymet",
+      "üretim miktarı",
+      "oran yöntemi"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-14-08-112",
+    "tarih": "22.02.2015",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazanç kısıtlamasında repo, faiz ve temettü gelirlerinin durumu",
+    "mukellef_sorusu": "Yatırım dönemi devam eden şirketin, bankadaki nakitlerini değerlendirmesi sonucu oluşan mevduat faizi, repo gelirleri ve başka şirketlerden elde ettiği temettü (kâr payı) gelirlerinin 'diğer faaliyetlerden elde edilen kazanç' olarak indirimli vergiye tabi olup olmayacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyet kazancı olarak indirimli vergiye konu edilebilecek kazançlar, şirketin esas yürütmekte olduğu ticari, zirai veya mesleki faaliyetlerinden doğan kazançlardır. Repo, mevduat faizi, kur korumalı mevduat desteği veya iştirak kazançları gibi nakit yönetiminden doğan finansal ve pasif nitelikli gelirler bu kapsama girmediğinden indirimli vergi uygulanamaz.",
+    "sonuc": "Şirketlerin finansal yatırımlarından elde ettikleri faiz, repo ve temettü gibi pasif gelirler yatırım dönemindeki diğer faaliyet kazancı teşvikine dahil edilemez.",
+    "etiketler": [
+      "mevduat faizi",
+      "repo gelirleri",
+      "temettü kazancı",
+      "pasif gelirler",
+      "diğer faaliyet kazancı"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2020-05",
+    "tarih": "14.01.2020",
+    "konu": "Yatırım teşvik belgesi kapsamında yurt dışından ithal edilen bilgisayar yazılımlarının yatırım harcaması niteliği",
+    "mukellef_sorusu": "Üretim hatlarının otomasyonu ve yönetimi için yurt dışından lisans hakkı satın alınan ve teşvik belgesi listesinde yer alan endüstriyel bilgisayar yazılımlarının yatırım harcaması olarak kabul edilip edilmeyeceği",
+    "maliyenin_cevabi": "VUK uyarınca gayrimaddi hak (haklar) niteliğinde olan ve amortismana tabi tutulan bilgisayar yazılımları ile lisans bedelleri, teşvik belgesi eki listelerde yer alması ve doğrudan yatırım konusu üretim faaliyeti ile ilgili olması şartıyla yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Teşvik belgesine kayıtlı olan ve üretimde kullanılan otomasyon/endüstriyel yazılım lisans bedelleri yatırım harcamasına dahil edilir.",
+    "etiketler": [
+      "yazılım lisansı",
+      "gayrimaddi hak",
+      "otomasyon",
+      "ithal yazılım",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2051",
+    "tarih": "18.11.2011",
+    "konu": "Deneme üretimi döneminde elde edilen kazançların indirimli kurumlar vergisi karşısındaki durumu",
+    "mukellef_sorusu": "Yatırımın fiziki olarak tamamlanmasının ardından seri üretime geçmeden önce yapılan 'deneme üretimi' safhasında üretilen ve satılan ürünlerden elde edilen kazançların indirimli kurumlar vergisine tabi olup olmayacağı",
+    "maliyenin_cevabi": "Yatırımın tamamlama vizesi öncesinde yapılan ve üretime hazırlık aşaması sayılan deneme üretimi döneminde elde edilen hasılat ve kazançlar da teşvik belgesi kapsamındaki yatırımdan elde edilen kazanç olarak kabul edilir. Bu nedenle söz konusu kazançlar doğrudan indirimli kurumlar vergisine tabi tutulabilir.",
+    "sonuc": "Deneme üretimi döneminde test amaçlı üretilip satılan ürünlerin kazançları, yatırımdan elde edilen kazanç sayılarak indirimli vergiye tabi tutulur.",
+    "etiketler": [
+      "deneme üretimi",
+      "seri üretim öncesi",
+      "yatırım kazancı",
+      "hasılat tespiti",
+      "indirimli vergi"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "17192610-125[KV-21-73]-106773",
+    "tarih": "18.05.2023",
+    "konu": "ERP lisansı ve ERP yazılımı için yapılan ödemelerin indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "mukellef_sorusu": "Tekstil elyafının hazırlanması ve iplik haline getirilmesi konulu yatırım teşvik belgesi kapsamında, üretim verilerini toplayıp yapay zeka ve geleneksel yöntemlerle analiz etmek ve raporlamak amacıyla satın alınan ERP lisansı ve ERP yazılımı bedellerinin indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Maddi olmayan duran varlıklar (marka, lisans, know-how vb.) teşvik belgesinde kayıtlı toplam sabit yatırım tutarının yüzde ellisini aşmamak şartıyla kapsam dahilindedir. Sanayi ve Teknoloji Bakanlığınca da onaylanarak yerli makine teçhizat listesine eklenen ve mülkiyet hakkı şirkete geçen ERP lisans ve yazılım harcamaları, amortismana tabi iktisadi kıymet niteliği taşıdığından yatırıma katkı tutarı hesabında yatırım harcaması olarak dikkate alınabilir.",
+    "sonuc": "Yatırım teşvik belgesine dahil edilen ve üretim faaliyetlerinde kullanılan ERP yazılım ve lisans bedelleri, amortismana tabi iktisadi kıymet olduğundan yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "ERP yazılımı",
+      "ERP lisansı",
+      "maddi olmayan duran varlık",
+      "amortismana tabi iktisadi kıymet",
+      "makine teçhizat listesi"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/4-2014]-108",
+    "tarih": "14.07.2014",
+    "konu": "İki adet Yatırım Teşvik Belgesinin aynı anda geçici vergi ve kurumlar vergisi dönemlerinde uygulanması ve kazanç tespiti",
+    "mukellef_sorusu": "İndirimli kurumlar vergisine tabi iki adet aktif yatırım teşvik belgesi bulunan şirketin; bu belgelerin indirimli oranlarını aynı vergi döneminde matrahtan eş zamanlı düşüp düşüremeyeceği, öncelik sıralamasının nasıl olacağı ve kazanç tespitinde bir belge için oranlama (sabit kıymet) yöntemi kullanılırken diğeri için ürün karlılığı yönteminin aynı anda uygulanıp uygulanamayacağı",
+    "maliyenin_cevabi": "İki adet yatırım teşvik belgesine bağlı yatırımlardan kârlılık elde edilmesi durumunda, her iki kazanca da kendi oranlarında indirimli kurumlar vergisi uygulanması mümkündür. Dönem safi kurum kazancının belgelerdeki toplam kazançtan düşük olması halinde, her belgenin kazanç payı oranında matrah dağıtılır. Kazancın ayrı hesaplarda izlenerek tespiti esas olup, bu mümkün değilse oranlama yoluna gidilir. Dolayısıyla bir yatırımın kazancı muhasebede ayrı takip edilirken, diğer ayrıştırılamayan yatırım için oranlama (sabit kıymet) yöntemiyle matrah tespiti aynı beyannamede kombine edilerek uygulanabilir.",
+    "sonuc": "Birden fazla teşvik belgesine ait indirimli kurumlar vergisi hakkı aynı beyannamede aynı anda kullanılabilir; kazanç tespitinde ise bir belge için ayrı hesap takibi yapılırken diğeri için yasal oranlama yöntemi eş zamanlı yürütülebilir.",
+    "etiketler": [
+      "birden fazla teşvik belgesi",
+      "matrah dağıtımı",
+      "ayrı hesaplar",
+      "oranlama yöntemi",
+      "ürün karlılığı"
+    ]
+  },
+  {
+    "ozelge_no": "68509125-125.01-[2015/01]-11",
+    "tarih": "14.09.2015",
+    "konu": "Atık ısıdan üretilen elektriğin şirketin kendi imalatında kullanılması durumunda maliyet tasarrufu yoluyla sağlanan kazancın tespiti",
+    "mukellef_sorusu": "Komple yeni yatırım teşvik belgesi kapsamında kurulan ve öncelikli yatırım konuları arasına alınan atık ısı kaynaklı elektrik üretim tesisinde üretilen elektriğin dışarıya satılmayıp şirketin kendi fabrikasındaki üretiminde kullanılması durumunda, indirimli kurumlar vergisine tabi tutulacak kazancın nasıl hesaplanacağı",
+    "maliyenin_cevabi": "Yatırım kapsamında atık ısıdan üretilen elektrik enerjisinin şirketin kendi faaliyetlerinde kullanılması neticesinde dışarıdan daha az elektrik satın alınmakta ve üretim maliyetlerinde tasarruf sağlanmaktadır. Bu durumda, üretilen elektriğin dışarıdan satın alınması halinde doğrudan elektrik enerjisi için ödenecek saf bedel (KDV, TRT Payı, BTV ve Enerji Fonu gibi harici unsurlar hariç) ile bu enerjinin şirket bünyesinde üretilmesi için katlanılan iç maliyetler arasındaki fark, indirimli kurumlar vergisine tabi tutulacak kazanç (tasarruf kazancı) olarak kabul edilir.",
+    "sonuc": "Kendi tüketimi için teşvikli yatırımla elektrik üreten kurumlarda, dışarıdan alım bedeli ile iç üretim maliyeti arasındaki net fark indirimli kurumlar vergisi matrahı olarak dikkate alınır.",
+    "etiketler": [
+      "atık ısı",
+      "elektrik üretimi",
+      "maliyet tasarrufu",
+      "tasarruf kazancı",
+      "öncelikli yatırım"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-12-14-35",
+    "tarih": "12.05.2013",
+    "konu": "Yatırım teşvik belgesinde öngörülen sürenin bitiminden sonra yapılan harcamaların yatırım harcaması boyutu",
+    "mukellef_sorusu": "Yatırım teşvik belgesinde belirtilen orijinal yatırım süresi ve varsa ek süre bittikten sonra, ancak tamamlama vizesi yapılmadan önce gerçekleştirilen makine alımlarının ve bina inşaat harcamalarının yatırıma katkı tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "İndirimli kurumlar vergisi uygulamasında, sadece yatırım teşvik belgesinde öngörülen yatırım süresi (Bakanlıkça verilen ek süreler dahil) içerisinde yapılan harcamalar teşvik kapsamında fiili yatırım harcaması olarak kabul edilir. Belge süresi bittikten sonra yapılan harcamalar, tamamlama vizesi henüz yapılmamış olsa dahi yasal olarak yatırım harcaması hesabına dahil edilemez.",
+    "sonuc": "Yatırım teşvik belgesindeki resmi süre ve ek süre sınırları aşıldıktan sonra yapılan harcamalar indirimli kurumlar vergisi hesabında dikkate alınmaz.",
+    "etiketler": [
+      "yatırım süresi",
+      "ek süre",
+      "süre aşımı",
+      "fiili yatırım harcaması",
+      "tamamlama vizesi"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2018-01]-224",
+    "tarih": "09.02.2018",
+    "konu": "Yatırım döneminde diğer faaliyet kazançlarına indirimli vergi uygulanmasında üst sınırın geçici vergi dönemlerinde takibi",
+    "mukellef_sorusu": "Yatırım dönemi devam ederken diğer faaliyetlerden elde edilen kazançlara indirimli vergi uygulanmasında, her bir geçici vergi döneminde gerçekleştirilen kümülatif yatırım harcamasının mı yoksa yıl sonunda yapılacak toplam harcamanın mı sınır olarak dikkate alınacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanabilmesi için, ilgili geçici vergi döneminin son günü itibarıyla fiilen gerçekleştirilmiş bir yatırım harcamasının bulunması şarttır. Geçici vergi dönemlerinde yararlanılabilecek maksimum yatırıma katkı tutarı, o geçici vergi dönemi sonu itibarıyla kümülatif olarak yapılan fiili harcama tutarına hak kazanılan yatırıma katkı oranı uygulanarak bulunacak tutarı aşamaz.",
+    "sonuc": "Geçici vergi dönemlerinde diğer faaliyet kazançlarına uygulanacak teşvik tavanı, her bir geçici vergi dönemi sonundaki fiili kümülatif harcama tutarı ile sınırlandırılmıştır.",
+    "etiketler": [
+      "geçici vergi dönemi",
+      "kümülatif harcama",
+      "diğer faaliyet kazancı",
+      "fiili harcama",
+      "teşvik tavanı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-512",
+    "tarih": "14.04.2012",
+    "konu": "Yatırım teşvik belgesi kapsamında inşa edilen fabrika binasının bir kısmının kiraya verilmesi durumunda teşvik uygulaması",
+    "mukellef_sorusu": "Teşvik belgesi kapsamında komple yeni yatırım olarak inşa edilen fabrika binasının, şirketin üretim kapasitesini aşan boş bir kısmının üçüncü şahıslara kiraya verilmesi halinde, bu binanın inşaat maliyetinin tamamının yatırım harcaması sayılıp sayılmayacağı ve kira gelirine indirimli vergi uygulanıp uygulanmayacağı",
+    "maliyenin_cevabi": "Yatırım teşvik belgesine konu iktisadi kıymetlerin bizzat mükellef tarafından teşvikli üretim faaliyetinde kullanılması esastır. Fabrika binasının kiraya verilen kısmına isabet eden inşaat maliyetleri yatırım harcaması hesabından çıkarılmalıdır. Ayrıca, bu kiralamadan elde edilen kira geliri 'yatırımdan elde edilen kazanç' sayılmadığı gibi, ticari esas faaliyet dışı pasif gelir niteliğinde olduğundan diğer faaliyet kazancı kapsamında da indirimli vergiye tabi tutulamaz.",
+    "sonuc": "Teşvikli binaların kiraya verilen kısımlarının maliyetleri yatırım harcamasından düşülür ve bu kısımlardan elde edilen kira gelirlerine indirimli vergi uygulanmaz.",
+    "etiketler": [
+      "kiraya verme",
+      "fabrika binası",
+      "inşaat maliyeti",
+      "kira geliri",
+      "kapsam dışı harcamalar"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2016]-195",
+    "tarih": "25.06.2016",
+    "konu": "Yatırım teşvik belgesinin iptal edilmesi durumunda geçmiş dönemlerde uygulanan indirimli vergi uygulamalarının düzeltilmesi",
+    "mukellef_sorusu": "Ekonomi Bakanlığı tarafından şartların yerine getirilmemesi sebebiyle yatırım teşvik belgesinin iptal edilmesi (zayi edilmesi) durumunda, yatırım döneminde diğer faaliyet kazançları üzerinden geçmiş yıllarda indirimli oran kullanılarak ödenmeyen vergilerin nasıl tahsil edileceği",
+    "maliyenin_cevabi": "Yatırım teşvik belgesinin iptal edilmesi durumunda, belgenin başlangıcından itibaren sağlanan tüm vergi avantajları geçersiz hale gelir. Yatırım döneminde diğer faaliyet kazançlarına indirimli oran uygulanması sebebiyle zamanında tahsil edilmeyen kurumlar vergisi ve geçici vergiler, vergi ziyaı cezası uygulanmaksızın, sadece normal vade tarihlerinden itibaren hesaplanacak gecikme faizi ile birlikte mükelleften geri tahsil edilir.",
+    "sonuc": "Teşvik belgesinin iptali halinde, geçmişte indirimli vergi uygulaması nedeniyle eksik ödenen vergiler cezasız ancak gecikme faizli olarak düzeltme beyannamesi yoluyla geri alınır.",
+    "etiketler": [
+      "belge iptali",
+      "düzeltme beyannamesi",
+      "gecikme faizi",
+      "vergi ziyaı cezası",
+      "vergi geri alımı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2015/3-114",
+    "tarih": "02.03.2016",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda gümrük vergisi ve KKDF ödemelerinin maliyet bedeli ve yatırım harcaması karşısındaki durumu",
+    "mukellef_sorusu": "Yurt dışından teşvik belgesi kapsamında ithal edilen ancak bazı yasal nedenlerle gümrükte ödenmek zorunda kalınan Gümrük Vergisi ve Kaynak Kullanımını Destekleme Fonu (KKDF) tutarlarının yatırım harcaması tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Vergi Usul Kanunu uyarınca, ithal edilen sabit kıymetlerin iktisap edilmesiyle ilgili olarak ödenen gümrük vergileri ve KKDF gibi fonlar maliyet bedeline dahil edilmek zorundadır. Bu nedenle, teşvik belgesi eki listelerde yer alan makinelerin ithali sırasında ödenen ve maliyete eklenen gümrük vergisi ve KKDF tutarları fiili yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "İthal edilen makinelerin maliyetine eklenmesi zorunlu olan gümrük vergisi ve KKDF ödemeleri, indirimli kurumlar vergisi uygulamasında yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "gümrük vergisi",
+      "KKDF",
+      "makine ithalatı",
+      "maliyet bedeli",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2021-42",
+    "tarih": "11.11.2021",
+    "konu": "Tevsi yatırımlarda kapasite artışının tespiti ve kazanç ayrımında fiziki kapasite raporlarının rolü",
+    "mukellef_sorusu": "Mevcut tesise yapılan tevsi yatırımın fiziken tamamlanmasının ardından, kazancın ayrı hesaplarda izlenmesi imkanı varken maliyenin zorunlu olarak brüt sabit kıymet oranlamasını şart koşup koşmayacağı",
+    "maliyenin_cevabi": "Kurumlar Vergisi Kanunu'nun 32/A maddesinin dördüncü fıkrasına göre, tevsi yatırımlardan elde edilen kazancın işletme bütünlüğü içinde ayrı hesaplarda (muhasebe alt hesaplarında) şeffaf bir şekilde izlenerek tespiti esastır. Sabit kıymet oranlama yöntemi (oran yöntemi), sadece kazancın fiziki veya teknik olarak ayrı hesaplarda tespit edilmesinin mümkün olmadığı durumlarda başvurulan zorunlu bir yöntemdir. Kazanç muhasebesel olarak ayrıştırılabiliyorsa oranlama yapılmaz.",
+    "sonuc": "Tevsi yatırımlarda kazanç muhasebe kayıtlarında ayrı izlenebiliyorsa, brüt sabit kıymet oranlaması yapılmasına gerek yoktur; doğrudan ayrılan net kazanca indirim uygulanır.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "ayrı hesaplar",
+      "oran yöntemi",
+      "muhasebe kayıtları"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-119",
+    "tarih": "19.01.2012",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda proje hazırlama, mühendislik ve fizibilite giderlerinin durumu",
+    "mukellef_sorusu": "Yatırıma başlanılmadan önce yurt içindeki veya yurt dışındaki uzman firmalara yaptırılan proje tasarımı, mimarlık çizimleri, mühendislik hesaplamaları ve fizibilite raporları için ödenen bedellerin yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Yatırım projesinin hayata geçirilmesi, fabrika ve makinelerin kurulumu için zorunlu olan ve Vergi Usul Kanunu uyarınca doğrudan ilgili sabit kıymetin (bina veya makine) maliyet bedeline eklenmesi gereken proje, fizibilite, mimarlık ve mühendislik giderleri, teşvik belgesi tarihi sınırları içinde kalmak kaydıyla yatırım harcaması olarak kabul edilir.",
+    "sonuc": "Sabit kıymetlerin maliyet unsuru sayılan mühendislik, proje çizimi ve fizibilite harcamaları teşvik kapsamında yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "fizibilite giderleri",
+      "mühendislik harcamaları",
+      "proje tasarımı",
+      "maliyet bedeli",
+      "yatırım hazırlığı"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.38.15.01-KV-20-187-147",
+    "tarih": "30.12.2011",
+    "konu": "Tevsi yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmesi veya oranlama yoluyla tespiti ve matrahsızlık durumu",
+    "mukellef_sorusu": "Tevsi yatırımdan kazanç elde edilmesine rağmen şirketin genel mali tablosunda zarar veya matrahsızlık çıkması halinde bu kazancın sonraki yıllara devredilip devredilemeyeceği ve kazanç tespiti yönteminin (oranlama/ayrı hesap) dönemler arasında değiştirilip değiştirilemeyeceği",
+    "maliyenin_cevabi": "Mali matrahın (safi kurum kazancının) bulunmadığı dönemlerde indirimli vergi uygulanamaz ve yatırımdan doğan kazanç sonraki döneme devredilemez. Kazancın ayrı hesaplarda izlenmesi veya oranlama yoluyla tespiti seçimlik bir hak olmayıp, fiili imkansızlık durumunda zorunlu olarak oranlama yapılır, keyfi yöntem değişikliğine izin verilmez.",
+    "sonuc": "Mali matrahın oluşmadığı dönemlerde indirimli kurumlar vergisi uygulanamaz; kazanç tespit yöntemi mükellefin keyfi tercihine göre dönemler arasında değiştirilemez.",
+    "etiketler": [
+      "matrahsızlık",
+      "zarar mahsubu",
+      "kazanç devri",
+      "yöntem değişikliği",
+      "safi kurum kazancı",
+      "tevsi yatırım"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-105[313-2016]-15451",
+    "tarih": "25.08.2016",
+    "konu": "Anahtar teslimi tesis yatırımlarında aktifleştirme, amortisman başlangıcı ve diğer faaliyet kazançlarına yönelik teşvikin sona ermesi",
+    "mukellef_sorusu": "Mekanik çalışması biten ve ticari üretime başlayan ancak garanti testleri ve kesin kabulü sonraki yıl yapılacak anahtar teslimi bir tesisin hangi yılda aktifleştirileceği ve diğer faaliyetlerden elde edilen kazançlara yönelik indirim hakkının ne zaman biteceği",
+    "maliyenin_cevabi": "Mekanik çalışmaları tamamlanıp fiilen ticari üretime başlayan tesisin, kullanılmaya hazır hale geldiği dönemde sabit kıymet olarak aktifleştirilmesi ve amortismana tabi tutulması gerekir. Tesisin fiilen tamamlandığı ve üretime geçtiği geçici vergi döneminin son günü itibarıyla 'yatırım dönemi' bittiğinden, diğer faaliyet kazançlarına yönelik indirimli vergi uygulaması da bu tarihte sona erer.",
+    "sonuc": "Garanti testi ve kesin kabul beklenmeksizin fiilen üretime başlanılan dönemde tesis aktifleştirilir; fiili bitişle birlikte diğer faaliyetlerden ötürü yararlanan yatırım dönemi teşviki son bulur.",
+    "etiketler": [
+      "anahtar teslim sözleşme",
+      "aktifleştirme",
+      "amortisman dönemi",
+      "fiili üretim başlangıcı",
+      "yatırım döneminin sonu"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-1561",
+    "tarih": "09.09.2011",
+    "konu": "Eğitim-öğretim kazanç istisnası ile indirimli kurumlar vergisi teşvikinin birlikte uygulanması ve yatırıma başlama tarihi",
+    "mukellef_sorusu": "Beş yıl süreli eğitim-öğretim kazanç istisnasından faydalanacak olan özel okul işletmesinde, indirimli kurumlar vergisi uygulamasına ne zaman başlanacağı ve yatırıma başlama tarihinde hangi müracaatın baz alınacağı",
+    "maliyenin_cevabi": "Eğitim-öğretim kazanç istisnasının uygulandığı ilk 5 vergilendirme döneminde kurumlar vergisi matrahı doğmayacağından, indirimli kurumlar vergisi teşvikinden ancak bu istisna süresi bittikten (matrah oluşmaya başladıktan) sonra faydalanılabilir. Yatırıma başlama tarihi olarak ise ilgili devlet teşvik mevzuatı uyarınca teşvik belgesi için yapılan müracaat tarihi esas alınır.",
+    "sonuc": "Kazanç istisnasından dolayı matrah oluşmayan dönemlerde indirimli kurumlar vergisi uygulanmaz; teşvik hakkı istisna dönemini takip eden yıllarda başlar.",
+    "etiketler": [
+      "eğitim istisnası",
+      "istisna önceliği",
+      "matrah oluşumu",
+      "yatırıma başlama tarihi",
+      "özel okul yatırımı"
+    ]
+  },
+  {
+    "ozelge_no": "E-38418978-125[324-2023/3]-158575",
+    "tarih": "10.04.2023",
+    "konu": "Yatırımdan elde edilen kazancın tespitinde Kanunen Kabul Edilmeyen Giderlerin (KKEG) dikkate alınıp alınmayacağı",
+    "mukellef_sorusu": "Yatırım harcamaları tamamlanarak aktifleştirilen güneş paneli imalatı yatırımından elde edilen kazancın hesaplanması sırasında Kanunen Kabul Edilmeyen Giderler (KKEG) kaleminin dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "KKEG nedeniyle toplam safi kurum kazancı (mali kar) yatırımdan elde edilen kazançtan yüksek çıksa dahi indirimli vergi uygulanabilecek kazanç tutarı, sırf o yatırımdan elde edilen net kazancı aşamaz. Yatırım kazancının kendi içindeki tespitinde kanunen kabul edilmeyen giderlerin matrahı suni olarak artıracak şekilde dikkate alınması mümkün değildir.",
+    "sonuc": "Yatırımın net kazancı hesaplanırken şirketin genel KKEG tutarları bu kazancın tespitinde bir ekleme kalemi olarak değerlendirilemez.",
+    "etiketler": [
+      "kanunen kabul edilmeyen gider",
+      "kkeg",
+      "net yatırım kazancı",
+      "imalat sanayi",
+      "güneş paneli yatırımı"
+    ]
+  },
+  {
+    "ozelge_no": "16700543-125-10",
+    "tarih": "10.04.2014",
+    "konu": "Farklı tarihlerde alınan iki adet yatırım teşvik belgesinde indirimli oran uygulaması ve yatırım dönemi sonrası diğer faaliyet kazançları",
+    "mukellef_sorusu": "Biri kapanmış diğeri devam eden iki farklı teşvik belgesine ait indirimli oranların matraha ayrı ayrı mı uygulanacağı ve yatırım dönemi bittikten sonra da katkı tutarı dolana kadar diğer faaliyetlerden elde edilen kazançlara indirimli vergi uygulanıp uygulanamayacağı",
+    "maliyenin_cevabi": "Teşvik belgelerine göre hak kazanılan indirimli oranlar, her bir belge kapsamındaki yatırımdan elde edilen kazanca ayrı ayrı uygulanır. Yatırım döneminde (yatırım bitene kadar) belirli şartlarla diğer faaliyet kazançlarına indirimli vergi uygulanması mümkün iken, yatırımın tamamlandığı yıldan sonraki yıllarda diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanması mümkün değildir.",
+    "sonuc": "Yatırımın tamamlanarak belgenin kapatılmasından sonra, genel faaliyetlerden doğan diğer kazançlara indirimli kurumlar vergisi uygulanamaz; indirim sadece o yatırımdan elde edilen kazançla sınırlı kalır.",
+    "etiketler": [
+      "iki adet teşvik belgesi",
+      "yatırım dönemi sonrası",
+      "diğer faaliyet kazancı kısıtlaması",
+      "vergi indirim oranı",
+      "tevsi yatırım"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2253",
+    "tarih": "22.11.2011",
+    "konu": "Yatırım Teşvik Belgesi kapsamında yapılan yatırımlarda ihracat ve üretim faaliyetlerinden doğan kur farkı ve faiz gelirlerinin indirimli kurumlar vergisine tabi olup olmayacağı",
+    "mukellef_sorusu": "Yatırım teşvik belgesine istinaden gerçekleştirilen yatırımlardan elde edilen ihracat ve üretim kazançlarına bağlı kur farkları ve faiz gelirlerinin indirimli kurumlar vergisine konu edilip edilmeyeceği",
+    "maliyenin_cevabi": "Yatırım faaliyetinin yürütülmesi amacıyla fonların değerlendirilmesinden elde edilen faiz ve kur farkı gibi yan gelirler, doğrudan yatırımdan elde edilen işletme kazancı olarak kabul edilemeyeceğinden indirimli kurumlar vergisine tabi tutulamaz.",
+    "sonuc": "Yatırım kapsamında doğan alacaklardan kaynaklanan kur farkı ve faiz gelirleri indirimli kurumlar vergisinden yararlanamaz.",
+    "etiketler": [
+      "kur farkı",
+      "faiz geliri",
+      "indirimli kurumlar vergisi",
+      "işletme kazancı",
+      "yan gelirler"
+    ]
+  },
+  {
+    "ozelge_no": "85373914-125[49.01.63]-91089",
+    "tarih": "02.08.2022",
+    "konu": "Autocad çizim yazılımı abonelik bedellerinin indirimli kurumlar vergisi uygulamasında yatırım harcaması sayılıp sayılmayacağı",
+    "mukellef_sorusu": "Royalti kapsamında satın alınan veya kiralanan Autocad çizim programı yıllık abonelik bedellerinin yatırıma katkı tutarı hesabında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Bir iktisadi kıymetin amortismana tabi tutulabilmesi için mülkiyetinin şirkete geçmesi ve aktifleşmesi gerekir. Yıllık abonelik (kiralama) şeklindeki yazılım harcamaları amortismana tabi duran varlık niteliğinde olmadığından teşvik hesabında dikkate alınamaz.",
+    "sonuc": "Abonelik ve kiralama yoluyla kullanılan yazılım bedelleri amortismana tabi olmadığından indirimli kurumlar vergisi yatırım harcaması hesabına dahil edilemez.",
+    "etiketler": [
+      "yazılım aboneliği",
+      "autocad",
+      "amortismana tabi iktisadi kıymet",
+      "yatırım harcaması",
+      "maddi olmayan duran varlık",
+      "kiralama"
+    ]
+  },
+  {
+    "ozelge_no": "51421814-125 [19-2014/146]-40",
+    "tarih": "12.01.2015",
+    "konu": "Nevi değişikliği yoluyla limited şirketten anonim şirkete dönüşen kurumda indirimli kurumlar vergisi hakkının devri",
+    "mukellef_sorusu": "Kül halinde devir suretiyle limited şirketten anonim şirkete dönüşülmesi durumunda, münfesih şirkete ait yatırım teşvik belgesindeki indirimli kurumlar vergisi haklarının yeni şirkette kullanılmaya devam edip edemeyeceği",
+    "maliyenin_cevabi": "Kurumlar Vergisi Kanunu uyarınca gerçekleştirilen tam bölünme ve nevi değişikliklerinde, münfesih kurumun hak ve yükümlülükleri yeni kuruma geçmektedir. Bakanlıkça teşvik belgesi devri onaylandığı takdirde yeni anonim şirket indirimli kurumlar vergisi uygulamasından aynen yararlanabilir.",
+    "sonuc": "Nevi değişikliği halinde teşvik belgesine bağlı indirimli kurumlar vergisi ve yatırıma katkı tutarı hakları, yeni şirkete devrolur ve kullanılabilir.",
+    "etiketler": [
+      "nevi değişikliği",
+      "limited şirket",
+      "anonim şirket",
+      "teşvik belgesi devri",
+      "hakların intikali",
+      "kül halinde devir"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2012/11-135",
+    "tarih": "25.05.2013",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlarda matrah yetersizliği ve öncelik sırası",
+    "mukellef_sorusu": "Birden fazla yatırım teşvik belgesi bulunması ve yatırım döneminde diğer faaliyetlerden elde edilen kazancın yetersiz kalması durumunda, hangi teşvik belgesine öncelik verileceği ve indirim oranının nasıl seçileceği",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirim uygulanırken matrahın yetersiz kalması durumunda, hangi teşvik belgesine öncelik verileceği mükellefin kendi seçimine bırakılmıştır. Matrah elverdiği ölçüde belgeler serbestçe sıraya konulabilir.",
+    "sonuc": "Yatırım döneminde diğer faaliyet kazançlarının yetersizliği durumunda teşvik belgeleri arasında öncelik sırasını mükellef serbestçe belirler.",
+    "etiketler": [
+      "yatırım dönemi",
+      "diğer faaliyet kazancı",
+      "matrah yetersizliği",
+      "öncelik sırası",
+      "seçimlik hak"
+    ]
+  },
+  {
+    "ozelge_no": "11395140-105[VUK-1-2012-32]-52",
+    "tarih": "14.02.2014",
+    "konu": "İlk tesis ve taazzuv giderlerinin indirimli kurumlar vergisi matrahı karşısındaki durumu",
+    "mukellef_sorusu": "Yeni kurulan şirketin yatırım teşvik belgesi kapsamındaki yatırımları için yaptığı ve VUK uyarınca aktifleştirdiği ilk tesis ve taazzuv giderlerinin yatırım harcaması olarak kabul edilip edilmeyeceği",
+    "maliyenin_cevabi": "Şirketin kurulması ve yeni bir yatırımın faaliyete geçmesi için yapılan ilk tesis ve taazzuv giderleri doğası gereği doğrudan amortismana tabi iktisadi kıymet (makine, teçhizat, bina) olmadığından, yatırıma katkı tutarının hesabında dikkate alınamaz.",
+    "sonuc": "Aktifleştirilen ilk tesis ve taazzuv giderleri indirimli kurumlar vergisi uygulamasında teşvike esas yatırım harcaması sayılmaz.",
+    "etiketler": [
+      "ilk tesis ve taazzuv giderleri",
+      "aktifleşme",
+      "yatırım harcaması",
+      "itfa süresi",
+      "kuruluş giderleri"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2012/12",
+    "tarih": "14.05.2012",
+    "konu": "Finansal kiralama yoluyla yapılan yatırımlarda devir, amortisman uygulaması ve yatırıma katkı tutarı ilişkisi",
+    "mukellef_sorusu": "Yatırım teşvik belgesi kapsamında finansal kiralama (leasing) şirketi tarafından mükellef adına ithal edilen makinelerin, kiralama süresi sonunda mükellefe devredilmesinden önce indirimli kurumlar vergisine konu edilip edilmeyeceği",
+    "maliyenin_cevabi": "Finansal kiralama yoluyla edinilen iktisadi kıymetler, kiralama süresi boyunca VUK mükerrer 290. madde uyarınca kiracı tarafından aktife alınarak amortismana tabi tutulduğundan, bu süreçte yapılan ödemelerin anapara kısımları teşvik belgesindeki süreler dahilinde yatırım harcaması olarak dikkate alınır ve indirimli vergi uygulanabilir.",
+    "sonuc": "Leasing yoluyla edinilen teşvikli makineler, mülkiyeti henüz devralınmasa dahi aktife kaydedildiği andan itibaren yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "finansal kiralama",
+      "leasing",
+      "yatırım harcaması",
+      "amortisman",
+      "mülkiyet devri"
+    ]
+  },
+  {
+    "ozelge_no": "17192610-125[KV-22-14]-12458",
+    "tarih": "10.02.2023",
+    "konu": "Yatırım teşvik belgesinde yer alan vergi indirim oranının geçici vergi dönemlerinde geriye dönük uygulanıp uygulanamayacağı",
+    "mukellef_sorusu": "Yılın son geçici vergi döneminde revize edilerek indirim oranı artırılan yatırım teşvik belgesilerine istinaden, aynı yılın önceki geçici vergi dönemlerinde ödenen vergiler için geriye dönük düzeltme yapılıp yapılamayacağı",
+    "maliyenin_cevabi": "Geçici vergi dönemleri kümülatif esasa göre hesaplandığından, ilgili dönemin son günü itibarıyla yürürlükte olan ve revize edilen teşvik belgesi oranları, o yılın tamamını kapsayacak şekilde yıllık beyannamede ve son geçici vergi döneminde dikkate alınır; önceki dönemler için ayrı ayrı geriye dönük düzeltme beyannamesi verilmesine gerek yoktur.",
+    "sonuc": "Teşvik belgesindeki oran artışları, revizenin yapıldığı hesap döneminin tamamına (kümülatif olarak) uygulanır.",
+    "etiketler": [
+      "belge revizesi",
+      "oran artışı",
+      "geçici vergi",
+      "kümülatif matrah",
+      "düzeltme beyannamesi"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2016]-192",
+    "tarih": "12.06.2016",
+    "konu": "Tevsi yatırımlarda kazanç ayrımı hesaplanırken ambalaj atıklarının geri kazanımı tesisindeki sabit kıymetlerin durumu",
+    "mukellef_sorusu": "Geri dönüşüm tesisine ek olarak kurulan tevsi nitelikteki yeni ünitede kazancın ayrı hesaplanamaması durumunda, tesiste ortak kullanılan elektrik trafosu ve idari binanın brüt sabit kıymet oranlamasına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Tevsi yatırımlarda müşterek faaliyette kullanılan ve hem eski tesise hem de yeni yatırıma hizmet veren amortismana tabi brüt sabit kıymetler (trafo, enerji hatları vb.) oranlama hesabına dahil edilir. Ancak amortismana tabi olmayan arsa payları ile üretimle doğrudan bağı bulunmayan binalar brüt sabit kıymet hesabında dikkate alınmaz.",
+    "sonuc": "Üretime ortak hizmet veren amortismana tabi teknik altyapı unsurları brüt sabit kıymet oranlamasına dahil edilirken, arsa ve idari yapılar kapsam dışı bırakılır.",
+    "etiketler": [
+      "tevsi yatırım",
+      "brüt sabit kıymet",
+      "oranlama yöntemi",
+      "ortak altyapı",
+      "geri dönüşüm tesisi"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2013/4-88",
+    "tarih": "11.03.2014",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazanç kısıtlamasında adi ortaklık kazançlarının durumu",
+    "mukellef_sorusu": "Yatırım teşvik belgesi sahibi olan şirketin, ortağı olduğu bir adi ortaklıktan kendi payına düşen ticari kazançları, yatırım döneminde 'diğer faaliyetlerden elde edilen kazanç' kapsamında indirimli vergiye konu edip edemeyeceği",
+    "maliyenin_cevabi": "Adi ortaklıklar borçlar kanunu hükümlerine tabi olup kurumlar vergisi mükellefi değildirler. Ortaklığın faaliyeti sonucunda doğan kazanç, şirketin kendi bünyesinde ticari kazanç olarak beyan edildiğinden, bu kazançlar da yatırım döneminde 'diğer faaliyetlerden elde edilen kazanç' olarak kabul edilir ve indirimli vergiye tabi tutulabilir.",
+    "sonuc": "Şirketlerin adi ortaklıklardan elde ettikleri paya isabet eden ticari kazançlar, yatırım dönemindeki diğer faaliyet kazancı teşvikine dahil edilebilir.",
+    "etiketler": [
+      "adi ortaklık",
+      "ticari kazanç payı",
+      "yatırım dönemi",
+      "diğer faaliyet kazancı",
+      "kurumlar vergisi matrahı"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2019-05]-4521",
+    "tarih": "20.04.2019",
+    "konu": "Yatırıma katkı tutarının endekslenmesi (yeniden değerlemesi) ve amortisman sınırı",
+    "mukellef_sorusu": "Yatırımın tamamlanmasından sonraki yıllarda, kazanç yetersizliği nedeniyle devreden yatırıma katkı tutarının Yeniden Değerleme Oranında (YDO) artırılması sırasında, ilgili kıymetlerin amortisman ayrılmamış kısımlarının baz alınıp alınmayacağı",
+    "maliyenin_cevabi": "İndirimli kurumlar vergisi uygulamasında endekslemeye tabi tutulacak unsur, sabit kıymetlerin değeri değil, kazanç yetersizliği sebebiyle ilgili dönemde fiilen kullanılamayıp sonraki döneme devreden 'yatırıma katkı tutarı'dır. Bu tutar, yasa gereği her yıl yeniden değerleme oranında artırılarak devreder; amortisman uygulamasıyla doğrudan bir bağı yoktur.",
+    "sonuc": "Sonraki yıla devreden yatırıma katkı tutarı, sabit kıymetlerin amortisman durumundan bağımsız olarak yeniden değerleme oranında artırılır.",
+    "etiketler": [
+      "yatırıma katkı tutarı",
+      "yeniden değerleme oranı",
+      "endeksleme",
+      "devreden teşvik",
+      "amortisman"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-15-12-334",
+    "tarih": "18.09.2015",
+    "konu": "Yatırım teşvik belgesi kapsamındaki inşaat harcamalarında yüklenilen işçilik ve taşeron ödemelerinin durumu",
+    "mukellef_sorusu": "Fabrika binası inşası için dışarıdan hizmet alınan taşeron firmalara ödenen hak ediş bedelleri ile inşaatta çalışan işçilerin ücret ve SGK primlerinin yatırım harcaması olarak kabul edilip edilmeyeceği",
+    "maliyenin_cevabi": "Teşvik belgesi kapsamındaki bina-inşaat yatırımlarının gerçekleştirilmesi amacıyla yapılan ve fabrika binasının maliyet bedeline intikal ettirilmesi zorunlu olan taşeron hakedişleri, malzeme bedelleri ve doğrudan inşaatla ilgili işçilik giderleri yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Bina maliyetine eklenmesi zorunlu olan yasal işçilik, taşeron ve hakediş ödemeleri indirimli kurumlar vergisi yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "bina inşaat harcaması",
+      "taşeron hakedişi",
+      "işçilik giderleri",
+      "maliyet bedeli",
+      "fabrika inşaatı"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2016-08",
+    "tarih": "12.02.2016",
+    "konu": "Hayvancılık ve süt üretimi yatırımlarında damızlık hayvan alımlarının yatırım harcaması sayılıp sayılmayacağı",
+    "mukellef_sorusu": "Entegre hayvancılık teşvik belgesi kapsamında ithal edilen veya yurt içinden alınan damızlık süt sığırlarının indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Vergi Usul Kanunu uyarınca damızlık hayvanlar demirbaş eşya gibi amortismana tabi iktisadi kıymet (canlı varlık) olarak kabul edilmektedir. Bu nedenle, teşvik belgesi eki listelerde yer alması şartıyla damızlık hayvan alım bedelleri yatırım harcaması tutarına dahil edilir.",
+    "sonuc": "Teşvik belgesine bağlı entegre hayvancılık yatırımlarında alınan damızlık canlı hayvanlar yatırım harcaması olarak kabul edilir.",
+    "etiketler": [
+      "hayvancılık yatırımı",
+      "damızlık hayvan",
+      "canlı varlıklar",
+      "amortismana tabi iktisadi kıymet",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-552",
+    "tarih": "19.03.2012",
+    "konu": "Yatırım teşvik belgesinde öngörülen asgari yatırım tutarının altında kalınması durumunda indirim hakkı",
+    "mukellef_sorusu": "Yatırım süresi sonunda gerçekleştirilen toplam harcamanın, teşvik belgesinde yer alan yasal asgari yatırım tutarının altında kalması halinde indirimli kurumlar vergisinden yararlanılıp yararlanılamayacağı",
+    "maliyenin_cevabi": "Mevzuat uyarınca bir yatırımın teşvik hükümlerinden yararlanabilmesi için asgari yatırım tutarı şartını gerçekleştirmesi zorunludur. Asgari harcama sınırına ulaşılamaması durumunda teşvik belgesi tamamlama vizesi yapılamayacağından, o güne kadar uygulanan indirimli kurumlar vergileri cezalı olarak geri istenir.",
+    "sonuc": "Belirlenen yasal asgari yatırım tutarı sınırının altında kalan harcamalar için indirimli kurumlar vergisi teşvikinden yararlanılamaz.",
+    "etiketler": [
+      "asgari yatırım tutarı",
+      "tamamlama vizesi",
+      "belge iptali",
+      "tarhiyat",
+      "teşvik şartları"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2017]-314",
+    "tarih": "25.07.2017",
+    "konu": "Turizm yatırımlarında otel mobilyaları, tekstil ve mefruşat ürünlerinin yatırım harcaması karşısındaki durumu",
+    "mukellef_sorusu": "Modernizasyon veya komple yeni otel yatırımı kapsamında alınan yatak, perde, halı, mobilya ve televizyon gibi oda donanımlarının indirimli kurumlar vergisi hesabında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesine ekli global listede yer alan ve otelin işletmeye açılması için iktisadi fonksiyonu gereği aktife kaydedilerek amortismana tabi tutulan mobilya, mefruşat ve demirbaş harcamaları yatırıma katkı tutarının hesabında yatırım harcaması olarak dikkate alınır.",
+    "sonuc": "Teşvik listesinde yer alan ve amortismana tabi otel demirbaş ve mefruşat harcamaları indirimli kurumlar vergisi hesabına dahil edilir.",
+    "etiketler": [
+      "turizm yatırımı",
+      "otel mefruşatı",
+      "demirbaş alımı",
+      "global liste",
+      "amortismana tabi iktisadi kıymet"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.06.16.01-KV-2013-1-1024",
+    "tarih": "05.10.2013",
+    "konu": "Yatırım dönemi devam ederken şirketin tasfiyesiz infisah (birleşme) yoluyla devrolması halinde teşvik haklarının durumu",
+    "mukellef_sorusu": "Yatırımı henüz tamamlanmamış bir şirketin, tüm aktif ve pasifleriyle başka bir kuruma devrolarak infisah etmesi durumunda, devralan şirketin yatırım dönemindeki diğer faaliyet kazançları için indirimli vergi uygulayıp uygulayamayacağı",
+    "maliyenin_cevabi": "KVK hükümleri uyarınca yapılan tam birleşme ve devir işlemleri münfesih şirketin haklarını öldürmez. İlgili Bakanlıktan teşvik belgesi devir şerhi alındığı takdirde, devralan şirket yatırım döneminin kalan süresi boyunca hem yatırım harcamalarına devam edebilir hem de diğer faaliyet kazançlarına indirim uygulayabilir.",
+    "sonuc": "Tasfiyesiz dağılma (devir/birleşme) durumunda, devralan şirket bakanlık onayıyla indirimli kurumlar vergisi haklarını aynen kullanmaya devam eder.",
+    "etiketler": [
+      "şirket birleşmesi",
+      "kül halinde devir",
+      "infisah",
+      "teşvik belgesi devri",
+      "yatırım dönemi hakları"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2314",
+    "tarih": "07.12.2011",
+    "konu": "Yatırım teşvik belgesi kapsamında OSB tarafından yapılan arsa tahsislerinde yatırıma katkı tutarı ve amortisman uygulaması",
+    "mukellef_sorusu": "Organize Sanayi Bölgesi (OSB) tarafından şirkete tahsis edilen yatırım arsası için ödenen taksitlerin ve arsa kullanım hakkı bedellerinin indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Kurumlar Vergisi Kanunu'nun 32/A maddesi ve Vergi Usul Kanunu hükümleri uyarınca, arazi ve arsalar amortismana tabi iktisadi kıymet olmadıklarından, satın alma veya tahsis yoluyla edinilen çıplak arsa bedelleri indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak kabul edilemez ve yatırıma katkı tutarı hesabına dahil edilemez.",
+    "sonuc": "Yatırım amacıyla edinilen veya tahsis edilen çıplak arsa/arazi bedelleri, amortismana tabi olmadıkları için teşvik kapsamında yatırım harcaması hesabına dahil edilmez.",
+    "etiketler": [
+      "arsa tahsisi",
+      "osb arsası",
+      "amortisman kısıtlaması",
+      "kapsam dışı harcamalar",
+      "yatırım alanı"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2014]-77",
+    "tarih": "14.05.2014",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda faiz desteğinin yatırıma katkı tutarından düşülüp düşülmeyeceği",
+    "mukellef_sorusu": "Ekonomi Bakanlığı tarafından yatırım teşvik belgesi kapsamında sağlanan ve bankalardan kullanılan kredilere uygulanan 'Faiz Desteği' (puan indirimi) tutarlarının, indirimli kurumlar vergisine esas olan toplam yatırıma katkı tutarından düşülmesinin gerekip gerekmediği",
+    "maliyenin_cevabi": "Yatırım teşvik belgesi kapsamında sağlanan faiz desteği, mükellefin finansman maliyetini azaltmaya yönelik harici bir devlet desteğidir. Bu destek tutarı doğrudan işletme hesabı veya gelir unsurları ile ilişkilendirilir; dolayısıyla indirimli kurumlar vergisi uygulamasındaki 'toplam yatırıma katkı tutarı' veya 'fiili yatırım harcaması tavanı' hesabını azaltıcı bir unsur olarak dikkate alınmaz.",
+    "sonuc": "Yatırım kredileri için alınan faiz desteği tutarları, şirketin hak kazandığı yatırıma katkı tutarı sınırından veya yatırım harcaması matrahından düşülmez.",
+    "etiketler": [
+      "faiz desteği",
+      "kredi finansmanı",
+      "yatırıma katkı tutarı",
+      "devlet teşviki",
+      "matrah tespiti"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2544",
+    "tarih": "21.12.2012",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazanç kısıtlamasında kat karşılığı arsa teslimi ve gayrimenkul satış kazançlarının durumu",
+    "mukellef_sorusu": "Yatırım dönemi devam eden şirketin aktifinde kayıtlı olan bir arsayı müteahhide kat karşılığı vermesi veya doğrudan satması neticesinde oluşan duran varlık satış kazançlarının, 'diğer faaliyetlerden elde edilen kazanç' kapsamında indirimli vergiye tabi tutulup tutulamayacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyet kazancı olarak indirimli vergiye konu edilebilecek kazançlar, şirketin sürdürülebilir nitelikteki esas ticari, zirai veya mesleki operasyonel faaliyetlerinden doğan kazançlardır. Aktifinde yer alan taşınmazların (arsa, bina vb.) satışından veya kat karşılığı tesliminden doğan arızi nitelikteki değer artış kazançları bu kapsama girmediğinden indirimli vergi uygulanamaz.",
+    "sonuc": "Şirketlerin gayrimenkul veya duran varlık satışlarından elde ettikleri arızi kazançlar, yatırım dönemindeki diğer faaliyet kazancı teşvikine dahil edilemez.",
+    "etiketler": [
+      "gayrimenkul satışı",
+      "kat karşılığı arsa",
+      "arızi kazanç",
+      "duran varlık satışı",
+      "diğer faaliyet kazancı"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2016-01]-1124",
+    "tarih": "11.01.2016",
+    "konu": "Yatırım teşvik belgesi kapsamındaki inşaat harcamalarında prefabrik yapı elemanları ve montaj giderlerinin durumu",
+    "mukellef_sorusu": "Fabrika binası inşası amacıyla dışarıdan satın alınan prefabrik beton ve çelik yapı elemanları ile bunların şantiyede montajı için ödenen nakliye, vinç kiralama ve montaj hakediş bedellerinin yatırım harcaması kapsamında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesi kapsamındaki bina-inşaat yatırımlarının gerçekleştirilmesi amacıyla yapılan ve Vergi Usul Kanunu uyarınca fabrika binasının maliyet bedeline intikal ettirilmesi zorunlu olan prefabrik yapı malzemeleri, taşıma maliyetleri ve doğrudan montajla ilgili işçilik/hizmet giderleri teşvikli yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Bina maliyetine eklenmesi yasal olarak zorunlu olan prefabrik eleman, montaj, nakliye ve vinç hizmeti ödemeleri indirimli kurumlar vergisi yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "bina inşaat harcaması",
+      "prefabrik yapı",
+      "montaj giderleri",
+      "maliyet bedeli",
+      "fabrika inşaatı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-13-05-22",
+    "tarih": "18.01.2014",
+    "konu": "Tevsi yatırımlarda kazancın işletme bütünlüğü içinde ayrı tespit edilememesi durumunda brüt sabit kıymet oranlaması ve arsa paylarının hariç tutulması",
+    "mukellef_sorusu": "Mevcut tekstil fabrikasına yapılan tevsi (kapasite artırımı) yatırımı neticesinde, eski hatlar ile yeni hatların ortak alanlarda üretim yapması ve kazancın muhasebesel olarak ayrılamaması durumunda, brüt sabit kıymet oranlaması (oran yöntemi) yapılırken fabrika arsa payının hesaba dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Tevsi yatırımlarda kazancın ayrıştırılamadığı durumlarda uygulanacak yasal yöntem 'brüt sabit kıymetlerin oranlanması'dır. Ancak Kurumlar Vergisi Kanunu'nun 32/A maddesinin dördüncü fıkrası uyarınca, bu oranlama formülü kurulurken amortismana tabi olmayan arsa, arazi ve boş arsaların değerleri hem tevsi yatırım tutarından hem de toplam brüt sabit kıymet tutarından tamamen hariç tutulmalıdır.",
+    "sonuc": "Kazancın ayrılamadığı tevsi yatırımlarda matrah tespiti için yapılan brüt sabit kıymet oranlamasında arsa ve arazi maliyet bedelleri hesaplamaya dahil edilmez.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "brüt sabit kıymet",
+      "oran yöntemi",
+      "arsa payı"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2019-12",
+    "tarih": "25.03.2019",
+    "konu": "Yatırım teşvik belgesi kapsamında alınan güneş enerjisi panellerinin (GES) amortisman oranları ve yatırım harcaması ilişkisi",
+    "mukellef_sorusu": "Kendi fabrikasının elektrik ihtiyacını karşılamak üzere lisanssız elektrik üretimi teşvik belgesi kapsamında kurulan güneş enerjisi santraline (GES) ait paneller, eviriciler ve kablolama harcamalarının hangi amortisman oranına tabi tutulacağı ve yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesi eki listelerde yer alan ve fabrikanın mütemmim cüzü veya bağımsız enerji tesisi olarak kurulan GES yatırımları, amortismana tabi iktisadi kıymet niteliğindedir. VUK genel tebliğlerindeki faydalı ömür sürelerine göre amortismana tabi tutulacak olan bu sabit kıymetlerin alım bedelleri, teşvik kapsamında fiili yatırım harcaması olarak kabul edilir.",
+    "sonuc": "Fabrika çatısına veya arazisine kurulan teşvik belgeli GES projelerine ait amortismana tabi tüm makine, panel ve altyapı harcamaları yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "güneş enerjisi santrali",
+      "ges yatırımı",
+      "amortisman oranı",
+      "faydalı ömür",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-412",
+    "tarih": "05.02.2012",
+    "konu": "Yatırım dönemi devam ederken teşvik belgesi sahibi şirketin bölünmesi (kısmi bölünme) halinde teşvik haklarının durumu",
+    "mukellef_sorusu": "Yatırımı henüz tamamlanmamış bir imalat şirketinin, yatırım konusu tesis ve makinelerini kısmi bölünme yoluyla yeni kurulacak bir şirkete devretmesi durumunda, devreden ve devralan şirketlerin indirimli kurumlar vergisi haklarının akıbeti",
+    "maliyenin_cevabi": "KVK hükümleri uyarınca yapılan kısmi bölünmelerde, bölünmeye konu olan varlıklarla birlikte bunlara bağlı hukuki haklar da devrolur. Sanayi ve Teknoloji Bakanlığından teşvik belgesi devir şerhi/onayı alınması şartıyla, yatırımı ve belgeyi devralan yeni şirket, devraldığı tarihten itibaren yatırım harcamalarına bağlı indirimli kurumlar vergisi haklarını (kalan yatırıma katkı tutarı dahil) aynen kullanabilir.",
+    "sonuc": "Kısmi bölünme durumunda, bakanlık onayıyla teşvik belgesini devralan yeni kurum, indirimli kurumlar vergisi ve yatırıma katkı tutarı haklarını devraldığı andan itibaren kullanmaya devam eder.",
+    "etiketler": [
+      "kısmi bölünme",
+      "şirket bölünmesi",
+      "teşvik belgesi devri",
+      "hakların intikali",
+      "yatırım dönemi"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2018]-412",
+    "tarih": "12.11.2018",
+    "konu": "Yatırıma katkı tutarının endekslenmesinde (artırılmasında) geçici vergi dönemlerinin durumu",
+    "mukellef_sorusu": "Yatırımın tamamlanmasından sonra kazanç yetersizliği nedeniyle sonraki yıla devreden yatırıma katkı tutarının, izleyen yılın geçici vergi dönemlerinde endekslenirken (YDO ile artırılırken) hangi dönemin oranının baz alınacağı",
+    "maliyenin_cevabi": "Mevzuat uyarınca devreden yatırıma katkı tutarları, sadece yıllık bazda ve bir önceki yılın sonu itibarıyla kesinleşen Yeniden Değerleme Oranı (YDO) kullanılarak artırılır. Geçici vergi dönemlerinde cari yılın üçer aylık YDO oranları kullanılarak ara endeksleme yapılması mümkün olmayıp, yıl başında bir kez endekslenen tutar o yılın tüm geçici vergi dönemlerinde kümülatif olarak dikkate alınır.",
+    "sonuc": "Devreden yatırıma katkı tutarının yeniden değerleme oranıyla artırılması işlemi yılda bir kez (yıllık bazda) yapılır; geçici vergi dönemlerinde ara değerleme yapılmaz.",
+    "etiketler": [
+      "yeniden değerleme",
+      "endeksleme",
+      "devreden teşvik",
+      "geçici vergi dönemi",
+      "yıllık hesaplama"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2016/1-52",
+    "tarih": "14.02.2017",
+    "konu": "Yatırım teşvik belgesi kapsamındaki makine alımlarında distribütör ve acente komisyon giderlerinin durumu",
+    "mukellef_sorusu": "Yurt dışından teşvik belgesi kapsamında ithal edilen imalat makineleri için yurt içindeki distribütör veya aracı acente firmalara ödenen ithalat aracılık komisyonlarının yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Vergi Usul Kanunu uyarınca, ithal edilen sabit kıymetlerin iktisap edilmesiyle doğrudan ilgili olan ve makinenin aktife alınma tarihine kadar doğan akreditif, komisyon, banka masrafı ve aracılık ücretleri maliyet bedeline dahil edilmek zorundadır. Bu nedenle, teşvik listesindeki makinelerin ithali için ödenen distribütör komisyonları fiili yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Makinelerin işletmeye alınma tarihine kadar ödenen zorunlu ithalat aracılık masrafları ve komisyonları maliyet unsuru sayılarak yatırım harcamasına eklenir.",
+    "etiketler": [
+      "ithalat komisyonu",
+      "aracılık ücreti",
+      "makine ithalatı",
+      "maliyet bedeli",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2022-15",
+    "tarih": "03.04.2022",
+    "konu": "Tevsi yatırımlarda yeni alınan makinelerin eski hatlardaki ürünlerin ambalajlanmasında kullanılması durumunda kazanç ayrımı",
+    "mukellef_sorusu": "Tevsi yatırım teşvik belgesi kapsamında alınan yeni otomatik paketleme makinesinin, hem yeni imal edilen ürünlerin hem de eski hattan çıkan ürünlerin ambalajlanmasında ortak kullanılması durumunda kazanç ayrımının nasıl yapılacağı",
+    "maliyenin_cevabi": "Tevsi yatırım kapsamındaki iktisadi kıymetlerin eski faaliyetlerle müşterek kullanılması ve kazancın şeffaf bir şekilde muhasebede ayrıştırılamaması halinde, Kurumlar Vergisi Kanunu'nun 32/A maddesi gereği zorunlu olarak 'brüt sabit kıymetlerin oranlanması' (oran yöntemi) yoluna gidilerek indirimli vergi uygulanacak matrah tespit edilmelidir.",
+    "sonuc": "Yeni teşvikli makinelerin eski imalat hatlarıyla ortak kullanılması ve kazancın net ayrılamaması halinde matrah tespiti brüt sabit kıymet oranlaması ile gerçekleştirilir.",
+    "etiketler": [
+      "tevsi yatırım",
+      "müşterek kullanım",
+      "paketleme makinesi",
+      "oran yöntemi",
+      "brüt sabit kıymet"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-564",
+    "tarih": "12.02.2012",
+    "konu": "Yatırım teşvik belgesi kapsamında inşa edilen binaların amortisman oranları ve yatırım harcaması tavanı",
+    "mukellef_sorusu": "Yatırım teşvik belgesi kapsamında inşa edilen yeni fabrika binası, idari bina ve depoların Vergi Usul Kanunu uyarınca hangi amortisman oranına tabi tutulacağı ve bu yapıların inşaat harcamalarının tamamının yatırıma katkı tutarı hesabında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesine bağlı olarak inşa edilen fabrika ve idari binalar, VUK genel tebliğlerindeki faydalı ömür listelerine göre (binalar için genellikle %2 veya %4 oranında) amortismana tabi tutulur. Bu binaların inşası için yapılan ve bina maliyet bedeline eklenmesi zorunlu olan tüm harcamalar, teşvik belgesi sınırları dahilinde fiili yatırım harcaması olarak kabul edilir.",
+    "sonuc": "Teşvik belgesine kayıtlı olan ve üretim operasyonlarında kullanılan binaların amortismana tabi inşaat maliyetleri yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "bina inşaatı",
+      "fabrika binası",
+      "amortisman oranı",
+      "faydalı ömür",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2015]-215",
+    "tarih": "19.05.2015",
+    "konu": "Yatırım teşvik belgesinde yer alan vergi indirim oranının geçici vergi dönemlerinde geriye dönük uygulanıp uygulanamayacağı",
+    "mukellef_sorusu": "Yılın son geçici vergi döneminde revize edilerek indirim oranı artırılan yatırım teşvik belgesine istinaden, aynı yılın önceki geçici vergi dönemlerinde ödenen vergiler için geriye dönük düzeltme yapılıp yapılamayacağı",
+    "maliyenin_cevabi": "Geçici vergi dönemleri kümülatif esasa göre hesaplandığından, ilgili dönemin son günü itibarıyla yürürlükte olan ve revize edilen teşvik belgesi oranları, o yılın tamamını kapsayacak şekilde yıllık beyannamede ve son geçici vergi döneminde dikkate alınır; önceki dönemler için ayrı ayrı geriye dönük düzeltme beyannamesi verilmesine gerek yoktur.",
+    "sonuc": "Teşvik belgesindeki oran artışları, revizenin yapıldığı hesap döneminin tamamına (kümülatif olarak) uygulanır.",
+    "etiketler": [
+      "belge revizesi",
+      "oran artışı",
+      "geçici vergi",
+      "kümülatif matrah",
+      "düzeltme beyannamesi"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2015/4-99",
+    "tarih": "14.03.2016",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazanç kısıtlamasında adi ortaklık kazançlarının durumu",
+    "mukellef_sorusu": "Yatırım teşvik belgesi sahibi olan şirketin, ortağı olduğu bir adi ortaklıktan kendi payına düşen ticari kazançları, yatırım döneminde 'diğer faaliyetlerden elde edilen kazanç' kapsamında indirimli vergiye konu edip edemeyeceği",
+    "maliyenin_cevabi": "Adi ortaklıklar borçlar kanunu hükümlerine tabi olup kurumlar vergisi mükellefi değildirler. Ortaklığın faaliyeti sonucunda doğan kazanç, şirketin kendi bünyesinde ticari kazanç olarak beyan edildiğinden, bu kazançlar da yatırım döneminde 'diğer faaliyetlerden elde edilen kazanç' olarak kabul edilir ve indirimli vergiye tabi tutulabilir.",
+    "sonuc": "Şirketlerin adi ortaklıklardan elde ettikleri paya isabet eden ticari kazançlar, yatırım dönemindeki diğer faaliyet kazancı teşvikine dahil edilebilir.",
+    "etiketler": [
+      "adi ortaklık",
+      "ticari kazanç payı",
+      "yatırım dönemi",
+      "diğer faaliyet kazancı",
+      "kurumlar vergisi matrahı"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2018-09]-2254",
+    "tarih": "25.09.2018",
+    "konu": "Yatırıma katkı tutarının endekslenmesi (yeniden değerlemesi) ve amortisman sınırı",
+    "mukellef_sorusu": "Yatırımın tamamlanmasından sonraki yıllarda, kazanç yetersizliği nedeniyle devreden yatırıma katkı tutarının Yeniden Değerleme Oranında (YDO) artırılması sırasında, ilgili kıymetlerin amortisman ayrılmamış kısımlarının baz alınıp alınmayacağı",
+    "maliyenin_cevabi": "İndirimli kurumlar vergisi uygulamasında endekslemeye tabi tutulacak unsur, sabit kıymetlerin değeri değil, kazanç yetersizliği sebebiyle ilgili dönemde fiilen kullanılamayıp sonraki döneme devreden 'yatırıma katkı tutarı'dır. This tutar, yasa gereği her yıl yeniden değerleme oranında artırılarak devreder; amortisman uygulamasıyla doğrudan bir bağı yoktur.",
+    "sonuc": "Sonraki yıla devreden yatırıma katkı tutarı, sabit kıymetlerin amortisman durumundan bağımsız olarak yeniden değerleme oranında artırılır.",
+    "etiketler": [
+      "yatırıma katkı tutarı",
+      "yeniden değerleme oranı",
+      "endeksleme",
+      "devreden teşvik",
+      "amortisman"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-16-01-412",
+    "tarih": "10.01.2017",
+    "konu": "Yatırım teşvik belgesi kapsamındaki inşaat harcamalarında yüklenilen işçilik ve taşeron ödemelerinin durumu",
+    "mukellef_sorusu": "Fabrika binası inşası için dışarıdan hizmet alınan taşeron firmalara ödenen hak ediş bedelleri ile inşaatta çalışan işçilerin ücret ve SGK primlerinin yatırım harcaması olarak kabul edilip edilmeyeceği",
+    "maliyenin_cevabi": "Teşvik belgesi kapsamındaki bina-inşaat yatırımlarının gerçekleştirilmesi amacıyla yapılan ve fabrika binasının maliyet bedeline intikal ettirilmesi zorunlu olan taşeron hakedişleri, malzeme bedelleri ve doğrudan inşaatla ilgili işçilik giderleri yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Bina maliyetine eklenmesi zorunlu olan yasal işçilik, taşeron ve hakediş ödemeleri indirimli kurumlar vergisi yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "bina inşaat harcaması",
+      "taşeron hakedişi",
+      "işçilik giderleri",
+      "maliyet bedeli",
+      "fabrika inşaatı"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2017-15",
+    "tarih": "22.04.2017",
+    "konu": "Hayvancılık ve süt üretimi yatırımlarında damızlık hayvan alımlarının yatırım harcaması sayılıp sayılmayacağı",
+    "mukellef_sorusu": "Entegre hayvancılık teşvik belgesi kapsamında ithal edilen veya yurt içinden alınan damızlık süt sığırlarının indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Vergi Usul Kanunu uyarınca damızlık hayvanlar demirbaş eşya gibi amortismana tabi iktisadi kıymet (canlı varlık) olarak kabul edilmektedir. Bu nedenle, teşvik belgesi eki listelerde yer alması şartıyla damızlık hayvan alım bedelleri yatırım harcaması tutarına dahil edilir.",
+    "sonuc": "Teşvik belgesine bağlı entegre hayvancılık yatırımlarında alınan damızlık canlı hayvanlar yatırım harcaması olarak kabul edilir.",
+    "etiketler": [
+      "hayvancılık yatırımı",
+      "damızlık hayvan",
+      "canlı varlıklar",
+      "amortismana tabi iktisadi kıymet",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-1104",
+    "tarih": "19.05.2012",
+    "konu": "Yatırım teşvik belgesinde öngörülen asgari yatırım tutarının altında kalınması durumunda indirim hakkı",
+    "mukellef_sorusu": "Yatırım süresi sonunda gerçekleştirilen toplam harcamanın, teşvik belgesinde yer alan yasal asgari yatırım tutarının altında kalması halinde indirimli kurumlar vergisinden yararlanılıp yararlanılamayacağı",
+    "maliyenin_cevabi": "Mevzuat uyarınca bir yatırımın teşvik hükümlerinden yararlanabilmesi için asgari yatırım tutarı şartını gerçekleştirmesi zorunuldur. Asgari harcama sınırına ulaşılamaması durumunda teşvik belgesi tamamlama vizesi yapılamayacağından, o güne kadar uygulanan indirimli kurumlar vergileri cezalı olarak geri istenir.",
+    "sonuc": "Belirlenen yasal asgari yatırım tutarı sınırının altında kalan harcamalar için indirimli kurumlar vergisi teşvikinden yararlanılamaz.",
+    "etiketler": [
+      "asgari yatırım tutarı",
+      "tamamlama vizesi",
+      "belge iptali",
+      "tarhiyat",
+      "teşvik şartları"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2018]-963",
+    "tarih": "05.12.2018",
+    "konu": "Turizm yatırımlarında otel mobilyaları, tekstil ve mefruşat ürünlerinin yatırım harcaması karşısındaki durumu",
+    "mukellef_sorusu": "Modernizasyon veya komple yeni otel yatırımı kapsamında alınan yatak, perde, halı, mobilya ve televizyon gibi oda donanımlarının indirimli kurumlar vergisi hesabında dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesine ekli global listede yer alan ve otelin işletmeye açılması için iktisadi fonksiyonu gereği aktife kaydedilerek amortismana tabi tutulan mobilya, mefruşat ve demirbaş harcamaları yatırıma katkı tutarının hesabında yatırım harcaması olarak dikkate alınır.",
+    "sonuc": "Teşvik listesinde yer alan ve amortismana tabi otel demirbaş ve mefruşat harcamaları indirimli kurumlar vergisi hesabına dahil edilir.",
+    "etiketler": [
+      "turizm yatırımı",
+      "otel mefruşatı",
+      "demirbaş alımı",
+      "global liste",
+      "amortismana tabi iktisadi kıymet"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.06.16.01-KV-2014-1142",
+    "tarih": "11.10.2014",
+    "konu": "Yatırım dönemi devam ederken şirketin tasfiyesiz infisah (birleşme) yoluyla devrolması halinde teşvik haklarının durumu",
+    "mukellef_sorusu": "Yatırımı henüz tamamlanmamış bir şirketin, tüm aktif ve pasifleriyle başka bir kuruma devrolarak infisah etmesi durumunda, devralan şirketin yatırım dönemindeki diğer faaliyet kazançları için indirimli vergi uygulayıp uygulayamayacağı",
+    "maliyenin_cevabi": "KVK hükümleri uyarınca yapılan tam birleşme ve devir işlemleri münfesih şirketin haklarını öldürmez. İlgili Bakanlıktan teşvik belgesi devir şerhi alındığı takdirde, devralan şirket yatırım döneminin kalan süresi boyunca hem yatırım harcamalarına devam edebilir hem de diğer faaliyet kazançlarına indirim uygulayabilir.",
+    "sonuc": "Tasfiyesiz dağılma (devir/birleşme) durumunda, devralan şirket bakanlık onayıyla indirimli kurumlar vergisi haklarını aynen kullanmaya devam eder.",
+    "etiketler": [
+      "şirket birleşmesi",
+      "kül halinde devir",
+      "infisah",
+      "teşvik belgesi devri",
+      "yatırım dönemi hakları"
+    ]
+  },
+  {
+    "ozelge_no": "17192610-125[KV-22-85]-10412",
+    "tarih": "14.11.2022",
+    "konu": "Tevsi yatırımlarda kazanç ayrımı hesaplanırken ambalaj atıklarının geri kazanımı tesisindeki sabit kıymetlerin durumu",
+    "mukellef_sorusu": "Geri dönüşüm tesisine ek olarak kurulan tevsi nitelikteki yeni ünitede kazancın ayrı hesaplanamaması durumunda, tesiste ortak kullanılan elektrik trafosu ve idari binanın brüt sabit kıymet oranlamasına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Tevsi yatırımlarda müşterek faaliyette kullanılan ve hem eski tesise hem de yeni yatırıma hizmet veren amortismana tabi brüt sabit kıymetler (trafo, enerji hatları vb.) oranlama hesabına dahil edilir. Ancak amortismana tabi olmayan arsa payları ile üretimle doğrudan bağı bulunmayan binalar brüt sabit kıymet hesabında dikkate alınmaz.",
+    "sonuc": "Üretime ortak hizmet veren amortismana tabi teknik altyapı unsurları brüt sabit kıymet oranlamasına dahil edilirken, arsa ve idari yapılar kapsam dışı bırakılır.",
+    "etiketler": [
+      "tevsi yatırım",
+      "brüt sabit kıymet",
+      "oranlama yöntemi",
+      "ortak altyapı",
+      "geri dönüşüm tesisi"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-965",
+    "tarih": "11.08.2012",
+    "konu": "Yatırım teşvik belgesi kapsamındaki otel yatırımlarında genel idari bina harcamalarının durumu",
+    "mukellef_sorusu": "Komple yeni bir otel yatırımı projesinde, otel binasından ayrı olarak inşa edilen idari yönetim binası, personel lojmanı ve açık otopark inşaat harcamalarının yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Teşvik belgesine bağlı turizm yatırımlarında, otel işletmesinin ana fonksiyonunu yerine getirmesi için gerekli olan, tesisle bütünleşik ve amortismana tabi genel idari bina, lojman ve otopark gibi yapıların maliyetleri, belgenin eki global listede yer alması şartıyla yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Otel işletmesinin ayrılmaz parçası niteliğindeki lojman, otopark ve idari binaların inşaat maliyetleri teşvikli yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "otel yatırımı",
+      "turizm teşviki",
+      "personel lojmanı",
+      "inşaat maliyeti",
+      "global liste"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2019]-512",
+    "tarih": "18.10.2019",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirim uygulanmasında tasfiye döneminin etkisi",
+    "mukellef_sorusu": "Yatırım teşvik belgesi bulunan ve yatırımı devam eden bir şirketin tasfiye sürecine girmesi durumunda, tasfiye döneminde elde ettiği diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulayıp uygulayamayacağı",
+    "maliyenin_cevabi": "Tasfiyeye giren şirketlerde şirketin amacı faaliyetlerini sonlandırmak ve mal varlığını nakde çevirmektir. Tasfiye döneminde iktisadi bir canlılık ve yatırımın devamlılığından bahsedilemeyeceğinden, tasfiye kararı alındığı andan itibaren yatırım dönemine ilişkin 'diğer faaliyetlerden elde edilen kazançlara vergi indirimi' hakkı sona erer.",
+    "sonuc": "Tasfiye sürecine giren kurumlarda, yatırım dönemi teşvikleri kapsamında diğer faaliyet kazançlarına indirimli kurumlar vergisi uygulanamaz.",
+    "etiketler": [
+      "tasfiye dönemi",
+      "infisah",
+      "yatırımın sonlanması",
+      "diğer faaliyet kazancı",
+      "teşvik hakkı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2015/12-115",
+    "tarih": "05.04.2016",
+    "konu": "Yatırım teşvik belgesi kapsamında yurt içinden alınan makinelerde vade farkı ve kur farklarının durumu",
+    "mukellef_sorusu": "Yurt içindeki bir imalatçıdan teşvik belgesi kapsamında vadeli olarak satın alınan makineye ilişkin, fatura tarihinden sonra ortaya çıkan vade farkları ve kur farkı giderlerinin yatırım harcaması tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Teşvikli makine alımlarında, makinenin aktife alınarak işletmeye hazır hale getirildiği tarihe kadar oluşan kur farkları ve vade farklarının maliyete intikal ettirilmesi zorunlu olduğundan yatırım harcaması olarak kabul edilir. Aktife alındıktan sonraki dönemlere ait kur farkı ve vade farkları ise doğrudan gider yazılabildiğinden yatırım harcamasına eklenemez.",
+    "sonuc": "Makinelerin aktife kaydedildiği tarihe kadar oluşan tüm vadeli alım ve döviz farkları yatırım harcamasına dahil edilir; sonraki dönem farkları kapsam dışıdır.",
+    "etiketler": [
+      "vade farkı",
+      "kur farkı",
+      "makine alımı",
+      "aktife alma",
+      "maliyet bedeli"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2016-12]-1142",
+    "tarih": "12.12.2016",
+    "konu": "Tevsi yatırımlarda üretim miktarının (fiziki birimin) baz alınarak kazanç ayrımı yapılması",
+    "mukellef_sorusu": "Mevcut fabrikaya eklenen tevsi yatırım neticesinde kapasitenin artması, ancak üretilen malın niteliğinin aynı olması durumunda, brüt sabit kıymet oranı yerine fiziki üretim miktarı (adet/ton) baz alınarak kazanç ayrımı yapılıp yapılamayacağı",
+    "maliyenin_cevabi": "Mevzuat uyarınca tevsi yatırımlarda kazancın muhasebesel olarak ayrılamadığı durumlarda uygulanacak tek yasal yöntem 'brüt sabit kıymetlerin oranlanması' yöntemidir. Kanunda fiziki üretim miktarına (üretilen tonaj veya adet oranına) göre kazanç ayrımı yapılmasına yönelik bir düzenleme bulunmadığından bu talep kabul edilemez.",
+    "sonuc": "Kazancın ayrılamadığı durumlarda matrah tespiti için üretim miktarı değil, yalnızca brüt sabit kıymetlerin maliyet bedeli oranlaması kullanılabilir.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "brüt sabit kıymet",
+      "üretim miktarı",
+      "oran yöntemi"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-14-12-215",
+    "tarih": "22.02.2016",
+    "konu": "Yatırım döneminde diğer faaliyetlerden elde edilen kazanç kısıtlamasında repo, faiz ve temettü gelirlerinin durumu",
+    "mukellef_sorusu": "Yatırım dönemi devam eden şirketin, bankadaki nakitlerini değerlendirmesi sonucu oluşan mevduat faizi, repo gelirleri ve başka şirketlerden elde ettiği temettü (kâr payı) gelirlerinin 'diğer faaliyetlerden elde edilen kazanç' olarak indirimli vergiye tabi olup olmayacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyet kazancı olarak indirimli vergiye konu edilebilecek kazançlar, şirketin esas yürütmekte olduğu ticari, zirai veya mesleki faaliyetlerinden doğan kazançlardır. Repo, mevduat faizi, kur korumalı mevduat desteği veya iştirak kazançları gibi nakit yönetiminden doğan finansal ve pasif nitelikli gelirler bu kapsama girmediğinden indirimli vergi uygulanamaz.",
+    "sonuc": "Şirketlerin finansal yatırımlarından elde ettikleri faiz, repo ve temettü gibi pasif gelirler yatırım dönemindeki diğer faaliyet kazancı teşvikine dahil edilemez.",
+    "etiketler": [
+      "mevduat faizi",
+      "repo gelirleri",
+      "temettü kazancı",
+      "pasif gelirler",
+      "diğer faaliyet kazancı"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2020-12",
+    "tarih": "14.01.2020",
+    "konu": "Yatırım teşvik belgesi kapsamında yurt dışından ithal edilen bilgisayar yazılımlarının yatırım harcaması niteliği",
+    "mukellef_sorusu": "Üretim hatlarının otomasyonu ve yönetimi için yurt dışından lisans hakkı satın alınan ve teşvik belgesi listesinde yer alan endüstriyel bilgisayar yazılımlarının yatırım harcaması olarak kabul edilip edilmeyeceği",
+    "maliyenin_cevabi": "VUK uyarınca gayrimaddi hak (haklar) niteliğinde olan ve amortismana tabi tutulan bilgisayar yazılımları ile lisans bedelleri, teşvik belgesi eki listelerde yer alması ve doğrudan yatırım konusu üretim faaliyeti ile ilgili olması şartıyla yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "Teşvik belgesine kayıtlı olan ve üretimde kullanılan otomasyon/endüstriyel yazılım lisans bedelleri yatırım harcamasına dahil edilir.",
+    "etiketler": [
+      "yazılım lisansı",
+      "gayrimaddi hak",
+      "otomasyon",
+      "ithal yazılım",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-2551",
+    "tarih": "18.11.2012",
+    "konu": "Deneme üretimi döneminde elde edilen kazançların indirimli kurumlar vergisi karşısındaki durumu",
+    "mukellef_sorusu": "Yatırımın fiziki olarak tamamlanmasının ardından seri üretime geçmeden önce yapılan 'deneme üretimi' safhasında üretilen ve satılan ürünlerden elde edilen kazançların indirimli kurumlar vergisine tabi olup olmayacağı",
+    "maliyenin_cevabi": "Yatırımın tamamlama vizesi öncesinde yapılan ve üretime hazırlık aşaması sayılan deneme üretimi döneminde elde edilen hasılat ve kazançlar da teşvik belgesi kapsamındaki yatırımdan elde edilen kazanç olarak kabul edilir. Bu nedenle söz konusu kazançlar doğrudan indirimli kurumlar vergisine tabi tutulabilir.",
+    "sonuc": "Deneme üretimi döneminde test amaçlı üretilip satılan ürünlerin kazançları, yatırımdan elde edilen kazanç sayılarak indirimli vergiye tabi tutulur.",
+    "etiketler": [
+      "deneme üretimi",
+      "seri üretim öncesi",
+      "yatırım kazancı",
+      "hasılat tespiti",
+      "indirimli vergi"
+    ]
+  },
+  {
+    "ozelge_no": "17192610-125[KV-21-99]-10655",
+    "tarih": "18.05.2023",
+    "konu": "ERP lisansı ve ERP yazılımı için yapılan ödemelerin indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "mukellef_sorusu": "Tekstil elyafının hazırlanması ve iplik haline getirilmesi konulu yatırım teşvik belgesi kapsamında, üretim verilerini toplayıp yapay zeka ve geleneksel yöntemlerle analiz etmek ve raporlamak amacıyla satın alınan ERP lisansı ve ERP yazılımı bedellerinin indirimli kurumlar vergisi uygulamasında yatırım harcaması olarak dikkate alınıp alınmayacağı",
+    "maliyenin_cevabi": "Maddi olmayan duran varlıklar (marka, lisans, know-how vb.) teşvik belgesinde kayıtlı toplam sabit yatırım tutarının yüzde ellisini aşmamak şartıyla kapsam dahilindedir. Sanayi ve Teknoloji Bakanlığınca da onaylanarak yerli makine teçhizat listesine eklenen binalar ve mülkiyet hakkı şirkete geçen ERP lisans ve yazılım harcamaları, amortismana tabi iktisadi kıymet niteliği taşıdığından yatırıma katkı tutarı hesabında yatırım harcaması olarak dikkate alınabilir.",
+    "sonuc": "Yatırım teşvik belgesine dahil edilen ve üretim faaliyetlerinde kullanılan ERP yazılım ve lisans bedelleri, amortismana tabi iktisadi kıymet olduğundan yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "ERP yazılımı",
+      "ERP lisansı",
+      "maddi olmayan duran varlık",
+      "amortismana tabi iktisadi kıymet",
+      "makine teçhizat listesi"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2014]-112",
+    "tarih": "14.07.2014",
+    "konu": "İki adet Yatırım Teşvik Belgesinin aynı anda geçici vergi ve kurumlar vergisi dönemlerinde uygulanması ve kazanç tespiti",
+    "mukellef_sorusu": "İndirimli kurumlar vergisine tabi iki adet aktif yatırım teşvik belgesi bulunan şirketin; bu belgelerin indirimli oranlarını aynı vergi döneminde matrahtan eş zamanlı düşüp düşüremeyeceği, öncelik sıralamasının nasıl olacağı ve kazanç tespitinde bir belge için oranlama (sabit kıymet) yöntemi kullanılırken diğeri için ürün karlılığı yönteminin aynı anda uygulanıp uygulananamayacağı",
+    "maliyenin_cevabi": "İki adet yatırım teşvik belgesine bağlı yatırımlardan kârlılık elde edilmesi durumunda, her iki kazanca da kendi oranlarında indirimli kurumlar vergisi uygulanması mümkündür. Dönem safi kurum kazancının belgelerdeki toplam kazançtan düşük olması halinde, her belgenin kazanç payı oranında matrah dağıtılır. Kazancın ayrı hesaplarda izlenerek tespiti esas olup, bu mümkün değilse oranlama yoluna gidilir. Dolayısıyla bir yatırımın kazancı muhasebede ayrı takip edilirken, diğer ayrıştırılamayan yatırım için oranlama (sabit kıymet) yöntemiyle matrah tespiti aynı beyannamede kombine edilerek uygulanabilir.",
+    "sonuc": "Birden fazla teşvik belgesine ait indirimli kurumlar vergisi hakkı aynı beyannamede aynı anda kullanılabilir; kazanç tespitinde ise bir belge için ayrı hesap takibi yapılırken diğeri için yasal oranlama yöntemi eş zamanlı yürütülebilir.",
+    "etiketler": [
+      "birden fazla teşvik belgesi",
+      "matrah dağıtımı",
+      "ayrı hesaplar",
+      "oranlama yöntemi",
+      "ürün karlılığı"
+    ]
+  },
+  {
+    "ozelge_no": "68509125-125.01-[2015/05]-15",
+    "tarih": "14.09.2015",
+    "konu": "Atık ısıdan üretilen elektriğin şirketin kendi imalatında kullanılması durumunda maliyet tasarrufu yoluyla sağlanan kazancın tespiti",
+    "mukellef_sorusu": "Komple yeni yatırım teşvik belgesi kapsamında kurulan ve öncelikli yatırım konuları arasına alınan atık ısı kaynaklı elektrik üretim tesisinde üretilen elektriğin dışarıya satılmayıp şirketin kendi fabrikasındaki üretiminde kullanılması durumunda, indirimli kurumlar vergisine tabi tutulacak kazancın nasıl hesaplanacağı",
+    "maliyenin_cevabi": "Yatırım kapsamında atık ısıdan üretilen elektrik enerjisinin şirketin kendi faaliyetlerinde kullanılması neticesinde dışarıdan daha az elektrik satın alınmakta ve üretim maliyetlerinde tasarruf sağlanmaktadır. Bu durumda, üretilen elektriğin dışarıdan satın alınması halinde doğrudan elektrik enerjisi için ödenecek saf bedel (KDV, TRT Payı, BTV ve Enerji Fonu gibi harici unsurlar hariç) ile bu enerjinin şirket bünyesinde üretilmesi için katlanılan iç maliyetler arasındaki fark, indirimli kurumlar vergisine tabi tutulacak kazanç (tasarruf kazancı) olarak kabul edilir.",
+    "sonuc": "Kendi tüketimi için teşvikli yatırımla elektrik üreten kurumlarda, dışarıdan alım bedeli ile iç üretim maliyeti arasındaki net fark indirimli kurumlar vergisi matrahı olarak dikkate alınır.",
+    "etiketler": [
+      "atık ısı",
+      "elektrik üretimi",
+      "maliyet tasarrufu",
+      "tasarruf kazancı",
+      "öncelikli yatırım"
+    ]
+  }
+]
+[
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-12-14-35",
+    "tarih": "12.05.2013",
+    "konu": "Yatırım teşvik belgesinde öngörülen sürenin bitiminden sonra yapılan harcamaların yatırım harcaması boyutu",
+    "mukellef_sorusu": "Yatırım teşvik belgesinde belirtilen orijinal yatırım süresi ve varsa ek süre bittikten sonra, ancak tamamlama vizesi yapılmadan önce gerçekleştirilen makine alımlarının ve bina inşaat harcamalarının yatırıma katkı tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "İndirimli kurumlar vergisi uygulamasında, sadece yatırım teşvik belgesinde öngörülen yatırım süresi (Bakanlıkça verilen ek süreler dahil) içerisinde yapılan harcamalar teşvik kapsamında fiili yatırım harcaması olarak kabul edilir. Belge süresi bittikten sonra yapılan harcamalar, tamamlama vizesi henüz yapılmamış olsa dahi yasal olarak yatırım harcaması hesabına dahil edilemez.",
+    "sonuc": "Yatırım teşvik belgesindeki resmi süre ve ek süre sınırları aşıldıktan sonra yapılan harcamalar indirimli kurumlar vergisi hesabında dikkate alınmaz.",
+    "etiketler": [
+      "yatırım süresi",
+      "ek süre",
+      "süre aşımı",
+      "fiili yatırım harcaması",
+      "tamamlama vizesi"
+    ]
+  },
+  {
+    "ozelge_no": "93767041-125[KVK-2018-01]-224",
+    "tarih": "09.02.2018",
+    "konu": "Yatırım döneminde diğer faaliyet kazançlarına indirimli vergi uygulanmasında üst sınırın geçici vergi dönemlerinde takibi",
+    "mukellef_sorusu": "Yatırım dönemi devam ederken diğer faaliyetlerden elde edilen kazançlara indirimli vergi uygulanmasında, her bir geçici vergi döneminde gerçekleştirilen kümülatif yatırım harcamasının mı yoksa yıl sonunda yapılacak toplam harcamanın mı sınır olarak dikkate alınacağı",
+    "maliyenin_cevabi": "Yatırım döneminde diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanabilmesi için, ilgili geçici vergi döneminin son günü itibarıyla fiilen gerçekleştirilmiş bir yatırım harcamasının bulunması şarttır. Geçici vergi dönemlerinde yararlanılabilecek maksimum yatırıma katkı tutarı, o geçici vergi dönemi sonu itibarıyla kümülatif olarak yapılan fiili harcama tutarına hak kazanılan yatırıma katkı oranı uygulanarak bulunacak tutarı aşamaz.",
+    "sonuc": "Geçici vergi dönemlerinde diğer faaliyet kazançlarına uygulanacak teşvik tavanı, her bir geçici vergi dönemi sonundaki fiili kümülatif harcama tutarı ile sınırlandırılmıştır.",
+    "etiketler": [
+      "geçici vergi dönemi",
+      "kümülatif harcama",
+      "diğer faaliyet kazancı",
+      "fiili harcama",
+      "teşvik tavanı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-512",
+    "tarih": "14.04.2012",
+    "konu": "Yatırım teşvik belgesi kapsamında inşa edilen fabrika binasının bir kısmının kiraya verilmesi durumunda teşvik uygulaması",
+    "mukellef_sorusu": "Teşvik belgesi kapsamında komple yeni yatırım olarak inşa edilen fabrika binasının, şirketin üretim kapasitesini aşan boş bir kısmının üçüncü şahıslara kiraya verilmesi halinde, bu binanın inşaat maliyetinin tamamının yatırım harcaması sayılıp sayılmayacağı ve kira gelirine indirimli vergi uygulanıp uygulanmayacağı",
+    "maliyenin_cevabi": "Yatırım teşvik belgesine konu iktisadi kıymetlerin bizzat mükellef tarafından teşvikli üretim faaliyetinde kullanılması esastır. Fabrika binasının kiraya verilen kısmına isabet eden inşaat maliyetleri yatırım harcaması hesabından çıkarılmalıdır. Ayrıca, bu kiralamadan elde edilen kira geliri 'yatırımdan elde edilen kazanç' sayılmadığı gibi, ticari esas faaliyet dışı pasif gelir niteliğinde olduğundan diğer faaliyet kazancı kapsamında da indirimli vergiye tabi tutulamaz.",
+    "sonuc": "Teşvikli binaların kiraya verilen kısımlarının maliyetleri yatırım harcamasından düşülür ve bu kısımlardan elde edilen kira gelirlerine indirimli vergi uygulanmaz.",
+    "etiketler": [
+      "kiraya verme",
+      "fabrika binası",
+      "inşaat maliyeti",
+      "kira geliri",
+      "kapsam dışı harcamalar"
+    ]
+  },
+  {
+    "ozelge_no": "64597866-125[32/A-2016]-195",
+    "tarih": "25.06.2016",
+    "konu": "Yatırım teşvik belgesinin iptal edilmesi durumunda geçmiş dönemlerde uygulanan indirimli vergi uygulamalarının düzeltilmesi",
+    "mukellef_sorusu": "Ekonomi Bakanlığı tarafından şartların yerine getirilmemesi sebebiyle yatırım teşvik belgesinin iptal edilmesi (zayi edilmesi) durumunda, yatırım döneminde diğer faaliyet kazançları üzerinden geçmiş yıllarda indirimli oran kullanılarak ödenmeyen vergilerin nasıl tahsil edileceği",
+    "maliyenin_cevabi": "Yatırım teşvik belgesinin iptal edilmesi durumunda, belgenin başlangıcından itibaren sağlanan tüm vergi avantajları geçersiz hale gelir. Yatırım döneminde diğer faaliyet kazançlarına indirimli oran uygulanması sebebiyle zamanında tahsil edilmeyen kurumlar vergisi ve geçici vergiler, vergi ziyaı cezası uygulanmaksızın, sadece normal vade tarihlerinden itibaren hesaplanacak gecikme faizi ile birlikte mükelleften geri tahsil edilir.",
+    "sonuc": "Teşvik belgesinin iptali halinde, geçmişte indirimli vergi uygulaması nedeniyle eksik ödenen vergiler cezasız ancak gecikme faizli olarak düzeltme beyannamesi yoluyla geri alınır.",
+    "etiketler": [
+      "belge iptali",
+      "düzeltme beyannamesi",
+      "gecikme faizi",
+      "vergi ziyaı cezası",
+      "vergi geri alımı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.41.15.01-KVK-2015/3-114",
+    "tarih": "02.03.2016",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda gümrük vergisi ve KKDF ödemelerinin maliyet bedeli ve yatırım harcaması karşısındaki durumu",
+    "mukellef_sorusu": "Yurt dışından teşvik belgesi kapsamında ithal edilen ancak bazı yasal nedenlerle gümrükte ödenmek zorunda kalınan Gümrük Vergisi ve Kaynak Kullanımını Destekleme Fonu (KKDF) tutarlarının yatırım harcaması tutarına dahil edilip edilmeyeceği",
+    "maliyenin_cevabi": "Vergi Usul Kanunu uyarınca, ithal edilen sabit kıymetlerin iktisap edilmesiyle ilgili olarak ödenen gümrük vergileri ve KKDF gibi fonlar maliyet bedeline dahil edilmek zorundadır. Bu nedenle, teşvik belgesi eki listelerde yer alan makinelerin ithali sırasında ödenen ve maliyete eklenen gümrük vergisi ve KKDF tutarı fiili yatırım harcaması kapsamında değerlendirilir.",
+    "sonuc": "İthal edilen makinelerin maliyetine eklenmesi zorunlu olan gümrük vergisi ve KKDF ödemeleri, indirimli kurumlar vergisi uygulamasında yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "gümrük vergisi",
+      "KKDF",
+      "makine ithalatı",
+      "maliyet bedeli",
+      "yatırım harcaması"
+    ]
+  },
+  {
+    "ozelge_no": "13334133-KVK-2021-42",
+    "tarih": "11.11.2021",
+    "konu": "Tevsi yatırımlarda kapasite artışının tespiti ve kazanç ayrımında fiziki kapasite raporlarının rolü",
+    "mukellef_sorusu": "Mevcut tesise yapılan tevsi yatırımın fiziken tamamlanmasının ardından, kazancın ayrı hesaplarda izlenmesi imkanı varken maliyenin zorunlu olarak brüt sabit kıymet oranlamasını şart koşup koşmayacağı",
+    "maliyenin_cevabi": "Kurumlar Vergisi Kanunu'nun 32/A maddesinin dördüncü fıkrasına göre, tevsi yatırımlardan elde edilen kazancın işletme bütünlüğü içinde ayrı hesaplarda (muhasebe alt hesaplarında) şeffaf bir şekilde izlenerek tespiti esastır. Sabit kıymet oranlama yöntemi (oran yöntemi), sadece kazancın fiziki veya teknik olarak ayrı hesaplarda tespit edilmesinin mümkün olmadığı durumlarda başvurulan zorunlu bir yöntemdir. Kazanç muhasebesel olarak ayrıştırılabiliyorsa oranlama yapılmaz.",
+    "sonuc": "Tevsi yatırımlarda kazanç muhasebe kayıtlarında ayrı izlenebiliyorsa, brüt sabit kıymet oranlaması yapılmasına gerek yoktur; doğrudan ayrılan net kazanca indirim uygulanır.",
+    "etiketler": [
+      "tevsi yatırım",
+      "kazanç ayrımı",
+      "ayrı hesaplar",
+      "oran yöntemi",
+      "muhasebe kayıtları"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.34.16.01-KVK 32/A-119",
+    "tarih": "19.01.2012",
+    "konu": "Yatırım teşvik belgesi kapsamındaki yatırımlarda proje hazırlama, mühendislik ve fizibilite giderlerinin durumu",
+    "mukellef_sorusu": "Yatırıma başlanılmadan önce yurt içindeki veya yurt dışındaki uzman firmalara yaptırılan proje tasarımı, mimarlık çizimleri, mühendislik hesaplamaları ve fizibilite raporları için ödenen bedellerin yatırım harcaması sayılıp sayılmayacağı",
+    "maliyenin_cevabi": "Yatırım projesinin hayata geçirilmesi, fabrika ve makinelerin kurulumu için zorunlu olan ve Vergi Usul Kanunu uyarınca doğrudan ilgili sabit kıymetin (bina veya makine) maliyet bedeline eklenmesi gereken proje, fizibilite, mimarlık ve mühendislik giderleri, teşvik belgesi tarihi sınırları içinde kalmak kaydıyla yatırım harcaması olarak kabul edilir.",
+    "sonuc": "Sabit kıymetlerin maliyet unsuru sayılan mühendislik, proje çizimi ve fizibilite harcamaları teşvik kapsamında yatırım harcaması hesabına dahil edilir.",
+    "etiketler": [
+      "fizibilite giderleri",
+      "mühendislik harcamaları",
+      "proje tasarımı",
+      "maliyet bedeli",
+      "yatırım hazırlığı"
+    ]
+  },
+  {
+    "ozelge_no": "B.07.1.GİB.4.16.16.01-KV-11-20-88",
+    "tarih": "28.12.2012",
+    "konu": "Yıllara sari inşaat ve onarma işlerinden elde edilen kazançların yatırım dönemi esnasında diğer faaliyet kazancı olarak değerlendirilmesi",
+    "mukellef_sorusu": "Şirketin üstlenmiş olduğu ve yasal olarak yıllara sari (birden fazla takvim yılına yayılan) inşaat ve onarma işi kapsamında yürüttüğü faaliyetlerden elde ettiği hakediş kazançlarının, yatırım teşvik belgesindeki yatırım dönemi esnasında 'diğer faaliyetlerden elde edilen kazanç' sayılarak indirimli vergiye tabi tutulup tutulamayacağı",
+    "maliyenin_cevabi": "Gelir Vergisi Kanunu ve Kurumlar Vergisi Kanunu hükümleri uyarınca, yıllara sari inşaat ve onarma işlerinde kazanç işin fiilen bittiği (geçici kabulün onaylandığı veya işin tamamlandığı) yıl itibarıyla kümülatif olarak tespit edilir ve beyan edilir. Yatırım teşvik belgesi kapsamındaki komple yeni veya tevsi yatırımın 'yatırım dönemi' devam ederken, yıllara sari inşaat işinin bittiği hesap döneminde beyan edilen bu inşaat kazançları, operasyonel ticari kazanç niteliğinde olduğundan indirimli kurumlar vergisi uygulamasında 'diğer faaliyetlerden elde edilen kazanç' olarak değerlendirilir ve vergi indiriminden yararlanabilir.",
+    "sonuc": "Yıllara sari inşaat ve onarma işlerinden doğan kazançlar, işin bittiği yıl eğer şirketin yatırım dönemi hala devam ediyorsa, 'diğer faaliyet kazancı' kapsamında indirimli kurumlar vergisine tabi tutulabilir.",
+    "etiketler": [
+      "yıllara sari inşaat",
+      "işin bitim tarihi",
+      "hakediş kazancı",
+      "yatırım dönemi",
+      "diğer faaliyet kazancı"
+    ]
+  }
+]

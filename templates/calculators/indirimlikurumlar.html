@@ -246,6 +246,7 @@
 .ikv-tab[href="?sekme=form"] { order: 3; }
 .ikv-tab[href="?sekme=ayrintili"] { order: 4; }
 .ikv-tab[href="?sekme=mevzuat"] { order: 5; }
+.ikv-tab[href*="/ozelgeler"] { order: 6; }
 
 /* Yeni Teşvik Badge */
 .ikv-new-badge {
@@ -422,6 +423,9 @@ body, html { background: #fff !important; }
         <a href="?sekme=mevzuat" class="ikv-tab {% if sekme == 'mevzuat' %}active{% endif %}">
           <i class="bi bi-book-half"></i>Mevzuat & Rehber
         </a>
+        <a href="{{ url_for('indirimlikurumlar_seo.ozelge_kutuphanesi') }}" class="ikv-tab">
+          <i class="bi bi-journal-text"></i>Özelgeler
+        </a>
       </div>
     </div>
 
@@ -529,12 +533,12 @@ body, html { background: #fff !important; }
 
       <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-info-circle me-2"></i>Aşama 1 - Temel Bilgiler</h5>
 
-      <div class="mb-3">
+      <div class="mb-3 d-none">
         <label>Yatırım Teşvik Belgesi Numarası</label>
         <input type="text" id="belge_no" name="belge_no" class="form-control" required>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 d-none">
         <label>Teşvik Belgesi Başvuru Tarihi</label>
         <input type="date" id="basvuru_tarihi" name="basvuru_tarihi" class="form-control" value="{{ (current_belge.basvuru_tarihi or '') if current_belge else '' }}" oninput="updateRejimTespiti()" onchange="updateRejimTespiti()">
         <small class="text-muted">2025/9903 geçiş hükmü için 16/6/2025 öncesi başvurular ayrı değerlendirilir.</small>
@@ -788,6 +792,31 @@ body, html { background: #fff !important; }
         <label>Toplam Yatırım Tutarını Giriniz</label>
         <input type="text" name="toplam_tutar" id="toplam_tutar" class="form-control" placeholder="Tutar Giriniz">
       </div>
+
+      <details class="mb-3 border rounded p-3 bg-light">
+        <summary class="fw-semibold">Indirime konu olmayan harcamalari ayir</summary>
+        <div class="small text-muted mt-2 mb-3">
+          Arazi/arsa, royalti, yedek parca ve amortismana tabi olmayan harcamalar yatirima katki hesabina dahil edilmez.
+        </div>
+        <div class="row g-2">
+          <div class="col-md-3">
+            <label class="form-label small">Arazi / Arsa</label>
+            <input type="text" name="haric_arsa_arazi" id="haric_arsa_arazi" class="form-control" value="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">Royalti</label>
+            <input type="text" name="haric_royalti" id="haric_royalti" class="form-control" value="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">Yedek Parca</label>
+            <input type="text" name="haric_yedek_parca" id="haric_yedek_parca" class="form-control" value="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">Amortismana Tabi Olmayan</label>
+            <input type="text" name="haric_amortismana_tabi_olmayan" id="haric_amortismana_tabi_olmayan" class="form-control" value="0,00">
+          </div>
+        </div>
+      </details>
 
       <div class="mb-3">
         <label>Toplam Yatırıma Katkı Tutarı</label>
@@ -1056,6 +1085,7 @@ body, html { background: #fff !important; }
       <div class="mb-3">
         <label>Cari Dönem Dahil Olmak Üzere Yararlanılan Toplam Yatırıma Katkı Tutarı</label>
         <input type="text" id="genel_toplam_katki" name="genel_toplam_katki" class="form-control" readonly>
+        <input type="hidden" id="yanan_katki_tutari" name="yanan_katki_tutari" value="0">
       </div>
 
       <div class="mb-3">
@@ -1070,7 +1100,7 @@ body, html { background: #fff !important; }
 
       <div class="mb-3">
         <label>Ödenecek Toplam Kurumlar Vergisi</label>
-        <input type="text" id="odenecek_toplam_kv" name="odenecek_toplam_kv" class="form-control" readonly>
+        <input type="hidden" id="odenecek_toplam_kv" name="odenecek_toplam_kv">
       </div>
 
       <div class="mb-3">
@@ -1251,6 +1281,10 @@ body, html { background: #fff !important; }
   // 2) MASK INPUT CONFIG
   const idConfig = { 
     "toplam_tutar": "katki", 
+    "haric_arsa_arazi": "katki",
+    "haric_royalti": "katki",
+    "haric_yedek_parca": "katki",
+    "haric_amortismana_tabi_olmayan": "katki",
     "cari_harcama_tutari": "katki", 
     "toplam_harcama_tutari": "katki", 
 
@@ -1286,6 +1320,7 @@ body, html { background: #fff !important; }
     "cari_diger_katki": "none",
     "cari_toplam_katki": "none",
     "genel_toplam_katki": "none",
+    "yanan_katki_tutari": "none",
     "indirimli_matrah": "none",
     "indirimli_kv": "none",
     "odenecek_toplam_kv": "none",
@@ -1327,6 +1362,8 @@ body, html { background: #fff !important; }
   };
 
   document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('odenecek_toplam_kv')?.closest('.mb-3')?.classList.add('d-none');
+
     const formTab = document.getElementById('ikv-form-tab-link');
     if (!formTab) return;
 
@@ -2947,10 +2984,16 @@ body, html { background: #fff !important; }
 
     const safe = (x) => (isNaN(x) ? 0 : x);
     const val = (id) => safe(getVal(id));
+    const haricYatirimHarcamasi = Math.max(
+      0,
+      val("haric_arsa_arazi") + val("haric_royalti") + val("haric_yedek_parca") + val("haric_amortismana_tabi_olmayan")
+    );
 
     // 1️⃣ Temel Girdiler
-    const toplamYatirim = val("toplam_tutar");
-    const harcamaYatirim = val("toplam_harcama_tutari");
+    const toplamYatirimBrut = val("toplam_tutar");
+    const harcamaYatirimBrut = val("toplam_harcama_tutari");
+    const toplamYatirim = Math.max(0, toplamYatirimBrut - haricYatirimHarcamasi);
+    const harcamaYatirim = Math.max(0, harcamaYatirimBrut - Math.min(haricYatirimHarcamasi, harcamaYatirimBrut));
     const katkiOraniInput = val("katki_orani");
     const vergiIndirimOraniInput = val("vergi_orani");
     const digerOranInput = val("diger_oran");
@@ -3024,32 +3067,42 @@ body, html { background: #fff !important; }
     }
 
     // 6️⃣ HESAPLAMA: Yatırım Kazancı Tarafı (10 Yıl Sınırı)
+    const efektifFark = (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+
     let cariYatirimKatkisi = 0;
+    let potansiyelYatirimKatkisi = 0;
     if (yatirimKazanci > 0 && donemFarki < 10) {
       // Yatırım kazancı katkısı için birikmiş harcama (hak edilen) sınırı var mı? 
       // Mevzuat "on yıllık süreyle sınırlı kaydıyla hak kazanılan katki tutarına ulaşılıncaya kadar" diyor.
-      const potansiyelYatirimKatkisi = yatirimKazanci * (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+      potansiyelYatirimKatkisi = yatirimKazanci * efektifFark;
       cariYatirimKatkisi = Math.min(potansiyelYatirimKatkisi, kullanilabilirHakEdilenBakiye);
     }
 
     // 7️⃣ HESAPLAMA: Diğer Faaliyet Kazancı Tarafı (4 Yıl Sınırı)
     let cariDigerKatkisi = 0;
+    let potansiyelDigerKatkisi = 0;
+    let azamiDigerKatkiLimit = 0;
     if (digerFaaliyetKazanci > 0 && donemFarki < 4) {
       // Kalan Hak Edilen Bakiye (Yatırım katkısı düşüldükten sonra)
       const bakiyeSonraYatirim = Math.max(0, kullanilabilirHakEdilenBakiye - cariYatirimKatkisi);
       
       // Üst Sınır: min(Bütçe, Kalan Hak Edilen)
-      const azamiDigerKatkiLimit = Math.min(digerFaaliyetButcesi, bakiyeSonraYatirim);
+      azamiDigerKatkiLimit = Math.min(digerFaaliyetButcesi, bakiyeSonraYatirim);
       
-      const potansiyelDigerKatkisi = digerFaaliyetKazanci * (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
+      potansiyelDigerKatkisi = digerFaaliyetKazanci * efektifFark;
       
       cariDigerKatkisi = Math.min(potansiyelDigerKatkisi, azamiDigerKatkiLimit);
     }
 
     // 8️⃣ Final Değerler
     const cariToplamKatki = cariYatirimKatkisi + cariDigerKatkisi;
+    const seciliGelirTipindeKullanilabilirKatki = Math.min(
+      kullanilabilirHakEdilenBakiye,
+      Math.max(0, potansiyelYatirimKatkisi) + Math.max(0, Math.min(potansiyelDigerKatkisi, azamiDigerKatkiLimit))
+    );
+    const yananKatkiTutari = Math.max(0, seciliGelirTipindeKullanilabilirKatki - cariToplamKatki);
     const genelToplamKatki = oncekiToplamKatki + cariToplamKatki;
-    const kalanKatkiTutari = Math.max(0, toplamKatkiPotansiyeli - genelToplamKatki);
+    const kalanKatkiTutari = Math.max(0, toplamKatkiPotansiyeli - genelToplamKatki - yananKatkiTutari);
 
     // 9️⃣ UI SET
     safeSet("cari_yatirim_katki", cariYatirimKatkisi);
@@ -3057,6 +3110,7 @@ body, html { background: #fff !important; }
     safeSet("cari_toplam_katki", cariToplamKatki);
     safeSet("genel_toplam_katki", genelToplamKatki);
     safeSet("kalan_katki_tutari", kalanKatkiTutari);
+    safeSet("yanan_katki_tutari", yananKatkiTutari);
     
     // Alt Bilgi Alanları
     safeSet("katki_tutari", toplamKatkiPotansiyeli);
@@ -3075,19 +3129,31 @@ body, html { background: #fff !important; }
       const bakiyeSonraYatirim = Math.max(0, kullanilabilirHakEdilenBakiye - cariYatirimKatkisi);
       document.getElementById("span-limit2-9903").textContent = fNum(bakiyeSonraYatirim);
       document.getElementById("span-limit-used-9903").textContent = fNum(Math.min(digerFaaliyetButcesi, bakiyeSonraYatirim));
+      const limitList = infoBox.querySelector("ul");
+      if (limitList) {
+        let periodRow = document.getElementById("span-9903-periods");
+        if (!periodRow) {
+          const li = document.createElement("li");
+          li.innerHTML = 'Sure takibi: <span id="span-9903-periods" class="fw-semibold text-dark">-</span>';
+          limitList.appendChild(li);
+          periodRow = document.getElementById("span-9903-periods");
+        }
+        const donemSirasi = baslangicYil && donemYil ? Math.max(1, donemFarki + 1) : 0;
+        periodRow.textContent = donemSirasi ? `Diger faaliyet ${Math.min(donemSirasi, 4)}/4, yatirim kazanci ${Math.min(donemSirasi, 10)}/10` : "-";
+      }
     }
 
     // 🔟 Matrah ve Vergi Sonuçları
     // Matrah = Kullanılan Katkı / Efektif Vergi Avantajı
-    const efektifFark = (ihrOran * farkIhr + imlOran * farkIml + digOran * farkDig);
-    
     const matrahYatirim = efektifFark > 0 ? Math.min(yatirimKazanci, cariYatirimKatkisi / efektifFark) : 0;
     const matrahDiger = efektifFark > 0 ? (cariDigerKatkisi / efektifFark) : 0;
     
     const indirimliMatrah = matrahYatirim + matrahDiger;
-    const indirimliKV = (matrahYatirim + matrahDiger) * (kvOranDiger * (1 - vergiIndirimOrani));
+    const agirlikliGenelKVOrani = (ihrOran * kvOranIhracat + imlOran * kvOranImalat + digOran * kvOranDiger);
+    const agirlikliIndirimliKVOrani = agirlikliGenelKVOrani * (1 - vergiIndirimOrani);
+    const indirimliKV = indirimliMatrah * agirlikliIndirimliKVOrani;
     const genelMatrah = Math.max(0, kvMatrah - indirimliMatrah);
-    const genelKV = genelMatrah * (ihrOran * kvOranIhracat + imlOran * kvOranImalat + digOran * kvOranDiger);
+    const genelKV = genelMatrah * agirlikliGenelKVOrani;
     const odenecekToplamKV = indirimliKV + genelKV;
     const indirimliKVOran = (indirimliMatrah > 0) ? (indirimliKV / indirimliMatrah) * 100 : 0;
 
@@ -3123,7 +3189,11 @@ body, html { background: #fff !important; }
     }
 
     // 2) Girdiler
-    const toplam = getVal("toplam_tutar");
+    const haricToplam = Math.max(
+      0,
+      getVal("haric_arsa_arazi") + getVal("haric_royalti") + getVal("haric_yedek_parca") + getVal("haric_amortismana_tabi_olmayan")
+    );
+    const toplam = Math.max(0, getVal("toplam_tutar") - haricToplam);
     const oran = getVal("katki_orani") / 100;
 
     // 3) Geçersiz Kontrol
@@ -3197,7 +3267,12 @@ body, html { background: #fff !important; }
     }
 
     // 1) Değerleri IMask uyumlu olarak oku
-    const toplamHarcama = getVal("toplam_harcama_tutari");
+    const haricToplam = Math.max(
+      0,
+      getVal("haric_arsa_arazi") + getVal("haric_royalti") + getVal("haric_yedek_parca") + getVal("haric_amortismana_tabi_olmayan")
+    );
+    const toplamHarcamaBrut = getVal("toplam_harcama_tutari");
+    const toplamHarcama = Math.max(0, toplamHarcamaBrut - Math.min(haricToplam, toplamHarcamaBrut));
     const oran = getVal("katki_orani");
 
     // 2) Geçersiz kontrol
@@ -4499,7 +4574,11 @@ body, html { background: #fff !important; }
       const m = String(o.value || "").match(/^(\d{4})\s*-\s*/);
       if (!m) return;
       const y = Number(m[1]);
-      o.disabled = y < allowedYear;
+      const disabled = y < allowedYear || y >= allowedYear + 10;
+      o.disabled = disabled;
+      o.title = disabled
+        ? `2025/9903 için ${allowedYear} - ${allowedYear + 9} arası dönemler kullanılabilir.`
+        : "";
     });
 
     // seçili değer geçersizse allowedYear'ın KURUMLAR'ına çek
@@ -4510,6 +4589,117 @@ body, html { background: #fff !important; }
       const opt = Array.from(donemSel.options).find(x => x.value === target);
       if (opt) donemSel.value = target;
     }
+  }
+
+  function parseDateAnyForIKV(value) {
+    if (!value) return null;
+    const text = String(value).trim();
+    let m = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    m = text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    return null;
+  }
+
+  function periodRankFromDateForIKV(value) {
+    const dt = parseDateAnyForIKV(value);
+    if (!dt) return null;
+    const month = dt.getMonth() + 1;
+    const rank = month <= 3 ? 1 : month <= 6 ? 2 : month <= 9 ? 3 : 4;
+    return { year: dt.getFullYear(), rank };
+  }
+
+  function is9903DateEligibleForIKV() {
+    const basvuru = parseDateAnyForIKV(document.getElementById("basvuru_tarihi")?.value);
+    const belgeAlinma = parseDateAnyForIKV(document.getElementById("belge_alinma_tarihi")?.value);
+    if (!basvuru || !belgeAlinma) return false;
+    return basvuru >= new Date(2025, 5, 16) && belgeAlinma >= new Date(2025, 6, 24);
+  }
+
+  function currentDonemKeyForIKV(donemData) {
+    const turu = String(donemData?.donem_turu || "").toUpperCase();
+    let rank = 0;
+    if (turu.includes("KURUMLAR")) rank = 5;
+    else if (turu.includes("4")) rank = 4;
+    else if (turu.includes("3")) rank = 3;
+    else if (turu.includes("2")) rank = 2;
+    else if (turu.includes("1")) rank = 1;
+    return { year: Number(donemData?.hesap_donemi || 0), rank };
+  }
+
+  function isAfterInvestmentPeriodForIKV(donemData) {
+    const endKeys = [
+      periodRankFromDateForIKV(document.getElementById("fiili_tamamlanma_tarihi")?.value),
+      periodRankFromDateForIKV(document.getElementById("vize_basvuru_tarihi")?.value)
+    ].filter(Boolean);
+    if (!endKeys.length) return false;
+    endKeys.sort((a, b) => (a.year - b.year) || (a.rank - b.rank));
+    const end = endKeys[0];
+    const cur = currentDonemKeyForIKV(donemData);
+    if (cur.year > end.year) return true;
+    if (cur.year < end.year) return false;
+    if (cur.rank === 5) return false;
+    return cur.rank > end.rank;
+  }
+
+  function validateIKVMevzuatBeforeSave(donemData) {
+    const karar = (document.getElementById("karar")?.value || "").trim();
+    const vizeRaw = (document.getElementById("vize_durumu")?.value || "").toLocaleLowerCase("tr-TR");
+    const year = Number(donemData?.hesap_donemi || 0);
+    const cariYatirim = Number(donemData?.cari_yatirim_katki || 0);
+    const cariDiger = Number(donemData?.cari_diger_katki || 0);
+    const indirimliMatrah = Number(donemData?.indirimli_matrah || 0);
+
+    if (karar === "2025/9903") {
+      if (!is9903DateEligibleForIKV()) {
+        return {
+          ok: false,
+          title: "2025/9903 rejim tespiti",
+          message: "2025/9903 icin basvuru tarihi 16.06.2025 veya sonrasi, belge alinma tarihi 24.07.2025 veya sonrasi olmalidir."
+        };
+      }
+      const allowedYear = getAllowedYearFor9903();
+      if (allowedYear && year < allowedYear) {
+        return {
+          ok: false,
+          title: "Geçersiz dönem",
+          message: `2025/9903 belgesi için ${allowedYear} öncesi dönem kaydedilemez.`
+        };
+      }
+      if (allowedYear && cariDiger > 0 && year >= allowedYear + 4) {
+        return {
+          ok: false,
+          title: "2025/9903 süre sınırı",
+          message: "Diğer faaliyet kazançları için 4 hesap dönemi sınırı dolmuş görünüyor."
+        };
+      }
+      if (allowedYear && (cariYatirim > 0 || cariDiger > 0 || indirimliMatrah > 0) && year >= allowedYear + 10) {
+        return {
+          ok: false,
+          title: "2025/9903 süre sınırı",
+          message: "İlk indirim hakkının kullanılabileceği hesap dönemi dahil 10 hesap dönemi sınırı aşılmış görünüyor."
+        };
+      }
+    }
+
+    if (karar === "2012/3305" && cariDiger > 0) {
+      if (vizeRaw.includes("evet") || vizeRaw.includes("işletme")) {
+        return {
+          ok: false,
+          title: "2012/3305 işletme dönemi",
+          message: "Tamamlama vizesi yapılmış belgede diğer faaliyet kazancı üzerinden katkı kaydedilemez."
+        };
+      }
+      if (isAfterInvestmentPeriodForIKV(donemData)) {
+        return {
+          ok: false,
+          title: "2012/3305 yatırım dönemi",
+          message: "Diğer faaliyet kazançlarından yararlanma yalnızca yatırım dönemi içinde kaydedilebilir."
+        };
+      }
+    }
+
+    return { ok: true };
   }
 
   function clearAllFormData() {
@@ -4702,6 +4892,10 @@ body, html { background: #fff !important; }
       yatirimdan_elde_edilen_kazanc: parseFormattedNumber(document.getElementById("yatirimdan_elde_edilen_kazanc")?.value),
       tevsi_yatirim_kazanci: parseFormattedNumber(document.getElementById("tevsi_yatirim_kazanci")?.value),
       diger_faaliyet: parseFormattedNumber(document.getElementById("diger_faaliyet")?.value),
+      haric_arsa_arazi: parseFormattedNumber(document.getElementById("haric_arsa_arazi")?.value),
+      haric_royalti: parseFormattedNumber(document.getElementById("haric_royalti")?.value),
+      haric_yedek_parca: parseFormattedNumber(document.getElementById("haric_yedek_parca")?.value),
+      haric_amortismana_tabi_olmayan: parseFormattedNumber(document.getElementById("haric_amortismana_tabi_olmayan")?.value),
 
       cari_yatirim_katki: parseFormattedNumber(document.getElementById("cari_yatirim_katki")?.value),
       cari_diger_katki: parseFormattedNumber(document.getElementById("cari_diger_katki")?.value),
@@ -4709,6 +4903,7 @@ body, html { background: #fff !important; }
 
       genel_toplam_katki: parseFormattedNumber(document.getElementById("genel_toplam_katki")?.value),
       kalan_katki_tutari: parseFormattedNumber(document.getElementById("kalan_katki_tutari")?.value),
+      yanan_katki_tutari: parseFormattedNumber(document.getElementById("yanan_katki_tutari")?.value),
 
       indirimli_matrah: parseFormattedNumber(document.getElementById("indirimli_matrah")?.value),
       indirimli_kv: parseFormattedNumber(document.getElementById("indirimli_kv")?.value),
@@ -5123,6 +5318,16 @@ body, html { background: #fff !important; }
     // ============================================
     try {
       const donemData = collectDonemUsageData();
+      const mevzuatKontrol = validateIKVMevzuatBeforeSave(donemData);
+      if (!mevzuatKontrol.ok) {
+        Swal.fire({
+          icon: "warning",
+          title: mevzuatKontrol.title || "Mevzuat kontrolü",
+          text: mevzuatKontrol.message || "Bu dönem kullanımı kaydedilemez.",
+          confirmButtonText: "Tamam"
+        });
+        return;
+      }
 
       const donemRes = await fetch("/indirimlikurumlar/save_tesvik_kullanim", {
         method: "POST",
@@ -5923,6 +6128,10 @@ body, html { background: #fff !important; }
           smartSet('yatirimdan_elde_edilen_kazanc', currentKullanimJSData.yatirimdan_elde_edilen_kazanc);
           smartSet('tevsi_yatirim_kazanci', currentKullanimJSData.tevsi_yatirim_kazanci);
           smartSet('diger_faaliyet', currentKullanimJSData.diger_faaliyet);
+          smartSet('haric_arsa_arazi', currentKullanimJSData.haric_arsa_arazi);
+          smartSet('haric_royalti', currentKullanimJSData.haric_royalti);
+          smartSet('haric_yedek_parca', currentKullanimJSData.haric_yedek_parca);
+          smartSet('haric_amortismana_tabi_olmayan', currentKullanimJSData.haric_amortismana_tabi_olmayan);
 
           // Gelir tipi secimini tahmin et
           const y = Number(currentKullanimJSData.yatirimdan_elde_edilen_kazanc || 0) + Number(currentKullanimJSData.tevsi_yatirim_kazanci || 0);

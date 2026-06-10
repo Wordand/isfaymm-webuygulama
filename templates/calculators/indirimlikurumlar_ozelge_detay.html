@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+{% block canonical_url %}{{ page_canonical }}{% endblock %}
+{% block og_title %}{{ page_title }}{% endblock %}
+{% block og_desc %}{{ page_description }}{% endblock %}
+
+{% block content %}
+<style>
+  .oz-detail-hero {
+    background: linear-gradient(135deg, #0f172a, #1d4ed8);
+    color: #fff;
+    border-radius: 18px;
+    padding: 32px;
+  }
+  .oz-topic {
+    color: #0f172a !important;
+    background: #e0f2fe !important;
+    border: 1px solid #7dd3fc !important;
+    font-weight: 800;
+  }
+  .oz-info-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+  }
+  .oz-summary-card {
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: #f8fbff;
+  }
+  .oz-label {
+    color: #1d4ed8;
+    font-weight: 800;
+  }
+  .oz-text {
+    color: #334155;
+    line-height: 1.7;
+  }
+  .oz-result-box {
+    background: #f0fdf4 !important;
+    border-left: 4px solid #16a34a !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+  }
+</style>
+
+<section class="container py-5">
+  <a href="{{ url_for('indirimlikurumlar_seo.ozelge_kutuphanesi') }}" class="btn btn-sm btn-outline-secondary rounded-pill mb-4">
+    <i class="bi bi-arrow-left me-1"></i> Özelge Kütüphanesi
+  </a>
+
+  <div class="oz-detail-hero mb-4">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <div class="small text-white-50 fw-semibold mb-2">İndirimli Kurumlar Vergisi Özelgesi</div>
+        <h1 class="h2 fw-bold mb-0">{{ item.title }}</h1>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a class="btn btn-danger rounded-pill px-4" target="_blank" rel="noopener" href="{{ url_for('indirimlikurumlar_seo.ozelge_pdf', filename=item.filename) }}">
+          <i class="bi bi-file-earmark-pdf me-1"></i> PDF Kaynağını Aç
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="oz-info-box p-4">
+        <h2 class="h5 fw-bold mb-3">Özelge Özeti</h2>
+
+        {% if item.summary %}
+        <div class="oz-result-box p-3 mb-3 rounded-3">
+          <div class="small fw-extrabold text-success text-uppercase mb-1">
+            <i class="bi bi-check-circle-fill me-1"></i>Nihai Sonuç / Karar
+          </div>
+          <div class="text-dark fw-bold" style="font-size:0.95rem; line-height: 1.5;">{{ item.summary }}</div>
+        </div>
+        {% endif %}
+
+        <div class="oz-summary-card p-3 mb-3">
+          <div class="oz-label mb-1">Konu</div>
+          <div class="oz-text">{{ item.konu_ozeti or item.title }}</div>
+        </div>
+
+        <div class="oz-summary-card p-3 mb-3">
+          <div class="oz-label mb-1">Soru</div>
+          <div class="oz-text">{{ item.soru_ozeti or "Özelge talebindeki olay özeti PDF kaynağında yer alır." }}</div>
+        </div>
+
+        <div class="oz-summary-card p-3 mb-4">
+          <div class="oz-label mb-1">Maliyenin cevabı</div>
+          <div class="oz-text">{{ item.cevap_ozeti or item.summary or "İdarenin görüşü PDF kaynağından incelenebilir." }}</div>
+        </div>
+
+        <div class="alert alert-info border-0 mb-0">
+          <strong>Not:</strong> Özelgeler somut olaylara verilen idari görüşlerdir. Benzer konu başlıklarında yön gösterir; nihai değerlendirme olayın kendi şartlarına göre yapılmalıdır.
+        </div>
+      </div>
+    </div>
+
+    <aside class="col-lg-4">
+      <div class="oz-info-box p-4 mb-3">
+        <h2 class="h6 fw-bold mb-3">Künye</h2>
+        <div class="small text-muted mb-1">Özelge No</div>
+        <div class="fw-bold mb-3">{{ item.ozelge_no or item.code }}</div>
+        <div class="small text-muted mb-1">Tarih</div>
+        <div class="fw-bold mb-0">{{ item.date or "-" }}</div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -286,6 +286,19 @@ body {
     padding-top: 80px !important;
 }
 
+/* Sidebar varken footer'ın sola kaydırılması */
+footer {
+    transition: margin-left var(--transition-speed-normal) ease;
+}
+
+body:not(.no-sidebar-layout) footer {
+    margin-left: 280px;
+}
+
+.sidebar.collapsed ~ footer {
+    margin-left: 60px;
+}
+
 
 
 
@@ -511,6 +524,10 @@ body.navbar-open .main-content {
     padding-top: 90px; /* navbar yüksekliği kadar boşluk */
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  footer {
+    margin-left: 0 !important;
   }
 
   /* Mobil menü açıkken içerik tıklanmasın */
