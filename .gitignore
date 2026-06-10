@@ -51,6 +51,9 @@ __MACOSX/
 # Ama mevzuat PDF'lerini dahil et
 !static/pdf/mevzuat/*.pdf
 
+# Özelge PDF'lerini dahil et
+!services/ozelgeler/*.pdf
+
 # HTML export, rapor çıktıları (eğer otomatik üretiliyorsa)
 /reports/
 exports/
