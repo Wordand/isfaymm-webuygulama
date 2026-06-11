@@ -1341,12 +1341,11 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         items.sort(key=lambda r: (int(r.get("hesap_donemi") or 0), _period_rank(r.get("donem_turu"))), reverse=True)
     # 🟩 Eğer sekme ayrıntılıysa DataFrame'den rows üret
     rows = []
-    if sekme == "ayrintili" and is_logged_in and user_id:
+    if sekme == "ayrintili":
         try:
-            df = get_user_profit_df(user_id)
+            df = get_user_profit_df(user_id if user_id else -1)
             rows = format_df_for_html(df)
         except Exception as e:
-            ("️     ")
             rows = []
 
     # Güvenli JSON objeleri
@@ -1367,7 +1366,18 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
 
 
     initial_ayrintili_ratios = {}
-    if user_df is not None:
+    if sekme == "ayrintili":
+        try:
+            df = get_user_profit_df(user_id if user_id else -1)
+            initial_ayrintili_ratios = {
+                c: f"{df.at[54, c]:.2f}".replace(".", ",") + "%"
+                if not pd.isna(df.at[54, c])
+                else "0,00%"
+                for c in ["C", "D", "E"]
+            }
+        except Exception as e:
+            pass
+    elif user_df is not None:
         initial_ayrintili_ratios = {
             c: f"{user_df.at[54, c]:.2f}".replace(".", ",") + "%"
             if not pd.isna(user_df.at[54, c])
