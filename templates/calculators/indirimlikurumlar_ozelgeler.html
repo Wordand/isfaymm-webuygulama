@@ -135,18 +135,14 @@
       <div class="col-lg-3">
         <label class="form-label fw-semibold">Konu / Senaryo</label>
         <select name="konu" class="form-select form-select-lg" onchange="this.form.submit()">
-          <option value="">Tüm Konular & Senaryolar</option>
-          <optgroup label="Hızlı Senaryolar">
-            <option value="sc:erp yazılım" {% if selected_topic == 'sc:erp yazılım' %}selected{% endif %}>ERP & Yazılım</option>
-            <option value="sc:arsa maliyeti" {% if selected_topic == 'sc:arsa maliyeti' %}selected{% endif %}>Arsa / OSB Bedelleri</option>
-            <option value="sc:finansal kiralama" {% if selected_topic == 'sc:finansal kiralama' %}selected{% endif %}>Leasing / Kiralama</option>
-            <option value="sc:süre bitiminden sonra" {% if selected_topic == 'sc:süre bitiminden sonra' %}selected{% endif %}>Belge Süre Aşımı</option>
-          </optgroup>
-          <optgroup label="Diğer Konular">
-            {% for topic in topics %}
-            <option value="{{ topic }}" {% if selected_topic == topic %}selected{% endif %}>{{ topic }}</option>
-            {% endfor %}
-          </optgroup>
+          <option value="">Tüm Konular</option>
+          <option value="sc:erp yazılım" {% if selected_topic == 'sc:erp yazılım' %}selected{% endif %}>ERP & Yazılım</option>
+          <option value="sc:arsa maliyeti" {% if selected_topic == 'sc:arsa maliyeti' %}selected{% endif %}>Arsa / OSB Bedelleri</option>
+          <option value="sc:finansal kiralama" {% if selected_topic == 'sc:finansal kiralama' %}selected{% endif %}>Leasing / Kiralama</option>
+          <option value="sc:süre bitiminden sonra" {% if selected_topic == 'sc:süre bitiminden sonra' %}selected{% endif %}>Belge Süre Aşımı</option>
+          {% for topic in topics %}
+          <option value="{{ topic }}" {% if selected_topic == topic %}selected{% endif %}>{{ topic }}</option>
+          {% endfor %}
         </select>
       </div>
       <div class="col-lg-2 d-grid">
