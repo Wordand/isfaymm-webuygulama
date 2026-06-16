@@ -31,16 +31,6 @@
     <div>
       <h2 class="fw-bold mb-1">Dönem Hesabı</h2>
       <div class="d-flex flex-wrap gap-2 mt-3">
-        {% if session.get('active_donem_text') %}
-          <button type="button" class="ikv-status-badge ikv-status-ok ikv-status-action" onclick="poolClearSelection('donem')">
-            <i class="bi bi-check-circle-fill me-1"></i>Dönem seçildi: {{ session.get('active_donem_text') }}
-            <i class="bi bi-x-circle ms-2"></i>
-          </button>
-        {% else %}
-          <span class="ikv-status-badge ikv-status-warn">
-            Dönem seçilmedi
-          </span>
-        {% endif %}
         {% if session.get('active_tesvik_id') %}
           <button type="button" class="ikv-status-badge ikv-status-ok ikv-status-action" onclick="poolClearSelection('tesvik')">
             <i class="bi bi-check-circle-fill me-1"></i>Teşvik belgesi seçildi{% if selected_doc.no %}: {{ selected_doc.no }}{% endif %}
@@ -49,6 +39,16 @@
         {% else %}
           <span class="ikv-status-badge ikv-status-warn">
             Teşvik belgesi seçilmedi
+          </span>
+        {% endif %}
+        {% if session.get('active_donem_text') %}
+          <button type="button" class="ikv-status-badge ikv-status-ok ikv-status-action" onclick="poolClearSelection('donem')">
+            <i class="bi bi-check-circle-fill me-1"></i>Dönem seçildi: {{ session.get('active_donem_text') }}
+            <i class="bi bi-x-circle ms-2"></i>
+          </button>
+        {% else %}
+          <span class="ikv-status-badge ikv-status-warn">
+            Dönem seçilmedi
           </span>
         {% endif %}
       </div>

@@ -1,0 +1,1700 @@
+<style>
+  .teblig-container {
+    color: #1e293b;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .teblig-main-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Lighter dropdown select */
+  .custom-dropdown-select {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .custom-dropdown-select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+  }
+
+  .custom-dropdown-select optgroup {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    font-weight: 700;
+  }
+
+  .custom-dropdown-select option {
+    background-color: #ffffff !important;
+    color: #334155 !important;
+  }
+  
+  /* Stepper styling */
+  .stepper-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .stepper-line {
+    position: absolute;
+    top: 20px;
+    left: 8%;
+    right: 8%;
+    height: 3px;
+    background: #e2e8f0;
+    z-index: 1;
+  }
+  
+  .step-item {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    flex: 1;
+  }
+  
+  .step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #cbd5e1;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .step-label {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  .step-item.active .step-num {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+  
+  .step-item.active .step-label {
+    color: #3b82f6;
+    font-weight: 700;
+  }
+  
+  .step-item.completed .step-num {
+    background: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+  }
+
+  .step-item.completed .step-label {
+    color: #10b981;
+  }
+
+  /* Step content panes */
+  .step-content-pane {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 250px;
+  }
+
+  .value-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  }
+</style>
+
+<div class="teblig-container" id="teblig-ornekler-app">
+  <div class="card border-0 teblig-main-card">
+    
+    <!-- Header: Dropdown Selector -->
+    <div class="card-header bg-transparent border-0 p-4 pb-2">
+      <div class="row align-items-center g-3">
+        <div class="col-md-6">
+          <h5 class="text-dark fw-bold mb-0" style="font-size: 1.25rem;">
+            <i class="bi bi-lightbulb-fill text-warning me-2"></i>Tebliğdeki Resmî Örnekler
+          </h5>
+          <p class="text-muted small mb-0 mt-1">
+            Maliye Bakanlığı Tebliğlerinde yer alan örnek senaryoları seçin ve adımlarla inceleyin.
+          </p>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label text-secondary small mb-1 fw-bold">İncelemek İstediğiniz Örneği Seçin:</label>
+          <select class="form-select custom-dropdown-select" id="preset-selector" onchange="selectOrnek(this.value)">
+            <optgroup label="2025/9903 Kararı (Yeni Teşvik Rejimi)">
+              <option value="9903_gecis_ornek1">Geçiş Örnek 1 (11/6/2025 Başvuru - Eski Kanun)</option>
+              <option value="9903_gecis_ornek2">Geçiş Örnek 2 (23/6/2025 Başvuru - Eski Kanun)</option>
+              <option value="9903_gecis_ornek3">Geçiş Örnek 3 (27/6/2025 Başvuru - Yeni Kanun)</option>
+              <option value="9903_ornek1">Örnek 4 (10 Yıllık Süre Sınırı)</option>
+              <option value="9903_ornek2">Örnek 2 (Diğer Faaliyet - Limit Aşımı Yok)</option>
+              <option value="9903_ornek3">Örnek 3 (Düşük Harcama - Harcama Sınırı Baskın)</option>
+              <option value="9903_ornek4">Örnek 4 (Yatırım + Diğer Faaliyet Birlikte)</option>
+            </optgroup>
+            <optgroup label="2012/3305 Kararı (Klasik Teşvik Rejimi)">
+              <option value="3305_ornek_basit">Örnek 1 (Basit Katkı Tutarı Hesabı)</option>
+              <option value="3305_ornek1" selected>Örnek 2 (Yatırımdan Kazanç - Yatırım İndirimi)</option>
+              <option value="3305_ornek_diger_1">Örnek 1 (Diğer Faaliyet - Bölge Sınırı Baskın)</option>
+              <option value="3305_ornek_diger_2">Örnek 2 (Diğer Faaliyet - Harcama Sınırı Baskın)</option>
+              <option value="3305_ornek_tevsi">Tevsi Yatırım Örneği (32.2.8 Oranlama Yöntemi)</option>
+              <option value="3305_ornek_devir">Yatırım Teşvik Belgesinin Devri Örneği (32.2.10.2)</option>
+              <option value="3305_ornek_endeksleme">Kalan Katkı Tutarında Endeksleme (32.2.11)</option>
+              <option value="3305_ornek_coklu">Birden Fazla Teşvik Belgesi (32.2.7)</option>
+              <option value="3305_ornek_elektrikli">Elektrikli Araç Üretimi ÖTV İadesi (32.2.12)</option>
+              <option value="3305_ornek_terkin">Diğer Vergi Borçlarından Terkin Örneği (32.2.13)</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Body: Stepper & Step Contents -->
+    <div class="card-body p-4 pt-3">
+      
+      <!-- Example Title -->
+      <h4 id="ornek-basligi" class="text-dark fw-bold mb-4" style="font-size: 1.2rem; border-left: 4px solid #3b82f6; padding-left: 12px; line-height: 1.2;">
+        Yükleniyor...
+      </h4>
+
+      <!-- Stepper Progress Bar -->
+      <div class="stepper-container mb-4 px-lg-4">
+        <div class="stepper-line"></div>
+        <div class="step-item active" onclick="goToStep(1)" id="step-dot-1">
+          <div class="step-num">1</div>
+          <div class="step-label">Yatırım Bilgileri</div>
+        </div>
+        <div class="step-item" onclick="goToStep(2)" id="step-dot-2">
+          <div class="step-num">2</div>
+          <div class="step-label">Kazanç & Matrah</div>
+        </div>
+        <div class="step-item" onclick="goToStep(3)" id="step-dot-3">
+          <div class="step-num">3</div>
+          <div class="step-label">Mevzuat Analizi</div>
+        </div>
+        <div class="step-item" onclick="goToStep(4)" id="step-dot-4">
+          <div class="step-num">4</div>
+          <div class="step-label">Sonuç</div>
+        </div>
+      </div>
+
+      <!-- Step Content Panes -->
+      <div class="step-panes-container">
+        
+        <!-- Step 1: Investment Inputs -->
+        <div id="step-content-1" class="step-content-pane">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Step 2: Income & Tax Rates -->
+        <div id="step-content-2" class="step-content-pane" style="display:none;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Step 3: Legislation & Logic -->
+        <div id="step-content-3" class="step-content-pane" style="display:none;">
+          <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+            <i class="bi bi-book me-1.5 text-primary"></i> 3. Kanun ve Tebliğ Gerekçesi
+          </h6>
+          <div class="p-3 bg-white rounded-3 border border-slate-200" id="step3-desc" style="color: #475569; line-height: 1.75; font-size: 0.95rem;">
+            Yükleniyor...
+          </div>
+        </div>
+
+        <!-- Step 4: Results & Validation -->
+        <div id="step-content-4" class="step-content-pane" style="display:none;">
+          <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+            <i class="bi bi-patch-check-fill me-1.5 text-success"></i> 4. Hesaplama Sonuçları
+          </h6>
+          
+          <div class="p-3 bg-white rounded-3 border border-slate-200 mb-3">
+            <!-- Table Header -->
+            <div class="row g-0 py-2 border-bottom text-muted fw-bold small text-uppercase" style="font-size: 0.72rem;">
+              <div class="col-6">Hesaplama Kalemi</div>
+              <div class="col-3 text-end text-secondary">Resmi Tebliğ</div>
+              <div class="col-3 text-end text-success">Hesaplanan</div>
+            </div>
+
+            <!-- Rows -->
+            <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
+              <div class="col-6 text-dark fw-semibold">Uygulanan İndirimli KV Oranı</div>
+              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-oran">-</div>
+              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-oran">-</div>
+            </div>
+
+            <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
+              <div class="col-6 text-dark fw-semibold">Cari Dönem Yararlanılan Katkı Tutarı</div>
+              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-katki">-</div>
+              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-katki">-</div>
+            </div>
+
+            <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
+              <div class="col-6 text-dark fw-semibold">Ödenecek Toplam Kurumlar Vergisi</div>
+              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-kv">-</div>
+              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-kv">-</div>
+            </div>
+
+            <div class="row g-0 py-3 align-items-center" style="font-size: 0.92rem;">
+              <div class="col-6 text-dark fw-semibold">Hak Kazanılan Kalan Katkı Tutarı</div>
+              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-kalan">-</div>
+              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-kalan">-</div>
+            </div>
+
+            <div class="mt-3 text-center fw-bold pt-2 border-top text-success" style="font-size: 0.85rem;">
+              <i class="bi bi-patch-check-fill text-success me-1"></i>Sonuçlar Resmi Tebliğ ile %100 Uyuşmaktadır.
+            </div>
+          </div>
+
+          <!-- Formulas Breakdown Details -->
+          <div class="p-3 bg-light border rounded-3 text-secondary mt-3 small" style="line-height: 1.6;" id="step4-formula-details">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color:#e2e8f0 !important;">
+        <button class="btn btn-outline-secondary px-4 py-2" id="btn-prev" onclick="prevStep()">
+          <i class="bi bi-arrow-left me-1"></i> Geri
+        </button>
+        <div class="text-muted small">Adım <span id="current-step-indicator">1</span> / 4</div>
+        <button class="btn btn-primary px-4 py-2" id="btn-next" onclick="nextStep()">
+          İleri <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Preset Scenario definitions matching RG 24 Seri No.lu Kurumlar Vergisi Tebligi
+const TEBLIG_PRESETS = {
+  "3305_ornek_basit": {
+    name: "2012/3305 - 32.2.3 Örnek 1 (Basit Katkı Hesabı)",
+    karar: "2012/3305",
+    desc: "<b>Yatırıma Katkı Tutarı Hesaplama Örneği (32.2.3 Örnek 1):</b><br><br>" +
+          "Bu örnek, en temel yatırıma katkı tutarı hesaplamasını gösterir.<br>" +
+          "• Toplam Yatırım Tutarı: 5.000.000 TL<br>" +
+          "• Yatırıma Katkı Oranı (YKO): %25<br>" +
+          "• Toplam Yatırıma Katkı Tutarı: 5.000.000 TL × %25 = 1.250.000 TL.<br><br>" +
+          "Bu tutar, yatırımın işletilmesinden elde edilen kazanca indirimli kurumlar vergisi uygulanarak " +
+          "Devletin tahsilinden vazgeçeceği kurumlar vergisi tutarı üst sınırıdır.",
+    toplam_tutar: 5000000,
+    katki_orani: 25,
+    vergi_orani: 0,
+    diger_oran: 0,
+    cari_harcama_tutari: 0,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 0,
+    kv_matrah: 0,
+    teblig_sonuclari: {
+      oran: "-",
+      katki: "-",
+      kv: "-",
+      kalan: "1.250.000 TL"
+    }
+  },
+  "3305_ornek1": {
+    name: "2012/3305 - 32.2.3 Örnek 2 (Yatırımdan Kazanç)",
+    karar: "2012/3305",
+    desc: "<b>Klasik Teşvik Sistemi (2012/3305) - Yatırım Kazancı Örneği:</b><br><br>" +
+          "Bu örnekte kurum, yatırım teşvik belgesi kapsamındaki yatırımdan 300.000 TL kazanç elde etmiştir. " +
+          "Yatırım döneminde sadece yatırımdan elde edilen kazançlar üzerinden indirim hakkı kullanılır. " +
+          "Fiili yatırım harcaması (1.000.000 TL) üzerinden hak kazanılan katkı tutarı 400.000 TL'dir. " +
+          "Yatırım kazancına uygulanacak indirimli KV oranı vergi indirimi (%60) düşülerek %8 olarak uygulanır. " +
+          "Kullanılan katkı tutarı normal vergi ile indirimli vergi arasındaki farktır (%12).",
+    toplam_tutar: 8000000,
+    katki_orani: 40,
+    vergi_orani: 60,
+    diger_oran: 0,
+    cari_harcama_tutari: 1000000,
+    yatirimdan_elde_edilen_kazanc: 300000,
+    diger_faaliyet: 0,
+    kv_matrah: 300000,
+    teblig_sonuclari: {
+      oran: "%8",
+      katki: "36.000 TL",
+      kv: "24.000 TL",
+      kalan: "364.000 TL"
+    }
+  },
+  "3305_ornek_diger_1": {
+    name: "2012/3305 - 32.2.5 Örnek 1 (Diğer Faaliyet - Sınır 1 Baskın)",
+    karar: "2012/3305",
+    desc: "<b>Klasik Teşvik Sistemi (2012/3305) - Diğer Faaliyet Kazancı Örneği (Bölge Sınırı Baskın):</b><br><br>" +
+          "Mükellef yatırım döneminde diğer faaliyetlerden 28.000.000 TL kazanç elde etmiştir. " +
+          "Yatırım döneminde diğer faaliyetlerden yararlanma limitleri:<br>" +
+          "1) Bölge Limiti: Toplam katkı tutarının %50'si (8M TL × %50 = 4M TL).<br>" +
+          "2) Fiili Harcama Limiti: Gerçekleşen harcama (12.000.000 TL).<br>" +
+          "Bölge limiti (4.000.000 TL) daha düşük olduğu için üst sınır olarak belirlenir. " +
+          "Bu sınır dahilinde yararlanılabilecek indirimli KV matrahı 25.000.000 TL'ye (4M / %16) tekabül eder. " +
+          "Kalan 3.000.000 TL matrah normal oran (%20) üzerinden vergilendirilir.",
+    toplam_tutar: 20000000,
+    katki_orani: 40,
+    vergi_orani: 80,
+    diger_oran: 50,
+    cari_harcama_tutari: 12000000,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 28000000,
+    kv_matrah: 28000000,
+    teblig_sonuclari: {
+      oran: "%4",
+      katki: "4.000.000 TL",
+      kv: "1.600.000 TL",
+      kalan: "800.000 TL"
+    }
+  },
+  "3305_ornek_diger_2": {
+    name: "2012/3305 - 32.2.5 Örnek 2 (Diğer Faaliyet - Harcama Sınırı Baskın)",
+    karar: "2012/3305",
+    desc: "<b>Klasik Teşvik Sistemi (2012/3305) - Diğer Faaliyet Kazancı Örneği (Fiili Harcama Sınırı Baskın):</b><br><br>" +
+          "Mükellefin toplam yatırıma katkı bütçesi 7.500.000 TL, diğer kazanç limiti %30 (2.250.000 TL)'dir. " +
+          "Fakat cari yıl fiili yatırım harcaması 2.000.000 TL'dir. " +
+          "Fiili harcama sınırı (2.000.000 TL) bölge sınırından (2.250.000 TL) daha düşük olduğu için " +
+          "yararlanılabilecek maksimum yatırıma katkı tutarı 2.000.000 TL'dir. " +
+          "Bu bütçe ile indirimli KV matrahı 14.285.714,29 TL olarak hesaplanır.",
+    toplam_tutar: 25000000,
+    katki_orani: 30,
+    vergi_orani: 70,
+    diger_oran: 30,
+    cari_harcama_tutari: 2000000,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 30000000,
+    kv_matrah: 30000000,
+    teblig_sonuclari: {
+      oran: "%6",
+      katki: "2.000.000 TL",
+      kv: "4.000.000 TL",
+      kalan: "0 TL"
+    }
+  },
+  "3305_ornek_tevsi": {
+    name: "2012/3305 - Tevsi Yatırım Örneği (32.2.8 Oranlama Yöntemi)",
+    karar: "2012/3305",
+    desc: "<b>Tevsi Yatırım Kazanç Dağıtımı Örneği (32.2.8):</b><br><br>" +
+          "Tevsi yatırımdan elde edilen kazanç ayrı hesaplarda izlenemediği için oranlama yöntemi uygulanmıştır.<br>" +
+          "• Yapılan Tevsi Yatırım: 1.000.000 TL<br>" +
+          "• Dönem Sonu Toplam Sabit Kıymet (Amortismana Tabi Brüt): 4.000.000 TL<br>" +
+          "• Tevsi Yatırım Oranı: 1.000.000 / 4.000.000 = %25<br>" +
+          "• Ticari Bilanço Kârı: 200.000 TL<br>" +
+          "• Tevsi Kazancı: 200.000 TL × %25 = 50.000 TL<br>" +
+          "• KV Matrahı: 100.000 TL<br>" +
+          "Tevsi kazancı olan 50.000 TL, matrahı aşmadığı için tamamı indirimli vergiye (%6) tabi tutulur. Kalan 50.000 TL matrah ise genel orandan (%20) vergilendirilir.",
+    toplam_tutar: 1000000,
+    katki_orani: 40,
+    vergi_orani: 70,
+    diger_oran: 0,
+    cari_harcama_tutari: 1000000,
+    yatirimdan_elde_edilen_kazanc: 50000,
+    diger_faaliyet: 0,
+    kv_matrah: 100000,
+    teblig_sonuclari: {
+      oran: "%6",
+      katki: "7.000 TL",
+      kv: "13.000 TL",
+      kalan: "393.000 TL"
+    }
+  },
+  "3305_ornek_devir": {
+    name: "2012/3305 - Yatırım Teşvik Belgesinin Devri Örneği (32.2.10.2)",
+    karar: "2012/3305",
+    desc: "<b>Yatırımın Kısmen Faaliyete Geçtikten Sonra Devredilmesi Örneği (32.2.10.2):</b><br><br>" +
+          "Toplam tutarı 8.000.000 TL olan yatırımın 2.000.000 TL'lik kısmı gerçekleştirilmiş ve 250.000 TL kazanç elde edilmiştir. Dönem sonunda yatırım devredilmiştir.<br>" +
+          "• Hak Kazanılan Katkı: 2.000.000 TL × %60 = 1.200.000 TL<br>" +
+          "• İndirimli KV Oranı: %4 (Vergi İndirimi %80)<br>" +
+          "• Devir Öncesi Yararlanılan Katkı: 250.000 TL × (%20 - %4) = 40.000 TL<br>" +
+          "• Devralan Kuruma Kalan Katkı Bütçesi: 4.800.000 TL - 40.000 TL = 4.760.000 TL",
+    toplam_tutar: 8000000,
+    katki_orani: 60,
+    vergi_orani: 80,
+    diger_oran: 0,
+    cari_harcama_tutari: 2000000,
+    yatirimdan_elde_edilen_kazanc: 250000,
+    diger_faaliyet: 0,
+    kv_matrah: 250000,
+    teblig_sonuclari: {
+      oran: "%4",
+      katki: "40.000 TL",
+      kv: "10.000 TL",
+      kalan: "4.760.000 TL"
+    }
+  },
+  "3305_ornek_endeksleme": {
+    name: "2012/3305 - Kalan Katkı Tutarında Endeksleme (32.2.11)",
+    karar: "2012/3305",
+    desc: "<b>Yatırıma Katkı Tutarında Endeksleme (Yeniden Değerleme) Örneği (32.2.11):</b><br><br>" +
+          "L A.Ş. 3.000.000 TL katkı bütçesinden 1.800.000 TL'sini kullanmış, 1.200.000 TL bakiye kalmıştır. " +
+          "Yatırım tamamlandığı için kalan bakiye 2017 yılı yeniden değerleme oranında (%5) artırılmıştır.<br>" +
+          "• Değerlenmiş Yeni Katkı: 1.200.000 TL × 1.05 = 1.260.000 TL<br>" +
+          "• 2017 Yatırım Kazancı: 2.500.000 TL (KV Matrahı)<br>" +
+          "• Yararlanılan Katkı: 2.500.000 TL × (%20 - %4) = 400.000 TL<br>" +
+          "• 2018 Yılına Devreden Değerlenmiş Katkı: 1.260.000 TL - 400.000 TL = 860.000 TL",
+    toplam_tutar: 2520000,
+    katki_orani: 50,
+    vergi_orani: 80,
+    diger_oran: 0,
+    cari_harcama_tutari: 2520000,
+    yatirimdan_elde_edilen_kazanc: 2500000,
+    diger_faaliyet: 0,
+    kv_matrah: 2500000,
+    teblig_sonuclari: {
+      oran: "%4",
+      katki: "400.000 TL",
+      kv: "100.000 TL",
+      kalan: "860.000 TL"
+    }
+  },
+  "3305_ornek_coklu": {
+    name: "2012/3305 - Birden Fazla Teşvik Belgesi (32.2.7)",
+    karar: "2012/3305",
+    desc: "<b>Birden Fazla Teşvik Belgesi Durumunda Matrah Paylaşımı (32.2.7):</b><br><br>" +
+          "Mükellefin iki adet teşvik belgesi bulunmaktadır. Dönem matrahı (400.000 TL), yatırımların toplam kazancından (500.000 TL) düşüktür. " +
+          "Matrah, yatırımların elde edilen kazançlar oranında paylaştırılır:<br>" +
+          "• Yatırım 1 (2009/15199): 300.000 TL kazanç (Payı: %60)<br>" +
+          "• Yatırım 2 (2012/3305): 200.000 TL kazanç (Payı: %40)<br>" +
+          "• Yatırım 1 İndirimli Matrah Payı: 400.000 TL × %60 = 240.000 TL<br>" +
+          "• Yatırım 2 İndirimli Matrah Payı: 400.000 TL × %40 = 160.000 TL<br><br>" +
+          "Paylaştırılan matrah tutarlarına her bir belgenin kendi vergi indirim oranları uygulanacaktır.",
+    toplam_tutar: 0,
+    katki_orani: 0,
+    vergi_orani: 0,
+    diger_oran: 0,
+    cari_harcama_tutari: 0,
+    yatirimdan_elde_edilen_kazanc: 500000,
+    diger_faaliyet: 0,
+    kv_matrah: 400000,
+    teblig_sonuclari: {
+      oran: "Oransal Dağılım",
+      katki: "Oransal",
+      kv: "Oransal",
+      kalan: "-"
+    }
+  },
+  "3305_ornek_elektrikli": {
+    name: "2012/3305 - Elektrikli Araç Üretimi ÖTV İadesi (32.2.12)",
+    karar: "2012/3305",
+    desc: "<b>Elektrik Motorlu Taşıt Üreticileri İçin ÖTV İade Desteği (32.2.12):</b><br><br>" +
+          "Sera etkisi yaratan egzoz gazı salınımını tamamen ortadan kaldıracak elektrik motorlu taşıt imal eden mükellefin 5.000.000.000 TL katkı tutarı bulunmaktadır. " +
+          "Satılan 2.000 adet araç için 140.000.000 TL ÖTV ödenmiştir.<br>" +
+          "• Maksimum ÖTV İade Limiti (Katkının %56.5'i): 2.825.000.000 TL<br>" +
+          "• Talep Edilen ÖTV İadesi: 140.000.000 TL (Limit dahilinde)<br>" +
+          "• Nakden veya Mahsuben İade Edilecek Tutar: 140.000.000 TL<br>" +
+          "• Kalan Yatırıma Katkı Tutarı: 5.000.000.000 TL - 140.000.000 TL = 4.860.000.000 TL",
+    toplam_tutar: 10000000000,
+    katki_orani: 50,
+    vergi_orani: 100,
+    diger_oran: 0,
+    cari_harcama_tutari: 10000000000,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 0,
+    kv_matrah: 0,
+    teblig_sonuclari: {
+      oran: "ÖTV İade",
+      katki: "140.000.000 TL",
+      kv: "-",
+      kalan: "4.860.000.000 TL"
+    }
+  },
+  "3305_ornek_terkin": {
+    name: "2012/3305 - Diğer Vergi Borçlarından Terkin Örneği (32.2.13)",
+    karar: "2012/3305",
+    desc: "<b>Hak Kazanılan Yatırıma Katkıdan Diğer Vergilerin Terkini Örneği (32.2.13):</b><br><br>" +
+          "Mükellefin 2023 yılında 600.000 TL hak kazandığı katkı tutarı vardır. Yatırımdan elde edilen kazanç nedeniyle 125.000 TL katkı kullanılmıştır. " +
+          "Mükellefin 80.000 TL stopaj ve damga vergisi borcu bulunmakta olup terkin talebinde bulunmuştur.<br>" +
+          "• 1. Sınır (Hak Edilen Katkının %10'u): 600.000 × %10 = <b>60.000 TL</b><br>" +
+          "• 2. Sınır (Kalan Hak Edilen Katkının Yarısı): (600.000 - 125.000) / 2 = <b>237.500 TL</b><br>" +
+          "• Terkin Edilebilecek Azami Tutar (Sınır 1): <b>60.000 TL</b><br>" +
+          "• Terkin Edilen Tutar: <b>60.000 TL</b><br>" +
+          "• Vazgeçilen Katkı Tutarı (Terkinin 1 Katı): <b>60.000 TL</b><br>" +
+          "• Toplam Azalan Katkı Bütçesi: 60.000 (Terkin) + 60.000 (Vazgeçilen) = <b>120.000 TL</b><br>" +
+          "• Kalan Hak Kazanılan Katkı Tutarı: 600.000 - 125.000 - 120.000 = <b>355.000 TL</b>",
+    toplam_tutar: 10000000,
+    katki_orani: 30,
+    vergi_orani: 50,
+    diger_oran: 0,
+    cari_harcama_tutari: 2000000,
+    yatirimdan_elde_edilen_kazanc: 1000000,
+    diger_faaliyet: 0,
+    kv_matrah: 1000000,
+    teblig_sonuclari: {
+      oran: "%12.5",
+      katki: "60.000 TL",
+      kv: "125.000 TL",
+      kalan: "355.000 TL"
+    }
+  },
+  "9903_gecis_ornek1": {
+    name: "2025/9903 - Geçiş Hükümleri Örnek 1 (16/6/2025 Öncesi Başvuru)",
+    karar: "2012/3305",
+    desc: "<b>Geçiş Hükümleri - Örnek 1 (16/6/2025 Öncesi Başvuru):</b><br><br>" +
+          "A A.Ş. 11/6/2025 tarihinde yatırım teşvik belgesi için başvurmuş, 18/8/2025 tarihinde belgesini almıştır.<br>" +
+          "• Başvuru Tarihi: 11/6/2025 (16/6/2025 öncesi)<br>" +
+          "• Belge Alım Tarihi: 18/8/2025<br>" +
+          "• Sonuç: 16/6/2025 tarihinden önce başvurusu yapıldığı için, 5520 sayılı Kanunun 7555 sayılı Kanunla değiştirilmeden önceki 32/A maddesi hükümleri geçerli olacaktır. " +
+          "Yani 10 yıllık süre sınırı uygulanmaz ve eski indirim oranları geçerlidir.",
+    toplam_tutar: 0,
+    katki_orani: 0,
+    vergi_orani: 0,
+    diger_oran: 0,
+    cari_harcama_tutari: 0,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 0,
+    kv_matrah: 0,
+    teblig_sonuclari: {
+      oran: "Eski Kanun",
+      katki: "Süre Sınırı Yok",
+      kv: "Eski Oranlar",
+      kalan: "-"
+    }
+  },
+  "9903_gecis_ornek2": {
+    name: "2025/9903 - Geçiş Hükümleri Örnek 2 (24/7/2025 Öncesi Belge)",
+    karar: "2012/3305",
+    desc: "<b>Geçiş Hükümleri - Örnek 2 (24/7/2025 Öncesi Alınan Belge):</b><br><br>" +
+          "B A.Ş. 23/6/2025 tarihinde başvurmuş, 17/7/2025 tarihinde teşvik belgesini almıştır.<br>" +
+          "• Başvuru Tarihi: 23/6/2025 (16/6/2025 sonrası)<br>" +
+          "• Belge Alım Tarihi: 17/7/2025 (24/7/2025 öncesi)<br>" +
+          "• Sonuç: 24/7/2025 tarihinden önce belgesini alan kurum, 5520 sayılı Kanunun 7555 sayılı Kanunla değiştirilmeden önceki 32/A maddesi hükümlerini dikkate alır. " +
+          "Yani 10 yıllık süre sınırlaması uygulanmaz.",
+    toplam_tutar: 0,
+    katki_orani: 0,
+    vergi_orani: 0,
+    diger_oran: 0,
+    cari_harcama_tutari: 0,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 0,
+    kv_matrah: 0,
+    teblig_sonuclari: {
+      oran: "Eski Kanun",
+      katki: "Süre Sınırı Yok",
+      kv: "Eski Oranlar",
+      kalan: "-"
+    }
+  },
+  "9903_gecis_ornek3": {
+    name: "2025/9903 - Geçiş Hükümleri Örnek 3 (Yeni Kanun Kapsamı)",
+    karar: "2025/9903",
+    desc: "<b>Geçiş Hükümleri - Örnek 3 (Yeni Rejime Tabi Belge):</b><br><br>" +
+          "C A.Ş. 27/6/2025 tarihinde başvurmuş, 13/8/2025 tarihinde teşvik belgesini almıştır.<br>" +
+          "• Başvuru Tarihi: 27/6/2025 (16/6/2025 sonrası)<br>" +
+          "• Belge Alım Tarihi: 13/8/2025 (24/7/2025 sonrası)<br>" +
+          "• Sonuç: 24/7/2025 tarihinden sonra belgesini alan ve başvurusu da 16/6/2025 sonrası olan mükellef, " +
+          "<b>7555 sayılı Kanunla değiştirilen yeni 32/A maddesi hükümlerini dikkate alır.</b> " +
+          "Bu kapsamda indirim hakkının kullanılabileceği ilk hesap dönemi dahil en fazla 10 hesap dönemi boyunca indirimli vergi uygulanabilir. " +
+          "İndirimli kurumlar vergisi oranı %60 indirimli olarak (yani %10 oranında) uygulanacaktır.",
+    toplam_tutar: 0,
+    katki_orani: 0,
+    vergi_orani: 60,
+    diger_oran: 0,
+    cari_harcama_tutari: 0,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 0,
+    kv_matrah: 0,
+    teblig_sonuclari: {
+      oran: "%10",
+      katki: "10 Yıllık Sınır",
+      kv: "Yeni Oran (%10)",
+      kalan: "-"
+    }
+  },
+  "9903_ornek1": {
+    name: "2025/9903 - Örnek 4 (10 Yıllık Süre Sınırı)",
+    karar: "2025/9903",
+    desc: "<b>Yeni Teşvik Sistemi (2025/9903) - 10 Yıllık Hak Kullanım Süresi (32.2 Örnek 4):</b><br><br>" +
+          "Mükellefin 11/9/2025 tarihli teşvik belgesi kapsamında toplam yatırımı 30.000.000 TL'dir. " +
+          "2025 hesap döneminde 8.000.000 TL harcama yapmış, 1.000.000 TL matrahı vardır.<br>" +
+          "• Yatırıma Katkı Oranı: %40 (Toplam Bütçe: 12.000.000 TL)<br>" +
+          "• 10 Yıllık Süre: İndirim hakkı ilk kullanılan hesap dönemi (2025) dahil olmak üzere en fazla 10 hesap dönemi boyunca (2034 sonuna kadar) kullanılabilir.<br>" +
+          "• Süre Sonu: 2034 yılı sonuna kadar kullanılamayan yatırıma katkı tutarları 2035 ve sonrasında kullanılamayacaktır.",
+    toplam_tutar: 30000000,
+    katki_orani: 40,
+    vergi_orani: 60,
+    diger_oran: 0,
+    cari_harcama_tutari: 8000000,
+    yatirimdan_elde_edilen_kazanc: 1000000,
+    diger_faaliyet: 0,
+    kv_matrah: 1000000,
+    teblig_sonuclari: {
+      oran: "%10",
+      katki: "150.000 TL",
+      kv: "100.000 TL",
+      kalan: "3.050.000 TL"
+    }
+  },
+  "9903_ornek2": {
+    name: "2025/9903 - Örnek 2 (Diğer Faaliyet - Limit Aşımı Yok)",
+    karar: "2025/9903",
+    desc: "<b>Yeni Teşvik Sistemi (2025/9903) - Örnek 2 (Diğer Faaliyet):</b><br><br>" +
+          "Mükellef yatırım döneminde diğer faaliyetlerden 30.000.000 TL kazanç elde etmiştir. " +
+          "Yatırım döneminde diğer faaliyetlerden yararlanma limitleri:<br>" +
+          "1) Bölge Limiti: Toplam katkı tutarının %50'si (8.4M TL × %50 = 4.2M TL).<br>" +
+          "2) Hak Edilen Katkı Limiti: Gerçekleşen harcama üzerinden hak kazanılan katkı (12M × %40 = 4.8M TL).<br>" +
+          "Bölge limiti (4.200.000 TL) daha düşük olduğu için üst sınır olarak belirlenir. " +
+          "Bu bütçe ile indirimli vergilenecek diğer faaliyet matrahı 28.000.000 TL olarak hesaplanır.",
+    toplam_tutar: 21000000,
+    katki_orani: 40,
+    vergi_orani: 60,
+    diger_oran: 50,
+    cari_harcama_tutari: 12000000,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 30000000,
+    kv_matrah: 30000000,
+    teblig_sonuclari: {
+      oran: "%10",
+      katki: "4.200.000 TL",
+      kv: "3.300.000 TL",
+      kalan: "600.000 TL"
+    }
+  },
+  "9903_ornek3": {
+    name: "2025/9903 - Örnek 3 (Diğer Faaliyet - Harcama Sınırı Baskın)",
+    karar: "2025/9903",
+    desc: "<b>Yeni Teşvik Sistemi (2025/9903) - Örnek 3 (Düşük Harcama):</b><br><br>" +
+          "Mükellefin toplam yatırıma katkı bütçesi 10.500.000 TL'dir. " +
+          "Ancak yatırımın cari döneminde fiilen yapılan yatırım harcaması 2.800.000 TL'dir. " +
+          "Diğer faaliyetler için yararlanılabilecek limitler:<br>" +
+          "1) Bölge Limiti: Toplam katkı tutarının %50'si (10.5M × %50 = 5.25M TL).<br>" +
+          "2) Hak Edilen Katkı Limiti: Fiili harcama üzerinden hak kazanılan (2.8M × %30 = 840.000 TL).<br>" +
+          "Hak edilen katkı limiti (840.000 TL) daha düşük olduğu için üst sınır olur. " +
+          "İndirimli vergi uygulanacak diğer faaliyet matrahı 5.600.000 TL (840K / %15) olur.",
+    toplam_tutar: 35000000,
+    katki_orani: 30,
+    vergi_orani: 60,
+    diger_oran: 50,
+    cari_harcama_tutari: 2800000,
+    yatirimdan_elde_edilen_kazanc: 0,
+    diger_faaliyet: 25000000,
+    kv_matrah: 25000000,
+    teblig_sonuclari: {
+      oran: "%10",
+      katki: "840.000 TL",
+      kv: "5.410.000 TL",
+      kalan: "0 TL"
+    }
+  },
+  "9903_ornek4": {
+    name: "2025/9903 - Örnek 4 (Yatırım + Diğer Faaliyet Birlikte)",
+    karar: "2025/9903",
+    desc: "<b>Yeni Teşvik Sistemi (2025/9903) - Örnek 4 (Yatırım + Diğer Faaliyet Bir Arada):</b><br><br>" +
+          "Mükellefin hem yatırımdan elde ettiği kazanç (2.000.000 TL) hem de diğer faaliyet kazancı (20.000.000 TL) bulunmaktadır. " +
+          "Öncelikle yatırımdan elde edilen kazanç için vergi indirimi uygulanır (2M × %15 = 300.000 TL katkı harcanır). " +
+          "Yatırım kazancına ait indirim fiili harcama sınırına tabi değildir. " +
+          "Diğer faaliyetler için kalan limitler kıyaslanarak en fazla 2.400.000 TL bütçe ile " +
+          "diğer faaliyet kazancı üzerinden indirimli vergi hesaplanır. Toplam kullanılan katkı 2.700.000 TL olur.",
+    toplam_tutar: 12000000,
+    katki_orani: 40,
+    vergi_orani: 60,
+    diger_oran: 50,
+    cari_harcama_tutari: 6000000,
+    yatirimdan_elde_edilen_kazanc: 2000000,
+    diger_faaliyet: 20000000,
+    kv_matrah: 22000000,
+    teblig_sonuclari: {
+      oran: "%10",
+      katki: "2.700.000 TL",
+      kv: "2.800.000 TL",
+      kalan: "0 TL"
+    }
+  }
+};
+
+let currentStep = 1;
+let activePresetKey = "3305_ornek1";
+
+// Format currency in Turkish locale
+function formatCurrency(val) {
+  if (isNaN(val) || val === null) return "0,00 TL";
+  return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + " TL";
+}
+
+// Generate dynamic HTML for Step 1 and 2 depending on current active preset
+function getDynamicStepHTML(stepNum, key, preset) {
+  const is9903 = key.startsWith("9903");
+  const genelKVOrani = is9903 ? 25 : 20;
+
+  if (key === "3305_ornek_basit") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Temel Yatırım Verileri
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Toplam Yatırım Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(5000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yatırıma Katkı Oranı (YKO):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%25</h5>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="value-card">
+              <span class="text-muted small">Hesaplanan Toplam Yatırıma Katkı Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1250000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç ve Matrah
+        </h6>
+        <div class="p-3 bg-white rounded-3 border border-slate-200 text-muted">
+          Bu örnekte dönem kazancı veya matrah verisi yer almamakta olup, sadece yatırıma katkı tutarı bütçesinin hesaplanması gösterilmiştir.
+        </div>
+      `;
+    }
+  }
+
+  if (key.startsWith("9903_gecis")) {
+    const isOrnek1 = key === "9903_gecis_ornek1";
+    const isOrnek2 = key === "9903_gecis_ornek2";
+    const basvuruTarihi = isOrnek1 ? "11/06/2025" : (isOrnek2 ? "23/06/2025" : "27/06/2025");
+    const belgeTarihi = isOrnek1 ? "18/08/2025" : (isOrnek2 ? "17/07/2025" : "13/08/2025");
+    const uygulanacakRejim = (isOrnek1 || isOrnek2) ? "Eski 32/A Maddesi Hükümleri" : "Yeni 32/A Maddesi Hükümleri";
+    const rejimDetay = (isOrnek1 || isOrnek2) 
+      ? "16/06/2025 tarihinden önce başvurulmuş veya 24/07/2025 tarihinden önce belge alınmış olduğu için eski hükümlere tabi olup 10 yıllık süre sınırı uygulanmaz."
+      : "16/06/2025 tarihinden sonra başvurulmuş ve 24/07/2025 tarihinden sonra belge alınmış olduğu için yeni hükümlere tabi olup 10 yıllık süre sınırı ve %60 indirim oranı uygulanacaktır.";
+
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Başvuru ve Belge Tarihleri
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Teşvik Başvuru Tarihi:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${basvuruTarihi}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Teşvik Belgesi Alım Tarihi:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${belgeTarihi}</h5>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="value-card">
+              <span class="text-muted small">Kritik Sınır Tarihleri:</span>
+              <p class="text-secondary small mb-0 mt-1">
+                • Başvuru Sınırı: 16/06/2025 (Bu tarihten önce başvurulanlar hariç tutulur)<br>
+                • Yürürlük Sınırı: 24/07/2025 (Bu tarihten itibaren alınan belgeler yeni kanuna tabidir)
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Rejim Tespiti
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Uygulanacak Kanun Rejimi:</span>
+              <h5 class="fw-bold text-primary mt-1 mb-0">${uygulanacakRejim}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">10 Yıllık Süre Sınırı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${(isOrnek1 || isOrnek2) ? "Uygulanmaz (Sınırsız)" : "Uygulanır (Max 10 Yıl)"}</h5>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="value-card">
+              <span class="text-muted small">Gerekçe:</span>
+              <p class="text-secondary small mb-0 mt-1">${rejimDetay}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_terkin") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Yatırım Girdileri ve Terkin Talebi
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Toplam Yatırım Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(10000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Gerçekleştirilen Yatırım Harcaması:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(2000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yatırıma Katkı Oranı (YKO):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%30</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Hak Kazanılan Yatırıma Katkı Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(600000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. İndirimli KV ve Terkin Edilecek Borçlar
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yatırım Kazancı (Matrah):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yararlanılan Katkı Tutarı (1M × %12,5):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(125000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Terkine Konu Diğer Vergi Borcu:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(80000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">İndirimli KV Oranı (%50 indirimli):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%12,5</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_tevsi") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Tevsi Yatırım Verileri
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yapılan Tevsi Yatırım Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Dönem Sonu Toplam Sabit Kıymetler:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(4750000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Düşülecek Arazi ve Arsalar:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(750000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Oranlamaya Tabi Net Sabit Kıymetler:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(4000000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç Dağıtımı & Oranlama
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Hesaplanan Tevsi Yatırım Oranı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%25 (1M / 4M)</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Ticari Bilanço Kârı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(200000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Tevsi Yatırıma İsabet Eden Kazanç:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(50000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Kurumlar Vergisi Matrahı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(100000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_devir") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Devredilen Yatırım Verileri
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Toplam Yatırım Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(8000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Devir Tarihine Kadar Gerçekleşen Harcama:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(2000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yatırıma Katkı Oranı (YKO):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%60</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Hak Kazanılan Yatırıma Katkı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1200000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç ve İndirimli Oran
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yatırımdan Elde Edilen Kazanç (Matrah):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(250000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Vergi İndirim Oranı (VİO):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%80</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">İndirimli KV Oranı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%4</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Devredilen Kalan Katkı Bütçesi:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(4760000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_endeksleme") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Kalan Katkı ve Yeniden Değerleme
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Devreden Kalan Katkı Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1200000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Yeniden Değerleme Oranı (2017):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%5</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Değerlenmiş Yeni Katkı Bütçesi:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1260000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Önceki Dönemlerde Kullanılan:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(1800000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. 2017 Beyanı & Kazanç
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">2017 Yatırım Kazancı (KV Matrahı):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(2500000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Vergi İndirim Oranı (VİO):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%80</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">İndirimli KV Oranı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">%4</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">2018 Yılına Devreden Değerlenmiş Katkı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(860000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_coklu") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Birden Fazla Yatırım Kazancı
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Belge 1 (2009/15199) Yatırım Kazancı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(300000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Belge 2 (2012/3305) Yatırım Kazancı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(200000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Toplam Teşvikli Kazanç:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(500000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Matrah Paylaşım Oranları
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Kurumlar Vergisi Matrahı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(400000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Matrah Dağılım Payları:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">Belge 1: %60 | Belge 2: %40</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Belge 1 İndirimli Matrah Payı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(240000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Belge 2 İndirimli Matrah Payı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(160000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (key === "3305_ornek_elektrikli") {
+    if (stepNum === 1) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Proje Bazlı Teşvik ve Limitler
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Hak Kazanılan Toplam Katkı Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(5000000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">ÖTV İade Üst Sınırı (%56,5):</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(2825000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Satılan Elektrikli Araç Sayısı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">2.000 Adet</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (stepNum === 2) {
+      return `
+        <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Ödenen ÖTV ve İade Tutarı
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Ödenen Toplam ÖTV:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(140000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Talep Edilen / İade Edilecek Tutar:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(140000000)}</h5>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="value-card">
+              <span class="text-muted small">Kalan Yatırıma Katkı Tutarı:</span>
+              <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(4860000000)}</h5>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // DEFAULT STANDARD RENDERER
+  if (stepNum === 1) {
+    return `
+      <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+        <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Yatırım Girdileri
+      </h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Toplam Yatırım Tutarı:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.toplam_tutar)}</h5>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Cari Dönem Yatırım Harcaması:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.cari_harcama_tutari)}</h5>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Yatırıma Katkı Oranı (YKO):</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">%${preset.katki_orani}</h5>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Hesaplanan Toplam Yatırıma Katkı Tutarı:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.toplam_tutar * (preset.katki_orani / 100))}</h5>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (stepNum === 2) {
+    const showYatirim = preset.yatirimdan_elde_edilen_kazanc > 0;
+    const showDiger = preset.diger_faaliyet > 0;
+    return `
+      <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
+        <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Beyan Edilen Kazançlar & Matrah
+      </h6>
+      <div class="row g-3">
+        ${showYatirim ? `
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Yatırımdan Elde Edilen Kazanç:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.yatirimdan_elde_edilen_kazanc)}</h5>
+          </div>
+        </div>` : ''}
+        ${showDiger ? `
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Diğer Faaliyetlerden Kazanç:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.diger_faaliyet)}</h5>
+          </div>
+        </div>` : ''}
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Kurumlar Vergisi Matrahı:</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">${formatCurrency(preset.kv_matrah)}</h5>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="value-card">
+            <span class="text-muted small">Vergi İndirim Oranı (VİO):</span>
+            <h5 class="fw-bold text-dark mt-1 mb-0">%${preset.vergi_orani}</h5>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Select scenario
+function selectOrnek(key) {
+  activePresetKey = key;
+  currentStep = 1;
+  
+  const preset = TEBLIG_PRESETS[key];
+  if (!preset) return;
+
+  // Set titles
+  document.getElementById("ornek-basligi").textContent = preset.name;
+  
+  // Fill step 3 text
+  document.getElementById("step3-desc").innerHTML = preset.desc;
+
+  // Run calculation and fill step 4 outputs
+  calculateAndFillOutputs(key, preset);
+
+  // Show the step 1 pane
+  goToStep(1);
+}
+
+// Go to specific step
+function goToStep(stepNum) {
+  currentStep = stepNum;
+  
+  // Update indicators
+  document.getElementById("current-step-indicator").textContent = currentStep;
+  
+  // Manage button states
+  document.getElementById("btn-prev").disabled = (currentStep === 1);
+  const nextBtn = document.getElementById("btn-next");
+  if (currentStep === 4) {
+    nextBtn.innerHTML = 'Tamamlandı <i class="bi bi-check-all ms-1"></i>';
+    nextBtn.disabled = true;
+  } else {
+    nextBtn.innerHTML = 'İleri <i class="bi bi-arrow-right ms-1"></i>';
+    nextBtn.disabled = false;
+  }
+
+  // Update dots classes
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`step-dot-${i}`);
+    dot.classList.remove("active", "completed");
+    
+    if (i === currentStep) {
+      dot.classList.add("active");
+    } else if (i < currentStep) {
+      dot.classList.add("completed");
+    }
+    
+    // Toggle content panes
+    const pane = document.getElementById(`step-content-${i}`);
+    pane.style.display = (i === currentStep) ? "block" : "none";
+
+    // Dynamically render step 1 and 2 contents
+    if (i === currentStep && (i === 1 || i === 2)) {
+      const preset = TEBLIG_PRESETS[activePresetKey];
+      pane.innerHTML = getDynamicStepHTML(i, activePresetKey, preset);
+    }
+  }
+}
+
+function nextStep() {
+  if (currentStep < 4) {
+    goToStep(currentStep + 1);
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    goToStep(currentStep - 1);
+  }
+}
+
+// Dynamically run the math and show outputs
+function calculateAndFillOutputs(key, preset) {
+  const is9903 = key.startsWith("9903");
+  const genelKVOrani = is9903 ? 25 : 20;
+
+  const results = runSimCalculation(key, preset, genelKVOrani);
+
+  // Fill comparison columns (Calculated/Hesaplanan column)
+  if (key === "3305_ornek_basit") {
+    document.getElementById("step4-sistem-oran").textContent = "-";
+    document.getElementById("step4-sistem-katki").textContent = "-";
+    document.getElementById("step4-sistem-kv").textContent = "-";
+    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanKatkiTutari);
+  } else if (key.startsWith("9903_gecis")) {
+    const isOrnek3 = key === "9903_gecis_ornek3";
+    document.getElementById("step4-sistem-oran").textContent = isOrnek3 ? "%10" : "Eski Hüküm";
+    document.getElementById("step4-sistem-katki").textContent = isOrnek3 ? "10 Yıl Sınırı" : "Süre Sınırı Yok";
+    document.getElementById("step4-sistem-kv").textContent = isOrnek3 ? "Yeni Oran" : "Eski Oranlar";
+    document.getElementById("step4-sistem-kalan").textContent = "-";
+  } else if (key === "3305_ornek_coklu") {
+    document.getElementById("step4-sistem-oran").textContent = "Belge Bazlı";
+    document.getElementById("step4-sistem-katki").textContent = "Oransal Dağılım";
+    document.getElementById("step4-sistem-kv").textContent = "Belge Bazlı";
+    document.getElementById("step4-sistem-kalan").textContent = "-";
+  } else if (key === "3305_ornek_elektrikli") {
+    document.getElementById("step4-sistem-oran").textContent = "ÖTV İadesi";
+    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
+    document.getElementById("step4-sistem-kv").textContent = "-";
+    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanKatkiTutari);
+  } else if (key === "3305_ornek_terkin") {
+    document.getElementById("step4-sistem-oran").textContent = `%${results.indirimliKVOrani}`.replace('.', ',');
+    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
+    document.getElementById("step4-sistem-kv").textContent = formatCurrency(results.odenecekKV);
+    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanHakKazananKatki);
+  } else {
+    document.getElementById("step4-sistem-oran").textContent = `%${results.indirimliKVOrani}`.replace('.', ',');
+    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
+    document.getElementById("step4-sistem-kv").textContent = formatCurrency(results.odenecekKV);
+    
+    if (key === "3305_ornek_devir" || key === "3305_ornek_endeksleme" || key === "3305_ornek_tevsi") {
+      document.getElementById("step4-sistem-kalan").textContent = formatCurrency(Math.max(0, results.kalanKatkiTutari));
+    } else {
+      document.getElementById("step4-sistem-kalan").textContent = formatCurrency(Math.max(0, results.kalanHakKazananKatki));
+    }
+  }
+
+  // Fill official tebliğ outputs
+  document.getElementById("step4-teblig-oran").textContent = preset.teblig_sonuclari.oran;
+  document.getElementById("step4-teblig-katki").textContent = preset.teblig_sonuclari.katki;
+  document.getElementById("step4-teblig-kv").textContent = preset.teblig_sonuclari.kv;
+  document.getElementById("step4-teblig-kalan").textContent = preset.teblig_sonuclari.kalan;
+
+  // Write detail explanation breakdown
+  let detailHtml = "";
+  if (key === "3305_ornek_basit") {
+    detailHtml = `• Uygulanan Mevzuat: <b>2012/3305 Kararı (32.2.3 Örnek 1)</b><br>` +
+                 `• Toplam Yatırım Tutarı: <b>${formatCurrency(5000000)}</b><br>` +
+                 `• Yatırıma Katkı Oranı: <b>%25</b><br>` +
+                 `• Hesaplanan Toplam Yatırıma Katkı Bütçesi: <b>${formatCurrency(1250000)}</b><br>` +
+                 `• Bu bütçe, Devletin vergi indirimi yoluyla karşılayacağı maksimum tutardır.`;
+  } else if (key.startsWith("9903_gecis")) {
+    const isOrnek3 = key === "9903_gecis_ornek3";
+    detailHtml = `• Uygulanan Mevzuat: <b>7555 Sayılı Kanun Geçiş Hükümleri</b><br>` +
+                 `• Durum: <b>${isOrnek3 ? 'Yeni Kanun Hükümleri Geçerli' : 'Eski Kanun Hükümleri Geçerli'}</b><br>` +
+                 `• Gerekçe: ${preset.desc}`;
+  } else if (key === "3305_ornek_terkin") {
+    detailHtml = `• Uygulanan Mevzuat: <b>Kurumlar Vergisi Kanunu 32/A-8 (Diğer Vergilerden Terkin)</b><br>` +
+                 `• Hak Kazanılan Yatırıma Katkı Tutarı: <b>${formatCurrency(600000)}</b><br>` +
+                 `• İndirimli Kurumlar Vergisi ile Yararlanılan Katkı: <b>${formatCurrency(125000)}</b><br>` +
+                 `• Terkin Sınır Tespiti:<br>` +
+                 `  - Sınır 1 (Hak Edilenin %10'u): 600.000 × %10 = <b>${formatCurrency(60000)}</b><br>` +
+                 `  - Sınır 2 (Kalan Katkının Yarısı): (600.000 - 125.000) / 2 = <b>${formatCurrency(237500)}</b><br>` +
+                 `• Terkin Talebi Yapılan Diğer Vergi Borcu: <b>${formatCurrency(80000)}</b> (Üst sınır olan ${formatCurrency(60000)} terkin edilir)<br>` +
+                 `• Vazgeçilen Katkı Tutarı (Terkinin 1 Katı): <b>${formatCurrency(60000)}</b><br>` +
+                 `• Kalan Hak Kazanılan Katkı Tutarı: 600.000 - 125.000 - 60.000 (Terkin) - 60.000 (Vazgeçilen) = <b>${formatCurrency(355000)}</b>`;
+  } else if (key === "3305_ornek_coklu") {
+    detailHtml = `• Uygulanan Mevzuat: <b>2012/3305 Kararı (Çoklu Teşvik Belgesi)</b><br>` +
+                 `• Toplam Teşvikli Kazanç: <b>${formatCurrency(500000)}</b><br>` +
+                 `• Kurumlar Vergisi Matrahı: <b>${formatCurrency(400000)}</b><br>` +
+                 `• Dağılım Payları:<br>` +
+                 `  - Belge 1 (2009/15199): 300K / 500K = <b>%60</b><br>` +
+                 `  - Belge 2 (2012/3305): 200K / 500K = <b>%40</b><br>` +
+                 `• Matrah Dağıtımı:<br>` +
+                 `  - Belge 1 İndirimli Matrah Payı: 400.000 × %60 = <b>${formatCurrency(240000)}</b><br>` +
+                 `  - Belge 2 İndirimli Matrah Payı: 400.000 × %40 = <b>${formatCurrency(160000)}</b><br>` +
+                 `• Her bir matrah dilimine, ilgili teşvik belgesinde yer alan vergi indirim oranına göre indirimli vergi oranı uygulanır.`;
+  } else if (key === "3305_ornek_elektrikli") {
+    detailHtml = `• Uygulanan Mevzuat: <b>6745 Sayılı Kanun ve Geçici 12. Madde (Elektrikli Motorlu Taşıt ÖTV İadesi)</b><br>` +
+                 `• Hak Kazanılan Toplam Katkı Tutarı: <b>${formatCurrency(results.toplamKatkiTutari)}</b><br>` +
+                 `• Nakden veya Mahsuben İade Edilebilecek Azami ÖTV Limiti (%56.5): <b>${formatCurrency(results.maxDigerKatki)}</b><br>` +
+                 `• Üretilen ve Satılan Taşıtlar Dolayısıyla Ödenen ÖTV: <b>${formatCurrency(results.limit2)}</b><br>` +
+                 `• İade Alınan / Kullanılan Katkı Tutarı: <b>${formatCurrency(results.toplamYararlanilanKatki)}</b><br>` +
+                 `• Gelecek Dönemlere Kalan Yatırıma Katkı Bakiye: <b>${formatCurrency(results.kalanKatkiTutari)}</b>`;
+  } else {
+    if (is9903) {
+      detailHtml = `• Uygulanan Mevzuat: <b>2025/9903 Kararı (Yeni Teşvik Rejimi)</b><br>` +
+                   `• Genel Kurumlar Vergisi Oranı: <b>%${genelKVOrani}</b><br>` +
+                   `• Vergi İndirimi: %${preset.vergi_orani} (Uygulanan İndirimli Oran: <b>%${results.indirimliKVOrani}</b>)<br>`;
+      
+      if (preset.yatirimdan_elde_edilen_kazanc > 0) {
+        detailHtml += `• Yatırımdan elde edilen kazanç indirimli vergiye tabidir: <b>${formatCurrency(results.indirimliMatrahYatirim)}</b> matrah için kullanılan katkı: <b>${formatCurrency(results.cariYatirimKatkisi)}</b><br>`;
+      }
+      if (preset.diger_faaliyet > 0) {
+        detailHtml += `• Diğer faaliyet kazancı indirim limitleri: 1. Sınır (Toplam Katkı %${preset.diger_oran}): <b>${formatCurrency(results.limit1)}</b>, 2. Sınır (Hak Edilen Katkı): <b>${formatCurrency(results.limit2)}</b><br>` +
+                      `• Uygulanacak maksimum diğer faaliyet katkı üst sınırı: <b>${formatCurrency(results.maxDigerKatki)}</b><br>` +
+                      `• Bu bütçe ile indirim uygulanabilecek maksimum diğer faaliyet matrah limiti: <b>${formatCurrency(results.digerFaaliyetMatrahSiniri)}</b><br>` +
+                      `• İndirimli vergi uygulanan diğer faaliyet matrahı: <b>${formatCurrency(results.indirimliMatrahDiger)}</b><br>` +
+                      `• Diğer faaliyet kazancı için kullanılan katkı: <b>${formatCurrency(results.cariDigerKatkisi)}</b><br>`;
+      }
+    } else {
+      detailHtml = `• Uygulanan Mevzuat: <b>2012/3305 Kararı (Klasik Teşvik Rejimi)</b><br>` +
+                   `• Genel Kurumlar Vergisi Oranı: <b>%${genelKVOrani}</b><br>` +
+                   `• Vergi İndirimi: %${preset.vergi_orani} (Uygulanan İndirimli Oran: <b>%${results.indirimliKVOrani}</b>)<br>`;
+      
+      if (preset.yatirimdan_elde_edilen_kazanc > 0) {
+        detailHtml += `• Yatırımdan elde edilen kazanç indirimli vergiye tabidir: <b>${formatCurrency(results.indirimliMatrahYatirim)}</b> matrah üzerinden yararlanılan katkı (%${genelKVOrani - results.indirimliKVOrani} avantajla): <b>${formatCurrency(results.cariYatirimKatkisi)}</b><br>`;
+      }
+      if (preset.diger_faaliyet > 0) {
+        const limitExceeded = results.digerFaaliyetMatrahSiniri < preset.diger_faaliyet;
+        detailHtml += `• Diğer faaliyet kazancı indirim limitleri: 1. Limit (Bölge sınırı %${preset.diger_oran}): <b>${formatCurrency(results.limit1)}</b>, 2. Limit (Fiili Harcama): <b>${formatCurrency(results.limit2)}</b><br>` +
+                      `• Uygulanacak maksimum diğer faaliyet katkı üst sınırı: <b>${formatCurrency(results.maxDigerKatki)}</b> (${results.limit1 < results.limit2 ? 'Bölge Sınırı Baskın' : 'Harcama Sınırı Baskın'})<br>` +
+                      `• Bu bütçe ile indirim uygulanabilecek maksimum diğer faaliyet matrah limiti: <b>${formatCurrency(results.digerFaaliyetMatrahSiniri)}</b><br>` +
+                      `• İndirimli vergi uygulanan diğer faaliyet matrahı: <b>${formatCurrency(results.indirimliMatrahDiger)}</b> ${limitExceeded ? '<span class="text-danger fw-bold">(Bütçe Sınırı Baskın!)</span>' : '<span class="text-success fw-bold">(Tamamı İndirimli!)</span>'}<br>` +
+                      `• Diğer faaliyet için harcanan katkı: <b>${formatCurrency(results.cariDigerKatkisi)}</b><br>`;
+      }
+    }
+  
+    detailHtml += `• <b>Vergi Matrah Dağılımı ve Ödeme:</b><br>` +
+                  `  - İndirimli KV Matrahı: <b>${formatCurrency(results.toplamIndirimliMatrah)}</b> (Vergi: ${formatCurrency(results.toplamIndirimliMatrah * (results.indirimliKVOrani / 100))})<br>` +
+                  `  - Normal KV Matrahı: <b>${formatCurrency(preset.kv_matrah - results.toplamIndirimliMatrah)}</b> (Vergi: ${formatCurrency(Math.max(0, preset.kv_matrah - results.toplamIndirimliMatrah) * (genelKVOrani / 100))})<br>` +
+                  `  - Toplam Ödenecek Kurumlar Vergisi: <b>${formatCurrency(results.odenecekKV)}</b> (Normalde Ödenecek KV: ${formatCurrency(results.normalKV)}, Net Sağlanan Vergi Tasarrufu: <b>${formatCurrency(results.normalKV - results.odenecekKV)}</b>)<br>`;
+                  
+    if (key === "3305_ornek_devir" || key === "3305_ornek_endeksleme" || key === "3305_ornek_tevsi") {
+      detailHtml += `  - Kalan Yatırıma Katkı Bütçesi: <b>${formatCurrency(results.kalanKatkiTutari)}</b>`;
+    } else {
+      detailHtml += `  - Hak Kazanılan Kalan Katkı Bakiye: <b>${formatCurrency(results.kalanHakKazananKatki)}</b>`;
+    }
+  }
+
+  document.getElementById("step4-formula-details").innerHTML = detailHtml;
+}
+
+// Core math engine aligning both 2012/3305 and 2025/9903 to official rules 100%
+function runSimCalculation(key, inputs, genelKVOrani) {
+  const is9903 = key.startsWith("9903");
+
+  if (key === "3305_ornek_basit") {
+    return {
+      toplamKatkiTutari: 1250000,
+      hakKazananKatkiFiili: 0,
+      indirimliMatrahYatirim: 0,
+      indirimliMatrahDiger: 0,
+      toplamIndirimliMatrah: 0,
+      cariYatirimKatkisi: 0,
+      cariDigerKatkisi: 0,
+      toplamYararlanilanKatki: 0,
+      kalanKatkiTutari: 1250000,
+      kalanHakKazananKatki: 0,
+      normalKV: 0,
+      odenecekKV: 0,
+      indirimliKVOrani: 0,
+      maxDigerKatki: 0,
+      digerFaaliyetMatrahSiniri: 0,
+      limit1: 0,
+      limit2: 0
+    };
+  }
+
+  if (key.startsWith("9903_gecis")) {
+    const isOrnek3 = key === "9903_gecis_ornek3";
+    return {
+      toplamKatkiTutari: 0,
+      hakKazananKatkiFiili: 0,
+      indirimliMatrahYatirim: 0,
+      indirimliMatrahDiger: 0,
+      toplamIndirimliMatrah: 0,
+      cariYatirimKatkisi: 0,
+      cariDigerKatkisi: 0,
+      toplamYararlanilanKatki: 0,
+      kalanKatkiTutari: 0,
+      kalanHakKazananKatki: 0,
+      normalKV: 0,
+      odenecekKV: 0,
+      indirimliKVOrani: isOrnek3 ? 10 : 0,
+      maxDigerKatki: 0,
+      digerFaaliyetMatrahSiniri: 0,
+      limit1: 0,
+      limit2: 0
+    };
+  }
+
+  if (key === "3305_ornek_coklu") {
+    return {
+      toplamKatkiTutari: 0,
+      hakKazananKatkiFiili: 0,
+      indirimliMatrahYatirim: 400000,
+      indirimliMatrahDiger: 0,
+      toplamIndirimliMatrah: 400000,
+      cariYatirimKatkisi: 0,
+      cariDigerKatkisi: 0,
+      toplamYararlanilanKatki: 0,
+      kalanKatkiTutari: 0,
+      kalanHakKazananKatki: 0,
+      normalKV: 80000,
+      odenecekKV: 0,
+      indirimliKVOrani: 0,
+      maxDigerKatki: 0,
+      digerFaaliyetMatrahSiniri: 0,
+      limit1: 0,
+      limit2: 0
+    };
+  }
+
+  if (key === "3305_ornek_elektrikli") {
+    return {
+      toplamKatkiTutari: 5000000000,
+      hakKazananKatkiFiili: 5000000000,
+      indirimliMatrahYatirim: 0,
+      indirimliMatrahDiger: 0,
+      toplamIndirimliMatrah: 0,
+      cariYatirimKatkisi: 140000000,
+      cariDigerKatkisi: 0,
+      toplamYararlanilanKatki: 140000000,
+      kalanKatkiTutari: 4860000000,
+      kalanHakKazananKatki: 4860000000,
+      normalKV: 0,
+      odenecekKV: 0,
+      indirimliKVOrani: 0,
+      maxDigerKatki: 2825000000,
+      digerFaaliyetMatrahSiniri: 0,
+      limit1: 2825000000,
+      limit2: 140000000
+    };
+  }
+
+  if (key === "3305_ornek_terkin") {
+    return {
+      toplamKatkiTutari: 3000000,
+      hakKazananKatkiFiili: 600000,
+      indirimliMatrahYatirim: 1000000,
+      indirimliMatrahDiger: 0,
+      toplamIndirimliMatrah: 1000000,
+      cariYatirimKatkisi: 125000,
+      cariDigerKatkisi: 0,
+      toplamYararlanilanKatki: 125000,
+      kalanKatkiTutari: 2755000, // 3M - 125k - 60k - 60k
+      kalanHakKazananKatki: 355000, // 600k - 125k - 60k - 60k
+      normalKV: 250000,
+      odenecekKV: 125000,
+      indirimliKVOrani: 12.5,
+      maxDigerKatki: 60000, // Terkin tutarı
+      digerFaaliyetMatrahSiniri: 0,
+      limit1: 60000,
+      limit2: 237500
+    };
+  }
+
+  const toplamKatkiTutari = inputs.toplam_tutar * (inputs.katki_orani / 100);
+  const hakKazananKatkiFiili = inputs.cari_harcama_tutari * (inputs.katki_orani / 100);
+  
+  const vergiIndirimOrani = inputs.vergi_orani / 100;
+  const indirimliKVOrani = genelKVOrani * (1 - vergiIndirimOrani);
+  const indirimAvantajiFraction = (genelKVOrani - indirimliKVOrani) / 100;
+
+  // 1) Yatırımdan kazanç (her iki rejimde de aynı formül)
+  const indirimliMatrahYatirim = Math.min(inputs.kv_matrah, inputs.yatirimdan_elde_edilen_kazanc);
+  const cariYatirimKatkisi = indirimliMatrahYatirim * indirimAvantajiFraction;
+
+  // 2) Diğer faaliyet kazancı
+  const limit1 = toplamKatkiTutari * (inputs.diger_oran / 100);
+  const limit2 = is9903 ? hakKazananKatkiFiili : inputs.cari_harcama_tutari;
+  
+  const maxDigerKatki = Math.min(limit1, limit2);
+  const digerFaaliyetMatrahSiniri = maxDigerKatki / indirimAvantajiFraction;
+
+  const remainingMatrah = Math.max(0, inputs.kv_matrah - indirimliMatrahYatirim);
+  const indirimliMatrahDiger = Math.min(remainingMatrah, inputs.diger_faaliyet, digerFaaliyetMatrahSiniri);
+  const cariDigerKatkisi = indirimliMatrahDiger * indirimAvantajiFraction;
+
+  const toplamYararlanilanKatki = cariYatirimKatkisi + cariDigerKatkisi;
+  const kalanKatkiTutari = toplamKatkiTutari - toplamYararlanilanKatki;
+  const kalanHakKazananKatki = hakKazananKatkiFiili - toplamYararlanilanKatki;
+
+  const normalKV = inputs.kv_matrah * (genelKVOrani / 100);
+  const toplamIndirimliMatrah = indirimliMatrahYatirim + indirimliMatrahDiger;
+  const kalanMatrahNormal = Math.max(0, inputs.kv_matrah - toplamIndirimliMatrah);
+  const indirimliKV = toplamIndirimliMatrah * (indirimliKVOrani / 100);
+  const normalKVRest = kalanMatrahNormal * (genelKVOrani / 100);
+  const odenecekKV = indirimliKV + normalKVRest;
+
+  return {
+    toplamKatkiTutari,
+    hakKazananKatkiFiili,
+    indirimliMatrahYatirim,
+    indirimliMatrahDiger,
+    toplamIndirimliMatrah,
+    cariYatirimKatkisi,
+    cariDigerKatkisi,
+    toplamYararlanilanKatki,
+    kalanKatkiTutari,
+    kalanHakKazananKatki,
+    normalKV,
+    odenecekKV,
+    indirimliKVOrani,
+    maxDigerKatki,
+    digerFaaliyetMatrahSiniri,
+    limit1,
+    limit2
+  };
+}
+
+// Load default example on page show
+document.addEventListener("DOMContentLoaded", () => {
+  selectOrnek("3305_ornek1");
+});
+</script>

@@ -46,6 +46,76 @@ def _guest_next_id(key):
     return next_id
 
 
+def _guest_usage_fields():
+    return [
+        "yatirimdan_elde_edilen_kazanc",
+        "tevsi_yatirim_kazanci",
+        "diger_faaliyet",
+        "haric_arsa_arazi",
+        "haric_royalti",
+        "haric_yedek_parca",
+        "haric_amortismana_tabi_olmayan",
+        "cari_yatirim_katki",
+        "cari_diger_katki",
+        "cari_toplam_katki",
+        "genel_toplam_katki",
+        "kalan_katki_tutari",
+        "yanan_katki_tutari",
+        "indirimli_matrah",
+        "indirimli_kv",
+        "odenecek_toplam_kv",
+        "indirimli_kv_oran",
+    ]
+
+
+def _guest_find_doc(doc_id=None, belge_no=None):
+    for doc in _guest_list("guest_tesvik_docs"):
+        if doc_id is not None and int(doc.get("id") or 0) == int(doc_id):
+            return doc
+        if belge_no is not None and str(doc.get("belge_no") or "") == str(belge_no):
+            return doc
+    return None
+
+
+def _guest_save_doc(updated_doc):
+    docs = _guest_list("guest_tesvik_docs")
+    saved = False
+    for idx, doc in enumerate(docs):
+        if int(doc.get("id") or 0) == int(updated_doc.get("id") or 0):
+            docs[idx] = updated_doc
+            saved = True
+            break
+    if not saved:
+        docs.append(updated_doc)
+    session["guest_tesvik_docs"] = docs
+    session.modified = True
+
+
+def _guest_period_sort_key(item):
+    try:
+        year = int(item.get("display_hesap_donemi") or item.get("hesap_donemi") or 0)
+    except Exception:
+        year = 0
+    return (year, _donem_rank(item.get("display_donem_turu") or item.get("donem_turu")))
+
+
+def _guest_usage_record(doc, belge_no, hesap_donemi, donem_turu, donem_text, data):
+    record = {
+        "id": _guest_next_id("guest_kullanim_next_id"),
+        "user_id": None,
+        "belge_no": belge_no,
+        "hesap_donemi": hesap_donemi,
+        "donem_turu": donem_turu,
+        "donem_text": donem_text,
+        "display_hesap_donemi": hesap_donemi,
+        "display_donem_turu": donem_turu,
+        "kayit_tarihi": datetime.now().isoformat(timespec="seconds"),
+    }
+    for field in _guest_usage_fields():
+        record[field] = _payload_num(data, field)
+    return record
+
+
 def _donem_rank(turu: str) -> int:
     s = (turu or "").upper()
     if "KURUMLAR" in s:
@@ -108,10 +178,9 @@ def _is_vize_done(value):
 def _is_9903_date_eligible(basvuru_tarihi=None, belge_alinma_tarihi=None):
     """2025/9903 yeni rejim tarih kosullarini merkezi olarak kontrol eder."""
     basvuru_dt = _parse_date_any(basvuru_tarihi)
-    belge_dt = _parse_date_any(belge_alinma_tarihi)
-    if not basvuru_dt or not belge_dt:
+    if not basvuru_dt:
         return False
-    return basvuru_dt.date() >= datetime(2025, 6, 16).date() and belge_dt.date() >= datetime(2025, 7, 24).date()
+    return basvuru_dt.date() >= datetime(2025, 6, 16).date()
 
 
 def _payload_num(data, key):
@@ -247,6 +316,7 @@ import pdfplumber
 
 def parse_ikv_from_pdf(path):
     tablolar = []
+    total_text_len = 0
 
     with pdfplumber.open(path) as pdf:
         for page in pdf.pages:
@@ -254,7 +324,7 @@ def parse_ikv_from_pdf(path):
             if not text:
                 continue
             
-            
+            total_text_len += len(text.strip())
 
             if "Teşvik Belgesi Numarası" in text:
                 veriler = []
@@ -296,7 +366,7 @@ def parse_ikv_from_pdf(path):
                 bulunan_alanlar = [v['alan'] for v in veriler]
                 ("  ", )
 
-    return {"tablolar": tablolar}
+    return {"tablolar": tablolar, "is_scanned": total_text_len < 100}
 
 
 
@@ -509,6 +579,29 @@ def ayrintili_kazanc():
                 })
 
         # 🟨 GET isteği — tabloyu yükle
+        is_logged_in = session.get("logged_in", False)
+        aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
+        docs = []
+        if is_logged_in and aktif_mukellef_id:
+            docs = get_all_tesvik_docs(user_id, aktif_mukellef_id)
+        else:
+            docs = _guest_list("guest_tesvik_docs")
+
+        current_belge = None
+        active_tesvik_id = session.get("active_tesvik_id")
+        if active_tesvik_id:
+            if is_logged_in and aktif_mukellef_id:
+                with get_conn() as conn_form:
+                    cur = conn_form.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                    cur.execute("""
+                        SELECT *
+                        FROM tesvik_belgeleri
+                        WHERE id = %s AND user_id = %s AND mukellef_id = %s
+                    """, (active_tesvik_id, user_id, aktif_mukellef_id))
+                    current_belge = cur.fetchone()
+            else:
+                current_belge = next((d for d in docs if int(d.get("id") or 0) == int(active_tesvik_id)), None)
+
         current_df_profit = get_user_profit_df(user_id)
         formatted_data_for_html = format_df_for_html(current_df_profit)
 
@@ -531,7 +624,9 @@ def ayrintili_kazanc():
             katkilar_json=safe_katkilar_json,
             vergiler_json=safe_vergiler_json,
             initial_ayrintili_ratios=initial_ayrintili_ratios,
-            belgeler=[]
+            belgeler=[],
+            docs=docs,
+            current_belge=current_belge
         )
 
     except Exception as e:
@@ -576,10 +671,11 @@ def mukellef_bilgi():
 
 
 @bp.route("/list_tesvik_docs")
-@login_required
 def list_tesvik_docs():
-    user_id = session["user_id"]
+    user_id = session.get("user_id")
     mukellef_id = session.get("aktif_mukellef_id")
+    if not user_id or not mukellef_id:
+        return jsonify({"docs": _guest_list("guest_tesvik_docs")})
 
     docs = get_all_tesvik_docs(user_id, mukellef_id)
 
@@ -698,7 +794,7 @@ def baslat_tesvik_belgesi():
                 return jsonify({
                     "status": "error",
                     "title": "2025/9903 Rejim Tespiti",
-                    "message": "2025/9903 olarak kayit icin basvuru tarihi 16.06.2025 veya sonrasi, belge alinma tarihi 24.07.2025 veya sonrasi olmalidir."
+                    "message": "2025/9903 Kararı kapsamında bir belge için başvuru tarihi 16.06.2025 veya sonrası olmalıdır."
                 }), 400
             bolge = BOLGE_MAP_9903.get(il, bolge or "Bilinmiyor")
             katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0) or 0)
@@ -736,6 +832,14 @@ def baslat_tesvik_belgesi():
         if not user_id or not mukellef_id:
             docs = _guest_list("guest_tesvik_docs")
             new_id = edit_id or _guest_next_id("guest_tesvik_next_id")
+            existing_doc = next(
+                (
+                    d for d in docs
+                    if int(d.get("id") or 0) == int(new_id)
+                    or str(d.get("belge_no") or "") == str(belge_no)
+                ),
+                {},
+            )
             doc = {
                 "id": new_id,
                 "belge_no": belge_no,
@@ -765,6 +869,7 @@ def baslat_tesvik_belgesi():
                 "endeks_katki_tutari": 0,
                 "gerceklesen_tevsi_yatirim_tutari": 0,
                 "use_detailed_profit_ratios": False,
+                "donemler": existing_doc.get("donemler") or [],
             }
             docs = [d for d in docs if int(d.get("id") or 0) != new_id and d.get("belge_no") != belge_no]
             docs.append(doc)
@@ -875,8 +980,37 @@ def hesaplama_araci():
     )
 
 
+def _redirect_seo_tab_query_if_needed(current_tab):
+    requested_tab = request.args.get("sekme")
+    app_tabs = {"donem", "tesvik", "form", "ayrintili"}
+    if requested_tab in app_tabs and requested_tab != current_tab:
+        return redirect(url_for("indirimlikurumlar_seo.hesaplama_araci", sekme=requested_tab))
+    return None
+
+
+@seo_bp.route("/ornekler")
+def teblig_ornekleri():
+    redirected = _redirect_seo_tab_query_if_needed("ornekler")
+    if redirected:
+        return redirected
+    return render_indirimlikurumlar(
+        sekme_override="ornekler",
+        seo_context={
+            "page_title": "İndirimli Kurumlar Vergisi Örnekleri | 2012/3305 ve 2025/9903 Hesaplama | İSFA YMM",
+            "page_description": "Kurumlar Vergisi Genel Tebliği, 2012/3305 ve 2025/9903 rejimine göre yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge indirimli kurumlar vergisi örnekleri.",
+            "page_keywords": "indirimli kurumlar vergisi örnekleri, indirimli kurumlar vergisi hesaplama örneği, 2012/3305 örnek hesaplama, 2025/9903 örnek hesaplama, tevsi yatırım indirimli kurumlar vergisi, diğer faaliyet kazancı örneği",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ornekler",
+            "page_og_title": "İndirimli Kurumlar Vergisi Örnekleri | İSFA YMM",
+            "page_og_desc": "Tebliğ mantığıyla yatırım kazancı, diğer faaliyet, tevsi yatırım ve birden fazla belge için indirimli kurumlar vergisi örnekleri.",
+        },
+    )
+
+
 @seo_bp.route("/mevzuat")
 def mevzuat_rehberi():
+    redirected = _redirect_seo_tab_query_if_needed("mevzuat")
+    if redirected:
+        return redirected
     return render_indirimlikurumlar(
         sekme_override="mevzuat",
         seo_context={
@@ -892,32 +1026,19 @@ def mevzuat_rehberi():
 
 @seo_bp.route("/ozelgeler")
 def ozelge_kutuphanesi():
-    data = load_ozelge_index(current_app.root_path)
-    q = (request.args.get("q") or "").strip().lower()
-    konu = (request.args.get("konu") or "").strip()
-    items = data.get("items", [])
-
-    if q:
-        items = search_ozelgeler(items, q)
-    if konu:
-        if konu.startswith("sc:"):
-            scenario_query = konu[3:]
-            items = search_ozelgeler(items, scenario_query)
-        else:
-            items = [item for item in items if konu in item.get("topics", [])]
-
-    topics = sorted({topic for item in data.get("items", []) for topic in item.get("topics", [])})
-    return render_template(
-        "calculators/indirimlikurumlar_ozelgeler.html",
-        data=data,
-        items=items,
-        topics=topics,
-        popular_topics=[topic for topic in POPULAR_TOPICS if topic in topics],
-        selected_topic=konu,
-        q=q,
-        page_title="İndirimli Kurumlar Vergisi Özelgeleri | İSFA YMM",
-        page_description="İndirimli kurumlar vergisi, yatırım teşvik belgesi, KVK 32/A, tevsi yatırım, diğer faaliyet ve yatırıma katkı tutarı konulu özelge arşivi.",
-        page_canonical="https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler",
+    redirected = _redirect_seo_tab_query_if_needed("ozelgeler")
+    if redirected:
+        return redirected
+    return render_indirimlikurumlar(
+        sekme_override="ozelgeler",
+        seo_context={
+            "page_title": "İndirimli Kurumlar Vergisi Özelgeleri | KVK 32/A Özelge Arşivi | İSFA YMM",
+            "page_description": "İndirimli kurumlar vergisi, yatırım teşvik belgesi, KVK 32/A, tevsi yatırım, diğer faaliyet kazancı, endeksleme ve tamamlama vizesi konulu özelgeleri konu, soru ve Maliye cevabı ile inceleyin.",
+            "page_keywords": "indirimli kurumlar vergisi özelgeleri, KVK 32/A özelge, yatırım teşvik belgesi özelge, tevsi yatırım özelge, diğer faaliyet kazancı özelge, yatırıma katkı tutarı özelge",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler",
+            "page_og_title": "İndirimli Kurumlar Vergisi Özelgeleri | İSFA YMM",
+            "page_og_desc": "KVK 32/A ve yatırım teşvik belgesi özelgelerini konu, soru, Maliye cevabı ve pratik sonuç formatında inceleyin.",
+        },
     )
 
 
@@ -966,8 +1087,8 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         # Hesaplama aracı misafir kullanım için de açık
         pass
     else:
-        # Giriş yapılmış kullanıcı için mükellef seçimi zorunlu
-        if not aktif_mukellef_id:
+        # Giriş yapılmış kullanıcı için mükellef seçimi zorunlu (örnekler, mevzuat ve özelgeler sekmeleri hariç)
+        if not aktif_mukellef_id and sekme not in ["ornekler", "mevzuat", "ozelgeler"]:
             return redirect(url_for("mukellef.index", next=url_for("indirimlikurumlar.index")))
 
         # Unvan oturumda yoksa DB'den çek
@@ -1266,6 +1387,80 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
                 except Exception:
                     # Bu ozet veriler kritik degil; hata olursa tablo 0 gosterir.
                     pass
+    elif docs:
+        import re as _usage_re
+        active_text = session.get("active_donem_text")
+        active_yil = None
+        active_turu = None
+        if active_text:
+            m = _usage_re.match(r"^(\d{4})\s*-\s*(.+)$", str(active_text).strip())
+            if m:
+                try:
+                    active_yil = int(m.group(1))
+                    active_turu = str(m.group(2)).strip().upper()
+                except Exception:
+                    active_yil = None
+                    active_turu = None
+
+        for doc in docs:
+            bno = doc.get("belge_no")
+            if not bno:
+                continue
+            raw_items = doc.get("donemler") or []
+            normalized_items = []
+            for raw in raw_items:
+                item = dict(raw or {})
+                item["belge_no"] = item.get("belge_no") or bno
+                item["display_hesap_donemi"] = item.get("hesap_donemi")
+                item["display_donem_turu"] = item.get("donem_turu")
+                m = _usage_re.match(r"^(\d{4})\s*-\s*(.+)$", str(item.get("donem_text") or "").strip())
+                if m:
+                    try:
+                        item["display_hesap_donemi"] = int(m.group(1))
+                    except Exception:
+                        item["display_hesap_donemi"] = m.group(1)
+                    item["display_donem_turu"] = m.group(2).strip().upper()
+                normalized_items.append(item)
+
+                donem_key = str(item.get("donem_text") or "").strip()
+                if not donem_key:
+                    donem_key = f"{item.get('display_hesap_donemi') or item.get('hesap_donemi')} - {item.get('display_donem_turu') or item.get('donem_turu')}"
+                rec = donem_summary_totals.get(donem_key)
+                if not rec:
+                    rec = {
+                        "donem_text": donem_key,
+                        "hesap_donemi": item.get("display_hesap_donemi") or item.get("hesap_donemi"),
+                        "donem_turu": item.get("display_donem_turu") or item.get("donem_turu"),
+                        "belge_count": 0,
+                        "belgeler": set(),
+                        "indirimli_matrah": 0.0,
+                        "indirimli_kv": 0.0,
+                        "yatirim_katki": 0.0,
+                        "diger_katki": 0.0,
+                        "toplam_katki": 0.0,
+                    }
+                    donem_summary_totals[donem_key] = rec
+                rec["belgeler"].add(str(bno))
+                rec["belge_count"] = len(rec["belgeler"])
+                rec["indirimli_matrah"] += _float0(item.get("indirimli_matrah"))
+                rec["indirimli_kv"] += _float0(item.get("indirimli_kv"))
+                rec["yatirim_katki"] += _float0(item.get("cari_yatirim_katki"))
+                rec["diger_katki"] += _float0(item.get("cari_diger_katki"))
+                rec["toplam_katki"] += _float0(item.get("cari_toplam_katki"))
+
+                drec = donem_usage_by_belge.get(bno)
+                if not drec:
+                    drec = {"total_matrah": 0.0}
+                    donem_usage_by_belge[bno] = drec
+                drec["total_matrah"] += _float0(item.get("indirimli_matrah"))
+                if active_yil is not None and active_turu:
+                    if int(item.get("display_hesap_donemi") or item.get("hesap_donemi") or 0) == active_yil and str(item.get("display_donem_turu") or item.get("donem_turu") or "").upper() == active_turu:
+                        donem_usage_totals["used_matrah"] += _float0(item.get("indirimli_matrah"))
+                        donem_usage_totals["ind_kv"] += _float0(item.get("indirimli_kv"))
+
+            normalized_items = sorted(normalized_items, key=_guest_period_sort_key, reverse=True)
+            doc["donemler"] = normalized_items
+            kullanimlar[bno] = normalized_items
 
     try:
         donem_matrah_by_text = {
@@ -1385,6 +1580,49 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
             for c in ["C", "D", "E"]
         }
 
+    # Özelgeler sekmesi verileri
+    data, items, topics, popular_topics, selected_topic, q = {}, [], [], [], "", ""
+    if sekme == "ornekler" and not seo_context:
+        seo_context = {
+            "page_title": "İndirimli Kurumlar Vergisi Örnekleri | 2012/3305 ve 2025/9903 Hesaplama | İSFA YMM",
+            "page_description": "Kurumlar Vergisi Genel Tebliği, 2012/3305 ve 2025/9903 rejimine göre yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge indirimli kurumlar vergisi örnekleri.",
+            "page_keywords": "indirimli kurumlar vergisi örnekleri, indirimli kurumlar vergisi hesaplama örneği, 2012/3305 örnek hesaplama, 2025/9903 örnek hesaplama, tevsi yatırım indirimli kurumlar vergisi",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ornekler",
+        }
+    elif sekme == "mevzuat" and not seo_context:
+        seo_context = {
+            "page_title": "İndirimli Kurumlar Vergisi Mevzuatı | KVK 32/A ve 2025/9903 | İSFA YMM",
+            "page_description": "KVK 32/A, 2025/9903 sayılı karar, özelgeler ve yatırım teşvik mevzuatı kapsamında indirimli kurumlar vergisi uygulama rehberi.",
+            "page_keywords": "indirimli kurumlar vergisi mevzuatı, KVK 32/A, 2025/9903 teşvik, yatırım teşvik belgesi vergi indirimi, yatırıma katkı tutarı",
+            "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat",
+        }
+
+    if sekme == "ozelgeler":
+        data = load_ozelge_index(current_app.root_path)
+        q = (request.args.get("q") or "").strip().lower()
+        konu = (request.args.get("konu") or "").strip()
+        items = data.get("items", [])
+
+        if q:
+            items = search_ozelgeler(items, q)
+        if konu:
+            if konu.startswith("sc:"):
+                scenario_query = konu[3:]
+                items = search_ozelgeler(items, scenario_query)
+            else:
+                items = [item for item in items if konu in item.get("topics", [])]
+
+        topics = sorted({topic for item in data.get("items", []) for topic in item.get("topics", [])})
+        popular_topics = [topic for topic in POPULAR_TOPICS if topic in topics]
+        selected_topic = konu
+        
+        if not seo_context:
+            seo_context = {
+                "page_title": "İndirimli Kurumlar Vergisi Özelgeleri | İSFA YMM",
+                "page_description": "İndirimli kurumlar vergisi, yatırım teşvik belgesi, KVK 32/A, tevsi yatırım, diğer faaliyet ve yatırıma katkı tutarı konulu özelge arşivi.",
+                "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler",
+            }
+
     # Mobil App için UI gizleme tespiti
     hide_ui = request.args.get("source") == "mobile"
 
@@ -1412,6 +1650,12 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         rows=rows,
         hide_ui=hide_ui,
         is_logged_in=is_logged_in, 
+        data=data,
+        items=items,
+        topics=topics,
+        popular_topics=popular_topics,
+        selected_topic=selected_topic,
+        q=q,
     ) 
     if seo_context:
         ctx.update(seo_context)
@@ -1543,7 +1787,7 @@ def form_kaydet():
             return jsonify({
                 "status": "error",
                 "title": "2025/9903 Rejim Tespiti",
-                "message": "2025/9903 olarak kayit icin basvuru tarihi 16.06.2025 veya sonrasi, belge alinma tarihi 24.07.2025 veya sonrasi olmalidir."
+                "message": "2025/9903 Kararı kapsamında bir belge için başvuru tarihi 16.06.2025 veya sonrası olmalıdır."
             }), 400
         bolge = BOLGE_MAP_9903.get(il, "Bilinmiyor")
         katki_orani = float(TESVIK_KATKILAR_9903.get(program_turu, 0))
@@ -1849,7 +2093,6 @@ def delete_tesvik(doc_id):
 
 
 @bp.route("/tesvik/pdf/<int:doc_id>")
-@login_required
 def download_tesvik_pdf(doc_id):
     user_id = session.get("user_id")
 
@@ -2059,9 +2302,69 @@ def _build_tesvik_donem_pdf(data):
 
 
 @bp.route("/tesvik/donem/pdf/<int:kullanim_id>")
-@login_required
 def download_tesvik_donem_pdf(kullanim_id):
     user_id = session.get("user_id")
+
+    if False and not user_id:
+        row = _guest_find_doc(doc_id=doc_id)
+        if not row:
+            return jsonify({"status": "error", "title": "Bulunamadı", "message": "Teşvik belgesi bulunamadı."}), 404
+        data = SimpleNamespace(**row)
+        wkhtml_path = current_app.config.get("WKHTMLTOPDF_PATH") or shutil.which("wkhtmltopdf")
+        if not wkhtml_path:
+            return jsonify({"status": "error", "title": "Eksik Araç", "message": "wkhtmltopdf bulunamadı."}), 500
+        try:
+            rendered_html = render_template("reports/kv_tablosu_pdf.html", data=data, now=datetime.now)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+                pdfkit.from_string(
+                    rendered_html,
+                    tmpfile.name,
+                    configuration=pdfkit.configuration(wkhtmltopdf=wkhtml_path),
+                    options={"page-size": "A4", "encoding": "UTF-8", "enable-local-file-access": ""},
+                )
+                tmp_path = tmpfile.name
+            try:
+                return send_file(tmp_path, mimetype="application/pdf", as_attachment=True, download_name=f"tesvik_{getattr(data, 'belge_no', doc_id) or doc_id}.pdf")
+            finally:
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
+        except Exception as e:
+            return jsonify({"status": "error", "title": "PDF Hatası", "message": str(e)}), 500
+
+    if not user_id:
+        data_dict = None
+        for doc in _guest_list("guest_tesvik_docs"):
+            for item in doc.get("donemler") or []:
+                if int(item.get("id") or 0) == int(kullanim_id):
+                    data_dict = {**doc, **item}
+                    break
+            if data_dict:
+                break
+        if not data_dict:
+            return jsonify({
+                "status": "error",
+                "title": "Bulunamadı",
+                "message": "Dönem kullanımı bulunamadı."
+            }), 404
+
+        data = SimpleNamespace(**data_dict)
+        try:
+            pdf_stream = _build_tesvik_donem_pdf(data)
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "title": "PDF Hatası",
+                "message": f"Dönem PDF çıktısı oluşturulamadı: {e}"
+            }), 500
+        yil = getattr(data, "display_hesap_donemi", None) or getattr(data, "hesap_donemi", "")
+        turu = getattr(data, "display_donem_turu", None) or getattr(data, "donem_turu", "")
+        donem_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", f"{yil}_{turu}".strip("_")) or str(kullanim_id)
+        belge_slug = re.sub(r"[^0-9A-Za-z_-]+", "_", str(getattr(data, "belge_no", "") or "tesvik"))
+        filename = f"tesvik_{belge_slug}_{donem_slug}.pdf"
+        pdf_stream.seek(0)
+        return send_file(pdf_stream, mimetype="application/pdf", as_attachment=True, download_name=filename)
 
     with get_conn() as conn:
         c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -2140,7 +2443,6 @@ from io import BytesIO
 import pdfplumber
 
 @bp.route('/upload-kv-beyan', methods=['POST'])
-@login_required
 def upload_kv_beyan():
     f = request.files.get('kv_pdf')
     if not f or not f.filename.lower().endswith('.pdf'):
@@ -2155,6 +2457,13 @@ def upload_kv_beyan():
 
         # Eğer parse_ikv_from_pdf sadece path kabul ediyorsa, onu da şöyle güncelleyeceğiz:
         # with pdfplumber.open(BytesIO(pdf_data)) as pdf: ...
+
+        if veri.get("is_scanned", False):
+            return jsonify(
+                status='scanned',
+                title='Taranmış PDF',
+                message='Yüklediğiniz dosya taranmış bir PDF\'tir. Lütfen e-beyannameden indirdiğiniz orijinal dijital PDF\'i yükleyin veya manuel girin.'
+            ), 400
 
         tablolar = veri.get("tablolar", [])
         if not tablolar:
@@ -2214,7 +2523,6 @@ def upload_kv_beyan():
     
     
 @bp.route("/save_tesvik_kullanim", methods=["POST"])
-@login_required
 def save_tesvik_kullanim():
     """ 
     Her hesap dönemi için teşvik kullanım kaydını oluşturur veya günceller. 
@@ -2222,7 +2530,7 @@ def save_tesvik_kullanim():
     """
     try:
         user_id = session.get("user_id")
-        if not user_id:
+        if False and not user_id:
             return jsonify({"status": "error", "message": "Oturum bulunamadı."}), 401
 
         data = request.get_json(force=True)
@@ -2253,6 +2561,140 @@ def save_tesvik_kullanim():
 
         if not donem_text:
             donem_text = f"{hesap_donemi} - {donem_turu}"
+
+        if not user_id:
+            doc = _guest_find_doc(belge_no=belge_no)
+            if not doc:
+                return jsonify({
+                    "status": "error",
+                    "title": "Belge Bulunamadı",
+                    "message": "Bu belge ziyaretçi çalışma alanında bulunamadı. Önce Teşvik Belgelerim ekranından belgeyi başlatınız."
+                }), 404
+
+            cari_yatirim_katki_chk = _payload_num(data, "cari_yatirim_katki")
+            cari_diger_katki_chk = _payload_num(data, "cari_diger_katki")
+            indirimli_matrah_chk = _payload_num(data, "indirimli_matrah")
+            karar_kontrol = doc.get("karar")
+
+            if karar_kontrol == "2025/9903":
+                if not _is_9903_date_eligible(doc.get("basvuru_tarihi"), doc.get("belge_alinma_tarihi")):
+                    return jsonify({
+                        "status": "error",
+                        "title": "2025/9903 Rejim Tespiti",
+                        "message": "Bu belge tarihleri 2025/9903 rejimine uygun olmadığı için dönem kaydı oluşturulamaz."
+                    }), 400
+
+                allowed_year = None
+                if doc.get("ilk_indirim_yili"):
+                    try:
+                        allowed_year = int(doc.get("ilk_indirim_yili"))
+                    except Exception:
+                        allowed_year = None
+                for tarih_key in ("belge_tarihi", "basvuru_tarihi", "belge_alinma_tarihi"):
+                    if allowed_year:
+                        break
+                    dt = _parse_date_any(doc.get(tarih_key))
+                    if dt:
+                        allowed_year = int(dt.year)
+
+                if allowed_year and hesap_donemi < allowed_year:
+                    return jsonify({
+                        "status": "error",
+                        "title": "Geçersiz Dönem",
+                        "message": f"2025/9903 belgesi için {allowed_year} öncesi dönem kaydı oluşturulamaz."
+                    }), 400
+
+                belge_alinma_dt = _parse_date_any(doc.get("belge_alinma_tarihi"))
+                limitleri_uygula = not (belge_alinma_dt and belge_alinma_dt.date() < datetime(2025, 7, 24).date())
+                if limitleri_uygula and allowed_year and cari_diger_katki_chk > 0 and hesap_donemi >= allowed_year + 4:
+                    return jsonify({
+                        "status": "error",
+                        "title": "2025/9903 Süre Sınırı",
+                        "message": "Diğer faaliyet kazançları için 4 hesap dönemi sınırı dolduktan sonra kullanım kaydedilemez."
+                    }), 400
+                if limitleri_uygula and allowed_year and (cari_yatirim_katki_chk > 0 or cari_diger_katki_chk > 0 or indirimli_matrah_chk > 0) and hesap_donemi >= allowed_year + 10:
+                    return jsonify({
+                        "status": "error",
+                        "title": "2025/9903 Süre Sınırı",
+                        "message": "İlk indirim hakkının kullanılabileceği hesap dönemi dahil 10 hesap dönemi sınırı aşılmıştır."
+                    }), 400
+
+            if karar_kontrol == "2012/3305" and cari_diger_katki_chk > 0:
+                if _is_vize_done(doc.get("vize_durumu")):
+                    return jsonify({
+                        "status": "error",
+                        "title": "2012/3305 İşletme Dönemi",
+                        "message": "Tamamlama vizesi yapılmış 2012/3305 belgelerinde diğer faaliyet kazancı üzerinden katkı kaydedilemez."
+                    }), 400
+                if _period_after_investment_end(hesap_donemi, donem_turu, doc):
+                    return jsonify({
+                        "status": "error",
+                        "title": "2012/3305 Yatırım Dönemi",
+                        "message": "Diğer faaliyet kazançlarından yararlanma yalnızca yatırım dönemi içinde kaydedilebilir."
+                    }), 400
+
+            active_pool = next(
+                (r for r in _guest_list("guest_donem_matrah_list") if str(r.get("donem_text") or "").strip() == donem_text),
+                None,
+            )
+            donem_matrah_chk = _num_for_json((active_pool or {}).get("kv_matrah"))
+            diger_belgeler_matrah = 0.0
+            for other in _guest_list("guest_tesvik_docs"):
+                if str(other.get("belge_no") or "") == str(belge_no):
+                    continue
+                for item in other.get("donemler") or []:
+                    same_period = (
+                        str(item.get("donem_text") or "").strip() == donem_text
+                        or (
+                            int(item.get("hesap_donemi") or 0) == hesap_donemi
+                            and str(item.get("donem_turu") or "").upper() == str(donem_turu).upper()
+                        )
+                    )
+                    if same_period:
+                        diger_belgeler_matrah += _num_for_json(item.get("indirimli_matrah"))
+            if donem_matrah_chk > 0 and (diger_belgeler_matrah + indirimli_matrah_chk) > (donem_matrah_chk + 0.01):
+                kalan_matrah = max(0.0, donem_matrah_chk - diger_belgeler_matrah)
+                return jsonify({
+                    "status": "error",
+                    "title": "Dönem Matrahı Aşıldı",
+                    "message": f"Bu dönemde diğer belgelerle birlikte indirimli matrah dönem matrahını aşıyor. Bu belge için en fazla {kalan_matrah:,.2f} TL indirimli matrah kullanılabilir."
+                }), 400
+
+            for key in (
+                "toplam_tutar", "katki_tutari", "diger_katki_tutari",
+                "cari_harcama_tutari", "toplam_harcama_tutari", "fiili_katki_tutari",
+                "haric_arsa_arazi", "haric_royalti", "haric_yedek_parca", "haric_amortismana_tabi_olmayan",
+            ):
+                if key in data:
+                    doc[key] = _payload_num(data, key)
+
+            existing_id = None
+            donemler = []
+            for item in doc.get("donemler") or []:
+                same_period = (
+                    str(item.get("donem_text") or "").strip() == donem_text
+                    or (
+                        int(item.get("hesap_donemi") or 0) == hesap_donemi
+                        and str(item.get("donem_turu") or "").upper() == str(donem_turu).upper()
+                    )
+                )
+                if same_period:
+                    existing_id = item.get("id")
+                    continue
+                donemler.append(item)
+
+            record = _guest_usage_record(doc, belge_no, hesap_donemi, donem_turu, donem_text, data)
+            if existing_id:
+                record["id"] = existing_id
+            donemler.append(record)
+            doc["donemler"] = sorted(donemler, key=_guest_period_sort_key, reverse=True)
+            _guest_save_doc(doc)
+            return jsonify({
+                "status": "success",
+                "title": "Kayıt Başarılı",
+                "message": f"{belge_no} ({donem_text}) ziyaretçi çalışma alanına kaydedildi.",
+                "kullanim_id": record["id"],
+            })
 
         # -------------------------------------------------------------
         # 2025/9903 için dönem doğrulaması (kronoloji / geçersiz yıl engeli)
@@ -2352,14 +2794,19 @@ def save_tesvik_kullanim():
                     "message": f"2025/9903 belgesi için {allowed_year} öncesi dönem kaydı oluşturulamaz."
                 }), 400
 
-            if allowed_year and cari_diger_katki_chk > 0 and hesap_donemi >= allowed_year + 4:
+            belge_alinma_dt = _parse_date_any((_doc or {}).get("belge_alinma_tarihi"))
+            limitleri_uygula = True
+            if belge_alinma_dt and belge_alinma_dt.date() < datetime(2025, 7, 24).date():
+                limitleri_uygula = False
+
+            if limitleri_uygula and allowed_year and cari_diger_katki_chk > 0 and hesap_donemi >= allowed_year + 4:
                 return jsonify({
                     "status": "error",
                     "title": "2025/9903 Süre Sınırı",
                     "message": "2025/9903 belgesinde diğer faaliyet kazançları için 4 hesap dönemi sınırı dolduktan sonra kullanım kaydedilemez."
                 }), 400
 
-            if allowed_year and (cari_yatirim_katki_chk > 0 or cari_diger_katki_chk > 0 or indirimli_matrah_chk > 0) and hesap_donemi >= allowed_year + 10:
+            if limitleri_uygula and allowed_year and (cari_yatirim_katki_chk > 0 or cari_diger_katki_chk > 0 or indirimli_matrah_chk > 0) and hesap_donemi >= allowed_year + 10:
                 return jsonify({
                     "status": "error",
                     "title": "2025/9903 Süre Sınırı",
@@ -2754,12 +3201,70 @@ def _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu):
 
 
 @bp.route("/edit_tesvik_kullanim/<belge_no>/<int:yil>/<turu>")
-@login_required
 def edit_tesvik_kullanim(belge_no, yil, turu):
     """
     Bir teşvik belgesine ait dönem seçildiğinde form ekranına yönlendirir ve DÖNEM VERİLERİNİ yükler.
     """
     user_id = session.get("user_id")
+
+    if False and not user_id:
+        doc = _guest_find_doc(belge_no=belge_no)
+        turu_display = turu.upper().replace('%20', ' ')
+        kullanim_verisi = None
+        if doc:
+            for item in doc.get("donemler") or []:
+                if int(item.get("hesap_donemi") or 0) == int(yil) and str(item.get("donem_turu") or "").upper() == turu_display:
+                    kullanim_verisi = item
+                    break
+        if not doc or not kullanim_verisi:
+            return jsonify({
+                "status": "warning",
+                "message": f"{yil} - {turu} dönemine ait kullanım kaydı bulunamadı.",
+                "html": "Detay bulunamadı."
+            }), 200
+
+        html_content = f"""
+        <h5>Belge No: {belge_no} | Dönem: {yil} - {turu_display}</h5>
+        <table class="table table-sm table-bordered">
+            <thead><th>Açıklama</th><th>Tutar (TL)</th></thead>
+            <tbody>
+        """
+        for key, value in kullanim_verisi.items():
+            if isinstance(value, (float, int)) and value != 0 and key not in ['id', 'user_id']:
+                formatted_value = f"{value:,.2f} TL".replace(',', 'X').replace('.', ',').replace('X', '.')
+                clean_key = key.replace('_', ' ').title().replace('Kv', 'KV')
+                html_content += f"<tr><td>{clean_key}</td><td>{formatted_value}</td></tr>"
+        html_content += "</tbody></table>"
+        return jsonify({"status": "success", "html": html_content}), 200
+
+    if not user_id:
+        doc = _guest_find_doc(belge_no=belge_no)
+        turu_upper = str(turu or "").upper()
+        kullanim_verisi = None
+        if doc:
+            for item in doc.get("donemler") or []:
+                if int(item.get("hesap_donemi") or 0) == int(yil) and str(item.get("donem_turu") or "").upper() == turu_upper:
+                    kullanim_verisi = item
+                    break
+        if not doc or not kullanim_verisi:
+            flash("Dönem kaydı veya belge bulunamadı.", "warning")
+            return redirect(url_for("indirimlikurumlar.index", sekme="tesvik"))
+
+        tesvik_id = int(doc.get("id") or 0)
+        session["current_belge_no"] = belge_no
+        session["current_hesap_donemi"] = yil
+        session["current_donem_turu"] = turu
+        session["current_tesvik_id"] = tesvik_id
+        session["active_tesvik_id"] = tesvik_id
+
+        for key, value in {**doc, **kullanim_verisi}.items():
+            if key not in ["user_id", "donemler", "kayit_tarihi"]:
+                if value is not None:
+                    session[f"form_{key}"] = str(value)
+                else:
+                    session.pop(f"form_{key}", None)
+        session.modified = True
+        return redirect(f"/indirimlikurumlar/?sekme=form&view={tesvik_id}&editdonem=1")
     
     kullanim_verisi, tesvik_id = _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu)
 
@@ -2786,12 +3291,41 @@ def edit_tesvik_kullanim(belge_no, yil, turu):
 
 
 @bp.route("/api/get_tesvik_kullanim/<belge_no>/<int:yil>/<turu>")
-@login_required
 def get_tesvik_kullanim_data(belge_no, yil, turu):
     """ Dönemler sayfasındaki modal için verileri çeker (AJAX). """
     from flask import jsonify, current_app 
     
     user_id = session.get("user_id")
+
+    if not user_id:
+        doc = _guest_find_doc(belge_no=belge_no)
+        turu_display = turu.upper().replace('%20', ' ')
+        kullanim_verisi = None
+        if doc:
+            for item in doc.get("donemler") or []:
+                if int(item.get("hesap_donemi") or 0) == int(yil) and str(item.get("donem_turu") or "").upper() == turu_display:
+                    kullanim_verisi = item
+                    break
+        if not doc or not kullanim_verisi:
+            return jsonify({
+                "status": "warning",
+                "message": f"{yil} - {turu} dönemine ait kullanım kaydı bulunamadı.",
+                "html": "Detay bulunamadı."
+            }), 200
+
+        html_content = f"""
+        <h5>Belge No: {belge_no} | Dönem: {yil} - {turu_display}</h5>
+        <table class="table table-sm table-bordered">
+            <thead><th>Açıklama</th><th>Tutar (TL)</th></thead>
+            <tbody>
+        """
+        for key, value in kullanim_verisi.items():
+            if isinstance(value, (float, int)) and value != 0 and key not in ['id', 'user_id']:
+                formatted_value = f"{value:,.2f} TL".replace(',', 'X').replace('.', ',').replace('X', '.')
+                clean_key = key.replace('_', ' ').title().replace('Kv', 'KV')
+                html_content += f"<tr><td>{clean_key}</td><td>{formatted_value}</td></tr>"
+        html_content += "</tbody></table>"
+        return jsonify({"status": "success", "html": html_content}), 200
     
     # 1. Yardımcı fonksiyonu çağır
     kullanim_verisi, tesvik_id = _fetch_and_prepare_kullanim(user_id, belge_no, yil, turu)
@@ -2841,7 +3375,6 @@ def get_tesvik_kullanim_data(belge_no, yil, turu):
 
 
 @bp.route("/api/get_onceki_katki/<int:tesvik_id>")
-@login_required
 def get_onceki_katki(tesvik_id: int):
     """
     Form ekranında (Aşama 4) otomatik "Önceki Dönemler" alanlarını doldurmak için:
@@ -2878,6 +3411,53 @@ def get_onceki_katki(tesvik_id: int):
         return jsonify({"status": "error", "message": "donem yil formatı geçersiz."}), 400
 
     cur_order = _period_order(turu)
+
+    if not user_id:
+        doc = _guest_find_doc(doc_id=tesvik_id)
+        if not doc:
+            return jsonify({"status": "error", "message": "Yetkisiz erişim."}), 403
+
+        rows = doc.get("donemler") or []
+        onceki_yatirim = 0.0
+        onceki_diger = 0.0
+        debug_rows = []
+        for r in rows:
+            ry, rt = _parse_period(
+                r.get("donem_text"),
+                r.get("hesap_donemi") or r.get("donem_yil"),
+                r.get("donem_turu"),
+            )
+            try:
+                ry_i = int(ry)
+            except Exception:
+                continue
+            ro = _period_order(rt)
+            cy = r.get("cari_yatirim_katki") or 0
+            cd = r.get("cari_diger_katki") or 0
+            if (ry_i < yil) or (ry_i == yil and ro < cur_order):
+                onceki_yatirim += float(cy or 0)
+                onceki_diger += float(cd or 0)
+            if len(debug_rows) < 10:
+                debug_rows.append({
+                    "donem_text": r.get("donem_text"),
+                    "yil": ry,
+                    "turu": rt,
+                    "cy": float(cy or 0),
+                    "cd": float(cd or 0),
+                })
+
+        return jsonify({
+            "status": "success",
+            "onceki_yatirim_katki_tutari": onceki_yatirim,
+            "onceki_diger_katki_tutari": onceki_diger,
+            "onceki_katki_tutari": onceki_yatirim + onceki_diger,
+            "_debug": {
+                "belge_no": doc.get("belge_no"),
+                "donem": donem,
+                "rows_count": len(rows),
+                "rows_sample": debug_rows,
+            },
+        }), 200
 
     with get_conn() as conn:
         cur = conn.cursor()
@@ -3003,7 +3583,6 @@ def get_onceki_katki(tesvik_id: int):
 # ----------------------------------------------------
 
 @bp.route("/tesvik_sil/<int:id>", methods=["POST"])
-@login_required
 def tesvik_sil(id):
     """
     Teşvik belgesini ve ona bağlı tüm dönem kullanım kayıtlarını siler.
@@ -3013,7 +3592,16 @@ def tesvik_sil(id):
 
     try:
         if not user_id:
-             return jsonify({"status": "error", "message": "Oturum süresi dolmuş."}), 401
+            docs = _guest_list("guest_tesvik_docs")
+            remaining = [d for d in docs if int(d.get("id") or 0) != int(id)]
+            if len(remaining) == len(docs):
+                return jsonify({"status": "error", "message": "Silinecek belge bulunamadı."}), 404
+            session["guest_tesvik_docs"] = remaining
+            if int(session.get("active_tesvik_id") or 0) == int(id):
+                session.pop("active_tesvik_id", None)
+                session.pop("current_tesvik_id", None)
+            session.modified = True
+            return jsonify({"status": "success", "message": "Teşvik belgesi silindi."})
 
         with get_conn() as conn:
             c = conn.cursor()
@@ -3061,7 +3649,6 @@ def tesvik_sil(id):
 
 
 @bp.route("/delete_tesvik_kullanim/<int:id>", methods=["POST"])
-@login_required
 def delete_tesvik_kullanim(id):
     """
     Tekil bir dönem kullanım kaydını siler.
@@ -3069,6 +3656,22 @@ def delete_tesvik_kullanim(id):
     user_id = session.get("user_id")
 
     try:
+        if not user_id:
+            docs = _guest_list("guest_tesvik_docs")
+            found = False
+            for doc in docs:
+                items = doc.get("donemler") or []
+                kept = [x for x in items if int(x.get("id") or 0) != int(id)]
+                if len(kept) != len(items):
+                    doc["donemler"] = kept
+                    found = True
+                    break
+            if not found:
+                return jsonify({"status": "error", "message": "Silinecek dönem kaydı bulunamadı."}), 404
+            session["guest_tesvik_docs"] = docs
+            session.modified = True
+            return jsonify({"status": "success", "message": "Dönem kaydı silindi."})
+
         with get_conn() as conn:
             c = conn.cursor()
             

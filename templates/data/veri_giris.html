@@ -163,6 +163,7 @@
                         <h5 class="fw-bold text-dark">Dosyaları Sürükleyin veya Seçin</h5>
                         <p class="text-muted small">PDF, XML, XLSX veya XLS formatları (Max 20MB)</p>
                         <input type="file" id="fileElem" name="files[]" accept=".pdf,.xml,.xlsx,.xls" class="d-none" multiple required>
+                        <input type="file" id="mizan_file" name="mizan_file" accept=".xlsx,.xls" class="d-none" onchange="handleMizanFileSelect(this)">
                         <button type="button" class="btn btn-primary px-4 py-2 mt-2" style="border-radius: 12px;">Dosya Gözat</button>
                     </div>
 
@@ -314,6 +315,10 @@
                     <label class="form-label small fw-bold text-muted">YENİ UNVAN</label>
                     <input type="text" id="newUnvanInput" class="form-control bg-light border-0" placeholder="Yeni şirket ünvanı" style="border-radius: 12px; height: 48px;">
                 </div>
+                <div class="mb-4" id="newVknInputGroup" style="display: none;">
+                    <label class="form-label small fw-bold text-muted">YENİ MÜKELLEF VKN (10 VEYA 11 HANELİ)</label>
+                    <input type="text" id="newVknInput" class="form-control bg-light border-0" placeholder="Yeni şirket vergi/TC kimlik numarası" style="border-radius: 12px; height: 48px;">
+                </div>
                 <div class="mb-4">
                     <label class="form-label small fw-bold text-muted">DÖNEM (YIL)</label>
                     <input type="text" id="modalDonemInput" class="form-control bg-light border-0" placeholder="Örn: 2024" style="border-radius: 12px; height: 48px;">
@@ -334,6 +339,13 @@ const mukellefSilUrl = "{{ url_for('data.mukellef_sil') }}";
 const donemSilUrl = "{{ url_for('data.donem_sil') }}";
 const kaydetMizanMetaUrl = "{{ url_for('data.kaydet_mizan_meta') }}";
 let currentMizanFilename = '';
+let uploadedFilesMap = {};
+
+function handleMizanFileSelect(input) {
+    if (input.files.length > 0) {
+        uploadFiles(input.files);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const fileElem = document.getElementById("fileElem");
@@ -364,6 +376,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function uploadFiles(files) {
+    [...files].forEach(f => {
+        uploadedFilesMap[f.name] = f;
+    });
     const formData = new FormData();
     [...files].forEach(f => formData.append("files[]", f));
     const xhr = new XMLHttpRequest();
@@ -464,26 +479,67 @@ function handleUploadMessages(messages) {
 }
 
 function toggleNewUnvanInput() {
-    document.getElementById('newUnvanInputGroup').style.display =
-        document.getElementById('modalUnvanSelect').value === 'yeni' ? 'block' : 'none';
+    const isYeni = document.getElementById('modalUnvanSelect').value === 'yeni';
+    document.getElementById('newUnvanInputGroup').style.display = isYeni ? 'block' : 'none';
+    document.getElementById('newVknInputGroup').style.display = isYeni ? 'block' : 'none';
 }
 
 function saveMizanInfo() {
-    let finalUnvan = document.getElementById('modalUnvanSelect').value;
-    if (finalUnvan === 'yeni') finalUnvan = document.getElementById('newUnvanInput').value;
-    const donem = document.getElementById('modalDonemInput').value;
+    const unvanSelect = document.getElementById('modalUnvanSelect');
+    const donem = document.getElementById('modalDonemInput').value.trim();
+    const currentMizanFile = uploadedFilesMap[currentMizanFilename];
+    
+    if (!currentMizanFile) {
+        return Swal.fire('Hata', 'Dosya bulunamadı. Lütfen dosyayı tekrar yükleyin.', 'error');
+    }
+    if (!donem) {
+        return Swal.fire('Hata', 'Dönem boş olamaz.', 'error');
+    }
+    if (!/^\d{4}$/.test(donem)) {
+        return Swal.fire('Hata', 'Dönem 4 haneli yıl olmalı.', 'error');
+    }
 
-    if (!finalUnvan || !donem) return Swal.fire('Hata', 'Unvan ve dönem boş olamaz.', 'error');
-    if (!/^\d{4}$/.test(donem)) return Swal.fire('Hata', 'Dönem 4 haneli yıl olmalı.', 'error');
+    let vkn = "";
+    let unvan = "";
+
+    if (unvanSelect.value === 'yeni') {
+        vkn = document.getElementById('newVknInput').value.trim();
+        unvan = document.getElementById('newUnvanInput').value.trim();
+        if (!vkn || !unvan) {
+            return Swal.fire('Hata', 'Yeni mükellef için VKN ve Unvan girilmelidir.', 'error');
+        }
+        if (!/^\d{10,11}$/.test(vkn)) {
+            return Swal.fire('Hata', 'VKN 10 veya 11 haneli sayı olmalıdır.', 'error');
+        }
+    } else {
+        vkn = unvanSelect.value;
+        if (!vkn) {
+            return Swal.fire('Hata', 'Lütfen bir mükellef seçin veya yeni ekleyin.', 'error');
+        }
+    }
 
     const formData = new FormData();
-    formData.append('vkn', finalUnvan);
+    formData.append('vkn', vkn);
+    if (unvan) {
+        formData.append('unvan', unvan);
+    }
     formData.append('donem', donem);
-    formData.append('filename', currentMizanFilename);
+    formData.append('mizan_file', currentMizanFile);
+
+    // Loading Swal
+    Swal.fire({
+        title: 'Kaydediliyor',
+        html: 'Mizan verileri işleniyor ve kaydediliyor...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading()
+        }
+    });
 
     fetch(kaydetMizanMetaUrl, { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {
+            Swal.close();
             if (data.status === 'success') {
                 bootstrap.Modal.getInstance(document.getElementById('mizanInfoModal')).hide();
                 Swal.fire({ icon: 'success', title: 'Başarılı', text: data.message, timer: 1500, showConfirmButton: false });
@@ -491,6 +547,10 @@ function saveMizanInfo() {
             } else {
                 Swal.fire('Hata!', data.message, 'error');
             }
+        })
+        .catch(err => {
+            Swal.close();
+            Swal.fire('Hata!', 'Sunucuya bağlanırken hata oluştu.', 'error');
         });
 }
 

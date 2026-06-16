@@ -334,7 +334,7 @@ def sitemap_xml():
         ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}), ('main.kv_istisna_indirimler', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
-        ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
+        ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.teblig_ornekleri', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
         ('indirimlikurumlar_seo.ozelge_kutuphanesi', {}),
     ]
     priority_map = {
@@ -342,6 +342,7 @@ def sitemap_xml():
         'calculators.gelir_vergisi': '0.9',
         'calculators.index': '0.8',
         'indirimlikurumlar_seo.hesaplama_araci': '0.9',
+        'indirimlikurumlar_seo.teblig_ornekleri': '0.8',
         'indirimlikurumlar_seo.mevzuat_rehberi': '0.8',
         'indirimlikurumlar_seo.ozelge_kutuphanesi': '0.8',
         'main.kv_istisna_indirimler': '0.9',

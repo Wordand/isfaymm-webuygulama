@@ -1,0 +1,1092 @@
+
+--- Page 211 ---
+- Diğer kazançlar (indirim kapsamında olmayan) 500.000 TL
+Matrah 2.000.000 TL
+İhracat faaliyetinden elde
+edilen kazanç
+İndirimli oran uygulanacak matrah: Matrah x
+Ticari bilanço karı
+İndirimli oran uygulanacak matrah: 2.000.000 TL x (1.500.000/2.000.000)
+: 2.000.000 TL x %75
+: 1.500.000 TL
+(O) A.Ş.’nin 2023 yılı matrahının tamamına Kurumlar Vergisi Kanununun 32/A maddesi kapsamında indirimli kurumlar
+vergisi uygulanacağı için yatırım teşvik belgesindeki %80 vergi indirim oranı,
+- Matrahın, ihracat faaliyetinden elde edilen kazanç nedeniyle 5 puan indirim uygulanan 1.500.000 TL’lik kısmı için
+(%25-%5=) %20 oranına,
+-Matrahın kalan 500.000 TL’lik kısmı için de % 25 oranına uygulanacaktır.
+Dolayısıyla, matrahın 1.500.000 TL’lik kısmına [%20 - (%20 x %80)] %4 oranı uygulanırken, matrahın kalan 500.000
+TL’lik kısmına [%25 - (%25 x %80)] %5 oranı uygulanacaktır. (O) A.Ş. indirimli kurumlar vergisi uygulaması dolayısıyla 2023
+yılında (240.000 TL + 100.000 TL) olmak üzere 340.000 TL tutarında yatırıma katkı tutarından yararlanmış olacaktır.
+Öte yandan, (O) A.Ş.’nin Kurumlar Vergisi Kanununun 32/A maddesi kapsamında indirimli kurumlar vergisinden
+yararlanmaması halinde, 2.000.000 TL’lik 2023 yılı matrahının 1.500.000 TL’lik kısmı için kurumlar vergisi oranını (%25-%5=)
+%20 olarak, matrahın kalan 500.000 TL’lik kısmı için ise genel oranı (%25) dikkate alacaktır.
+32.1.2.12. Diğer hususlar
+32.1.2.12.1. Genel giderlerin dağılımı
+İndirim kapsamında kabul edilen faaliyetler ile bu kapsama girmeyen işlerin birlikte yapılması halinde, indirim
+uygulanacak kazanca ilişkin hasılat, gider ve maliyet unsurlarının ayrı olarak tespit edilmesi esastır. Söz konusu indirim
+kapsamında kabul edilen faaliyetlerden elde edilen kazancın, kurumlar vergisi matrahının tespiti açısından, hasılat, maliyet ve
+gider unsurlarının; ayrı ayrı izlenmesi, diğer faaliyetlerle ilişkilendirilmemesi ve kayıtların da bu ayrımı sağlayacak şekilde
+tutulması gerekmektedir.
+Gider ve maliyet unsurlarının ayrı hesaplarda izlenmek suretiyle tespitinin mümkün olmadığı hallerde ise müşterek
+genel giderler, indirim kapsamında olan faaliyetler ile indirim kapsamında olmayan faaliyetler arasında uygun bir dağıtım
+anahtarı tespit edilerek dağıtılabilecektir.
+Öte yandan, indirim kapsamındaki faaliyetler ile bu kapsamda değerlendirilmeyen faaliyetlerde müştereken kullanılan
+tesisat, makine ve ulaştırma vasıtalarına ilişkin amortismanların ise bunların her bir işte kullanıldıkları gün sayısına göre
+dağıtımının yapılması gerekmektedir. Hangi işte ne kadar süreyle kullanıldığı tespit edilemeyen sabit kıymetlere ilişkin
+amortismanlar ise müşterek genel giderlerle birlikte dağıtıma tabi tutulacaktır.
+32.1.2.12.2. Münhasıran üretim veya ihracat kazançlarına isabet eden kur farkı ve diğer gelirlerin durumu
+Gerek ihracat faaliyeti gerekse üretim faaliyeti kapsamında doğan alacaklara isabet eden kur farkı, faiz ve benzeri gelirler
+indirim uygulanacak kurum kazancı kapsamında değerlendirilirken, bu faaliyetler kapsamındaki alacakların tahsilinden sonra
+oluşan kur farkı, faiz ve benzeri gelirlerin ise söz konusu indirimden yararlanamayacağı tabiidir.
+32.2. İndirimli kurumlar vergisi (Değişik bölüm: RG-4/9/2025- 33007)230
+230 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden önceki
+hali için 10 Seri No.lu Kurumlar Vergisi Genel Tebliğine bakınız.
+211
+--- Page 212 ---
+Kurumlar Vergisi Kanununun 20/7/2025 tarihli ve 7555 sayılı Kanunun 18 inci maddesiyle değiştirilen 32/A maddesinde,
+kurumlar vergisi oranının, Sanayi ve Teknoloji Bakanlığı tarafından düzenlenen yatırım teşvik belgesi kapsamında
+gerçekleştirilen yatırımlardan elde edilen kazançlara yatırımın kısmen veya tamamen işletilmesine başlanılan hesap
+döneminden itibaren yatırıma katkı tutarına ulaşıncaya kadar, indirim hakkının kullanılabileceği ilk hesap dönemi dahil en
+fazla on hesap dönemi %60 indirimli olarak uygulanacağı hüküm altına alınmıştır.
+24/7/2025 tarihli ve 32965 sayılı Resmî Gazete’de yayımlanan 7555 sayılı Kanunun 18 inci maddesiyle yapılan
+değişikliklerin yürürlük tarihi, 16/6/2025 tarihinden önce başvurusu yapılmış ve reddedilmemiş olanlar hariç, yayımı
+tarihinden itibaren alınan yatırım teşvik belgelerine uygulanmak üzere yayımı tarihi olarak belirlenmiştir. Buna göre, indirim
+hakkının kullanılabileceği ilk hesap dönemi dahil en fazla on hesap dönemine ilişkin sınırlama, 16/6/2025 tarihinden önce
+başvurusu yapılmış ve reddedilmemiş olanlar hariç, 24/7/2025 tarihinden itibaren (bu tarih dahil) alınan yatırım teşvik
+belgeleri yönünden geçerli olacaktır.
+Örnek 1: (A) A.Ş., 11/6/2025 tarihinde yatırım teşvik belgesi için Sanayi ve Teknoloji Bakanlığına başvurmuş, bu
+başvurusuna istinaden 18/8/2025 tarihinde de teşvik belgesini almıştır.
+Bu durumda, 16/6/2025 tarihinden önce başvurusu yapılan teşvik belgesi için, 5520 sayılı Kanunun 7555 sayılı Kanunla
+değiştirilmeden önceki 32/A maddesi hükümleri geçerli olacaktır.
+Örnek 2: (B) A.Ş., 23/6/2025 tarihinde yatırım teşvik belgesi için Sanayi ve Teknoloji Bakanlığına başvurmuş, bu
+başvurusuna istinaden 17/7/2025 tarihinde de teşvik belgesini almıştır.
+Bu durumda, 24/7/2025 tarihinden önce teşvik belgesini alan (B) A.Ş., 5520 sayılı Kanunun 7555 sayılı Kanunla
+değiştirilmeden önceki 32/A maddesi hükümlerini dikkate alarak indirimli kurumlar vergisini uygulayacaktır.
+Örnek 3: (C) A.Ş., 27/6/2025 tarihinde yatırım teşvik belgesi için Sanayi ve Teknoloji Bakanlığına başvurmuş, bu
+başvurusuna istinaden 13/8/2025 tarihinde de teşvik belgesini almıştır.
+Bu durumda, 24/7/2025 tarihinden sonra teşvik belgesini alan (C) A.Ş., 5520 sayılı Kanunun 7555 sayılı Kanunla
+değiştirilen 32/A maddesi hükümlerini dikkate alarak indirimli kurumlar vergisini uygulayacaktır.
+Örnek 4: (D) A.Ş., 11/9/2025 tarihinde alınmış yatırım teşvik belgesi kapsamındaki toplam 30.000.000 TL’lik yatırımına
+8/10/2025 tarihinde başlamış olup bu yatırıma ilişkin olarak 2025 hesap dönemi sonu itibarıyla 8.000.000 TL tutarında yatırım
+harcaması yapmıştır. Şirketin 2025 hesap döneminde indirimli kurumlar vergisi uygulamasından yararlanabileceği 1.000.000
+TL matrahı bulunmaktadır.
+Buna göre mükellef, 2025 hesap dönemi itibarıyla indirimli kurumlar vergisi uygulamasından yararlanmaya başlayacak
+olup, 2034 hesap dönemi sonu itibarıyla indirimli vergi uygulaması son bulacaktır. 2034 hesap döneminde kullanılamayan
+yatırıma katkı tutarı kalması halinde, 2035 hesap dönemi ve sonrasında kalan yatırıma katkı tutarı kullanılamayacaktır.
+(D) A.Ş.’nin 2025 hesap döneminde indirim hakkını kullanabileceği matrahı bulunmaması ve indirim hakkının ilk olarak
+2026 hesap döneminde ortaya çıkması halinde, 2035 hesap dönemi sonuna kadar indirimli vergi uygulanabilecektir.
+On yıllık süreye yönelik sınırlama, her bir yatırım teşvik belgesi bazında ayrı ayrı dikkate alınacaktır.
+Ayrıca, 16/6/2025 tarihinden önce başvurusu yapılmış ve reddedilmemiş olanlar hariç, 24/7/2025 tarihinden itibaren
+alınan yatırım teşvik belgelerine uygulanmak üzere indirimli vergi oranı da %60 olarak belirlenmiştir.
+Kazanç bulunmasına rağmen yararlanılmayan yatırıma katkı tutarları müteakip dönemlerde dikkate alınamaz. Buna
+göre, ilgili hesap dönemlerinde faydalanma imkanı bulunmakta iken faydalanılmayan yatırıma katkı tutarlarının, izleyen
+dönemlerde kullanılması mümkün değildir.
+Tebliğde geçen, 24/7/2025 tarihinden itibaren alınan yatırım teşvik belgeleri ibareleri, aksi belirtilmedikçe, 16/6/2025
+tarihinden önce başvurusu yapılmış ve reddedilmemiş olanlar hariç, 24/7/2025 tarihinden itibaren alınan yatırım teşvik
+belgelerini ifade etmektedir.
+32.2.1. Kapsam (Değişik bölüm: RG-4/9/2025-33007)231
+231 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden önceki
+hali için 10 ve 11 Seri No.lu Kurumlar Vergisi Genel Tebliğlerine bakınız.
+212
+--- Page 213 ---
+Kurumlar vergisi mükelleflerinin, Sanayi ve Teknoloji Bakanlığınca yatırım teşvik belgesine bağlanan yatırımlarından,
+yatırımın kısmen veya tamamen işletilmesine başlanılan hesap döneminden itibaren elde ettikleri kazançları dolayısıyla
+indirimli kurumlar vergisi uygulamasından faydalanmaları mümkündür.
+Ayrıca, 7555 sayılı Kanunla Kurumlar Vergisi Kanununun 32/A maddesinin değiştirilen üçüncü fıkrasının (c) bendinde, bu
+maddeye göre hesaplanacak yatırıma katkı tutarına mahsuben, toplam yatırıma katkı tutarının %50’sini ve hak edilen yatırıma
+katkı tutarını geçmemek üzere; indirim hakkının kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna
+kadar kurumun diğer faaliyetlerinden elde edilen kazançlarına indirimli vergi oranı uygulatmak suretiyle yatırıma katkı tutarını
+kısmen kullandırmaya, bu oranı sıfıra kadar indirmeye Cumhurbaşkanının yetkili olduğu hüküm altına alınmıştır.
+Buna göre, mükelleflerin, yatırım teşvik belgesi kapsamındaki yatırımlarından elde ettikleri kazançlarının yanı sıra toplam
+yatırıma katkı tutarının Cumhurbaşkanı Kararı ile belirlenen kısmına ilişkin olarak, dört hesap dönemiyle sınırlı şekilde diğer
+faaliyetlerinden elde ettikleri kazançlarına da indirimli kurumlar vergisi uygulanması mümkündür.
+İndirimli vergi oranı uygulamasından gelir vergisi mükellefleri de yararlanabilecektir.
+32.2.2. İndirimli vergi oranından yararlanamayacaklar
+Finans ve sigortacılık sektörlerinde faaliyet gösteren kurumlar ile iş ortaklıklarının indirimli kurumlar vergisi
+uygulamasından faydalanması mümkün değildir.
+Ayrıca taahhüt işlerinden, 16/7/1997 tarihli ve 4283 sayılı Yap-İşlet Modeli ile Elektrik Enerjisi Üretim Tesislerinin
+Kurulması ve İşletilmesi ile Enerji Satışının Düzenlenmesi Hakkında Kanun ve 8/6/1994 tarihli ve 3996 sayılı Bazı Yatırım ve
+Hizmetlerin Yap-İşlet-Devret Modeli Çerçevesinde Yaptırılması Hakkında Kanun kapsamında yapılan yatırımlar ile rödovans
+sözleşmelerine bağlı olarak yapılan yatırımlardan elde edilen kazançlar dolayısıyla da mükelleflerin indirimli vergi oranı
+uygulamasından yararlanması mümkün değildir.
+32.2.3. İndirimli kurumlar vergisi uygulaması
+Yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazançlara, ilgili teşvik belgesinde yer alan yatırıma katkı
+ve vergi indirim oranları dikkate alınarak yatırımın kısmen veya tamamen işletilmesine başlanılan hesap döneminden itibaren,
+yatırıma katkı tutarına ulaşılıncaya kadar (Ek ibare: RG-4/9/2025-33007)232 indirim hakkının kullanılabileceği ilk hesap
+dönemi dahil en fazla on hesap dönemi boyunca indirimli kurumlar vergisi uygulanabilecektir.
+Yatırıma katkı tutarı, indirimli kurumlar vergisi uygulanmak suretiyle tahsilinden vazgeçilen vergi yoluyla yatırımların
+Devletçe karşılanacak tutarını, bu tutarın yapılan toplam yatırım tutarına bölünmesi suretiyle bulunacak oran ise yatırıma
+katkı oranını ifade etmektedir.
+Örnek 1: (A) A.Ş.’nin yatırım teşvik belgesi kapsamındaki yatırımının toplam tutarı 5.000.000 TL ve yatırıma katkı oranı
+%25’tir. Bu durumda toplam yatırıma katkı tutarı aşağıdaki şekilde hesaplanacaktır.
+Toplam yatırıma katkı tutarı = Toplam yatırım harcaması x Yatırıma katkı oranı
+= 5.000.000 TL x %25
+= 1.250.000 TL
+Söz konusu toplam yatırıma katkı tutarı, yatırımdan elde edilen kazanca indirimli kurumlar vergisi uygulanmak
+suretiyle Devletin tahsilinden vazgeçeceği kurumlar vergisi tutarını ifade etmektedir.
+(Değişik paragraf: RG-4/9/2025-33007)233 Öte yandan Cumhurbaşkanı, yatırım harcamaları içindeki arsa, bina,
+kullanılmış makine, yedek parça, yazılım, patent, lisans ve know-how bedeli gibi harcamaların oranlarını ayrı ayrı veya topluca
+sınırlandırmaya yetkili olup bu yetki çerçevesinde çıkarılan 29/5/2025 tarihli ve 9903 sayılı Cumhurbaşkanı Kararı eki
+Yatırımlarda Devlet Yardımları Hakkında Karar (Karar) uyarınca, arazi, arsa, royalti, yedek parça ve amortismana tâbi olmayan
+diğer harcamalar indirimli kurumlar vergisi uygulamasına konu edilemeyecektir. Dolayısıyla yatırıma katkı tutarının
+232 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+233 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden
+önceki hali için 10 seri No.lu Kurumlar Vergisi Genel Tebliğine bakınız.
+213
+--- Page 214 ---
+hesaplanmasında arazi, arsa, royalti ve yedek parça harcamaları ile amortismana tâbi olmayan diğer harcamalar dikkate
+alınmayacaktır.
+Yatırım teşvik belgesi kapsamındaki yatırımlardan elde edilen kazançlarla ilgili olarak indirimli kurumlar vergisi
+uygulamasına, yatırımın kısmen veya tamamen işletilmeye başlandığı geçici vergi döneminden itibaren başlanılır. Yatırımın
+işletilmeye başlandığı geçici vergi döneminden itibaren yatırımdan elde edilen kazanca, teşvik belgesinde yer alan ve vergi
+indirimi içeren yatırım tutarını aşmamak üzere, gerçekleştirilen yatırım harcaması dolayısıyla (Ek ibare: RG-4/9/2025-
+33007)234 on yıllık süreyle sınırlı olmak kaydıyla hak kazanılan yatırıma katkı tutarına ulaşılıncaya kadar indirimli oranda
+kurumlar vergisi uygulanır.
+Örnek 2: Yeni kurulan (B) A.Ş.’nin 2014 hesap döneminde başlamış olduğu ve yatırım teşvik belgesi kapsamındaki
+komple yeni yatırımının toplam tutarı 8.000.000 TL’dir. 2015 hesap döneminde kısmen işletilmeye başlanan bu yatırımın
+1.000.000 TL’lik kısmı gerçekleştirilmiş ve (B) A.Ş. söz konusu yatırımdan bu hesap döneminde 300.000 TL kazanç elde etmiştir.
+(Yatırıma katkı oranı: %40, vergi indirim oranı: %60)
+Toplam yatırıma katkı tutarı = Toplam yatırım harcaması x Yatırıma katkı oranı
+= 8.000.000 TL x %40
+= 3.200.000 TL
+2015 hesap döneminde hak kazanılan yatırıma katkı tutarı = Gerçekleştirilen yatırım harcaması x Yatırıma katkı oranı
+= 1.000.000 TL x %40
+= 400.000 TL
+Buna göre, (B) A.Ş.’nin yatırım teşvik belgesi kapsamındaki bu yatırımından 2015 hesap döneminde elde ettiği kazanca
+uygulanacak indirimli kurumlar vergisi oranı ile yararlanılan yatırıma katkı tutarı aşağıdaki gibi olacaktır.
+İndirimli KV oranı = [KV oranı - (KV oranı x Vergi indirim oranı)]
+= [%20 - (%20 x %60)] = [%20 - %12] = %8
+- Yatırımdan elde edilen kazanç …………………………………………………….. : 300.000 TL
+- İndirimli KV olmasaydı ödenecek KV (300.000 TL x %20)…….….......... : 60.000 TL
+- İndirimli orana göre hesaplanan KV (300.000 TL x %8)………………….. : 24.000 TL
+- Yararlanılan yatırıma katkı tutarı (60.000 TL - 24.000 TL)………........... : 36.000 TL
+(B) A.Ş.’nin yatırım teşvik belgesi kapsamındaki yatırımının kısmen işletilmesinden 2015 hesap döneminde elde ettiği
+300.000 TL kazancına indirimli kurumlar vergisi uygulanmak suretiyle faydalandığı yatırıma katkı tutarı 36.000 TL’dir.
+Dolayısıyla, yapılan yatırım harcaması nedeniyle 2015 hesap döneminde hak kazanılan 400.000 TL’lik yatırıma katkı tutarının
+bu dönemde faydalanılamayan (400.000 TL - 36.000 TL) 364.000 TL’lik kısmından izleyen hesap dönemlerinde bu yatırımdan
+elde edilen kazançlara indirimli vergi oranı uygulanmak suretiyle yararlanılabilecektir.
+(Ek paragraf: RG-4/9/2025-33007)235 Bu örnekte yer alan yatırım teşvik belgesinin 24/7/2025 tarihinden itibaren
+alınan bir belge olması durumunda, indirim hakkının kullanılabileceği ilk hesap dönemi dahil en fazla on hesap dönemi
+süresince indirimli oran uygulanacaktır.
+234 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+235 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+214
+--- Page 215 ---
+32.2.4. İndirimli vergi uygulamasına ilişkin Cumhurbaşkanına verilen yetki (Başlığıyla birlikte değişik bölüm: RG-
+4/9/2025-33007)236
+Cumhurbaşkanı, Kanunun 32/A maddesinin 7555 sayılı Kanunla değişik üçüncü fıkrasının;
+- (a) bendi ile istatistikî bölge birimleri sınıflandırması ile kişi başına düşen milli gelir veya sosyoekonomik gelişmişlik
+düzeylerini dikkate almak suretiyle illeri ve ilçeleri gruplandırmaya ve bu gruplar, Gökçeada ve Bozcaada'da yapılan yatırımlar,
+sektörler, teknoloji alanları, Ar-Ge veya tasarım faaliyetleri, sanayi bölgeleri, kültür ve turizm koruma ve gelişim bölgeleri veya
+oluşturulacak teşvik programları itibarıyla teşvik edilecek yatırım konularına ilişkin yatırım ve istihdam büyüklüklerini
+belirlemeye,
+- (b) bendi ile (a) bendinde belirtilen yatırımlar için yatırıma katkı oranını %50'yi geçmemek üzere belirlemeye,
+- (c) bendi ile yatırım teşvik belgesi kapsamında bu maddeye göre hesaplanacak yatırıma katkı tutarına mahsuben,
+toplam yatırıma katkı tutarının %50'sini ve hak edilen yatırıma katkı tutarını geçmemek üzere; indirim hakkının
+kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna kadar kurumun diğer faaliyetlerinden elde edilen
+kazançlarına indirimli kurumlar vergisi oranı uygulatmak suretiyle yatırıma katkı tutarını kısmen kullandırmaya, bu oranı sıfıra
+kadar indirmeye,
+- (ç) bendi ile yatırım harcamaları içindeki arsa, bina, kullanılmış makine, yedek parça, yazılım, patent, lisans ve know-
+how bedeli gibi harcamaların oranlarını ayrı ayrı veya topluca sınırlandırmaya,
+- (d) bendi ile 6745 sayılı Kanun kapsamındaki yatırımlar için, birinci fıkra ile (c) bendindeki süreleri bir katına kadar, (c)
+bendindeki oranı %100'e kadar artırmaya,
+yetkilidir.
+Bu yetki çerçevesinde Cumhurbaşkanınca, 9903 sayılı Cumhurbaşkanı Kararı eki Yatırımlarda Devlet Yardımları
+Hakkında Karar başta olmak üzere indirimli vergi oranı uygulamasına ilişkin belirlemeler yapılmıştır.
+32.2.5. Diğer faaliyetlerden elde edilen kazançlarda indirimli kurumlar vergisi uygulaması (Başlığıyla birlikte değişik
+bölüm: RG-4/9/2025- 33007)237
+Yatırım teşvik belgesinde yer alan yatırıma katkı ve vergi indirim oranı dikkate alınarak ilgili teşvik belgesi kapsamındaki
+yatırımlardan elde edilen kazançlara indirimli kurumlar vergisi uygulanması esastır.
+Kanunun 32/A maddesinin ikinci fıkrasına 6322 sayılı Kanunla eklenen (c) bendi hükmüyle, mükelleflerin yatırım teşvik
+belgesi kapsamındaki yatırımlarının yatırım döneminde diğer faaliyetlerinden 1/1/2013 tarihinden itibaren elde ettikleri
+kazançlarına, indirimli kurumlar vergisi uygulanması suretiyle yatırıma katkı tutarının kısmen kullandırılması mümkün hale
+gelmiştir.
+24/7/2025 tarihinden itibaren alınan teşvik belgelerinde ise, diğer faaliyetlerden elde edilen kazançlara ilişkin uygulama
+aşağıdaki açıklamalar çerçevesinde olacaktır.
+Mükelleflerin, yatırım teşvik belgeleri kapsamında yatırımlarına fiilen başladıkları tarihten itibaren, hesaplanacak
+yatırıma katkı tutarına mahsuben;
+a) Toplam yatırıma katkı tutarının Cumhurbaşkanı Kararı ile belirlenen oranını geçmemek ve
+b) Hak edilen yatırıma katkı tutarını aşmamak
+üzere, indirim hakkının kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna kadar diğer
+faaliyetlerinden elde ettikleri kazançlarına indirimli kurumlar vergisi uygulanabilecektir.
+Buna göre, 24/7/2025 tarihinden itibaren alınan yatırım teşvik belgeleri kapsamındaki yatırımlarda indirim hakkının
+kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna kadar, mükelleflerin diğer faaliyetlerinden elde
+ettikleri kazançlarına indirimli kurumlar vergisi uygulanmak suretiyle kısmen yararlanılabilecek yatırıma katkı tutarı, en fazla
+toplam yatırıma katkı tutarının Cumhurbaşkanı Kararı ile belirlenen oranına tekabül eden kısmı kadar olabilecektir. İndirim
+hakkının kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna kadar, yatırım teşvik belgesi kapsamında
+2364/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden önceki
+hali için 10 ve 11 Seri No.lu Kurumlar Vergisi Genel Tebliğlerine bakınız.
+2374/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden önceki
+hali için 10 Seri No.lu Kurumlar Vergisi Genel Tebliğine bakınız.
+215
+--- Page 216 ---
+hak edilen yatırıma katkı tutarının, bu dönemde yararlanılabilecek yatırıma katkı tutarından (toplam yatırıma katkı tutarının
+Cumhurbaşkanı Kararı ile belirlenen oranına tekabül eden kısmı) daha düşük olması halinde diğer faaliyetlerden elde edilen
+kazançlara indirimli kurumlar vergisi uygulanmak suretiyle kısmen yararlanılacak yatırıma katkı tutarı, hak edilen yatırıma
+katkı tutarını aşamayacaktır.
+İndirim hakkının kullanılabileceği ilk hesap dönemi dahil dördüncü hesap döneminin sonuna kadar olan süre, yatırım
+teşvik belgesi kapsamındaki yatırıma fiilen başlanılan tarihi içeren hesap döneminin başından, dördüncü hesap döneminin
+sonuna kadar olan dönemi kapsamaktadır.
+Örnek 1: (B) A.Ş., 18/8/2025 tarihinde alınmış yatırım teşvik belgesi kapsamında yatırım harcamasına başlamış olup
+yatırımını henüz işletmeye başlamamıştır. Şirketin, 2025 hesap döneminde diğer faaliyetlerinden elde edilen kazançları
+dolayısıyla indirimli kurumlar vergisi uygulamasından yararlanabileceği matrahı bulunmaktadır.
+Buna göre, mükellef 2025 hesap döneminde diğer faaliyetlerden elde edilen kazançları için indirimli kurumlar vergisi
+uygulamasından yararlanmaya başlayacak olup, diğer faaliyetlerinden elde edilen kazançlar için yatırıma katkı tutarının
+kullanımı, 2028 hesap dönemi itibarıyla son bulacaktır. 2028 hesap döneminde de bu kapsamda kullanılamayan yatırıma katkı
+tutarı kalması halinde, 2029 hesap dönemi ve sonrasında kalan yatırıma katkı tutarı hakkı diğer faaliyetlerden elde edilen
+kazançlar için kullanılamayacaktır.
+(B) A.Ş.’nin 2025 hesap döneminde diğer faaliyetlerden elde ettiği kazançları dolayısıyla indirim hakkını kullanılabileceği
+matrahı bulunmaması ve indirim hakkının ilk olarak 2026 hesap döneminde ortaya çıkması halinde, diğer faaliyetlerden elde
+edilen kazançları için en son 2029 hesap dönemi sonuna kadar indirimli vergi uygulanabilecektir.
+Örnek 2: (D) A.Ş. 24/7/2025 tarihinden sonra alınmış yatırım teşvik belgesi kapsamındaki toplam 21.000.000 TL’lik
+yatırımına 2/9/2025 tarihinde başlamış olup, bu yatırıma ilişkin olarak 2025 hesap dönemi sonu itibarıyla 12.000.000 TL
+tutarında yatırım harcaması yapmıştır. 2026 hesap döneminde de devam eden bu yatırımını henüz işletmeye başlamamış olan
+(D) A.Ş., 2025 hesap döneminde diğer faaliyetlerinden 30.000.000 TL kazanç elde etmiş olup bu tutar aynı zamanda (D)
+A.Ş.’nin kurumlar vergisi matrahıdır. (Yatırıma katkı oranı: %40, vergi indirim oranı: %60, yatırıma katkı tutarının diğer
+faaliyetlerden elde edilen kazançlara uygulanabilecek kısmı: %50)
+Buna göre (D) A.Ş.’nin toplam yatırıma katkı tutarı, (21.000.000 TL x %40) 8.400.000 TL’dir.
+(D) A.Ş., henüz işletilmeyen bu yatırımından kazanç elde etmediği için 2025 hesap döneminde sadece diğer
+faaliyetlerinden elde ettiği kazançlarına indirimli kurumlar vergisi uygulayabilecektir.
+Diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulamasındaki üst sınır:
+- 1. sınır:
+Diğer faaliyetlerden elde edilen kazançlar [(Toplam yatırım harcaması x Yatırıma
+=
+için yararlanılabilecek yatırıma katkı tutarı katkı oranı) x Belirlenen oran]
+= [(21.000.000 TL x %40) x %50]
+= 4.200.000 TL
+- 2. sınır:
+Hak edilen yatırıma katkı tutarı = (12.000.000 TL x %40)
+= 4.800.000 TL
+24/7/2025 tarihinden itibaren alınan yatırım teşvik belgeleri kapsamındaki yatırımların mükelleflerin diğer
+faaliyetlerinden elde ettikleri kazançlarına indirimli kurumlar vergisi uygulanmak suretiyle kısmen yararlanılabilecek yatırıma
+216
+--- Page 217 ---
+katkı tutarı, en fazla toplam yatırıma katkı tutarının Cumhurbaşkanı Kararı ile belirlenen oranına tekabül eden kısmı kadar
+olabileceğinden, (D) A.Ş.’nin diğer faaliyetlerinden elde ettiği kazançlara, yararlanılacak yatırıma katkı tutarı 4.200.000 TL’yi
+geçmemek üzere, indirimli kurumlar vergisi uygulanabilecektir.
+(D) A.Ş.’nin 2025 hesap döneminde diğer faaliyetlerden elde ettiği kazançlarına ilişkin indirimli kurumlar vergisi
+uygulaması aşağıdaki gibi olacaktır.
+İndirimli KV oranı = [KV oranı - (KV oranı x Vergi indirim oranı)]
+= [%25 - (%25 x %60)] = [%25 - %15] = %10
+- Diğer faaliyetlerden elde edilen kazanç (KV matrahı) : 30.000.000 TL
+- İndirimli KV olmasaydı ödenecek KV : 7.500.000 TL
+- 2025 hesap döneminde diğer faaliyetlerden elde edilen kazançlar
+için yararlanılabilecek yatırıma katkı tutarı : 4.200.000 TL
+- İndirimli KV matrahı [Yararlanılabilecek yatırıma katkı tutarı /
+(KV oranı - İndirimli KV oranı)] = [4.200.000 TL / (%25 - %10)] : 28.000.000 TL
+- İndirimli orana tabi matrah üzerinden hesaplanan KV
+(28.000.000 TL x %10) : 2.800.000 TL
+- Genel orana tabi matrah (30.000.000 TL – 28.000.000 TL) : 2.000.000 TL
+- Genel orana tabi matrah üzerinden hesaplanan
+KV (2.000.000 TL x %25) : 500.000 TL
+- Ödenecek toplam KV (2.800.000 TL + 500.000 TL) : 3.300.000 TL
+(D) A.Ş.’nin diğer faaliyetlerden elde ettiği kazancının 28.000.000 TL’lik kısmına indirimli kurumlar vergisi oranı
+uygulanması nedeniyle tahsilinden vazgeçilen kurumlar vergisi tutarı [(28.000.000 TL x %25) - (28.000.000 TL x %10)]
+4.200.000 TL’dir. Buna göre, (D) A.Ş. bu yatırımı dolayısıyla diğer faaliyetlerden elde edilen kazançlar için yararlanabileceği
+yatırıma katkı tutarının (4.200.000 TL) tamamından, 2025 hesap döneminde diğer faaliyetlerden elde edilen kazancına
+indirimli kurumlar vergisi uygulanmak suretiyle faydalanmıştır. Dolayısıyla, (D) A.Ş.’nin henüz tamamlanmamış bu yatırımı
+nedeniyle 2026 ve sonraki hesap dönemlerinde diğer faaliyetlerinden elde ettiği kazançlarına indirimli kurumlar vergisi
+uygulanmasına imkân bulunmamaktadır.
+Öte yandan, toplam yatırıma katkı tutarının kalan [(21.000.000 TL x %40) - 4.200.000 TL] 4.200.000 TL’lik kısmının, bu
+yatırımın işletilmesinden elde edilecek kazançlara indirimli kurumlar vergisi uygulanmak suretiyle kullanılabileceği tabiidir.
+Örnek 3: (E) A.Ş. 24/7/2025 tarihinden sonra alınmış yatırım teşvik belgesi kapsamındaki toplam 35.000.000 TL
+tutarındaki yatırımına 18/8/2025 tarihinde başlamış olup 2025 hesap dönemi içinde bu yatırımına ilişkin olarak 2.800.000 TL
+yatırım harcaması yapmıştır. (Yatırıma katkı oranı: %30, vergi indirim oranı: %60, yatırıma katkı tutarının diğer faaliyetlerden
+elde edilen kazançlara uygulanabilecek kısmı: %50)
+(E) A.Ş. yatırımını 12/3/2026 tarihinde fiilen tamamlamış olup 15/4/2026 tarihinde tamamlama vizesinin yapılması için
+Sanayi ve Teknoloji Bakanlığına müracaat etmiştir.
+Hesap dönemi olarak takvim yılını kullanan (E) A.Ş. indirim hakkının kullanılabileceği ilk hesap dönemi dahil dördüncü
+hesap döneminin sonuna kadar diğer faaliyetlerinden elde ettiği kazançlara indirimli kurumlar vergisi uygulayabilecektir.
+(E) A.Ş. 2025 hesap döneminde diğer faaliyetlerinden 25.000.000 TL kazanç elde etmiştir. Bu dönemde (E) A.Ş.’nin söz
+konusu yeni yatırımından herhangi bir kazancı bulunmamaktadır.
+217
+--- Page 218 ---
+Diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulamasındaki üst sınır:
+- 1. sınır:
+Diğer faaliyetlerden elde edilen kazançlar
+= [(35.000.000 TL x %30) x %50]
+için yararlanılabilecek yatırıma katkı tutarı
+= 5.250.000 TL
+- 2. sınır:
+Hak edilen yatırıma katkı tutarı = (2.800.000 TL x %30)
+= 840.000 TL
+Dolayısıyla, (E) A.Ş.’nin 2025 hesap döneminde diğer faaliyetlerinden elde ettiği 25.000.000 TL kazancına, yararlanılacak
+yatırıma katkı tutarı 840.000 TL’yi geçmemek üzere, indirimli kurumlar vergisi uygulanabilecektir.
+İndirimli KV oranı [%25 - (%25 x %60)] = [%25 - %15] : %10
+- Diğer faaliyetlerden elde edilen kazanç (KV matrahı) : 25.000.000 TL
+- İndirimli KV olmasaydı ödenecek KV : 6.250.000 TL
+- 2025 hesap döneminde diğer faaliyetlerden elde edilen
+kazançlar için yararlanılabilecek yatırıma katkı tutarı : 840.000 TL
+- İndirimli KV matrahı [840.000 / (%25 - %10)] : 5.600.000 TL
+- İndirimli orana tabi matrah üzerinden hesaplanan
+KV (5.600.000 TL x %10) : 560.000 TL
+- Genel orana tabi matrah (25.000.000 TL – 5.600.000 TL) : 19.400.000 TL
+- Genel orana tabi matrah üzerinden hesaplanan
+KV (19.400.000 TL x %25) : 4.850.000 TL
+- Ödenecek toplam KV (560.000 TL + 4.850.000 TL) : 5.410.000 TL
+2025 hesap döneminde diğer faaliyetlerden elde edilen kazanca indirimli kurumlar vergisi oranı uygulanması nedeniyle
+tahsilinden vazgeçilen kurumlar vergisi tutarı [(5.600.000 TL x %25) - (5.600.000 TL x %10)] 840.000 TL’dir. Buna göre, toplam
+yatırıma katkı tutarının diğer faaliyetlerden elde edilen kazançlar için yararlanılabilecek 5.250.000 TL’lik kısmından kalan
+(5.250.000 - 840.000 TL) 4.410.000 TL’lik tutar için, ilave yatırım harcaması yapılarak en az bu tutar kadar hak edilen yatırıma
+katkı tutarı olması kaydıyla müteakip üç hesap dönemi içinde diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar
+vergisi uygulanabilecektir.
+Öte yandan, toplam yatırıma katkı tutarının dört hesap dönemi içinde diğer faaliyetlerden elde edilen kazançlar için
+kullanılmayan kısmının, hak kazanılan yatırıma katkı tutarını aşmamak üzere, ilk dört hesap dönemi dahil on hesap dönemi
+içerisinde bu yatırımın işletilmesinden elde edilecek kazançlara indirimli kurumlar vergisi uygulanmak suretiyle
+kullanılabileceği tabiidir.
+Buna göre (E) A.Ş.’nin, 2028 hesap döneminden sonra diğer faaliyetlerinden elde ettiği kazançlar genel oranda kurumlar
+vergisine tabi tutulacak olup, 2029 ila 2034 hesap dönemlerinde, toplam yatırıma katkı tutarının ilk dört hesap döneminde
+kullanılmayan kısmına ulaşılıncaya kadar, sadece yatırım teşvik belgesi kapsamındaki bu yatırımdan elde edilen kazançlara
+indirimli kurumlar vergisi uygulanabilecektir.
+218
+--- Page 219 ---
+Örnek 4: (F) A.Ş.’nin 24/7/2025 tarihinden sonra alınmış yatırım teşvik belgesi kapsamında 2025 hesap döneminde
+başlamış olduğu yatırımının toplam tutarı 12.000.000 TL’dir. 2025 hesap döneminde kısmen işletilmeye başlanan bu yatırımın
+6.000.000 TL’lik kısmı gerçekleştirilmiş ve (F) A.Ş. 2025 hesap döneminde bu yatırımından 2.000.000 TL, diğer faaliyetlerinden
+de 20.000.000 TL kazanç elde etmiştir.
+(Yatırıma katkı oranı: %40, vergi indirim oranı: %60, yatırıma katkı tutarının diğer faaliyetlerden elde edilen kazançlara
+uygulanabilecek kısmı: %50)
+Bu durumda;
+Yatırıma katkı tutarı = Toplam yatırım harcaması x Yatırıma katkı oranı
+= 12.000.000 TL x %40
+= 4.800.000 TL
+2025 hesap döneminde gerçekleştirilen = Gerçekleştirilen yatırım harcaması x
+yatırım dolayısıyla hak kazanılan Yatırıma katkı oranı
+yatırıma katkı tutarı
+= 6.000.000 TL x %40
+= 2.400.000 TL
+İndirimli KV oranı = [KV oranı - (KV oranı x Vergi indirim oranı)]
+= [%25 - (%25 x %60)] = [%25 - %15] = %10
+- Yatırımdan elde edilen kazanç : 2.000.000 TL
+- İndirimli KV olmasaydı ödenecek KV : 500.000 TL
+- İndirimli KV oranı : %10
+- İndirimli orana göre hesaplanan KV (2.000.000 TL x %10) : 200.000 TL
+- Yararlanılan yatırıma katkı tutarı (500.000 TL - 200.000 TL) : 300.000 TL
+(F) A.Ş. yatırım teşvik belgesi kapsamındaki henüz tamamlanmamış yatırımından 2025 hesap döneminde elde ettiği
+2.000.000 TL kazancı üzerinden indirimli orana göre (%10 oranında) hesaplanan 200.000 TL kurumlar vergisini ödeyecek ve
+300.000 TL yatırıma katkı tutarından faydalanabilecektir.
+Öte yandan (F) A.Ş.’nin, 2025 hesap döneminde diğer faaliyetlerinden elde ettiği kazançlarına da indirimli kurumlar
+vergisi uygulanması mümkün bulunmaktadır. Bu kapsamda yararlanılacak yatırıma katkı tutarıyla ilgili hesaplama ise aşağıdaki
+şekilde olacaktır.
+Diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulamasındaki üst sınır:
+- 1. Sınır:
+Diğer faaliyetlerden elde edilen kazançlar için = [(12.000.000 TL x %40) x %50]
+yararlanılabilecek yatırıma katkı tutarı
+= 2.400.000 TL
+219
+--- Page 220 ---
+- 2. Sınır:
+Hak edilen yatırıma katkı tutarı = (6.000.000 TL x %40)
+= 2.400.000 TL
+- Kurumlar vergisi matrahı : 22.000.000 TL
+- İndirimli KV olmasaydı ödenecek KV (22.000.000 TL x %25) : 5.500.000 TL
+- Yararlanılabilecek azami yatırıma katkı tutarı (Diğer
+faaliyetlerden elde edilen kazançlar dolayısıyla) : 2.400.000 TL
+- İndirimli KV oranı [%25 - (%25 x %60)] = [%25 - %15] : %10
+- İndirimli KV matrahı [2.400.000 / (%25 - %10)] (Diğer
+faaliyetlerden elde edilen kazançlar dolayısıyla) : 16.000.000 TL
+- İndirimli KV matrahı toplamı (16.000.000 TL + 2.000.000 TL) : 18.000.000 TL
+- İndirimli orana göre hesaplanan KV (18.000.000 TL x %10) : 1.800.000 TL
+- Genel orana tabi matrah (20.000.000 TL – 16.000.000 TL) : 4.000.000 TL
+- Genel orana göre hesaplanan KV (4.000.000 TL x %25) : 1.000.000 TL
+- Ödenecek toplam KV (1.800.000 TL + 1.000.000 TL) : 2.800.000 TL
+- Yararlanılan toplam yatırıma katkı tutarı
+(2.400.000 TL+300.000 TL) : 2.700.000 TL
+Yatırıma katkı tutarına ilişkin olarak diğer faaliyetlerden elde edilen kazanca indirimli kurumlar vergisi oranı
+uygulanması nedeniyle tahsilinden vazgeçilen kurumlar vergisi tutarı [(16.000.000 TL x %25) - (16.000.000 TL x %10)]
+2.400.000 TL’dir. Buna göre, diğer faaliyetlerden elde edilen kazançlara indirimli kurumlar vergisi uygulanmak suretiyle
+yararlanılabilecek 2.400.000 TL’lik toplam yatırıma katkı tutarının tamamından 2025 hesap döneminde faydalanılmıştır.
+Dolayısıyla, (F) A.Ş.’nin müteakip üç hesap döneminde, diğer faaliyetlerinden elde ettiği kazançlarına bu yatırımı dolayısıyla
+indirimli kurumlar vergisi uygulanması mümkün bulunmamakta olup diğer faaliyetlerinden elde ettiği kazançlar genel oranda
+kurumlar vergisine tabi tutulacaktır.
+Öte yandan, toplam yatırıma katkı tutarının kalan (4.800.000 TL – 2.400.000 TL) 2.400.000 TL’lik kısmının, bu yatırımın
+işletilmesinden elde edilecek kazançlara indirimli kurumlar vergisi uygulanmak suretiyle kullanılabileceği tabiidir.
+2025 hesap döneminde bu yatırımın kısmen işletilmesinden elde edilen kazanca indirimli kurumlar vergisi uygulanması
+nedeniyle (F) A.Ş., [(2.000.000 TL x %25) - (2.000.000 TL x %10)] 300.000 TL tutarında yatırıma katkı tutarından faydalanmıştır.
+Dolayısıyla, on hesap dönemiyle sınırlı olacak şekilde, kalan (2.400.000 TL - 300.000 TL) 2.100.000 TL’lik yatırıma katkı tutarına
+ulaşılıncaya kadar, gerçekleştirilen yatırım harcaması üzerinden hak kazanılan yatırıma katkı tutarını aşmamak üzere, sadece
+yatırım teşvik belgesi kapsamındaki bu yatırımdan elde edilen kazançlara indirimli kurumlar vergisi uygulanabilecektir.
+32.2.6. Diğer faaliyetlerden elde edilen kazancın kapsamı ve indirimli vergi oranı uygulamasında öncelik sırası
+(Değişik bölüm: RG-4/9/2025-33007)238
+İndirimli vergi oranı uygulamasında, mükelleflerin yatırım teşvik belgeleri kapsamındaki yatırımlarının işletilmesinden
+elde edilen kazançları dışında kalan tüm kazançları diğer faaliyetlerden elde edilen kazanç olarak kabul edilecektir.
+238 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden
+önceki hali için 10 Seri No.lu Kurumlar Vergisi Genel Tebliğine bakınız.
+220
+--- Page 221 ---
+Dolayısıyla, yatırım teşvik belgeleri kapsamındaki yatırımlardan elde edilen kazançlara, ilgili teşvik belgesinde yer alan
+vergi indirim oranı dikkate alınarak indirimli vergi uygulanması esas olup, yatırım teşvik belgeleri kapsamındaki yatırımlardan
+elde edilen kazançlar, indirimli vergi uygulamasında diğer faaliyetlerden elde edilen kazanç olarak değerlendirilmeyecektir.
+Ancak, yatırım teşvik belgesi kapsamındaki yatırımların tamamlanmış ve indirimli vergi oranı uygulanmak suretiyle
+yatırıma katkı tutarlarının tamamının kullanılmış olması veya on yıllık sürenin dolması halinde, bu yatırımlardan, hak kazanılan
+yatırıma katkı tutarının tamamının kullanıldığı veya on yıllık sürenin dolduğu hesap döneminden itibaren elde edilen kazançlar,
+indirimli vergi uygulamasında diğer faaliyetlerden elde edilen kazanç olarak değerlendirilebilecektir.
+Mükelleflerin birden fazla yatırım teşvik belgesinin bulunması ve indirim hakkının kullanılabileceği ilk hesap
+dönemi dahil dördüncü hesap döneminin sonuna kadar diğer faaliyetlerden elde edilen kazancın yetersiz olması durumunda,
+hangi teşvik belgesine öncelik verileceği mükellefler tarafından serbestçe belirlenebilecektir. Mükelleflerin tercih ettikleri
+teşvik belgesinde yer alan vergi indirim oranına göre ve mevzuatta belirlenen sınırlar dâhilinde, diğer faaliyetlerinden elde
+ettikleri kazançlarına indirimli vergi oranı uygulanabilecektir.
+32.2.7. Kurumlar vergisi matrahının birden fazla yatırım teşvik belgesi kapsamında elde edilen kazançtan düşük
+olması
+İlgili dönem kurumlar vergisi matrahının, (Mülga ibare:RG-4/9/2025-33007)239 birden fazla yatırım teşvik belgesi
+kapsamındaki yatırımlardan bu hesap dönemi içinde elde edilen toplam kazançtan düşük olması halinde, her bir yatırım teşvik
+belgesi kapsamında ayrı ayrı elde edilen kazancın bu yatırımlardan elde edilen toplam kazanca oranının kurumlar vergisi
+matrahına uygulanması suretiyle, bu teşvik belgelerinde yer alan vergi indirim oranlarına göre indirimli kurumlar vergisi
+uygulanabilecektir.
+Örnek: (G) A.Ş. 2013 hesap döneminde, 2009/15199 sayılı Karara göre düzenlenmiş yatırım teşvik belgesi
+kapsamındaki 1. yatırımından 300.000 TL, 2012/3305 sayılı Karara göre düzenlenmiş yatırım teşvik belgesi kapsamındaki 2.
+yatırımından ise 200.000 TL kazanç elde etmiştir. Ancak, (G) A.Ş.’nin 2013 hesap dönemi sonundaki kurumlar vergisi matrahı
+400.000 TL’dir.
+Yatırımlardan elde edilen kazanca indirimli kurumlar vergisi uygulanması:
+Yatırım teşvik belgesi kapsamındaki ilgili
+yatırımdan elde edilen kazanç
+İlgili teşvik belgesi kapsamında indirimli KV
+= KV matrahı x
+uygulanacak matrah
+Yatırım teşvik belgesi kapsamındaki
+yatırımlardan elde edilen toplam kazanç
+Yatırım 1 (2009/15199) → 300.000 / (300.000 + 200.000) = %60
+Yatırım 2 (2012/3305) → 200.000 / (300.000 + 200.000) = %40
+İlgili teşvik belgesi kapsamında indirimli KV uygulanacak matrah = KV matrahı x Tespit edilen oran
+Yatırım 1 (2009/15199) → 400.000 x %60 = 240.000 TL
+Yatırım 2 (2012/3305) → 400.000 x %40 = 160.000 TL
+Dolayısıyla, 400.000 TL’lik kurumlar vergisi matrahının 240.000 TL’lik kısmına 2009/15199 sayılı Karara göre
+düzenlenmiş yatırım teşvik belgesindeki vergi indirim oranı; 160.000 TL’lik kısmına ise 2012/3305 sayılı Karara göre
+düzenlenmiş yatırım teşvik belgesindeki vergi indirim oranı dikkate alınarak indirimli kurumlar vergisi uygulanabilecektir.
+32.2.8. Tevsi yatırımlardan doğan kazançlarda indirimli kurumlar vergisi oranı uygulaması
+239 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile kaldırılmıştır. Kaldırılmadan önceki
+hali: 2009/15199 sayılı veya 2012/3305 sayılı Karara göre düzenlenmiş.
+221
+--- Page 222 ---
+Tevsi yatırımlardan elde edilen kazancın işletme bütünlüğü çerçevesinde ayrı hesaplarda izlenmek suretiyle tespit
+edilebilmesi halinde, bu kazanca indirimli vergi oranı uygulanacaktır. Kazancın ayrı bir şekilde tespit edilememesi halinde ise
+tevsi yatırım dolayısıyla indirimli vergi oranı uygulanacak kazanç, yapılan tevsi yatırım tutarının, dönem sonunda kurumun
+aktifine kayıtlı bulunan toplam sabit kıymet tutarına (devam eden yatırımlara ait tutarlar da dahil) oranlanması suretiyle
+belirlenecektir.
+Tevsi yatırımlardan elde edilen kazancın bu şekilde oranlama yapılmak suretiyle belirlenmesi seçimlik bir hak olmayıp,
+indirimli kurumlar vergisi uygulanacak kazancın işletme bütünlüğü çerçevesinde ayrı hesaplarda izlenmek suretiyle mükellefçe
+tespit edilmesi esastır.
+“Dönem sonunda kurumun aktifine kayıtlı bulunan toplam sabit kıymet” ifadesinden Vergi Usul Kanununun 313 üncü
+maddesi uyarınca amortisman mevzuunu oluşturan iktisadi kıymetlerin anlaşılması, dolayısıyla boş arazi-arsa ve amortismana
+tabi olmayan diğer kıymetlerle ilgili tutarların bu hesaplamada dikkate alınmaması; sabit kıymet tutarının hesabında ise bu
+kıymetlerin birikmiş amortismanları düşülmeden önceki brüt tutarlarının dikkate alınması gerekmektedir.
+Öte yandan bu hesaplama sırasında işletme aktifinde yer alan sabit kıymetlerin kayıtlı değeri olarak, gerekli şartların
+oluşması halinde yapılan enflasyon düzeltmesi sonucu oluşan değerleri dikkate alınacaktır.
+Birden fazla tevsi yatırımı bulunan kurumların oranlama yaparken sadece tevsi yatırıma konu hizmet ve üretim
+işletmesiyle ilgili sabit kıymetleri değil, kurumun aktifine kayıtlı olan ve amortisman mevzuunu oluşturan tüm sabit kıymetlerin
+toplamını dikkate almaları gerekmektedir.
+Hak kazanılan yatırıma katkı tutarına birden fazla yılda ulaşılması halinde her bir dönem itibarıyla indirimli oran
+uygulanacak kazanç, tevsi yatırım tutarının her bir dönem sonu itibarıyla kurumun aktifine kayıtlı bulunan toplam sabit kıymet
+tutarına oranlanması suretiyle belirlenecektir.
+Ayrıca mevcut sabit kıymet tutarı, indirimli kurumlar vergisi uygulanacak kazancın tespit edileceği geçici vergilendirme
+dönemleri için, ilgili geçici vergilendirme döneminin son günü; hesap dönemleri için ise ilgili hesap döneminin son günü
+itibarıyla tespit edilecek ve indirimli oran uygulanacak kazancın hesaplanmasında dikkate alınacaktır.
+Tevsi yatırımlardan elde edilen kazancın ayrı hesaplarda izlenmek suretiyle tespit edilememesi durumunda indirimli
+kurumlar vergisine konu edilecek kazanç, tevsi yatırım tutarının toplam sabit kıymet tutarına bölünmesi suretiyle bulunacak
+oranın kurumun ticari bilanço kârı ile çarpılması suretiyle hesaplanacaktır. Ancak, indirimli kurumlar vergisi uygulanacak
+kazancın, kurumlar vergisi matrahını aşamayacağı tabiidir.
+Örnek: (H) A.Ş. 2013 hesap döneminde yatırım teşvik belgesi kapsamında 1.000.000 TL tutarında tevsi yatırım
+harcaması yapmış olup söz konusu yatırım 2013 yılında tamamlanmıştır. Yatırım döneminde herhangi bir kazancı bulunmayan
+(H) A.Ş. bu dönemde indirimli kurumlar vergisinden yararlanmamıştır.
+Söz konusu şirketin 2014 hesap döneminde ticari bilanço kârı 200.000 TL, kurumlar vergisi matrahı ise 100.000 TL’dir.
+Tevsi yatırımdan doğan kazanç ayrı bir şekilde tespit edilememiştir. (Yatırıma katkı oranı: %40, vergi indirim oranı: %70)
+(H) A.Ş.’nin dönem sonunda aktifine kayıtlı bulunan sabit kıymetlerin tutarları aşağıdaki gibidir:
+Amortisman düşülmeden
+Sabit kıymetler
+önceki brüt tutar
+250-Arazi ve Arsalar 750.000 TL
+252-Binalar 2.000.000 TL
+255-Demirbaşlar 1.000.000 TL
+258-Yapılmakta Olan Yatırımlar 1.000.000 TL
+TOPLAM 4.750.000 TL
+Tevsi yatırıma isabet eden kazanç tutarının hesaplanmasında amortismana tabi olmayan boş arsa ve araziler dikkate
+alınmayacağından, oranlamada dikkate alınacak tutar (4.750.000 TL - 750.000 TL) 4.000.000 TL’dir.
+222
+--- Page 223 ---
+Gerçekleşen tevsi yatırım tutarı
+Tevsi yatırıma isabet eden kazanç tutarı = x Ticari bilanço kârı
+Dönem sonu toplam sabit
+kıymet tutarı
+1.000.000 TL
+Tevsi yatırıma isabet eden kazanç
+= x 200.000 TL
+tutarı
+4.000.000 TL
+= %25 x 200.000 TL
+= 50.000 TL
+Buna göre, indirimli kurumlar vergisine tabi tutulacak olan matrah 50.000 TL, (H) A.Ş.’nin kurumlar vergisi matrahından
+düşük olduğundan, bu tutarın tamamı indirimli kurumlar vergisi uygulamasına konu olacaktır.
+Yatırıma katkı oranı %40 olduğundan, hak kazanılan yatırıma katkı tutarı (1.000.000 TL x % 40) 400.000 TL’dir.
+- Kurumlar vergisi matrahı : 100.000 TL
+- İndirimli KV oranı [%20 - (%20 x %70)] = [%20 - %14] : %6
+- İndirimli KV matrahı : 50.000 TL
+- İndirimli orana göre hesaplanan KV (50.000 TL x %6) : 3.000 TL
+- Genel orana tabi matrah (100.000 - 50.000 TL) : 50.000 TL
+- Genel orana göre hesaplanan KV (50.000 TL x %20) : 10.000 TL
+- Ödenecek toplam KV (3.000 TL + 10.000 TL) : 13.000 TL
+Yapılan tevsi yatırım nedeniyle tahsilinden vazgeçilen kurumlar vergisi, diğer bir ifadeyle yararlanılan yatırıma katkı
+tutarı [(50.000 TL x %20) - (50.000 TL x %6)] 7.000 TL’dir. Buna göre, hak kazanılan 400.000 TL’lik yatırıma katkı tutarının kalan
+(400.000 TL - 7.000 TL) 393.000 TL’lik kısmı için izleyen hesap dönemlerinde sadece bu yatırımdan elde edilen kazanca indirimli
+kurumlar vergisi uygulanması mümkün bulunmaktadır.
+Öte yandan, (H) A.Ş.’nin yatırım döneminde diğer faaliyetlerden kazanç elde etmiş olması halinde diğer şartları da
+taşıması kaydıyla bu kazançlarına indirimli kurumlar vergisi uygulanması mümkün olabilecektir.
+(Ek paragraf: RG-4/9.2025-33007)240 24/7/2025 tarihinden itibaren alınan teşvik belgelerinde ise, on yıllık süreyle
+sınırlı olmak kaydıyla hak kazanılan yatırıma katkı tutarına ulaşılıncaya kadar indirimli oranda kurumlar vergisi uygulanacaktır.
+Bu yatırım teşvik belgeleri kapsamında diğer faaliyetlerden elde edilen kazançlara da dört hesap dönemiyle sınırlı şekilde
+indirimli kurumlar vergisi uygulanması mümkündür.
+32.2.9. Kanunda belirtilen şartlara uyulmaması halinde yapılacak işlemler
+Hesap dönemi itibarıyla 32/A maddesinin ikinci (Ek ibare: RG- 4/9/2025- 33007)241 ve üçüncü fıkrasında belirtilen
+şartların sağlanamadığının tespit edilmesi halinde, söz konusu vergilendirme döneminde indirimli vergi oranı uygulanması
+nedeniyle zamanında tahakkuk ettirilmemiş vergiler, vergi ziyaı cezası uygulanmaksızın gecikme faiziyle birlikte tahsil olunur.
+240 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+241 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+223
+--- Page 224 ---
+Dolayısıyla, anılan maddenin (Değişik ibare: RG-4/9/2025-33007)242 üçüncü fıkrasında verilen yetki çerçevesinde
+(Değişik ibare: RG-4/9/2025-33007)243 Cumhurbaşkanı Kararı ile belirlenen hususlara uyulmaması halinde indirimli vergi
+oranı uygulanması nedeniyle zamanında tahakkuk ettirilmemiş vergiler, vergi ziyaı cezası uygulanmaksızın gecikme faiziyle
+birlikte tahsil edilecektir. Ancak, mezkûr (Değişik ibare: RG-4/9/2025-33007)244 üçüncü fıkrada belirtilen şartların
+sağlanamaması dışında, haksız bir nedenle indirimli kurumlar vergisi uygulamasından yararlanılması nedeniyle zamanında
+tahakkuk ettirilmemiş vergilere ilişkin olarak vergi ziyaının gerçekleşeceği tabiidir.
+32.2.10. Teşvik belgeli yatırımların devri
+32.2.10.1. Yatırımın faaliyete geçmeden önce devredilmesi durumu
+Kanunun 32/A maddesinin altıncı fıkrasına göre, yatırımın faaliyete geçmesinden önce devri halinde, devralan kurum,
+ilgili mevzuatta belirtilen koşulları aynen yerine getirmek kaydıyla indirimli vergi uygulamasından yararlanabilecektir.
+Yatırımın faaliyete geçmesinden önce devri halinde devreden kurumun bu yatırım dolayısıyla indirimli vergi oranı
+uygulamasından yararlanamayacağı tabiidir.
+Diğer taraftan, yatırımın kısmen veya tamamen işletilmesine başlanılmadan önce indirimli kurumlar vergisi uygulanan
+hallerde, yatırımın tamamlanıp işletilmeye geçilmemesi durumunda yatırım döneminde indirimli vergi oranı uygulanması
+nedeniyle zamanında tahakkuk ettirilmemiş vergiler, vergi ziyaı cezası uygulanmaksızın gecikme faiziyle birlikte tahsil edilir.
+32.2.10.2. Yatırımın kısmen veya tamamen faaliyete geçmesinden sonra devredilmesi durumu
+Kanunun 32/A maddesinin yedinci fıkrasına göre, yatırımın kısmen veya tamamen faaliyete geçmesinden sonra devri
+halinde, indirimli vergi uygulamasından devir tarihine kadar devreden, devir tarihinden sonra ise devralan, ilgili mevzuatta
+belirtilen koşulları yerine getirmek kaydıyla yararlanabilecektir.
+Örnek: (K) A.Ş.’nin yatırım teşvik belgesi kapsamındaki yatırımının toplam tutarı 8.000.000 TL’dir. (K) A.Ş. 2015 hesap
+döneminde başladığı yatırım kapsamında bu dönemde 2.000.000 TL yatırım harcaması yapmış ve kısmen işletilmeye başlanan
+bu yatırımdan anılan dönemde 250.000 TL kazanç elde etmiştir. (K) A.Ş. bu yatırımını, kısmen işletilmeye başlandığı 2015
+hesap döneminin sonunda devretmiştir. (Yatırıma katkı oranı: %60, vergi indirim oranı: %80).
+Buna göre,
+Yatırıma katkı tutarı = Toplam yatırım harcaması x Yatırıma katkı oranı
+= 8.000.000 TL x %60
+= 4.800.000 TL
+2015 hesap döneminde hak kazanılan
+yatırıma katkı tutarı = Gerçekleştirilen yatırım harcaması x Yatırıma katkı oranı
+= 2.000.000 TL x %60
+= 1.200.000 TL
+Bu yatırımdan elde edilen kazanca kurumlar vergisi %80 oranında indirimli uygulanacağı için, yatırıma katkı tutarına
+ulaşıncaya kadar yatırımdan elde edilen kazanç [%20 - (%20 x %80)] %4 oranında kurumlar vergisine tabi olacaktır.
+Yatırımdan (K) A.Ş. tarafından elde edilen 250.000 TL kazanç üzerinden (250.000 TL x %4) 10.000 TL kurumlar vergisi
+ödenecek olup ilk yıl yararlanılan yatırıma katkı tutarı;
+242 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden
+önceki hali: ikinci.
+243 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden
+önceki hali: Bakanlar Kurulu.
+244 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile değiştirilmiştir. Değiştirilmeden
+önceki hali: ikinci.
+224
+--- Page 225 ---
+[(250.000 TL x %20) - (250.000 TL x %4)] 40.000 TL olacaktır.
+Dolayısıyla, kısmen işletilmeye başlanılan bu yatırımı devralan kurum, gereken koşulları yerine getirmek kaydıyla,
+4.800.000 TL’lik yatırıma katkı tutarının kalan (4.800.000 TL - 40.000 TL) 4.760.000 TL’lik kısmı için indirimli kurumlar
+vergisinden yararlanabilecektir.
+(Ek paragraf: RG-4/9/2025-33007)245 24/7/2025 tarihinden itibaren alınan teşvik belgelerinde ise, yatırımı devreden
+ve devralan için birlikte toplam on yıllık süreyle sınırlı olmak kaydıyla hak kazanılan yatırıma katkı tutarına ulaşılıncaya kadar
+indirimli oranda kurumlar vergisi uygulanacaktır.
+32.2.11. Yatırıma katkı tutarında endeksleme (Ek:RG-31/12/2016-29935 3.Mükerrer)246
+6745 sayılı Yatırımların Proje Bazında Desteklenmesi ile Bazı Kanun ve Kanun Hükmünde Kararnamelerde Değişiklik
+Yapılmasına Dair Kanunun 66 ncı maddesiyle 5520 sayılı Kanunun 32/A maddesinin ikinci fıkrasına, birinci cümlesinden sonra
+gelmek üzere; “Yatırımın tamamlanması şartıyla, indirimli kurumlar vergisi uygulanmak suretiyle yararlanılan kısmı hariç
+olmak üzere kalan yatırıma katkı tutarı, yatırımın tamamlandığı hesap dönemini izleyen yıllarda Vergi Usul Kanunu
+hükümlerine göre bu yıllar için belirlenen yeniden değerleme oranında artırılarak dikkate alınır.” hükmü eklenmiştir.
+Buna göre, ilgili teşvik belgesi kapsamındaki toplam yatırıma katkı tutarının yatırımın tamamlandığı hesap döneminin
+sonuna kadar yararlanılamayan kısmı (yatırımın tamamlandığı hesap döneminin sonuna kadar gerek diğer faaliyetlerden elde
+edilen kazançlara ve gerekse yatırımın tamamen veya kısmen işletilmesinden elde edilen kazançlara indirimli kurumlar vergisi
+uygulanması suretiyle yararlanılan kısmından sonra kalan yatırıma katkı tutarı), yatırımın tamamlandığı hesap dönemini
+izleyen yıllarda Vergi Usul Kanunu hükümlerine göre bu yıllar için belirlenen yeniden değerleme oranında artırılarak dikkate
+alınacaktır.
+Örnek: (L) A.Ş. yatırım teşvik belgesi kapsamında 2013 hesap döneminde başladığı yatırımını 15/10/2015 tarihinde
+tamamlamış ve 1/11/2015 tarihinde tamamen işletmeye başlamıştır.
+(L) A.Ş.’nin yatırım teşvik belgesi kapsamındaki yatırımının yatırıma katkı oranı %50 ve vergi indirim oranı %80 olup
+toplam yatırıma katkı tutarı 3.000.000.- TL’dir. (L) A.Ş. toplam yatırıma katkı tutarının 800.000.- TL’lik kısmını 2013 ve 2014
+hesap dönemlerinde diğer faaliyetlerinden elde ettiği kazançlarına indirimli kurumlar vergisi uygulamak suretiyle kullanmıştır.
+Yatırımın tamamlandığı 2015 hesap dönemine ilişkin kurumlar vergisi beyannamesinde, diğer faaliyetlerinden elde ettiği
+kazançlarına indirimli kurumlar vergisi uygulamak suretiyle 450.000.- TL, bu yatırımından elde ettiği kazancına indirimli
+kurumlar vergisi uygulamak suretiyle de 250.000.- TL olmak üzere yatırıma katkı tutarının toplam 700.000.- TL’lik kısmından
+yararlanmıştır. 2016 hesap dönemine ilişkin kurumlar vergisi beyannamesinde, bu yatırımından elde ettiği kazancına indirimli
+kurumlar vergisi uygulamak suretiyle yatırıma katkı tutarının 300.000.- TL’lik kısmından faydalanmıştır.
+Buna göre, (L) A.Ş. bu yatırımına ilişkin toplam yatırıma katkı tutarının kalan [3.000.000.- TL – (800.000.- TL + 700.000.-
+TL + 300.000.- TL)=] 1.200.000.- TL’lik kısmını, 2017 yılı için Vergi Usul Kanunu hükümlerine göre belirlenen yeniden değerleme
+oranında artırarak kullanabilecektir. 2017 yılı için belirlenen yeniden değerleme oranının %5 olması halinde, (L)
+A.Ş.’nin yeniden değerleme sonrasında yararlanabileceği yatırıma katkı tutarı [1.200.000.- TL x (1 + 0,05)=] 1.260.000.- TL
+olacaktır.
+(L) A.Ş.’nin 2017 hesap döneminde bu yatırımından elde ettiği kazancının 2.500.000.- TL olması halinde yararlanılacak
+yatırıma katkı tutarı [(2.500.000.- TL x %20) – (2.500.000.TL x %4)] 400.000.- TL ve bu durumda 2018 hesap dönemine
+devreden yatırıma katkı tutarı da (1.260.000.- TL – 400.000.- TL=) 860.000.- TL olacaktır. (L) A.Ş. bu tutarı, 2018 yılı için Vergi
+Usul Kanunu hükümlerine göre belirlenen yeniden değerleme oranında artırarak kullanabilecektir.
+(Ek paragraflar:RG-7/4/2023-32156)247 17/10/2016 tarihli ve 2016/9495 sayılı Yatırımlara Proje Bazlı Devlet Yardımı
+Verilmesine İlişkin Kararın 12 nci maddesinin on yedinci fıkrasında, yatırım süresi asgari 10 yıl olarak belirlenen ve
+entegrasyonu sağlayan fazlardan oluşan yatırımlar için asgari 5 milyar TL yatırım harcamasının gerçekleştirilmesini müteakip
+kısmi tamamlama işleminin yapılabileceği hükme bağlanmıştır.
+Buna göre, ilgili teşvik belgesi kapsamındaki yatırıma katkı tutarının, yukarıdaki madde kapsamında kısmi tamamlama
+işleminin yapıldığı hesap döneminin sonuna kadar yararlanılamayan kısmı, kısmi tamamlanan bölüme ilişkin yatırıma katkı
+tutarıyla sınırlı olmak üzere kısmi tamamlamanın yapıldığı hesap dönemini izleyen yıllarda Vergi Usul Kanunu hükümlerine
+göre bu yıllar için belirlenen yeniden değerleme oranında artırılarak dikkate alınabilecektir.
+245 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+246 31/12/2016 tarihli ve 29935 3. Mükerrer sayılı Resmi Gazete’de yayımlanan 11 seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+247 07/04/2023 tarihli ve 32156 sayılı Resmi Gazete’de yayımlanan 22 seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+225
+--- Page 226 ---
+32.2.12. Elektrik motorlu taşıt üretenler için yatırıma katkı tutarının kullanımı (Ek:RG-7/4/2023-32156)248
+19/7/2019 tarihli ve 30836 mükerrer sayılı Resmi Gazete'de yayımlanan 7186 sayılı Kanunun 19 uncu maddesi ile
+Kurumlar Vergisi Kanununa eklenen geçici 12 nci maddede,
+“(1) 20/8/2016 tarihli ve 6745 sayılı Yatırımların Proje Bazında Desteklenmesi ile Bazı Kanun ve Kanun Hükmünde
+Kararnamelerde Değişiklik Yapılmasına Dair Kanunun 80 inci maddesi kapsamında teşviklerden yararlanmasına karar verilen
+ve bu kapsamda sera etkisi yaratan egzoz gazı salınımını tamamen ortadan kaldıracak teknolojilerin geliştirilmesi için
+münhasıran Türkiye’de gerçekleştirdikleri Ar-Ge faaliyetleri sonucunda geliştirdikleri elektrik motorlu taşıt araçlarını
+Türkiye’de imal eden mükelleflerin, destek kararında belirlenen kadarıyla, bu yatırımları dolayısıyla bu Kanunun 32/A maddesi
+kapsamında hak kazandıkları yatırıma katkı tutarını, söz konusu malların ilk iktisabı dolayısıyla 31/12/2035 tarihine kadar vergi
+dairesine ödenen özel tüketim vergisinin, takvim yılının üçer aylık dönemleri itibarıyla bu mükelleflere kısmen veya tamamen,
+nakden ya da vergi borçlarına mahsuben ödenmesi suretiyle kullandırmaya Cumhurbaşkanı yetkilidir.
+(2) Bu maddenin uygulamasına ilişkin usul ve esasları belirlemeye Hazine ve Maliye Bakanlığı yetkilidir.”
+hükmüne yer verilmiştir.
+27/12/2019 tarihli ve 30991 sayılı Resmi Gazete’de yayımlanan 26/12/2019 tarihli ve 1945 sayılı Cumhurbaşkanı Kararı
+eki Kararın “Vergi indirimi uygulaması” başlıklı 4 üncü maddesinde,
+“(1) 13/6/2006 tarihli ve 5520 sayılı Kurumlar Vergisi Kanununun geçici 12 nci maddesi kapsamında yatırıma katkı
+tutarı, 31/12/2032 tarihine kadar azami 960 bin adet araç için kullanılmak üzere, 3 üncü maddenin birinci fıkrasının (ç) bendi
+kapsamında hak edilen yatırıma katkı tutarının %56,5’ini geçemez.
+(2) Birinci fıkra kapsamında belirlenen yatırıma katkı tutarı, bu yatırım kapsamında üretilen araçların ilk iktisabı
+dolayısıyla ödenen özel tüketim vergisinin, takvim yılının üçer aylık dönemleri itibarıyla bu mükelleflere tamamen, nakden ya
+da vergi borçlarına mahsuben ödenmesi suretiyle kullandırılabilir.”
+açıklaması yapılmıştır.
+Yatırıma katkı tutarının bu madde kapsamında kullanılması için yatırımların;
+a) Yatırımların Proje Bazında Desteklenmesi ile Bazı Kanun ve Kanun Hükmünde Kararnamelerde Değişiklik Yapılmasına
+Dair Kanunun 80 inci maddesi kapsamında teşviklerden yararlanmasına karar verilen bir yatırım olması,
+b) Sera etkisi yaratan egzoz gazı salınımını tamamen ortadan kaldıracak teknolojilerin geliştirilmesi için münhasıran
+Türkiye’de gerçekleştirilen Ar-Ge faaliyetleri sonucunda geliştirilen elektrik motorlu taşıt araçlarına yönelik olması
+gerekmektedir.
+Bu yatırımlar dolayısıyla hak kazanılan yatırıma katkı tutarının, sadece elektrikli taşıtların ilk iktisabı dolayısıyla
+31/12/2035 tarihine kadar vergi dairesine ödenen özel tüketim vergisinin (ÖTV), takvim yılının üçer aylık dönemleri itibarıyla
+bu mükelleflere kısmen veya tamamen, nakden ya da vergi borçlarına mahsuben ödenmesi suretiyle kullandırılması
+mümkündür.
+1945 sayılı Cumhurbaşkanı Kararı ile Türkiye’de üretilen sadece elektrikli taşıtların ilk iktisabı dolayısıyla ödenen
+ÖTV’nin, takvim yılının üçer aylık dönemleri itibarıyla, Kararda belirtildiği şekilde tamamen, nakden ya da vergi borçlarına
+mahsuben ödenmesi suretiyle kullandırılması uygun görülmüştür. Bu şekildeki kullanımın Kurumlar Vergisi Kanununun geçici
+12 nci maddesi kapsamında hak edilen yatırıma katkı tutarının %56,5’ini veya öngörülen bu tutarın aşılmaması kaydıyla azami
+960 bin adet taşıt satışı için ödenen ÖTV tutarını geçmemesi öngörülmüştür.
+32.2.12.1. İade talebinde aranacak belgeler
+4760 sayılı ÖTV Kanununa ekli (II) sayılı listede yer alan “sadece elektrik motorlu olanlar” kapsamında olan ve yurt
+içinde imal edilen taşıtlar için iade talebi Gelir İdaresi Başkanlığının internet adresi (www.gib.gov.tr) üzerinden kurumlar
+vergisi yönünden bağlı olunan vergi dairesine verilecek 429 Sıra No.lu Vergi Usul Kanunu Genel Tebliği ekinde yer alan standart
+iade talep dilekçesi ile elektronik ortamda ve takvim yılının üçer aylık dönemlerini takip eden bir ay içerisinde yapılır.
+İade taleplerinde, standart iade talep dilekçesi ekine aşağıdaki belgeler eklenir:
+248 07/04/2023 tarihli ve 32156 sayılı Resmi Gazete’de yayımlanan 22 seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+226
+--- Page 227 ---
+-İade talep eden imalatçının sanayi sicil belgesinin aslı veya noter onaylı örneği (Bu belge bir defaya mahsus olmak
+üzere verilecek olup, belgenin vize edilmesi veya yenilenmesi halinde yeni belge ibraz edilir.)
+-Yatırım teşvik belgesi ve eki listenin onaylı örneği (Bu belgenin revize edilmediği sürece bir defaya mahsus olmak
+üzere verilmesi yeterlidir.)
+-İade hakkı doğuran taşıtların şasi numarası bilgilerini de içeren faturaların listesi,
+-Yatırıma katkı tutarının toplamı, önceki dönemlerde yararlanılan katkı tutarı, kalan yatırıma katkı tutarı, endekslenen
+yatırıma katkı tutarı, önceki dönemlerde iadeye konu olan ÖTV tutarı ve araç sayısı, ilgili dönemde yararlanılacak ÖTV iade
+tutarı bilgilerini içeren tablo,
+-YMM Raporuna istinaden yerine getirilecek taleplerde YMM Raporu.
+Gelir İdaresi Başkanlığınca gerekli görülmesi halinde, dilekçe ve ekine eklenmesi gereken belgeler ile liste ve tabloların
+içeriğinde değişiklik yapılabilir ve istenebilecek diğer belge, liste ve tabloların “www.gib.gov.tr” adresi üzerinden elektronik
+ortamda gönderilmesi zorunluluğu getirilebilir.
+32.2.12.2. İade talebinin yerine getirilmesi
+İade talepleri, Tebliğin (32.2.12.1.) bölümünde belirtilen belgeler tamamlanmadıkça hüküm ifade etmez. Bu belgelerin
+vergi dairesine ibrazı üzerine, yurt içinde imal edilen taşıtlar için iadesi talep edilen ÖTV’nin, mükellefi tarafından ödenip
+ödenmediği ilgili vergi dairesi tarafından sistem üzerinden kontrol edilir. Bir eksiklik bulunmaması durumunda iade mükellefin
+talebine göre, YMM Raporu veya Vergi İnceleme Raporuna istinaden yerine getirilir.
+Öte yandan, (2A) numaralı ÖTV Beyannamesinin verildiği vergi dairesi tarafından iadeye konu edilen tüm taşıtların
+satış sonrası ihraç edilerek ÖTV’lerinin iade edildiğinin veya 7/11/2013 tarihli ve 6502 sayılı Tüketicinin Korunması Hakkında
+Kanun hükümleri gereğince mükellefine iade edilen taşıtlara ilişkin ÖTV'lerin iade edildiğinin tespit edilmesi durumunda, bu
+durum beş işgünü içinde imalatçı mükellefin kurumlar vergisi yönünden bağlı bulunduğu vergi dairesine ve bu vergi dairesi
+tarafından da bir sonraki iade talebindeki tutardan mahsup edilmek üzere imalatçı mükellefe bildirilir.
+Vergi inceleme raporu veya YMM Raporu ile yapılacak nakden iade talepleri, bunların eksiksiz ibraz edildiği tarihte
+geçerlik kazanır.
+Aynı şekilde, YMM Raporu ile yapılacak mahsuben iade talepleri, diğer belgelerle birlikte Raporun eksiksiz ibraz edildiği
+tarihte geçerlik kazanır. Vergi İnceleme Raporu sonucuna göre sonuçlandırılacak mahsuben iade taleplerinde ise mahsup talep
+dilekçesinin vergi dairesine verildiği tarih itibarıyla iadeye hak kazanılır.
+32.2.12.3. Diğer hususlar
+Mükellefe mahsuben veya nakden yapılan iade tutarları, mükellef tarafından kurum kazancının tespitinde gelir olarak
+dikkate alınacağından, bu tutarların, geçici ve yıllık kurumlar vergisi beyannamelerinde "Zarar Olsa Dahi İndirilecek İstisna ve
+İndirimler" bölümünde yer alan "Diğer İndirim ve İstisnalar" satırında gösterilmek suretiyle kurum kazancından indirilmesi
+mümkündür.
+Yatırıma katkı tutarının mahsuben veya nakden iade alınarak kullanılan bölümü için, ayrıca indirimli kurumlar vergisi
+hesaplanmayacaktır.
+Örnek: (T) A.Ş., sera etkisi yaratan egzoz gazı salınımını tamamen ortadan kaldıracak teknolojilerin geliştirilmesi için
+münhasıran Türkiye’de gerçekleştirilen Ar-Ge faaliyetleri sonucunda geliştirilen sadece elektrik motorlu taşıt araçları
+üretimine ilişkin proje bazlı yatırımların desteklenmesi mevzuatı kapsamında yatırım teşvik belgesi almıştır.
+2023 yılı Nisan ayı itibarıyla yatırımını kısmen tamamlayan ve hak kazanılan 5.000.000.000 TL yatırıma katkı tutarı
+bulunan şirketin, ürettiği sadece elektrik motorlu taşıtların 1/4/2023-30/6/2023 tarihleri arasında satışından doğan kurum
+kazancı için indirimli kurumlar vergisi uygulamasından faydalanma hakkı bulunmaktadır.
+1/4/2023 ila 30/6/2023 tarihleri arasında, (T) A.Ş. tarafından üretilerek satılan 2.000 adet elektrikli taşıtın ilk iktisabı
+dolayısıyla vergi dairesine 140.000.000 TL ÖTV ödenmiştir.
+(T) A.Ş., iade talep dilekçesi ve iade tutarının hesaplanmasına ilişkin YMM Raporuyla birlikte, ilgili üç aylık dönemde
+vergi dairesine ödenen ÖTV’nin iadesine ilişkin 5/7/2023 tarihinde vergi dairesinden iade talebinde bulunmuştur.
+İlgili dönemde YMM Raporuna göre hak edilen yatırım katkı tutarının (5.000.000.000 TL) azami (5.000.000.000 TL x
+%56,5) 2.825.000.000 TL’sinin, ödenen ÖTV tutarlarına mahsuben veya nakden iadesi mümkündür.
+227
+--- Page 228 ---
+Bu durumda, ilgili üç aylık dönemde ödenen 140.000.000 TL ÖTV tutarı, nakden veya mükellefin talep ettiği vergi
+borçlarına mahsuben iade edilebilecektir.
+Öte yandan, madde kapsamında ÖTV iade talebinde bulunmaya hakkı olan mükelleflerin gerçekleştirdiği, Türkiye’de
+kayıt ve tescil edilmemiş taşıtların ihracında, ÖTV Kanunu hükümleri uyarınca Türkiye’de ilk iktisap söz konusu olmadığından,
+bu işlemler ÖTV’nin konusuna girmez ve ihraç edilen bu taşıtlara ilişkin (2A) numaralı ÖTV Beyannamesi de verilmez.
+Dolayısıyla, bu araçlara ilişkin olarak iade hesabına dahil edilebilecek bir unsur bulunmamaktadır.
+Ayrıca, taşıtların ihraç kaydıyla teslimlerinde, ihracatın gerçekleşmesi halinde de tecil edilen ÖTV terkin edileceğinden
+iadeye konu olabilecek ÖTV tutarı bulunmayacaktır. Aynı şekilde, ÖTV Kanunu kapsamında istisnalı olarak teslime konu edilen
+ve dolayısıyla ÖTV ödemesi söz konusu olmayan taşıtlar bakımından da iade hesabına herhangi bir tutarın eklenmeyeceği
+tabiidir.
+Diğer taraftan, söz konusu mükelleflerin yurt içinde sattıkları taşıtların, taşıtı iktisap eden mükellefler tarafından ihraç
+edilmesi halinde, satış faturasında gösterilen ve ödenen ÖTV’nin, ihracatçı mükellef tarafından iadeye konu edilmesi
+durumunda, söz konusu vergi ayrıca bu uygulama kapsamında iadeye konu edilemez. İmalatçı mükelleflere iade yapıldıktan
+sonra taşıtı iktisap edenlerce ihracatın ve iadenin gerçekleştiğinin İdarece tespiti halinde ise bu durum, imalatçı mükellefe
+bildirilir ve Kurumlar Vergisi Kanununun geçici 12 nci maddesi kapsamında yapılacak ilk iade hesabında bu tutarlar, iade
+alınacak tutardan düşülmek suretiyle işlem tesis edilir.
+Bunun yanı sıra, kayıt ve tescil edilmiş olsa dahi 6502 sayılı Kanun hükümleri gereğince alıcıları tarafından iade edilen
+taşıtların ÖTV’sine ilişkin düzeltme işlemleri, ÖTV mevzuatı çerçevesinde değerlendirilecek olup, taşıtların ayıplı mal olması
+nedeniyle alıcısına iade edilmesi ve bu nedenle ödenen ÖTV’nin iade edilmesi durumunda, bu tutarlar da iade hesabına dahil
+edilmeyecektir. Bu durumun, Kurumlar Vergisi Kanununun geçici 12 nci maddesi kapsamında iadenin gerçekleşmesinden
+sonra ortaya çıkması durumunda ise, söz konusu ÖTV tutarları mezkûr madde kapsamında yapılacak ilk iade talebindeki
+tutardan mahsup edilmek suretiyle hesaplaması yapılacaktır.
+32.2.13. Hak kazanılan yatırıma katkı tutarından diğer vergi borçlarından terkin yoluyla yararlanılması (Ek bölüm:
+RG-28/9/2024-32676)249
+1/1/2022 tarihinden itibaren yapılacak yatırım harcamalarına uygulanmak üzere 7338 sayılı Kanunun 60 ıncı
+maddesiyle Kurumlar Vergisi Kanununun 32/A maddesine eklenen sekizinci fıkrada;
+“(8) Yatırım teşvik belgesi bazında yapılan yatırım harcamasına yatırıma katkı oranının uygulanmasıyla belirlenen
+tutarın %10'luk kısmı, kurumlar vergisi beyannamesinin verilmesi gereken ayı takip eden ikinci ayın sonuna kadar talep
+edilmesi şartıyla, özel tüketim vergisi ve katma değer vergisi hariç olmak üzere tahakkuk etmiş diğer vergi borçlarından terkin
+edilmek suretiyle kullanılabilir. Terkin talebinde bulunulabilecek tutar, hak edilen yatırıma katkı tutarından indirimli kurumlar
+vergisi yoluyla kullanılan yatırıma katkı tutarının düşülmesinden sonra bulunan tutarın yarısından fazla olamaz. Diğer vergi
+borçlarının terkini suretiyle kullanılan tutarın bir katına isabet eden yatırıma katkı tutarından vazgeçildiği kabul edilir, diğer
+vergilerden terkini talep edilen tutar ile vazgeçilen yatırıma katkı tutarları dolayısıyla vergi matrahına indirimli oranda
+kurumlar vergisi uygulanmaz. Bu fıkra kapsamında diğer vergi borçlarından terkin edilebilecek toplam tutar, ilgili yatırım teşvik
+belgesi kapsamında fiilen yapılan yatırım harcamalarına, yatırıma katkı oranı uygulanmak suretiyle hesaplanan tutarın
+%10'undan fazla olamaz.”
+hükmüne yer verilmiştir.
+Buna göre, ilgili hesap dönemi başından kurumlar vergisi beyannamesinin verilmesi gereken ayı takip eden ikinci ayın
+sonuna kadar talep edilmesi şartıyla, ilgili dönem itibarıyla hak kazanılan yatırıma katkı tutarının %10’luk kısmından, özel
+tüketim vergisi ve katma değer vergisi hariç olmak üzere tahakkuk etmiş diğer vergi borçlarından terkin edilmek suretiyle
+yararlanılmasına imkan sağlanmıştır.
+Ancak terkin talebinde bulunulabilecek tutar, hak kazanılan yatırıma katkı tutarından indirimli kurumlar vergisi yoluyla
+kullanılan yatırıma katkı tutarının düşülmesinden sonra bulunan tutarın yarısından fazla olamayacaktır.
+Bu uygulamada, diğer vergi borçlarının terkini suretiyle kullanılan yatırıma katkı tutarının bir katına isabet eden
+yatırıma katkı tutarından da vazgeçildiği kabul edilecektir. Böylece yatırıma katkı tutarı, diğer vergilerden terkini talep edilen
+tutar ile terkin nedeniyle vazgeçilen yatırıma katkı tutarı kadar azalmış olacaktır.
+249 28/9/2024 tarihli ve 32676 sayılı Resmi Gazete’de yayımlanan 23 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+228
+--- Page 229 ---
+Dolayısıyla, diğer vergilerden terkini talep edilen tutar ile terkin nedeniyle vazgeçilen yatırıma katkı tutarları için
+indirimli kurumlar vergisi uygulamasından yararlanılması mümkün değildir.
+Örnek: (B) A.Ş.'nin 2023 hesap döneminde başlamış olduğu yatırım teşvik belgesi kapsamındaki komple yeni
+yatırımının toplam tutarı 10.000.000 TL'dir. 2023 hesap döneminde kısmen işletilmeye başlanan bu yatırımın 2.000.000 TL'lik
+kısmı 11/3/2023 tarihi itibariyle gerçekleştirilmiş ve (B) A.Ş. söz konusu yatırımdan 2023 hesap döneminin 3. geçici
+vergilendirme döneminde 1.000.000 TL kazanç elde etmiştir. (Yatırıma katkı oranı: %30, vergi indirim oranı: %50)
+Toplam yatırıma katkı tutarı = Toplam yatırım harcaması x Yatırıma katkı oranı
+= 10.000.000 TL x %30
+= 3.000.000 TL
+2023/3. geçici vergilendirme dönemi itibariyle Gerçekleştirilen yatırım harcaması x Yatırıma
+=
+hak kazanılan yatırıma katkı tutarı k a t k ı o r a n ı
+= 2.000.000 TL x %30
+= 600.000 TL
+Buna göre, (B) A.Ş.’nin yatırım teşvik belgesi kapsamındaki bu yatırımından 2023 hesap döneminin 3. geçici
+vergilendirme döneminde elde ettiği kazanca uygulanacak indirimli kurumlar vergisi oranı ile yararlanılan yatırıma katkı tutarı
+aşağıdaki gibi olacaktır.
+İndirimli KV oranı = [KV oranı - (KV oranı x Vergi indirim oranı)]
+= [%25 - (%25 x %50)] = [%25 - %12,5] = %12,5
+- Yatırımdan elde edilen kazanç 1.000.000 TL
+- İndirimli KV olmasaydı ödenecek KV (1.000.000 TL x %25) 250.000 TL
+- İndirimli orana göre hesaplanan KV (1.000.000 TL x %12,5) 125.000 TL
+- Yararlanılan yatırıma katkı tutarı (250.000 TL - 125.000 TL) 125.000 TL
+(B) A.Ş.'nin yatırım teşvik belgesi kapsamındaki yatırımının kısmen işletilmesinden 2023 hesap döneminin 3. geçici
+vergilendirme döneminde elde ettiği 1.000.000 TL kazancına indirimli kurumlar vergisi uygulanmak suretiyle faydalandığı
+yatırıma katkı tutarı 125.000 TL'dir. Dolayısıyla, yapılan yatırım harcaması nedeniyle 2023 hesap döneminin 3. geçici
+vergilendirme döneminde hak kazanılan 600.000 TL'lik yatırıma katkı tutarının bu dönemde faydalanılamayan (600.000 TL -
+125.000 TL) 475.000 TL'lik kısmından izleyen hesap dönemlerinde bu yatırımdan elde edilen kazançlara indirimli vergi oranı
+uygulanmak suretiyle yararlanılabilecektir.
+Mükellef 22/5/2023 tarihinde vermiş olduğu dilekçeyle, Kurumlar Vergisi Kanununun 32/A maddesinin sekizinci fıkrası
+kapsamında indirimli kurumlar vergisi uygulaması nedeniyle hesaplanan yatırıma katkı tutarının %10’unun diğer vergi
+borçlarından terkin edilmek suretiyle kullanılmasını talep etmiştir. Mükellefin Kasım/2023 dönem gelir vergisi stopajı ve
+damga vergisi borcu 80.000 TL’dir.
+Mükellefin terkin yoluyla yararlanabileceği yatırıma katkı tutarı aşağıdaki şekilde hesaplanacaktır.
+1. sınır:
+Diğer vergi borçlarından terkin edilecek tutar = Hak edilen yatırıma katkı tutarı x %10
+= 600.000 TL x %10
+= 60.000 TL
+229
+--- Page 230 ---
+Buna göre, mükellefin ilgili dönemde diğer vergi borçlarına terkin yoluyla kullanımını talep edebileceği yatırıma katkı
+tutarı, hak edilen yatırıma katkı tutarının %10’unu geçemeyecektir.
+2. sınır:
+(Hak kazanılan yatırıma katkı tutarı –
+Terkin talebinde bulunulabilecek üst sınır =
+yararlanılan yatırıma katkı tutarı) / 2
+= (600.000 TL – 125.000 TL) / 2
+= 475.000 TL / 2
+= 237.500 TL
+(B) A.Ş.’nin terkin talebinde bulunabileceği üst sınır 237.500 TL olup mükellefin terkin edilebilecek vergi borcu söz
+konusu üst sınırın altında kalmaktadır.
+Bununla birlikte, hak kazanılan yatırıma katkı tutarının %10’u olan 60.000 TL, 80.000 TL’lik borç tutarının altında
+kaldığından, mükellefin 22/5/2023 tarihinde yapmış olduğu başvuru doğrultusunda, hak kazanılan yatırıma katkı tutarının
+yalnızca 60.000 TL’lik kısmı 80.000 TL tutarındaki diğer vergi borcundan terkin edilebilecektir.
+Bu terkin işleminin yapılabilmesi için mükellefin, 2023 hesap döneminin 3. geçici vergilendirme dönemi beyannamesini
+vermesini müteakiben, yukarıdaki hesaplamaları içeren terkine ilişkin yeni bir dilekçe vermesi gerekmektedir.
+Diğer taraftan, (B) A.Ş.’nin söz konusu tutarı diğer vergi borçlarından terkin etmesi durumunda, kullanılan tutarın bir
+katına isabet eden yatırıma katkı tutarından vazgeçilecektir.
+Diğer vergi borçlarının terkini suretiyle
+Vazgeçilen yatırıma katkı tutarı =
+kullanılan tutar x 1
+= 60.000 TL x 1
+= 60.000 TL
+Dolayısıyla, (B) A.Ş.’nin diğer vergilerden terkin ettiği 60.000 TL ile bu tutarın bir katına isabet eden (vazgeçilen yatırıma
+katkı tutarı) 60.000 TL’nin toplamı olan 120.000 TL indirimli oranda kurumlar vergisine tabi olmayacaktır.
+Ayrıca, hak edilen yatırıma katkı tutarından diğer vergi borçlarından terkin yoluyla yararlanılmasına ilişkin söz konusu
+uygulama 1/1/2022 tarihinden itibaren yapılacak yatırım harcamaları için geçerlidir.
+Terkin talebinde bulunan mükelleflerin, her bir geçici vergi ile yıllık beyannamesini ibrazı sonrasında, terkin talep
+dilekçesindeki hesaplamaları revize etmesi ve yeni bir terkin talep dilekçesi vermesi gerekmektedir. Terkin talebi, her bir
+yatırım teşvik belgesi bazında ayrı ayrı yapılacaktır.
+Mükelleflerin terkin suretiyle kullanacağı yatırıma katkı tutarları, mükellefler tarafından kurum kazancının tespitinde
+gelir olarak dikkate alınacağından, bu tutarların, geçici ve yıllık kurumlar vergisi beyannamelerinde "Zarar Olsa Dahi İndirilecek
+İstisna ve İndirimler" bölümünde yer alan "Diğer İndirim ve İstisnalar" satırında gösterilmek suretiyle kurum kazancından
+indirilmesi mümkündür.
+(Ek paragraf: RG-4/9/2025-33007)250 24/7/2025 tarihinden itibaren alınan teşvik belgelerinde on yıllık süreyle sınırlı
+olarak indirimli oranda kurumlar vergisi uygulanacağından, on yıllık sürenin dolduğu hesap döneminden sonra, diğer vergi
+borçlarından terkin yoluyla yatırıma katkı tutarının kullanılması mümkün olmayacaktır.
+32.3. Küçük ve orta büyüklükteki işletmelerin (KOBİ) birleşmelerinde kurumlar vergisi oranının indirimli
+uygulanması (Ek bölüm: RG-11/2/2017-29976)251
+6770 sayılı Kanunun 29 uncu maddesiyle Kurumlar Vergisi Kanununun 32 nci maddesine eklenen beşinci fıkrada; “(5)
+19 uncu maddenin birinci fıkrası kapsamında birleşen sanayi sicil belgesini haiz ve fiilen üretim faaliyetiyle iştigal eden küçük
+ve orta büyüklükteki işletmelerin, birleşme tarihinde sona eren hesap döneminde münhasıran üretim faaliyetinden elde ettiği
+kazançları ile bu kapsamda birleşilen kurumun birleşme işleminin gerçekleştiği hesap dönemi dahil olmak üzere üç hesap
+250 4/9/2025 tarihli ve 33007 sayılı Resmi Gazete’de yayımlanan 24 Seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+251 11/2/2017 tarihli ve 29976 sayılı Resmi Gazete’de yayımlanan 12 seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+230
+--- Page 231 ---
+döneminde münhasıran üretim faaliyetinden elde ettiği kazançlarına uygulanmak üzere kurumlar vergisi oranını %75’e kadar
+indirimli uygulatmaya, bu indirim oranını, sektörler, iş kolları, üretim alanları, bölgeler, hesap dönemleri itibarıyla ya da orta
+ve yüksek teknolojili ürün üreten veya imalatçı ihracatçı kurumlar için ayrı ayrı veya birlikte farklılaştırmaya Bakanlar Kurulu;
+bu fıkranın uygulanmasına ilişkin usul ve esasları belirlemeye Maliye Bakanlığı yetkilidir.” hükümlerine yer verilmiştir.
+32.3.1. KOBİ tanımı
+19/10/2005 tarihli ve 2005/9617 sayılı Bakanlar Kurulu Kararı ile yürürlüğe konulan Küçük ve Orta Büyüklükteki
+İşletmelerin Tanımı, Nitelikleri ve Sınıflandırılması Hakkında Yönetmeliğin “Tanımlar” başlıklı 4 üncü maddesinin birinci
+fıkrasının (b) bendinde, küçük ve orta büyüklükte işletme, ikiyüzelli kişiden az yıllık çalışan istihdam eden ve yıllık net satış
+hasılatı veya mali bilançosundan herhangi biri kırk milyon Türk Lirasını aşmayan ve anılan Yönetmelikte mikro işletme, küçük
+işletme ve orta büyüklükteki işletme olarak sınıflandırılan ekonomik birimler veya girişimler olarak tanımlanmıştır.
+5520 sayılı Kanunun 32 nci maddesinin beşinci fıkrasının uygulanması bakımından küçük ve orta büyüklükteki işletme
+(KOBİ); birleşmenin gerçekleştiği tarihten önceki hesap döneminde ikiyüzelli kişiden az yıllık çalışan istihdam eden ve aynı
+hesap dönemine ilişkin gelir tablosunda yer alan yıllık net satış hasılatı veya bu dönemin sonunda çıkarılan bilançonun aktif
+toplamından herhangi biri kırk milyon Türk Lirasını aşmayan işletmeleri ifade etmektedir. Birleşmenin gerçekleştiği tarihten
+önceki hesap döneminde ikiyüzelli kişiden az yıllık çalışan istihdam etme kriterinin tespitinde, sigorta bildirgeleri esas alınmak
+suretiyle hesaplanan yıllık ortalama çalışan sayısı dikkate alınacaktır.
+Örnek: (A) Ltd. Şti. 2016 hesap döneminde vermiş olduğu sigorta bildirgelerine göre on iki aylık dönem boyunca toplam
+2.892 çalışan bildiriminde bulunmuştur. Ayrıca 31/12/2016 tarihli bilançosunun aktif toplamı 45.000.000.- TL olup 2016 hesap
+dönemine ait gelir tablosuna göre net satış hasılatı 34.000.000.-TL’dir.
+(A) Ltd. Şti.’nin 2016 hesap dönemine ilişkin yıllık ortalama çalışan sayısı (2.892 / 12 = 241) 250’nin altında olduğundan
+ve bu dönemin sonunda çıkarılan bilançosunun aktif toplamı her ne kadar kırk milyon Türk Lirasının üzerinde olsa da yıllık net
+satış hasılatı kırk milyon Türk Lirasını aşmadığından, 2017 yılında gerçekleştirilecek birleşmeler açısından (A) Ltd. Şti. Kanunun
+32 nci maddesinin beşinci fıkrasının uygulamasında KOBİ niteliğini haiz bulunmaktadır.
+Bir kurum, 250’den az işçi çalıştırmakla birlikte, bir önceki hesap döneminin sonu itibarıyla yıllık net satışları ve net
+aktif toplamının her ikisi de kırk milyon TL’den fazla ise KOBİ kapsamında değerlendirilmeyecektir.
+32.3.2. KOBİ birleşmelerinde kurumlar vergisi oranının indirimli uygulanmasının şartları
+Kanunun 32 nci maddesinin beşinci fıkrası hükümleri kapsamında, KOBİ’lerin münhasıran üretim faaliyetlerinden
+elde ettikleri kazançlarına kurumlar vergisi oranının indirimli olarak uygulanabilmesi için;
+a) Birleşmenin, Kanunun 19 uncu maddesinin birinci fıkrasında yer alan devir şartlarını taşıması,
+b) Birleşen kurumların KOBİ niteliğinde olması,
+c) Birleşen kurumların devir tarihi itibarıyla sanayi sicil belgesini haiz ve fiilen üretim faaliyetiyle iştigal eden kurumlardan
+olması
+şarttır.
+32.3.2.1. Birleşmenin, Kanunun 19 uncu maddesinin birinci fıkrasında yer alan devir şartlarını taşıması
+Kanunun 32 nci maddesinin beşinci fıkrasının uygulaması bakımından birleşme, KOBİ’lerin Kanunun 19 uncu
+maddesinin birinci fıkrası kapsamında gerçekleştirdikleri devirleri ifade etmektedir. Dolayısıyla, Kanunun 32 nci maddesinin
+beşinci fıkrası hükümlerinden yararlanılabilmesi için birleşmenin, bu Tebliğin (19.1) bölümünde yapılan açıklamalara uygun
+olarak gerçekleştirilen devir niteliğinde olması şarttır.
+32.3.2.2. Birleşen kurumların KOBİ niteliğinde olması
+Kanunun 32 nci maddesinin beşinci fıkrası hükümlerinin uygulanması bakımından birleşen kurumların KOBİ niteliğini
+taşımaları şarttır.
+Buna göre, KOBİ niteliğinde olmayan kurumlarla gerçekleştirilen devirler dolayısıyla anılan fıkra hükümlerinden
+yararlanılması mümkün bulunmamaktadır.
+32.3.2.3. Birleşen kurumların devir tarihi itibarıyla sanayi sicil belgesini haiz ve fiilen üretim faaliyetiyle iştigal
+eden kurumlardan olması
+231
+--- Page 232 ---
+Kanunun 32 nci maddesinin beşinci fıkrası hükümlerinden sadece, sanayi sicil belgesini haiz ve fiilen üretim
+faaliyetiyle iştigal eden KOBİ’lerin yararlanmaları mümkündür. Bu kapsamda, birleşen kurumların devir tarihi itibarıyla sanayi
+sicil belgesini haiz olmaları ve fiilen de üretim faaliyetiyle iştigal etmeleri şarttır.
+Dolayısıyla, sanayi sicil belgesini haiz olmakla birlikte fiilen üretim faaliyetiyle iştigal etmeyen veya fiilen üretim
+faaliyetiyle iştigal etmekle birlikte sanayi sicil belgesini haiz olmayan KOBİ’ler, diğer şartları taşısalar dahi bu fıkra
+hükümlerinden yararlanamazlar.
+32.3.3. Kurumlar vergisi oranının indirimli uygulanması
+Kanunun 32 nci maddesinin beşinci fıkrası kapsamında, şartları sağlayan KOBİ’lerin, birleşme tarihinde sona eren
+hesap döneminde münhasıran üretim faaliyetinden elde ettiği kazançları ile birleşilen kurumun birleşme işleminin
+gerçekleştiği hesap dönemi dahil olmak üzere üç hesap döneminde münhasıran üretim faaliyetinden elde ettiği kazançlarına,
+Bakanlar Kurulunca belirlenecek indirimli oranda kurumlar vergisi uygulanacaktır.
+Örnek: 1/8/2017 tarihinde KOBİ niteliğindeki (A) Ltd. Şti., KOBİ niteliğindeki mevcut (B) A.Ş.’ye Kurumlar Vergisi
+Kanununun 19 uncu maddesinin birinci fıkrası kapsamında devrolunmuştur.
+Buna göre,
+a) (A) Ltd. Şti.’nin 1/1/2017-1/8/2017 kıst döneminde ve
+b) (B) A.Ş.’nin de;
+- 1/1/2017-31/12/2017 hesap döneminde,
+- 1/1/2018-31/12/2018 hesap döneminde,
+- 1/1/2019-31/12/2019 hesap döneminde
+münhasıran üretim faaliyetlerinden elde ettikleri kazançlarına, Kanunun 32 nci maddesinin beşinci fıkrası kapsamında
+kurumlar vergisi oranı indirimli olarak uygulanacaktır.
+Diğer taraftan, üretim faaliyetleri dışında elde edilen kazançlar için kurumlar vergisi oranı indirimli olarak
+uygulanmayacaktır.
+Kanunun 32 nci maddesinin beşinci fıkrası kapsamında kurumlar vergisi oranı indirimli olarak uygulanacak kazançlar
+münhasıran üretim faaliyetlerinden elde edilen kazançlar olduğundan, birleşilen kurumun muhasebe kayıtlarını üretim
+faaliyetlerine ilişkin kazançlarını diğer kazançlarından ayrı olarak tespitine imkan verecek şekilde tutması gerekmektedir.
+Devir tarihinden sonra, devir tarihi itibarıyla faaliyette bulunulan alanlardan farklı alanlarda üretim faaliyetlerine
+başlanılması halinde, bu yeni üretim faaliyetlerinden kalan süre içerisinde elde edilen kazançlara da söz konusu fıkra hükmü
+kapsamında kurumlar vergisi oranı indirimli olarak uygulanabilecektir.
+Ayrıca, birleşmeden sonra birleşilen kurumun KOBİ niteliğini kaybetmesi münhasıran üretim faaliyetinden elde ettiği
+kazançlarına kurumlar vergisi oranının indirimli olarak uygulanmasına engel teşkil etmeyecektir.
+32.4. Sermaye azaltımında vergileme (Ek bölüm: RG-1/3/2023-32119)252
+32.4.1. Yasal düzenleme
+7420 sayılı Kanunun 22 nci maddesiyle Kurumlar Vergisi Kanununa aşağıdaki madde eklenmiştir.
+“MADDE 32/B- (1) Kurumlar tarafından sermayeye eklenen öz sermaye kalemlerinin, sermayeye eklendiği tarihten
+itibaren beş tam yıl geçtikten sonra herhangi bir şekilde sermaye azaltımına konu edilmesi durumunda, nakdi veya ayni
+sermaye ile sermayeye eklenen diğer unsurların toplam sermayeye oranlanması suretiyle azaltıma konu edilen tutar
+içerisindeki sermaye unsurları tespit olunur. Söz konusu oranın tespitinde,
+a) Sermayeye ilave dışında başka bir hesaba nakledilmesi, işletmeden çekilmesi veya sermaye hesabından başka
+hesaplara aktarımı kurumlar vergisine ve kar dağıtımına veya ana merkeze aktarılan tutara bağlı vergi kesintisine tabi
+tutulacak öz sermaye kalemlerinin,
+252 1/3/2023 tarihli ve 32119 sayılı Resmi Gazete’de yayımlanan 21 seri No.lu Kurumlar Vergisi Genel Tebliği ile eklenmiştir.
+232
+--- Page 233 ---
+b) Sadece kar dağıtımına veya ana merkeze aktarılan tutara bağlı vergi kesintisine tabi tutulacak öz sermaye
+kalemlerinin,
+c) Başka bir hesaba nakledilmesi veya işletmeden çekilmesi halinde vergilendirilmeyecek olan ayni ve nakdi
+sermayenin
+toplam sermaye içindeki payları dikkate alınır.
+(2) Kurumların öz sermaye kalemlerini sermayeye ekledikleri tarihten itibaren beş tam yıllık süre tamamlanmadan
+sermaye azaltımı yapmaları durumunda, azaltımın sırasıyla birinci fıkranın (a), (b) ve (c) bentlerinde yer alan sermaye
+unsurlarından yapıldığı kabul edilir.
+(3) Sermaye azaltımında, öncelikli olarak sermayeye ilave edilen öz sermaye kalemlerinden, sermayeye eklenme tarihi
+beş tam yıllık süreyi geçmemiş olanların işletmeden çekildiği kabul edilir.
+(4) Bu maddenin birinci, ikinci ve üçüncü fıkraları kapsamında sermaye azaltımı suretiyle tespit olunan sermaye
+unsurlarından; birinci fıkranın (a) bendi kapsamında olanlar kurumlar vergisine ve vergi kesintisine, (b) bendi kapsamında
+olanlar sadece vergi kesintisine tabi tutulur. Sermayeye ilave dışında başka bir hesaba nakledilmesi, işletmeden çekilmesi veya
+sermaye hesabından başka hesaplara aktarılması halinde kurumlar vergisine tabi tutulacak kısım için kesinti matrahı kurumlar
+vergisi hesaplandıktan sonra kalan tutardır.
+(5) Geçmiş yıl zararlarının mahsubu suretiyle sermaye azaltılması durumunda, bu şekilde azaltıma konu edilen sermaye
+unsurları birinci, ikinci ve üçüncü fıkra hükümlerine göre tespit edilir ancak vergi kesintisine tabi tutulmaz.
+(6) Hazine ve Maliye Bakanlığı bu maddenin uygulamasına ilişkin usul ve esasları belirlemeye yetkilidir.”
+32.4.2. Sermaye azaltımına konu edilebilecek sermaye unsurları
+Kurumların öz sermaye kalemleri içerisinde yer alan; yeniden değerleme fonları, sermaye düzeltmesi olumlu farkları
+gibi bazı hesap kalemleri işletmeden çekildiğinde kurumlar vergisine ve kar payı dağıtımına bağlı vergi kesintisine; geçmiş yıl
+karları gibi bazı hesap kalemleri ise işletmeden çekildiğinde kar payı dağıtımına bağlı vergi kesintisine tabi tutulmaktadır.
+Mükellefler tarafından, öz sermaye kalemleri içerisinde söz konusu hesaplarda yer alan tutar sermayeye ilave
+edilebilmektedir. Bu bağlamda, sermaye azaltımı yapılması durumunda, sermaye azaltımının sermayeye ilave edilen hangi
+kalemlerden yapıldığı vergilendirme açısından önem arz etmektedir.
+Kurumlar Vergisi Kanununun 32/B maddesinde yapılan düzenleme ile kurumların sermayelerini azaltmaları
+durumunda, hangi sermaye unsurunun ne kadar tutarda azaltılmış kabul edileceği ve azaltılan bu tutarın nasıl
+vergilendirileceği hususları belirlenmiştir.
+213 sayılı Vergi Usul Kanununun 192 nci maddesinde, işletmenin aktif toplamı ile borçları arasındaki fark öz sermaye
+olarak tanımlanmaktadır. 1 Sıra No.lu Muhasebe Sistemi Uygulama Genel Tebliği açısından ise öz sermaye, işletme sahip veya
+ortaklarının bilanço tarihinde işletmeye yapmış oldukları sermaye yatırımlarının tutarını gösteren ödenmiş sermaye ile
+sermaye yedekleri, kar yedekleri, geçmiş yıllar karları ve geçmiş yıllar zararları ve dönemin net kar veya zararını kapsar şeklinde
+ifade edilmiştir.
+Öz sermaye kalemlerinin sermayeye eklenmesi sonrası kurumlar tarafından sermaye azaltılması durumunda, azaltılan
+bu tutar üzerinden yapılması gereken vergileme işleminde öncelikle dikkat edilecek husus, sermayenin hangi unsurunun ne
+kadar tutarda azaltılacağıdır.
+Azaltıma konu edilebilecek sermaye unsurları esas itibarıyla;
+Sermayeye ilave dışında başka bir hesaba nakledilmesi, işletmeden çekilmesi veya sermaye hesabından başka
+hesaplara aktarımı kurumlar vergisine ve kar dağıtımına/ana merkeze aktarılan tutara bağlı vergi kesintisine tabi tutulacak öz
+sermaye kalemleri,
+Sadece kar dağıtımına/ana merkeze aktarılan tutara bağlı vergi kesintisine tabi tutulacak öz sermaye kalemleri,
+Başka bir hesaba nakledilmesi veya işletmeden çekilmesi halinde vergilendirilmeyecek olan ayni ve nakdi sermaye
+şeklinde üç sınıfta gruplandırılabilecektir.
+Kurumlar Vergisi Kanununun 32/B maddesi uyarınca, öz sermaye kalemlerinin sermayeye eklendiği tarihten itibaren
+beş tam yıllık süre tamamlanmadan sermaye azaltımı yapılması durumunda, azaltımın yukarıdaki gruplandırmada (I), (II) ve
+(III) numaralı sınıflarda yer alan sermaye unsurlarından sırasıyla yapıldığı kabul edilecektir.
+233
+--- Page 234 ---
+Diğer taraftan, bu unsurların sermayeye eklendiği tarihten itibaren beş tam yıl geçtikten sonra herhangi bir şekilde
+sermaye azaltımına konu edilmesi durumunda ise söz konusu sınıflandırmalarda yer alan sermaye unsurlarının toplam
+sermayeye oranlanması suretiyle azaltıma konu edilen tutar içerisindeki sermaye unsurları tespit olunacaktır.
+Bu bağlamda, sermaye azaltımına konu edilen sermaye unsurları, vergi kanunları ve özel kanunlarında yer alan ilgili
+düzenlemeleri uyarınca vergilendirilecektir.
+32.4.3. Öz sermaye kalemlerinin sermayeye eklendiği tarihten itibaren beş tam yıl geçtikten sonra kurumlar
+tarafından sermaye azaltılması
+Sermayeye ilave olunan öz sermaye kalemlerinin sermayenin bir unsuru olduğu tarihten itibaren beş tam yıl geçtikten
+sonra, kurumlar tarafından sermaye azaltılması halinde; işletmeye konulan nakdi veya ayni sermaye ile sermayeye eklenen
+diğer unsurların toplam sermayeye oranlanması suretiyle azaltıma konu edilen tutar içerisindeki sermaye unsurları tespit
+edilecektir. Söz konusu hesaplamada, Tebliğin “32.4.2.” bölümünde yer alan ve üç sınıfta gruplandırılan sermaye unsurlarının
+toplam sermayeye oranları dikkate alınacak olup, bu sınıfların dışında başka bir gruplandırma yapılmayacaktır.
+Örnek: 600.000 TL nakdi sermayesi bulunan (ABC) A.Ş., 26/3/2016 tarihinde tescil edilen kararla enflasyon düzeltmesi
+olumlu farklarından 300.000 TL, geçmiş yıl karlarından ise 100.000 TL sermayesine ilave etmek suretiyle sermayesini
+1.000.000 TL’ye çıkarmıştır. Mükellef, 1/9/2023 tarihinde ise ticaret sicil gazetesinde tescil edilen kararla sermayesini 400.000
+TL azaltmıştır.
+Buna göre, mükellefin toplam 1.000.000 TL tutarındaki sermayesinin %60’ı nakdi sermayeden, %30’u enflasyon
+düzeltmesi olumlu farklarından, %10’u ise geçmiş yıl karlarından oluşmaktadır. 1/9/2023 tarihinde sermayenin 400.000 TL
+azaltılması nedeniyle azaltılan tutarın 240.000 TL’sinin (400.000 TLx0,60) nakdi sermayeden, 120.000 TL’sinin (400.000
+TLx0,30) enflasyon düzeltmesi olumlu farklarından, 40.000 TL’sinin (400.000 TLx0,10) ise geçmiş yıl karlarından kaynaklandığı
+kabul edilecektir.
+Bu kapsamda, azaltıma konu edilen ve enflasyon düzeltmesi olumlu farklarından kaynaklanan 120.000 TL hem
+kurumlar vergisine hem de ortakların niteliğine bağlı olarak kar dağıtımına bağlı vergi kesintisine, geçmiş yıl karından
+kaynaklanan 40.000 TL ise ortakların niteliğine bağlı olarak yalnızca kar dağıtımına bağlı vergi kesintisine tabi tutulacaktır.
+Nakdi sermayeden kaynaklanan 240.000 TL üzerinden ise herhangi bir vergileme yapılması söz konusu olmayacaktır.
+Azaltılan sermaye Azaltıma konu edilen tutar Hesaplanan kurumlar
+Gelir vergisi kesintisi
+unsuru (400.000 TL) vergisi
+1-Enflasyon düzeltmesi
+(400.000x0,30) = 120.000 TL (120.000x0,20*) = 24.000 TL (96.000 TLx0,10**) = 9.600 TL
+olumlu farkları
+2-Geçmiş yıl karları (400.000x0,10) = 40.000 TL - (40.000 TLx0,10**) = 4.000 TL
+3-Nakdi sermaye (400.000x0,60) = 240.000 TL - -
+TOPLAM 400.000 TL 24.000 TL 13.600 TL
+(*) 2023 yılında kurumlar vergisi oranının %20 olduğu varsayılmıştır.
+(**) 2023 yılında kar dağıtımına bağlı vergi kesintisi oranının %10 ve ortakların gerçek kişi olduğu varsayılmıştır.
+234
+--- Page 235 ---
+32.4.4. Öz sermaye kalemlerinin sermayeye eklendiği tarihten itibaren beş tam yıl geçmeden kurumlar tarafından
+sermaye azaltılması
+Sermayeye ilave olunan öz sermaye kalemlerinin sermayenin bir unsuru olduğu tarihten itibaren beş tam yıl
+geçmeden, kurumların sermayelerini azaltmaları durumunda Tebliğin “32.4.2.” bölümünde yer alan ve üç sınıfta
+gruplandırılan sermaye unsurlarının sırasıyla azaltıma konu edildiği kabul edilecektir. Buna göre, beş tam yıllık süre
+tamamlanmadan sermaye azaltımı yapılması durumunda, sermaye azaltımının sırasıyla;
+I. Sermayeye ilave dışında başka bir hesaba nakledilmesi, işletmeden çekilmesi veya sermaye hesabından başka
+hesaplara aktarımı kurumlar vergisine ve kar dağıtımına/ana merkeze aktarılan tutara bağlı vergi kesintisine tabi tutulacak öz
+sermaye kalemlerinden,
+II. Sadece kar dağıtımına/ana merkeze aktarılan tutara bağlı vergi kesintisine tabi tutulacak öz sermaye kalemlerinden,
+III. Başka bir hesaba nakledilmesi veya işletmeden çekilmesi halinde vergilendirilmeyecek olan ayni ve nakdi sermaye
+unsurlarından
+yapıldığı kabul edilecek ve buna göre vergileme yapılacaktır.
+Örnek: (DEF) A.Ş. 50.000 TL nakdi sermaye ile 16/6/2000 tarihinde kurulmuştur. Şirket genel kurulunun 29/12/2022
+tarihinde aldığı kararla şirketin sermayesinin 1.000.000 TL’ye çıkarılması ve bu tutarın 650.000 TL’sinin şirket ortaklarınca
+nakden işletmeye konulması, 200.000 TL’sinin enflasyon düzeltmesi olumlu farklarından, 100.000 TL’sinin ise geçmiş yıl
+karlarından karşılanması kararı alınmıştır. Bu karar, 11/1/2023 tarihinde tescil edilmiştir.
+Mükellef kurum tarafından 7/8/2025 tarihinde tescil edilen kararla şirket sermayesinin 400.000 TL azaltılması kararı
+alınmıştır.
+Buna göre, azaltıma konu edilen sermayenin 200.000 TL’sinin enflasyon düzeltmesi olumlu farklarından, 100.000
+TL’sinin geçmiş yıl karlarından ve kalan 100.000 TL’sinin de nakdi sermayeden yapıldığı kabul edilecektir.
+Azaltılan sermaye Azaltıma Hesaplanan kurumlar Gelir vergisi kesintisi
+unsuru konu edilen
+vergisi
+tutar
+1-Enflasyon 200.000 TL (200.000 TLx0,20*) = 40.000 TL (160.000 TLx0,10**) = 16.000 TL
+düzeltmesi olumlu
+farkları
+2-Geçmiş yıl karları 100.000 TL - (100.000 TLx0,10**) = 10.000 TL
+3-Nakdi sermaye 100.000 TL - -
+TOPLAM 400.000 TL 40.000 TL 26.000 TL
+(*) 2025 yılında kurumlar vergisi oranının %20 olduğu varsayılmıştır.
+(**) 2025 yılında kar dağıtımına bağlı vergi kesintisi oranının %10 ve ortakların gerçek kişi olduğu varsayılmıştır.
+32.4.5. Öz sermaye unsurlarının sermayeye ilave edilme tarihine göre sermaye azaltımındaki öncelik durumu
+Kurumlar tarafından yapılacak sermaye azaltımında, daha önce sermayeye eklenen öz sermaye unsurlarının
+sermayeye eklenme tarihi itibarıyla bazılarının beş tam yıllık süreyi aşması bazılarının ise bu süreyi aşmaması söz konusu
+olabilmektedir. Bu durumda, sermayeye ilave edilen öz sermaye unsurlarından öncelikle sermayeye eklenme tarihi beş tam
+yılı geçmemiş olan unsurların sermayeden azaltıldığı kabul edilecektir.
+Örnek: 9.000.000 TL nakdi sermayesi olan (KLM) Ltd. Şti., 14/7/2017 tarihinde tescil edilen kararla tamamı enflasyon
+düzeltmesi olumlu farklarından karşılanmak suretiyle sermayesini 12.000.000 TL’ye çıkarmıştır.
+Mükellef kurum tarafından 28/11/2022 tarihinde tescil edilen ikinci bir kararla; 3.000.000 TL’si yeniden değerleme
+artışlarından, 2.000.000 TL’si geçmiş yıl karlarından olmak üzere kurum sermayesi 17.000.000 TL olarak yeniden belirlenmiştir.
+Bu defa, mükellef kurum yetkili organı tarafından 9.000.000 TL sermaye azaltımı kararı alınmış ve bu karar 7/8/2024
+tarihinde tescil edilmiştir.
+(KLM) Ltd. Şti. tarafından yapılan sermaye azaltımının, öncelikle sermayeye eklenme tarihi beş tam yıllık süreyi
+geçmemiş unsurlardan karşılandığı varsayılacaktır. Buna göre, sermaye azaltımının sırasıyla yeniden değerleme artışları
+235

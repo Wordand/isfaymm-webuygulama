@@ -12,6 +12,20 @@ load_dotenv(find_dotenv(), override=True)
 from flask import Flask, session
 from flask_limiter import Limiter
 from werkzeug.security import generate_password_hash
+import os
+
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=True)
+
+from flask import Flask, session
+from flask_limiter import Limiter
+from werkzeug.security import generate_password_hash
 from jinja2 import Undefined
 from datetime import timedelta
 
@@ -22,7 +36,7 @@ from services.db import (
     migrate_users_table, migrate_login_logs_table, migrate_tesvik_columns, 
     migrate_tesvik_kullanim_table, migrate_donem_matrah_table, migrate_profit_data_table, migrate_kdv_tables,
     migrate_mukellef_table, migrate_kdv_mukellef_table, migrate_kdv_documents_table,
-    migrate_kdv_notes_table, get_conn
+    migrate_kdv_notes_table, migrate_beyanname_table, get_conn
 )
 from services.utils import safe_date, currency_filter, tlformat
 
@@ -162,6 +176,7 @@ with app.app_context():
         app.logger.info("Running migrations...")
         migrate_users_table()   
         migrate_login_logs_table()
+        migrate_beyanname_table()
         migrate_tesvik_columns()
         migrate_tesvik_kullanim_table()
         migrate_donem_matrah_table()
@@ -174,8 +189,6 @@ with app.app_context():
         
         # Superuser
         bootstrap_admin_from_env()
-        
-        # AI resources will be loaded lazily via fuzzy search, no pre-loading needed.
         
         # Quick Connection Test
         with get_conn() as conn:

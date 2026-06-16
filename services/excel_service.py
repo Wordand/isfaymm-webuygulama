@@ -208,9 +208,9 @@ def parse_mizan_excel(excel_path):
         df_gelir_final = calculate_group_total_and_add(df_gelir_final, GELIR_TABLOSU_HESAPLARI)
 
         return {
-            "aktif": df_bilanco_aktif_final,
-            "pasif": df_bilanco_pasif_final,
-            "gelir": df_gelir_final,
+            "aktif": df_bilanco_aktif_final.to_dict(orient="records"),
+            "pasif": df_bilanco_pasif_final.to_dict(orient="records"),
+            "gelir": df_gelir_final.to_dict(orient="records"),
             "has_inflation": False,
             "unvan": "Bilinmiyor",
             "donem": "Bilinmiyor"

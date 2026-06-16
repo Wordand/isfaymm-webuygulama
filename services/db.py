@@ -1190,3 +1190,38 @@ def migrate_kdv_files_extra_cols():
                     conn.commit()
         except Exception as e:
             print(f"migrate_kdv_files_extra_cols hatasi: {e}")
+
+def migrate_beyanname_table():
+    """beyanname tablosunu olusturur."""
+    with get_conn() as conn:
+        cur = conn.cursor()
+        if USE_SQLITE:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS beyanname (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                mukellef_id INTEGER NOT NULL,
+                donem TEXT NOT NULL,
+                tur TEXT NOT NULL,
+                veriler BLOB,
+                yuklenme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, mukellef_id, donem, tur),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (mukellef_id) REFERENCES mukellef(id) ON DELETE CASCADE
+            );
+            """)
+        else:
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS beyanname (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                mukellef_id INTEGER NOT NULL REFERENCES mukellef(id) ON DELETE CASCADE,
+                donem TEXT NOT NULL,
+                tur TEXT NOT NULL,
+                veriler BYTEA,
+                yuklenme_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, mukellef_id, donem, tur)
+            );
+            """)
+        conn.commit()
+    print("beyanname tablosu kontrol edildi.")

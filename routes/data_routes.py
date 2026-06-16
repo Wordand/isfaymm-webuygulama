@@ -302,31 +302,46 @@ def kaydet_mizan_meta():
     donem = request.form.get("donem")
     file = request.files.get("mizan_file")
     
-    if not all([vkn, unvan, donem, file]):
-        flash("Eksik bilgi.", "danger")
-        return redirect(url_for("data.veri_giris"))
+    if not vkn or not donem or not file:
+        return jsonify({"status": "error", "message": "Eksik bilgi: VKN, dönem ve dosya gereklidir."}), 400
         
     if not allowed_file(file.filename):
-        flash("Geçersiz dosya.", "danger")
-        return redirect(url_for("data.veri_giris"))
+        return jsonify({"status": "error", "message": "Desteklenmeyen dosya formatı."}), 400
+
+    if not unvan:
+        try:
+            with get_conn() as conn:
+                c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                c.execute("SELECT unvan FROM mukellef WHERE vergi_kimlik_no=%s AND user_id=%s", (vkn, session["user_id"]))
+                row = c.fetchone()
+                if row:
+                    unvan = row["unvan"]
+                else:
+                    return jsonify({"status": "error", "message": f"Mükellef ({vkn}) bulunamadı. Lütfen yeni mükellef olarak ekleyin."}), 400
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Mükellef aranırken hata oluştu: {str(e)}"}), 500
 
     temp_path = os.path.join(tempfile.gettempdir(), secure_filename(file.filename))
     file.save(temp_path)
     
     try:
         parsed = parse_mizan_excel(temp_path)
-        if parsed.get("status") == "error":
-            flash(parsed["message"], "danger")
+        if isinstance(parsed, dict) and parsed.get("status") == "error":
+            return jsonify({"status": "error", "message": parsed.get("message")}), 400
         else:
             parsed.update({"vergi_kimlik_no": vkn, "unvan": unvan, "donem": donem})
             if kaydet_beyanname(parsed, "mizan"):
-                flash("Mizan başarıyla kaydedildi.", "success")
+                return jsonify({"status": "success", "message": "Mizan başarıyla kaydedildi."})
             else:
-                flash("Kayıt hatası.", "danger")
+                return jsonify({"status": "error", "message": "Veritabanına kaydedilirken hata oluştu."}), 500
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Mizan işlenirken hata oluştu: {str(e)}"}), 500
     finally:
-        if os.path.exists(temp_path): os.remove(temp_path)
-        
-    return redirect(url_for("data.veri_giris"))
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except:
+                pass
 
 @bp.route("/veri-giris")
 @login_required
