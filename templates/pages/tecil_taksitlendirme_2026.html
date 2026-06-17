@@ -1,0 +1,332 @@
+{% extends "layout.html" %}
+
+{% block title %}2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi | 72 Ay, %29 Tecil Faizi | İSFA YMM{% endblock %}
+{% block description %}6183 sayılı Kanun md.48 ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında 2026 vergi borcu tecil ve taksitlendirme şartları: son başvuru, taksit sayısı, teminat ve kapsam dışı borçlar.{% endblock %}
+{% block keywords %}vergi borcu tecil 2026, vergi borcu taksitlendirme 2026, 6183 48 tecil, 72 ay taksitlendirme, tecil faizi 2026, tahsilat genel tebliği seri b sıra no 20, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/mevzuat/vergi-borcu-tecil-taksitlendirme-2026{% endblock %}
+{% block og_title %}2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi{% endblock %}
+{% block og_desc %}31 Ağustos 2026'ya kadar başvuru, yıllık %29 tecil faizi, 36/48/72 ay ve KDV-BSMV için 12 taksit koşulları.{% endblock %}
+
+{% block content %}
+<style>
+  .tecil-hero {
+    background: linear-gradient(135deg, #0f2f57 0%, #0b6b7a 100%);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+  }
+  .tecil-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    padding: .45rem .75rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: .9rem;
+  }
+  .tecil-card {
+    border: 1px solid #dce4ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 47, 87, .08);
+  }
+  .tecil-fact {
+    border-left: 4px solid #0d6efd;
+    background: #f6f9ff;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .tecil-fact strong {
+    display: block;
+    color: #0f2f57;
+    font-size: 1.2rem;
+  }
+  .tecil-section h2 {
+    color: #0f2f57;
+    font-weight: 800;
+  }
+  .tecil-table th {
+    background: #f2f6fb;
+    color: #0f2f57;
+  }
+  .tecil-check {
+    list-style: none;
+    padding-left: 0;
+  }
+  .tecil-check li {
+    padding-left: 1.9rem;
+    position: relative;
+    margin-bottom: .75rem;
+  }
+  .tecil-check li::before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e7f8ef;
+    color: #087f45;
+    font-weight: 800;
+  }
+  .tecil-warning {
+    background: #fff7e6;
+    border: 1px solid #ffd58a;
+    border-left: 5px solid #f59f00;
+    border-radius: 12px;
+  }
+  .tecil-cta {
+    background: #0f2f57;
+    color: #fff;
+    border-radius: 16px;
+  }
+</style>
+
+<section class="tecil-hero py-5">
+  <div class="container py-3">
+    <nav aria-label="breadcrumb" class="small mb-4">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a class="text-white text-opacity-75" href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+        <li class="breadcrumb-item"><a class="text-white text-opacity-75" href="{{ url_for('main.mevzuat') }}">Mevzuat</a></li>
+        <li class="breadcrumb-item active text-white" aria-current="page">2026 Tecil ve Taksitlendirme</li>
+      </ol>
+    </nav>
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <span class="tecil-pill mb-3"><i class="bi bi-calendar-check"></i> Son başvuru: 31.08.2026</span>
+        <h1 class="display-6 fw-bold mb-3">2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi</h1>
+        <p class="lead mb-0 text-white text-opacity-90">
+          6183 sayılı Kanunun 48 inci maddesi ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında,
+          vergi dairesine olan borçlar için daha düşük tecil faiziyle taksitlendirme imkanı getirildi.
+        </p>
+      </div>
+      <div class="col-lg-4">
+        <div class="tecil-card p-4 text-dark">
+          <div class="small text-muted fw-bold text-uppercase mb-2">Kısa özet</div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Faiz</span><strong>Yıllık %29</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Azami süre</span><strong>72 taksit</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>İlk taksit</span><strong>Eylül 2026</strong></div>
+          <div class="d-flex justify-content-between py-2"><span>Teminat</span><strong>10 milyon TL'ye kadar yok</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-5">
+  <section class="row g-3 mb-5" aria-label="Önemli bilgiler">
+    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Başvuru tarihi</span><strong>31.08.2026</strong><small>Bu tarih dahil.</small></div></div>
+    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Kapsam tarihi</span><strong>05.06.2026</strong><small>Bu tarih dahil vadesi gelmiş borçlar.</small></div></div>
+    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Tecil faizi</span><strong>%29</strong><small>Yıllık oran.</small></div></div>
+    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Taksit</span><strong>12-72</strong><small>Borç türü ve duruma göre.</small></div></div>
+  </section>
+
+  <section class="tecil-section mb-5">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <h2 class="h3 mb-3">Kimler yararlanabilir?</h2>
+        <p class="text-muted">
+          Hazine ve Maliye Bakanlığına bağlı vergi dairelerince takip edilen ve 5 Haziran 2026 tarihi itibarıyla
+          vadesi geldiği halde Tebliğin yayım tarihine kadar ödenmemiş amme alacakları kapsama girer.
+        </p>
+        <ul class="tecil-check">
+          <li>Başvuru 31 Ağustos 2026 tarihine kadar yapılmalıdır.</li>
+          <li>Birden fazla vergi dairesine borç varsa her vergi dairesi için ayrı başvuru gerekir.</li>
+          <li>Borçlunun ilgili vergi dairesindeki tüm borçları için tecil talep etmesi gerekir.</li>
+        </ul>
+      </div>
+      <div class="col-lg-5">
+        <div class="tecil-warning p-4 h-100">
+          <h3 class="h5 fw-bold text-dark">Kapsam dışında kalan önemli borçlar</h3>
+          <p class="mb-2 text-muted">
+            Özel tüketim vergisi ile 2026 yılına ait gelir veya kurumlar vergisine mahsup edilecek geçici vergi,
+            bunlara bağlı vergi ziyaı cezası, gecikme faizi, gecikme zammı ve ilgili damga vergileri bu özel düzenleme kapsamında değildir.
+          </p>
+          <p class="small text-muted mb-0">Bu ayrım, başvuru öncesinde borç listesinin doğru okunması için kritik.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tecil-section mb-5">
+    <h2 class="h3 mb-3">Kaç taksit yapılır?</h2>
+    <div class="table-responsive tecil-card p-0">
+      <table class="table table-bordered align-middle mb-0 tecil-table">
+        <thead>
+          <tr>
+            <th>Durum</th>
+            <th class="text-end">Taksit sayısı</th>
+            <th>Açıklama</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Likidite oranı 0,50 veya daha yüksek</td>
+            <td class="text-end fw-bold">36</td>
+            <td>Faal, bilanço veya işletme hesabı esasına göre defter tutan mükellefler.</td>
+          </tr>
+          <tr>
+            <td>Likidite oranı 0,50'den küçük ve 0,30'dan büyük</td>
+            <td class="text-end fw-bold">48</td>
+            <td>Çok zor durum derecesine göre ara grup.</td>
+          </tr>
+          <tr>
+            <td>Likidite oranı 0,30 veya daha düşük</td>
+            <td class="text-end fw-bold">72</td>
+            <td>En uzun taksit imkanı.</td>
+          </tr>
+          <tr>
+            <td>KDV ve BSMV borçları</td>
+            <td class="text-end fw-bold">12</td>
+            <td>Bu vergiler ve bunlara bağlı fer'i alacaklar için özel sınır.</td>
+          </tr>
+          <tr>
+            <td>Belediyeler, il özel idareleri ve kapsamdaki şirketler</td>
+            <td class="text-end fw-bold">72</td>
+            <td>Borç türü ayrımı yapılmadan uygulanır.</td>
+          </tr>
+          <tr>
+            <td>Yukarıdaki gruplara girmeyen borçlular</td>
+            <td class="text-end fw-bold">48</td>
+            <td>Genel uygulama.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tecil-section mb-5">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="tecil-card p-4 h-100">
+          <h2 class="h4 mb-3">Teminat gerekir mi?</h2>
+          <p class="text-muted mb-3">
+            Tecil taleplerinde 10 milyon TL'ye kadar olan amme alacakları için teminat alınmaz.
+            10 milyon TL'yi aşan kısım için ise aşan tutarın yarısı kadar teminat aranır.
+          </p>
+          <div class="border rounded-3 p-3 bg-light">
+            <strong>Örnek:</strong> 14 milyon TL borçta, 10 milyon TL'yi aşan 4 milyon TL'nin yarısı,
+            yani 2 milyon TL teminat konusu olur.
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="tecil-card p-4 h-100">
+          <h2 class="h4 mb-3">Başvuru nereden yapılır?</h2>
+          <ul class="tecil-check mb-0">
+            <li>Gelir İdaresi Başkanlığı internet adresi</li>
+            <li>Dijital Vergi Dairesi</li>
+            <li>e-Devlet</li>
+            <li>Borçlu olunan vergi dairesi, posta veya diğer vergi daireleri aracılığı</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tecil-section mb-5">
+    <h2 class="h3 mb-3">Taksit ödenmezse ne olur?</h2>
+    <div class="tecil-card p-4">
+      <p class="text-muted">
+        Taksitlerin süresinde ödenmemesi veya eksik ödenmesi normalde tecilin ihlali anlamına gelir.
+        Ancak bir takvim yılında en fazla iki taksitin süresinde ödenmemesi veya eksik ödenmesi,
+        takip eden taksit ödeme süresi içinde tecil faiziyle birlikte ödenirse ihlal sayılmaz.
+      </p>
+      <p class="mb-0 text-muted">
+        Son taksitin gecikmesi halinde ise takip eden ayın sonuna kadar ödeme yapılması gerekir.
+      </p>
+    </div>
+  </section>
+
+  <section class="tecil-section mb-5">
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-6">
+        <div class="tecil-card p-4 h-100">
+          <h2 class="h4 mb-3">Borcu yoktur yazısında görünür mü?</h2>
+          <p class="text-muted mb-0">
+            Tecil edilen borcun borç durumunu gösterir belgede yer almaması için, tecil edilen borç tutarının
+            tecil faizi hariç en az %10'unun ödenmiş olması gerekir. %10'dan az ödeme varsa ödenmeyen fark belgede görünür.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="tecil-card p-4 h-100">
+          <h2 class="h4 mb-3">Bu bir yapılandırma mı?</h2>
+          <p class="text-muted mb-0">
+            Bu düzenleme klasik anlamda ana para indirimi getiren bir yapılandırma değildir. Esas avantaj,
+            6183/48 kapsamında borcun daha uzun süreye yayılması ve bu Tebliğ için yıllık %29 tecil faizi uygulanmasıdır.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tecil-cta p-4 p-lg-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <h2 class="h3 fw-bold mb-2">Tecil faizi ve taksit planını hesaplayın</h2>
+        <p class="mb-0 text-white text-opacity-75">
+          Tecil başvurusunda toplam borç tutarı, vade ve başvuru tarihine kadar işleyen fer'i alacaklarla birlikte değerlendirilir.
+          Tecil faizi aracıyla tahmini taksit tutarını, faiz yükünü ve toplam ödeme planını hızlıca görebilirsiniz.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a class="btn btn-light btn-lg rounded-pill fw-bold px-4" href="{{ url_for('calculators.tecil_faizi') }}">
+          Tecil Faizi Hesapla
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-4">
+    {% include "partials/tax_disclaimer.html" %}
+  </div>
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "2026 vergi borcu tecil başvurusu için son tarih nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında başvuru için son tarih 31 Ağustos 2026'dır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bu tecilde faiz oranı kaç?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu Tebliğ kapsamında tecil edilen borçlara yıllık %29 tecil faizi uygulanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Vergi borcu en fazla kaç taksit yapılır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Borç türü, hukuki statü ve çok zor durum haline göre 12, 36, 48 veya 72 taksit uygulanabilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tecil için teminat gerekir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "10 milyon TL'ye kadar olan amme alacakları için teminat aranmaz. 10 milyon TL'yi aşan kısım için aşan tutarın yarısı kadar teminat gerekir."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}

@@ -91,6 +91,13 @@
                                     <div class="dmi-desc">Güncel oranlarla hesaplama</div>
                                 </div>
                             </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.tecil_faizi') }}">
+                                <div class="dmi-icon bg-blue"><i class="bi bi-calendar2-check"></i></div>
+                                <div>
+                                    <div class="dmi-label">Tecil Faizi</div>
+                                    <div class="dmi-desc">Taksit ve faiz planı</div>
+                                </div>
+                            </a>
                             <a class="dropdown-item-modern" href="{{ url_for('calculators.kdv_tevkifat') }}">
                                 <div class="dmi-icon bg-warning text-dark"><i class="bi bi-pie-chart-fill"></i></div>
                                 <div>
@@ -181,6 +188,7 @@
                                     <div class="dmi-label">Mevzuat Değişiklikleri <span class="badge-new">YENİ</span></div>
                                     <div class="dmi-desc">Güncel değişiklikler</div>
                                 </div>
+
                             </a>
 
                             <div class="dropdown-divider-modern my-2"></div>
@@ -337,6 +345,13 @@
                                 <div>
                                     <div class="dmi-label">KV İstisna &amp; İndirimler <span class="badge-new">YENİ</span></div>
                                     <div class="dmi-desc">Kazanç ve zarar durumuna göre tam liste</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">
+                                <div class="dmi-icon bg-blue"><i class="bi bi-calendar2-check"></i></div>
+                                <div>
+                                    <div class="dmi-label">2026 Vergi Borcu Tecil <span class="badge-new">YENİ</span></div>
+                                    <div class="dmi-desc">31.08.2026 son başvuru ve 72 aya kadar taksit</div>
                                 </div>
                             </a>
                             <a class="dropdown-item-modern" href="{{ url_for('main.ceza') }}">

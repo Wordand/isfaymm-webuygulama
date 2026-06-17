@@ -1,0 +1,280 @@
+{% extends "layout.html" %}
+
+{% block title %}Tecil Faizi Hesaplama 2026 | Vergi Borcu Taksitlendirme Planı | İSFA YMM{% endblock %}
+{% block description %}2026 vergi borcu tecil faizi hesaplama aracı ile borç tutarı, başvuru tarihi, taksit sayısı ve yıllık %29 tecil faizi üzerinden tahmini ödeme planı oluşturun.{% endblock %}
+{% block keywords %}tecil faizi hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil faizi, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/tecil-faizi{% endblock %}
+{% block og_title %}Tecil Faizi Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block og_desc %}Vergi borcu tecil ve taksitlendirme için tahmini taksit, tecil faizi ve toplam ödeme planı hesaplayın.{% endblock %}
+
+{% block content %}
+<style>
+  .tecil-calc-hero {
+    background: linear-gradient(135deg, #0f2f57 0%, #0b6b7a 100%);
+    border-radius: 0 0 26px 26px;
+    color: #fff;
+  }
+  .tecil-calc-card {
+    border: 1px solid #dce4ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 47, 87, .08);
+  }
+  .tecil-result {
+    background: #f6f9ff;
+    border: 1px solid #cfe0ff;
+    border-radius: 12px;
+  }
+  .tecil-result strong {
+    color: #0f2f57;
+    font-size: 1.15rem;
+  }
+  .tecil-note {
+    background: #fff7e6;
+    border: 1px solid #ffd58a;
+    color: #6a4a00;
+    border-radius: 12px;
+  }
+  .tecil-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    color: #0f2f57;
+    border: 1px solid rgba(255, 255, 255, .85);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .14);
+    border-radius: 999px;
+    padding: .45rem .85rem;
+    font-weight: 800;
+  }
+</style>
+
+<section class="tecil-calc-hero py-5">
+  <div class="container">
+    <nav aria-label="breadcrumb" class="small mb-3">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a class="text-white" href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+        <li class="breadcrumb-item"><a class="text-white" href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
+        <li class="breadcrumb-item active text-white-50" aria-current="page">Tecil Faizi</li>
+      </ol>
+    </nav>
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <span class="tecil-hero-badge mb-3">2026 Tebliğ: yıllık %29</span>
+        <h1 class="display-6 fw-bold mb-3">Tecil Faizi Hesaplama 2026</h1>
+        <p class="lead mb-0 text-white-75">
+          Vergi borcu tecil ve taksitlendirme başvurusu için borç tutarı, taksit sayısı ve başvuru tarihine göre tahmini ödeme planını görün.
+        </p>
+      </div>
+      <div class="col-lg-4">
+        <div class="tecil-calc-card p-4 text-dark">
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Faiz oranı</span><strong>Yıllık %29</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>İlk taksit</span><strong>Eylül 2026</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Azami süre</span><strong>72 taksit</strong></div>
+          <div class="d-flex justify-content-between py-2"><span>Teminat</span><strong>10 milyon TL'ye kadar yok</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="tecil-calc-card p-4">
+        <h2 class="h4 fw-bold mb-3">Ödeme Planı Bilgileri</h2>
+        <form id="tecilForm">
+          <div class="mb-3">
+            <label for="borcTutari" class="form-label fw-bold">Tecil edilecek borç tutarı (TL)</label>
+            <input type="text" inputmode="decimal" id="borcTutari" class="form-control form-control-lg" placeholder="0,00" required>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="basvuruTarihi" class="form-label fw-bold">Başvuru tarihi</label>
+              <input type="date" id="basvuruTarihi" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="ilkTaksitAyi" class="form-label fw-bold">İlk taksit ayı</label>
+              <input type="month" id="ilkTaksitAyi" class="form-control" value="2026-09" required>
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label for="taksitSayisi" class="form-label fw-bold">Taksit sayısı</label>
+              <select id="taksitSayisi" class="form-select">
+                <option value="12">12 taksit</option>
+                <option value="36">36 taksit</option>
+                <option value="48">48 taksit</option>
+                <option value="72" selected>72 taksit</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="faizOrani" class="form-label fw-bold">Yıllık tecil faizi (%)</label>
+              <input type="number" id="faizOrani" class="form-control" value="29" min="0" step="0.01" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+            <i class="bi bi-calculator me-2"></i> Tecil Faizini Hesapla
+          </button>
+        </form>
+        <div class="tecil-note p-3 mt-3 small">
+          Bu araç ön hesaplama içindir. Vergi dairesinin vereceği resmi ödeme planında başvuru tarihi, ödeme tarihi ve sistem hesaplama kuralları nedeniyle küçük farklar oluşabilir.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="tecil-calc-card p-4">
+        <h2 class="h4 fw-bold mb-3">Hesaplama Sonucu</h2>
+        <div id="emptyState" class="text-muted">
+          Borç tutarını ve taksit bilgilerini girince tahmini ödeme planı burada görünecek.
+        </div>
+        <div id="sonucAlani" style="display:none;">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Ana borç</span><br><strong id="resAnaBorc">0,00 TL</strong></div></div>
+            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tahmini tecil faizi</span><br><strong id="resFaiz">0,00 TL</strong></div></div>
+            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Toplam ödeme</span><br><strong id="resToplam">0,00 TL</strong></div></div>
+          </div>
+          <div class="alert alert-info small mb-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Tecil faizi, her taksit tutarı için başvuru tarihinden ilgili taksit vadesine kadar geçen süre üzerinden hesaplanır. Bu nedenle vadeye kalan süre uzadıkça taksitlerdeki faiz tutarı artar.
+          </div>
+          <div class="table-responsive" style="max-height: 520px;">
+            <table class="table table-sm table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Taksit</th>
+                  <th>Vade</th>
+                  <th class="text-end">Ana para</th>
+                  <th class="text-end">Tecil faizi</th>
+                  <th class="text-end">Ödenecek</th>
+                </tr>
+              </thead>
+              <tbody id="planBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="mt-5">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="tecil-calc-card p-4 h-100">
+          <h2 class="h4 fw-bold mb-3">Hangi durumda kaç taksit?</h2>
+          <p class="text-muted mb-0">
+            KDV ve BSMV borçları için genel olarak 12 taksit; likidite oranına göre 36, 48 veya 72 taksit; bazı kamu bağlantılı borçlularda ise 72 taksit uygulanabilir.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="tecil-calc-card p-4 h-100">
+          <h2 class="h4 fw-bold mb-3">Detaylı şartları okuyun</h2>
+          <p class="text-muted">
+            Kapsama giren borçlar, kapsam dışı kalan vergiler, başvuru şekli ve teminat sınırı için rehber sayfasını inceleyebilirsiniz.
+          </p>
+          <a class="btn btn-outline-primary rounded-pill fw-bold" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">2026 Tecil Rehberine Git</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-4">
+    {% include "partials/tax_disclaimer.html" %}
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("tecilForm");
+  const borcInput = document.getElementById("borcTutari");
+  const basvuruInput = document.getElementById("basvuruTarihi");
+  const monthInput = document.getElementById("ilkTaksitAyi");
+  const taksitInput = document.getElementById("taksitSayisi");
+  const faizInput = document.getElementById("faizOrani");
+  const emptyState = document.getElementById("emptyState");
+  const sonucAlani = document.getElementById("sonucAlani");
+  const planBody = document.getElementById("planBody");
+
+  const today = new Date().toISOString().slice(0, 10);
+  basvuruInput.value = today;
+
+  function parseMoney(value) {
+    return Number(String(value || "").replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  function money(value) {
+    return Number(value || 0).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " TL";
+  }
+
+  function formatMoneyInput(input) {
+    const raw = input.value.replace(/[^\d]/g, "");
+    if (!raw) {
+      input.value = "";
+      return;
+    }
+    input.value = (Number(raw) / 100).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function monthEnd(year, monthIndex) {
+    return new Date(year, monthIndex + 1, 0);
+  }
+
+  function addMonths(year, monthIndex, add) {
+    const d = new Date(year, monthIndex + add, 1);
+    return { year: d.getFullYear(), monthIndex: d.getMonth() };
+  }
+
+  borcInput.addEventListener("input", () => formatMoneyInput(borcInput));
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const borc = parseMoney(borcInput.value);
+    const basvuru = new Date(basvuruInput.value + "T00:00:00");
+    const [firstYear, firstMonth] = monthInput.value.split("-").map(Number);
+    const taksitSayisi = Number(taksitInput.value);
+    const faizOrani = Number(faizInput.value) / 100;
+
+    if (!borc || !basvuruInput.value || !monthInput.value || !taksitSayisi) {
+      return;
+    }
+
+    let toplamFaiz = 0;
+    let toplamOdeme = 0;
+    planBody.innerHTML = "";
+
+    const basePrincipal = Math.floor((borc / taksitSayisi) * 100) / 100;
+    const firstPrincipal = Math.round((borc - (basePrincipal * (taksitSayisi - 1))) * 100) / 100;
+
+    for (let i = 1; i <= taksitSayisi; i++) {
+      const dueMonth = addMonths(firstYear, firstMonth - 1, i - 1);
+      const dueDate = monthEnd(dueMonth.year, dueMonth.monthIndex);
+      const principal = i === 1 ? firstPrincipal : basePrincipal;
+      const days = Math.max(0, Math.ceil((dueDate - basvuru) / 86400000));
+      const interest = Math.round((principal * faizOrani * days / 365) * 100) / 100;
+      const installmentTotal = principal + interest;
+      toplamFaiz += interest;
+      toplamOdeme += installmentTotal;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i}</td>
+        <td>${dueDate.toLocaleDateString("tr-TR")}</td>
+        <td class="text-end">${money(principal)}</td>
+        <td class="text-end">${money(interest)}</td>
+        <td class="text-end fw-bold">${money(installmentTotal)}</td>
+      `;
+      planBody.appendChild(tr);
+    }
+
+    document.getElementById("resAnaBorc").textContent = money(borc);
+    document.getElementById("resFaiz").textContent = money(toplamFaiz);
+    document.getElementById("resToplam").textContent = money(toplamOdeme);
+    emptyState.style.display = "none";
+    sonucAlani.style.display = "block";
+  });
+});
+</script>
+{% endblock %}
