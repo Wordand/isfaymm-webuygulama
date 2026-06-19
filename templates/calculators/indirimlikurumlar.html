@@ -433,6 +433,45 @@ body, html { background: #fff !important; }
   }
 </style>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const isMobileWidth = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  const storageKey = "ikv_mobile_desktop_hint_seen";
+  if (!isMobileWidth || localStorage.getItem(storageKey) === "1") return;
+
+  const showMobileHint = () => {
+    if (!window.Swal) return;
+    Swal.fire({
+      icon: "info",
+      title: "Masaüstünde daha rahat kullanılır",
+      html: `
+        <div style="text-align:left; line-height:1.55;">
+          İndirimli kurumlar vergisi hesaplama aracı; dönem matrahı, teşvik belgesi,
+          önceki dönem katkıları, tevsi oranlama ve PDF raporları gibi detaylı alanlar içerir.
+          <br><br>
+          Daha sağlıklı ve hatasız kullanım için masaüstü bilgisayar veya geniş ekran önerilir.
+        </div>
+      `,
+      confirmButtonText: "Anladım",
+      showCancelButton: true,
+      cancelButtonText: "Yine de devam et",
+      confirmButtonColor: "#0d6efd",
+      cancelButtonColor: "#6c757d"
+    }).then((result) => {
+      if (result.isConfirmed || result.dismiss === Swal.DismissReason.cancel) {
+        localStorage.setItem(storageKey, "1");
+      }
+    });
+  };
+
+  if (window.Swal) {
+    showMobileHint();
+  } else {
+    setTimeout(showMobileHint, 600);
+  }
+});
+</script>
+
 <div class="{% if sekme == 'ayrintili' %}container-fluid px-md-5{% else %}container{% endif %} py-4">
   <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
 
