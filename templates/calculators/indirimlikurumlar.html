@@ -201,6 +201,48 @@
     font-weight: 800;
     line-height: 1.45;
 }
+.ikv-seo-entry {
+    border: 1px solid #dbeafe;
+    background: #f8fbff;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin: 1.25rem 0 0;
+}
+.ikv-seo-entry h2 {
+    font-size: 1rem;
+    color: #0f172a;
+    font-weight: 800;
+    margin-bottom: 0.35rem;
+}
+.ikv-seo-entry p {
+    color: #475569;
+    margin-bottom: 0.65rem;
+    font-size: 0.92rem;
+}
+.ikv-seo-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.ikv-seo-link-row a {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.ikv-seo-link-row a.primary {
+    background: #0d6efd;
+    color: #ffffff;
+    border-color: #0d6efd;
+}
+.ikv-seo-link-row a:hover {
+    border-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+}
 @media (max-width: 768px) {
     .ikv-seo-grid,
     .ikv-faq-grid {
@@ -502,7 +544,8 @@ document.addEventListener("DOMContentLoaded", function () {
             İndirimli Kurumlar Vergisi Hesaplama 2026
           </h1>
           <p class="mb-0" style="color:rgba(255,255,255,0.7); font-size:1rem; font-weight:400;">
-            2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini hesaplayın.
+            2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV oranı,
+            dönem matrahı, diğer faaliyet katkısı ve kalan katkı bakiyesini hesaplayın.
           </p>
           {% endif %}
         </div>
@@ -641,10 +684,10 @@ document.addEventListener("DOMContentLoaded", function () {
           <i class="bi bi-bar-chart-line"></i>Ayrıntılı Kazanç 
         </a> 
         <a href="{{ url_for('indirimlikurumlar_seo.teblig_ornekleri') }}" data-public-tab="ornekler" class="ikv-tab {% if sekme == 'ornekler' %}active{% endif %}">
-          <i class="bi bi-lightbulb-fill"></i>Tebliğdeki Örnekler
+          <i class="bi bi-lightbulb-fill"></i>Tebliğ Örnekleri
         </a>
         <a href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}" data-public-tab="mevzuat" class="ikv-tab {% if sekme == 'mevzuat' %}active{% endif %}">
-          <i class="bi bi-book-half"></i>Mevzuat & Rehber
+          <i class="bi bi-book-half"></i>Mevzuat Rehberi
         </a>
         <a href="{{ url_for('indirimlikurumlar_seo.ozelge_kutuphanesi') }}" data-public-tab="ozelgeler" class="ikv-tab {% if sekme == 'ozelgeler' %}active{% endif %}">
           <i class="bi bi-journal-text"></i>Özelgeler
@@ -654,9 +697,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     <!-- Content Body -->
     <div class="card-body p-4">
-
-
-
 
 <div class="mt-4">
   {% if sekme == 'tesvik' %}
@@ -1406,6 +1446,47 @@ document.addEventListener("DOMContentLoaded", function () {
       <button type="button" class="btn btn-lg btn-danger ms-2" id="clearProfitData">🗑️ Tümünü Temizle</button>
     </div>
   </form>
+  {% endif %}
+
+  {% if sekme == 'ornekler' %}
+  <section class="ikv-seo-entry" aria-labelledby="ikv-ornek-entry-title">
+    <h2 id="ikv-ornek-entry-title">Tebliğ örnekleriyle indirimli kurumlar vergisi hesaplama</h2>
+    <p>
+      Bu sayfada 2012/3305 ve 2025/9903 rejimlerine göre yatırım kazancı, diğer faaliyet kazancı,
+      tevsi yatırım ve çoklu belge senaryoları örnek verilerle açıklanır.
+    </p>
+    <div class="ikv-seo-link-row">
+      <a class="primary" href="{{ url_for('indirimlikurumlar_seo.hesaplama_araci', sekme='donem') }}">Hesaplama Aracına Geç</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}">Mevzuat Rehberi</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.ozelge_kutuphanesi') }}">Özelge Arşivi</a>
+    </div>
+  </section>
+  {% elif sekme == 'mevzuat' %}
+  <section class="ikv-seo-entry" aria-labelledby="ikv-mevzuat-entry-title">
+    <h2 id="ikv-mevzuat-entry-title">KVK 32/A ve yatırım teşvik mevzuatı</h2>
+    <p>
+      KVK 32/A, 2012/3305, 2025/9903, yatırım dönemi, işletme dönemi, 4 dönem ve 10 hesap dönemi sınırları
+      birlikte değerlendirilir.
+    </p>
+    <div class="ikv-seo-link-row">
+      <a class="primary" href="{{ url_for('indirimlikurumlar_seo.hesaplama_araci', sekme='donem') }}">Hesaplama Aracına Geç</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.teblig_ornekleri') }}">Tebliğ Örnekleri</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.ozelge_kutuphanesi') }}">Özelge Arşivi</a>
+    </div>
+  </section>
+  {% elif sekme == 'ozelgeler' %}
+  <section class="ikv-seo-entry" aria-labelledby="ikv-ozelge-entry-title">
+    <h2 id="ikv-ozelge-entry-title">İndirimli kurumlar vergisi özelgeleri</h2>
+    <p>
+      KVK 32/A, yatırım teşvik belgesi, tevsi yatırım, diğer faaliyet kazancı, endeksleme ve tamamlama vizesi
+      özelgelerini konu, soru ve idare görüşü olarak inceleyebilirsiniz.
+    </p>
+    <div class="ikv-seo-link-row">
+      <a class="primary" href="{{ url_for('indirimlikurumlar_seo.hesaplama_araci', sekme='donem') }}">Hesaplama Aracına Geç</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.teblig_ornekleri') }}">Tebliğ Örnekleri</a>
+      <a href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}">Mevzuat Rehberi</a>
+    </div>
+  </section>
   {% endif %}
 
   <section class="ikv-seo-guide" aria-labelledby="ikv-seo-title">

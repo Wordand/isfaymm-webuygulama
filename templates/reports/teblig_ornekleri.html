@@ -1,4 +1,4 @@
-<style>
+﻿<style>
   .teblig-container {
     color: #1e293b;
     background: #f8fafc;
@@ -147,7 +147,7 @@
         </div>
         <div class="col-md-6">
           <label class="form-label text-secondary small mb-1 fw-bold">İncelemek İstediğiniz Örneği Seçin:</label>
-          <select class="form-select custom-dropdown-select" id="preset-selector" onchange="selectOrnek(this.value)">
+          <select class="form-select custom-dropdown-select" id="preset-selector" onchange="selectTebligOrnek(this.value)">
             <optgroup label="2025/9903 Kararı (Yeni Teşvik Rejimi)">
               <option value="9903_gecis_ornek1">Geçiş Örnek 1 (11/6/2025 Başvuru - Eski Kanun)</option>
               <option value="9903_gecis_ornek2">Geçiş Örnek 2 (23/6/2025 Başvuru - Eski Kanun)</option>
@@ -185,19 +185,19 @@
       <!-- Stepper Progress Bar -->
       <div class="stepper-container mb-4 px-lg-4">
         <div class="stepper-line"></div>
-        <div class="step-item active" onclick="goToStep(1)" id="step-dot-1">
+        <div class="step-item active" onclick="goToTebligStep(1)" id="step-dot-1">
           <div class="step-num">1</div>
           <div class="step-label">Yatırım Bilgileri</div>
         </div>
-        <div class="step-item" onclick="goToStep(2)" id="step-dot-2">
+        <div class="step-item" onclick="goToTebligStep(2)" id="step-dot-2">
           <div class="step-num">2</div>
           <div class="step-label">Kazanç & Matrah</div>
         </div>
-        <div class="step-item" onclick="goToStep(3)" id="step-dot-3">
+        <div class="step-item" onclick="goToTebligStep(3)" id="step-dot-3">
           <div class="step-num">3</div>
           <div class="step-label">Mevzuat Analizi</div>
         </div>
-        <div class="step-item" onclick="goToStep(4)" id="step-dot-4">
+        <div class="step-item" onclick="goToTebligStep(4)" id="step-dot-4">
           <div class="step-num">4</div>
           <div class="step-label">Sonuç</div>
         </div>
@@ -219,7 +219,7 @@
         <!-- Step 3: Legislation & Logic -->
         <div id="step-content-3" class="step-content-pane" style="display:none;">
           <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-            <i class="bi bi-book me-1.5 text-primary"></i> 3. Kanun ve Tebliğ Gerekçesi
+            <i class="bi bi-book me-2 text-primary"></i> 3. Kanun ve Tebliğ Gerekçesi
           </h6>
           <div class="p-3 bg-white rounded-3 border border-slate-200" id="step3-desc" style="color: #475569; line-height: 1.75; font-size: 0.95rem;">
             Yükleniyor...
@@ -229,44 +229,28 @@
         <!-- Step 4: Results & Validation -->
         <div id="step-content-4" class="step-content-pane" style="display:none;">
           <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-            <i class="bi bi-patch-check-fill me-1.5 text-success"></i> 4. Hesaplama Sonuçları
+            <i class="bi bi-patch-check-fill me-2 text-success"></i> 4. Hesaplama Sonuçları
           </h6>
           
           <div class="p-3 bg-white rounded-3 border border-slate-200 mb-3">
-            <!-- Table Header -->
-            <div class="row g-0 py-2 border-bottom text-muted fw-bold small text-uppercase" style="font-size: 0.72rem;">
-              <div class="col-6">Hesaplama Kalemi</div>
-              <div class="col-3 text-end text-secondary">Resmi Tebliğ</div>
-              <div class="col-3 text-end text-success">Hesaplanan</div>
-            </div>
-
-            <!-- Rows -->
             <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
-              <div class="col-6 text-dark fw-semibold">Uygulanan İndirimli KV Oranı</div>
-              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-oran">-</div>
-              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-oran">-</div>
+              <div class="col-7 text-dark fw-semibold">Uygulanan İndirimli KV Oranı</div>
+              <div class="col-5 text-end text-success fw-bold" id="step4-sonuc-oran">-</div>
             </div>
 
             <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
-              <div class="col-6 text-dark fw-semibold">Cari Dönem Yararlanılan Katkı Tutarı</div>
-              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-katki">-</div>
-              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-katki">-</div>
+              <div class="col-7 text-dark fw-semibold">Cari Dönem Yararlanılan Katkı Tutarı</div>
+              <div class="col-5 text-end text-success fw-bold" id="step4-sonuc-katki">-</div>
             </div>
 
             <div class="row g-0 py-3 border-bottom align-items-center" style="font-size: 0.92rem;">
-              <div class="col-6 text-dark fw-semibold">Ödenecek Toplam Kurumlar Vergisi</div>
-              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-kv">-</div>
-              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-kv">-</div>
+              <div class="col-7 text-dark fw-semibold">Ödenecek Toplam Kurumlar Vergisi</div>
+              <div class="col-5 text-end text-success fw-bold" id="step4-sonuc-kv">-</div>
             </div>
 
             <div class="row g-0 py-3 align-items-center" style="font-size: 0.92rem;">
-              <div class="col-6 text-dark fw-semibold">Hak Kazanılan Kalan Katkı Tutarı</div>
-              <div class="col-3 text-end text-secondary fw-bold" id="step4-teblig-kalan">-</div>
-              <div class="col-3 text-end text-success fw-bold" id="step4-sistem-kalan">-</div>
-            </div>
-
-            <div class="mt-3 text-center fw-bold pt-2 border-top text-success" style="font-size: 0.85rem;">
-              <i class="bi bi-patch-check-fill text-success me-1"></i>Sonuçlar Resmi Tebliğ ile %100 Uyuşmaktadır.
+              <div class="col-7 text-dark fw-semibold">Hak Kazanılan Kalan Katkı Tutarı</div>
+              <div class="col-5 text-end text-success fw-bold" id="step4-sonuc-kalan">-</div>
             </div>
           </div>
 
@@ -280,11 +264,11 @@
 
       <!-- Navigation buttons -->
       <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color:#e2e8f0 !important;">
-        <button class="btn btn-outline-secondary px-4 py-2" id="btn-prev" onclick="prevStep()">
+        <button type="button" class="btn btn-outline-secondary px-4 py-2" id="btn-prev" onclick="prevTebligStep(); return false;">
           <i class="bi bi-arrow-left me-1"></i> Geri
         </button>
         <div class="text-muted small">Adım <span id="current-step-indicator">1</span> / 4</div>
-        <button class="btn btn-primary px-4 py-2" id="btn-next" onclick="nextStep()">
+        <button type="button" class="btn btn-primary px-4 py-2" id="btn-next" onclick="nextTebligStep(); return false;">
           İleri <i class="bi bi-arrow-right ms-1"></i>
         </button>
       </div>
@@ -743,7 +727,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Temel Yatırım Verileri
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Temel Yatırım Verileri
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -769,7 +753,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç ve Matrah
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Kazanç ve Matrah
         </h6>
         <div class="p-3 bg-white rounded-3 border border-slate-200 text-muted">
           Bu örnekte dönem kazancı veya matrah verisi yer almamakta olup, sadece yatırıma katkı tutarı bütçesinin hesaplanması gösterilmiştir.
@@ -791,7 +775,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Başvuru ve Belge Tarihleri
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Başvuru ve Belge Tarihleri
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -820,7 +804,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Rejim Tespiti
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Rejim Tespiti
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -850,7 +834,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Yatırım Girdileri ve Terkin Talebi
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Yatırım Girdileri ve Terkin Talebi
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -882,7 +866,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. İndirimli KV ve Terkin Edilecek Borçlar
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. İndirimli KV ve Terkin Edilecek Borçlar
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -918,7 +902,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Tevsi Yatırım Verileri
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Tevsi Yatırım Verileri
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -950,7 +934,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç Dağıtımı & Oranlama
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Kazanç Dağıtımı & Oranlama
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -986,7 +970,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Devredilen Yatırım Verileri
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Devredilen Yatırım Verileri
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1018,7 +1002,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Kazanç ve İndirimli Oran
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Kazanç ve İndirimli Oran
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1054,7 +1038,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Kalan Katkı ve Yeniden Değerleme
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Kalan Katkı ve Yeniden Değerleme
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1086,7 +1070,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. 2017 Beyanı & Kazanç
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. 2017 Beyanı & Kazanç
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1122,7 +1106,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Birden Fazla Yatırım Kazancı
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Birden Fazla Yatırım Kazancı
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1148,7 +1132,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Matrah Paylaşım Oranları
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Matrah Paylaşım Oranları
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1184,7 +1168,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     if (stepNum === 1) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Proje Bazlı Teşvik ve Limitler
+          <i class="bi bi-info-circle me-2 text-primary"></i> 1. Proje Bazlı Teşvik ve Limitler
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1210,7 +1194,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     } else if (stepNum === 2) {
       return `
         <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-          <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Ödenen ÖTV ve İade Tutarı
+          <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Ödenen ÖTV ve İade Tutarı
         </h6>
         <div class="row g-3">
           <div class="col-md-6">
@@ -1240,7 +1224,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
   if (stepNum === 1) {
     return `
       <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-        <i class="bi bi-info-circle me-1.5 text-primary"></i> 1. Yatırım Girdileri
+        <i class="bi bi-info-circle me-2 text-primary"></i> 1. Yatırım Girdileri
       </h6>
       <div class="row g-3">
         <div class="col-md-6">
@@ -1274,7 +1258,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
     const showDiger = preset.diger_faaliyet > 0;
     return `
       <h6 class="fw-bold mb-3 text-secondary d-flex align-items-center">
-        <i class="bi bi-cash-stack me-1.5 text-primary"></i> 2. Beyan Edilen Kazançlar & Matrah
+        <i class="bi bi-cash-stack me-2 text-primary"></i> 2. Beyan Edilen Kazançlar & Matrah
       </h6>
       <div class="row g-3">
         ${showYatirim ? `
@@ -1309,7 +1293,7 @@ function getDynamicStepHTML(stepNum, key, preset) {
 }
 
 // Select scenario
-function selectOrnek(key) {
+function selectTebligOrnek(key) {
   activePresetKey = key;
   currentStep = 1;
   
@@ -1326,22 +1310,26 @@ function selectOrnek(key) {
   calculateAndFillOutputs(key, preset);
 
   // Show the step 1 pane
-  goToStep(1);
+  goToTebligStep(1);
 }
 
 // Go to specific step
-function goToStep(stepNum) {
+function goToTebligStep(stepNum) {
+  stepNum = Math.max(1, Math.min(4, Number(stepNum) || 1));
   currentStep = stepNum;
   
   // Update indicators
-  document.getElementById("current-step-indicator").textContent = currentStep;
+  const stepIndicator = document.getElementById("current-step-indicator");
+  if (stepIndicator) stepIndicator.textContent = currentStep;
   
   // Manage button states
-  document.getElementById("btn-prev").disabled = (currentStep === 1);
+  const prevBtn = document.getElementById("btn-prev");
+  if (prevBtn) prevBtn.disabled = (currentStep === 1);
   const nextBtn = document.getElementById("btn-next");
   if (currentStep === 4) {
     nextBtn.innerHTML = 'Tamamlandı <i class="bi bi-check-all ms-1"></i>';
-    nextBtn.disabled = true;
+    nextBtn.disabled = false;
+    nextBtn.innerHTML = 'Başa Dön <i class="bi bi-arrow-counterclockwise ms-1"></i>';
   } else {
     nextBtn.innerHTML = 'İleri <i class="bi bi-arrow-right ms-1"></i>';
     nextBtn.disabled = false;
@@ -1350,6 +1338,7 @@ function goToStep(stepNum) {
   // Update dots classes
   for (let i = 1; i <= 4; i++) {
     const dot = document.getElementById(`step-dot-${i}`);
+    if (!dot) continue;
     dot.classList.remove("active", "completed");
     
     if (i === currentStep) {
@@ -1360,6 +1349,7 @@ function goToStep(stepNum) {
     
     // Toggle content panes
     const pane = document.getElementById(`step-content-${i}`);
+    if (!pane) continue;
     pane.style.display = (i === currentStep) ? "block" : "none";
 
     // Dynamically render step 1 and 2 contents
@@ -1370,17 +1360,28 @@ function goToStep(stepNum) {
   }
 }
 
-function nextStep() {
+function nextTebligStep() {
   if (currentStep < 4) {
-    goToStep(currentStep + 1);
+    goToTebligStep(currentStep + 1);
+  } else {
+    goToTebligStep(1);
   }
 }
 
-function prevStep() {
+function prevTebligStep() {
   if (currentStep > 1) {
-    goToStep(currentStep - 1);
+    goToTebligStep(currentStep - 1);
   }
 }
+
+window.selectTebligOrnek = selectTebligOrnek;
+window.goToTebligStep = goToTebligStep;
+window.nextTebligStep = nextTebligStep;
+window.prevTebligStep = prevTebligStep;
+window.selectOrnek = selectTebligOrnek;
+window.goToStep = goToTebligStep;
+window.nextStep = nextTebligStep;
+window.prevStep = prevTebligStep;
 
 // Dynamically run the math and show outputs
 function calculateAndFillOutputs(key, preset) {
@@ -1389,50 +1390,47 @@ function calculateAndFillOutputs(key, preset) {
 
   const results = runSimCalculation(key, preset, genelKVOrani);
 
-  // Fill comparison columns (Calculated/Hesaplanan column)
+  let sonucOran = "-";
+  let sonucKatki = "-";
+  let sonucKV = "-";
+  let sonucKalan = "-";
+
   if (key === "3305_ornek_basit") {
-    document.getElementById("step4-sistem-oran").textContent = "-";
-    document.getElementById("step4-sistem-katki").textContent = "-";
-    document.getElementById("step4-sistem-kv").textContent = "-";
-    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanKatkiTutari);
+    sonucKalan = formatCurrency(results.kalanKatkiTutari);
   } else if (key.startsWith("9903_gecis")) {
     const isOrnek3 = key === "9903_gecis_ornek3";
-    document.getElementById("step4-sistem-oran").textContent = isOrnek3 ? "%10" : "Eski Hüküm";
-    document.getElementById("step4-sistem-katki").textContent = isOrnek3 ? "10 Yıl Sınırı" : "Süre Sınırı Yok";
-    document.getElementById("step4-sistem-kv").textContent = isOrnek3 ? "Yeni Oran" : "Eski Oranlar";
-    document.getElementById("step4-sistem-kalan").textContent = "-";
+    sonucOran = isOrnek3 ? "%10" : "Eski Hüküm";
+    sonucKatki = isOrnek3 ? "10 Yıl Sınırı" : "Süre Sınırı Yok";
+    sonucKV = isOrnek3 ? "Yeni Oran" : "Eski Oranlar";
   } else if (key === "3305_ornek_coklu") {
-    document.getElementById("step4-sistem-oran").textContent = "Belge Bazlı";
-    document.getElementById("step4-sistem-katki").textContent = "Oransal Dağılım";
-    document.getElementById("step4-sistem-kv").textContent = "Belge Bazlı";
-    document.getElementById("step4-sistem-kalan").textContent = "-";
+    sonucOran = "Oransal Dağılım";
+    sonucKatki = "Oransal";
+    sonucKV = "Oransal";
   } else if (key === "3305_ornek_elektrikli") {
-    document.getElementById("step4-sistem-oran").textContent = "ÖTV İadesi";
-    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
-    document.getElementById("step4-sistem-kv").textContent = "-";
-    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanKatkiTutari);
+    sonucOran = "ÖTV İadesi";
+    sonucKatki = formatCurrency(results.toplamYararlanilanKatki);
+    sonucKalan = formatCurrency(results.kalanKatkiTutari);
   } else if (key === "3305_ornek_terkin") {
-    document.getElementById("step4-sistem-oran").textContent = `%${results.indirimliKVOrani}`.replace('.', ',');
-    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
-    document.getElementById("step4-sistem-kv").textContent = formatCurrency(results.odenecekKV);
-    document.getElementById("step4-sistem-kalan").textContent = formatCurrency(results.kalanHakKazananKatki);
+    sonucOran = `%${results.indirimliKVOrani}`.replace('.', ',');
+    sonucKatki = formatCurrency(results.toplamYararlanilanKatki);
+    sonucKV = formatCurrency(results.odenecekKV);
+    sonucKalan = formatCurrency(results.kalanHakKazananKatki);
   } else {
-    document.getElementById("step4-sistem-oran").textContent = `%${results.indirimliKVOrani}`.replace('.', ',');
-    document.getElementById("step4-sistem-katki").textContent = formatCurrency(results.toplamYararlanilanKatki);
-    document.getElementById("step4-sistem-kv").textContent = formatCurrency(results.odenecekKV);
+    sonucOran = `%${results.indirimliKVOrani}`.replace('.', ',');
+    sonucKatki = formatCurrency(results.toplamYararlanilanKatki);
+    sonucKV = formatCurrency(results.odenecekKV);
     
     if (key === "3305_ornek_devir" || key === "3305_ornek_endeksleme" || key === "3305_ornek_tevsi") {
-      document.getElementById("step4-sistem-kalan").textContent = formatCurrency(Math.max(0, results.kalanKatkiTutari));
+      sonucKalan = formatCurrency(Math.max(0, results.kalanKatkiTutari));
     } else {
-      document.getElementById("step4-sistem-kalan").textContent = formatCurrency(Math.max(0, results.kalanHakKazananKatki));
+      sonucKalan = formatCurrency(Math.max(0, results.kalanHakKazananKatki));
     }
   }
 
-  // Fill official tebliğ outputs
-  document.getElementById("step4-teblig-oran").textContent = preset.teblig_sonuclari.oran;
-  document.getElementById("step4-teblig-katki").textContent = preset.teblig_sonuclari.katki;
-  document.getElementById("step4-teblig-kv").textContent = preset.teblig_sonuclari.kv;
-  document.getElementById("step4-teblig-kalan").textContent = preset.teblig_sonuclari.kalan;
+  document.getElementById("step4-sonuc-oran").textContent = sonucOran;
+  document.getElementById("step4-sonuc-katki").textContent = sonucKatki;
+  document.getElementById("step4-sonuc-kv").textContent = sonucKV;
+  document.getElementById("step4-sonuc-kalan").textContent = sonucKalan;
 
   // Write detail explanation breakdown
   let detailHtml = "";
@@ -1695,6 +1693,6 @@ function runSimCalculation(key, inputs, genelKVOrani) {
 
 // Load default example on page show
 document.addEventListener("DOMContentLoaded", () => {
-  selectOrnek("3305_ornek1");
+  selectTebligOrnek("3305_ornek1");
 });
 </script>

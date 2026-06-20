@@ -971,11 +971,11 @@ def hesaplama_araci():
     return render_indirimlikurumlar(
         seo_context={
             "page_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı | İSFA YMM",
-            "page_description": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini ücretsiz hesaplayın.",
+            "page_description": "İndirimli kurumlar vergisi hesaplama aracı: 2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV oranı, dönem matrahı, diğer faaliyet katkısı ve kalan katkı bakiyesini hesaplayın.",
             "page_keywords": "indirimli kurumlar vergisi hesaplama, indirimli kurumlar vergisi hesaplama tablosu excel, yatırım teşvik belgesi vergi indirimi hesaplama, yatırım teşvik belgesi kurumlar vergisi indirimi hesaplama excel, yatırım teşvik hesaplama tablosu excel 2025, yatırıma katkı tutarı hesaplama, 2012/3305 indirimli kurumlar vergisi, 2025/9903 indirimli kurumlar vergisi, KVK 32/A hesaplama, İSFA YMM",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/",
             "page_og_title": "İndirimli Kurumlar Vergisi Hesaplama 2026 | Yatırım Teşvik Vergi İndirimi Aracı",
-            "page_og_desc": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV matrahı, diğer faaliyet katkısı ve ödenecek kurumlar vergisini hesaplayın.",
+            "page_og_desc": "2012/3305 ve 2025/9903 kararlarına göre yatırıma katkı tutarı, indirimli KV oranı, dönem matrahı ve kalan katkı bakiyesini hesaplayın.",
         },
     )
 
@@ -997,7 +997,7 @@ def teblig_ornekleri():
         sekme_override="ornekler",
         seo_context={
             "page_title": "İndirimli Kurumlar Vergisi Örnekleri | 2012/3305 ve 2025/9903 Hesaplama | İSFA YMM",
-            "page_description": "Kurumlar Vergisi Genel Tebliği, 2012/3305 ve 2025/9903 rejimine göre yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge indirimli kurumlar vergisi örnekleri.",
+            "page_description": "İndirimli kurumlar vergisi örnekleri: 2012/3305 ve 2025/9903 rejimlerinde yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge senaryolarını hesaplama aracıyla test edin.",
             "page_keywords": "indirimli kurumlar vergisi örnekleri, indirimli kurumlar vergisi hesaplama örneği, 2012/3305 örnek hesaplama, 2025/9903 örnek hesaplama, tevsi yatırım indirimli kurumlar vergisi, diğer faaliyet kazancı örneği",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ornekler",
             "page_og_title": "İndirimli Kurumlar Vergisi Örnekleri | İSFA YMM",
@@ -1015,7 +1015,7 @@ def mevzuat_rehberi():
         sekme_override="mevzuat",
         seo_context={
             "page_title": "İndirimli Kurumlar Vergisi Mevzuatı | KVK 32/A ve 2025/9903 | İSFA YMM",
-            "page_description": "KVK 32/A, 2025/9903 sayılı karar, özelgeler ve yatırım teşvik mevzuatı kapsamında indirimli kurumlar vergisi uygulama rehberi.",
+            "page_description": "KVK 32/A, 2012/3305 ve 2025/9903 kapsamında indirimli kurumlar vergisi mevzuatı: yatırıma katkı tutarı, 4 dönem, 10 hesap dönemi, tevsi yatırım ve diğer faaliyet sınırları.",
             "page_keywords": "indirimli kurumlar vergisi mevzuatı, KVK 32/A, 2025/9903 teşvik, yatırım teşvik belgesi vergi indirimi, yatırıma katkı tutarı, İSFA YMM",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat",
             "page_og_title": "İndirimli Kurumlar Vergisi Mevzuatı | İSFA YMM",
@@ -1585,14 +1585,14 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
     if sekme == "ornekler" and not seo_context:
         seo_context = {
             "page_title": "İndirimli Kurumlar Vergisi Örnekleri | 2012/3305 ve 2025/9903 Hesaplama | İSFA YMM",
-            "page_description": "Kurumlar Vergisi Genel Tebliği, 2012/3305 ve 2025/9903 rejimine göre yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge indirimli kurumlar vergisi örnekleri.",
+            "page_description": "İndirimli kurumlar vergisi örnekleri: 2012/3305 ve 2025/9903 rejimlerinde yatırım kazancı, diğer faaliyet, tevsi yatırım ve çoklu belge senaryolarını hesaplama aracıyla test edin.",
             "page_keywords": "indirimli kurumlar vergisi örnekleri, indirimli kurumlar vergisi hesaplama örneği, 2012/3305 örnek hesaplama, 2025/9903 örnek hesaplama, tevsi yatırım indirimli kurumlar vergisi",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ornekler",
         }
     elif sekme == "mevzuat" and not seo_context:
         seo_context = {
             "page_title": "İndirimli Kurumlar Vergisi Mevzuatı | KVK 32/A ve 2025/9903 | İSFA YMM",
-            "page_description": "KVK 32/A, 2025/9903 sayılı karar, özelgeler ve yatırım teşvik mevzuatı kapsamında indirimli kurumlar vergisi uygulama rehberi.",
+            "page_description": "KVK 32/A, 2012/3305 ve 2025/9903 kapsamında indirimli kurumlar vergisi mevzuatı: yatırıma katkı tutarı, 4 dönem, 10 hesap dönemi, tevsi yatırım ve diğer faaliyet sınırları.",
             "page_keywords": "indirimli kurumlar vergisi mevzuatı, KVK 32/A, 2025/9903 teşvik, yatırım teşvik belgesi vergi indirimi, yatırıma katkı tutarı",
             "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat",
         }
@@ -1619,7 +1619,7 @@ def render_indirimlikurumlar(sekme_override=None, seo_context=None):
         if not seo_context:
             seo_context = {
                 "page_title": "İndirimli Kurumlar Vergisi Özelgeleri | İSFA YMM",
-                "page_description": "İndirimli kurumlar vergisi, yatırım teşvik belgesi, KVK 32/A, tevsi yatırım, diğer faaliyet ve yatırıma katkı tutarı konulu özelge arşivi.",
+                "page_description": "İndirimli kurumlar vergisi özelgeleri: KVK 32/A, yatırım teşvik belgesi, tevsi yatırım, diğer faaliyet kazancı, endeksleme, tamamlama vizesi ve katkıya dahil edilmeyen harcamalar.",
                 "page_canonical": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/ozelgeler",
             }
 

@@ -344,8 +344,8 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5 class="fw-bold mb-3 fs-6 text-uppercase text-light">Yasal</h5>
                     <ul class="list-unstyled d-flex flex-column gap-2">
-                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#kvkkModal" class="text-secondary text-decoration-none hover-text-white transition-colors small">KVKK Aydınlatma Metni</a></li>
-                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal" class="text-secondary text-decoration-none hover-text-white transition-colors small">Çerez Politikası</a></li>
+                        <li><a href="{{ url_for('main.kvkk_aydinlatma_metni') }}" class="text-light text-decoration-none hover-text-white transition-colors small opacity-75">KVKK Aydınlatma Metni</a></li>
+                        <li><a href="{{ url_for('main.cerez_politikasi') }}" class="text-light text-decoration-none hover-text-white transition-colors small opacity-75">Çerez Politikası</a></li>
                     </ul>
                 </div>
 
@@ -389,7 +389,7 @@
                     <div>
                         <h6 class="fw-bold mb-1">Çerez Politikası</h6>
                         <p class="mb-0 small text-secondary">
-                            Web sitemizin düzgün çalışmasını sağlamak, içerik ve reklamları kişiselleştirmek, sosyal medya özellikleri sağlamak ve trafiğimizi analiz etmek için çerezleri kullanıyoruz. Ayrıca sosyal medya, reklam ve analiz ortaklarımızı web sitemizi kullanımınız hakkında bilgilendiriyoruz. Çerezlerimiz hakkında bilgi içeren <a href="#" data-bs-toggle="modal" data-bs-target="#cookieModal" class="text-decoration-underline text-light">Çerez politikamızı</a> lütfen okuyunuz.
+                            Sitede yalnızca oturum, güvenlik ve tercihlerin hatırlanması gibi zorunlu/işlevsel kayıtlar kullanılabilir. Kullanıcıyı reklam amacıyla takip eden çerez kullanmamaya özen gösteriyoruz. Ayrıntılar için <a href="{{ url_for('main.cerez_politikasi') }}" class="text-decoration-underline text-light">Çerez Politikası</a> sayfasını inceleyebilirsiniz.
                         </p>
                     </div>
                 </div>
