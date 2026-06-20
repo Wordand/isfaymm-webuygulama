@@ -4,7 +4,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 
-from flask import Blueprint, render_template, request, make_response, jsonify, send_from_directory, url_for, current_app, redirect, flash
+from flask import Blueprint, render_template, request, make_response, jsonify, send_from_directory, url_for, current_app, redirect, flash, abort
 from services.ozelge_service import load_ozelge_index
 from auth import login_required
 from datetime import datetime
@@ -322,7 +322,7 @@ def contact():
 
 @bp.route("/kvkk-aydinlatma-metni")
 def kvkk_aydinlatma_metni():
-    return render_template("pages/kvkk_aydinlatma_metni.html")
+    abort(410)
 
 @bp.route("/cerez-politikasi")
 def cerez_politikasi():
@@ -339,7 +339,7 @@ def sitemap_xml():
         ('main.home', {}), ('main.about', {}), ('main.team', {}), ('main.mevzuat', {}),
         ('main.indirim', {}), ('main.ceza', {}), ('main.kdv_tebligi', {}),
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
-        ('main.kvkk_aydinlatma_metni', {}), ('main.cerez_politikasi', {}),
+        ('main.cerez_politikasi', {}),
         ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}), ('main.kv_istisna_indirimler', {}),
         ('main.tecil_taksitlendirme_2026', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
