@@ -31,8 +31,9 @@
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        min-width: 80px;
+        min-width: 100px;
         padding: 10px;
+        flex-shrink: 0;
     }
 
     .badge-custom {
@@ -49,6 +50,53 @@
 
     .summary-list li strong {
         color: #1e3a8a;
+    }
+
+    /* Print Styles */
+    @media print {
+        /* Hide layout and irrelevant elements */
+        #mainNavbar,
+        footer,
+        .legislation-hero,
+        .timeline-card:not(.print-active-card),
+        #cookie-consent-banner,
+        .mobile-overlay,
+        #mobile-overlay,
+        #intro-loader {
+            display: none !important;
+        }
+
+        /* Setup full width for printed card and clear margins */
+        body, main, .main-content, .container, .row, .col-lg-9 {
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+        }
+
+        /* Format card container */
+        .timeline-card.print-active-card {
+            border: 1px solid #cbd5e1 !important;
+            border-left: 5px solid #059669 !important; /* Note: inline style takes precedence on border color */
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 30px !important;
+            transform: none !important;
+        }
+
+        /* Hide buttons inside the printed card */
+        .print-active-card .btn,
+        .print-active-card button,
+        .print-active-card a {
+            display: none !important;
+        }
+        .print-active-card .bg-light {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
     }
 </style>
 
@@ -67,7 +115,100 @@
         <div class="row justify-content-center">
             <div class="col-lg-9">
 
-                <!-- Timeline Item 0 (09 Feb 2026) -->
+                <!-- Timeline Item 0 (04 Jun 2026) -->
+                <div class="card timeline-card shadow-sm mb-5" style="border-left-color: #4f46e5;" data-aos="fade-up">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex flex-column flex-md-row align-items-md-start">
+                            <div class="date-badge text-center me-md-4 mb-3 mb-md-0 shadow-sm">
+                                <span class="d-block h3 mb-0 fw-bold" style="color: #4f46e5;">04</span>
+                                <span class="d-block text-uppercase fw-bold text-muted small">Haziran</span>
+                                <span class="text-muted small">2026</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="mb-2">
+                                    <span class="badge bg-indigo shadow-sm mb-2" style="background-color: #4f46e5;">YENİ KANUN</span>
+                                </div>
+                                <h2 class="h3 fw-bold text-dark mb-4">Bazı Kanunlarda Değişiklik Yapılmasına Dair Kanun <span
+                                        class="text-muted">(Kanun No. 7582)</span></h2>
+
+                                <div class="bg-light rounded-4 p-4 mb-4">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-file-earmark-ruled me-2"></i>
+                                        Varlık Barışı, Yurt Dışı Kazanç İstisnası ve Vergi Kolaylıkları
+                                    </h5>
+
+                                    <p class="text-muted small mb-3">
+                                        4 Haziran 2026 tarihli Resmî Gazete'de yayımlanan 7582 Sayılı Kanun ile vergi mevzuatımızda yatırımcılar, mükellefler ve yurt dışından gelir elde edenler lehine çok önemli yapısal düzenlemeler yapılmıştır.
+                                    </p>
+
+                                    <ul class="summary-list list-unstyled mb-0">
+                                        <li>
+                                            <i class="bi bi-check2-square text-primary me-2"></i>
+                                            <strong>Yeni Varlık Barışı (Geçici Md. 19):</strong>
+                                            Yurt dışı ve yurt içi (kayıt dışı) varlıkların (para, altın, döviz, menkul kıymet) <strong>31 Temmuz 2027</strong> tarihine kadar bildirilmesi halinde vergi incelemesi ve tarhiyatı yapılmayacaktır. Peşin vergi oranı %5 olup, varlıkların vadeli hesap veya fonlarda 1-5 yıl tutulması taahhüdüne göre vergi oranı <strong>%0'a kadar</strong> düşmektedir.
+                                        </li>
+
+                                        <li>
+                                            <i class="bi bi-check2-square text-primary me-2"></i>
+                                            <strong>Yurt Dışı Kazanç İstisnası (Mükerrer 20/D):</strong>
+                                            Son 3 yıldır Türkiye'de ikametgahı/mükellefiyeti olmayan gerçek kişilerin yurt dışından elde ettiği kazançlar <strong>20 yıl boyunca</strong> gelir vergisinden istisna edilmiştir. Bu kazançlara veraset intikalinde %1 vergi oranı uygulanacaktır.
+                                        </li>
+
+                                        <li>
+                                            <i class="bi bi-check2-square text-primary me-2"></i>
+                                            <strong>Amme Alacaklarında Kolaylık (6183 Md. 48):</strong>
+                                            Vergi borçlarının taksitlendirme (tecil) süresi en fazla 36 aydan <strong>72 aya</strong> çıkarılmış; teminat aranmaksızın tecil edilebilecek sınır 50.000 TL'den <strong>1 milyon TL'ye</strong> yükseltilmiştir.
+                                        </li>
+
+                                        <li>
+                                            <i class="bi bi-check2-square text-primary me-2"></i>
+                                            <strong>Nitelikli Hizmet Merkezleri Teşviki (Doğrudan Yatırımlar):</strong>
+                                            Yurt dışındaki ilişkili şirketlere finans, muhasebe, risk yönetimi vb. hizmeti sunan merkezlerin yurt dışı kazançlarına <strong>%95 kazanç indirimi</strong> getirilmiş; buralarda çalışan nitelikli personelin asgari ücretin 3 katına (İFM'de 5 katına) kadar olan ücretleri gelir vergisinden istisna edilmiştir.
+                                        </li>
+
+                                        <li>
+                                            <i class="bi bi-check2-square text-primary me-2"></i>
+                                            <strong>İndirimli Üretici Kurumlar Vergisi (5520 Md. 32):</strong>
+                                            Sanayi sicil belgeli üreticiler ile zirai üretimle iştigal eden kurumların üretim faaliyetlerinden elde ettikleri kazançlara uygulanan kurumlar vergisi oranı <strong>%12,5</strong> olarak belirlenmiştir.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="alert alert-warning py-2 px-3 small border-0 shadow-sm mb-4"
+                                    style="background-color: #fffbeb; color: #b45309;">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>Yürürlük Tarihleri:</strong> Yurt dışı kazanç istisnası 1/1/2026'dan itibaren uygulanacak olup; kurumlar vergisi indirimleri (aracılık ve hizmet merkezi indirimleri) 1/1/2026 hesap dönemi kazançlarından itibaren geçerlidir.
+                                </div>
+
+                                <div class="d-flex flex-wrap align-items-center gap-3 w-100">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge badge-custom bg-primary text-white shadow-sm"><i
+                                                class="bi bi-shield-check me-1"></i>Varlık Barışı</span>
+                                        <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
+                                                class="bi bi-cash-stack me-1"></i>Yurt Dışı İstisnası</span>
+                                        <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
+                                                class="bi bi-percent me-1"></i>%12,5 Kurumlar</span>
+                                    </div>
+                                    <div class="d-flex gap-2 ms-auto">
+                                        <a href="{{ url_for('main.varlik_barisi_2026') }}"
+                                            class="btn btn-primary btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-cash-coin me-2"></i>Varlık Barışı Rehberi
+                                        </a>
+                                        <button class="btn btn-outline-dark btn-sm rounded-3 print-card-btn shadow-sm">
+                                            <i class="bi bi-printer me-2"></i>Yazdır
+                                        </button>
+                                        <a href="https://www.resmigazete.gov.tr/eskiler/2026/06/20260604-1.htm" target="_blank"
+                                            class="btn btn-outline-primary btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i>Resmî Gazete'yi Gör
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 1 (09 Feb 2026) -->
                 <div class="card timeline-card shadow-sm mb-5" style="border-left-color: #059669;" data-aos="fade-up">
                     <div class="card-body p-4 p-md-5">
                         <div class="d-flex flex-column flex-md-row align-items-md-start">
@@ -160,7 +301,7 @@
 
 
 
-                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="d-flex flex-wrap align-items-center gap-3 w-100">
                                     <div class="d-flex flex-wrap gap-2">
                                         <span class="badge badge-custom bg-success text-white shadow-sm"><i
                                                 class="bi bi-percent me-1"></i>Enflasyon Düzeltmesi</span>
@@ -169,10 +310,15 @@
                                         <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
                                                 class="bi bi-building me-1"></i>Yatırımlar</span>
                                     </div>
-                                    <a href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank"
-                                        class="btn btn-outline-success btn-sm rounded-3 ms-auto shadow-sm">
-                                        <i class="bi bi-box-arrow-up-right me-2"></i>GİB Kaynağına Git
-                                    </a>
+                                    <div class="d-flex gap-2 ms-auto">
+                                        <button class="btn btn-outline-dark btn-sm rounded-3 print-card-btn shadow-sm">
+                                            <i class="bi bi-printer me-2"></i>Yazdır
+                                        </button>
+                                        <a href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank"
+                                            class="btn btn-outline-success btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-box-arrow-up-right me-2"></i>GİB Kaynağına Git
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -232,7 +378,7 @@
                                     </ul>
                                 </div>
 
-                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="d-flex flex-wrap align-items-center gap-3 w-100">
                                     <div class="d-flex flex-wrap gap-2">
                                         <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
                                                 class="bi bi-tag me-1"></i>KDV</span>
@@ -241,14 +387,19 @@
                                         <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
                                                 class="bi bi-file-earmark-text me-1"></i>Resmi Gazete</span>
                                     </div>
-                                    <a href="{{ url_for('calculators.ithalat_kdv') }}"
-                                        class="btn btn-primary btn-sm rounded-3 shadow-sm">
-                                        <i class="bi bi-calculator me-2"></i>İthalatta KDV İndirimi Hesaplama
-                                    </a>
-                                    <a href="https://www.resmigazete.gov.tr/eskiler/2026/01/20260131-11.htm"
-                                        target="_blank" class="btn btn-outline-danger btn-sm rounded-3 shadow-sm">
-                                        <i class="bi bi-file-earmark-pdf me-2"></i>Resmî Gazete'yi Gör
-                                    </a>
+                                    <div class="d-flex gap-2 ms-auto flex-wrap justify-content-end">
+                                        <button class="btn btn-outline-dark btn-sm rounded-3 print-card-btn shadow-sm">
+                                            <i class="bi bi-printer me-2"></i>Yazdır
+                                        </button>
+                                        <a href="{{ url_for('calculators.ithalat_kdv') }}"
+                                            class="btn btn-primary btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-calculator me-2"></i>İthalatta KDV İndirimi Hesaplama
+                                        </a>
+                                        <a href="https://www.resmigazete.gov.tr/eskiler/2026/01/20260131-11.htm"
+                                            target="_blank" class="btn btn-outline-danger btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i>Resmî Gazete'yi Gör
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -311,7 +462,7 @@
                                     hususlara tam tasdik raporu içinde yer verilmesi yeterlidir.
                                 </div>
 
-                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="d-flex flex-wrap align-items-center gap-3 w-100">
                                     <div class="d-flex flex-wrap gap-2">
                                         <span class="badge badge-custom bg-primary text-white shadow-sm"><i
                                                 class="bi bi-person-check me-1"></i>YMM Tasdik</span>
@@ -320,11 +471,16 @@
                                         <span class="badge badge-custom bg-secondary text-white shadow-sm"><i
                                                 class="bi bi-calendar-event me-1"></i>2025/2026</span>
                                     </div>
-                                    <a href="https://www.resmigazete.gov.tr/eskiler/2025/12/20251230-8.htm"
-                                        target="_blank"
-                                        class="btn btn-outline-primary btn-sm rounded-3 ms-auto shadow-sm">
-                                        <i class="bi bi-file-earmark-pdf me-2"></i>Resmî Gazete'yi Gör
-                                    </a>
+                                    <div class="d-flex gap-2 ms-auto">
+                                        <button class="btn btn-outline-dark btn-sm rounded-3 print-card-btn shadow-sm">
+                                            <i class="bi bi-printer me-2"></i>Yazdır
+                                        </button>
+                                        <a href="https://www.resmigazete.gov.tr/eskiler/2025/12/20251230-8.htm"
+                                            target="_blank"
+                                            class="btn btn-outline-primary btn-sm rounded-3 shadow-sm">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i>Resmî Gazete'yi Gör
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -337,6 +493,7 @@
 </section>
 {% endblock %}
 
+{% block extra_scripts %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -352,6 +509,79 @@
       "@type": "ImageObject",
       "url": "https://www.isfaymm.com/static/images/logo.png"
     }
-  }
+  },
+  "mainEntity": [
+    {
+      "@type": "NewsArticle",
+      "headline": "Bazı Kanunlarda Değişiklik Yapılmasına Dair Kanun (Kanun No. 7582)",
+      "datePublished": "2026-06-04",
+      "description": "Varlık barışı, yurt dışı kazanç ve iratlar için gelir vergisi istisnası, tecil süresinin 72 aya uzatılması, nitelikli hizmet merkezleri indirimi ve kurumlar vergisi güncellemeleri.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      }
+    },
+    {
+      "@type": "NewsArticle",
+      "headline": "Vergi Usul Kanunu Sirküleri (VUK-196/2026-2) - Yapılmakta Olan Yatırımlar",
+      "datePublished": "2026-02-09",
+      "description": "Yapılmakta olan yatırımlar hesabının enflasyon düzeltmesine tabi tutulması sonucu ortaya çıkan farkların vergisel niteliği ve özel fon uygulaması.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      }
+    },
+    {
+      "@type": "NewsArticle",
+      "headline": "KDV Genel Uygulama Tebliğinde Değişiklik (Seri No: 57)",
+      "datePublished": "2026-01-31",
+      "description": "İthalatta KDV indirimi kısıtlaması, KDV iade süreçleri ve limitler, UEFA organizasyonları istisnası ve belediye taşınmaz satışları.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      }
+    },
+    {
+      "@type": "NewsArticle",
+      "headline": "SMMM ve YMM Kanunu Genel Tebliği (Sıra No: 49) - Tasdik Sınırları",
+      "datePublished": "2025-12-30",
+      "description": "2025 ve izleyen dönemlerde indirim ve istisnalardan yararlanmak amacıyla YMM tasdik raporu ibraz zorunluluğuna yönelik yeni sınırlar.",
+      "author": {
+        "@type": "Organization",
+        "name": "İSFA Yeminli Mali Müşavirlik",
+        "url": "https://www.isfaymm.com"
+      }
+    }
+  ]
 }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Bireysel Yazdırma Fonksiyonu
+        document.querySelectorAll('.print-card-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const card = this.closest('.timeline-card');
+                if (card) {
+                    card.classList.add('print-active-card');
+                    window.print();
+                    // Clear the active class on print end / timer
+                    setTimeout(() => {
+                        card.classList.remove('print-active-card');
+                    }, 1000);
+                }
+            });
+        });
+
+        // Cleanup on afterprint event as well for extra robustness
+        window.addEventListener('afterprint', () => {
+            document.querySelectorAll('.timeline-card').forEach(card => {
+                card.classList.remove('print-active-card');
+            });
+        });
+    });
+</script>
+{% endblock %}

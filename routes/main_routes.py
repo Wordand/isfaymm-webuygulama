@@ -341,7 +341,7 @@ def sitemap_xml():
         ('main.kv_tebligi', {}), ('main.mevzuat_degisiklikleri', {}), ('main.contact', {}),
         ('main.cerez_politikasi', {}),
         ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}), ('main.kv_istisna_indirimler', {}),
-        ('main.tecil_taksitlendirme_2026', {}),
+        ('main.tecil_taksitlendirme_2026', {}), ('main.varlik_barisi_2026', {}),
         ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.tecil_faizi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.teblig_ornekleri', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
@@ -357,6 +357,7 @@ def sitemap_xml():
         'indirimlikurumlar_seo.ozelge_kutuphanesi': '0.8',
         'main.kv_istisna_indirimler': '0.9',
         'main.tecil_taksitlendirme_2026': '0.9',
+        'main.varlik_barisi_2026': '0.9',
         'calculators.tecil_faizi': '0.9',
     }
     for rule, kw in static_endpoints:
@@ -404,6 +405,10 @@ def mevzuat(): return render_template("pages/mevzuat.html")
 @bp.route("/mevzuat/vergi-borcu-tecil-taksitlendirme-2026")
 def tecil_taksitlendirme_2026():
     return render_template("pages/tecil_taksitlendirme_2026.html")
+
+@bp.route("/mevzuat/varlik-barisi-2026")
+def varlik_barisi_2026():
+    return render_template("pages/varlik_barisi_2026.html")
 
 @bp.route("/mevzuat/kdv-tebligi")
 @bp.route("/mevzuat/kdv-tebligi/<path:bolum_id>")

@@ -1,0 +1,325 @@
+{% extends "layout.html" %}
+
+{% block title %}2026 Varlık Barışı Rehberi | %0-%5 Vergi, 31.07.2027 Son Bildirim | İSFA YMM{% endblock %}
+{% block description %}5520 sayılı Kurumlar Vergisi Kanunu geçici madde 19 kapsamında 2026 varlık barışı: yurt dışı ve yurt içi varlık bildirimi, vergi oranları, süreler, defter kaydı ve inceleme koruması.{% endblock %}
+{% block keywords %}varlık barışı 2026, varlık barışı 2027, varlık barışı vergi oranı, yurt dışı varlık bildirimi, yurt içi varlık bildirimi, 5520 geçici madde 19, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/mevzuat/varlik-barisi-2026{% endblock %}
+{% block og_title %}2026 Varlık Barışı Rehberi{% endblock %}
+{% block og_desc %}Yurt dışı ve yurt içi varlıkların bildirimi, %0-%5 vergi oranları, 31.07.2027 son tarih ve şartların pratik özeti.{% endblock %}
+
+{% block content %}
+<style>
+  .vb-hero {
+    background: linear-gradient(135deg, #122044 0%, #0f766e 100%);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+  }
+  .vb-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    border: 1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    padding: .45rem .75rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: .9rem;
+  }
+  .vb-card {
+    border: 1px solid #dce4ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(18, 32, 68, .08);
+  }
+  .vb-fact {
+    border-left: 4px solid #0d9488;
+    background: #f0fdfa;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .vb-fact strong {
+    display: block;
+    color: #122044;
+    font-size: 1.18rem;
+  }
+  .vb-section h2 {
+    color: #122044;
+    font-weight: 800;
+  }
+  .vb-table th {
+    background: #f2f6fb;
+    color: #122044;
+  }
+  .vb-check {
+    list-style: none;
+    padding-left: 0;
+  }
+  .vb-check li {
+    padding-left: 1.9rem;
+    position: relative;
+    margin-bottom: .75rem;
+  }
+  .vb-check li::before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e7f8ef;
+    color: #087f45;
+    font-weight: 800;
+  }
+  .vb-warning {
+    background: #fff7e6;
+    border: 1px solid #ffd58a;
+    border-left: 5px solid #f59f00;
+    border-radius: 12px;
+  }
+  .vb-note {
+    background: #eef6ff;
+    border: 1px solid #cfe3ff;
+    border-radius: 12px;
+  }
+</style>
+
+<section class="vb-hero py-5">
+  <div class="container py-3">
+    <nav aria-label="breadcrumb" class="small mb-4">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a class="text-white text-opacity-75" href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
+        <li class="breadcrumb-item"><a class="text-white text-opacity-75" href="{{ url_for('main.mevzuat') }}">Mevzuat</a></li>
+        <li class="breadcrumb-item active text-white" aria-current="page">2026 Varlık Barışı</li>
+      </ol>
+    </nav>
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <span class="vb-pill mb-3"><i class="bi bi-calendar-check"></i> Son bildirim: 31.07.2027</span>
+        <h1 class="display-6 fw-bold mb-3">2026 Varlık Barışı Rehberi</h1>
+        <p class="lead mb-0 text-white text-opacity-90">
+          5520 sayılı Kurumlar Vergisi Kanununa eklenen geçici madde 19 ile yurt dışında veya Türkiye'de bulunan
+          bazı varlıkların banka ve aracı kurumlar üzerinden bildirilmesine ilişkin yeni varlık barışı düzenlemesi getirildi.
+        </p>
+      </div>
+      <div class="col-lg-4">
+        <div class="vb-card p-4 text-dark">
+          <div class="small text-muted fw-bold text-uppercase mb-2">Kısa özet</div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Son bildirim</span><strong>31.07.2027</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Vergi oranı</span><strong>%0 - %5</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Yurt dışı transfer</span><strong>2 ay</strong></div>
+          <div class="d-flex justify-content-between py-2"><span>Fon hesabı</span><strong>2 yıl</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="container py-5">
+  <section class="row g-3 mb-5" aria-label="Önemli tarihler">
+    <div class="col-md-3"><div class="vb-fact h-100"><span class="small text-muted">Bildirim son tarihi</span><strong>31.07.2027</strong><small>Bu tarih dahil.</small></div></div>
+    <div class="col-md-3"><div class="vb-fact h-100"><span class="small text-muted">Yurt dışı varlık</span><strong>2 ay</strong><small>Bildirimden sonra Türkiye'ye getirme veya hesaba transfer.</small></div></div>
+    <div class="col-md-3"><div class="vb-fact h-100"><span class="small text-muted">Peşin vergi</span><strong>%0 - %5</strong><small>Taahhüt süresine göre değişir.</small></div></div>
+    <div class="col-md-3"><div class="vb-fact h-100"><span class="small text-muted">Fon hesabı</span><strong>2 yıl</strong><small>Sermayeye ilave hariç işletmeden çekilemez.</small></div></div>
+  </section>
+
+  <section class="vb-section mb-5">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <h2 class="h3 mb-3">Hangi varlıklar bildirilebilir?</h2>
+        <p class="text-muted">
+          Düzenleme, gerçek ve tüzel kişilerin yurt dışında bulunan varlıkları ile gelir veya kurumlar vergisi mükelleflerinin
+          Türkiye'de bulunan ancak kanuni defter kayıtlarında yer almayan bazı varlıklarını kapsar.
+        </p>
+        <ul class="vb-check">
+          <li>Para, altın ve döviz.</li>
+          <li>Menkul kıymetler.</li>
+          <li>Diğer sermaye piyasası araçları.</li>
+          <li>Yurt içinde kayıt dışı olup banka veya aracı kurumlara yatırılarak tevsik edilen varlıklar.</li>
+        </ul>
+      </div>
+      <div class="col-lg-5">
+        <div class="vb-warning p-4 h-100">
+          <h3 class="h5 fw-bold text-dark">En kritik şart</h3>
+          <p class="mb-2 text-muted">
+            Yurt dışı varlıklar, bildirimin yapıldığı tarihten itibaren iki ay içinde Türkiye'deki banka veya aracı kurum
+            hesabına transfer edilmeli ya da fiziki getirilen varlıklar bu hesaplara yatırılmalıdır.
+          </p>
+          <p class="small text-muted mb-0">Bu süre ve tevsik şartı sağlanmazsa inceleme ve tarhiyat korumasından yararlanılamaz.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vb-section mb-5">
+    <h2 class="h3 mb-3">Vergi oranı nasıl belirlenir?</h2>
+    <p class="text-muted">
+      Banka ve aracı kurumlar, bildirilen varlıkların değeri üzerinden vergiyi peşin tahsil eder. Taahhüt süresi arttıkça oran düşer.
+      1 Ocak 2027 ile 31 Temmuz 2027 arasında yapılacak bildirimlerde oranlara yarım puan eklenir.
+    </p>
+    <div class="table-responsive vb-card p-0">
+      <table class="table table-bordered align-middle mb-0 vb-table">
+        <thead>
+          <tr>
+            <th>Taahhüt süresi</th>
+            <th class="text-end">2026 bildirimi</th>
+            <th class="text-end">01.01.2027 - 31.07.2027 bildirimi</th>
+            <th>Açıklama</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>En az 5 yıl</td><td class="text-end fw-bold">%0</td><td class="text-end fw-bold">%0,5</td><td>Belirlenen yatırım araçlarında elde tutma taahhüdü.</td></tr>
+          <tr><td>En az 4 yıl</td><td class="text-end fw-bold">%1</td><td class="text-end fw-bold">%1,5</td><td>Taahhüt süresine göre indirimli oran.</td></tr>
+          <tr><td>En az 3 yıl</td><td class="text-end fw-bold">%2</td><td class="text-end fw-bold">%2,5</td><td>Orta vadeli elde tutma taahhüdü.</td></tr>
+          <tr><td>En az 2 yıl</td><td class="text-end fw-bold">%3</td><td class="text-end fw-bold">%3,5</td><td>Kısa vadeli taahhüt seçeneği.</td></tr>
+          <tr><td>En az 1 yıl</td><td class="text-end fw-bold">%4</td><td class="text-end fw-bold">%4,5</td><td>En kısa taahhütlü seçenek.</td></tr>
+          <tr><td>Taahhüt yok</td><td class="text-end fw-bold">%5</td><td class="text-end fw-bold">%5,5</td><td>Genel oran.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="vb-note p-3 mt-3 small text-muted">
+      Uzatma yetkisi kullanılır ve 31.07.2027 sonrasına geçilirse, oranların toplamda 1 puan artırımlı uygulanması öngörülmüştür.
+    </div>
+  </section>
+
+  <section class="vb-section mb-5">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="vb-card p-4 h-100">
+          <h2 class="h4 mb-3">Defter kaydı ve özel fon hesabı</h2>
+          <p class="text-muted mb-0">
+            213 sayılı Kanuna göre defter tutan mükellefler, bildirilen varlıkları bildirim tarihi itibarıyla kanuni defterlerine kaydeder.
+            Bilanço esasına göre defter tutanlarda pasifte özel fon hesabı açılır. Bu fon hesabı iki yıl geçmedikçe işletmeden çekilemez
+            ve sermayeye ilave dışında başka amaçla kullanılamaz.
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="vb-card p-4 h-100">
+          <h2 class="h4 mb-3">İnceleme ve tarhiyat koruması</h2>
+          <p class="text-muted mb-0">
+            Şartların yerine getirilmesi halinde, bildirilen varlıklara isabet eden tutarlar nedeniyle vergi incelemesi ve vergi tarhiyatı yapılmaz.
+            Ancak bildirilen varlıklar dışındaki nedenlerle bulunan matrah farkları için bu koruma uygulanmaz.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vb-section mb-5">
+    <h2 class="h3 mb-3">Hangi hallerde koruma kaybedilir?</h2>
+    <div class="vb-warning p-4">
+      <ul class="mb-0 text-muted">
+        <li>Yurt dışı varlıkların iki ay içinde Türkiye'ye getirilmemesi veya hesaba transfer edilmemesi.</li>
+        <li>Yurt içi varlıkların bildirim tarihi itibarıyla banka veya aracı kurumlara yatırılarak tevsik edilmemesi.</li>
+        <li>Verginin süresinde ödenmemesi.</li>
+        <li>Taahhütlere uyulmaması.</li>
+        <li>Vergi incelemesine başlanıldıktan veya takdir komisyonuna sevk edildikten sonra bildirim yapılması.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="vb-section mb-5">
+    <h2 class="h3 mb-3">Sık sorulan sorular</h2>
+    <div class="accordion" id="varlikBarisiFaq">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqOne">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOneBody" aria-expanded="true" aria-controls="faqOneBody">
+            Varlık barışı için son bildirim tarihi nedir?
+          </button>
+        </h3>
+        <div id="faqOneBody" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#varlikBarisiFaq">
+          <div class="accordion-body">Bildirimler 31.07.2027 tarihine kadar yapılabilir. Cumhurbaşkanının süreyi uzatma yetkisi bulunmaktadır.</div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqTwo">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwoBody" aria-expanded="false" aria-controls="faqTwoBody">
+            Varlık barışı vergisi gider yazılabilir mi?
+          </button>
+        </h3>
+        <div id="faqTwoBody" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#varlikBarisiFaq">
+          <div class="accordion-body">Hayır. Bu kapsamda ödenen vergi gider yazılamaz ve başka bir vergiden mahsup edilemez.</div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqThree">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThreeBody" aria-expanded="false" aria-controls="faqThreeBody">
+            Bildirimden sonra düzeltme yapılabilir mi?
+          </button>
+        </h3>
+        <div id="faqThreeBody" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#varlikBarisiFaq">
+          <div class="accordion-body">Bildirim süresi sona erdikten sonra bildirimlere ilişkin düzeltme yapılamaz.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vb-card p-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+      <div>
+        <h2 class="h4 mb-2">Varlık bildirimi öncesi kontrol</h2>
+        <p class="text-muted mb-0">
+          Bildirimden önce varlığın türü, yurt dışı/yurt içi niteliği, banka/aracı kurum tevsiki, taahhüt süresi ve defter kaydı birlikte değerlendirilmelidir.
+        </p>
+      </div>      
+    </div>
+  </section>
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "2026 Varlık Barışı Rehberi",
+  "description": "5520 sayılı Kurumlar Vergisi Kanunu geçici madde 19 kapsamında yurt dışı ve yurt içi varlık bildirimi, oranlar ve süreler.",
+  "datePublished": "2026-06-22",
+  "dateModified": "2026-06-22",
+  "author": {
+    "@type": "Organization",
+    "name": "İSFA YMM"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM"
+  },
+  "mainEntityOfPage": "https://www.isfaymm.com/mevzuat/varlik-barisi-2026"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Varlık barışı için son bildirim tarihi nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bildirimler 31.07.2027 tarihine kadar yapılabilir. Cumhurbaşkanının süreyi uzatma yetkisi bulunmaktadır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Varlık barışı vergisi gider yazılabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hayır. Bu kapsamda ödenen vergi gider yazılamaz ve başka bir vergiden mahsup edilemez."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bildirimden sonra düzeltme yapılabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bildirim süresi sona erdikten sonra bildirimlere ilişkin düzeltme yapılamaz."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}

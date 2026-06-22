@@ -84,8 +84,11 @@
         <h2 class="h4 fw-bold mb-3">Ödeme Planı Bilgileri</h2>
         <form id="tecilForm">
           <div class="mb-3">
-            <label for="borcTutari" class="form-label fw-bold">Tecil edilecek borç tutarı (TL)</label>
+            <label for="borcTutari" class="form-label fw-bold">Tecile esas toplam borç tutarı (TL)</label>
             <input type="text" inputmode="decimal" id="borcTutari" class="form-control form-control-lg" placeholder="0,00" required>
+            <div class="form-text">
+              Vade tarihinden tecil başvuru tarihine kadar hesaplanan gecikme zammı, gecikme faizi ve diğer fer'i alacaklar dahil toplam tutarı girin.
+            </div>
           </div>
           <div class="row g-3">
             <div class="col-md-6">
@@ -102,10 +105,14 @@
               <label for="taksitSayisi" class="form-label fw-bold">Taksit sayısı</label>
               <select id="taksitSayisi" class="form-select">
                 <option value="12">12 taksit</option>
+                <option value="24">24 taksit</option>
                 <option value="36">36 taksit</option>
                 <option value="48">48 taksit</option>
                 <option value="72" selected>72 taksit</option>
               </select>
+              <div class="form-text">
+                Azami sınırı aşmamak kaydıyla daha az taksit seçilebilir. KDV ve BSMV borçlarında üst sınır 12 taksittir.
+              </div>
             </div>
             <div class="col-md-6">
               <label for="faizOrani" class="form-label fw-bold">Yıllık tecil faizi (%)</label>
@@ -117,7 +124,7 @@
           </button>
         </form>
         <div class="tecil-note p-3 mt-3 small">
-          Bu araç ön hesaplama içindir. Vergi dairesinin vereceği resmi ödeme planında başvuru tarihi, ödeme tarihi ve sistem hesaplama kuralları nedeniyle küçük farklar oluşabilir.
+          Bu araç ön hesaplama içindir. Resmi ödeme planında borç türü, çok zor durum hali, teminat değerlendirmesi, başvuru tarihi ve ödeme tarihi nedeniyle fark oluşabilir.
         </div>
       </div>
     </div>
@@ -130,10 +137,12 @@
         </div>
         <div id="sonucAlani" style="display:none;">
           <div class="row g-3 mb-4">
-            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Ana borç</span><br><strong id="resAnaBorc">0,00 TL</strong></div></div>
-            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tahmini tecil faizi</span><br><strong id="resFaiz">0,00 TL</strong></div></div>
-            <div class="col-md-4"><div class="tecil-result p-3 h-100"><span class="small text-muted">Toplam ödeme</span><br><strong id="resToplam">0,00 TL</strong></div></div>
+            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tecile esas borç</span><br><strong id="resAnaBorc">0,00 TL</strong></div></div>
+            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tahmini tecil faizi</span><br><strong id="resFaiz">0,00 TL</strong></div></div>
+            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Toplam ödeme</span><br><strong id="resToplam">0,00 TL</strong></div></div>
+            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Teminat</span><br><strong id="resTeminat">Gerekmez</strong></div></div>
           </div>
+          <div id="teminatNotu" class="alert alert-light border small mb-3"></div>
           <div class="alert alert-info small mb-3">
             <i class="bi bi-info-circle me-1"></i>
             Tecil faizi, her taksit tutarı için başvuru tarihinden ilgili taksit vadesine kadar geçen süre üzerinden hesaplanır. Bu nedenle vadeye kalan süre uzadıkça taksitlerdeki faiz tutarı artar.
@@ -272,6 +281,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("resAnaBorc").textContent = money(borc);
     document.getElementById("resFaiz").textContent = money(toplamFaiz);
     document.getElementById("resToplam").textContent = money(toplamOdeme);
+    const teminatSiniri = 10000000;
+    const teminatTutari = borc > teminatSiniri ? Math.round(((borc - teminatSiniri) / 2) * 100) / 100 : 0;
+    document.getElementById("resTeminat").textContent = teminatTutari > 0 ? money(teminatTutari) : "Gerekmez";
+    document.getElementById("teminatNotu").innerHTML = teminatTutari > 0
+      ? `<i class="bi bi-shield-check me-1"></i> ${money(borc)} borç için 10.000.000,00 TL'yi aşan kısmın yarısı kadar, yani <strong>${money(teminatTutari)}</strong> teminat gerekebilir.`
+      : `<i class="bi bi-shield-check me-1"></i> Tecile esas borç 10.000.000,00 TL sınırını aşmadığı için bu hesaplamaya göre teminat gerekmez.`;
     emptyState.style.display = "none";
     sonucAlani.style.display = "block";
   });
