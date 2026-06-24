@@ -7,6 +7,9 @@ from datetime import date
 SECRET_KEY = os.getenv("SECRET_KEY")
 FERNET_KEY = os.getenv("FERNET_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
+SECRET_LOGIN_PATH = os.getenv("SECRET_LOGIN_PATH", "login").strip("/")
+SECRET_REGISTER_PATH = os.getenv("SECRET_REGISTER_PATH", "register").strip("/")
+ALLOW_REGISTRATION = os.getenv("ALLOW_REGISTRATION", "0") == "1"
 
 # İzin verilen dosya uzantıları
 ALLOWED_EXTENSIONS = {"pdf", "docx", "xlsx", "xls", "xml"}

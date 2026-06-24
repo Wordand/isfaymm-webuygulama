@@ -345,6 +345,7 @@
                     <h5 class="fw-bold mb-3 fs-6 text-uppercase text-light">Yasal</h5>
                     <ul class="list-unstyled d-flex flex-column gap-2">
                         <li><a href="{{ url_for('main.cerez_politikasi') }}" class="text-light text-decoration-none hover-text-white transition-colors small opacity-75">Çerez Politikası</a></li>
+                        <li><a href="{{ url_for('main.kvkk_aydinlatma_metni') }}" class="text-light text-decoration-none hover-text-white transition-colors small opacity-75">KVKK Aydınlatma Metni</a></li>
                     </ul>
                 </div>
 
@@ -562,7 +563,9 @@
 
             // 🟦 NAVBAR SCROLL LOGIC
             const navbar = document.getElementById('mainNavbar');
-            const isHomePage = window.location.pathname === '/' || window.location.pathname.includes('home');
+            // Transparan navbar sadece anasayfada ve sidebar YOKSA (ziyaretçi ise) aktif olsun
+            const hasSidebar = !document.body.classList.contains('no-sidebar-layout');
+            const isHomePage = (window.location.pathname === '/' || window.location.pathname.includes('home')) && !hasSidebar;
 
             function handleScroll() {
                 if (window.scrollY > 50) {
@@ -579,6 +582,7 @@
                 window.addEventListener('scroll', handleScroll);
             } else {
                 navbar.classList.add('navbar-scrolled');
+                navbar.classList.remove('navbar-transparent');
             }
         });
         

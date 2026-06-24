@@ -1,9 +1,14 @@
 {% extends "layout.html" %}
 
-{% block title %}Finansman Gider Kısıtlaması Hesaplama | İSFA YMM{% endblock %}
+{% block title %}Finansman Gider Kısıtlaması Hesaplama 2026 | KKEG Hesaplama | İSFA YMM{% endblock %}
 
-{% block description %}KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.{% endblock %}
-{% block og_desc %}KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.{% endblock %}
+{% block description %}Finansman gider kısıtlaması hesaplama aracı ile KVK 11/1-i kapsamında öz kaynak, yabancı kaynak, finansman gideri ve KKEG tutarını 2026 güncel oranıyla hesaplayın.{% endblock %}
+{% block keywords %}finansman gider kısıtlaması hesaplama, KKEG hesaplama, finansman gider kısıtlaması 2026, KVK 11/1-i, yabancı kaynak öz kaynak hesaplama, finansman gideri KKEG, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/finansman-gider-kisitlamasi{% endblock %}
+{% block og_title %}Finansman Gider Kısıtlaması Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block og_desc %}KVK 11/1-i kapsamında öz kaynak, yabancı kaynak ve finansman giderlerinden KKEG tutarını 2026 güncel oranıyla hesaplayın.{% endblock %}
+{% block twitter_title %}Finansman Gider Kısıtlaması Hesaplama 2026{% endblock %}
+{% block twitter_desc %}Finansman gider kısıtlaması, KKEG ve yabancı kaynak aşımını ücretsiz hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-5" style="background: linear-gradient(135deg, #f8faff 0%, #e8efff 100%); min-height: 100vh;">
@@ -11,13 +16,18 @@
         <!-- 🚀 Hero Section -->
         <div class="text-center mb-5 animate-fade-in">
             <div class="badge bg-primary text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="letter-spacing: 1px;">
-                <i class="bi bi-percent me-1"></i> VERGİ GÜVENLİK MÜESSESESİ
+                <i class="bi bi-percent me-1"></i> 2026 GÜNCEL | KVK 11/1-i
             </div>
-            <h1 class="display-4 fw-bold text-dark mb-3">Finansman Gider Kısıtlaması</h1>
+            <h1 class="display-4 fw-bold text-dark mb-3">Finansman Gider Kısıtlaması Hesaplama 2026</h1>
             <p class="lead text-muted mx-auto" style="max-width: 700px;">
                 KVK Madde 11/1-i kapsamında, öz kaynaklarını aşan yabancı kaynak kullanan işletmelerde 
-                finansman giderlerinin KKEG tutarını profesyonelce hesaplayın.
+                finansman giderlerinin KKEG tutarını güncel %10 kısıtlama oranıyla hesaplayın.
             </p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <span class="badge rounded-pill bg-white border px-3 py-2 fgk-pill fgk-pill-primary">KVK 11/1-i</span>
+                <span class="badge rounded-pill bg-white border px-3 py-2 fgk-pill fgk-pill-danger">Kısıtlama oranı: %10</span>
+                <span class="badge rounded-pill bg-white border px-3 py-2 fgk-pill fgk-pill-success">KKEG hesaplama</span>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -185,7 +195,7 @@
                                 <h6 class="small fw-bold text-muted text-uppercase mb-3">Hesap Özeti</h6>
                                 <div class="bg-light rounded-3 p-3">
                                     <div class="d-flex justify-content-between small mb-2">
-                                        <span>Gider Kabul Edilen:</span>
+                                        <span>Kısıtlamaya Esas Gider:</span>
                                         <span class="fw-bold text-success" id="resultGiderKabul">0,00 ₺</span>
                                     </div>
                                     <div class="d-flex justify-content-between small">
@@ -217,6 +227,34 @@
                 </div>
             </div>
         </div>
+
+        <section class="mt-5 animate-fade-in" aria-labelledby="finansman-faq-title">
+            <div class="glass-card shadow-sm border-0 rounded-4 p-4 p-lg-5 bg-white">
+                <h2 class="h4 fw-bold text-dark mb-4" id="finansman-faq-title">Finansman gider kısıtlaması hakkında sık sorulanlar</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h3 class="h6 fw-bold text-primary">Finansman gider kısıtlaması kimlere uygulanır?</h3>
+                        <p class="small text-muted mb-0">Kredi kuruluşları ve finansal kuruluşlar dışında, yabancı kaynakları öz kaynaklarını aşan gelir ve kurumlar vergisi mükellefleri için uygulanır.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h6 fw-bold text-primary">KKEG tutarı nasıl hesaplanır?</h3>
+                        <p class="small text-muted mb-0">Öz kaynağı aşan yabancı kaynak oranı bulunur. Bu orana isabet eden finansman giderinin %10'u kanunen kabul edilmeyen gider olarak dikkate alınır.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h6 fw-bold text-primary">Yatırım maliyetine eklenen finansman gideri dahil mi?</h3>
+                        <p class="small text-muted mb-0">Yatırım maliyetine eklenen finansman giderleri kısıtlamaya esas giderden düşülmelidir. Araçta bu tutar ayrıca girilebilir.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h6 fw-bold text-primary">Finansman gelirleri giderlerden mahsup edilir mi?</h3>
+                        <p class="small text-muted mb-0">Hayır. Finansman gider kısıtlamasında finansman gelirleri ile finansman giderleri birbirinden mahsup edilmez.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h6 fw-bold text-primary">Kısıtlama oranı kaçtır?</h3>
+                        <p class="small text-muted mb-0">3490 sayılı Cumhurbaşkanı Kararı ile uygulanacak kısıtlama oranı %10 olarak belirlenmiştir.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
@@ -231,6 +269,13 @@
     .money-mask { text-align: right; }
     .icon-box { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }
     .text-xs { font-size: 0.75rem; }
+    .fgk-pill { font-weight: 700; background: #fff !important; }
+    .fgk-pill-primary { color: #0d6efd !important; border-color: #b8d4ff !important; }
+    .fgk-pill-danger { color: #dc3545 !important; border-color: #ffc2c9 !important; }
+    .fgk-pill-success { color: #198754 !important; border-color: #bfe8d2 !important; }
+    .gradient-header .icon-box { background: #fff !important; }
+    .gradient-header .icon-box i { color: #1e3c72 !important; }
+    .gradient-header[style*="e74c3c"] .icon-box i { color: #c0392b !important; }
 
     @media print {
         .navbar, .sidebar, footer, .btn, .breadcrumb, .nav-pills, .sticky-top { display: none !important; }
@@ -245,15 +290,64 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Finansman Gider Kısıtlaması Hesaplama Aracı",
+  "name": "Finansman Gider Kısıtlaması Hesaplama 2026",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/finansman-gider-kisitlamasi",
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
-  "description": "KVK Madde 11/1-i kapsamında finansman gider kısıtlaması ve kanunen kabul edilmeyen gider (KKEG) tutarını kolayca ve ücretsiz hesaplayın.",
+  "description": "KVK 11/1-i kapsamında öz kaynak, yabancı kaynak, finansman gideri ve KKEG tutarını 2026 güncel oranıyla hesaplayın.",
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "TRY"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Finansman gider kısıtlaması kimlere uygulanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kredi kuruluşları ve finansal kuruluşlar dışında, yabancı kaynakları öz kaynaklarını aşan gelir ve kurumlar vergisi mükellefleri için uygulanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "KKEG tutarı nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Öz kaynağı aşan yabancı kaynak oranı bulunur. Bu orana isabet eden finansman giderinin yüzde 10'u kanunen kabul edilmeyen gider olarak dikkate alınır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Yatırım maliyetine eklenen finansman gideri dahil mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yatırım maliyetine eklenen finansman giderleri kısıtlamaya esas giderden düşülmelidir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Finansman gelirleri giderlerden mahsup edilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hayır. Finansman gider kısıtlamasında finansman gelirleri ile finansman giderleri birbirinden mahsup edilmez."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Finansman gider kısıtlaması oranı kaçtır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "3490 sayılı Cumhurbaşkanı Kararı ile uygulanacak kısıtlama oranı yüzde 10 olarak belirlenmiştir."
+      }
+    }
+  ]
 }
 </script>
 <script>
@@ -297,14 +391,12 @@
         let asanKisim = 0;
         let asimOrani = 0;
         let isabetEdenGider = 0;
+        const netMatrah = Math.max(0, toplamGiderRaw - yatirimMaliyeti - digerKKEG);
 
-        if (yabanciKaynak > ozKaynak) {
+        if (yabanciKaynak > ozKaynak && yabanciKaynak > 0 && netMatrah > 0) {
             asanKisim = yabanciKaynak - ozKaynak;
             asimOrani = asanKisim / yabanciKaynak; // Ratio of exceeding liabilities
-            
-            // Matrah computation: Subtract excluded items from total finance expense
-            const netMatrah = toplamGiderRaw - yatirimMaliyeti - digerKKEG;
-            
+
             // Calculate expense corresponding to the exceeding liabilities
             isabetEdenGider = netMatrah * asimOrani;
             
@@ -318,7 +410,7 @@
         document.getElementById('resultKKEG').innerText = formatMoney(kkeg);
         document.getElementById('resultAsanKisim').innerText = formatMoney(asanKisim);
         document.getElementById('resultAsimOrani').innerText = `%${(asimOrani * 100).toFixed(2)}`;
-        document.getElementById('resultGiderKabul').innerText = formatMoney(toplamGiderRaw - kkeg);
+        document.getElementById('resultGiderKabul').innerText = formatMoney(netMatrah);
         document.getElementById('resTotalRaw').innerText = formatMoney(toplamGiderRaw);
         
         // Visual warning if KKEG > 0

@@ -4,7 +4,7 @@ from services.utils import prepare_df, to_float_turkish, month_key
 from services.pdf_service import SECTION_KEYS, SECTION_ALIASES
 from extensions import fernet
 from finansal_oranlar import hesapla_finansal_oranlar, analiz_olustur
-from auth import login_required
+from auth import role_required
 import pandas as pd
 import json
 import psycopg2.extras
@@ -138,6 +138,7 @@ def reorder_by_section(kdv_data: dict) -> "OrderedDict[str, dict]":
 # --- Routes ---
 
 @bp.route("/raporlama")
+@role_required(allow_roles=("admin",))
 def raporlama():
     vkn = request.args.get("vkn")
     fa_years = [y for y in request.args.get("fa_years", "").split(",") if y]
@@ -183,6 +184,7 @@ def raporlama():
     return render_template("reports/raporlama.html", mukellefler=unvanlar, donemler=donemler, secili_vkn=vkn, secili_unvan=secili_unvan, secili_fa_years=fa_years, secili_kdv_periods=kdv_periods, analiz_turu=analiz_turu, yuklenen_dosyalar=yuklenen_dosyalar, grafik_listesi=grafik_listesi)
 
 @bp.route("/raporlama-grafik")
+@role_required(allow_roles=("admin",))
 def raporlama_grafik():
     """Trend grafiği oluşturma ve görüntüleme"""
     vkn = request.args.get("vkn")
@@ -298,12 +300,14 @@ def raporlama_grafik():
 
 
 @bp.route("/finansal-oran-raporu")
+@role_required(allow_roles=("admin",))
 def finansal_oran_raporu():
     # Finansal oran raporu isteğini (PDF/Excel) şimdilik analiz sayfasına yönlendir
     return redirect(url_for('report.finansal_analiz', **request.args))
 
 
 @bp.route("/rapor-kdv")
+@role_required(allow_roles=("admin",))
 def rapor_kdv():
     vkn = request.args.get("vkn")
     unvan = request.args.get("unvan")
@@ -390,6 +394,7 @@ def rapor_kdv():
                            inconsistencies=inconsistencies)
 
 @bp.route("/rapor-kdv-excel")
+@role_required(allow_roles=("admin",))
 def rapor_kdv_excel():
     vkn = request.args.get("vkn")
     unvan = request.args.get("unvan", "M\u00FCkellef")
@@ -483,6 +488,7 @@ def rapor_kdv_excel():
     return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 @bp.route("/tablo-mizan/<string:tur>")
+@role_required(allow_roles=("admin",))
 def tablo_mizan(tur):
     vkn = request.args.get("vkn")
     donem = request.args.get("donem")
@@ -524,6 +530,7 @@ def tablo_mizan(tur):
     return redirect(url_for("data.veri_giris"))
 
 @bp.route("/finansal-analiz")
+@role_required(allow_roles=("admin",))
 def finansal_analiz():
     secili_vkn = request.args.get("vkn")
     secili_yillar = request.args.getlist("yillar") or []
@@ -645,7 +652,7 @@ def finansal_analiz():
                            is_guest=is_guest)
 
 @bp.route("/pdf-belgeler-tablo")
-@login_required
+@role_required(allow_roles=("admin",))
 def pdf_belgeler_tablo():
     vkn = request.args.get("vkn")
     donem = request.args.get("donem")

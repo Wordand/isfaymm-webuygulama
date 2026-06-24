@@ -150,27 +150,7 @@
                             </a>
                         </div>
 
-                        <div class="dropdown-divider-modern"></div>
 
-                        <div class="dropdown-section">
-                            <div class="dropdown-section-title">
-                                <i class="bi bi-bar-chart text-success"></i> Analiz & Raporlama
-                            </div>
-                            <a class="dropdown-item-modern" href="{{ url_for('reports.raporlama') }}">
-                                <div class="dmi-icon bg-teal"><i class="bi bi-graph-up-arrow"></i></div>
-                                <div>
-                                    <div class="dmi-label">Finansal Analiz & Raporlama</div>
-                                    <div class="dmi-desc">Bilanço & gelir tablosu analizi</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('calculators.tdhp') }}">
-                                <div class="dmi-icon bg-cyan"><i class="bi bi-book"></i></div>
-                                <div>
-                                    <div class="dmi-label">Tek Düzen Hesap Planı</div>
-                                    <div class="dmi-desc">TDHP rehberi</div>
-                                </div>
-                            </a>
-                        </div>
                     </div>
                 </li>
 
@@ -180,201 +160,220 @@
                         href="#" id="mevzuatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-journal-text me-1"></i> Mevzuat
                     </a>
-                    <div class="dropdown-menu dropdown-menu-modern dropdown-menu-end" aria-labelledby="mevzuatDropdown">
-                        <div class="dropdown-section">
-                            <a class="dropdown-item-modern" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
-                                <div class="dmi-icon bg-red"><i class="bi bi-megaphone"></i></div>
-                                <div>
-                                    <div class="dmi-label">Mevzuat Değişiklikleri <span class="badge-new">YENİ</span></div>
-                                    <div class="dmi-desc">Güncel değişiklikler</div>
+                    <div class="dropdown-menu dropdown-menu-mevzuat dropdown-menu-end" aria-labelledby="mevzuatDropdown">
+                        <div class="mevzuat-megamenu-container">
+                            <!-- Sol Sütun: Güncel Gelişmeler & Portallar (Gri Panel) -->
+                            <div class="mevzuat-megamenu-left">
+                                <div class="megamenu-section-header">
+                                    <i class="bi bi-broadcast text-danger"></i> GÜNCEL GELİŞMELER
                                 </div>
-
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">
-                                <div class="dmi-icon bg-blue"><i class="bi bi-calendar2-check"></i></div>
-                                <div>
-                                    <div class="dmi-label">2026 Vergi Borcu Tecil <span class="badge-new">YENİ</span></div>
-                                    <div class="dmi-desc">31.08.2026 son başvuru ve 72 aya kadar taksit</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.varlik_barisi_2026') }}">
-                                <div class="dmi-icon bg-teal"><i class="bi bi-cash-coin"></i></div>
-                                <div>
-                                    <div class="dmi-label">2026 Varlık Barışı <span class="badge-new">YENİ</span></div>
-                                    <div class="dmi-desc">31.07.2027 son bildirim ve %0-%5 vergi</div>
-                                </div>
-                            </a>
-
-                            <div class="dropdown-divider-modern my-2"></div>
-
-                            <!-- Alt Menülü Kategori: Katma Değer Vergisi -->
-                            <div class="dropdown-submenu-modern position-relative">
-                                <a class="dropdown-item-modern" href="javascript:void(0)">
-                                    <div class="dmi-icon bg-orange"><i class="bi bi-receipt"></i></div>
-                                    <div class="flex-grow-1">
-                                        <div class="dmi-label">Katma Değer Vergisi</div>
-                                        <div class="dmi-desc">KDV İade ve Tevkifat Uygulamaları</div>
+                                
+                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
+                                    <div class="dimc-icon"><i class="bi bi-megaphone"></i></div>
+                                    <div class="dimc-body">
+                                        <div class="dimc-title">Mevzuat Değişiklikleri <span class="badge-new">YENİ</span></div>
+                                        <div class="dimc-desc">Güncel yasal düzenlemeler ve özetleri</div>
                                     </div>
-                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
                                 </a>
-                                <div class="submenu-modern-content">
-                                    <div class="dropdown-section-title"><i class="bi bi-journal-text text-primary"></i> Uygulama Rehberleri</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('main.kdv_tevkifat') }}">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-pie-chart-fill text-warning me-1"></i> KDV Tevkifat Rehberi</div>
-                                            <div class="dmi-desc">Tam/Kısmi Tevkifat ve Hesaplama Aracı</div>
+
+                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">
+                                    <div class="dimc-icon"><i class="bi bi-calendar2-check"></i></div>
+                                    <div class="dimc-body">
+                                        <div class="dimc-title">2026 Vergi Borcu Tecil <span class="badge-new">YENİ</span></div>
+                                        <div class="dimc-desc">Başvuru şartları ve taksitlendirme detayları</div>
+                                    </div>
+                                </a>
+
+                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.varlik_barisi_2026') }}">
+                                    <div class="dimc-icon"><i class="bi bi-cash-coin"></i></div>
+                                    <div class="dimc-body">
+                                        <div class="dimc-title">2026 Varlık Barışı <span class="badge-new">YENİ</span></div>
+                                        <div class="dimc-desc">Yurt dışı ve yurt içi varlıkların bildirimi</div>
+                                    </div>
+                                </a>
+
+                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.ceza') }}">
+                                    <div class="dimc-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                                    <div class="dimc-body">
+                                        <div class="dimc-title">Güncel Vergi Cezaları</div>
+                                        <div class="dimc-desc">2026 yılı VUK ceza hükümleri ve oranları</div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Sağ Sütun: Uygulama Rehberleri & Portallar (Beyaz Panel) -->
+                            <div class="mevzuat-megamenu-right">
+                                <div class="megamenu-section-header">
+                                    <i class="bi bi-book-half text-primary"></i> UYGULAMA REHBERLERİ & PORTALLAR
+                                </div>
+
+                                <!-- Alt Menülü Kategori: Katma Değer Vergisi -->
+                                <div class="dropdown-submenu-modern position-relative">
+                                    <a class="dropdown-item-mevzuat-card" href="javascript:void(0)">
+                                        <div class="dimc-icon"><i class="bi bi-receipt"></i></div>
+                                        <div class="dimc-body flex-grow-1">
+                                            <div class="dimc-title">Katma Değer Vergisi</div>
+                                            <div class="dimc-desc">KDV İade ve Tevkifat Uygulamaları</div>
+                                        </div>
+                                        <i class="bi bi-chevron-left ms-2 text-muted" style="align-self: center; font-size:0.75rem;"></i>
+                                    </a>
+                                    <div class="submenu-modern-content">
+                                        <div class="dropdown-section-title"><i class="bi bi-journal-text text-primary"></i> Uygulama Rehberleri</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('main.kdv_tevkifat') }}">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-pie-chart-fill text-warning me-1"></i> KDV Tevkifat Rehberi</div>
+                                                <div class="dmi-desc">Tam/Kısmi Tevkifat ve Hesaplama Aracı</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('main.itus') }}">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-shield-fill-check text-success me-1"></i> İndirimli Teminat Uygulaması (İTUS)</div>
+                                                <div class="dmi-desc">İTUS Sertifikası ve İade İşlemleri</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('main.his') }}">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-lightning-charge-fill text-primary me-1"></i> Hızlandırılmış İade Sistemi (HİS)</div>
+                                                <div class="dmi-desc">HİS Sertifikası ve İade İşlemleri</div>
+                                            </div>
+                                        </a>
+                                        <div class="dropdown-divider-modern my-2"></div>
+                                        <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> KDV İadesi Rehberi</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KDV TEBLİĞİ - 10.05.2026.pdf') }}#page=48&zoom=125,0,50" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Tevkifata Tabi İşlemlerde KDV İadesi</div>
+                                                <div class="dmi-desc">Bölüm 2.1.5. (Sayfa 48)</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Alt Menülü Kategori: Yatırım Teşvik -->
+                                <div class="dropdown-submenu-modern position-relative">
+                                    <a class="dropdown-item-mevzuat-card" href="javascript:void(0)">
+                                        <div class="dimc-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                                        <div class="dimc-body flex-grow-1">
+                                            <div class="dimc-title">Yatırım Teşvik Mevzuatı</div>
+                                            <div class="dimc-desc">Teşvik belgelerine ilişkin yasal çerçeve</div>
+                                        </div>
+                                        <i class="bi bi-chevron-left ms-2 text-muted" style="align-self: center; font-size:0.75rem;"></i>
+                                    </a>
+                                    <div class="submenu-modern-content">
+                                        <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2012-3305 SAYILI KARAR.pdf') }}" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2012/3305 Sayılı Karar</div>
+                                                <div class="dmi-desc">Yatırımlarda Devlet Yardımları Hakkında Karar</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2025-9903 SAYILI KARAR.pdf') }}" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2025/9903 Sayılı Karar</div>
+                                                <div class="dmi-desc">Yatırımlarda Devlet Yardımları Yeni Sistem Kararı</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Alt Menülü Kategori: İndirimli Kurumlar -->
+                                <div class="dropdown-submenu-modern position-relative">
+                                    <a class="dropdown-item-mevzuat-card" href="javascript:void(0)">
+                                        <div class="dimc-icon"><i class="bi bi-building"></i></div>
+                                        <div class="dimc-body flex-grow-1">
+                                            <div class="dimc-title">İndirimli Kurumlar Mevzuatı</div>
+                                            <div class="dimc-desc">KVK Madde 32/A kapsamındaki uygulamalar</div>
+                                        </div>
+                                        <i class="bi bi-chevron-left ms-2 text-muted" style="align-self: center; font-size:0.75rem;"></i>
+                                    </a>
+                                    <div class="submenu-modern-content">
+                                        <div class="dropdown-section-title"><i class="bi bi-journal-bookmark-fill text-primary"></i> Rehber ve Makaleler</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('main.indirim') }}">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-book text-info me-1"></i> İndirimli Kurumlar Rehberi</div>
+                                                <div class="dmi-desc">Detaylı açıklamalar ve mevzuat analizi</div>
+                                            </div>
+                                        </a>
+                                        <div class="dropdown-divider-modern my-2"></div>
+                                        <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ KANUNU - 10.05.2026.pdf') }}#page=42&zoom=125,0,700" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> KVK Madde 32/A</div>
+                                                <div class="dmi-desc">İndirimli Kurumlar Vergisi Kanunu (Sayfa 42)</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ TEBLİĞİ - 10.05.2026.pdf') }}#page=211" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 1 Seri No.lu KV Genel Tebliği</div>
+                                                <div class="dmi-desc">Tebliğin 32.2. Bölümü (Sayfa 211)</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Alt Menülü Kategori: Enflasyon Düzeltmesi -->
+                                <div class="dropdown-submenu-modern position-relative">
+                                    <a class="dropdown-item-mevzuat-card" href="javascript:void(0)">
+                                        <div class="dimc-icon"><i class="bi bi-graph-up"></i></div>
+                                        <div class="dimc-body flex-grow-1">
+                                            <div class="dimc-title">Enflasyon Düzeltmesi</div>
+                                            <div class="dimc-desc">VUK Mükerrer 298/A tebliğ ve sirkülerleri</div>
+                                        </div>
+                                        <i class="bi bi-chevron-left ms-2 text-muted" style="align-self: center; font-size:0.75rem;"></i>
+                                    </a>
+                                    <div class="submenu-modern-content">
+                                        <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 555 NOLU VUK TEBLİĞİ.pdf') }}" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 555 No'lu Tebliğ</div>
+                                                <div class="dmi-desc">Enflasyon Düzeltmesi Tebliği</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 165 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 165 No'lu Sirküler</div>
+                                                <div class="dmi-desc">Düzeltme Uygulama Esasları</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 176 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 176 No'lu Sirküler</div>
+                                                <div class="dmi-desc">Uygulama Detayları</div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item-modern p-2" href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank">
+                                            <div>
+                                                <div class="dmi-label text-dark"><i class="bi bi-link-45deg text-info me-1"></i> 196 No'lu Sirküler</div>
+                                                <div class="dmi-desc">GİB Resmi Sayfası</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.kv_istisna_indirimler') }}">
+                                    <div class="dimc-icon"><i class="bi bi-shield-check"></i></div>
+                                    <div class="dimc-body">
+                                        <div class="dimc-title">KV İstisna &amp; İndirimler</div>
+                                        <div class="dimc-desc">Kazanç ve zarar durumuna göre tam liste</div>
+                                    </div>
+                                </a>
+
+                                <div class="mevzuat-megamenu-footer-row">
+                                    <a class="dropdown-item-mevzuat-card py-2 px-3 flex-grow-1" href="{{ url_for('main.mevzuat') }}">
+                                        <div class="dimc-icon bg-light text-dark border-0"><i class="bi bi-balance-scale text-primary"></i></div>
+                                        <div class="dimc-body">
+                                            <div class="dimc-title">Mevzuat Portalı</div>
+                                            <div class="dimc-desc">Tüm mevzuat arşivi</div>
                                         </div>
                                     </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('main.itus') }}">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-shield-fill-check text-success me-1"></i> İndirimli Teminat Uygulaması (İTUS)</div>
-                                            <div class="dmi-desc">İTUS Sertifikası ve İade İşlemleri</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('main.his') }}">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-lightning-charge-fill text-primary me-1"></i> Hızlandırılmış İade Sistemi (HİS)</div>
-                                            <div class="dmi-desc">HİS Sertifikası ve İade İşlemleri</div>
-                                        </div>
-                                    </a>
-                                    <div class="dropdown-divider-modern my-2"></div>
-                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> KDV İadesi Rehberi</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KDV TEBLİĞİ - 10.05.2026.pdf') }}#page=48&zoom=125,0,50" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Tevkifata Tabi İşlemlerde KDV İadesi</div>
-                                            <div class="dmi-desc">Bölüm 2.1.5. (Sayfa 48)</div>
+                                    <a class="dropdown-item-mevzuat-card py-2 px-3 flex-grow-1" href="{{ url_for('calculators.tdhp') }}">
+                                        <div class="dimc-icon bg-light text-dark border-0"><i class="bi bi-book text-success"></i></div>
+                                        <div class="dimc-body">
+                                            <div class="dimc-title">Tek Düzen Hesap Planı</div>
+                                            <div class="dimc-desc">Hesap kodları rehberi</div>
                                         </div>
                                     </a>
                                 </div>
                             </div>
-
-                            <!-- Alt Menülü Kategori: Yatırım Teşvik -->
-                            <div class="dropdown-submenu-modern position-relative">
-                                <a class="dropdown-item-modern" href="javascript:void(0)">
-                                    <div class="dmi-icon bg-green"><i class="bi bi-graph-up-arrow"></i></div>
-                                    <div class="flex-grow-1">
-                                        <div class="dmi-label">Yatırım Teşvik Mevzuatı</div>
-                                        <div class="dmi-desc">Teşvik belgelerine ilişkin mevzuat</div>
-                                    </div>
-                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
-                                </a>
-                                <div class="submenu-modern-content">
-                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2012-3305 SAYILI KARAR.pdf') }}" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2012/3305 Sayılı Karar</div>
-                                            <div class="dmi-desc">Yatırımlarda Devlet Yardımları Hakkında Karar</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/2025-9903 SAYILI KARAR.pdf') }}" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 2025/9903 Sayılı Karar</div>
-                                            <div class="dmi-desc">Yatırımlarda Devlet Yardımları Yeni Sistem Kararı</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Alt Menülü Kategori: İndirimli Kurumlar -->
-                            <div class="dropdown-submenu-modern position-relative">
-                                <a class="dropdown-item-modern" href="javascript:void(0)">
-                                    <div class="dmi-icon bg-blue"><i class="bi bi-building"></i></div>
-                                    <div class="flex-grow-1">
-                                        <div class="dmi-label">İndirimli Kurumlar Mevzuatı</div>
-                                        <div class="dmi-desc">KVK 32/A uygulamaları</div>
-                                    </div>
-                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
-                                </a>
-                                <div class="submenu-modern-content">
-                                    <div class="dropdown-section-title"><i class="bi bi-journal-bookmark-fill text-primary"></i> Rehber ve Makaleler</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('main.indirim') }}">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-book text-info me-1"></i> İndirimli Kurumlar Rehberi</div>
-                                            <div class="dmi-desc">Detaylı açıklamalar ve mevzuat analizi</div>
-                                        </div>
-                                    </a>
-
-                                    <div class="dropdown-divider-modern my-2"></div>
-                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ KANUNU - 10.05.2026.pdf') }}#page=42&zoom=125,0,700" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> KVK Madde 32/A</div>
-                                            <div class="dmi-desc">İndirimli Kurumlar Vergisi Kanunu (Sayfa 42)</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/KURUMLAR VERGİSİ TEBLİĞİ - 10.05.2026.pdf') }}#page=211" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 1 Seri No.lu KV Genel Tebliği</div>
-                                            <div class="dmi-desc">Tebliğin 32.2. Bölümü (Sayfa 211)</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Alt Menülü Kategori: Enflasyon Düzeltmesi -->
-                            <div class="dropdown-submenu-modern position-relative">
-                                <a class="dropdown-item-modern" href="javascript:void(0)">
-                                    <div class="dmi-icon bg-purple"><i class="bi bi-graph-up"></i></div>
-                                    <div class="flex-grow-1">
-                                        <div class="dmi-label">Enflasyon Düzeltmesi</div>
-                                        <div class="dmi-desc">VUK Mükerrer 298/A uygulamaları</div>
-                                    </div>
-                                    <i class="bi bi-chevron-left ms-2 text-muted" style="font-size:0.75rem;"></i>
-                                </a>
-                                <div class="submenu-modern-content">
-                                    <div class="dropdown-section-title"><i class="bi bi-link-45deg"></i> Resmi Kaynaklar</div>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 555 NOLU VUK TEBLİĞİ.pdf') }}" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 555 No'lu Tebliğ</div>
-                                            <div class="dmi-desc">Enflasyon Düzeltmesi Tebliği</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 165 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 165 No'lu Sirküler</div>
-                                            <div class="dmi-desc">Düzeltme Uygulama Esasları</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="{{ url_for('static', filename='pdf/mevzuat/ED - 176 NOLU VUK SİRKÜLERİ.pdf') }}" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> 176 No'lu Sirküler</div>
-                                            <div class="dmi-desc">Uygulama Detayları</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-modern p-2" href="https://www.gib.gov.tr/mevzuat/kanun/434/sirkuler/1136" target="_blank">
-                                        <div>
-                                            <div class="dmi-label text-dark"><i class="bi bi-link-45deg text-info me-1"></i> 196 No'lu Sirküler</div>
-                                            <div class="dmi-desc">GİB Resmi Sayfası</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="dropdown-divider-modern"></div>
-
-                        <div class="dropdown-section">
-                            <a class="dropdown-item-modern" href="{{ url_for('main.kv_istisna_indirimler') }}">
-                                <div class="dmi-icon bg-green"><i class="bi bi-shield-check"></i></div>
-                                <div>
-                                    <div class="dmi-label">KV İstisna &amp; İndirimler</div>
-                                    <div class="dmi-desc">Kazanç ve zarar durumuna göre tam liste</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.ceza') }}">
-                                <div class="dmi-icon bg-orange"><i class="bi bi-exclamation-triangle"></i></div>
-                                <div>
-                                    <div class="dmi-label">Güncel Vergi Cezaları</div>
-                                    <div class="dmi-desc">2026 yılı VUK ceza hükümleri</div>
-                                </div>
-                            </a>
-                            <a class="dropdown-item-modern" href="{{ url_for('main.mevzuat') }}">
-                                <div class="dmi-icon bg-indigo"><i class="bi bi-balance-scale"></i></div>
-                                <div>
-                                    <div class="dmi-label">Mevzuat Portalı</div>
-                                    <div class="dmi-desc">Tüm mevzuat arşivi</div>
-                                </div>
-                            </a>
                         </div>
                     </div>
                 </li>
@@ -580,6 +579,176 @@
     animation: dropFade 0.2s ease;
     background: white;
 }
+
+/* ═══════════════════════════════════════
+   MEVZUAT MEGAMENU DESIGN
+   ═══════════════════════════════════════ */
+.dropdown-menu-mevzuat {
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15), 0 5px 20px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
+    background: white;
+    animation: dropFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Desktop wide sizing */
+@media (min-width: 992px) {
+    .dropdown-menu-mevzuat {
+        min-width: 780px;
+    }
+}
+
+.mevzuat-megamenu-container {
+    display: flex;
+    flex-direction: row;
+}
+
+/* Left panel (grey background) */
+.mevzuat-megamenu-left {
+    flex: 1;
+    background: #f8fafc; /* Beautiful soft slate gray */
+    padding: 24px;
+    border-right: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Right panel (white background) */
+.mevzuat-megamenu-right {
+    flex: 1.2;
+    background: white;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Headings */
+.megamenu-section-header {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #64748b;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Cards style items inside Mevzuat Megamenu */
+.dropdown-item-mevzuat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #334155;
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.dropdown-item-mevzuat-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.mevzuat-megamenu-left .dropdown-item-mevzuat-card:hover {
+    background: white;
+}
+.mevzuat-megamenu-right .dropdown-item-mevzuat-card:hover {
+    background: #f8fafc;
+}
+
+/* Modern thin circular icons instead of heavy solid cards */
+.dimc-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item-mevzuat-card:hover .dimc-icon {
+    border-color: #c8102e;
+    color: white;
+    background: #c8102e;
+}
+
+.dimc-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.dimc-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #1e293b;
+    transition: color 0.15s ease;
+}
+
+.dropdown-item-mevzuat-card:hover .dimc-title {
+    color: #c8102e;
+}
+
+.dimc-desc {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 2px;
+    line-height: 1.3;
+}
+
+/* Footer row for portals in right column */
+.mevzuat-megamenu-footer-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 12px;
+}
+
+/* Submenu behavior inside Mevzuat */
+.dropdown-menu-mevzuat .submenu-modern-content {
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .mevzuat-megamenu-container {
+        flex-direction: column;
+    }
+    .mevzuat-megamenu-left {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 16px;
+    }
+    .mevzuat-megamenu-right {
+        padding: 16px;
+    }
+    .mevzuat-megamenu-footer-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
 @keyframes dropFade {
     from { opacity: 0; transform: translateY(-8px) scale(0.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }

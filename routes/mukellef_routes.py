@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, jsonify, session, current_app, flash, redirect, url_for
 from services.db import get_conn
-from auth import login_required
+from auth import role_required
 import psycopg2.extras
 
 bp = Blueprint("mukellef", __name__, url_prefix="/mukellef")
 
 @bp.route("/mukellef-yonetimi")
-@login_required
+@role_required(allow_roles=("admin",))
 def index():
     user_id = session.get("user_id")
     try:
@@ -31,7 +31,7 @@ def index():
         return redirect(url_for("main.home"))
 
 @bp.route("/api/mukellef-listesi")
-@login_required
+@role_required(allow_roles=("admin",))
 def listesi():
     """Aktif kullanıcının mükellef listesini JSON olarak getirir"""
     uid = session.get("user_id")
@@ -42,7 +42,7 @@ def listesi():
     return jsonify(rows)
 
 @bp.route("/api/mukellef-ekle", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def ekle():
     data = request.get_json()
     vkn = data.get("vergi_kimlik_no", "").strip()
@@ -67,7 +67,7 @@ def ekle():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/api/mukellef-guncelle", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def guncelle():
     data = request.get_json()
     mid = data.get("id")
@@ -93,7 +93,7 @@ def guncelle():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/api/mukellef-sil", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def sil():
     data = request.get_json()
     mid = data.get("id")
@@ -117,7 +117,7 @@ def sil():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/api/mukellef-sec", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def sec():
     data = request.get_json()
     mukellef_id = data.get("id")

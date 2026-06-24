@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import io
 import pdfkit
-import pdfplumber
 import re
 import tempfile
 import os
@@ -310,66 +309,6 @@ explanations = [
     "İHRACAT, İMALAT VE DİĞER FAALİYETLERİN TOPLAM PAYLARI (%)"   #54
 ]
 
-
-import re
-import pdfplumber
-
-def parse_ikv_from_pdf(path):
-    tablolar = []
-    total_text_len = 0
-
-    with pdfplumber.open(path) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text()
-            if not text:
-                continue
-            
-            total_text_len += len(text.strip())
-
-            if "Teşvik Belgesi Numarası" in text:
-                veriler = []
-
-                def ekle(alan, regex):
-                    match = re.search(regex, text)
-                    if match:
-                        deger = match.group(1).strip()
-                        veriler.append({'alan': alan, 'deger': deger})
-
-                ekle("Teşvik Belgesi Numarası", r"Teşvik Belgesi Numarası\s*:?\s*(\d+)")
-                ekle("Teşvik Belgesinin Hangi Karara Göre Düzenlendiği", r"Karara Göre Düzenlendiği\s*:?\s*([^\n]+)")                
-                ekle("Yatırıma Başlama Tarihi", r"Başlama Tarihi\s*:?\s*([^\n]+)")
-                ekle("Yatırımın Türü 1", r"Yatırımın Türü 1\s*:?\s*([^\n]+)")
-                ekle("Yatırımın Türü 2", r"Yatırımın Türü 2\s*:?\s*([^\n]+)")
-
-                ekle("Toplam Yatırım Tutarı (İndirimli KV Kapsamında Olmayan Harcamalar Hariç)", r"Toplam Yatırım Tutarı.*?(?<!Katkı).*?:?\s*([0-9\.,]+)")
-                ekle("Yatırıma Katkı Oranı", r"Yatırıma Katkı Oranı\s*:?\s*([0-9]+)")
-                ekle("Vergi İndirim Oranı", r"Vergi İndirim Oranı\s*:?\s*([0-9]+)")
-                ekle("Yatırımın Yapıldığı Bölge", r"Yatırımın Yapıldığı Bölge\s*:?\s*([^\n]+)")
-                ekle("İndirimli KV Oranı", r"İndirimli KV Oranı\s*:?\s*([0-9]+)")
-
-                ekle("Toplam Yatırıma Katkı Tutarı", r"Toplam Yatırıma Katkı Tutarı[^\d]*([0-9\.,]+)")
-                ekle("Cari Yılda Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı", r"Cari Yılda Fiilen Gerçekleştirilen(?: Yatırım Harcaması)?(?: Tutarı)?[^\d]*([0-9\.,]+)")
-                ekle("Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı (Başlangıçtan İtibaren)", r"Gerçekleştirilen Yatırım Harcaması.*Başlangıçtan.*?:?\s*([0-9\.,]+)")
-                ekle("Fiili Yatırım Harcaması Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı", r"Hak Kazanılan Yatırıma Katkı Tutarı\s*:?\s*([0-9\.,]+)")
-                ekle("Endekslenmiş Tutarlar Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı", r"Endekslenmiş.*Hak Kazanılan.*Katkı Tutarı\s*:?\s*([0-9\.,]+)")
-
-                ekle("Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen Kazanç Dolayısıyla)", r"Önceki.*Yatırımdan Elde Edilen Kazanç Dolayısıyla\)\s*:?\s*([0-9\.,]+)")
-                ekle("Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden Elde Edilen Kazanç Dolayısıyla)", r"Önceki.*Diğer Faaliyetlerden Elde Edilen Kazanç Dolayısıyla\)\s*:?\s*([0-9\.,]+)")
-                ekle("Önceki Dönemlerde Yararlanılan Toplam Yatırıma Katkı Tutarı", r"Önceki.*Toplam Yatırıma Katkı Tutarı\s*:?\s*([0-9\.,]+)")
-                ekle("Cari Dönemde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen Kazanç Dolayısıyla)", r"Cari.*Yatırımdan Elde Edilen Kazanç Dolayısıyla\)\s*:?\s*([0-9\.,]+)")
-                ekle("Cari Dönemde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden Elde Edilen Gelirler Dolayısıyla)", r"Cari.*Diğer Faaliyetlerden Elde Edilen Gelirler Dolayısıyla\)\s*:?\s*([0-9\.,]+)")
-                ekle("Cari Dönem Dahil Olmak Üzere Yararlanılan Toplam Yatırıma Katkı Tutarı", r"Cari Dönem Dahil.*Toplam Yatırıma Katkı Tutarı\s*:?\s*([0-9\.,]+)")
-                ekle("Cari Dönemde Yararlanılan Toplam Yatırıma Katkı Tutarı", r"Cari.*Toplam Yatırıma Katkı Tutarı\s*:?\s*([0-9\.,]+)")
-
-                tablolar.append({'veriler': veriler})
-                
-                bulunan_alanlar = [v['alan'] for v in veriler]
-                ("  ", )
-
-    return {"tablolar": tablolar, "is_scanned": total_text_len < 100}
-
-
-
 def format_date_for_input(date_str):
     try:
         return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
@@ -486,10 +425,18 @@ def format_df_for_html(dataframe: pd.DataFrame) -> list[dict]:
 
 @bp.route('/ayrintili-kazanc', methods=['GET', 'POST'])
 def ayrintili_kazanc():
-    user_id = session.get("user_id") or -1 # Public session
+    user_id = session.get("user_id")
+    is_logged_in = bool(session.get("logged_in") and user_id)
 
     try:
         if request.method == 'POST':
+            if not is_logged_in:
+                return jsonify({
+                    "status": "info",
+                    "title": "Ziyaretçi Modu",
+                    "message": "Ayrıntılı kazanç verileri ziyaretçi modunda sunucuya kaydedilmez."
+                })
+
             current_df_profit = get_user_profit_df(user_id)
 
             # 🟦 İçe Aktar
@@ -579,7 +526,6 @@ def ayrintili_kazanc():
                 })
 
         # 🟨 GET isteği — tabloyu yükle
-        is_logged_in = session.get("logged_in", False)
         aktif_mukellef_id = session.get("aktif_mukellef_id") if is_logged_in else None
         docs = []
         if is_logged_in and aktif_mukellef_id:
@@ -602,7 +548,13 @@ def ayrintili_kazanc():
             else:
                 current_belge = next((d for d in docs if int(d.get("id") or 0) == int(active_tesvik_id)), None)
 
-        current_df_profit = get_user_profit_df(user_id)
+        if is_logged_in:
+            current_df_profit = get_user_profit_df(user_id)
+        else:
+            current_df_profit = pd.DataFrame({
+                'Açıklama': explanations,
+                'B': 0.0, 'C': 0.0, 'D': 0.0, 'E': 0.0
+            })
         formatted_data_for_html = format_df_for_html(current_df_profit)
 
         safe_bolge_map = {str(k): v if v is not None else None for k, v in BOLGE_MAP.items()}
@@ -2439,85 +2391,7 @@ def download_tesvik_donem_pdf(kullanim_id):
         
     
     
-from io import BytesIO
-import pdfplumber
-
-@bp.route('/upload-kv-beyan', methods=['POST'])
-def upload_kv_beyan():
-    f = request.files.get('kv_pdf')
-    if not f or not f.filename.lower().endswith('.pdf'):
-        return jsonify(status='error', title='Geçersiz Dosya', message='Lütfen bir PDF dosyası yükleyin.'), 400
-
-    try:
-        # PDF verisini belleğe al
-        pdf_data = BytesIO(f.read())
-
-        # parse_ikv_from_pdf fonksiyonun path yerine bytes kabul ediyorsa:
-        veri = parse_ikv_from_pdf(pdf_data)
-
-        # Eğer parse_ikv_from_pdf sadece path kabul ediyorsa, onu da şöyle güncelleyeceğiz:
-        # with pdfplumber.open(BytesIO(pdf_data)) as pdf: ...
-
-        if veri.get("is_scanned", False):
-            return jsonify(
-                status='scanned',
-                title='Taranmış PDF',
-                message='Yüklediğiniz dosya taranmış bir PDF\'tir. Lütfen e-beyannameden indirdiğiniz orijinal dijital PDF\'i yükleyin veya manuel girin.'
-            ), 400
-
-        tablolar = veri.get("tablolar", [])
-        if not tablolar:
-            return jsonify(status='error', title='Veri Hatası', message='Hiç tablo bulunamadı.'), 400
-
-        def parse_veri_listesi(veri_listesi):
-            def find_deger(alan):
-                for e in veri_listesi:
-                    if e["alan"] == alan:
-                        return e["deger"]
-                return ''
-
-            return {
-                'belge_no':    find_deger('Teşvik Belgesi Numarası'),
-                'karar':       find_deger('Teşvik Belgesinin Hangi Karara Göre Düzenlendiği'),
-                'belge_tarihi':find_deger('Yatırıma Başlama Tarihi'),
-                'program_turu': find_deger('Program Türü') or find_deger('Programın Türü'),
-                'yatirim_turu1': find_deger('Yatırımın Türü 1'),
-                'yatirim_turu2': find_deger('Yatırımın Türü 2'),
-                'toplam_tutar': find_deger('Toplam Yatırım Tutarı (İndirimli KV Kapsamında Olmayan Harcamalar Hariç)'),
-                'katki_orani':  find_deger('Yatırıma Katkı Oranı'),
-                'vergi_orani':  find_deger('Vergi İndirim Oranı'),
-                'bolge':        find_deger('Yatırımın Yapıldığı Bölge'),
-                'diger_oran':   find_deger('İndirimli KV Oranı'),
-                'katki_tutari':          find_deger('Toplam Yatırıma Katkı Tutarı'),
-                'cari_harcama_tutari':   find_deger('Cari Yılda Fiilen Gerçekleştirilen Yatırım Harcaması Tutarı'),
-                'toplam_harcama_tutari': find_deger('Fiilen Gerçekleştirilen Yatırım Harcaması (Yatırımın Başlangıcından İtibaren)'),
-                'fiili_katki_tutari':    find_deger('Fiili Yatırım Harcaması Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı'),
-                'endeks_katki_tutari':   find_deger('Endekslenmiş Tutarlar Nedeniyle Hak Kazanılan Yatırıma Katkı Tutarı'),
-                'onceki_yatirim_katki_tutari': find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Yatırımdan Elde Edilen)'),
-                'onceki_diger_katki_tutari':   find_deger('Önceki Dönemlerde Yararlanılan Yatırıma Katkı (Diğer Faaliyetlerden)'),
-                'onceki_katki_tutari':         find_deger('Önceki Dönemlerde Yararlanılan Toplam Yatırıma Katkı Tutarı'),
-            }
-
-
-        if len(tablolar) > 1:
-            parsed_list = []
-            secenekler = []
-            for i, tablo in enumerate(tablolar):
-                parsed = parse_veri_listesi(tablo.get("veriler", []))
-                current_app.logger.info(f"[DEBUG] Tablo {i} - Belge No: {parsed.get('belge_no')}")
-                parsed_list.append(parsed)
-                secenekler.append({
-                    "index": i,
-                    "belge_no": parsed["belge_no"] or f"Belge {i+1}"
-                })
-            return jsonify(status='multiple', tablolar=secenekler, raw_data=parsed_list)
-
-        parsed = parse_veri_listesi(tablolar[0].get("veriler", []))
-        return jsonify(status='ok', parsed=parsed)
-
-    except Exception as e:
-        current_app.logger.exception("PDF parse hatası")
-        return jsonify(status='error', title='Parse Hatası', message=str(e)), 500
+# PDF parse route has been removed for KVKK and data privacy compliance.
     
     
     

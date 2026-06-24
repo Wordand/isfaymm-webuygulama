@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 
-{% block title %}Tecil Faizi Hesaplama 2026 | Vergi Borcu Taksitlendirme Planı | İSFA YMM{% endblock %}
-{% block description %}2026 vergi borcu tecil faizi hesaplama aracı ile borç tutarı, başvuru tarihi, taksit sayısı ve yıllık %29 tecil faizi üzerinden tahmini ödeme planı oluşturun.{% endblock %}
-{% block keywords %}tecil faizi hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil faizi, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
+{% block title %}Tecil Faizi Hesaplama 2026 | 7582 Sayılı Kanun Uyumlu 72 Ay Taksit | İSFA YMM{% endblock %}
+{% block description %}2026 tecil faizi hesaplama aracı ile 7582 sayılı Kanun ve Seri:B Sıra No:20 Tebliğ kapsamında yıllık %29 tecil faizi, 72 aya kadar taksit ve teminat tutarını hesaplayın.{% endblock %}
+{% block keywords %}tecil faizi hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil faizi, 7582 sayılı kanun tecil, seri b sıra no 20 tecil, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/tecil-faizi{% endblock %}
 {% block og_title %}Tecil Faizi Hesaplama 2026 | İSFA YMM{% endblock %}
 {% block og_desc %}Vergi borcu tecil ve taksitlendirme için tahmini taksit, tecil faizi ve toplam ödeme planı hesaplayın.{% endblock %}
@@ -59,10 +59,10 @@
     </nav>
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
-        <span class="tecil-hero-badge mb-3">2026 Tebliğ: yıllık %29</span>
+        <span class="tecil-hero-badge mb-3">7582 Sayılı Kanun ve 2026 Tebliğ uyumlu</span>
         <h1 class="display-6 fw-bold mb-3">Tecil Faizi Hesaplama 2026</h1>
         <p class="lead mb-0 text-white-75">
-          Vergi borcu tecil ve taksitlendirme başvurusu için borç tutarı, taksit sayısı ve başvuru tarihine göre tahmini ödeme planını görün.
+          Vergi borcu tecil ve taksitlendirme başvurusu için yıllık %29 tecil faizi, 72 aya kadar taksit, teminat durumu ve tahmini ödeme planını görün.
         </p>
       </div>
       <div class="col-lg-4">
@@ -192,6 +192,34 @@
     {% include "partials/tax_disclaimer.html" %}
   </div>
 </main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Tecil Faizi Hesaplama 2026",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/tecil-faizi",
+  "description": "7582 sayılı Kanun ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında yıllık %29 tecil faizi, 72 aya kadar taksit planı ve teminat tutarını hesaplayan ücretsiz vergi borcu tecil faizi aracı.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM",
+    "url": "https://www.isfaymm.com"
+  },
+  "featureList": [
+    "Tecil faizi hesaplama",
+    "Vergi borcu taksitlendirme planı",
+    "72 aya kadar taksit hesabı",
+    "Teminat tutarı hesaplama"
+  ]
+}
+</script>
 {% endblock %}
 
 {% block extra_scripts %}

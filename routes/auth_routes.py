@@ -5,6 +5,7 @@ from extensions import limiter
 from datetime import timedelta
 import re
 import psycopg2.extras
+import config
 
 bp = Blueprint("auth", __name__)
 
@@ -20,17 +21,25 @@ def log_login_attempt(username, success, user_id=None):
         )
         conn.commit()
 
-@bp.route("/register", methods=["GET", "POST"])
+@bp.route(f"/{config.SECRET_REGISTER_PATH}", methods=["GET", "POST"])
 def register():
+    if not config.ALLOW_REGISTRATION:
+        from flask import abort
+        abort(404)
     if session.get("user_id"):
         return redirect(url_for('main.home'))
 
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
+        kvkk_consent = request.form.get("kvkk_consent")
 
         if not username or not password:
             flash("Lütfen tüm alanları doldurun.", "warning")
+            return render_template("auth/register.html")
+
+        if not kvkk_consent:
+            flash("Kaydolmak için KVKK Aydınlatma Metni'ni kabul etmeniz gerekmektedir.", "warning")
             return render_template("auth/register.html")
 
         if len(password) < 6:
@@ -58,7 +67,7 @@ def register():
 
     return render_template("auth/register.html")
 
-@bp.route("/login", methods=["GET", "POST"])
+@bp.route(f"/{config.SECRET_LOGIN_PATH}", methods=["GET", "POST"])
 @limiter.limit("50 per 10 minutes")
 def login():
     if session.get("user_id"):

@@ -122,6 +122,12 @@
                 <label class="form-label">Şifre</label>
                 <input type="password" class="form-control" name="password" required>
             </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="kvkk_consent" name="kvkk_consent" value="1" required>
+                <label class="form-check-label small text-muted" for="kvkk_consent" style="cursor: pointer; user-select: none;">
+                    <a href="{{ url_for('main.kvkk_aydinlatma_metni') }}" target="_blank" class="text-decoration-underline text-primary">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum.
+                </label>
+            </div>
             <button type="submit" class="btn btn-primary w-100">Kayıt Ol</button>
             <a href="{{ url_for('auth.login') }}" class="btn-link mt-3">Zaten hesabınız var mı? Giriş yapın</a>
         </form>

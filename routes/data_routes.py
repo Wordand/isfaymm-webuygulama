@@ -11,7 +11,7 @@ from services.pdf_service import (
 from services.xml_service import parse_xml_file
 from services.excel_service import parse_mizan_excel
 from extensions import fernet
-from auth import login_required
+from auth import role_required
 import os
 import json
 import psycopg2.extras
@@ -145,7 +145,7 @@ def process_parsed_parts(full_data, doc_type):
     return results
 
 @bp.route("/yukle-coklu", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def yukle_coklu():
     if "files[]" not in request.files:
         flash("Dosya seçilmedi.", "warning")
@@ -295,7 +295,7 @@ def yukle_coklu():
     return jsonify(sonuclar)
 
 @bp.route("/kaydet-mizan-meta", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def kaydet_mizan_meta():
     vkn = request.form.get("vkn")
     unvan = request.form.get("unvan")
@@ -344,7 +344,7 @@ def kaydet_mizan_meta():
                 pass
 
 @bp.route("/veri-giris")
-@login_required
+@role_required(allow_roles=("admin",))
 def veri_giris():
     secili_vkn = request.args.get("vkn")
     secili_donem = request.args.get("donem")
@@ -411,7 +411,7 @@ def veri_giris():
         return redirect(url_for("main.home"))
 
 @bp.route("/mukellef-sil", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def mukellef_sil():
     vkn = request.form.get("vkn", "").strip()
     if not vkn: return jsonify({"status": "error", "message": "VKN gerekli."}), 400
@@ -433,7 +433,7 @@ def mukellef_sil():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/donem-sil", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def donem_sil():
     vkn = request.form.get("vkn", "").strip()
     donem = request.form.get("donem", "").strip()
@@ -460,7 +460,7 @@ def donem_sil():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/yeniden-yukle", methods=["POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def yeniden_yukle():
     vkn = request.form.get("vkn")
     donem = request.form.get("donem")
@@ -493,7 +493,7 @@ def yeniden_yukle():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @bp.route("/matrah", methods=["GET", "POST"])
-@login_required
+@role_required(allow_roles=("admin",))
 def matrah():
     hesaplanan_matrah = None
     if request.method == "POST":

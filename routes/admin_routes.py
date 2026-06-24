@@ -197,35 +197,11 @@ def admin_reset_password(user_id):
 @bp.route("/login_logs")
 @login_required
 def login_logs():
-    if session.get("username", "").lower() != "admin":
-        flash("Bu sayfaya erişim izniniz yok.", "danger")
-        return redirect(url_for("main.home"))
-
-    try:
-        with get_conn() as conn:
-            c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            c.execute("SELECT * FROM login_logs ORDER BY id DESC LIMIT 100")
-            rows = c.fetchall()
-            logs = [dict(r) for r in rows]
-
-        return render_template("admin/admin_login_logs.html", logs=logs)
-    except Exception as e:
-        import traceback
-        current_app.logger.error(f"Error in login_logs: {e}\n{traceback.format_exc()}")
-        flash("Giriş logları yüklenirken bir hata oluştu.", "danger")
-        return redirect(url_for("admin.admin_users"))
+    flash("Giriş logları ekranı veri minimizasyonu kapsamında kapatıldı.", "info")
+    return redirect(url_for("admin.admin_users"))
 
 @bp.route("/delete_all_logs", methods=["POST"])
 @login_required
 def delete_all_logs():
-    if session.get("username", "").lower() != "admin":
-        flash("Bu işlemi yapma yetkiniz yok.", "danger")
-        return redirect(url_for("admin.login_logs"))
-
-    with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM login_logs")
-        conn.commit()
-
-    flash("Tüm log kayıtları başarıyla silindi.", "success")
-    return redirect(url_for("admin.login_logs"))
+    flash("Giriş logları işlemleri veri minimizasyonu kapsamında kapatıldı.", "info")
+    return redirect(url_for("admin.admin_users"))

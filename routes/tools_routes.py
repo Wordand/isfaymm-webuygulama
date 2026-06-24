@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from config import tarifeler, asgari_ucretler, GECIKME_ZAMMI_ORANLARI
@@ -105,9 +105,13 @@ def sermaye():
 def serbest_meslek():
     return render_template("calculators/serbest_meslek.html")
 
-@bp.route("/finansman")
+@bp.route("/hesaplama-araclari/finansman-gider-kisitlamasi")
 def finansman():
     return render_template("calculators/finansman.html")
+
+@bp.route("/finansman")
+def finansman_legacy():
+    return redirect(url_for("tools.finansman"), code=301)
 
 @bp.route("/sermaye-azaltimi")
 def sermaye_azaltimi():

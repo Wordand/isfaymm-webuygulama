@@ -476,6 +476,10 @@ body, html { background: #fff !important; }
 </style>
 
 <script>
+const IKV_DEBUG = false;
+function ikvLog(...args) {
+  if (IKV_DEBUG) console.log(...args);
+}
 document.addEventListener("DOMContentLoaded", function () {
   const isMobileWidth = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
   const storageKey = "ikv_mobile_desktop_hint_seen";
@@ -489,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
       html: `
         <div style="text-align:left; line-height:1.55;">
           İndirimli kurumlar vergisi hesaplama aracı; dönem matrahı, teşvik belgesi,
-          önceki dönem katkıları, tevsi oranlama ve PDF raporları gibi detaylı alanlar içerir.
+          önceki dönem katkıları, tevsi oranlama ve çıktı alma gibi detaylı alanlar içerir.
           <br><br>
           Daha sağlıklı ve hatasız kullanım için masaüstü bilgisayar veya geniş ekran önerilir.
         </div>
@@ -648,23 +652,6 @@ document.addEventListener("DOMContentLoaded", function () {
           <i class="bi bi-person-check me-1"></i>Mükellef Seç
         </a>
       </div>
-
-      {% else %}
-      <div class="ikv-banner visitor">
-        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-             style="width:32px; height:32px; background:rgba(96,165,250,0.25);">
-          <i class="bi bi-person text-info"></i>
-        </div>
-        <div class="flex-grow-1">
-          <span class="text-white fw-semibold" style="font-size:0.95rem;">Ziyaretçi Modu</span>
-          <span style="color:rgba(255,255,255,0.55); font-size:0.88rem;"> — hesaplama ve kayıtlar bu tarayıcı oturumunda tutulur</span>
-        </div>
-        <a href="{{ url_for('auth.login') }}"
-           class="flex-shrink-0 text-decoration-none px-3 py-1 rounded-pill fw-semibold"
-           style="background:rgba(255,255,255,0.15); color:white; font-size:0.85rem; border:1px solid rgba(255,255,255,0.25);">
-          <i class="bi bi-box-arrow-in-right me-1"></i>Giriş Yaparak Kalıcılaştır
-        </a>
-      </div>
       {% endif %}
       </div>
       {% endif %}
@@ -736,12 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    <!-- 🧰 Form İşlem Butonları -->
-    <div class="mb-3 d-flex flex-wrap justify-content-center align-items-center gap-2">
-      <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('kvUploadInput').click()">
-        PDF’den İçe Aktar
-      </button>
-    </div>
+
 
     <!-- 🔄 Modern Stepper -->
     <div class="modern-stepper mb-5">
@@ -775,7 +757,7 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
     </div>
 
-    <input id="kvUploadInput" type="file" accept="application/pdf" style="display: none">
+
 
     <!-- Step 1 -->
     <div id="step1" class="corporate-card">
@@ -1353,10 +1335,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <input type="text" id="indirimli_kv" name="indirimli_kv" class="form-control" readonly>
       </div>
 
-      <div class="mb-3">
-        <label>Ödenecek Toplam Kurumlar Vergisi</label>
-        <input type="hidden" id="odenecek_toplam_kv" name="odenecek_toplam_kv">
-      </div>
+      <input type="hidden" id="odenecek_toplam_kv" name="odenecek_toplam_kv">
 
       <div class="mb-3">
         <label>İndirimli Kurumlar Vergisi Oranı %</label>
@@ -1368,10 +1347,10 @@ document.addEventListener("DOMContentLoaded", function () {
         <button type="button" class="btn btn-secondary" onclick="goToStep6()">← Geri</button>
 
         <button type="button" class="btn btn-primary" onclick="submitFullFormAndDonem()">
-          💾 Kaydet / Güncelle
+          💾 {% if session.get('logged_in') %}Kaydet / Güncelle{% else %}Geçici Kaydet{% endif %}
         </button>
         <button type="button" class="btn btn-outline-danger" onclick="generateIKVPdfReport()">
-          📄 PDF Çıktısı Al
+          📄 Hesaplama Çıktısı Al
         </button>
       </div>
 
@@ -1513,7 +1492,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="ikv-faq-grid">
       <article class="ikv-faq-item">
         <h3>Excel hesaplama tablosu yerine kullanılabilir mi?</h3>
-        <p>Evet. Araç, indirimli kurumlar vergisi hesaplama tablosu Excel mantığını belge ve dönem bazlı kayıt akışına dönüştürür; PDF çıktısı da alınabilir.</p>
+        <p>Evet. Araç, indirimli kurumlar vergisi hesaplama tablosu Excel mantığını çevrim içi takip etmenize yardımcı olur; nihai kontrol kullanıcıya aittir.</p>
       </article>
       <article class="ikv-faq-item">
         <h3>2012/3305 ile 2025/9903 farkı nedir?</h3>
@@ -2117,7 +2096,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 💡 YENİ: Kullanıcı sadece "Diğer Faaliyetler" seçtiyse yatırım kazancı girişini kapalı tut
     const choice = sessionStorage.getItem("gelir_uygulama_tipi");
     if (choice === 'diger') {
-      console.log("🔒 Sadece 'Diğer Faaliyetler' seçili, yatırım kazancı girişi pasif.");
+      ikvLog("🔒 Sadece 'Diğer Faaliyetler' seçili, yatırım kazancı girişi pasif.");
       return; 
     }
 
@@ -2153,7 +2132,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 2025/9903 → Bölge değiştirilmez
     if (karar === "2025/9903") {
-      console.log("📍 2025/9903 aktif — setBolge() pasif bırakıldı.");
+      ikvLog("📍 2025/9903 aktif — setBolge() pasif bırakıldı.");
       return;
     }
 
@@ -2173,7 +2152,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 🔥 1) 2025/9903 → ORAN HESABI YOK, HESAP TETİKLEME YOK
     if (karar === "2025/9903") {
-      console.log("⚪ setOranlar() 9903 modunda pasif.");
+      ikvLog("⚪ setOranlar() 9903 modunda pasif.");
       return;
     }
 
@@ -2291,15 +2270,15 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       if (!resp.ok) return;
       const data = await resp.json();
-      console.log("🔎 onceki_katki api:", { tesvikId, donem, data });
-      try { console.log("🔎 onceki_katki _debug:", data?._debug); } catch (_) {}
+      ikvLog("🔎 onceki_katki api:", { tesvikId, donem, data });
+      try { ikvLog("🔎 onceki_katki _debug:", data?._debug); } catch (_) {}
       if (!data || data.status !== "success") return;
 
       const oyVal = Number(data.onceki_yatirim_katki_tutari || 0) || 0;
       const odVal = Number(data.onceki_diger_katki_tutari || 0) || 0;
       safeSet("onceki_yatirim_katki_tutari", oyVal);
       safeSet("onceki_diger_katki_tutari", odVal);
-      console.log("✅ onceki_katki set:", { oyVal, odVal });
+      ikvLog("✅ onceki_katki set:", { oyVal, odVal });
       // Toplam ve kalan alanları yeniden hesaplat
       if (typeof hesaplaOncekiKatkiTutari === "function") hesaplaOncekiKatkiTutari();
       if (typeof hesaplaKalanVeEndeks === "function") hesaplaKalanVeEndeks();
@@ -2437,7 +2416,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================================================
     if (karar === "2025/9903") {
 
-      console.log("→ 2025/9903 modu aktif!");
+      ikvLog("→ 2025/9903 modu aktif!");
 
       makeSelectReadonly(ilSelect);
       makeSelectReadonly(osbSelect);
@@ -2483,7 +2462,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======================================================
     //            KLASİK TEŞVİK MODU
     // ======================================================
-    console.log("→ Normal teşvik modu aktif");
+    ikvLog("→ Normal teşvik modu aktif");
 
     const help9903 = document.getElementById("ilk-indirim-help-9903");
     const helpKlasik = document.getElementById("ilk-indirim-help-klasik");
@@ -2987,6 +2966,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Ayrıntılı kazanç tablosunu sunucuya kaydetmek için AJAX fonksiyonu
   async function saveDetailedProfitData() {
+    if (!window.IS_LOGGED_IN) {
+      updateSessionStorageRatios();
+      return;
+    }
     const ayrTable = document.getElementById('ayrintili-kazanc-table');
     if (!ayrTable) {
       return;
@@ -3155,7 +3138,7 @@ document.addEventListener("DOMContentLoaded", function () {
         : (val ?? '');
       el.value = v;
 
-      // ➕ PDF’den geleni kalıcılaştır
+      // Belge formunda girilen ana alanları geçici forma taşı.
       sessionStorage.setItem(`form_${destName}`, v);
     });
 
@@ -3178,114 +3161,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 
-  // PDF yükleme ve parse işlemi: Kullanıcının seçtiği KV beyannamesi PDF'ini backend'e gönderir,
-  // gelen verileri kontrol eder ve uygun form alanlarına otomatik olarak doldurur.
-  // Çoklu belge varsa seçim yaptırır, hata veya eksik durumlarında uyarı gösterir.
-  async function handleKVUpload(ev) {
-    const file = ev.target.files?.[0];
-    if (!file) return;
 
-    // aynı dosyayı tekrar seçebilin
-    ev.target.value = '';
-
-    const fd = new FormData();
-    fd.append('kv_pdf', file);
-
-    // 1) Loading
-    Swal.fire({
-      title: 'Yükleniyor...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    let resp;
-    try {
-      // (opsiyonel) timeout
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 20000);
-
-      const r = await fetch('{{ url_for("indirimlikurumlar.upload_kv_beyan") }}', {
-        method: 'POST',
-        body: fd,
-        signal: ctrl.signal
-      });
-
-      clearTimeout(t);
-
-      const ct = r.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) {
-        const text = await r.text();
-        throw new Error('Beklenmeyen yanıt: ' + ct + ' / ' + text.slice(0, 200));
-      }
-
-      resp = await r.json();
-    } catch (e) {
-      Swal.close();
-      Swal.fire('Hata', 'PDF yüklenirken ağ/yanıt hatası oluştu.', 'error');
-      return;
-    } finally {
-      Swal.close();
-    }
-
-    console.log('KV upload resp:', resp);
-
-    // 2) Mutlu yollar
-    if (resp?.status === 'ok' && resp?.parsed) {
-      fillFormWithParsedData(resp.parsed);
-      await Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
-      return;
-    }
-
-    if (resp.status === 'multiple' && Array.isArray(resp.raw_data) && resp.raw_data.length) {
-      // Seçenekleri hazırla
-      const inputOptions = {};
-      resp.raw_data.forEach((item, i) => {
-        const no = (item.belge_no || `Belge ${i + 1}`).toString().trim();
-        const karar = item.karar ? ` • ${item.karar}` : '';
-        const tarih = item.belge_tarihi ? ` • ${item.belge_tarihi}` : '';
-        inputOptions[i] = `${no}${karar}${tarih}`;
-      });
-
-      // Kullanıcıya sor
-      const { value: idx } = await Swal.fire({
-        title: 'Hangi teşvik belgesini içe aktarmak istersiniz?',
-        input: 'select',
-        inputOptions,
-        inputPlaceholder: 'Seçiniz',
-        showCancelButton: true,
-        confirmButtonText: 'Seç',
-        cancelButtonText: 'İptal'
-      });
-
-      if (idx !== undefined) {
-        fillFormWithParsedData(resp.raw_data[Number(idx)]);
-        Swal.fire('Tamam', 'PDF’den bilgiler aktarıldı.', 'success');
-      }
-      return;
-    }
-
-    if (resp.status === 'scanned') {
-      Swal.fire('Taranmış PDF', resp.message || 'Yüklediğiniz dosya taranmış bir PDF\'tir. Lütfen e-beyannameden indirdiğiniz orijinal dijital PDF\'i yükleyin veya manuel girin.', 'warning');
-      return;
-    }
-
-
-    // 3) Özel: KV sayfası/tablosu bulunamadı senaryosu
-    if (
-      resp.status === 'not_found' ||     // backend böyle dönüyorsa
-      resp.status === 'no_kv' ||     // …veya bu
-      resp.status === 'empty' ||     // …veya bu
-      (resp.status === 'multiple' && (!resp.raw_data || !resp.raw_data.length || !resp.tablolar || !resp.tablolar.length)) ||
-      (resp.status === 'ok' && !resp.parsed)
-    ) {
-      Swal.fire('Bulunamadı', 'Yüklediğiniz PDF’de “İndirimli Kurumlar” bölümü tespit edilemedi.', 'warning');
-      return;
-    }
-
-    // 4) Diğer tüm hatalar
-    Swal.fire('Hata', resp.message || 'PDF verisi işlenemedi.', 'error');
-
-  }
 
 
 
@@ -3298,7 +3174,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const karar = document.getElementById("karar")?.value;
     if (karar !== "2025/9903") return;
 
-    console.log("🔹 hesaplaKatkiTutari9903() [GÜNCELLENMİŞ] BAŞLADI");
+    ikvLog("🔹 hesaplaKatkiTutari9903() [GÜNCELLENMİŞ] BAŞLADI");
 
     const safe = (x) => (isNaN(x) ? 0 : x);
     const val = (id) => safe(getVal(id));
@@ -3494,7 +3370,7 @@ document.addEventListener("DOMContentLoaded", function () {
     safeSet("odenecek_toplam_kv", odenecekToplamKV);
     safeSet("indirimli_kv_oran", indirimliKVOran);
 
-    console.log("✅ 9903 Hesaplama Tamam:", {
+    ikvLog("✅ 9903 Hesaplama Tamam:", {
       cariYatirimKatkisi,
       cariDigerKatkisi,
       indirimliMatrah,
@@ -3817,7 +3693,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 🟥 2025/9903 ÖZEL AKIŞ
     // ============================================================
     if (karar === "2025/9903") {
-      console.log("⚙️ 2025/9903 aktif — özel hesap fonksiyonu çalışıyor");
+      ikvLog("⚙️ 2025/9903 aktif — özel hesap fonksiyonu çalışıyor");
 
       if (typeof hesaplaKatkiTutari9903 === "function") {
         hesaplaKatkiTutari9903({ advance: true });
@@ -3828,7 +3704,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     // 🟦 KLASİK AKIŞ
     // ============================================================
-    console.log("--- calculateCariAndNext() BAŞLADI ---");
+    ikvLog("--- calculateCariAndNext() BAŞLADI ---");
 
     const vizeDurumuTercihi = document.getElementById("vize_durumu")?.value || "";
     const digerKazancUygulama = sessionStorage.getItem("diger_kazanc_uygulama") || "hayir";
@@ -4006,7 +3882,7 @@ document.addEventListener("DOMContentLoaded", function () {
       vergiIndirimOrani
     );
 
-    console.log("--- calculateCariAndNext() BİTTİ, _updateStepDisplay(7) çağrılıyor ---");
+    ikvLog("--- calculateCariAndNext() BİTTİ, _updateStepDisplay(7) çağrılıyor ---");
     _updateStepDisplay(7);
   }
 
@@ -4148,7 +4024,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const karar = (document.getElementById('karar')?.value || "").trim();
     const yatirimKazancInput = document.getElementById('yatirimdan_elde_edilen_kazanc');
 
-    console.log("🔹 handleInvestmentIncomeFlow() Step 1 Başlatıldı");
+    ikvLog("🔹 handleInvestmentIncomeFlow() Step 1 Başlatıldı");
 
     const result = await Swal.fire({
       title: 'Yatırım Kazancı Tespiti',
@@ -4259,7 +4135,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (kar > 0) safeSet("ticari_bilanco_kari", kar);
     }
 
-    console.log("Tevsi Hesap:", { gerceklesen, sabit, kar });
+    ikvLog("Tevsi Hesap:", { gerceklesen, sabit, kar });
 
     let kazanc = 0;
     if (sabit > 0) {
@@ -4551,7 +4427,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 🔹 İptal durumunda hiçbir şey yapılmaz
     if (isDismissed) {
-      console.log("❌ Kullanıcı cari dönem girişini iptal etti.");
+      ikvLog("❌ Kullanıcı cari dönem girişini iptal etti.");
       return;
     }
 
@@ -4671,7 +4547,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (hiddenBelgeTarihi) hiddenBelgeTarihi.value = belgeTarihi;
     if (hiddenBolge) hiddenBolge.value = bolge;
 
-    console.log("🟢 Gizli alanlar güncellendi:", { belgeNo, belgeTarihi, bolge });
+    ikvLog("🟢 Gizli alanlar güncellendi:", { belgeNo, belgeTarihi, bolge });
 
     // 🔹 Her şey tamamsa bir sonraki adıma geç
     _updateStepDisplay(2);
@@ -4739,13 +4615,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       try {
         if (karar === "2025/9903") {
-          console.log("✅ 2025/9903 kararı: yeni kazanç seçimi sorusu gösteriliyor.");
+          ikvLog("✅ 2025/9903 kararı: yeni kazanç seçimi sorusu gösteriliyor.");
           await askWhichIncomeToApplyDiscount();
         } else if (vizeDurumu.includes("evet") || vizeDurumu.includes("hayır") || vizeDurumu.includes("hayir")) {
-          console.log("📘 2025/9903 dışı karar: klasik kazanç seçimi sorusu gösteriliyor.");
+          ikvLog("📘 2025/9903 dışı karar: klasik kazanç seçimi sorusu gösteriliyor.");
           await askWhichIncomeToApplyDiscount();
         } else {
-          console.log("⚪ Vize durumu boş, doğrudan aşama 5’e geçiliyor.");
+          ikvLog("⚪ Vize durumu boş, doğrudan aşama 5’e geçiliyor.");
         }
       } catch (e) {
         console.warn("⚠️ Soru akışı hata verdi:", e);
@@ -4763,7 +4639,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 🟩 Eğer mevcut aşama 4'ten geliniyorsa (soruların ardından),
     // otomatik olarak 5. aşamaya geç
     if (CURRENT_STEP === 4) {
-      console.log("🔁 Aşama 4'ten gelindi → 6 yerine 5'e yönlendiriliyor.");
+      ikvLog("🔁 Aşama 4'ten gelindi → 6 yerine 5'e yönlendiriliyor.");
       _updateStepDisplay(5);
       return;
     }
@@ -5306,7 +5182,6 @@ document.addEventListener("DOMContentLoaded", function () {
       ["Toplam Yararlanılan Katkı", `${getFieldValue("cari_toplam_katki") || "0,00"} TL`],
       ["İndirimli KV Matrahı", `${getFieldValue("indirimli_matrah") || "0,00"} TL`],
       ["İndirimli Kurumlar Vergisi", `${getFieldValue("indirimli_kv") || "0,00"} TL`],
-      ["Ödenecek Toplam Kurumlar Vergisi", `${getFieldValue("odenecek_toplam_kv") || "0,00"} TL`],
       ["İndirimli KV Oranı", `%${getFieldValue("indirimli_kv_oran") || "0"}`]
     ];
 
@@ -5364,7 +5239,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `).join("")}
           </table>
           <div class="note">
-            Bu rapor bilgilendirme amacıyla hazırlanmıştır. İşleme ve mükellefin durumuna göre farklı vergisel sonuçlar doğabilir. Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
+            Bu çıktı, kullanıcı tarafından girilen verilere göre bilgilendirme amacıyla hazırlanır; resmi beyan, tasdik veya nihai vergi raporu yerine geçmez. Birden fazla teşvik belgesi bulunan dönemlerde ödenecek toplam kurumlar vergisi ayrıca dönem toplamları üzerinden değerlendirilmelidir. Kesin işlem öncesinde YMM görüşü alınması tavsiye edilir.
           </div>
         </div>
         <div class="footer">
@@ -5639,12 +5514,6 @@ document.addEventListener("DOMContentLoaded", function () {
       detailedCb.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
-    if (false && !window.IS_LOGGED_IN) {
-      sessionStorage.removeItem("current_tesvik_id");
-      const tesvikIdEl = document.getElementById("tesvik_id");
-      if (tesvikIdEl) tesvikIdEl.value = "";
-    }
-
     setVal("belge_no", p.belge_no || "");
     if (p.basvuru_tarihi) setVal("basvuru_tarihi", p.basvuru_tarihi);
     if (p.belge_alinma_tarihi) setVal("belge_alinma_tarihi", p.belge_alinma_tarihi);
@@ -5710,16 +5579,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    if (false && !window.IS_LOGGED_IN) {
-      Swal.fire({
-        icon: "info",
-        title: "Kayıt İçin Giriş Gerekli",
-        html: "Hesaplamayı kullanmaya ve PDF çıktısı almaya devam edebilirsiniz.<br><br>Kaydetmek ve daha sonra tekrar erişmek için giriş yapmanız gerekir. İsterseniz İSFA YMM ile irtibata geçebilirsiniz.",
-        confirmButtonText: "Tamam"
-      });
-      return;
-    }
-
     const form = document.getElementById('form-giris');
 
     Swal.fire({
@@ -5748,7 +5607,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Tesvik ID yoksa (yeni kayıt) devam etmeli, backend oluşturacak.
     if (!tesvikId) {
-      console.log("ℹ️ Yeni belge kaydı yapılıyor (ID henüz yok).");
+      ikvLog("ℹ️ Yeni belge kaydı yapılıyor (ID henüz yok).");
     }
 
     // ============================================
@@ -5846,7 +5705,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function initGuard() {
       // ✅ URL yerine DOM elementini kontrol et (URL'de parametre olmasa bile varsayılan sayfa form olabilir)
       if (!document.getElementById("form-giris")) {
-        console.log("↩ Form giriş elementi bulunamadı, form modülleri yüklenmiyor.");
+        ikvLog("↩ Form giriş elementi bulunamadı, form modülleri yüklenmiyor.");
         return false;
       }
       return true;
@@ -6551,7 +6410,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 15) BELGE İNCELEME (VIEW) VERİ YÜKLEME
     // ============================================================
     if (currentBelgeJSData && window.location.search.includes('sekme=form')) {
-      console.log("📂 Belge verileri forma yükleniyor...");
+      ikvLog("📂 Belge verileri forma yükleniyor...");
       
       const smartSet = (id, val) => {
         if (!id) return;
@@ -6674,7 +6533,7 @@ document.addEventListener("DOMContentLoaded", function () {
           try { maybeAutofillOncekiFromDB(); } catch (_) {}
         }, 250);
         
-        console.log("✅ Belge verileri başarıyla yüklendi.");
+        ikvLog("✅ Belge verileri başarıyla yüklendi.");
       } catch (err) {
         console.error("❌ Veri yükleme hatası:", err);
       }
@@ -6691,9 +6550,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-  // Gizli file input → PDF parser
-  const kvInput = document.getElementById('kvUploadInput');
-  if (kvInput) kvInput.addEventListener('change', handleKVUpload);
+
 
 
   // Ayrıntılı Kazanç Formu (güvenli dışa aktar + AJAX kayıt)
@@ -7247,3 +7104,4 @@ document.addEventListener("DOMContentLoaded", function () {
 </div><!-- /container -->
 
 {% endblock %}
+

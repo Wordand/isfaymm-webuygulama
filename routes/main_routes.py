@@ -302,7 +302,7 @@ def perform_hybrid_search(tax_type, question):
 
 @bp.route("/")
 def home():
-    stats = {"experience_years": 15, "financial_ratios": 120, "ymm_cities": 2}
+    stats = {"experience_years": 17, "financial_ratios": 120, "ymm_cities": 2}
     return render_template("index.html", stats=stats)
 
 @bp.route("/about")
@@ -322,7 +322,7 @@ def contact():
 
 @bp.route("/kvkk-aydinlatma-metni")
 def kvkk_aydinlatma_metni():
-    abort(410)
+    return render_template("pages/kvkk_aydinlatma_metni.html")
 
 @bp.route("/cerez-politikasi")
 def cerez_politikasi():
