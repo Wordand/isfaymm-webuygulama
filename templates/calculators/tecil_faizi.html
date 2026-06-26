@@ -127,6 +127,33 @@
           Bu araç ön hesaplama içindir. Resmi ödeme planında borç türü, çok zor durum hali, teminat değerlendirmesi, başvuru tarihi ve ödeme tarihi nedeniyle fark oluşabilir.
         </div>
       </div>
+
+      <div class="tecil-calc-card p-4 mt-4">
+        <h2 class="h5 fw-bold mb-2">Likidite Oranı Ön Kontrolü</h2>
+        <p class="text-muted small mb-3">
+          Bu küçük hesaplama yalnızca tarayıcınızda yapılır; girilen tutarlar kaydedilmez.
+        </p>
+        <div class="mb-3">
+          <label for="donenVarliklar" class="form-label fw-bold">Dönen varlıklar (TL)</label>
+          <input type="text" inputmode="decimal" id="donenVarliklar" class="form-control liquidity-input" placeholder="0,00">
+        </div>
+        <div class="mb-3">
+          <label for="stoklar" class="form-label fw-bold">Stoklar (TL)</label>
+          <input type="text" inputmode="decimal" id="stoklar" class="form-control liquidity-input" placeholder="0,00">
+        </div>
+        <div class="mb-3">
+          <label for="kisaVadeliBorc" class="form-label fw-bold">Kısa vadeli yabancı kaynaklar (TL)</label>
+          <input type="text" inputmode="decimal" id="kisaVadeliBorc" class="form-control liquidity-input" placeholder="0,00">
+        </div>
+        <div id="likiditeSonuc" class="tecil-result p-3">
+          <span class="small text-muted">Likidite oranı</span><br>
+          <strong>-</strong>
+          <div class="small text-muted mt-2">Formül: (Dönen varlıklar - Stoklar) / Kısa vadeli yabancı kaynaklar</div>
+        </div>
+        <div class="alert alert-light border small mt-3 mb-0">
+          KDV ve BSMV borçlarında üst sınır 12 taksittir. Nihai taksit sayısı vergi dairesi değerlendirmesine göre belirlenir.
+        </div>
+      </div>
     </div>
 
     <div class="col-lg-7">
@@ -234,6 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const emptyState = document.getElementById("emptyState");
   const sonucAlani = document.getElementById("sonucAlani");
   const planBody = document.getElementById("planBody");
+  const liquidityInputs = document.querySelectorAll(".liquidity-input");
+  const liquidityResult = document.getElementById("likiditeSonuc");
 
   const today = new Date().toISOString().slice(0, 10);
   basvuruInput.value = today;
@@ -265,6 +294,40 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   borcInput.addEventListener("input", () => formatMoneyInput(borcInput));
+  liquidityInputs.forEach((input) => input.addEventListener("input", () => {
+    formatMoneyInput(input);
+    updateLiquidityResult();
+  }));
+
+  function updateLiquidityResult() {
+    const donenVarliklar = parseMoney(document.getElementById("donenVarliklar").value);
+    const stoklar = parseMoney(document.getElementById("stoklar").value);
+    const kisaVadeliBorc = parseMoney(document.getElementById("kisaVadeliBorc").value);
+
+    if (!kisaVadeliBorc) {
+      liquidityResult.innerHTML = `
+        <span class="small text-muted">Likidite oranı</span><br>
+        <strong>-</strong>
+        <div class="small text-muted mt-2">Formül: (Dönen varlıklar - Stoklar) / Kısa vadeli yabancı kaynaklar</div>
+      `;
+      return;
+    }
+
+    const oran = (donenVarliklar - stoklar) / kisaVadeliBorc;
+    let taksitNotu = "36 taksit";
+    if (oran <= 0.30) {
+      taksitNotu = "72 taksit";
+    } else if (oran < 0.50) {
+      taksitNotu = "48 taksit";
+    }
+
+    liquidityResult.innerHTML = `
+      <span class="small text-muted">Likidite oranı</span><br>
+      <strong>${oran.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+      <div class="small mt-2">Ön değerlendirmeye göre azami süre: <strong>${taksitNotu}</strong></div>
+      <div class="small text-muted mt-2">Formül: (Dönen varlıklar - Stoklar) / Kısa vadeli yabancı kaynaklar</div>
+    `;
+  }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();

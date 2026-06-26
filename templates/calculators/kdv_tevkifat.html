@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 
 {% block title %}KDV Tevkifat Hesaplama 2026 | Tevkifatlı Fatura, Matrah ve Düzeltme | İSFA YMM{% endblock %}
-{% block description %}KDV tevkifat hesaplama aracı ile tevkifatlı fatura, tevkifattan matrah bulma ve tevkifat düzeltme işlemlerini hesaplayın. 2/10, 4/10, 5/10, 7/10 ve tam tevkifat uyumlu.{% endblock %}
-{% block keywords %}kdv tevkifat hesaplama, tevkifatlı fatura hesaplama, tevkifattan matrah bulma, tevkifat düzeltme işlemleri, tevkifat hesaplama, kdv hesaplama tevkifatlı, 4/10 tevkifat hesaplama, 5/10 tevkifat hesaplama, 2/10 tevkifat hesaplama, İSFA YMM{% endblock %}
+{% block description %}KDV tevkifat hesaplama 2026 aracı ile tevkifatlı fatura, tevkifattan matrah bulma, 2/10, 4/10, 5/10, 7/10, tam tevkifat ve tevkifat düzeltme işlemlerini hesaplayın.{% endblock %}
+{% block keywords %}kdv tevkifat hesaplama, kdv tevkifat hesaplama 2026, tevkifatlı fatura hesaplama, tevkifattan matrah bulma, tevkifat düzeltme işlemleri, kdv tevkifat oranları 2026, tevkifat hesaplama, kdv hesaplama tevkifatlı, 4/10 tevkifat hesaplama, 5/10 tevkifat hesaplama, 2/10 tevkifat hesaplama, İSFA YMM{% endblock %}
 
 {% block content %}
 <!-- ⭐ HERO SECTION -->
@@ -20,6 +20,12 @@
                 <p class="lead text-light mb-0 fw-normal" style="max-width: 700px;">
                     Tevkifatlı fatura, tevkifattan matrah bulma ve düzeltme işlemleri için 2/10, 4/10, 5/10, 7/10 ve tam tevkifat hesaplarını anında yapın.
                 </p>
+                <div class="d-flex flex-wrap gap-2 mt-3" aria-label="KDV tevkifat hesaplama kapsamı">
+                    <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Tevkifatlı fatura</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Tevkifattan matrah bulma</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Düzeltme işlemleri</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Tam ve kısmi tevkifat</span>
+                </div>
             </div>
             <div class="col-lg-4 d-none d-lg-block text-end">
                 <a href="{{ url_for('main.kdv_tevkifat') }}" class="btn btn-outline-warning btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale">
@@ -32,7 +38,7 @@
 
 <!-- ⭐ BREADCRUMB -->
 <div class="bg-white border-bottom py-3 shadow-sm mb-5">
-    <div class="container d-flex justify-content-between align-items-center">
+    <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
@@ -40,9 +46,6 @@
                 <li class="breadcrumb-item active" aria-current="page">KDV Tevkifat Hesaplama</li>
             </ol>
         </nav>
-        <button class="btn btn-light btn-sm rounded-pill px-3 shadow-xs border" onclick="window.print()" title="Sayfayı Yazdır">
-            <i class="bi bi-printer-fill text-primary me-1"></i> Yazdır
-        </button>
     </div>
 </div>
 
@@ -496,6 +499,44 @@
                 </div>
             </div>
 
+            <section class="mb-5" aria-labelledby="kdv-tevkifat-kullanim-alanlari">
+                <div class="bg-white border rounded-4 p-4 p-lg-5 shadow-xs">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge rounded-pill text-bg-primary">2026</span>
+                        <h2 id="kdv-tevkifat-kullanim-alanlari" class="h4 fw-black text-dark mb-0">KDV tevkifat aracında neleri hesaplayabilirsiniz?</h2>
+                    </div>
+                    <p class="text-muted mb-4">
+                        KDV tevkifat hesaplama aracı; tevkifatlı fatura düzenlerken alıcı tarafından beyan edilecek KDV tutarını, satıcının tahsil edeceği KDV'yi ve fatura toplamını birlikte gösterir. Ayrıca iade faturası, matrah azalması, fiyat farkı ve fazla veya yersiz tevkifat gibi düzeltme işlemlerinde hangi KDV tutarının düzeltilmesi gerektiğini ayrı olarak hesaplar.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-6 col-xl-3">
+                            <div class="border rounded-4 p-3 h-100 bg-slate-soft">
+                                <h3 class="h6 fw-bold text-dark mb-2">Tevkifatlı fatura</h3>
+                                <p class="small text-muted mb-0">Matrah, KDV oranı ve tevkifat oranına göre alıcı tevkifatı, satıcı KDV'si ve tahsil edilecek tutar hesaplanır.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="border rounded-4 p-3 h-100 bg-slate-soft">
+                                <h3 class="h6 fw-bold text-dark mb-2">Tevkifattan matrah bulma</h3>
+                                <p class="small text-muted mb-0">KDV hariç işlem bedeli esas alınarak tevkifata konu KDV ayrıştırılır; matrah ve oran ilişkisi açık şekilde gösterilir.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="border rounded-4 p-3 h-100 bg-slate-soft">
+                                <h3 class="h6 fw-bold text-dark mb-2">2/10, 4/10, 5/10, 7/10</h3>
+                                <p class="small text-muted mb-0">Sık kullanılan kısmi tevkifat oranları için alıcı ve satıcı tarafındaki KDV yükü ayrı ayrı hesaplanır.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="border rounded-4 p-3 h-100 bg-slate-soft">
+                                <h3 class="h6 fw-bold text-dark mb-2">Düzeltme işlemleri</h3>
+                                <p class="small text-muted mb-0">Mal iadesi, bedel azalması, fiyat farkı ve yersiz tevkifat durumlarında düzeltilecek KDV kısmı gösterilir.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="mb-5" aria-labelledby="kdv-tevkifat-sss">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <span class="badge rounded-pill text-bg-warning">SSS</span>
@@ -524,6 +565,18 @@
                         <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
                             <h3 class="h6 fw-bold text-slate-dark mb-2">Tam tevkifat ile kısmi tevkifat farkı nedir?</h3>
                             <p class="small text-muted mb-0">Tam tevkifatta KDV'nin tamamı alıcı tarafından beyan edilir. Kısmi tevkifatta ise KDV'nin yalnızca belirlenen oran kadarı alıcı, kalan kısmı satıcı tarafından beyan edilir.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">Tevkifattan matrah nasıl bulunur?</h3>
+                            <p class="small text-muted mb-0">Tevkifat oranı, hesaplanan KDV üzerinden uygulanır. Bu nedenle matrah KDV hariç işlem bedelidir; araç matrah, KDV, tevkifat ve tahsil edilecek toplamı birlikte gösterir.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 h-100 bg-white shadow-xs">
+                            <h3 class="h6 fw-bold text-slate-dark mb-2">Tevkifatlı faturada iade veya düzeltme nasıl yapılır?</h3>
+                            <p class="small text-muted mb-0">Mal iadesi veya bedel azalmasında düzeltme, kural olarak tevkifata tabi tutulmayan KDV kısmı üzerinden yapılır. Fazla veya yersiz tevkifatta tarafların beyan durumuna göre ayrıca düzeltme gerekebilir.</p>
                         </div>
                     </div>
                 </div>
@@ -990,6 +1043,27 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "KDV Tevkifat Hesaplama 2026",
+  "operatingSystem": "All",
+  "applicationCategory": "FinanceApplication",
+  "description": "KDV tevkifat hesaplama 2026 aracı ile tevkifatlı fatura, tevkifattan matrah bulma, 2/10, 4/10, 5/10, 7/10, tam tevkifat ve tevkifat düzeltme işlemlerini hesaplayın.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  },
+  "url": "https://www.isfaymm.com/hesaplama-araclari/kdv-tevkifat",
+  "publisher": {
+    "@type": "Organization",
+    "name": "İSFA YMM",
+    "url": "https://www.isfaymm.com"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
     {
@@ -1022,6 +1096,22 @@
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Tam tevkifatta KDV'nin tamamı alıcı tarafından beyan edilir. Kısmi tevkifatta ise KDV'nin belirlenen oran kadarı alıcı, kalan kısmı satıcı tarafından beyan edilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tevkifattan matrah nasıl bulunur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tevkifat oranı hesaplanan KDV üzerinden uygulanır. Matrah KDV hariç işlem bedelidir; bu matrah üzerinden KDV, tevkifat ve tahsil edilecek toplam ayrıştırılır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tevkifatlı faturada iade veya düzeltme nasıl yapılır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mal iadesi veya bedel azalmasında düzeltme, kural olarak tevkifata tabi tutulmayan KDV kısmı üzerinden yapılır. Fazla veya yersiz tevkifatta tarafların beyan durumuna göre ayrıca düzeltme gerekebilir."
       }
     }
   ]

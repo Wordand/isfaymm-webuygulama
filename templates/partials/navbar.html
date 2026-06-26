@@ -358,15 +358,15 @@
                                 </a>
 
                                 <div class="mevzuat-megamenu-footer-row">
-                                    <a class="dropdown-item-mevzuat-card py-2 px-3 flex-grow-1" href="{{ url_for('main.mevzuat') }}">
-                                        <div class="dimc-icon bg-light text-dark border-0"><i class="bi bi-balance-scale text-primary"></i></div>
+                                    <a class="dropdown-item-mevzuat-card mevzuat-footer-card py-2 px-3 flex-grow-1" href="{{ url_for('main.mevzuat') }}">
+                                        <div class="dimc-icon dimc-icon-portal"><i class="bi bi-balance-scale"></i></div>
                                         <div class="dimc-body">
                                             <div class="dimc-title">Mevzuat Portalı</div>
                                             <div class="dimc-desc">Tüm mevzuat arşivi</div>
                                         </div>
                                     </a>
-                                    <a class="dropdown-item-mevzuat-card py-2 px-3 flex-grow-1" href="{{ url_for('calculators.tdhp') }}">
-                                        <div class="dimc-icon bg-light text-dark border-0"><i class="bi bi-book text-success"></i></div>
+                                    <a class="dropdown-item-mevzuat-card mevzuat-footer-card py-2 px-3 flex-grow-1" href="{{ url_for('calculators.tdhp') }}">
+                                        <div class="dimc-icon dimc-icon-tdhp"><i class="bi bi-book"></i></div>
                                         <div class="dimc-body">
                                             <div class="dimc-title">Tek Düzen Hesap Planı</div>
                                             <div class="dimc-desc">Hesap kodları rehberi</div>
@@ -721,6 +721,42 @@
     margin-top: 6px;
     border-top: 1px dashed #e2e8f0;
     padding-top: 12px;
+}
+
+.mevzuat-footer-card {
+    align-items: center;
+    min-height: 64px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+}
+
+.mevzuat-footer-card:hover {
+    background: #ffffff;
+    border-color: #dbeafe;
+}
+
+.dimc-icon-portal,
+.dimc-icon-tdhp {
+    border: 0;
+    color: #ffffff;
+}
+
+.dimc-icon-portal {
+    background: #2563eb;
+}
+
+.dimc-icon-tdhp {
+    background: #16a34a;
+}
+
+.dropdown-item-mevzuat-card:hover .dimc-icon-portal {
+    background: #1d4ed8;
+    color: #ffffff;
+}
+
+.dropdown-item-mevzuat-card:hover .dimc-icon-tdhp {
+    background: #15803d;
+    color: #ffffff;
 }
 
 /* Submenu behavior inside Mevzuat */

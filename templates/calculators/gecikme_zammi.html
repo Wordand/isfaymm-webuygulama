@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
-{% block title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Zammı | İSFA YMM{% endblock %}
+{% block title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Faizi | İSFA YMM{% endblock %}
 
-{% block description %}Gecikme zammı hesaplama aracı ile vergi borcu, vergi ziyaı cezası ve 6183 sayılı Kanun kapsamındaki amme alacakları için vade ve ödeme tarihine göre tutarı hesaplayın.{% endblock %}
-{% block keywords %}gecikme zammı hesaplama, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, gecikme zammı hesaplama 2026, 6183 gecikme zammı, gecikme faizi hesaplama, İSFA YMM{% endblock %}
+{% block description %}Gecikme zammı hesaplama 2026 aracı ile vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade ve ödeme tarihine göre gecikme zammı ve toplam borcu hesaplayın.{% endblock %}
+{% block keywords %}gecikme zammı hesaplama, gecikme zammı hesaplama 2026, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, vergi gecikme faizi hesaplama, 6183 gecikme zammı hesaplama, gecikme faizi hesaplama, gecikme zammı oranı 2026, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi{% endblock %}
-{% block og_title %}Gecikme Zammı Hesaplama | İSFA YMM{% endblock %}
-{% block og_desc %}Vergi borçları için vade ve ödeme tarihine göre gecikme zammını hesaplayın.{% endblock %}
+{% block og_title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Faizi{% endblock %}
+{% block og_desc %}Vergi borçları için vade ve ödeme tarihine göre gecikme zammını ve toplam ödenecek tutarı hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -20,9 +20,15 @@
                     </ol>
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">Gecikme Zammı Hesaplama 2026</h1>
-                <p class="lead text-muted mb-0">
+                <p class="lead text-muted mb-3">
                     Vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade tarihi ile ödeme tarihine göre gecikme zammı tutarını hesaplayın.
                 </p>
+                <div class="d-flex flex-wrap gap-2" aria-label="Gecikme zammı hesaplama kapsamı">
+                    <span class="badge rounded-pill text-bg-danger px-3 py-2">2026 güncel</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Vergi borcu</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">6183 gecikme zammı</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gecikme faizi ayrımı</span>
+                </div>
             </header>
 
             <div class="card shadow-sm">
@@ -151,6 +157,29 @@
                 </div>
             </section>
 
+            <section class="mt-5" aria-labelledby="gecikme-zammi-faizi-farki">
+                <div class="border rounded-4 p-4 bg-white shadow-sm">
+                    <h2 id="gecikme-zammi-faizi-farki" class="h4 fw-bold text-dark mb-3">Gecikme zammı ile gecikme faizi farkı nedir?</h2>
+                    <p class="text-muted mb-4">
+                        Kullanıcılar çoğu zaman iki kavramı aynı anlamda arar; ancak vergi uygulamasında gecikme zammı ve gecikme faizi farklı durumlarda kullanılır. Bu araç, vadesinde ödenmeyen amme alacakları için gecikme zammı hesabına odaklanır.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <h3 class="h6 fw-bold text-danger mb-2">Gecikme zammı</h3>
+                                <p class="small text-muted mb-0">Vadesi geldiği halde ödenmeyen vergi borcu ve benzeri amme alacaklarında, ödeme tarihine kadar geçen süre için hesaplanır.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded-3 p-3 h-100">
+                                <h3 class="h6 fw-bold text-primary mb-2">Gecikme faizi</h3>
+                                <p class="small text-muted mb-0">Tarhiyat, ikmalen veya resen tarh edilen vergiler ve bazı düzeltme süreçlerinde, ilgili mevzuata göre ayrıca gündeme gelir.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="mt-5" aria-labelledby="gecikme-sss">
                 <h2 id="gecikme-sss" class="h4 fw-bold text-dark mb-3">Gecikme Zammı Hesaplama Hakkında Sık Sorulan Sorular</h2>
                 <div class="row g-3">
@@ -176,6 +205,12 @@
                         <div class="border rounded-3 p-3 h-100 bg-white">
                             <h3 class="h6 fw-bold">30.000 TL vergi borcunun gecikme zammı nasıl bulunur?</h3>
                             <p class="small text-muted mb-0">30.000 TL borç tutarı, vade tarihi ve ödeme tarihi girildiğinde araç ilgili dönem oranlarını dikkate alarak gecikme zammını ve toplam ödenecek tutarı gösterir.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold">6183 gecikme zammı hangi borçlar için hesaplanır?</h3>
+                            <p class="small text-muted mb-0">6183 sayılı Kanun kapsamındaki vadesi geçmiş amme alacaklarında gecikme zammı gündeme gelir. Ancak bazı ceza türlerinde gecikme zammı doğmayabilir.</p>
                         </div>
                     </div>
                 </div>
@@ -286,10 +321,10 @@ document.addEventListener("DOMContentLoaded", () => {
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Gecikme Zammı Hesaplama Aracı",
+  "name": "Gecikme Zammı Hesaplama 2026",
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
-  "description": "Vergi borçları, vergi ziyaı ve diğer amme alacakları için güncel oranlarla gecikme zammı hesaplama aracı.",
+  "description": "Gecikme zammı hesaplama 2026 aracı ile vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade ve ödeme tarihine göre gecikme zammı ve toplam borcu hesaplayın.",
   "url": "https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi",
   "offers": {
     "@type": "Offer",
@@ -324,7 +359,15 @@ document.addEventListener("DOMContentLoaded", () => {
       "name": "Gecikme faizi ile gecikme zammı aynı şey midir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat ve tahakkuk süreçlerine bağlı farklı durumlarda uygulanır."
+        "text": "Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat, ikmalen veya resen tarh edilen vergiler ve bazı düzeltme süreçlerinde uygulanır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "6183 gecikme zammı hangi borçlar için hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "6183 sayılı Kanun kapsamındaki vadesi geçmiş amme alacaklarında gecikme zammı gündeme gelir. Ancak usulsüzlük ve özel usulsüzlük cezaları gibi bazı borç türlerinde gecikme zammı doğmayabilir."
       }
     },
     {

@@ -1,100 +1,130 @@
 {% extends "layout.html" %}
 
 {% block title %}
-2026 Güncel Vergi Mevzuatı Portalı – KDV, KV, Yatırım Teşvik ve Tevkilat Rehberi | İSFA YMM
+2026 Güncel Vergi Mevzuatı Portalı - KDV, KV ve Rehberler | İSFA YMM
 {% endblock %}
 
 {% block description %}
-2026 yılı güncel vergi mevzuatı portalı: KDV ve Kurumlar Vergisi tebliğleri, yatırım teşvik mevzuatı (3305-9903), vergi cezaları ve indirimli kurumlar vergisi (KVK 32/A) hakkında açıklamalı rehber.
+2026 yılı güncel vergi mevzuatı portalı: KDV ve Kurumlar Vergisi tebliğleri, vergi borcu tecil, varlık barışı, vergi cezaları ve indirimli kurumlar vergisi rehberleri.
 {% endblock %}
 
 {% block content %}
 
-<!-- ⭐ ÜST BAŞLIK (SEO – H1 buradadır) -->
 <section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad, #007bff);">
     <div class="container" data-aos="fade-up">
-        <h1 class="fw-bold mb-3">2026 Yılı – Güncel Mevzuat Portalı – Vergi ve Teşvik Rehberi</h1>
+        <h1 class="fw-bold mb-3">2026 Güncel Mevzuat Portalı</h1>
         <p class="lead text-white-50">
-            İndirimli kurumlar vergisi, yatırım teşvik sistemi ve vergi cezaları hakkında güncel ve açıklamalı mevzuat.
+            Vergi borcu tecil, varlık barışı, KDV, kurumlar vergisi ve uygulama rehberlerine tek yerden ulaşın.
         </p>
     </div>
 </section>
 
-<!-- ⭐ ANA KATEGORİ KARTLARI -->
 <section class="py-5">
     <div class="container">
+        <div class="mb-4">
+            <h2 class="h4 fw-bold text-dark mb-1">Güncel Gelişmeler</h2>
+            <p class="text-muted mb-0">Yeni düzenlemeler, başvuru süreleri ve güncel oranlara ilişkin hızlı rehberler.</p>
+        </div>
+
         <div class="row g-4 justify-content-center">
-
-            <!-- 1️⃣ KDV TEBLİĞİ -->
             <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none">
+                <a href="{{ url_for('main.mevzuat_degisiklikleri') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
                         <div class="card-body text-center p-5">
-                            <i class="bi bi-file-earmark-ruled text-warning fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">KDV Genel Tebliği</h4>
-                            <p class="text-muted mb-0">
-                                KDV mevzuatının tamamı, hiyerarşik ve açıklamalı olarak.
-                            </p>
+                            <i class="bi bi-megaphone text-danger fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">Mevzuat Değişiklikleri</h4>
+                            <p class="text-muted mb-0">Güncel yasal düzenlemeler, değişiklik özetleri ve uygulama notları.</p>
                         </div>
                     </div>
                 </a>
             </div>
 
-            <!-- 2️⃣ KURUMLAR VERGİSİ TEBLİĞİ -->
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kv_tebligi') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-book-half text-primary fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">Kurumlar Vergisi Tebliği</h4>
-                            <p class="text-muted mb-0">
-                                Kurumlar vergisi mevzuatı, hiyerarşik ve açıklamalı olarak.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- 3️⃣ KV İSTİSNA & İNDİRİMLER -->
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kv_istisna_indirimler') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-shield-check text-success fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">KV İstisna &amp; İndirimler</h4>
-                            <p class="text-muted mb-0">
-                                Kazanç ve zarar durumuna göre uygulanacak tüm istisna ve indirimler.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- 4. 2026 TECIL VE TAKSITLENDIRME -->
             <div class="col-md-6 col-lg-4">
                 <a href="{{ url_for('main.tecil_taksitlendirme_2026') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
                         <div class="card-body text-center p-5">
                             <i class="bi bi-calendar2-check text-info fs-1"></i>
                             <h4 class="fw-bold mt-3 text-dark">2026 Vergi Borcu Tecil</h4>
-                            <p class="text-muted mb-0">
-                                31.08.2026 son başvuru, %29 tecil faizi, 36/48/72 ay taksit ve teminat rehberi.
-                            </p>
+                            <p class="text-muted mb-0">31.08.2026 son başvuru, %29 tecil faizi, 36/48/72 ay taksit ve teminat rehberi.</p>
                         </div>
                     </div>
                 </a>
             </div>
 
-            <!-- 5. 2026 VARLIK BARISI -->
             <div class="col-md-6 col-lg-4">
                 <a href="{{ url_for('main.varlik_barisi_2026') }}" class="text-decoration-none">
                     <div class="card shadow-sm border-0 h-100 hover-card">
                         <div class="card-body text-center p-5">
                             <i class="bi bi-cash-coin text-success fs-1"></i>
                             <h4 class="fw-bold mt-3 text-dark">2026 Varlık Barışı</h4>
-                            <p class="text-muted mb-0">
-                                Yurt dışı ve yurt içi varlık bildirimi, %0-%5 vergi oranları ve 31.07.2027 son tarih rehberi.
-                            </p>
+                            <p class="text-muted mb-0">Yurt dışı ve yurt içi varlık bildirimi, vergi oranları ve 31.07.2027 son tarih rehberi.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('main.ceza') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-exclamation-triangle text-warning fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">Güncel Vergi Cezaları</h4>
+                            <p class="text-muted mb-0">2026 yılı VUK ceza hükümleri, usulsüzlük cezaları ve güncel tutarlar.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-5 mb-4">
+            <h2 class="h4 fw-bold text-dark mb-1">Uygulama Rehberleri &amp; Portallar</h2>
+            <p class="text-muted mb-0">KDV, kurumlar vergisi ve uygulama rehberlerine tek yerden ulaşın.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-file-earmark-ruled text-warning fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">Katma Değer Vergisi</h4>
+                            <p class="text-muted mb-0">KDV Genel Uygulama Tebliği, iade ve tevkifat uygulamaları.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-building text-primary fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">İndirimli Kurumlar Mevzuatı</h4>
+                            <p class="text-muted mb-0">KVK 32/A, yatırım dönemi, işletme dönemi ve katkı sınırları rehberi.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('main.kv_tebligi') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-book-half text-primary fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">Kurumlar Vergisi Tebliği</h4>
+                            <p class="text-muted mb-0">Kurumlar vergisi mevzuatı, hiyerarşik ve açıklamalı olarak.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ url_for('main.kv_istisna_indirimler') }}" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 h-100 hover-card">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-shield-check text-success fs-1"></i>
+                            <h4 class="fw-bold mt-3 text-dark">KV İstisna &amp; İndirimler</h4>
+                            <p class="text-muted mb-0">Kazanç ve zarar durumuna göre uygulanacak tüm istisna ve indirimler.</p>
                         </div>
                     </div>
                 </a>
@@ -104,15 +134,13 @@
     </div>
 </section>
 
-<!-- ⭐ STRUCTURED DATA – Google SEO için çok önemli -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  "name": "Vergi Mevzuatı – İndirimli Kurumlar Vergisi, Yatırım Teşvik, Vergi Cezaları",
-  "description": "İndirimli kurumlar vergisi (KVK 32/A), yatırım teşvik sistemi (3305–9903), vergi cezaları ve usulsüzlük cezaları dahil tüm mevzuatın açıklamalı kaynağı.",
+  "name": "Vergi Mevzuatı Portalı",
+  "description": "Vergi borcu tecil, varlık barışı, KDV, kurumlar vergisi ve indirimli kurumlar vergisi rehberleri.",
   "url": "https://www.isfaymm.com/mevzuat",
-  
   "hasPart": {
     "@type": "ItemList",
     "name": "Mevzuat Kategorileri",
@@ -120,39 +148,56 @@
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "KDV Genel Uygulama Tebliği",
-        "url": "https://www.isfaymm.com/kdv-tebligi"
+        "name": "Mevzuat Değişiklikleri",
+        "url": "https://www.isfaymm.com/mevzuat-degisiklikleri"
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Kurumlar Vergisi Genel Tebliği",
-        "url": "https://www.isfaymm.com/kv-tebligi"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": "Kurumlar Vergisi İstisna ve İndirimleri",
-        "url": "https://www.isfaymm.com/mevzuat/kv-istisna-indirimler"
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
         "name": "2026 Vergi Borcu Tecil ve Taksitlendirme",
         "url": "https://www.isfaymm.com/mevzuat/vergi-borcu-tecil-taksitlendirme-2026"
       },
       {
         "@type": "ListItem",
-        "position": 5,
+        "position": 3,
         "name": "2026 Varlık Barışı",
         "url": "https://www.isfaymm.com/mevzuat/varlik-barisi-2026"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "Güncel Vergi Cezaları",
+        "url": "https://www.isfaymm.com/ceza"
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": "Katma Değer Vergisi",
+        "url": "https://www.isfaymm.com/mevzuat/kdv-tebligi"
+      },
+      {
+        "@type": "ListItem",
+        "position": 6,
+        "name": "İndirimli Kurumlar Mevzuatı",
+        "url": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat"
+      },
+      {
+        "@type": "ListItem",
+        "position": 7,
+        "name": "Kurumlar Vergisi Genel Tebliği",
+        "url": "https://www.isfaymm.com/mevzuat/kv-tebligi"
+      },
+      {
+        "@type": "ListItem",
+        "position": 8,
+        "name": "Kurumlar Vergisi İstisna ve İndirimleri",
+        "url": "https://www.isfaymm.com/mevzuat/kv-istisna-indirimler"
       }
     ]
   }
 }
 </script>
 
-<!-- ⭐ KART HOVER STİLİ -->
 <style>
     .hover-card:hover {
         transform: translateY(-4px);

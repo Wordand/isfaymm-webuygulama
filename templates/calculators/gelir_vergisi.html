@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
-{% block title %}Gelir Vergisi Hesaplama 2026 | Ücret ve Kümülatif Matrah | İSFA YMM{% endblock %}
+{% block title %}Gelir Vergisi Hesaplama 2026 | Ücret, Matrah ve Vergi Dilimi | İSFA YMM{% endblock %}
 
-{% block description %}2026 gelir vergisi hesaplama aracı ile ücret, maaş, ücret dışı gelir ve kümülatif vergi matrahına göre hesaplanan gelir vergisi ve ödenecek net vergiyi hesaplayın.{% endblock %}
-{% block keywords %}gelir vergisi hesaplama, gelir vergisi hesaplama 2026, ücret gelir vergisi hesaplama, maaş gelir vergisi hesaplama, kümülatif gelir vergisi hesaplama, gelir vergisi dilimleri, İSFA YMM{% endblock %}
+{% block description %}2026 gelir vergisi dilimlerine göre ücret, maaş, kümülatif matrah ve ücret dışı gelir için ödenecek gelir vergisini ücretsiz hesaplayın.{% endblock %}
+{% block keywords %}gelir vergisi hesaplama, gelir vergisi hesaplama 2026, 2026 gelir vergisi hesaplama, ücret gelir vergisi hesaplama, maaş gelir vergisi hesaplama, kümülatif gelir vergisi matrahı hesaplama, gelir vergisi dilimleri 2026, aylık gelir vergisi hesaplama, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gelir-vergisi{% endblock %}
-{% block og_title %}Gelir Vergisi Hesaplama 2026 | Ücret ve Kümülatif Matrah{% endblock %}
-{% block og_desc %}Ücret, maaş ve diğer gelirler için 2026 gelir vergisi dilimlerine göre kümülatif matrah üzerinden hesaplama yapın.{% endblock %}
+{% block og_title %}Gelir Vergisi Hesaplama 2026 | Ücret, Matrah ve Vergi Dilimi{% endblock %}
+{% block og_desc %}2026 gelir vergisi dilimlerine göre ücret, maaş, kümülatif matrah ve ücret dışı gelir vergisini hesaplayın.{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -20,9 +20,15 @@
                     </ol>
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">Gelir Vergisi Hesaplama 2026</h1>
-                <p class="lead text-muted mb-0">
-                    Ücret, maaş, ücret dışı gelir ve kümülatif vergi matrahı için gelir vergisi dilimlerine göre hızlı hesaplama yapın.
+                <p class="lead text-muted mb-3">
+                    2026 gelir vergisi dilimlerine göre ücret, maaş, kümülatif matrah ve ücret dışı gelir için ödenecek gelir vergisini hesaplayın.
                 </p>
+                <div class="d-flex flex-wrap gap-2" aria-label="Gelir vergisi hesaplama kapsamı">
+                    <span class="badge rounded-pill text-bg-danger px-3 py-2">2026 güncel</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Ücret gelir vergisi</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Kümülatif matrah</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gelir vergisi dilimleri</span>
+                </div>
             </header>
 
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
@@ -88,7 +94,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-danger w-100 btn-lg rounded-pill py-3 shadow-sm hover-glow">
-                            <i class="bi bi-cpu me-2"></i> Analiz Et ve Hesapla
+                            <i class="bi bi-cpu me-2"></i> Gelir Vergisini Hesapla
                         </button>
                     </form>
 
@@ -189,6 +195,59 @@
                 </div>
             </section>
 
+            <section class="mt-5" aria-labelledby="gelir-vergisi-dilimleri-2026">
+                <h2 id="gelir-vergisi-dilimleri-2026" class="h4 fw-bold text-dark mb-3">2026 Gelir Vergisi Dilimleri</h2>
+                <p class="text-muted">
+                    2026 yılında ücret gelirleri ile ücret dışı gelirler için üst dilim sınırları farklılaşır. Hesaplama aracı, seçilen gelir türüne göre ilgili tarifeyi kullanır.
+                </p>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="border rounded-4 overflow-hidden h-100 bg-white">
+                            <div class="bg-light px-3 py-2 fw-bold">Ücret Gelirleri İçin 2026 Tarife</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0 align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-3">Matrah dilimi</th>
+                                            <th class="text-end pe-3">Oran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="ps-3">190.000 TL'ye kadar</td><td class="text-end pe-3">%15</td></tr>
+                                        <tr><td class="ps-3">400.000 TL'ye kadar</td><td class="text-end pe-3">%20</td></tr>
+                                        <tr><td class="ps-3">1.500.000 TL'ye kadar</td><td class="text-end pe-3">%27</td></tr>
+                                        <tr><td class="ps-3">5.300.000 TL'ye kadar</td><td class="text-end pe-3">%35</td></tr>
+                                        <tr><td class="ps-3">5.300.000 TL üzeri</td><td class="text-end pe-3">%40</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="border rounded-4 overflow-hidden h-100 bg-white">
+                            <div class="bg-light px-3 py-2 fw-bold">Ücret Dışı Gelirler İçin 2026 Tarife</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0 align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-3">Matrah dilimi</th>
+                                            <th class="text-end pe-3">Oran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="ps-3">190.000 TL'ye kadar</td><td class="text-end pe-3">%15</td></tr>
+                                        <tr><td class="ps-3">400.000 TL'ye kadar</td><td class="text-end pe-3">%20</td></tr>
+                                        <tr><td class="ps-3">1.000.000 TL'ye kadar</td><td class="text-end pe-3">%27</td></tr>
+                                        <tr><td class="ps-3">5.300.000 TL'ye kadar</td><td class="text-end pe-3">%35</td></tr>
+                                        <tr><td class="ps-3">5.300.000 TL üzeri</td><td class="text-end pe-3">%40</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="mt-5" aria-labelledby="gelir-vergisi-sss">
                 <h2 id="gelir-vergisi-sss" class="h4 fw-bold text-dark mb-3">Gelir Vergisi Hesaplama Hakkında Sık Sorulan Sorular</h2>
                 <div class="row g-3">
@@ -221,6 +280,14 @@
                             <h3 class="h6 fw-bold mb-2">2026 gelir vergisi nasıl hesaplanır?</h3>
                             <p class="small text-muted mb-0">
                                 Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 h-100 bg-white">
+                            <h3 class="h6 fw-bold mb-2">2026 gelir vergisi dilimleri nelerdir?</h3>
+                            <p class="small text-muted mb-0">
+                                2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir.
                             </p>
                         </div>
                     </div>
@@ -566,10 +633,10 @@ document.addEventListener("DOMContentLoaded", () => {
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Gelir Vergisi Hesaplama Aracı",
+  "name": "Gelir Vergisi Hesaplama 2026",
   "operatingSystem": "All",
   "applicationCategory": "FinanceApplication",
-  "description": "2026 yılı güncel vergi dilimleri ile ücret ve diğer kazançların gelir vergisini ücretsiz ve hızlıca hesaplayın.",
+  "description": "2026 gelir vergisi dilimlerine göre ücret, maaş, kümülatif matrah ve ücret dışı gelir için ödenecek gelir vergisini ücretsiz hesaplayın.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -618,6 +685,14 @@ document.addEventListener("DOMContentLoaded", () => {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "2026 gelir vergisi dilimleri nelerdir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir."
       }
     },
     {
