@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}Tecil Faizi Hesaplama 2026 | 7582 Sayılı Kanun Uyumlu 72 Ay Taksit | İSFA YMM{% endblock %}
-{% block description %}2026 tecil faizi hesaplama aracı ile 7582 sayılı Kanun ve Seri:B Sıra No:20 Tebliğ kapsamında yıllık %29 tecil faizi, 72 aya kadar taksit ve teminat tutarını hesaplayın.{% endblock %}
-{% block keywords %}tecil faizi hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil faizi, 7582 sayılı kanun tecil, seri b sıra no 20 tecil, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
-{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/tecil-faizi{% endblock %}
-{% block og_title %}Tecil Faizi Hesaplama 2026 | İSFA YMM{% endblock %}
-{% block og_desc %}Vergi borcu tecil ve taksitlendirme için tahmini taksit, tecil faizi ve toplam ödeme planı hesaplayın.{% endblock %}
+{% block title %}Tecil Hesaplama 2026 | 7582 Sayılı Kanun Uyumlu 72 Ay Taksit | İSFA YMM{% endblock %}
+{% block description %}2026 tecil hesaplama aracı ile 7582 sayılı Kanun ve Seri:B Sıra No:20 Tebliğ kapsamında yıllık %29 tecil oranı, 72 aya kadar taksit ve teminat tutarını hesaplayın.{% endblock %}
+{% block keywords %}tecil hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil oranı, 7582 sayılı kanun tecil, seri b sıra no 20 tecil, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/tecil{% endblock %}
+{% block og_title %}Tecil Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block og_desc %}Vergi borcu tecil ve taksitlendirme için tahmini taksit, tecil oranı ve toplam ödeme planı hesaplayın.{% endblock %}
 
 {% block content %}
 <style>
@@ -54,20 +54,20 @@
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a class="text-white" href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
         <li class="breadcrumb-item"><a class="text-white" href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
-        <li class="breadcrumb-item active text-white-50" aria-current="page">Tecil Faizi</li>
+        <li class="breadcrumb-item active text-white-50" aria-current="page">Tecil</li>
       </ol>
     </nav>
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
         <span class="tecil-hero-badge mb-3">7582 Sayılı Kanun ve 2026 Tebliğ uyumlu</span>
-        <h1 class="display-6 fw-bold mb-3">Tecil Faizi Hesaplama 2026</h1>
+        <h1 class="display-6 fw-bold mb-3">Tecil Hesaplama 2026</h1>
         <p class="lead mb-0 text-white-75">
-          Vergi borcu tecil ve taksitlendirme başvurusu için yıllık %29 tecil faizi, 72 aya kadar taksit, teminat durumu ve tahmini ödeme planını görün.
+          Vergi borcu tecil ve taksitlendirme başvurusu için yıllık %29 tecil oranı, 72 aya kadar taksit, teminat durumu ve tahmini ödeme planını görün.
         </p>
       </div>
       <div class="col-lg-4">
         <div class="tecil-calc-card p-4 text-dark">
-          <div class="d-flex justify-content-between border-bottom py-2"><span>Faiz oranı</span><strong>Yıllık %29</strong></div>
+          <div class="d-flex justify-content-between border-bottom py-2"><span>Oran</span><strong>Yıllık %29</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>İlk taksit</span><strong>Eylül 2026</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>Azami süre</span><strong>72 taksit</strong></div>
           <div class="d-flex justify-content-between py-2"><span>Teminat</span><strong>10 milyon TL'ye kadar yok</strong></div>
@@ -115,12 +115,12 @@
               </div>
             </div>
             <div class="col-md-6">
-              <label for="faizOrani" class="form-label fw-bold">Yıllık tecil faizi (%)</label>
-              <input type="number" id="faizOrani" class="form-control" value="29" min="0" step="0.01" required>
+              <label for="Orani" class="form-label fw-bold">Yıllık tecil oranı (%)</label>
+              <input type="number" id="Orani" class="form-control" value="29" min="0" step="0.01" required>
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
-            <i class="bi bi-calculator me-2"></i> Tecil Faizini Hesapla
+            <i class="bi bi-calculator me-2"></i> Tecil Hesapla
           </button>
         </form>
         <div class="tecil-note p-3 mt-3 small">
@@ -165,14 +165,14 @@
         <div id="sonucAlani" style="display:none;">
           <div class="row g-3 mb-4">
             <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tecile esas borç</span><br><strong id="resAnaBorc">0,00 TL</strong></div></div>
-            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tahmini tecil faizi</span><br><strong id="resFaiz">0,00 TL</strong></div></div>
+            <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Tahmini tecil tutarı</span><br><strong id="resTecil">0,00 TL</strong></div></div>
             <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Toplam ödeme</span><br><strong id="resToplam">0,00 TL</strong></div></div>
             <div class="col-md-6 col-xl-3"><div class="tecil-result p-3 h-100"><span class="small text-muted">Teminat</span><br><strong id="resTeminat">Gerekmez</strong></div></div>
           </div>
           <div id="teminatNotu" class="alert alert-light border small mb-3"></div>
           <div class="alert alert-info small mb-3">
             <i class="bi bi-info-circle me-1"></i>
-            Tecil faizi, her taksit tutarı için başvuru tarihinden ilgili taksit vadesine kadar geçen süre üzerinden hesaplanır. Bu nedenle vadeye kalan süre uzadıkça taksitlerdeki faiz tutarı artar.
+            Tecil, her taksit tutarı için başvuru tarihinden ilgili taksit vadesine kadar geçen süre üzerinden hesaplanır. Bu nedenle vadeye kalan süre uzadıkça taksitlerdeki tecil tutarı artar.
           </div>
           <div class="table-responsive" style="max-height: 520px;">
             <table class="table table-sm table-bordered align-middle">
@@ -181,7 +181,7 @@
                   <th>Taksit</th>
                   <th>Vade</th>
                   <th class="text-end">Ana para</th>
-                  <th class="text-end">Tecil faizi</th>
+                  <th class="text-end">Tecil Tutarı</th>
                   <th class="text-end">Ödenecek</th>
                 </tr>
               </thead>
@@ -224,11 +224,11 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Tecil Faizi Hesaplama 2026",
+  "name": "Tecil Hesaplama 2026",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Web",
-  "url": "https://www.isfaymm.com/hesaplama-araclari/tecil-faizi",
-  "description": "7582 sayılı Kanun ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında yıllık %29 tecil faizi, 72 aya kadar taksit planı ve teminat tutarını hesaplayan ücretsiz vergi borcu tecil faizi aracı.",
+  "url": "https://www.isfaymm.com/hesaplama-araclari/tecil",
+  "description": "7582 sayılı Kanun ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında yıllık %29 tecil oranı, 72 aya kadar taksit planı ve teminat tutarını hesaplayan ücretsiz vergi borcu tecil hesaplama aracı.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -240,7 +240,7 @@
     "url": "https://www.isfaymm.com"
   },
   "featureList": [
-    "Tecil faizi hesaplama",
+    "Tecil hesaplama",
     "Vergi borcu taksitlendirme planı",
     "72 aya kadar taksit hesabı",
     "Teminat tutarı hesaplama"
@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const basvuruInput = document.getElementById("basvuruTarihi");
   const monthInput = document.getElementById("ilkTaksitAyi");
   const taksitInput = document.getElementById("taksitSayisi");
-  const faizInput = document.getElementById("faizOrani");
+  const oranInput = document.getElementById("Orani");
   const emptyState = document.getElementById("emptyState");
   const sonucAlani = document.getElementById("sonucAlani");
   const planBody = document.getElementById("planBody");
@@ -335,13 +335,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const basvuru = new Date(basvuruInput.value + "T00:00:00");
     const [firstYear, firstMonth] = monthInput.value.split("-").map(Number);
     const taksitSayisi = Number(taksitInput.value);
-    const faizOrani = Number(faizInput.value) / 100;
+    const Orani = Number(oranInput.value) / 100;
 
     if (!borc || !basvuruInput.value || !monthInput.value || !taksitSayisi) {
       return;
     }
 
-    let toplamFaiz = 0;
+    let toplamTecil = 0;
     let toplamOdeme = 0;
     planBody.innerHTML = "";
 
@@ -353,9 +353,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const dueDate = monthEnd(dueMonth.year, dueMonth.monthIndex);
       const principal = i === 1 ? firstPrincipal : basePrincipal;
       const days = Math.max(0, Math.ceil((dueDate - basvuru) / 86400000));
-      const interest = Math.round((principal * faizOrani * days / 365) * 100) / 100;
+      const interest = Math.round((principal * Orani * days / 365) * 100) / 100;
       const installmentTotal = principal + interest;
-      toplamFaiz += interest;
+      toplamTecil += interest;
       toplamOdeme += installmentTotal;
 
       const tr = document.createElement("tr");
@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.getElementById("resAnaBorc").textContent = money(borc);
-    document.getElementById("resFaiz").textContent = money(toplamFaiz);
+    document.getElementById("resTecil").textContent = money(toplamTecil);
     document.getElementById("resToplam").textContent = money(toplamOdeme);
     const teminatSiniri = 10000000;
     const teminatTutari = borc > teminatSiniri ? Math.round(((borc - teminatSiniri) / 2) * 100) / 100 : 0;

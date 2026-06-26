@@ -32,10 +32,10 @@ def gecikme_zammi():
     return render_template("calculators/gecikme_zammi.html")
 
 
-# 📅 Tecil Faizi
-@calculators_bp.route("/tecil-faizi")
-def tecil_faizi():
-    return render_template("calculators/tecil_faizi.html")
+# 📅 Tecil
+@calculators_bp.route("/tecil")
+def tecil():
+    return render_template("calculators/tecil.html")
 
 
 # 🧾 Serbest Meslek Makbuzu
