@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block title %}Ar-Ge ve Teknopark Personel Teşvikleri Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block description %}5746 ve 4691 kapsamında Ar-Ge, tasarım ve Teknopark personelinin gelir vergisi stopaj teşviki ile SGK işveren hissesi desteğini hesaplayın.{% endblock %}
+{% block keywords %}arge personel teşviki hesaplama, teknopark gelir vergisi stopajı, 5746 stopaj teşviki, arge sgk teşviki, teknopark uzaktan çalışma 2026{% endblock %}
+{% block canonical_url %}{{ url_for('calculators.arge_teknopark_personel_tesvikleri', _external=True) }}{% endblock %}
+
+{% block content %}
+<main class="incentive-page">
+    <header class="incentive-hero">
+        <div class="incentive-wrap">
+            <div class="eyebrow">4691 ve 5746 personel teşvikleri</div>
+            <h1>Ar-Ge ve Teknopark Personel Teşvikleri</h1>
+            <p>Bir personel için gelir vergisi stopaj teşvikini, SGK işveren hissesi desteğini ve teşvike uygun çalışma oranını hesaplayın.</p>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i> Personel adı, T.C. kimlik numarası veya bordro dosyası istenmez. Bilgiler kaydedilmez.</div>
+        </div>
+    </header>
+
+    <div class="incentive-wrap">
+        <div class="incentive-grid">
+            <section class="tool-panel" aria-labelledby="personel-form-title">
+                <div class="panel-heading"><div><h2 id="personel-form-title">Personel ve bordro bilgileri</h2><p>Kimlik bilgisi girmeden yalnızca hesap tutarlarını kullanın.</p></div></div>
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="ptRejim">Teşvik kapsamı</label>
+                        <select id="ptRejim"><option value="5746">5746 - Ar-Ge/Tasarım Merkezi veya Proje</option><option value="4691">4691 - Teknoloji Geliştirme Bölgesi</option></select>
+                    </div>
+                    <div class="field" id="ptNitelikWrap">
+                        <label for="ptNitelik">Personelin niteliği</label>
+                        <select id="ptNitelik">
+                            <option value="95">Doktoralı veya desteklenen programda yüksek lisanslı</option>
+                            <option value="90">Yüksek lisanslı veya desteklenen programda lisanslı</option>
+                            <option value="80">Diğer personel</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="ptMeslek">2026 uzaktan çalışma grubu</label>
+                        <select id="ptMeslek"><option value="bilisim">Bakanlıkça belirlenen bilişim personeli</option><option value="diger">Diğer personel</option></select>
+                    </div>
+                    <div class="field">
+                        <label for="ptPersonelTuru">Personel türü</label>
+                        <select id="ptPersonelTuru"><option value="arge">Ar-Ge veya tasarım personeli</option><option value="destek">Destek personeli</option></select>
+                    </div>
+                    <div class="section-label">Bordrodan alınacak iki tutar</div>
+                    <div class="field">
+                        <label for="ptGelirVergisi">Teşvike esas hesaplanan gelir vergisi (TL)</label>
+                        <input id="ptGelirVergisi" data-money inputmode="decimal" value="0,00">
+                        <small>Asgari ücret istisnası ve brüt asgari ücretin 40 katı sınırı dikkate alındıktan sonraki vergi.</small>
+                    </div>
+                    <div class="field">
+                        <label for="ptSgk">Hesaplanan SGK işveren hissesi (TL)</label>
+                        <input id="ptSgk" data-money inputmode="decimal" value="0,00">
+                        <small>İşsizlik sigortası primi bu desteğin kapsamında değildir.</small>
+                    </div>
+                    <div class="section-label">Çalışma süresi</div>
+                    <div class="field">
+                        <label for="ptToplamSaat">Aylık toplam çalışma süresi (saat)</label>
+                        <input id="ptToplamSaat" type="number" min="0" step="0.5" value="180">
+                    </div>
+                    <div class="field">
+                        <label for="ptIceriSaat">Merkez/bölge içindeki süre (saat)</label>
+                        <input id="ptIceriSaat" type="number" min="0" step="0.5" value="180">
+                    </div>
+                    <div class="field">
+                        <label for="ptDisariSaat">Merkez/bölge dışındaki süre (saat)</label>
+                        <input id="ptDisariSaat" type="number" min="0" step="0.5" value="0">
+                    </div>
+                </div>
+
+                <details class="advanced-box" id="ptSupportDetails">
+                    <summary>Destek personeli sınırı kontrolü</summary>
+                    <div class="field-grid">
+                        <div class="field"><label for="ptArgeSayisi">Ar-Ge/tasarım personeli sayısı</label><input id="ptArgeSayisi" type="number" min="0" step="1" value="0"></div>
+                        <div class="field"><label for="ptDestekSayisi">Destek personeli sayısı</label><input id="ptDestekSayisi" type="number" min="0" step="1" value="0"></div>
+                    </div>
+                </details>
+                <div class="callout info">2026 yılında merkez/bölge dışı çalışma sınırı bilişim personelinde %100, diğer personelde %75'tir. Bu sınır işverenin toplam personeli veya toplam çalışma süresi üzerinden kontrol edilir.</div>
+            </section>
+
+            <aside class="result-panel" aria-live="polite">
+                <h2>Aylık teşvik sonucu</h2>
+                <div class="result-main"><span>Toplam personel teşviki</span><strong id="ptToplamTesvik">0,00 TL</strong></div>
+                <div class="result-row"><span>Teşvike uygun çalışma oranı</span><strong id="ptCalismaOrani">%100</strong></div>
+                <div class="result-row"><span>Stopaj teşvik oranı</span><strong id="ptStopajOrani">%95</strong></div>
+                <div class="result-row good"><span>Gelir vergisi stopaj teşviki</span><strong id="ptStopajTesviki">0,00 TL</strong></div>
+                <div class="result-row good"><span>SGK işveren hissesi desteği</span><strong id="ptSgkTesviki">0,00 TL</strong></div>
+                <div class="result-row"><span>Teşvik dışında kalan dış süre</span><strong id="ptDisSure">0 saat</strong></div>
+                <div class="callout hidden" id="ptWarning"></div>
+                <p class="legal-footnote">Hesap tek personel için ön kontroldür. İşveren toplamı, yönetici şirket/merkez onayı ve yasal bildirim şartları ayrıca kontrol edilmelidir.</p>
+            </aside>
+        </div>
+
+        <div class="content-tabs" role="tablist"><button class="active" data-tab-button="ozet">Kısa özet</button><button data-tab-button="ornek">Örnekler</button><button data-tab-button="mevzuat">Mevzuat</button></div>
+        <section class="info-band" data-tab-panel="ozet"><h2>İki teşvik birlikte nasıl hesaplanır?</h2><p>5746 kapsamında asgari ücret istisnası sonrası kalan gelir vergisinin personel niteliğine göre %95, %90 veya %80'i; 4691 kapsamında ise uygun verginin tamamı stopaj teşvikine konu olabilir. Uygun çalışma süresine ait SGK işveren hissesinin yarısı destek olarak dikkate alınır.</p></section>
+        <section class="info-band hidden" data-tab-panel="ornek"><h2>Hesaplama örnekleri</h2><div class="example-grid"><div class="example-card"><strong>5746 - Diğer personel</strong><p>%75 uzaktan çalışma sınırı ve %80 stopaj oranı.</p><button type="button" data-pt-example="5746">Örneği yükle</button></div><div class="example-card"><strong>4691 - Bilişim personeli</strong><p>%100 uzaktan çalışma ve tam stopaj teşviki.</p><button type="button" data-pt-example="4691">Örneği yükle</button></div></div></section>
+        <section class="info-band hidden" data-tab-panel="mevzuat"><h2>Mevzuat dayanağı</h2><ul class="mb-0"><li>5746 sayılı Kanun madde 3/2 ve 3/3</li><li>4691 sayılı Kanun geçici madde 2</li><li>5746 Uygulama ve Denetim Yönetmeliği madde 10 ve 11</li><li>25.12.2025 tarihli 10766 sayılı Cumhurbaşkanı Kararı</li><li>Teşviklerin uygulama süresi: 31.12.2028</li></ul></section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tesvik_hesaplama.css') }}?v=2">
+<script src="{{ url_for('static', filename='js/calculators/tesvik_common.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/calculators/arge_teknopark_personel.js') }}?v=1"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ar-Ge ve Teknopark Personel Teşvikleri Hesaplama","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"}}</script>
+{% endblock %}

@@ -471,6 +471,9 @@ def indirim(): return render_template("pages/indirim.html")
 @bp.route("/mevzuat/kv-istisna-indirimler")
 def kv_istisna_indirimler(): return render_template("pages/kv_istisna_indirim.html")
 
+@bp.route("/mevzuat/gv-istisna-indirimler")
+def gv_istisna_indirimler(): return render_template("pages/gv_istisna_indirim.html")
+
 
 
 # --- API ROUTES ---

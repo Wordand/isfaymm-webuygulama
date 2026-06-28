@@ -134,4 +134,29 @@ def kdv_tevkifat():
     return render_template("calculators/kdv_tevkifat.html")
 
 
+@calculators_bp.route("/teknopark-kazanc-istisnasi")
+def teknopark_kazanc_istisnasi():
+    return render_template("calculators/teknopark.html")
+
+
+@calculators_bp.route("/ar-ge-tasarim-indirimi")
+def arge_tasarim_indirimi():
+    return render_template("calculators/arge.html")
+
+
+@calculators_bp.route("/asgari-kurumlar-vergisi")
+def asgari_kurumlar_vergisi():
+    return render_template("calculators/asgarikurumlar.html")
+
+
+@calculators_bp.route("/arge-teknopark-personel-tesvikleri")
+def arge_teknopark_personel_tesvikleri():
+    return render_template("calculators/arge_teknopark_personel.html")
+
+
+@calculators_bp.route("/teknopark-kdv-istisnasi")
+def teknopark_kdv_istisnasi():
+    return render_template("calculators/teknopark_kdv.html")
+
+
 # deploy trigger – no functional change

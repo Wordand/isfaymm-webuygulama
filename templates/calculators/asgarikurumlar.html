@@ -1,0 +1,209 @@
+{% extends "layout.html" %}
+
+{% block title %}Asgari Kurumlar Vergisi Hesaplama 2026 | KVK 32/C | İSFA YMM{% endblock %}
+{% block description %}KVK 32/C kapsamında normal kurumlar vergisi ile yurt içi asgari kurumlar vergisini karşılaştırın; Teknopark istisnası ve Ar-Ge indiriminin etkisini görün.{% endblock %}
+{% block keywords %}asgari kurumlar vergisi hesaplama, yurt içi asgari kurumlar vergisi, KVK 32/C, teknopark asgari vergi, arge indirimi asgari vergi{% endblock %}
+{% block canonical_url %}{{ url_for('calculators.asgari_kurumlar_vergisi', _external=True) }}{% endblock %}
+{% block og_title %}Asgari Kurumlar Vergisi Hesaplama 2026{% endblock %}
+{% block og_desc %}Normal ve asgari kurumlar vergisini karşılaştırın; 4691 ve 5746 tutarlarının etkisini görün.{% endblock %}
+
+{% block content %}
+<main class="incentive-page">
+    <header class="incentive-hero">
+        <div class="incentive-wrap">
+            <div class="eyebrow">KVK Madde 32/C</div>
+            <h1>Asgari Kurumlar Vergisi Hesaplama</h1>
+            <p>Normal kurumlar vergisi ile yurt içi asgari kurumlar vergisini karşılaştırın ve ödenecek yüksek tutarı görün.</p>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i> Girdiğiniz bilgiler tarayıcınızda hesaplanır; sunucuya gönderilmez ve kaydedilmez.</div>
+        </div>
+    </header>
+
+    <div class="incentive-wrap">
+        <div class="incentive-grid">
+            <section class="tool-panel" aria-labelledby="asgari-form-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="asgari-form-title">Kurum kazancı ve indirimler</h2>
+                        <p>Temel bilgileri girin; diğer ayrıntıları yalnızca gerekiyorsa açın.</p>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="akvYil">Hesap dönemi</label>
+                        <input id="akvYil" type="number" min="2025" max="2100" value="2026">
+                    </div>
+                    <div class="field">
+                        <label for="akvKurulus">Şirketin faaliyete başladığı yıl</label>
+                        <input id="akvKurulus" type="number" min="1900" max="2100" placeholder="Örn. 2020">
+                        <small>İlk üç hesap döneminde asgari kurumlar vergisi uygulanmaz.</small>
+                    </div>
+                    <div class="field">
+                        <label for="akvTicariKar">Ticari bilanço kârı (TL)</label>
+                        <input id="akvTicariKar" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="akvKkeg">Kanunen kabul edilmeyen giderler (TL)</label>
+                        <input id="akvKkeg" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="akvKvOrani">Genel kurumlar vergisi oranı (%)</label>
+                        <input id="akvKvOrani" type="number" min="0" max="100" step="0.01" value="25">
+                    </div>
+                </div>
+
+                <div class="deduction-section">
+                    <div class="panel-heading compact-heading">
+                        <div>
+                            <h2>İstisna, indirim veya zarar ekle</h2>
+                            <p>Kalemi seçin; sistem asgari vergiye etkisini otomatik belirlesin.</p>
+                        </div>
+                    </div>
+                    <div class="field item-search">
+                        <label for="akvKalemAra">Kalem ara</label>
+                        <input id="akvKalemAra" type="search" placeholder="Örn. Teknopark, bağış, geçmiş yıl zararı">
+                    </div>
+                    <div class="entry-builder">
+                        <div class="field entry-type">
+                            <label for="akvKalemSec">Kalem</label>
+                            <select id="akvKalemSec"><option value="">Kalem seçiniz</option></select>
+                        </div>
+                        <div class="field">
+                            <label for="akvKalemTutar">Tutar (TL)</label>
+                            <input id="akvKalemTutar" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <div class="field hidden" id="akvOzelTutarWrap">
+                            <label for="akvKalemAsgari">Asgari matrahtan düşülebilecek kısım</label>
+                            <input id="akvKalemAsgari" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <button type="button" class="add-entry-button" id="akvKalemEkle"><i class="bi bi-plus-lg"></i> Ekle</button>
+                    </div>
+                    <div class="selected-table-wrap">
+                        <table class="selected-items-table">
+                            <thead><tr><th>Seçilen kalem</th><th>Tutar</th><th>Asgari KV etkisi</th><th>İşlem</th></tr></thead>
+                            <tbody id="akvKalemler"></tbody>
+                        </table>
+                        <div class="empty-selection" id="akvKalemBos">Henüz istisna, indirim veya zarar eklenmedi.</div>
+                    </div>
+                </div>
+
+                <details class="advanced-box tax-credit-box">
+                    <summary>Hesaplanan vergiden indirim ekle</summary>
+                    <p class="detail-intro">Bu tutarlar matrahı değil, hesaplanan vergiyi azaltır.</p>
+                    <div class="entry-builder tax-builder">
+                        <div class="field entry-type">
+                            <label for="akvVergiKalemSec">Vergi indirimi</label>
+                            <select id="akvVergiKalemSec"><option value="">Kalem seçiniz</option></select>
+                        </div>
+                        <div class="field">
+                            <label for="akvVergiKalemTutar">Alınmayan/indirilecek vergi (TL)</label>
+                            <input id="akvVergiKalemTutar" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <button type="button" class="add-entry-button" id="akvVergiKalemEkle"><i class="bi bi-plus-lg"></i> Ekle</button>
+                    </div>
+                    <div class="selected-table-wrap compact-table-wrap">
+                        <table class="selected-items-table">
+                            <thead><tr><th>Seçilen kalem</th><th>Tutar</th><th>Asgari KV etkisi</th><th>İşlem</th></tr></thead>
+                            <tbody id="akvVergiKalemler"></tbody>
+                        </table>
+                        <div class="empty-selection" id="akvVergiKalemBos">Henüz hesaplanan vergiden indirim eklenmedi.</div>
+                    </div>
+                </details>
+            </section>
+
+            <aside class="result-panel" aria-live="polite">
+                <h2>Vergi karşılaştırması</h2>
+                <div class="result-main">
+                    <span>Ödenecek kurumlar vergisi</span>
+                    <strong id="akvOdenecek">0,00 TL</strong>
+                </div>
+                <div class="result-row"><span>Normal KV matrahı</span><strong id="akvNormalMatrah">0,00 TL</strong></div>
+                <div class="result-row"><span>Normal kurumlar vergisi</span><strong id="akvNormalVergi">0,00 TL</strong></div>
+                <div class="result-row"><span>Asgari KV matrahı</span><strong id="akvAsgariMatrah">0,00 TL</strong></div>
+                <div class="result-row"><span>Asgari kurumlar vergisi</span><strong id="akvAsgariVergi">0,00 TL</strong></div>
+                <div class="result-row good"><span>Sonucu belirleyen hesap</span><strong id="akvDurum">Bekleniyor</strong></div>
+                <div class="callout info hidden" id="akvMuafiyet"></div>
+                <p class="legal-footnote">Bu ön hesaplama beyanname veya mesleki görüş yerine geçmez. İstisna ve indirimlerin niteliği güncel mevzuatla birlikte kontrol edilmelidir.</p>
+            </aside>
+        </div>
+
+        <div class="content-tabs" role="tablist" aria-label="Asgari vergi bilgi bölümleri">
+            <button class="active" data-tab-button="ozet">Kısa özet</button>
+            <button data-tab-button="ornek">Tebliğ örnekleri</button>
+            <button data-tab-button="mevzuat">Mevzuat</button>
+        </div>
+        <section class="info-band" data-tab-panel="ozet">
+            <h2>Yurt içi asgari kurumlar vergisi nasıl hesaplanır?</h2>
+            <p class="mb-0">Ticari bilanço kârına KKEG eklenir ve mevzuatta açıkça izin verilen istisna ile indirimler düşülür. Kalan tutarın %10'u üzerinden asgari vergi hesaplanır. Normal kurumlar vergisi ile karşılaştırılarak yüksek olan tutar dikkate alınır.</p>
+        </section>
+        <section class="info-band hidden" data-tab-panel="ornek">
+            <h2>Tebliğdeki örnekleri hesaplama aracına yükleyin</h2>
+            <div class="example-loader">
+                <div class="field">
+                    <label for="akvOrnekSec">Örnek seçin</label>
+                    <select id="akvOrnekSec">
+                        <option value="1">Örnek 1 - Temel kâr ve KKEG</option>
+                        <option value="2">Örnek 2 - Ticari zarar ve KKEG</option>
+                        <option value="3">Örnek 3 - Düşülen ve düşülmeyen kalemler</option>
+                        <option value="4">Örnek 4 - Ar-Ge ve yatırım teşvik belgesi</option>
+                        <option value="5">Örnek 5 - KKM ve geçmiş yıl zararı</option>
+                        <option value="6">Örnek 6 - İhracat, serbest bölge ve nakdi sermaye</option>
+                        <option value="7">Örnek 7 - GYO taşınmaz kazançları</option>
+                        <option value="8">Örnek 8 - Yurt dışı kazançlarda vergi yükü</option>
+                    </select>
+                </div>
+                <p id="akvOrnekAciklama">İndirim ve istisnası bulunmayan temel asgari kurumlar vergisi örneği.</p>
+                <button type="button" class="tool-link primary border-0" id="akvOrnek">Örneği yükle</button>
+            </div>
+            <div class="callout info mt-3">Geçmiş yıl zararları bulunan örnekler, Danıştay 3. Dairesinin iptal kararı doğrultusunda zarar asgari matrahtan düşülerek hesaplanır.</div>
+        </section>
+        <section class="info-band hidden" data-tab-panel="mevzuat">
+            <h2>Mevzuat dayanağı</h2>
+            <p>5520 sayılı Kurumlar Vergisi Kanunu madde 32/C ve 1 Seri No.lu Kurumlar Vergisi Genel Tebliği bölüm 32.5 esas alınmıştır.</p>
+            <div class="law-columns">
+                <details open>
+                    <summary>Asgari matrahtan düşülebilenler</summary>
+                    <ul>
+                        <li>İştirak kazancı, emisyon primi ve taşınmaz dışı yatırım fonu/ortaklık kazançları</li>
+                        <li>Risturn, sat-kirala-geri al ve varlık kiralama kazançları</li>
+                        <li>Türk Uluslararası Gemi Sicili, serbest bölge ve Teknopark kazançları</li>
+                        <li>Girişim sermayesi fonu, korumalı işyeri ve Ar-Ge/tasarım indirimleri</li>
+                        <li>Danıştay iptal kararı doğrultusunda geçmiş yıl zararları</li>
+                    </ul>
+                </details>
+                <details>
+                    <summary>Asgari matrahtan düşülemeyenler</summary>
+                    <ul>
+                        <li>Taşınmaz ve iştirak hissesi satış kazancı, sınai mülkiyet ve KKM istisnaları</li>
+                        <li>Eğitim, yurt dışı şube ve yurt dışı hizmet kazancı istisnaları</li>
+                        <li>Sponsorluk, bağış ve yardımlar</li>
+                        <li>Hizmet ihracı, nakdi sermaye ve İstanbul Finans Merkezi indirimleri</li>
+                        <li>Yatırım indirimi, teknogirişim ve teknokent sermaye desteği indirimleri</li>
+                    </ul>
+                </details>
+                <details>
+                    <summary>Özel hesaplananlar</summary>
+                    <p>Yurt dışı kaynaklı istisna kazançlarda vergi yüküne göre asgari matrahtan düşülebilecek tutar ayrıca belirlenir.</p>
+                </details>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tesvik_hesaplama.css') }}?v=1">
+<script src="{{ url_for('static', filename='js/calculators/tesvik_common.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/calculators/asgarikurumlar.js') }}?v=1"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Asgari Kurumlar Vergisi Hesaplama",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "TRY"},
+  "description": "KVK 32/C kapsamında normal ve yurt içi asgari kurumlar vergisi karşılaştırması."
+}
+</script>
+{% endblock %}

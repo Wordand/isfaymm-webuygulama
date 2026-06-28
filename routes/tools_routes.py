@@ -95,7 +95,7 @@ def gecikme_zammi_hesapla(borc, vade, odeme, borc_turu):
 
 @bp.route("/asgari")
 def asgari():
-    return render_template("calculators/asgari.html")
+    return redirect(url_for("calculators.asgari_kurumlar_vergisi"), code=301)
 
 @bp.route("/sermaye")
 def sermaye():

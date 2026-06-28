@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}Ar-Ge ve Tasarım İndirimi Hesaplama 2026 | 5746 | İSFA YMM{% endblock %}
+{% block description %}5746 sayılı Kanuna göre Ar-Ge ve tasarım harcamalarını, %100 indirimi, dışarıdan sağlanan hizmet sınırını, devreden indirimi ve yatırım yükümlülüğünü hesaplayın.{% endblock %}
+{% block keywords %}arge indirimi hesaplama, 5746 arge indirimi, tasarım indirimi hesaplama, arge harcamaları, arge merkezi kurumlar vergisi{% endblock %}
+{% block canonical_url %}{{ url_for('calculators.arge_tasarim_indirimi', _external=True) }}{% endblock %}
+{% block og_title %}Ar-Ge ve Tasarım İndirimi Hesaplama 2026{% endblock %}
+{% block og_desc %}5746 kapsamındaki uygun harcamaları ve kullanılabilecek Ar-Ge indirimini sade biçimde hesaplayın.{% endblock %}
+
+{% block content %}
+<main class="incentive-page">
+    <header class="incentive-hero">
+        <div class="incentive-wrap">
+            <div class="eyebrow">5746 sayılı Kanun</div>
+            <h1>Ar-Ge ve Tasarım İndirimi Hesaplama</h1>
+            <p>Uygun Ar-Ge ve tasarım harcamalarınızı, kullanılabilecek indirimi ve sonraki döneme devreden tutarı tek ekranda görün.</p>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i> Girdiğiniz bilgiler tarayıcınızda hesaplanır; sunucuya gönderilmez ve kaydedilmez.</div>
+        </div>
+    </header>
+
+    <div class="incentive-wrap">
+        <div class="incentive-grid">
+            <section class="tool-panel" aria-labelledby="arge-form-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="arge-form-title">Ar-Ge ve tasarım harcamaları</h2>
+                        <p>Döneme ait uygun harcamaları ilgili satırlara girin.</p>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="argeMalzeme">İlk madde ve malzeme (TL)</label>
+                        <input id="argeMalzeme" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="argePersonel">Ar-Ge ve tasarım personeli (TL)</label>
+                        <input id="argePersonel" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="argeAmortisman">Amortismanlar (TL)</label>
+                        <input id="argeAmortisman" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="argeGenel">Doğrudan ilişkili genel giderler (TL)</label>
+                        <input id="argeGenel" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="argeVergi">Vergi, resim ve harçlar (TL)</label>
+                        <input id="argeVergi" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="argeDisHizmet">Dışarıdan sağlanan fayda ve hizmetler (TL)</label>
+                        <input id="argeDisHizmet" data-money inputmode="decimal" value="0,00">
+                        <small>Hesaba alınacak tutar toplam uygun harcamanın %50'sini aşamaz.</small>
+                    </div>
+                    <div class="field">
+                        <label for="argeHibe">Hibe ve geri ödemesiz destekler (TL)</label>
+                        <input id="argeHibe" data-money inputmode="decimal" value="0,00">
+                        <small>Özel fonda izlenen destekler indirim hesabına dahil edilmez.</small>
+                    </div>
+                    <div class="field">
+                        <label for="argeKazanc">İndirim öncesi kurum kazancı (TL)</label>
+                        <input id="argeKazanc" data-money inputmode="decimal" value="0,00">
+                    </div>
+                </div>
+
+                <details class="advanced-box">
+                    <summary>Devreden ve ilave indirim hesabı</summary>
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="argeDevreden">Önceki dönemden devreden Ar-Ge indirimi (TL)</label>
+                            <input id="argeDevreden" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <div class="field">
+                            <label for="argeYdo">Yeniden değerleme oranı (%)</label>
+                            <input id="argeYdo" type="number" min="0" step="0.01" value="0">
+                        </div>
+                        <div class="field">
+                            <label for="argeOncekiHarcama">Önceki yıl uygun Ar-Ge harcaması (TL)</label>
+                            <input id="argeOncekiHarcama" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <div class="field">
+                            <label for="argeIlaveKosul">İlave indirim koşulu</label>
+                            <select id="argeIlaveKosul">
+                                <option value="hayir">Koşul sağlanmıyor / uygulanmayacak</option>
+                                <option value="evet">Karardaki göstergelerden en az biri sağlanıyor</option>
+                            </select>
+                            <small>İlave indirim yalnızca yıllık beyannamede dikkate alınır.</small>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="callout info">
+                    Aynı proje veya faaliyet için 5746 sayılı Kanun indirimi ile 4691 sayılı Kanun teknopark kazanç istisnası birlikte uygulanmaz.
+                </div>
+            </section>
+
+            <aside class="result-panel" aria-live="polite">
+                <h2>Hesaplama sonucu</h2>
+                <div class="result-main">
+                    <span>Cari dönemde kullanılabilecek Ar-Ge indirimi</span>
+                    <strong id="argeKullanilan">0,00 TL</strong>
+                </div>
+                <div class="result-row"><span>Uygun cari dönem harcaması</span><strong id="argeUygunHarcama">0,00 TL</strong></div>
+                <div class="result-row"><span>Hesaba alınan dış hizmet</span><strong id="argeDisHizmetUygun">0,00 TL</strong></div>
+                <div class="result-row"><span>Endekslenmiş devreden indirim</span><strong id="argeEndeksli">0,00 TL</strong></div>
+                <div class="result-row"><span>İlave Ar-Ge indirimi</span><strong id="argeIlave">0,00 TL</strong></div>
+                <div class="result-row good"><span>Toplam kullanılabilir indirim</span><strong id="argeToplam">0,00 TL</strong></div>
+                <div class="result-row"><span>Sonraki döneme devreden</span><strong id="argeYeniDevreden">0,00 TL</strong></div>
+                <div class="result-row warn"><span>Girişim sermayesi yatırım yükümlülüğü</span><strong id="argeYatirimYuk">Doğmaz</strong></div>
+                <div class="callout hidden" id="argeLimitNote"></div>
+                <div class="result-actions">
+                    <a id="argeAsgariLink" class="tool-link primary" href="{{ url_for('calculators.asgari_kurumlar_vergisi') }}"><i class="bi bi-calculator"></i> Asgari vergi etkisini gör</a>
+                </div>
+                <p class="legal-footnote">Sonuç bilgilendirme amaçlıdır. Projenin uygunluğu, destek kararları ve harcama belgeleri ayrıca değerlendirilmelidir.</p>
+            </aside>
+        </div>
+
+        <div class="content-tabs" role="tablist" aria-label="Ar-Ge bilgi bölümleri">
+            <button class="active" data-tab-button="ozet">Kısa özet</button>
+            <button data-tab-button="ornekler">Örnekler</button>
+            <button data-tab-button="mevzuat">Mevzuat</button>
+        </div>
+
+        <section class="info-band" data-tab-panel="ozet">
+            <h2>Ar-Ge indirimi nasıl hesaplanır?</h2>
+            <p>5746 kapsamındaki uygun Ar-Ge, yenilik ve tasarım harcamalarının tamamı indirim hesabına alınır. Hibe ve geri ödemesiz destekler harcamadan ayrıştırılır. Kazanç yetersizliği nedeniyle kullanılamayan tutar, yeniden değerleme oranıyla artırılarak sonraki döneme devredebilir.</p>
+            <p class="mb-0">Dışarıdan sağlanan fayda ve hizmetlerin indirim hesabına alınabilecek kısmı, toplam uygun Ar-Ge ve tasarım harcamasının %50'siyle sınırlıdır.</p>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="ornekler">
+            <h2>Hazır örnekler</h2>
+            <div class="example-grid">
+                <div class="example-card"><strong>Temel Ar-Ge indirimi</strong><p>Personel, malzeme ve amortisman giderleri.</p><button type="button" data-arge-example="basic">Örneği yükle</button></div>
+                <div class="example-card"><strong>Dış hizmet sınırı</strong><p>Dış hizmet tutarının sınırı aştığı durum.</p><button type="button" data-arge-example="service">Örneği yükle</button></div>
+                <div class="example-card"><strong>Devreden ve ilave indirim</strong><p>Kazanç sınırı ve önceki dönem tutarı birlikte.</p><button type="button" data-arge-example="carry">Örneği yükle</button></div>
+            </div>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="mevzuat">
+            <h2>Mevzuat dayanağı</h2>
+            <ul class="mb-0">
+                <li>5746 sayılı Araştırma, Geliştirme ve Tasarım Faaliyetlerinin Desteklenmesi Hakkında Kanun</li>
+                <li>5746 Uygulama ve Denetim Yönetmeliği</li>
+                <li>1 Seri No.lu Kurumlar Vergisi Genel Tebliği, bölüm 10.2</li>
+                <li>31.12.2025 tarihli 10803 sayılı Cumhurbaşkanı Kararı</li>
+            </ul>
+        </section>
+
+        {% include "calculators/_arge_teknopark_karsilastirma.html" %}
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tesvik_hesaplama.css') }}?v=1">
+<script src="{{ url_for('static', filename='js/calculators/tesvik_common.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/calculators/arge.js') }}?v=1"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Ar-Ge ve Tasarım İndirimi Hesaplama",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "TRY"},
+  "description": "5746 sayılı Kanuna göre Ar-Ge ve tasarım indirimi, devreden indirim ve yatırım yükümlülüğü hesabı."
+}
+</script>
+{% endblock %}

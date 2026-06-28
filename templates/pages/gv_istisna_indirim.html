@@ -1,0 +1,1005 @@
+{% extends "layout.html" %}
+
+{% block title %}Gelir Vergisi İstisna ve Muafiyetleri 2026 | İSFA YMM{% endblock %}
+
+{% block description %}2026 yılı güncel Gelir Vergisi Kanunu kapsamında ücret, mesken kira geliri, genç girişimci, esnaf muafiyeti ve telif kazançları istisnaları. Koşullar, limitler ve yasal mevzuat rehberi.{% endblock %}
+
+{% block content %}
+
+<!-- 🎯 BAŞLIK -->
+<section class="py-5 text-center text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #8b1e2a 0%, #dc3545 100%);">
+  <div class="position-absolute top-0 start-0 w-100 h-100" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.07;"></div>
+  <div class="container position-relative" data-aos="fade-up">
+    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill mb-3 fw-bold" style="font-size:0.8rem;">GVK İSTİSNA, İNDİRİM VE MUAFLIKLAR</span>
+    <h1 class="fw-bold display-6 mb-3">Gelir Vergisi İstisna ve Muafiyetleri</h1>
+    <p class="lead text-white-50 mb-0 mx-auto" style="max-width:680px;">Ücret, kira geliri, genç girişimcilik ve esnaf muaflığı kapsamındaki tüm yasal vergi avantajları ve 2026 güncel limitleri.</p>
+  </div>
+</section>
+
+<!-- 🧭 SEKME MENÜ -->
+<section class="bg-white shadow-sm sticky-top" style="z-index:1020; top:0;">
+  <div class="container">
+    <div class="d-flex justify-content-center gap-3 py-3 flex-wrap">
+      <button class="kvi-tab-btn active" id="tabBtnIstisnalar" onclick="switchTab('tab-istisnalar', this)">
+        <span class="kvi-tab-dot bg-warning"></span>
+        <span>İstisnalar</span>
+      </button>
+      <button class="kvi-tab-btn" id="tabBtnMuafliklar" onclick="switchTab('tab-muafliklar', this)">
+        <span class="kvi-tab-dot bg-danger"></span>
+        <span>Muaflıklar</span>
+      </button>
+      <button class="kvi-tab-btn" id="tabBtnIndirimler" onclick="switchTab('tab-indirimler', this)">
+        <span class="kvi-tab-dot bg-info"></span>
+        <span>İndirimler</span>
+      </button>
+      <button class="kvi-tab-btn" id="tabBtnBeyanTarife" onclick="switchTab('tab-beyan-tarife', this)">
+        <span class="kvi-tab-dot bg-success"></span>
+        <span>Beyan &amp; Tarife</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- 📋 ANA İÇERİK -->
+<section class="py-4 bg-light" style="min-height:80vh;">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- SOL: KALEM LİSTESİ -->
+      <div class="col-lg-10 mx-auto">
+
+        <!-- Arama -->
+        <div class="d-flex flex-column align-items-center mb-4">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden w-100" style="max-width:540px;">
+            <span class="input-group-text bg-white border-end-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="searchInput" class="form-control border-start-0 ps-0 py-2" placeholder="İstisna adı veya yasal madde ara…" oninput="filterItems()">
+          </div>
+          <span class="text-muted small mt-2" id="itemCount"></span>
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 1: MUAFLIKLAR                     -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab-muafliklar" class="kvi-tab-content d-none">
+          <div class="kvi-group-header">
+            <i class="bi bi-shield-check text-danger me-2"></i>GELİR VERGİSİNDEN MUAF OLANLAR
+          </div>
+
+          {% set items_muafliklar = [
+            ("Madde 9", "Esnaf Muaflığı (Vergiden Muaf Esnaf)", "danger"),
+            ("Madde 15", "Diplomat Muaflığı", "danger")
+          ] %}
+          {% for madde_no, baslik, renk in items_muafliklar %}
+          <div class="kvi-row" data-tab="tab-muafliklar" onclick='toggleDescription(this, {{ baslik|tojson }}, {{ madde_no|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="kvi-row-number fw-bold text-{{ renk }}" style="min-width: 140px; font-size: 0.95rem;">{{ madde_no }}</div>
+                  <div class="kvi-row-name text-dark fw-medium" style="font-size: 0.95rem;">{{ baslik }}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 2: İSTİSNALAR                     -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab-istisnalar" class="kvi-tab-content">
+          <div class="kvi-group-header">
+            <i class="bi bi-file-earmark-check text-warning me-2"></i>GELİR VERGİSİ KAZANÇ İSTİSNALARI
+          </div>
+
+          {% set items_istisnalar = [
+            ("Madde 16", "Yabancı Elçilik ve Konsolosluk Personeli Ücret İstisnası", "warning"),
+            ("Madde 17", "Hizmet Erbabına Pay Senedi Verilmesinde Ücret İstisnası", "warning"),
+            ("Madde 18", "Serbest Meslek Kazançlarında Telif İstisnası", "warning"),
+            ("Madde 20", "Kreş ve Gündüz Bakımevleri ile Eğitim-Öğretim İşletmeleri İstisnası", "warning"),
+            ("Mükerrer Madde 20", "Genç Girişimcilerde Kazanç İstisnası", "warning"),
+            ("Mükerrer Madde 20/B", "Sosyal İçerik Üreticiliği ve Mobil Uygulama İstisnası", "warning"),
+            ("Mükerrer Madde 20/C", "Tarımsal Destekleme Ödemelerinde Kazanç İstisnası", "warning"),
+            ("Mükerrer Madde 20/D", "Yurt Dışından Elde Edilen Kazanç ve İratlar İstisnası", "warning"),
+            ("Madde 21", "Mesken (Konut) Kira Geliri İstisnası", "warning"),
+            ("Madde 22", "Menkul Sermaye İratlarında İstisna (Kâr Payları ve Gelir Sigortası)", "warning"),
+            ("Madde 23", "Ücretlerde İstisna", "warning"),
+            ("Madde 24", "Gider Karşılıklarında İstisna (Yolluk ve Harcırahlar)", "warning"),
+            ("Madde 25", "Tazminat ve Yardımlarda İstisna (Kıdem Tazminatı vb.)", "warning"),
+            ("Madde 26", "Vatan Hizmetleri Yardımlarında İstisna", "warning"),
+            ("Madde 27", "Teçhizat ve Tayın Bedellerinde İstisna", "warning"),
+            ("Madde 28", "Tahsil ve Tatbikat Ödemelerinde İstisna", "warning"),
+            ("Madde 29", "Teşvik İkramiye ve Mükafatları İstisnası", "warning"),
+            ("Madde 30", "Sergi ve Panayır İstisnası", "warning"),
+            ("Mükerrer Madde 80", "Değer Artışı Kazançlarında İstisna", "warning"),
+            ("Mükerrer Madde 82", "Arızi Kazançlarda İstisna", "warning")
+          ] %}
+          {% for madde_no, baslik, renk in items_istisnalar %}
+          <div class="kvi-row" data-tab="tab-istisnalar" onclick='toggleDescription(this, {{ baslik|tojson }}, {{ madde_no|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="kvi-row-number fw-bold text-{{ renk }}" style="min-width: 140px; font-size: 0.95rem;">{{ madde_no }}</div>
+                  <div class="kvi-row-name text-dark fw-medium" style="font-size: 0.95rem;">{{ baslik }}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 3: İNDİRİMLER                     -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab-indirimler" class="kvi-tab-content d-none">
+          <div class="kvi-group-header">
+            <i class="bi bi-percent text-info me-2"></i>BEYANNAMEDE DİKKATE ALINACAK İNDİRİMLER (GVK Md. 89 & 31)
+          </div>
+
+          {% set items_indirimler = [
+            ("Madde 31", "Engellilik İndirimi", "info"),
+            ("Madde 89", "Diğer İndirimler (Beyanname İndirimleri)", "info")
+          ] %}
+          {% for madde_no, baslik, renk in items_indirimler %}
+          <div class="kvi-row" data-tab="tab-indirimler" onclick='toggleDescription(this, {{ baslik|tojson }}, {{ madde_no|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="kvi-row-number fw-bold text-{{ renk }}" style="min-width: 140px; font-size: 0.95rem;">{{ madde_no }}</div>
+                  <div class="kvi-row-name text-dark fw-medium" style="font-size: 0.95rem;">{{ baslik }}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <!-- TAB 4: BEYAN & TARİFE                -->
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div id="tab-beyan-tarife" class="kvi-tab-content d-none">
+          <div class="kvi-group-header">
+            <i class="bi bi-calculator text-success me-2"></i>BEYANNAME VERME SINIRLARI VE TARİFELER
+          </div>
+
+          {% set items_beyantarife = [
+            ("Madde 86", "Beyanname Verme Sınırları (Toplama Yapılmayan Haller)", "success"),
+            ("Madde 103", "Gelir Vergisi Tarifesi (2020-2026 Dilimleri)", "success")
+          ] %}
+          {% for madde_no, baslik, renk in items_beyantarife %}
+          <div class="kvi-row" data-tab="tab-beyan-tarife" onclick='toggleDescription(this, {{ baslik|tojson }}, {{ madde_no|tojson }})'>
+            <div class="kvi-row-content">
+              <div class="kvi-row-header-wrapper d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="kvi-row-number fw-bold text-{{ renk }}" style="min-width: 140px; font-size: 0.95rem;">{{ madde_no }}</div>
+                  <div class="kvi-row-name text-dark fw-medium" style="font-size: 0.95rem;">{{ baslik }}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-chevron-down text-muted kvi-toggle-icon"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━ SCRİPTLER ━━━━━━━━ -->
+<script>
+  let activeTabId = 'tab-istisnalar';
+
+  /* ── Sekme geçişleri ── */
+  function switchTab(tabId, btn) {
+    activeTabId = tabId;
+    
+    // Tab buton sınıflarını güncelle
+    document.querySelectorAll('.kvi-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Tab panellerini göster/gizle
+    document.querySelectorAll('.kvi-tab-content').forEach(pane => {
+      if (pane.id === tabId) {
+        pane.classList.remove('d-none');
+      } else {
+        pane.classList.add('d-none');
+      }
+    });
+
+    // Açık olan tüm açıklama kutularını kapat
+    document.querySelectorAll('.kvi-description-collapse').forEach(el => {
+      el.classList.remove('expanded');
+      el.style.maxHeight = '0px';
+    });
+    document.querySelectorAll('.kvi-row').forEach(row => {
+      row.classList.remove('active-row');
+      const icon = row.querySelector('.kvi-toggle-icon');
+      if (icon) icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+    });
+    
+    filterItems();
+  }
+
+  /* ── Arama filtresi ── */
+  function filterItems() {
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    const activePanel = document.getElementById(activeTabId);
+    const rows = activePanel.querySelectorAll('.kvi-row');
+    
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+      const name = row.querySelector('.kvi-row-name').textContent.toLowerCase();
+      const number = row.querySelector('.kvi-row-number').textContent.toLowerCase();
+      
+      // Arama kelimesi satır adı ya da yasal madde adında geçiyorsa göster
+      if (name.includes(query) || number.includes(query)) {
+        row.classList.remove('d-none');
+        const next = row.nextElementSibling;
+        if (next && next.classList.contains('kvi-description-collapse')) {
+          next.classList.remove('d-none');
+        }
+        visibleCount++;
+      } else {
+        row.classList.add('d-none');
+        const next = row.nextElementSibling;
+        if (next && next.classList.contains('kvi-description-collapse')) {
+          next.classList.add('d-none');
+        }
+      }
+    });
+    
+    const countEl = document.getElementById('itemCount');
+    if (query === "") {
+      countEl.textContent = `Toplam ${visibleCount} kayıt listeleniyor.`;
+    } else {
+      countEl.textContent = `Arama sonucunda ${visibleCount} kayıt bulundu.`;
+    }
+  }
+
+  /* ── Detaylı açıklama metinleri (Yasal Kanun Metinleri) ── */
+  function getDescriptionText(name, madde) {
+    let detail = "";
+    
+    if (madde === "Madde 9") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-12"><p class="text-secondary fw-semibold mb-2">Ticari ve sanatsal faaliyetlerini iş yeri açmaksızın gerçekleştiren esnaflar gelir vergisinden muaftır. Temel muafiyet kategorileri şunlardır:</p></div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-danger-custom mb-2">Gezici & Hurda</span>
+              <ul class="ps-3 mb-0 small text-muted">
+                <li>Motorlu taşıt kullanmadan gezici perakende satış yapanlar.</li>
+                <li>Evden eve hurda veya atık madde toplayıp satanlar.</li>
+                <li>Motorsuz su vasıtaları veya tek hayvan arabasıyla nakliyecilik yapanlar.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-danger-custom mb-2">Geleneksel & Sanatsal</span>
+              <ul class="ps-3 mb-0 small text-muted">
+                <li>Kaybolmaya yüz tutan geleneksel el sanatları kolları.</li>
+                <li>El dokuması, bakır işlemeciliği, çini, sedef kakma, bastonculuk, semercilik, yorgancılık vb.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-danger-custom mb-2">Evde Üretim & İnternet Satışı</span>
+              <p class="small text-muted mb-2">Evde el emeğiyle üretilen havlu, dantel, süs eşyası, erişte vb. ürünleri dükkan açmadan internetten satanlar.</p>
+              <div class="alert alert-danger py-1 px-2 mb-0 small" style="font-size:0.75rem;">
+                <strong>2026 Sınırı:</strong> Yıllık brüt asgari ücret tutarı (<strong>1.900.000 TL</strong>). Banka hesabı üzerinden <strong>%4 (%2 istihdamlı)</strong> stopaj kesintisi yapılır.
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-danger-custom mb-2">Çatı Güneş Enerjisi</span>
+              <p class="small text-muted mb-0">Konut çatılarında kurulan azami <strong>50 kW</strong> kurulu güce kadar olan yenilenebilir enerji tesislerinden yapılan elektrik satışları vergiden muaftır.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 15") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-danger-custom mb-2">Diplomatik Muafiyet</span>
+          <p class="text-muted mb-0">Yabancı devletlerin Türkiye'de bulunan elçi, maslahatgüzar ve konsolosları ile resmi elçilik/konsolosluk personeli, karşılıklılık esasına göre gelir vergisinden muaftırlar.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 16") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Elçilik Personeli Ücreti</span>
+          <p class="text-muted mb-0">Yabancı elçilik ve konsolosluklarda çalışan memur ve hizmetlilerin yalnız bu işlerinden dolayı aldıkları ücretler, karşılıklılık ilkesine göre gelir vergisinden istisnadır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 17") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-12"><p class="text-secondary mb-2 small">Teknogirişim şirketlerinin hizmet erbabına bedelsiz veya indirimli olarak verdikleri pay senetlerinde uygulanan vergi avantajıdır:</p></div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">İstisna Limiti</span>
+              <p class="small text-muted mb-0">Pay senetlerinin rayiç değerinin, o yıldaki 1 yıllık brüt ücret tutarının <strong>iki katını</strong> aşmayan kısmı gelir vergisinden tamamen istisnadır.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Elde Tutma Şartları</span>
+              <p class="small text-muted mb-1">Payların elden çıkarılma süresine göre muafiyet oranları:</p>
+              <ul class="ps-3 mb-0 small text-muted">
+                <li>2 yıl içinde elden çıkarsa: %0 muafiyet</li>
+                <li>3-4 yıl içinde elden çıkarsa: %75 muafiyet</li>
+                <li>5-6 yıl içinde elden çıkarsa: %25 muafiyet</li>
+                <li>6 yıl üzeri elden çıkarsa: %100 muafiyet</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 18") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Telif Kazançları İstisnası</span>
+          <p class="text-muted small mb-2">Yazar, tercüman, heykeltraş, ressam, bestekar, bilgisayar programcısı ve mucitlerin; yazılım, beste, patent ve telif satışlarından elde ettikleri gelirler gelir vergisinden istisnadır.</p>
+          <div class="alert alert-warning py-1 px-2 mb-0 small">
+            <strong>2026 Yılı Beyan Sınırı:</strong> Yıllık kazanç toplamı <strong>5.300.000 TL</strong> limitini aşarsa bu kazançlar yıllık beyannameye dahil edilir.
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 20") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Eğitim Kurumları Kazanç İstisnası</span>
+          <p class="text-muted small mb-0">Özel kreş ve gündüz bakımevleri ile okul öncesi eğitim, ilköğretim ve orta öğretim özel okullarının işletilmesinden elde edilen kazançlar, faaliyete başlanılan dönemden itibaren <strong>5 vergilendirme dönemi</strong> boyunca gelir vergisinden tamamen istisnadır.</p>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 20") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-12"><p class="text-secondary mb-2 small">İlk defa vergi mükellefi olan genç girişimcilere sağlanan 3 yıllık vergi kolaylığıdir:</p></div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">İstisna Tutarı</span>
+              <p class="small text-muted mb-0">Faaliyete başlanan takvim yılından itibaren 3 vergilendirme dönemi boyunca elde edilen kazancın yıllık <strong>400.000 TL</strong>'lik kısmı gelir vergisinden muaftır.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Başvuru Koşulları</span>
+              <ul class="ps-3 mb-0 small text-muted">
+                <li>Mükellefiyet başlangıcı itibarıyla <strong>29 yaşını</strong> doldurmamış olmak.</li>
+                <li>İşe başlamayı kanuni süresi içinde bildirmek.</li>
+                <li>Kendi işinde bilfiil çalışmak veya işi sevk ve idare etmek.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 20/B") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Sosyal İçerik & Mobil Uygulama</span>
+          <p class="text-muted small mb-2">YouTube ve diğer mecralardan video/metin paylaşan sosyal içerik üreticileri ile mobil cihazlara uygulama geliştirenlerin kazançları gelir vergisinden istisnadır.</p>
+          <div class="alert alert-warning py-2 px-3 mb-0 small">
+            <ul class="ps-3 mb-0">
+              <li>Türkiye'de kurulu bankada açılan ticari hesaptan <strong>%15 stopaj</strong> kesilir.</li>
+              <li><strong>2026 Beyan Sınırı:</strong> Yıllık hasılat <strong>5.300.000 TL</strong> limitini aşarsa bu kazançlar yıllık beyanname ile beyan edilir.</li>
+            </ul>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 20/C") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Tarımsal Destekleme Ödemeleri</span>
+          <p class="text-muted small mb-0">Kamu kurum ve kuruluşları tarafından çiftçilere yapılan tarımsal destekleme ödemeleri (mazot, gübre vb. destekleri) gelir vergisinden tamamen istisnadır.</p>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 20/D") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Yurt Dışı Kazanç İstisnası</span>
+          <p class="text-muted small mb-0">Türkiye'ye yerleşen ancak yerleşmeden önceki son 3 takvim yılında Türkiye'de vergi mükellefiyeti bulunmayan kişilerin, Türkiye dışındaki ülkelerden elde ettikleri kazançları <strong>20 yıl boyunca</strong> gelir vergisinden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 21") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Konut Kira Geliri İstisnası</span>
+          <p class="text-muted small mb-2">Binaların mesken (konut) olarak kiraya verilmesinden bir takvim yılında elde edilen kira hasılatının 2026 takvim yılı için <strong>58.000 TL</strong>'si gelir vergisinden muaftır.</p>
+          <div class="alert alert-warning py-1 px-2 mb-0 small" style="font-size:0.75rem;">
+            <strong>İstisnadan Yararlanamayanlar:</strong> Yıllık beyannameyle ticari/mesleki kazanç bildirenler ile toplam geliri (2026 yılı için <strong>1.500.000 TL</strong>) aşanlar yararlanamaz.
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 22") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Kâr Payı (Temettü) Yarısı</span>
+              <p class="small text-muted mb-0">Tam mükellef şirketlerden elde edilen kâr paylarının (temettülerin) <strong>yarısı</strong> gelir vergisinden muaftır. Kalan yarısı beyan sınırını aşarsa beyan edilir.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Yurt Dışı Kâr Payı</span>
+              <p class="small text-muted mb-0">Yurt dışındaki şirketlerden elde edilen kâr paylarının <strong>yarısı</strong>; en az <strong>%20</strong> sermaye payına sahip olunması ve kârın Türkiye'ye transfer edilmesi şartıyla muaftır.</p>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="p-3 rounded border bg-white">
+              <span class="badge-warning-custom mb-2">Gelir Sigortası Ödemeleri</span>
+              <p class="small text-muted mb-0">Sigorta süresi en az 10 yıl veya ömür boyu olan tek primli yıllık gelir sigortalarından yapılan ödemelerin içerdiği irat tutarları vergiden tamamen istisnadır.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 23") {
+      detail = `
+        <div class="row g-3" style="max-height: 500px; overflow-y: auto;">
+          <div class="col-12"><p class="text-secondary fw-semibold mb-2">Gelir Vergisi Kanunu kapsamında ücret gelirleri ve sağlanan menfaatlerde uygulanan istisnalar:</p></div>
+          
+          <!-- Grup 1: Genel ve Sosyal Ücret İstisnaları -->
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-success-custom mb-2">Genel &amp; Sosyal Haklar</span>
+              <ul class="ps-3 mb-0 small text-muted" style="list-style-type: decimal;">
+                <li class="mb-2"><strong>Halı ve Kilim İşçileri (Bent 1):</strong> Nüfusu 5.000'i aşmayan yerlerde el halısı ve kilimi dokuyan işçilerin ücretleri.</li>
+                <li class="mb-2"><strong>Ev Hizmetlileri Ücretleri (Bent 6):</strong> Evlerde çalışan hizmetçilerin ücretleri istisnadır (mürebbiyeler hariç).</li>
+                <li class="mb-2"><strong>Öğrenci, Hükümlü ve Düşkünler (Bent 7):</strong> Sanat okulu, cezaevi ve darülaceze atölyelerinde çalışanlara verilen ücretler.</li>
+                <li class="mb-2"><strong>Çırakların Ücretleri (Bent 12):</strong> 3308 sayılı Kanuna tabi çırakların asgari ücreti aşmayan ücretleri.</li>
+                <li class="mb-2"><strong>Asgari Ücret İstisnası (Bent 18):</strong> Çalışanların net asgari ücrete isabet eden aylık ücret tutarları tamamen gelir vergisinden istisnadır.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Grup 2: Sosyal Yardım & Yan Ödemeler -->
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Sosyal &amp; Yan Ödemeler</span>
+              <ul class="ps-3 mb-0 small text-muted" style="list-style-type: decimal;">
+                <li class="mb-2"><strong>Günlük Yemek Bedeli (Bent 8):</strong> İş yerinde yemek verilmeyen durumlarda çalışılan günlere ait günlük yemek bedelinin 2026 yılı için <strong>300 TL</strong>'ye kadar olan kısmı istisnadır.</li>
+                <li class="mb-2"><strong>Konut Tedariki (Bent 9):</strong> Madenlerde/fabrikalarda çalışanlara ve memurlara sağlanan brüt <strong>100 m²</strong>'yi aşmayan lojman tahsisleri vergisizdir.</li>
+                <li class="mb-2"><strong>Ulaşım Gideri (Bent 10):</strong> İşverence taşıma sağlanmayan hallerde, günlük toplu taşıma kartı/bileti olarak ödenen <strong>158 TL</strong>'ye kadar olan kısım istisnadır (nakdi ödemeler hariç).</li>
+                <li class="mb-2"><strong>Kreş Yardımı (Bent 16):</strong> Kadın çalışanlar için çocuk başına brüt asgari ücretin <strong>%50</strong>'sini aşmayan kreş ödemeleri istisnadır (doğrudan kreşe ödenmesi şartıyla).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Grup 3: Sektörel & Özel Görevler -->
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Sektörel &amp; Özel Görevler</span>
+              <ul class="ps-3 mb-0 small text-muted" style="list-style-type: decimal;">
+                <li class="mb-2"><strong>Muaf Esnaf Yanında Çalışanlar (Bent 2):</strong> Gelir vergisinden muaf esnafların veya gerçek usulde vergilendirilmeyen çiftçilerin yanında çalışan işçilerin ücretleri istisnadır.</li>
+                <li class="mb-2"><strong>Yer Altı Maden İşçileri (Bent 3):</strong> Toprak altı maden işletmelerinde cevher istihsali ve buna bağlı işlerde çalışanların yer altında geçen sürelerine ait ücretlerinin tamamı vergisizdir.</li>
+                <li class="mb-2"><strong>Köy Hizmetlileri &amp; Bekçiler (Bent 5):</strong> Köy bütçesinden ödenen muhtar, katip, korucu, imam, bekçi ücretleri ile çiftçi mallarını koruma bekçilerinin ücretleri.</li>
+                <li class="mb-2"><strong>Amatör Sporcular &amp; Hakemler (Bent 15):</strong> Yüz ve daha az işçi çalıştıranlarda 1, yüzden fazla işçi çalıştıranlarda 2 amatör sporcuya ödenen ücretler (asgari ücretin 2 katına kadar) vergisizdir.</li>
+                <li class="mb-2"><strong>Pilot ve Kabin Memurları (Bent 17):</strong> Türk Hava Kurumu veya yerli sivil havacılık şirketlerinde uçuş personeline ödenen aylık ücretlerin <strong>%70</strong>'i gelir vergisinden istisnadır.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Grup 4: Uluslararası & Nitelikli Hizmetler -->
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-danger-custom mb-2">Uluslararası &amp; Nitelikli</span>
+              <ul class="ps-3 mb-0 small text-muted" style="list-style-type: decimal;">
+                <li class="mb-2"><strong>Sandık &amp; Emekli Aylıkları (Bent 11 &amp; 13):</strong> Emekli sandıkları ve SSK geçici 20. md sandıklarınca bağlanan aylıklar (devlet memuru emekli ikramiye sınırına kadar) ile yurt dışı sandıklardan ödenen emekli aylıkları.</li>
+                <li class="mb-2"><strong>Dar Mükellef İşveren Döviz Ödemeleri (Bent 14):</strong> Dar mükellef şirketlerin yurt dışı kazançlarından çalışanlarına döviz olarak ödedikleri ücretler (bölgesel yönetim merkezleri dahil).</li>
+                <li class="mb-2"><strong>Yurt Dışı Şantiye Ücretleri (Bent 19):</strong> Yurt dışı inşaat, onarım, montaj ve teknik hizmetlerde çalışan ve ücreti yurt dışı kazançtan dövizle ödenen personelin ücretleri istisnadır.</li>
+                <li class="mb-2"><strong>Nitelikli Hizmet Personeli (Bent 20):</strong> Nitelikli hizmet merkezlerinde çalışanların ücretlerinin brüt asgari ücretin <strong>3 katına</strong> (İstanbul Finans Merkezinde ve endüstri bölgelerinde <strong>5 katına</strong>) kadar olan kısmı istisnadır.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 24") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Yolluk ve Harcırah İstisnası</span>
+          <p class="text-muted small mb-0">Devlet memurlarına ödenen yolluk ve harcırahların tamamı ile özel şirketler tarafından verilen yol, yemek ve konaklama gideri karşılıklarının memur limitlerini aşmayan kısımları vergisizdir.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 25") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Kıdem Tazminatı</span>
+              <p class="small text-muted mb-0">Yasal kıdem tazminatlarının tamamı (kıdem tavanını aşmayan kısmı) ile ikale sözleşmesi kapsamında ödenen tazminatlar gelir vergisinden muaftır.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-warning-custom mb-2">Diğer Tazminat & Yardımlar</span>
+              <p class="small text-muted mb-0">Ölüm, engellilik, hastalık nedeniyle ödenen tazminat ve yardımlar, işsizlik ödeneği, işe başlatmama tazminatı vergisizdir.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 26") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Vatan Hizmetleri</span>
+          <p class="text-muted small mb-0">Harp malullüğü zamları, şehitlerin dul ve yetimlerine bağlanan aylıklar ve yapılan yardımlar, gazilere vatan hizmetleri tertibinden bağlanan aylıklar vergiden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 27") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Teçhizat & Giyim</span>
+          <p class="text-muted small mb-0">İşin gereği olarak personele demirbaş verilen ve işten ayrılınca geri alınan giyim eşyaları ile eğitim görenlerin giyim harcamaları vergiden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 28") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Burs ve Tahsil Ödemeleri</span>
+          <p class="text-muted small mb-0">Öğrencilere geçim, tahsil veya barınma gideri olarak ödenen burslar ve paralar gelir vergisinden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 29") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Teşvik ve Ödüller</span>
+          <p class="text-muted small mb-0">Bilimsel, sanatsal veya tarımsal faaliyetleri teşvik etmek amacıyla verilen mükafatlar, amatör sporcuların aldıkları ödüller ve amatör lig hakemlerine ödenen ücretler vergiden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 30") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Sergi ve Panayır İstisnası</span>
+          <p class="text-muted small mb-0">Dar mükellefiyete tabi kişilerin, fuar, sergi ve panayırlarda yaptıkları ticari ve serbest meslek kazançları vergiden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 80") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Gayrimenkul Değer Artış Kazancı</span>
+          <p class="text-muted small mb-0">Satın alınan bir gayrimenkulün iktisap tarihinden itibaren <strong>5 yıl</strong> geçtikten sonra satılması halinde elde edilen kazanç ne kadar olursa olsun gelir vergisinden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Mükerrer Madde 82") {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <span class="badge-warning-custom mb-2">Arızi Kazançlar</span>
+          <p class="text-muted small mb-0">Devamlılık arz etmeyen, yılda bir kereye mahsus yapılan arızi danışmanlık, aracılık veya ticari işlerden elde edilen kazançların yıllık belirlenen limitlere kadar olan kısmı gelir vergisinden muaftır.</p>
+        </div>
+      `;
+    } else if (madde === "Madde 31") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-12"><p class="text-secondary mb-2 small">Çalışma gücü kayıp oranlarına göre çalışanların aylık vergi matrahından düşülen engellilik indirimleri:</p></div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-white text-center h-100">
+              <span class="badge-info-custom mb-2">1. Derece (%80+)</span>
+              <h5 class="fw-bold mb-0 text-dark">12.000 TL</h5>
+              <span class="text-muted small">Aylık Matrahtan Düşülür</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-white text-center h-100">
+              <span class="badge-info-custom mb-2">2. Derece (%60+)</span>
+              <h5 class="fw-bold mb-0 text-dark">7.000 TL</h5>
+              <span class="text-muted small">Aylık Matrahtan Düşülür</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-white text-center h-100">
+              <span class="badge-info-custom mb-2">3. Derece (%40+)</span>
+              <h5 class="fw-bold mb-0 text-dark">3.000 TL</h5>
+              <span class="text-muted small">Aylık Matrahtan Düşülür</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 89") {
+      detail = `
+        <div class="row g-3" style="max-height: 450px; overflow-y: auto;">
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Eğitim &amp; Sağlık Harcamaları</span>
+              <p class="small text-muted mb-0">Mükellefin kendisi, eşi ve küçük çocuklarının yurt içindeki eğitim ve sağlık harcamaları beyan edilen gelirin <strong>%10</strong>'unu aşmamak kaydıyla matrahtan düşülebilir.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Şahıs Sigortası &amp; Hayat</span>
+              <p class="small text-muted mb-0">Mükellefin kendisi, eşi ve çocukları için ödediği şahıs sigorta primlerinin %50'si ile hayat sigortası primlerinin %100'ü (beyan edilen gelirin %15'i ve yıllık brüt asgari ücret sınırı ile) indirilir.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Yurt Dışı Hizmet İndirimi</span>
+              <p class="small text-muted mb-0">Türkiye'den yurt dışındaki müşterilere verilen yazılım, tasarım, mühendislik, veri analizi vb. hizmetlerden elde edilen kazançların <strong>%100'ü</strong> (2026 yılı itibarıyla, kazancın Türkiye'ye getirilmesi şartıyla) vergiden indirilir.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Mikro İhracat İndirimi</span>
+              <p class="small text-muted mb-0">ETGB kapsamında kargo şirketleri aracılığıyla yapılan mal ihracatı kazançlarının <strong>%50'si</strong> (sigortalı olma ve ciro limitlerine göre işçi çalıştırma koşullarıyla) beyannamede indirilir.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Bağış ve Yardımlar</span>
+              <p class="small text-muted mb-0">Kamu idareleri, belediyeler, Kızılay, Yeşilay ve Darülaceze ile kamuya yararlı vakıf/derneklere yapılan yardımlar indirilir. Okul/yurt yapım bağışlarında sınır yoktur.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-info-custom mb-2">Sponsorluk Harcamaları</span>
+              <p class="small text-muted mb-0">Spor faaliyetleri için yapılan sponsorluk harcamalarının; amatör sporlarda <strong>%100'ü</strong>, profesyonel sporlarda <strong>%50'si</strong> beyan edilen gelirden düşülür.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 86") {
+      detail = `
+        <div class="row g-3">
+          <div class="col-12"><p class="text-secondary mb-2 small">Gelirlerin hangi durumlarda beyannameye dahil edilmeyeceğini veya toplanmayacağını belirleyen yıllık limit ve kurallar:</p></div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-success-custom mb-2">Tek İşverenden Alınan Ücret</span>
+              <p class="small text-muted mb-0">Tek işverenden alınan tevkif edilmiş ücretlerde yıllık gelir <strong>5.300.000 TL</strong> sınırını aşmadığı sürece beyanname verilmez.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-success-custom mb-2">Birden Fazla İşverenden Ücret</span>
+              <p class="small text-muted mb-0">Birden sonraki işverenden alınan ücretlerin toplamı <strong>400.000 TL</strong>'yi ve toplam ücret geliri <strong>5.300.000 TL</strong>'yi aşmıyorsa beyanname verilmez.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-success-custom mb-2">Tevkifatsız Faiz &amp; Kira Geliri</span>
+              <p class="small text-muted mb-0">Stopaj ve istisna uygulamasına konu olmayan (örneğin yurt dışı faiz geliri, stopajsız işyeri kirası) gelirlerin toplamı yıllık <strong>22.000 TL</strong> limitini aşmıyorsa beyan edilmez.</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded border bg-white h-100">
+              <span class="badge-success-custom mb-2">Dar Mükellefler</span>
+              <p class="small text-muted mb-0">Türkiye'de tamamı vergi kesintisi (stopaj) yoluyla vergilendirilmiş ücret, kira, faiz veya serbest meslek kazancı olan dar mükellefler beyanname vermezler.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (madde === "Madde 103") {
+      detail = `
+        <div class="legal-text-box" style="max-height: 400px; overflow-y: auto;">
+          <p class="text-secondary small mb-3">Gelir vergisine tabi gelirler aşağıdaki oranlar çerçevesinde vergilendirilir:</p>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-danger">2026 Takvim Yılı Tarifesi (332 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>190.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>400.000 TL'nin 190.000 TL'si için 28.500 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>1.000.000 TL'nin 400.000 TL'si için 70.500 TL (Ücretlilerde 1.500.000 TL'nin 400.000 TL'si için 70.500 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>5.300.000 TL'nin 1.000.000 TL'si için 232.500 TL (Ücretlilerde 5.300.000 TL'nin 1.500.000 TL'si için 367.500 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>5.300.000 TL'den fazlasının 5.300.000 TL'si için 1.737.500 TL (Ücretlilerde 5.300.000 TL'den fazlasının 5.300.000 TL'si için 1.697.500 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2025 Takvim Yılı Tarifesi (329 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>158.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>330.000 TL'nin 158.000 TL'si için 23.700 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>800.000 TL'nin 330.000 TL'si için 58.100 TL (Ücretlilerde 1.200.000 TL'nin 330.000 TL'si için 58.100 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>4.300.000 TL'nin 800.000 TL'si için 185.000 TL (Ücretlilerde 4.300.000 TL'nin 1.200.000 TL'si için 293.000 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>4.300.000 TL'den fazlasının 4.300.000 TL'si için 1.410.000 TL (Ücretlilerde 4.300.000 TL'den fazlasının 4.300.000 TL'si için 1.378.000 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2024 Takvim Yılı Tarifesi (324 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>110.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>230.000 TL'nin 110.000 TL'si için 16.500 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>580.000 TL'nin 230.000 TL'si için 40.500 TL (Ücretlilerde 870.000 TL'nin 230.000 TL'si için 40.500 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>3.000.000 TL'nin 580.000 TL'si için 135.000 TL (Ücretlilerde 3.000.000 TL'nin 870.000 TL'si için 213.300 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>3.000.000 TL'den fazlasının 3.000.000 TL'si için 982.000 TL (Ücretlilerde 3.000.000 TL'den fazlasının 3.000.000 TL'si için 958.800 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2023 Takvim Yılı Tarifesi (323 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>70.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>150.000 TL'nin 70.000 TL'si için 10.500 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>370.000 TL'nin 150.000 TL'si için 26.500 TL (Ücretlilerde 550.000 TL'nin 150.000 TL'si için 26.500 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>1.900.000 TL'nin 370.000 TL'si için 85.900 TL (Ücretlilerde 1.900.000 TL'nin 550.000 TL'si için 134.500 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>1.900.000 TL'den fazlasının 1.900.000 TL'si için 621.400 TL (Ücretlilerde 1.900.000 TL'den fazlasının 1.900.000 TL'si için 607.000 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2022 Takvim Yılı Tarifesi (317 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>32.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>70.000 TL'nin 32.000 TL'si için 4.800 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>170.000 TL'nin 70.000 TL'si için 12.400 TL (Ücretlilerde 250.000 TL'nin 70.000 TL'si için 12.400 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>880.000 TL'nin 170.000 TL'si için 39.400 TL (Ücretlilerde 880.000 TL'nin 250.000 TL'si için 61.000 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>880.000 TL'den fazlasının 880.000 TL'si için 287.900 TL (Ücretlilerde 880.000 TL'den fazlasının 880.000 TL'si için 281.500 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2021 Takvim Yılı Tarifesi (313 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>24.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>53.000 TL'nin 24.000 TL'si için 3.600 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>130.000 TL'nin 53.000 TL'si için 9.400 TL (Ücretlilerde 190.000 TL'nin 53.000 TL'si için 9.400 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>650.000 TL'nin 130.000 TL'si için 30.190 TL (Ücretlilerde 650.000 TL'nin 190.000 TL'si için 46.390 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>650.000 TL'den fazlasının 650.000 TL'si için 212.190 TL (Ücretlilerde 650.000 TL'den fazlasının 650.000 TL'si için 207.390 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-3">
+            <h6 class="fw-bold text-secondary">2020 Takvim Yılı Tarifesi (310 Seri No.lu Genel Tebliğ)</h6>
+            <table class="table table-sm table-bordered table-striped small mb-0">
+              <thead class="table-light">
+                <tr><th>Gelir Dilimi Tutarı</th><th class="text-center">Oran</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>22.000 TL'ye kadar</td><td class="text-center fw-bold">%15</td></tr>
+                <tr><td>49.000 TL'nin 22.000 TL'si için 3.300 TL, fazlası</td><td class="text-center fw-bold">%20</td></tr>
+                <tr><td>120.000 TL'nin 49.000 TL'si için 8.700 TL (Ücretlilerde 180.000 TL'nin 49.000 TL'si için 8.700 TL), fazlası</td><td class="text-center fw-bold">%27</td></tr>
+                <tr><td>600.000 TL'nin 120.000 TL'si için 27.870 TL (Ücretlilerde 600.000 TL'nin 180.000 TL'si için 44.070 TL), fazlası</td><td class="text-center fw-bold">%35</td></tr>
+                <tr><td>600.000 TL'den fazlasının 600.000 TL'si için 195.870 TL (Ücretlilerde 600.000 TL'den fazlasının 600.000 TL'si için 191.070 TL), fazlası</td><td class="text-center fw-bold">%40</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      `;
+    } else {
+      detail = `
+        <div class="p-3 rounded border bg-white">
+          <p class="text-muted mb-0">${name} kazanç kalemi, Gelir Vergisi Kanunu kapsamında beyannamede dikkate alınabilecek yasal indirim, muafiyet ve istisnalar arasında yer almaktadır.</p>
+        </div>
+      `;
+    }
+    
+    return `
+      <div class="p-3 rounded-3" style="background-color: #f8fafc; border-left: 4px solid #64748b;">
+        <div style="font-size:0.9rem; line-height: 1.6; color: #1e293b;">${detail}</div>
+      </div>
+    `;
+  }
+
+  /* ── Açıklama kutusunu göster/gizle ── */
+  function toggleDescription(row, name, madde) {
+    let nextEl = row.nextElementSibling;
+    
+    if (!nextEl || !nextEl.classList.contains('kvi-description-collapse')) {
+      const collapseDiv = document.createElement('div');
+      collapseDiv.className = 'kvi-description-collapse';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'kvi-description-content';
+      contentDiv.innerHTML = getDescriptionText(name, madde);
+      
+      collapseDiv.appendChild(contentDiv);
+      row.parentNode.insertBefore(collapseDiv, row.nextSibling);
+      nextEl = collapseDiv;
+    }
+    
+    const wasExpanded = nextEl.classList.contains('expanded');
+    const toggleIcon = row.querySelector('.kvi-toggle-icon');
+    
+    // Aktif tabdaki diğer tüm açık kutuları kapat
+    const activeTab = row.closest('.kvi-tab-content');
+    activeTab.querySelectorAll('.kvi-description-collapse.expanded').forEach(el => {
+      if (el !== nextEl) {
+        el.classList.remove('expanded');
+        el.style.maxHeight = '0px';
+        const siblingRow = el.previousElementSibling;
+        siblingRow.classList.remove('active-row');
+        const siblingIcon = siblingRow.querySelector('.kvi-toggle-icon');
+        if (siblingIcon) {
+          siblingIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        }
+      }
+    });
+    
+    if (!wasExpanded) {
+      nextEl.classList.add('expanded');
+      row.classList.add('active-row');
+      if (toggleIcon) {
+        toggleIcon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      }
+      nextEl.style.maxHeight = nextEl.scrollHeight + 'px';
+    } else {
+      nextEl.classList.remove('expanded');
+      row.classList.remove('active-row');
+      if (toggleIcon) {
+        toggleIcon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      }
+      nextEl.style.maxHeight = '0px';
+    }
+  }
+
+  // İlk yüklemede toplam kalem sayısını göster
+  document.addEventListener('DOMContentLoaded', () => {
+    filterItems();
+  });
+</script>
+
+<!-- ━━━━━━━━ STİLLER ━━━━━━━━ -->
+<style>
+/* Tab Butonları */
+.kvi-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50px;
+  background: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.kvi-tab-btn:hover { border-color: #dc3545; color: #dc3545; background-color: #f8fafc; }
+.kvi-tab-btn.active { border-color: #dc3545; background: #dc3545; color: white; box-shadow: 0 4px 12px rgba(220,53,69,0.25); }
+.kvi-tab-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.kvi-tab-btn.active .kvi-tab-dot { background-color: white !important; }
+
+/* Grup Başlığı */
+.kvi-group-header {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8b1e2a;
+  padding: 12px 24px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Kalem Satırı */
+.kvi-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.kvi-row:hover { border-color: #fca5a5; background: #f8fafc; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+.kvi-row.active-row { border-color: #dc3545; background: #fff5f5; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; box-shadow: none; }
+
+.kvi-row-content { flex: 1; min-width: 0; }
+.kvi-row-header-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.kvi-row-name { font-size: 0.92rem; font-weight: 600; color: #1e293b; line-height: 1.4; }
+
+/* Custom Badge Sınıfları */
+.badge-danger-custom {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 0.78rem;
+}
+.badge-warning-custom {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 0.78rem;
+}
+.badge-info-custom {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 0.78rem;
+}
+.badge-success-custom {
+  background-color: #dcfce7 !important;
+  color: #15803d !important;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 0.78rem;
+}
+
+/* Açıklama Kutusu ve Butonlar */
+.kvi-description-collapse {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-left: 4px solid #dc3545;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  margin-top: 0;
+  margin-bottom: 10px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+}
+.kvi-description-collapse.expanded {
+  max-height: none;
+}
+.kvi-description-content {
+  padding: 20px 24px;
+}
+.kvi-toggle-icon {
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+</style>
+
+{% endblock %}

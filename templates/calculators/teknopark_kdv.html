@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block title %}Teknopark KDV İstisnası Kontrolü 2026 | Yazılım Teslimleri | İSFA YMM{% endblock %}
+{% block description %}Teknoparkta üretilen yazılım tesliminin KDV geçici 20/1 istisnasına uygunluğunu birkaç adımda kontrol edin. Sonuçlar tarayıcıda hesaplanır ve kaydedilmez.{% endblock %}
+{% block keywords %}teknopark kdv istisnası, teknokent yazılım kdv, geçici 20/1, yazılım teslimi kdv istisnası, kdv istisna kodu 223{% endblock %}
+{% block canonical_url %}{{ url_for('calculators.teknopark_kdv_istisnasi', _external=True) }}{% endblock %}
+
+{% block content %}
+<main class="incentive-page">
+    <header class="incentive-hero">
+        <div class="incentive-wrap">
+            <div class="eyebrow">KDV Kanunu geçici madde 20/1</div>
+            <h1>Teknopark KDV İstisnası Kontrolü</h1>
+            <p>Teknoparkta üretilen yazılımın teslim veya lisanslanmasında KDV istisnası şartlarını sade bir ön kontrolle değerlendirin.</p>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i> Firma, müşteri veya belge bilgisi istenmez. Seçimleriniz kaydedilmez.</div>
+        </div>
+    </header>
+
+    <div class="incentive-wrap">
+        <div class="incentive-grid">
+            <section class="tool-panel" aria-labelledby="tkdv-form-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="tkdv-form-title">İstisna şartları</h2>
+                        <p>İşleminize uyan seçenekleri işaretleyin.</p>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="tkdvBolge">Satıcı, teknoloji geliştirme bölgesinde girişimci mi?</label>
+                        <select id="tkdvBolge">
+                            <option value="evet">Evet</option>
+                            <option value="hayir">Hayır</option>
+                            <option value="belirsiz">Emin değilim</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="tkdvKazanc">İlgili faaliyet kazanç istisnası kapsamında mı?</label>
+                        <select id="tkdvKazanc">
+                            <option value="evet">Evet</option>
+                            <option value="hayir">Hayır</option>
+                            <option value="belirsiz">Emin değilim</option>
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label for="tkdvUretim">Yazılım yalnızca bölge içinde mi üretildi?</label>
+                        <select id="tkdvUretim">
+                            <option value="evet">Evet</option>
+                            <option value="hayir">Hayır</option>
+                            <option value="karma">Bölge içi ve dışı çalışmalar birlikte</option>
+                            <option value="belirsiz">Emin değilim</option>
+                        </select>
+                    </div>
+                    <div class="section-label">Yazılım ve işlem türü</div>
+                    <div class="field">
+                        <label for="tkdvYazilim">Yazılımın türü</label>
+                        <select id="tkdvYazilim">
+                            <option value="uygun">Sistem veya veri yönetimi yazılımı</option>
+                            <option value="uygun">İş uygulaması veya sektörel yazılım</option>
+                            <option value="uygun">İnternet, mobil veya oyun yazılımı</option>
+                            <option value="uygun">Askerî komuta kontrol yazılımı</option>
+                            <option value="diger">Diğer yazılım veya Ar-Ge çıktısı</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="tkdvIslem">Yapılan işlem</label>
+                        <select id="tkdvIslem">
+                            <option value="teslim">Yazılım teslimi veya lisans hakkı</option>
+                            <option value="guncelleme">Yazılım güncellemesi</option>
+                            <option value="bakim">Bakım veya destek hizmeti</option>
+                            <option value="donanim">Donanım veya cihaz satışı</option>
+                            <option value="reklam">Reklam hizmeti</option>
+                            <option value="karma">Birden fazla unsur içeren karma işlem</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="callout info">İstisna, yazılımın kendisinin teslimine yöneliktir. Teknoparkta kullanılan mal ve hizmet alımları bu nedenle kendiliğinden KDV'siz olmaz.</div>
+            </section>
+
+            <aside class="result-panel" aria-live="polite">
+                <h2>Ön kontrol sonucu</h2>
+                <div class="result-main" id="tkdvResultBox">
+                    <span>İşlemin durumu</span>
+                    <strong id="tkdvStatus">İstisnaya uygun görünüyor</strong>
+                </div>
+                <div class="result-row"><span>Beyanname istisna kodu</span><strong id="tkdvCode">223</strong></div>
+                <div class="result-row"><span>KDV hesaplanması</span><strong id="tkdvTax">Hesaplanmaz</strong></div>
+                <div class="result-row"><span>Alımlardaki KDV</span><strong>Kapsam dışında</strong></div>
+                <div class="callout" id="tkdvExplanation"></div>
+                <p class="legal-footnote">Bu sonuç, işlem türünü sınıflandırmaya yardımcı olan bir ön kontroldür. Sözleşmenin içeriği, üretim yeri ve kazanç istisnası kayıtları birlikte değerlendirilmelidir.</p>
+            </aside>
+        </div>
+
+        <div class="content-tabs" role="tablist" aria-label="Teknopark KDV bilgi bölümleri">
+            <button class="active" data-tab-button="ozet">Kısa özet</button>
+            <button data-tab-button="ornekler">Örnekler</button>
+            <button data-tab-button="mevzuat">Mevzuat</button>
+        </div>
+
+        <section class="info-band" data-tab-panel="ozet">
+            <h2>Teknopark KDV istisnası hangi işlemlerde uygulanır?</h2>
+            <p>Teknoloji geliştirme bölgesinde faaliyette bulunan girişimcilerin, kazanç istisnası uygulanan dönem içinde ve bölgede ürettikleri belirli yazılımların teslimleri KDV'den istisna olabilir. Sistem ve veri yönetimi, iş uygulamaları, sektörel, internet, mobil, oyun ve askerî komuta kontrol yazılımları kapsamda sayılan başlıca türlerdir.</p>
+            <p class="mb-0">Bakım ve destek hizmeti, donanım satışı veya reklam hizmeti gibi yazılım tesliminden farklı işlemler ayrıca değerlendirilir.</p>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="ornekler">
+            <h2>Hazır örnekler</h2>
+            <div class="example-grid">
+                <div class="example-card"><strong>Mobil uygulama lisansı</strong><p>Bölgede üretilmiş uygun yazılım teslimi.</p><button type="button" data-tkdv-example="license">Örneği yükle</button></div>
+                <div class="example-card"><strong>Bakım hizmeti</strong><p>Yazılımdan ayrı sunulan bakım ve destek.</p><button type="button" data-tkdv-example="maintenance">Örneği yükle</button></div>
+                <div class="example-card"><strong>Karma sözleşme</strong><p>Yazılım, donanım ve hizmet birlikte.</p><button type="button" data-tkdv-example="mixed">Örneği yükle</button></div>
+            </div>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="mevzuat">
+            <h2>Mevzuat dayanağı</h2>
+            <ul class="mb-0">
+                <li>3065 sayılı Katma Değer Vergisi Kanunu geçici madde 20/1</li>
+                <li>KDV Genel Uygulama Tebliği, teknoloji geliştirme bölgelerine ilişkin açıklamalar</li>
+                <li>KDV beyannamesi istisna kodu: 223</li>
+                <li>Kazanç istisnası süresi: 31.12.2028</li>
+            </ul>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tesvik_hesaplama.css') }}?v=3">
+<script src="{{ url_for('static', filename='js/calculators/tesvik_common.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/calculators/teknopark_kdv.js') }}?v=1"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Teknopark KDV İstisnası Kontrolü","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"}}</script>
+{% endblock %}

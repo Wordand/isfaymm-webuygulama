@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block title %}Teknopark Kazanç İstisnası Hesaplama 2026 | İSFA YMM{% endblock %}
+{% block description %}4691 sayılı Kanuna göre teknopark kazanç istisnasını, giderleri, gayrimaddi hak oranını ve girişim sermayesi yatırım yükümlülüğünü ücretsiz hesaplayın.{% endblock %}
+{% block keywords %}teknopark kazanç istisnası hesaplama, teknoloji geliştirme bölgesi kurumlar vergisi, 4691 istisna, teknokent vergi hesaplama, arge teknopark farkı{% endblock %}
+{% block canonical_url %}{{ url_for('calculators.teknopark_kazanc_istisnasi', _external=True) }}{% endblock %}
+{% block og_title %}Teknopark Kazanç İstisnası Hesaplama 2026{% endblock %}
+{% block og_desc %}Teknopark gelir ve giderlerinizi girerek istisna kazancı ve yatırım yükümlülüğünü görün.{% endblock %}
+
+{% block content %}
+<main class="incentive-page">
+    <header class="incentive-hero">
+        <div class="incentive-wrap">
+            <div class="eyebrow">4691 sayılı Kanun</div>
+            <h1>Teknopark Kazanç İstisnası Hesaplama</h1>
+            <p>Teknoloji geliştirme bölgesindeki yazılım, tasarım ve Ar-Ge faaliyetlerinden elde edilen istisna kazancı sade biçimde hesaplayın.</p>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i> Girdiğiniz bilgiler tarayıcınızda hesaplanır; sunucuya gönderilmez ve kaydedilmez.</div>
+        </div>
+    </header>
+
+    <div class="incentive-wrap">
+        <div class="incentive-grid">
+            <section class="tool-panel" aria-labelledby="tekno-form-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="tekno-form-title">İstisna kazanç bilgileri</h2>
+                        <p>Toplam faaliyet gelirinizi ve bu kazanca ait giderleri girin.</p>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field full">
+                        <label for="teknoFaaliyet">Faaliyet türü</label>
+                        <select id="teknoFaaliyet">
+                            <option value="normal">Yazılım, tasarım veya Ar-Ge faaliyeti</option>
+                            <option value="seri">Seri üretime konu ürün</option>
+                            <option value="ip">Gayrimaddi hakkın satışı, devri veya kiralanması</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="teknoGelir">Faaliyetten elde edilen toplam gelir (TL)</label>
+                        <input id="teknoGelir" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="teknoKapsamDisi">Kapsam dışı gelirler (TL)</label>
+                        <input id="teknoKapsamDisi" data-money inputmode="decimal" value="0,00">
+                        <small>Faiz, kur farkı ve istisna faaliyetiyle doğrudan bağlantısı olmayan gelirler.</small>
+                    </div>
+                    <div class="field">
+                        <label for="teknoDogrudanGider">Doğrudan giderler (TL)</label>
+                        <input id="teknoDogrudanGider" data-money inputmode="decimal" value="0,00">
+                    </div>
+                    <div class="field">
+                        <label for="teknoOrtakGider">Faaliyete düşen ortak gider payı (TL)</label>
+                        <input id="teknoOrtakGider" data-money inputmode="decimal" value="0,00">
+                    </div>
+                </div>
+
+                <details class="advanced-box" id="teknoAdvanced">
+                    <summary>Gelişmiş hesap</summary>
+                    <div class="field-grid">
+                        <div class="field hidden" id="serialField">
+                            <label for="teknoIpPayi">Ürün kazancındaki gayrimaddi hak payı (%)</label>
+                            <input id="teknoIpPayi" type="number" min="0" max="100" step="0.01" value="100">
+                            <small>Transfer fiyatlandırması esaslarına göre belirlenen pay.</small>
+                        </div>
+                        <div class="field hidden" id="qualifiedField">
+                            <label for="teknoNitelikli">Nitelikli harcamalar (TL)</label>
+                            <input id="teknoNitelikli" data-money inputmode="decimal" value="0,00">
+                        </div>
+                        <div class="field hidden" id="totalSpendField">
+                            <label for="teknoToplamHarcama">Toplam harcamalar (TL)</label>
+                            <input id="teknoToplamHarcama" data-money inputmode="decimal" value="0,00">
+                            <small>Nitelikli harcama tutarı hesapta en fazla %30 artırılır.</small>
+                        </div>
+                        <div class="field">
+                            <label for="teknoKvOrani">Genel kurumlar vergisi oranı (%)</label>
+                            <input id="teknoKvOrani" type="number" min="0" max="100" step="0.01" value="25">
+                        </div>
+                    </div>
+                </details>
+
+                <div class="callout info">
+                    Aynı proje veya faaliyet için hem 4691 sayılı Kanun istisnası hem de 5746 sayılı Kanun Ar-Ge indirimi birlikte uygulanmaz.
+                </div>
+            </section>
+
+            <aside class="result-panel" aria-live="polite">
+                <h2>Hesaplama sonucu</h2>
+                <div class="result-main">
+                    <span>Teknopark kazanç istisnası</span>
+                    <strong id="teknoIstisna">0,00 TL</strong>
+                </div>
+                <div class="result-row"><span>İstisna kapsamındaki gelir</span><strong id="teknoUygunGelir">0,00 TL</strong></div>
+                <div class="result-row"><span>İstisna öncesi faaliyet kazancı</span><strong id="teknoFaaliyetKazanci">0,00 TL</strong></div>
+                <div class="result-row"><span>İstisna oranı</span><strong id="teknoIstisnaOrani">%100</strong></div>
+                <div class="result-row good"><span>Asgari vergi öncesi vergi avantajı</span><strong id="teknoVergiAvantaji">0,00 TL</strong></div>
+                <div class="result-row warn"><span>Girişim sermayesi yatırım yükümlülüğü</span><strong id="teknoYatirimYuk">Doğmaz</strong></div>
+                <div class="callout hidden" id="teknoLimitNote"></div>
+                <div class="result-actions">
+                    <a id="teknoAsgariLink" class="tool-link primary" href="{{ url_for('calculators.asgari_kurumlar_vergisi') }}"><i class="bi bi-calculator"></i> Asgari vergi etkisini gör</a>
+                </div>
+                <p class="legal-footnote">Sonuç bilgilendirme amaçlıdır. Proje niteliği, bölge yönetici şirketi kayıtları ve güncel mevzuat birlikte değerlendirilmelidir.</p>
+            </aside>
+        </div>
+
+        <div class="content-tabs" role="tablist" aria-label="Teknopark bilgi bölümleri">
+            <button class="active" data-tab-button="ozet">Kısa özet</button>
+            <button data-tab-button="ornekler">Örnekler</button>
+            <button data-tab-button="mevzuat">Mevzuat</button>
+        </div>
+
+        <section class="info-band" data-tab-panel="ozet">
+            <h2>Teknopark kazanç istisnası nasıl hesaplanır?</h2>
+            <p>İstisna, bölgedeki uygun yazılım, tasarım veya Ar-Ge faaliyetinden doğan kazanç üzerinden hesaplanır. İlgili gelirden doğrudan giderler ve uygun yöntemle dağıtılan ortak giderler düşülür. Faiz ve benzeri faaliyet dışı gelirler istisna kapsamında değerlendirilmez.</p>
+            <p class="mb-0">Gayrimaddi hak gelirlerinde nitelikli harcama oranı; seri üretimde ise gayrimaddi hakka isabet eden kazanç payı ayrıca dikkate alınır.</p>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="ornekler">
+            <h2>Hazır örnekler</h2>
+            <div class="example-grid">
+                <div class="example-card"><strong>Yazılım projesi</strong><p>5 milyon TL gelir, 2 milyon TL gider.</p><button type="button" data-tekno-example="basic">Örneği yükle</button></div>
+                <div class="example-card"><strong>Seri üretim</strong><p>Ürün kazancının %35'i gayrimaddi hakka ait.</p><button type="button" data-tekno-example="serial">Örneği yükle</button></div>
+                <div class="example-card"><strong>Gayrimaddi hak</strong><p>Nitelikli harcama oranı ile istisna hesabı.</p><button type="button" data-tekno-example="ip">Örneği yükle</button></div>
+            </div>
+        </section>
+
+        <section class="info-band hidden" data-tab-panel="mevzuat">
+            <h2>Mevzuat dayanağı</h2>
+            <ul class="mb-0">
+                <li>4691 sayılı Teknoloji Geliştirme Bölgeleri Kanunu geçici madde 2</li>
+                <li>1 Seri No.lu Kurumlar Vergisi Genel Tebliği, bölüm 5.12.2</li>
+                <li>31.12.2025 tarihli 10803 sayılı Cumhurbaşkanı Kararı</li>
+                <li>İstisna süresi: 31.12.2028</li>
+            </ul>
+        </section>
+
+        {% include "calculators/_arge_teknopark_karsilastirma.html" %}
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tesvik_hesaplama.css') }}?v=1">
+<script src="{{ url_for('static', filename='js/calculators/tesvik_common.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/calculators/teknopark.js') }}?v=1"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Teknopark Kazanç İstisnası Hesaplama",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "TRY"},
+  "description": "4691 sayılı Kanuna göre teknopark kazanç istisnası ve girişim sermayesi yatırım yükümlülüğü hesabı."
+}
+</script>
+{% endblock %}

@@ -168,147 +168,245 @@
                 </div>
             </div>
 
-            <section class="mt-5" aria-labelledby="gelir-vergisi-rehber">
-                <h2 id="gelir-vergisi-rehber" class="h4 fw-bold text-dark mb-3">Gelir Vergisi Nasıl Hesaplanır?</h2>
-                <p class="text-muted">
-                    Gelir vergisi hesaplamasında vergiye tabi matrah, ilgili yılın gelir vergisi tarifesindeki dilimlere ayrılır. Her dilime karşılık gelen oran uygulanır ve toplam vergi bulunur. Ücret gelirlerinde asgari ücret gelir vergisi istisnası ve yıl içindeki kümülatif matrah dikkate alınır.
-                </p>
-                <div class="row g-3 mt-2">
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <h3 class="h6 fw-bold">Ücret Geliri</h3>
-                            <p class="small text-muted mb-0">Maaş ve ücret gelirlerinde kümülatif matrah, ay seçimi ve asgari ücret istisnası birlikte değerlendirilir.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <h3 class="h6 fw-bold">Ücret Dışı Gelir</h3>
-                            <p class="small text-muted mb-0">Kira, değer artışı veya benzeri gelirlerde ücret dışı gelir vergisi tarifesi esas alınır.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100">
-                            <h3 class="h6 fw-bold">Sonuç Raporu</h3>
-                            <p class="small text-muted mb-0">Hesaplanan vergi, istisna ve ödenecek net vergi tutarı aynı ekranda görüntülenir.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <!-- Detaylı Bilgi Sekmeleri (SEO & UX Geliştirmesi) -->
+            <style>
+                .nav-pills-custom {
+                    background-color: #f8f9fa;
+                    border-radius: 50px;
+                    padding: 6px;
+                }
+                .nav-pills-custom .nav-link {
+                    color: #4b5563 !important;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    padding: 10px 20px;
+                    transition: all 0.2s ease;
+                    border: 1px solid transparent;
+                }
+                .nav-pills-custom .nav-link.active {
+                    color: #fff !important;
+                    background-color: #dc3545 !important;
+                    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+                }
+                .nav-pills-custom .nav-link:hover:not(.active) {
+                    background-color: #e9ecef;
+                    color: #212529 !important;
+                }
+                .tab-pane {
+                    animation: fadeInTab 0.3s ease-in-out;
+                }
+                @keyframes fadeInTab {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .example-card {
+                    border: 1px solid #e9ecef;
+                    border-radius: 12px;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    background: #fff;
+                }
+                .example-card:hover {
+                    border-color: #dc3545;
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 20px rgba(220, 53, 69, 0.05);
+                }
+            </style>
 
-            <section class="mt-5" aria-labelledby="gelir-vergisi-dilimleri-2026">
-                <h2 id="gelir-vergisi-dilimleri-2026" class="h4 fw-bold text-dark mb-3">2026 Gelir Vergisi Dilimleri</h2>
-                <p class="text-muted">
-                    2026 yılında ücret gelirleri ile ücret dışı gelirler için üst dilim sınırları farklılaşır. Hesaplama aracı, seçilen gelir türüne göre ilgili tarifeyi kullanır.
-                </p>
-                <div class="row g-4">
-                    <div class="col-lg-6">
-                        <div class="border rounded-4 overflow-hidden h-100 bg-white">
-                            <div class="bg-light px-3 py-2 fw-bold">Ücret Gelirleri İçin 2026 Tarife</div>
-                            <div class="table-responsive">
-                                <table class="table table-sm mb-0 align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th class="ps-3">Matrah dilimi</th>
-                                            <th class="text-end pe-3">Oran</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td class="ps-3">190.000 TL'ye kadar</td><td class="text-end pe-3">%15</td></tr>
-                                        <tr><td class="ps-3">400.000 TL'ye kadar</td><td class="text-end pe-3">%20</td></tr>
-                                        <tr><td class="ps-3">1.500.000 TL'ye kadar</td><td class="text-end pe-3">%27</td></tr>
-                                        <tr><td class="ps-3">5.300.000 TL'ye kadar</td><td class="text-end pe-3">%35</td></tr>
-                                        <tr><td class="ps-3">5.300.000 TL üzeri</td><td class="text-end pe-3">%40</td></tr>
-                                    </tbody>
-                                </table>
+            <div class="mt-5">
+                <div class="nav nav-pills nav-fill nav-pills-custom mb-4 shadow-sm" id="gelirVergisiTabs" role="tablist">
+                    <button class="nav-link active" id="tab-ozet" data-bs-toggle="pill" data-bs-target="#pane-ozet" type="button" role="tab" aria-controls="pane-ozet" aria-selected="true">
+                        <i class="bi bi-file-text me-2"></i>Kısa Özet
+                    </button>
+                    <button class="nav-link" id="tab-ornekler" data-bs-toggle="pill" data-bs-target="#pane-ornekler" type="button" role="tab" aria-controls="pane-ornekler" aria-selected="false">
+                        <i class="bi bi-lightning-charge me-2"></i>Pratik Örnekler
+                    </button>
+                    <button class="nav-link" id="tab-mevzuat" data-bs-toggle="pill" data-bs-target="#pane-mevzuat" type="button" role="tab" aria-controls="pane-mevzuat" aria-selected="false">
+                        <i class="bi bi-book me-2"></i>Mevzuat (2026)
+                    </button>
+                    <button class="nav-link" id="tab-sss" data-bs-toggle="pill" data-bs-target="#pane-sss" type="button" role="tab" aria-controls="pane-sss" aria-selected="false">
+                        <i class="bi bi-question-circle me-2"></i>Sıkça Sorulan Sorular
+                    </button>
+                </div>
+
+                <div class="tab-content" id="gelirVergisiTabContent">
+                    <!-- Kısa Özet -->
+                    <div class="tab-pane fade show active" id="pane-ozet" role="tabpanel" aria-labelledby="tab-ozet">
+                        <div class="p-4 bg-white border rounded-4 shadow-sm">
+                            <h3 class="h5 fw-bold text-dark mb-3">Gelir Vergisi Nasıl Hesaplanır?</h3>
+                            <p class="text-muted">
+                                Gelir vergisi hesaplamasında vergiye tabi matrah, ilgili yılın gelir vergisi tarifesindeki dilimlere ayrılır. Her dilime karşılık gelen oran uygulanır ve toplam vergi bulunur. Ücret gelirlerinde asgari ücret gelir vergisi istisnası ve yıl içindeki kümülatif matrah dikkate alınır.
+                            </p>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold">Ücret Geliri</h4>
+                                        <p class="small text-muted mb-0">Maaş ve ücret gelirlerinde kümülatif matrah, ay seçimi and asgari ücret istisnası birlikte değerlendirilir.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold">Ücret Dışı Gelir</h4>
+                                        <p class="small text-muted mb-0">Kira, değer artışı veya benzeri gelirlerde ücret dışı gelir vergisi tarifesi esas alınır.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold">Sonuç Raporu</h4>
+                                        <p class="small text-muted mb-0">Hesaplanan vergi, istisna ve ödenecek net vergi tutarı aynı ekranda görüntülenir ve PDF raporu alınabilir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-danger-subtle border-danger text-danger-emphasis d-flex align-items-center gap-3 mt-4 mb-0 rounded-3" style="background-color: #fdf2f2;">
+                                <i class="bi bi-info-circle-fill fs-5 text-danger"></i>
+                                <div class="small">
+                                    <strong>İstisna ve Muafiyetler:</strong> Ücret, kira geliri, genç girişimci ve esnaf muafiyeti gibi tüm yasal hakların detayları için 
+                                    <a href="{{ url_for('main.gv_istisna_indirimler') }}" class="fw-bold text-danger text-decoration-underline">Gelir Vergisi İstisna ve Muafiyetleri Kılavuzu</a> sayfamızı inceleyebilirsiniz.
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="border rounded-4 overflow-hidden h-100 bg-white">
-                            <div class="bg-light px-3 py-2 fw-bold">Ücret Dışı Gelirler İçin 2026 Tarife</div>
-                            <div class="table-responsive">
-                                <table class="table table-sm mb-0 align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th class="ps-3">Matrah dilimi</th>
-                                            <th class="text-end pe-3">Oran</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr><td class="ps-3">190.000 TL'ye kadar</td><td class="text-end pe-3">%15</td></tr>
-                                        <tr><td class="ps-3">400.000 TL'ye kadar</td><td class="text-end pe-3">%20</td></tr>
-                                        <tr><td class="ps-3">1.000.000 TL'ye kadar</td><td class="text-end pe-3">%27</td></tr>
-                                        <tr><td class="ps-3">5.300.000 TL'ye kadar</td><td class="text-end pe-3">%35</td></tr>
-                                        <tr><td class="ps-3">5.300.000 TL üzeri</td><td class="text-end pe-3">%40</td></tr>
-                                    </tbody>
-                                </table>
+
+                    <!-- Pratik Örnekler -->
+                    <div class="tab-pane fade" id="pane-ornekler" role="tabpanel" aria-labelledby="tab-ornekler">
+                        <div class="p-4 bg-white border rounded-4 shadow-sm">
+                            <h3 class="h5 fw-bold text-dark mb-3">Hazır Hesaplama Örnekleri</h3>
+                            <p class="text-muted mb-4">Aşağıdaki hazır senaryolardan birini seçerek hesaplama formunu otomatik doldurabilir ve sonucu inceleyebilirsiniz:</p>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="example-card p-3 h-100 d-flex flex-column justify-content-between" onclick="loadExample(22002.00, 2026, 'ucret', 1, true)">
+                                        <div>
+                                            <h4 class="h6 fw-bold text-dark mb-2">Asgari Ücretli Çalışan</h4>
+                                            <p class="small text-muted mb-3">2026 yılı Ocak ayı brüt asgari ücret matrahı üzerinden %15 vergi ve asgari ücret istisnası uygulaması.</p>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill mt-2">Örneği Yükle</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="example-card p-3 h-100 d-flex flex-column justify-content-between" onclick="loadExample(120000.00, 2026, 'ucret', 6, true, 500000.00)">
+                                        <div>
+                                            <h4 class="h6 fw-bold text-dark mb-2">Yüksek Ücretli (Beyaz Yaka)</h4>
+                                            <p class="small text-muted mb-3">Aylık 120.000 TL ücret matrahı. Yıl ortasında (Haziran ayı) 500.000 TL kümülatif matrah etkisi ve üst dilim (%27) hesabı.</p>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill mt-2">Örneği Yükle</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="example-card p-3 h-100 d-flex flex-column justify-content-between" onclick="loadExample(450000.00, 2026, 'normal', 0, false)">
+                                        <div>
+                                            <h4 class="h6 fw-bold text-dark mb-2">Kira Geliri (Ücret Dışı)</h4>
+                                            <p class="small text-muted mb-3">Yıllık 450.000 TL kira veya değer artış kazancı matrahı üzerinden asgari ücret istisnası olmadan yıllık vergi hesabı.</p>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill mt-2">Örneği Yükle</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mevzuat -->
+                    <div class="tab-pane fade" id="pane-mevzuat" role="tabpanel" aria-labelledby="tab-mevzuat">
+                        <div class="p-4 bg-white border rounded-4 shadow-sm">
+                            <h3 class="h5 fw-bold text-dark mb-3">2026 Gelir Vergisi Dilimleri</h3>
+                            <p class="text-muted mb-4">
+                                2026 yılında ücret gelirleri ile ücret dışı gelirler için üst dilim sınırları farklılaşır. Hesaplama aracı, seçilen gelir türüne göre ilgili tarifeyi kullanır.
+                            </p>
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="border rounded-4 overflow-hidden bg-light">
+                                        <div class="bg-dark text-white px-3 py-2 fw-bold small">Ücret Gelirleri İçin 2026 Tarife</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-borderless mb-0 align-middle small">
+                                                <thead>
+                                                    <tr class="border-bottom"><th class="ps-3 py-2">Matrah Dilimi</th><th class="text-end pe-3 py-2">Oran</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr><td class="ps-3 py-2">190.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%15</td></tr>
+                                                    <tr><td class="ps-3 py-2">400.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%20</td></tr>
+                                                    <tr><td class="ps-3 py-2">1.500.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%27</td></tr>
+                                                    <tr><td class="ps-3 py-2">5.300.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%35</td></tr>
+                                                    <tr class="border-top"><td class="ps-3 py-2 fw-bold">5.300.000 TL üzeri</td><td class="text-end pe-3 py-2 fw-bold">%40</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="border rounded-4 overflow-hidden bg-light">
+                                        <div class="bg-dark text-white px-3 py-2 fw-bold small">Ücret Dışı Gelirler İçin 2026 Tarife</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-borderless mb-0 align-middle small">
+                                                <thead>
+                                                    <tr class="border-bottom"><th class="ps-3 py-2">Matrah Dilimi</th><th class="text-end pe-3 py-2">Oran</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr><td class="ps-3 py-2">190.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%15</td></tr>
+                                                    <tr><td class="ps-3 py-2">400.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%20</td></tr>
+                                                    <tr><td class="ps-3 py-2">1.000.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%27</td></tr>
+                                                    <tr><td class="ps-3 py-2">5.300.000 TL'ye kadar</td><td class="text-end pe-3 py-2">%35</td></tr>
+                                                    <tr class="border-top"><td class="ps-3 py-2 fw-bold">5.300.000 TL üzeri</td><td class="text-end pe-3 py-2 fw-bold">%40</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-danger-subtle border-danger text-danger-emphasis d-flex align-items-center gap-3 mt-4 mb-0 rounded-3" style="background-color: #fdf2f2;">
+                                <i class="bi bi-info-circle-fill fs-5 text-danger"></i>
+                                <div class="small">
+                                    <strong>Detaylı İstisna &amp; Muafiyetler:</strong> Yasa maddeleri, şartlar ve genç girişimci, telif, esnaf muafiyeti limitleri için 
+                                    <a href="{{ url_for('main.gv_istisna_indirimler') }}" class="fw-bold text-danger text-decoration-underline">Gelir Vergisi İstisna ve Muafiyetleri Kılavuzu</a> sayfamızı inceleyebilirsiniz.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SSS -->
+                    <div class="tab-pane fade" id="pane-sss" role="tabpanel" aria-labelledby="tab-sss">
+                        <div class="p-4 bg-white border rounded-4 shadow-sm">
+                            <h3 class="h5 fw-bold text-dark mb-4">Sık Sorulan Sorular</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">Gelir vergisi hesaplama aracı ne işe yarar?</h4>
+                                        <p class="small text-muted mb-0">İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">Kümülatif vergi matrahı nedir?</h4>
+                                        <p class="small text-muted mb-0">Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">Asgari ücret istisnası ne zaman uygulanır?</h4>
+                                        <p class="small text-muted mb-0">Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">2026 gelir vergisi nasıl hesaplanır?</h4>
+                                        <p class="small text-muted mb-0">Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">2026 gelir vergisi dilimleri nelerdir?</h4>
+                                        <p class="small text-muted mb-0">2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold mb-2">Ücret gelir vergisinde kümülatif matrah neden gerekir?</h4>
+                                        <p class="small text-muted mb-0">Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <section class="mt-5" aria-labelledby="gelir-vergisi-sss">
-                <h2 id="gelir-vergisi-sss" class="h4 fw-bold text-dark mb-3">Gelir Vergisi Hesaplama Hakkında Sık Sorulan Sorular</h2>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">Gelir vergisi hesaplama aracı ne işe yarar?</h3>
-                            <p class="small text-muted mb-0">
-                                İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">Kümülatif vergi matrahı nedir?</h3>
-                            <p class="small text-muted mb-0">
-                                Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">Asgari ücret istisnası ne zaman uygulanır?</h3>
-                            <p class="small text-muted mb-0">
-                                Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">2026 gelir vergisi nasıl hesaplanır?</h3>
-                            <p class="small text-muted mb-0">
-                                Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">2026 gelir vergisi dilimleri nelerdir?</h3>
-                            <p class="small text-muted mb-0">
-                                2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">Ücret gelir vergisinde kümülatif matrah neden gerekir?</h3>
-                            <p class="small text-muted mb-0">
-                                Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold mb-2">Maaş ve ücret dışı gelir hesabı aynı mı?</h3>
-                            <p class="small text-muted mb-0">
-                                Gelir vergisi tarifesi aynı yapıya sahip olsa da ücret gelirlerinde asgari ücret istisnası ve aylık kümülatif matrah etkisi ayrıca değerlendirilir.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            </div>
 
         </div>
     </div>
@@ -545,6 +643,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Örnek yükleme fonksiyonu
+    window.loadExample = function(brut, yil, tur, ay, istisna, oncekiMatrah) {
+        const brutUcretInput = document.getElementById("brutUcret");
+        const yilInput = document.getElementById("yilInput");
+        const gelirTuruInput = document.getElementById("gelirTuru");
+        const aySecimi = document.getElementById("aySecimi");
+        const istisnaCheckbox = document.getElementById("asgariIstisna");
+
+        yilInput.value = yil;
+        gelirTuruInput.value = tur;
+        
+        // Gelir türü değişim eventini tetikle (böylece ay/istisna devre dışı kalma mantığı çalışır)
+        gelirTuruInput.dispatchEvent(new Event("change"));
+
+        brutUcretInput.value = Number(brut).toLocaleString("tr-TR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        aySecimi.value = ay;
+        istisnaCheckbox.checked = istisna;
+
+        // Sayfayı forma yumuşakça kaydır
+        document.getElementById("gelirVergisiForm").scrollIntoView({ behavior: "smooth" });
+
+        // Önceki kümülatif matrah varsa kaydet, yoksa temizle
+        if (oncekiMatrah !== undefined) {
+            window.autoOncekiMatrah = oncekiMatrah;
+        } else {
+            window.autoOncekiMatrah = undefined;
+        }
+
+        // Formu otomatik gönder
+        setTimeout(() => {
+            document.getElementById("gelirVergisiForm").dispatchEvent(new Event("submit"));
+        }, 150);
+    };
+
     document.getElementById("gelirVergisiForm").addEventListener("submit", async function (e) {
         e.preventDefault();
 
@@ -560,17 +695,22 @@ document.addEventListener("DOMContentLoaded", () => {
         let oncekiMatrahlar = {};
 
         if (ay > 1 && gelirTuru === "ucret") {
-            const { value } = await Swal.fire({
-                title: "Kümülatif Matrah",
-                html: '<input type="text" class="form-control swal2-input onceki-toplam" placeholder="Önceki Toplam Matrah">',
-                confirmButtonText: "Hesapla",
-                preConfirm: () => {
-                   const val = document.querySelector(".onceki-toplam").value;
-                   return parseFloat(val.replace(/\./g,"").replace(",", ".")) || 0;
-                }
-            });
-            if (value === undefined) return;
-            oncekiMatrahlar["toplam"] = value;
+            if (window.autoOncekiMatrah !== undefined) {
+                oncekiMatrahlar["toplam"] = window.autoOncekiMatrah;
+                window.autoOncekiMatrah = undefined; // Tek seferlik kullanıp temizle
+            } else {
+                const { value } = await Swal.fire({
+                    title: "Kümülatif Matrah",
+                    html: '<input type="text" class="form-control swal2-input onceki-toplam" placeholder="Önceki Toplam Matrah">',
+                    confirmButtonText: "Hesapla",
+                    preConfirm: () => {
+                       const val = document.querySelector(".onceki-toplam").value;
+                       return parseFloat(val.replace(/\./g,"").replace(",", ".")) || 0;
+                    }
+                });
+                if (value === undefined) return;
+                oncekiMatrahlar["toplam"] = value;
+            }
         }
 
         try {

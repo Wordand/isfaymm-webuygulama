@@ -80,7 +80,7 @@
                     <p class="text-muted mb-4 small">
                         Vergi borcu tecil ve taksitlendirme için tahmini taksit, faiz ve toplam ödeme planı.
                     </p>
-                    <a href="{{ url_for('calculators.tecil_faizi') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
+                    <a href="{{ url_for('calculators.tecil') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
@@ -166,6 +166,62 @@
         </div>
 
         <!-- Asgari Kurumlar Vergisi -->
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="480">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-buildings fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Teknopark Kazanç İstisnası</h4>
+                    <p class="text-muted mb-4 small">
+                        4691 sayılı Kanuna göre istisna kazanç ve girişim sermayesi yatırım yükümlülüğü hesabı.
+                    </p>
+                    <a href="{{ url_for('calculators.teknopark_kazanc_istisnasi') }}" class="btn btn-info text-white px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="482">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-lightbulb fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Ar-Ge ve Tasarım İndirimi</h4>
+                    <p class="text-muted mb-4 small">
+                        5746 sayılı Kanuna göre uygun harcama, devreden indirim ve yatırım yükümlülüğü hesabı.
+                    </p>
+                    <a href="{{ url_for('calculators.arge_tasarim_indirimi') }}" class="btn btn-success px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="483">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-people fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Ar-Ge ve Teknopark Personel Teşvikleri</h4>
+                    <p class="text-muted mb-4 small">Gelir vergisi stopaj teşviki, SGK işveren hissesi desteği ve çalışma süresi hesabı.</p>
+                    <a href="{{ url_for('calculators.arge_teknopark_personel_tesvikleri') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="484">
+            <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box mb-3 mx-auto bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-receipt fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Teknopark KDV İstisnası</h4>
+                    <p class="text-muted mb-4 small">Yazılım teslim veya hizmetinin KDV Geçici 20/1 kapsamını adım adım kontrol edin.</p>
+                    <a href="{{ url_for('calculators.teknopark_kdv_istisnasi') }}" class="btn btn-info text-white px-4 rounded-pill fw-bold">Kontrol Et</a>
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="485">
             <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-glow">
                 <div class="card-body p-4 text-center">
@@ -176,7 +232,7 @@
                     <p class="text-muted mb-4 small">
                         KVK 32/C kapsamında asgari kurumlar vergisi, istisna ve indirim etkisi hesabı.
                     </p>
-                    <a href="{{ url_for('tools.asgari') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
+                    <a href="{{ url_for('calculators.asgari_kurumlar_vergisi') }}" class="btn btn-primary px-4 rounded-pill fw-bold">Şimdi Hesapla</a>
                 </div>
             </div>
         </div>
