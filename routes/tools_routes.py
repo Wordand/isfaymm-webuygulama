@@ -103,7 +103,7 @@ def sermaye():
 
 @bp.route("/serbest-meslek")
 def serbest_meslek():
-    return render_template("calculators/serbest_meslek.html")
+    return redirect(url_for("calculators.serbest_meslek"), code=301)
 
 @bp.route("/hesaplama-araclari/finansman-gider-kisitlamasi")
 def finansman():

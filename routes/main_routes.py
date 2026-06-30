@@ -342,7 +342,7 @@ def sitemap_xml():
         ('main.cerez_politikasi', {}),
         ('main.kdv_tevkifat', {}), ('main.itus', {}), ('main.his', {}), ('main.kv_istisna_indirimler', {}),
         ('main.tecil_taksitlendirme_2026', {}), ('main.varlik_barisi_2026', {}),
-        ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.serbest_meslek', {}), ('tools.sermaye_azaltimi', {}),
+        ('tools.asgari', {}), ('tools.sermaye', {}), ('tools.finansman', {}), ('tools.sermaye_azaltimi', {}),
         ('calculators.index', {}), ('calculators.gelir_vergisi', {}), ('calculators.ithalat_kdv', {}), ('calculators.gecikme_zammi', {}), ('calculators.tecil_faizi', {}), ('calculators.serbest_meslek', {}), ('calculators.tdhp', {}), ('calculators.kdv_tevkifat', {}),
         ('indirimlikurumlar_seo.hesaplama_araci', {}), ('indirimlikurumlar_seo.teblig_ornekleri', {}), ('indirimlikurumlar_seo.mevzuat_rehberi', {}),
         ('indirimlikurumlar_seo.ozelge_kutuphanesi', {}),

@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Gecikme Zammı Hesaplama 2026 | Vergi Borcu Gecikme Faizi | İSFA YMM{% endblock %}
-
 {% block description %}Gecikme zammı hesaplama 2026 aracı ile vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade ve ödeme tarihine göre gecikme zammı ve toplam borcu hesaplayın.{% endblock %}
 {% block keywords %}gecikme zammı hesaplama, gecikme zammı hesaplama 2026, vergi gecikme zammı hesaplama, vergi borcu gecikme zammı, vergi gecikme faizi hesaplama, 6183 gecikme zammı hesaplama, gecikme faizi hesaplama, gecikme zammı oranı 2026, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/gecikme-zammi{% endblock %}
@@ -8,111 +7,134 @@
 {% block og_desc %}Vergi borçları için vade ve ödeme tarihine göre gecikme zammını ve toplam ödenecek tutarı hesaplayın.{% endblock %}
 
 {% block content %}
+<style>
+/* ORANGE TEMA RENKLERİ */
+:root {
+    --theme-color: #f97316;
+    --theme-hover: #ea580c;
+    --theme-light: #ffedd5;
+    --theme-dark: #c2410c;
+}
+.text-theme { color: var(--theme-color) !important; }
+.bg-theme { background-color: var(--theme-color) !important; color: #fff !important; }
+.btn-theme { background-color: var(--theme-color); color: #fff; border: 0; }
+.btn-theme:hover { background-color: var(--theme-hover); color: #fff; }
+.badge-theme { background-color: var(--theme-light); color: var(--theme-dark) !important; font-size:.7rem; padding:3px 8px; border-radius:20px; font-weight:700; }
+.amt-input { font-family:'Roboto Mono',monospace; text-align:right; font-weight:600; }
+.result-card { border-radius:16px; padding:1.5rem; text-align:center; }
+.result-card h6 { font-size:.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.5rem; }
+.result-card .val { font-size:1.6rem; font-weight:800; font-family:'Roboto Mono',monospace; }
+</style>
+
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
+            <!-- Header -->
             <header class="mb-4">
                 <nav aria-label="breadcrumb" class="small mb-2">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
-                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Gecikme Zammı</li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}" class="text-decoration-none text-muted">Hesaplama Araçları</a></li>
+                        <li class="breadcrumb-item active text-theme" aria-current="page" style="color: var(--theme-color) !important;">Gecikme Zammı</li>
                     </ol>
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">Gecikme Zammı Hesaplama 2026</h1>
                 <p class="lead text-muted mb-3">
-                    Vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade tarihi ile ödeme tarihine göre gecikme zammı tutarını hesaplayın.
+                    Vergi borcu, vergi ziyaı cezası ve 6183 kapsamındaki amme alacakları için vade ve ödeme tarihlerine göre gecikme zammını hesaplayın.
                 </p>
-                <div class="d-flex flex-wrap gap-2" aria-label="Gecikme zammı hesaplama kapsamı">
-                    <span class="badge rounded-pill text-bg-danger px-3 py-2">2026 güncel</span>
-                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Vergi borcu</span>
-                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">6183 gecikme zammı</span>
-                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gecikme faizi ayrımı</span>
+                <div class="d-flex flex-wrap gap-2" aria-label="Hesaplama kapsamı">
+                    <span class="badge rounded-pill bg-theme text-white px-3 py-2">6183 Kanun md.51</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gecikme Zammı Oranı</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Vergi Aslı / Ziyaı Cezası</span>
                 </div>
             </header>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Gecikme Zammı Hesaplama</h4>
+            <!-- Ana Hesaplama Kartı -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-stopwatch me-2"></i>Vergi Borcu Bilgileri</h4>
+                        <span class="badge bg-white text-theme fw-bold">6183 UYUMLU</span>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-
-                    <form id="gecikmeForm">
-                        <div class="row g-3 mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <form id="gecikmeForm" autocomplete="off">
+                        
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label for="borcTuru" class="form-label fw-bold">Borç Türü</label>
-                                <select id="borcTuru" class="form-select" required>
-                                    <option value="vergi_asli" selected>Vergi Aslı</option>
+                                <label for="borcTuru" class="form-label fw-bold small">Borç Türü</label>
+                                <select id="borcTuru" class="form-select border-0 bg-light rounded-3 p-3" required>
+                                    <option value="vergi_asli" selected>Vergi Asli Borçları (Kurumlar, KDV, GV vb.)</option>
                                     <option value="vergi_ziyasi">Vergi Ziyaı Cezası</option>
-                                    <option value="mahkeme_cezasi">Mahkeme Cezası</option>
-                                    <option value="usulsuzluk">Usulsüzlük Cezası</option>
+                                    <option value="mahkeme_cezasi">İdari ve Adli Mahkeme Cezaları</option>
+                                    <option value="usulsuzluk">Usulsüzlük Cezası (Gecikme zammı uygulanmaz)</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="borc" class="form-label fw-bold">Borç Tutarı (TL)</label>
+                                <label for="borc" class="form-label fw-bold small">Borç Tutarı (TL) <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="text" inputmode="decimal" id="borc" class="form-control" placeholder="0,00" required>
-                                    <span class="input-group-text">₺</span>
+                                    <input type="text" inputmode="decimal" id="borc" class="form-control border-0 bg-light rounded-start-3 p-3 text-end fw-bold" placeholder="0,00" required>
+                                    <span class="input-group-text border-0 bg-light rounded-end-3 px-3 fw-bold">₺</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row g-3 mb-4">
+                        <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <label for="vade" class="form-label fw-bold">Vade Tarihi</label>
-                                <input type="date" id="vade" class="form-control" required>
+                                <label for="vade" class="form-label fw-bold small">Vade Tarihi <span class="text-danger">*</span></label>
+                                <input type="date" id="vade" class="form-control border-0 bg-light rounded-3 p-3" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="odeme" class="form-label fw-bold">Ödeme Tarihi</label>
-                                <input type="date" id="odeme" class="form-control" required>
+                                <label for="odeme" class="form-label fw-bold small">Ödeme Tarihi <span class="text-danger">*</span></label>
+                                <input type="date" id="odeme" class="form-control border-0 bg-light rounded-3 p-3" required>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-danger w-100 btn-lg" id="hesaplaBtn">
+                        <button type="submit" class="btn btn-theme w-100 btn-lg fw-bold rounded-pill py-3 shadow" id="hesaplaBtn">
                             <i class="bi bi-calculator me-2"></i> Gecikme Zammını Hesapla
                         </button>
-
-                        <hr class="my-4">
-
-                        <!-- Sonuç Alanı -->
-                        <div id="sonucAlani" style="display:none;">
-                            <h5 class="fw-bold text-danger mb-3">Hesaplama Sonucu</h5>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <th class="w-50">Hesaplanan Gecikme Zammı</th>
-                                            <td class="text-end text-danger fw-bold fs-5" id="resGecikme">0,00 ₺</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Toplam Ödenecek Tutar (Borç + Zam)</th>
-                                            <td class="text-end fw-bold fs-4 text-dark" id="resToplam">0,00 ₺</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
                     </form>
 
-                    <div class="mt-3">
-                        <div class="alert alert-light border small text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Bilgi:</strong> Hesaplama 6183 sayılı Kanun md.51 kapsamında yapılır. Usulsüzlük (md. 352) ve Özel Usulsüzlük (md. 353) cezalarına gecikme zammı uygulanmaz.
+                    <!-- SONUÇ ALANI -->
+                    <div id="sonucAlani" style="display:none;" class="mt-5 pt-4 border-top">
+                        <h4 class="fw-bold text-dark mb-4 text-center">Hesaplama Sonuçları</h4>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="result-card bg-danger-subtle border-0 shadow-sm p-4">
+                                    <h6 class="text-danger fw-bold"><i class="bi bi-exclamation-circle-fill me-1"></i> Gecikme Zammı</h6>
+                                    <div class="val text-danger fs-3 mt-2" id="resGecikme">0,00 ₺</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="result-card bg-success-subtle border-0 shadow-sm p-4">
+                                    <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Toplam Ödenecek Tutar (Ana Borç + Zam)</h6>
+                                    <div class="val text-success fs-3 mt-2" id="resToplam">0,00 ₺</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mt-3 p-3 rounded-3 border" style="background:#f6f9ff; border-color:#b9d4ff !important;">
+                    <!-- Yasal Uyarılar ve Bilgiler -->
+                    <div class="mt-4">
+                        <div class="alert alert-secondary border-0 small text-muted p-3.5 rounded-3 mb-0">
+                            <i class="bi bi-info-circle-fill text-theme me-2 fs-5" style="color: var(--theme-color) !important;"></i>
+                            <strong>Bilgi:</strong> Hesaplama 6183 sayılı Kanun md.51 kapsamında yürürlükteki gecikme zammı oranları baz alınarak yapılmaktadır. Usulsüzlük (md. 352) ve Özel Usulsüzlük (md. 353) cezalarına gecikme zammı uygulanmaz.
+                        </div>
+                    </div>
+
+                    <!-- Tecil Kampanyası & Bilgi Kutusu -->
+                    <div class="mt-4 p-4 rounded-4 border-0 shadow-sm" style="background-color: #fffbeb; border-left: 4px solid var(--theme-color) !important;">
                         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                             <div>
-                                <div class="fw-bold text-primary mb-1">
-                                    <i class="bi bi-calendar2-check me-1"></i> 2026 vergi borcu tecil ve taksitlendirme imkanı
-                                </div>
-                                <div class="small text-muted">
-                                    31.08.2026'ya kadar başvuru, yıllık %29 tecil faizi ve duruma göre 36/48/72 taksit imkanı.
-                                </div>
+                                <h5 class="fw-bold text-dark mb-1">
+                                    <i class="bi bi-calendar2-check-fill text-theme me-1" style="color: var(--theme-color) !important;"></i> Vergi Borcu Tecil & Taksitlendirme İmkanı
+                                </h5>
+                                <p class="small text-muted mb-0">
+                                    31.08.2026 tarihine kadar başvuruda bulunarak yıllık %29 tecil faiziyle 36 aya kadar taksitlendirme talep edebilirsiniz.
+                                </p>
                             </div>
-                            <a class="btn btn-outline-primary rounded-pill fw-bold px-3" href="{{ url_for('calculators.tecil') }}">
+                            <a class="btn btn-theme rounded-pill fw-bold px-4 py-2.5 shadow-sm" href="{{ url_for('calculators.tecil') }}">
                                 Tecil Faizini Hesapla
                             </a>
                         </div>
@@ -122,20 +144,20 @@
             </div>
 
             <!-- Geçmiş Hesaplamalar -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">📋 Son Hesaplamalar</h6>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-light py-3 ps-4">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-journal-text me-2"></i> Son Hesaplamalar</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0" id="logTable">
+                        <table class="table table-hover align-middle mb-0" id="logTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-3">Borç Türü</th>
-                                    <th>Tutar</th>
-                                    <th>Vade / Ödeme</th>
+                                    <th class="ps-4">Borç Türü</th>
+                                    <th>Ana Borç</th>
+                                    <th>Vade / Ödeme Tarihi</th>
                                     <th>Gecikme Zammı</th>
-                                    <th>İşlem</th>
+                                    <th class="pe-4 text-end">İşlem</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -145,81 +167,29 @@
                 </div>
             </div>
 
-            <section class="mt-5" aria-labelledby="gecikme-rehber">
-                <h2 id="gecikme-rehber" class="h4 fw-bold text-dark mb-3">Gecikme Zammı Nasıl Hesaplanır?</h2>
-                <p class="text-muted">
-                    Gecikme zammı, vadesinde ödenmeyen amme alacakları için ödeme tarihine kadar geçen süre ve yürürlükteki oranlar dikkate alınarak hesaplanır. Borç türüne göre bazı cezalar için oran farklı uygulanabilir veya gecikme zammı doğmayabilir.
-                </p>
-                <div class="row g-3">
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Vade Tarihi</h3><p class="small text-muted mb-0">Borcun kanuni ödeme süresinin son gününü ifade eder.</p></div></div>
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Ödeme Tarihi</h3><p class="small text-muted mb-0">Gecikme zammının hesaplanacağı fiili ödeme tarihidir.</p></div></div>
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100"><h3 class="h6 fw-bold">Toplam Tutar</h3><p class="small text-muted mb-0">Ana borç ve hesaplanan gecikme zammının toplamıdır.</p></div></div>
-                </div>
-            </section>
-
-            <section class="mt-5" aria-labelledby="gecikme-zammi-faizi-farki">
-                <div class="border rounded-4 p-4 bg-white shadow-sm">
-                    <h2 id="gecikme-zammi-faizi-farki" class="h4 fw-bold text-dark mb-3">Gecikme zammı ile gecikme faizi farkı nedir?</h2>
-                    <p class="text-muted mb-4">
-                        Kullanıcılar çoğu zaman iki kavramı aynı anlamda arar; ancak vergi uygulamasında gecikme zammı ve gecikme faizi farklı durumlarda kullanılır. Bu araç, vadesinde ödenmeyen amme alacakları için gecikme zammı hesabına odaklanır.
-                    </p>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="border rounded-3 p-3 h-100">
-                                <h3 class="h6 fw-bold text-danger mb-2">Gecikme zammı</h3>
-                                <p class="small text-muted mb-0">Vadesi geldiği halde ödenmeyen vergi borcu ve benzeri amme alacaklarında, ödeme tarihine kadar geçen süre için hesaplanır.</p>
-                            </div>
+            <!-- Bilgilendirme İçeriği -->
+            <section class="mb-5 mt-5">
+                <h2 class="fw-bold text-dark mb-4 text-center">Gecikme Zammı ve Gecikme Faizi Arasındaki Fark Nedir?</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4" style="border-top: 4px solid var(--theme-color) !important;">
+                            <h4 class="h5 fw-bold text-theme mb-3" style="color: var(--theme-color) !important;"><i class="bi bi-exclamation-octagon-fill me-1"></i> Gecikme Zammı</h4>
+                            <p class="small text-muted mb-0" style="line-height: 1.6;">
+                                Vadesi geldiği halde ödenmeyen amme alacaklarına uygulanır. Borcun vade gününden fiili ödeme gününe kadar geçen süre için her ay ve ay kesri için günlük olarak hesaplanır.
+                            </p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="border rounded-3 p-3 h-100">
-                                <h3 class="h6 fw-bold text-primary mb-2">Gecikme faizi</h3>
-                                <p class="small text-muted mb-0">Tarhiyat, ikmalen veya resen tarh edilen vergiler ve bazı düzeltme süreçlerinde, ilgili mevzuata göre ayrıca gündeme gelir.</p>
-                            </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4" style="border-top: 4px solid #3b82f6 !important;">
+                            <h4 class="h5 fw-bold text-primary mb-3"><i class="bi bi-info-circle-fill me-1"></i> Gecikme Faizi</h4>
+                            <p class="small text-muted mb-0" style="line-height: 1.6;">
+                                İkmalen, resen veya idarece yapılan tarhiyatların tahakkuk ettirilmesi aşamasında, normal vade tarihi ile tarhiyatın kesinleştiği tarih arasındaki süre için hesaplanan faiz türüdür.
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
-
-            <section class="mt-5" aria-labelledby="gecikme-sss">
-                <h2 id="gecikme-sss" class="h4 fw-bold text-dark mb-3">Gecikme Zammı Hesaplama Hakkında Sık Sorulan Sorular</h2>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold">Gecikme zammı aylık mı günlük mü hesaplanır?</h3>
-                            <p class="small text-muted mb-0">Oranlar aylık olarak ilan edilir; hesaplamada vade ile ödeme tarihi arasındaki süre dikkate alınır ve ay kesirleri için gün hesabı yapılır.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold">Vergi gecikme zammı hangi tutar üzerinden hesaplanır?</h3>
-                            <p class="small text-muted mb-0">Hesaplama ana borç tutarı üzerinden yapılır. Borç türüne göre bazı cezalar için gecikme zammı doğmayabilir; araç bu ayrımı dikkate alır.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold">Gecikme faizi ile gecikme zammı aynı şey midir?</h3>
-                            <p class="small text-muted mb-0">Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat ve tahakkuk süreçlerine bağlı farklı durumlarda uygulanır.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold">30.000 TL vergi borcunun gecikme zammı nasıl bulunur?</h3>
-                            <p class="small text-muted mb-0">30.000 TL borç tutarı, vade tarihi ve ödeme tarihi girildiğinde araç ilgili dönem oranlarını dikkate alarak gecikme zammını ve toplam ödenecek tutarı gösterir.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded-3 p-3 h-100 bg-white">
-                            <h3 class="h6 fw-bold">6183 gecikme zammı hangi borçlar için hesaplanır?</h3>
-                            <p class="small text-muted mb-0">6183 sayılı Kanun kapsamındaki vadesi geçmiş amme alacaklarında gecikme zammı gündeme gelir. Ancak bazı ceza türlerinde gecikme zammı doğmayabilir.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
         </div>
-    </div>
-    <div class="mt-4">
-        {% include "partials/tax_disclaimer.html" %}
     </div>
 </div>
 {% endblock %}
@@ -295,17 +265,20 @@ document.addEventListener("DOMContentLoaded", () => {
             // Tabloya ekle (Log)
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="ps-3">${borcTuruSelect.options[borcTuruSelect.selectedIndex].text}</td>
-                <td>${borc.toLocaleString("tr-TR", {minimumFractionDigits:2})} ₺</td>
-                <td class="small">${vade} <br> ${odeme}</td>
+                <td class="ps-4 text-dark font-weight-bold">${borcTuruSelect.options[borcTuruSelect.selectedIndex].text}</td>
+                <td class="fw-bold">${borc.toLocaleString("tr-TR", {minimumFractionDigits:2})} ₺</td>
+                <td class="small text-muted">${vade} ➔ ${odeme}</td>
                 <td class="fw-bold text-danger">${gecikme.toLocaleString("tr-TR", {minimumFractionDigits:2})} ₺</td>
-                <td><button class="btn btn-sm btn-outline-secondary py-0" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+                <td class="pe-4 text-end"><button class="btn btn-sm btn-outline-secondary py-1 border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
             `;
             logTableBody.prepend(tr);
 
+            // Sonuca kaydır
+            document.getElementById('sonucAlani').scrollIntoView({behavior:'smooth', block:'start'});
+
         } catch (err) {
             console.error(err);
-            Swal.fire("Hata", "Hesaplama yapılamadı. Lütfen tarihleri kontrol ediniz (Vade > Ödeme olamaz).", "error");
+            Swal.fire("Hata", "Hesaplama yapılamadı. Lütfen tarihleri kontrol ediniz (Vade tarihi ödeme tarihinden sonra olamaz).", "error");
         }
     });
 
@@ -331,54 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "price": "0",
     "priceCurrency": "TRY"
   }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Gecikme zammı aylık mı günlük mü hesaplanır?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Oranlar aylık olarak ilan edilir; hesaplamada vade ile ödeme tarihi arasındaki süre dikkate alınır ve ay kesirleri için gün hesabı yapılır."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Vergi gecikme zammı hangi tutar üzerinden hesaplanır?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Hesaplama ana borç tutarı üzerinden yapılır. Borç türüne göre bazı cezalar için gecikme zammı doğmayabilir."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Gecikme faizi ile gecikme zammı aynı şey midir?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Hayır. Gecikme zammı vadesinde ödenmeyen amme alacakları için, gecikme faizi ise tarhiyat, ikmalen veya resen tarh edilen vergiler ve bazı düzeltme süreçlerinde uygulanır."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "6183 gecikme zammı hangi borçlar için hesaplanır?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "6183 sayılı Kanun kapsamındaki vadesi geçmiş amme alacaklarında gecikme zammı gündeme gelir. Ancak usulsüzlük ve özel usulsüzlük cezaları gibi bazı borç türlerinde gecikme zammı doğmayabilir."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "30.000 TL vergi borcunun gecikme zammı nasıl bulunur?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "30.000 TL borç tutarı, vade tarihi ve ödeme tarihi girildiğinde ilgili dönem oranlarına göre gecikme zammı ve toplam ödenecek tutar hesaplanır."
-      }
-    }
-  ]
 }
 </script>
 {% endblock %}

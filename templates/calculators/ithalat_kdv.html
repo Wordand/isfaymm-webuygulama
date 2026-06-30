@@ -8,6 +8,18 @@
 
 {% block content %}
 <style>
+/* TEAL / CYAN TEMA RENKLERİ */
+:root {
+    --theme-color: #0d9488;
+    --theme-hover: #0f766e;
+    --theme-light: #ccfbf1;
+    --theme-dark: #115e59;
+}
+.text-theme { color: var(--theme-color) !important; }
+.bg-theme { background-color: var(--theme-color) !important; color: #fff !important; }
+.btn-theme { background-color: var(--theme-color); color: #fff; border: 0; }
+.btn-theme:hover { background-color: var(--theme-hover); color: #fff; }
+.badge-theme { background-color: var(--theme-light); color: var(--theme-dark) !important; font-size:.7rem; padding:3px 8px; border-radius:20px; font-weight:700; }
 .amt-input { font-family:'Roboto Mono',monospace; text-align:right; font-weight:600; }
 .result-card { border-radius:16px; padding:1.5rem; text-align:center; }
 .result-card h6 { font-size:.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.5rem; }
@@ -15,7 +27,7 @@
 .detail-row { display:flex; justify-content:space-between; padding:.65rem 0; border-bottom:1px solid #f1f5f9; font-size:.95rem; }
 .detail-row:last-child { border:none; }
 .detail-val { font-weight:700; font-family:'Roboto Mono',monospace; }
-.badge-7846 { background-color: #ffd8d8; color: #8b0000 !important; font-size:.7rem; padding:3px 8px; border-radius:20px; font-weight:700; vertical-align:middle; }
+.badge-7846 { background-color: #fee2e2; color: #991b1b !important; font-size:.7rem; padding:3px 8px; border-radius:20px; font-weight:700; vertical-align:middle; }
 </style>
 
 <div class="container py-4">
@@ -27,7 +39,7 @@
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted">Ana Sayfa</a></li>
                         <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}" class="text-decoration-none text-muted">Hesaplama Araçları</a></li>
-                        <li class="breadcrumb-item active text-danger" aria-current="page">İthalatta KDV</li>
+                        <li class="breadcrumb-item active text-theme" aria-current="page" style="color: var(--theme-color) !important;">İthalatta KDV</li>
                     </ol>
                 </nav>
                 <h1 class="fw-bold text-dark mb-2">İthalatta KDV İndirimi Hesaplama</h1>
@@ -35,7 +47,7 @@
                     7846 sayılı Cumhurbaşkanı Kararı ve KDV Genel Uygulama Tebliği (III/C-2.6) kapsamında indirilecek ve indirilemeyecek KDV tutarını hesaplayın.
                 </p>
                 <div class="d-flex flex-wrap gap-2" aria-label="Hesaplama kapsamı">
-                    <span class="badge rounded-pill text-bg-danger px-3 py-2">7846 Kararı</span>
+                    <span class="badge rounded-pill bg-theme text-white px-3 py-2">7846 Kararı</span>
                     <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">İndirilemeyecek KDV</span>
                     <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gözetim Farkı</span>
                     <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Dampinge Karşı Vergi</span>
@@ -44,10 +56,10 @@
 
             <!-- Ana Hesaplama Kartı -->
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-dark text-white p-4">
+                <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #0d9488, #0f766e);">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0 fw-bold"><i class="bi bi-truck me-2 text-danger"></i>Gümrük Beyanname Verileri</h4>
-                        <span class="badge bg-danger">7846 UYUMLU</span>
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-truck me-2"></i>Gümrük Beyanname Verileri</h4>
+                        <span class="badge bg-white text-theme fw-bold">7846 UYUMLU</span>
                     </div>
                 </div>
                 <div class="card-body p-4 p-md-5">
@@ -55,7 +67,7 @@
 
                         <!-- BÖLÜM 1: Temel Bilgiler -->
                         <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
-                            <i class="bi bi-box-seam me-1 text-danger"></i> 1. Beyanname Temel Bilgileri
+                            <i class="bi bi-box-seam me-1 text-theme" style="color: var(--theme-color) !important;"></i> 1. Beyanname Temel Bilgileri
                         </div>
                         <div class="row g-4 mb-4">
                             <div class="col-md-4">
@@ -77,7 +89,7 @@
 
                         <!-- BÖLÜM 2: Gümrük Vergileri -->
                         <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
-                            <i class="bi bi-bank me-1 text-danger"></i> 2. Gümrük Vergileri
+                            <i class="bi bi-bank me-1 text-theme" style="color: var(--theme-color) !important;"></i> 2. Gümrük Vergileri
                         </div>
                         <div class="row g-4 mb-4">
                             <div class="col-md-3">
@@ -100,7 +112,7 @@
 
                         <!-- BÖLÜM 3: 7846 Kapsamı Vergiler -->
                         <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
-                            <i class="bi bi-shield-exclamation me-1 text-danger"></i> 3. 7846 Sayılı Karar Kapsamı (İndirilemeyecek) Vergiler
+                            <i class="bi bi-shield-exclamation me-1 text-theme" style="color: var(--theme-color) !important;"></i> 3. 7846 Sayılı Karar Kapsamı (İndirilemeyecek) Vergiler
                         </div>
                         <div class="row g-4 mb-4">
                             <div class="col-md-3">
@@ -123,7 +135,7 @@
 
                         <!-- BÖLÜM 4: Diğer Giderler -->
                         <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
-                            <i class="bi bi-receipt me-1 text-danger"></i> 4. Diğer İthalat Giderleri (KDV Matrahına Dahil)
+                            <i class="bi bi-receipt me-1 text-theme" style="color: var(--theme-color) !important;"></i> 4. Diğer İthalat Giderleri (KDV Matrahına Dahil)
                         </div>
                         <div class="row g-4 mb-4">
                             <div class="col-md-2.4 col-sm-6 mb-3">
@@ -150,11 +162,11 @@
 
                         <!-- Toplam KDV Matrahı Göstergesi -->
                         <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-dark"><i class="bi bi-calculator-fill me-1 text-danger"></i> Toplam KDV Matrahı (Öngörülen):</span>
+                            <span class="fw-bold text-dark"><i class="bi bi-calculator-fill me-1 text-theme" style="color: var(--theme-color) !important;"></i> Toplam KDV Matrahı (Öngörülen):</span>
                             <input type="text" class="form-control amt-input border-0 bg-transparent fw-bold text-dark fs-5 w-auto" id="kdvMatrahi" style="max-width: 200px;" readonly value="0,00">
                         </div>
 
-                        <button type="button" class="btn btn-danger w-100 btn-lg fw-bold rounded-pill py-3 shadow" onclick="hesapla()">
+                        <button type="button" class="btn btn-theme w-100 btn-lg fw-bold rounded-pill py-3 shadow" onclick="hesapla()">
                             <i class="bi bi-calculator me-2"></i>Hesapla
                         </button>
                     </form>
@@ -216,7 +228,7 @@
 
             <!-- Yasal Bilgilendirme ve Açıklamalar -->
             <div class="alert alert-secondary border-0 shadow-sm p-4 rounded-4 mb-5" style="background-color: #f8f9fa;">
-                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-exclamation text-danger me-2"></i>Yasal Sorumluluk Sınırı</h5>
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-exclamation text-theme me-2" style="color: var(--theme-color) !important;"></i>Yasal Sorumluluk Sınırı</h5>
                 <p class="small text-muted mb-0" style="line-height: 1.6;">
                     Bu hesaplama aracı genel bilgilendirme amacıyla hazırlanmıştır. İthalat işlemlerinizdeki KDV indirimi kısıtlamaları (gözetim belgesi, korunma önlemi, damping vb. vergiler) her beyanname bazında kendi özel gümrük tarife istatistik pozisyonu (GTİP) ve menşe koduna göre değişkenlik gösterebilir. Kesin beyanname işlemleri ve vergi yükü planlamalarınız için gümrük müşaviriniz veya **Yeminli Mali Müşavir (YMM)** kadromuzla iletişime geçmeniz tavsiye olunur.
                 </p>
@@ -227,7 +239,7 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
-                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-tag-fill text-danger me-2"></i>Gözetim Farkı Kısıtı</h4>
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-tag-fill text-theme me-2" style="color: var(--theme-color) !important;"></i>Gözetim Farkı Kısıtı</h4>
                             <p class="small text-muted mb-0" style="line-height: 1.6;">
                                 Gözetim uygulaması kapsamında tevsik edilemeyen (gerçekleşmeyen) gözetim matrah farkı üzerinden gümrükte ödenen KDV'nin KDV beyannamesinde indirim konusu yapılması kanunen kısıtlanmıştır.
                             </p>
@@ -235,7 +247,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
-                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-x-diamond-fill text-danger me-2"></i>Damping ve Korunma</h4>
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-x-diamond-fill text-theme me-2" style="color: var(--theme-color) !important;"></i>Damping ve Korunma</h4>
                             <p class="small text-muted mb-0" style="line-height: 1.6;">
                                 Haksız rekabetin önlenmesi çerçevesinde uygulanan dampinge karşı vergi, korunma önlemi gümrük vergileri ve ek mali yükümlülükler kapsamında ödenen KDV tutarları indirilemez.
                             </p>
@@ -243,7 +255,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
-                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-file-earmark-medical-fill text-danger me-2"></i>YMM Rapor Sınırı</h4>
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-file-earmark-medical-fill text-theme me-2" style="color: var(--theme-color) !important;"></i>YMM Rapor Sınırı</h4>
                             <p class="small text-muted mb-0" style="line-height: 1.6;">
                                 İthalat beyannamelerinde KDV indirimlerinin tevsiki için, takvim yılının altışar aylık dönemleri itibarıyla ithalat tutarı yasal haddi aştığında Özel Amaçlı YMM Tevsik Raporu aranır.
                             </p>
