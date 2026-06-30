@@ -222,7 +222,7 @@
                         <i class="bi bi-lightning-charge me-2"></i>Pratik Örnekler
                     </button>
                     <button class="nav-link" id="tab-mevzuat" data-bs-toggle="pill" data-bs-target="#pane-mevzuat" type="button" role="tab" aria-controls="pane-mevzuat" aria-selected="false">
-                        <i class="bi bi-book me-2"></i>Mevzuat (2026)
+                        <i class="bi bi-table me-2"></i>Gelir Vergisi Dilimleri
                     </button>
                     <button class="nav-link" id="tab-sss" data-bs-toggle="pill" data-bs-target="#pane-sss" type="button" role="tab" aria-controls="pane-sss" aria-selected="false">
                         <i class="bi bi-question-circle me-2"></i>Sıkça Sorulan Sorular
@@ -233,39 +233,69 @@
                     <!-- Kısa Özet -->
                     <div class="tab-pane fade show active" id="pane-ozet" role="tabpanel" aria-labelledby="tab-ozet">
                         <div class="p-4 bg-white border rounded-4 shadow-sm">
-                            <h3 class="h5 fw-bold text-dark mb-3">Gelir Vergisi Nasıl Hesaplanır?</h3>
-                            <p class="text-muted">
+                            <h3 class="h5 fw-bold text-dark mb-3"><i class="bi bi-info-circle text-danger me-2"></i>Gelir Vergisi Nasıl Hesaplanır?</h3>
+                            <p class="text-muted" style="line-height: 1.6;">
                                 Gelir vergisi hesaplamasında vergiye tabi matrah, ilgili yılın gelir vergisi tarifesindeki dilimlere ayrılır. Her dilime karşılık gelen oran uygulanır ve toplam vergi bulunur. Ücret gelirlerinde asgari ücret gelir vergisi istisnası ve yıl içindeki kümülatif matrah dikkate alınır.
                             </p>
+                            
                             <div class="row g-3 mt-2">
                                 <div class="col-md-4">
-                                    <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold">Ücret Geliri</h4>
-                                        <p class="small text-muted mb-0">Maaş ve ücret gelirlerinde kümülatif matrah, ay seçimi and asgari ücret istisnası birlikte değerlendirilir.</p>
+                                    <div class="border-0 rounded-4 p-3 h-100" style="background-color: #f8fafc; border-left: 4px solid #3b82f6 !important;">
+                                        <h4 class="h6 fw-bold text-primary mb-2"><i class="bi bi-person-workspace me-2"></i>Ücret Geliri</h4>
+                                        <p class="small text-dark mb-0" style="line-height: 1.5;">Maaş ve ücret gelirlerinde kümülatif matrah, ay seçimi ve asgari ücret istisnası birlikte değerlendirilir.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold">Ücret Dışı Gelir</h4>
-                                        <p class="small text-muted mb-0">Kira, değer artışı veya benzeri gelirlerde ücret dışı gelir vergisi tarifesi esas alınır.</p>
+                                    <div class="border-0 rounded-4 p-3 h-100" style="background-color: #f8fafc; border-left: 4px solid #f97316 !important;">
+                                        <h4 class="h6 fw-bold text-warning mb-2" style="color: #ea580c !important;"><i class="bi bi-file-earmark-text me-2"></i>Ücret Dışı Gelir</h4>
+                                        <p class="small text-dark mb-0" style="line-height: 1.5;">Kira, değer artışı veya benzeri gelirlerde asgari ücret istisnası dikkate alınmadan ücret dışı vergi tarifesi esas alınır.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold">Sonuç Raporu</h4>
-                                        <p class="small text-muted mb-0">Hesaplanan vergi, istisna ve ödenecek net vergi tutarı aynı ekranda görüntülenir ve PDF raporu alınabilir.</p>
+                                    <div class="border-0 rounded-4 p-3 h-100" style="background-color: #f8fafc; border-left: 4px solid #10b981 !important;">
+                                        <h4 class="h6 fw-bold text-success mb-2"><i class="bi bi-file-earmark-pdf me-2"></i>Sonuç Raporu</h4>
+                                        <p class="small text-dark mb-0" style="line-height: 1.5;">Hesaplanan vergi, istisna ve ödenecek net vergi tutarı grafik yardımıyla analiz edilir ve PDF raporu alınabilir.</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="alert alert-danger-subtle border-danger text-danger-emphasis d-flex align-items-center gap-3 mt-4 mb-0 rounded-3" style="background-color: #fdf2f2;">
-                                <i class="bi bi-info-circle-fill fs-5 text-danger"></i>
-                                <div class="small">
-                                    <strong>İstisna ve Muafiyetler:</strong> Ücret, kira geliri, genç girişimci ve esnaf muafiyeti gibi tüm yasal hakların detayları için 
-                                    <a href="{{ url_for('main.gv_istisna_indirimler') }}" class="fw-bold text-danger text-decoration-underline">Gelir Vergisi İstisna ve Muafiyetleri Kılavuzu</a> sayfamızı inceleyebilirsiniz.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                              </div>
+
+                              <!-- 🔗 GELİR VERGİSİ PORTALI YÖNLENDİRME KARTLARI -->
+                              <div class="mt-4 p-4 rounded-4 border-0" style="background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%); border-left: 5px solid #dc3545 !important;">
+                                  <h4 class="h6 fw-bold text-danger mb-2 d-flex align-items-center">
+                                      <i class="bi bi-shield-fill-check me-2"></i> Gelir Vergisi İstisna, İndirim ve Muafiyet Kılavuzları
+                                  </h4>
+                                  <p class="small text-dark mb-3">
+                                      Hesaplama yaparken yararlanabileceğiniz yasal haklarınızı, istisna limitlerini ve muafiyet şartlarını detaylı rehberlerimizden inceleyin:
+                                  </p>
+                                  <div class="row g-2">
+                                      <div class="col-sm-6 col-md-3">
+                                          <a href="{{ url_for('main.gv_istisnalar') }}" class="btn btn-outline-danger btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center justify-content-between" style="font-size: 0.82rem; font-weight: 600; background-color: #fff; color: #dc2626 !important; border-color: #fca5a5 !important;">
+                                              <span><i class="bi bi-gift me-1"></i> İstisnalar</span>
+                                              <i class="bi bi-arrow-right"></i>
+                                          </a>
+                                      </div>
+                                      <div class="col-sm-6 col-md-3">
+                                          <a href="{{ url_for('main.gv_indirimler') }}" class="btn btn-outline-info btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center justify-content-between" style="font-size: 0.82rem; font-weight: 600; background-color: #fff; color: #0891b2 !important; border-color: #a5f3fc !important;">
+                                              <span><i class="bi bi-percent me-1"></i> İndirimler</span>
+                                              <i class="bi bi-arrow-right"></i>
+                                          </a>
+                                      </div>
+                                      <div class="col-sm-6 col-md-3">
+                                          <a href="{{ url_for('main.gv_muafliklar') }}" class="btn btn-outline-danger btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center justify-content-between" style="font-size: 0.82rem; font-weight: 600; background-color: #fff; color: #dc2626 !important; border-color: #fca5a5 !important;">
+                                              <span><i class="bi bi-shield-check me-1"></i> Muaflıklar</span>
+                                              <i class="bi bi-arrow-right"></i>
+                                          </a>
+                                      </div>
+                                      <div class="col-sm-6 col-md-3">
+                                          <a href="{{ url_for('main.gv_beyan_tarife') }}" class="btn btn-outline-success btn-sm w-100 py-2 rounded-3 text-start d-flex align-items-center justify-content-between" style="font-size: 0.82rem; font-weight: 600; background-color: #fff; color: #16a34a !important; border-color: #bbf7d0 !important;">
+                                              <span><i class="bi bi-calculator me-1"></i> Beyan &amp; Tarife</span>
+                                              <i class="bi bi-arrow-right"></i>
+                                          </a>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
 
                     <!-- Pratik Örnekler -->
                     <div class="tab-pane fade" id="pane-ornekler" role="tabpanel" aria-labelledby="tab-ornekler">
@@ -351,11 +381,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="alert alert-danger-subtle border-danger text-danger-emphasis d-flex align-items-center gap-3 mt-4 mb-0 rounded-3" style="background-color: #fdf2f2;">
-                                <i class="bi bi-info-circle-fill fs-5 text-danger"></i>
+                            <div class="alert alert-success-subtle border-success text-success-emphasis d-flex align-items-center gap-3 mt-4 mb-0 rounded-3" style="background-color: #f0fdf4;">
+                                <i class="bi bi-info-circle-fill fs-5 text-success"></i>
                                 <div class="small">
-                                    <strong>Detaylı İstisna &amp; Muafiyetler:</strong> Yasa maddeleri, şartlar ve genç girişimci, telif, esnaf muafiyeti limitleri için 
-                                    <a href="{{ url_for('main.gv_istisna_indirimler') }}" class="fw-bold text-danger text-decoration-underline">Gelir Vergisi İstisna ve Muafiyetleri Kılavuzu</a> sayfamızı inceleyebilirsiniz.
+                                    <strong>Beyanname Limitleri &amp; Detaylar:</strong> 2026 yılı beyanname verme sınırları, toplama yapılmayan haller ve vergi tarife mevzuatının tam metni için 
+                                    <a href="{{ url_for('main.gv_beyan_tarife') }}" class="fw-bold text-success text-decoration-underline">Gelir Vergisi Beyanname ve Tarife Kılavuzu</a> sayfamızı ziyaret edebilirsiniz.
                                 </div>
                             </div>
                         </div>
@@ -363,43 +393,67 @@
 
                     <!-- SSS -->
                     <div class="tab-pane fade" id="pane-sss" role="tabpanel" aria-labelledby="tab-sss">
-                        <div class="p-4 bg-white border rounded-4 shadow-sm">
-                            <h3 class="h5 fw-bold text-dark mb-4">Sık Sorulan Sorular</h3>
+                        <div class="p-4 bg-white border rounded-4 shadow-sm" style="max-height: 620px; overflow-y: auto;">
+                            <h3 class="h5 fw-bold text-dark mb-4"><i class="bi bi-question-circle text-danger me-2"></i>Sıkça Sorulan Sorular</h3>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">Gelir vergisi hesaplama aracı ne işe yarar?</h4>
-                                        <p class="small text-muted mb-0">İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Kümülatif vergi matrahı ücret hesaplamalarında neden kritiktir?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">Ücretlilerde gelir vergisi kümülatif matraha göre artan oranlı hesaplanır. Yıl içinde elde ettiğiniz safi vergi matrahı her ay üst üste toplanarak kümülatif matrahı oluşturur. Matrah arttıkça girilen vergi dilimi yükselir (%15'ten başlayıp %40'a kadar) ve net maaşınız azalır.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">Kümülatif vergi matrahı nedir?</h4>
-                                        <p class="small text-muted mb-0">Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Yıl ortasında iş değiştiren bir çalışanın kümülatif vergi matrahı sıfırlanır mı?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;"><strong>Evet, sıfırlanır.</strong> Yeni bir işverenin yanında işe başlayan çalışanın kümülatif vergi matrahı sıfırdan başlatılır. Ancak, eski işyerinden alınan matrah ile yeni işyerindeki matrahın yıl sonunda birleştirilip birleştirilmeyeceği ücret toplam sınırlarına bağlıdır. Limit aşılıyorsa beyannameyle birleştirilir.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">Asgari ücret istisnası ne zaman uygulanır?</h4>
-                                        <p class="small text-muted mb-0">Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Birden fazla işverenden ücret alanlar için beyanname sınırı nedir?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">GVK Md. 86/1-b uyarınca, en yüksek ücret aldığınız birinci işveren dışındaki diğer işverenlerden aldığınız ücretlerin kümülatif toplamı 2026 yılı için <strong>190.000 TL</strong>'yi veya tüm işverenlerden aldığınız ücretlerin brüt kümülatif toplamı <strong>5.300.000 TL</strong>'yi aşarsa yıllık beyanname vermeniz zorunludur.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">2026 gelir vergisi nasıl hesaplanır?</h4>
-                                        <p class="small text-muted mb-0">Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Asgari ücret gelir vergisi istisnası birden fazla işyerinde kullanılabilir mi?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;"><strong>Hayır, kullanılamaz.</strong> Her ay brüt asgari ücretin vergi matrahı kadar kısım gelir vergisinden istisna edilir. Bu istisna hakkı <strong>yalnızca tek bir işverende (en yüksek ücret alınan yerde)</strong> uygulanabilir. Birden fazla yerde çalışanlar istisnayı yalnızca bir işyerinde kullanabilirler.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">2026 gelir vergisi dilimleri nelerdir?</h4>
-                                        <p class="small text-muted mb-0">2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Ücret gelirleri ile ücret dışı gelirlerin vergi tarifelerindeki fark nedir?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">Her iki gelir türü de GVK 103 vergi dilimlerine tabi olsa da dilimlerin üst sınırları farklıdır. 2026 tarifesinde; üçüncü dilim sınırı ücret dışı gelirlerde <strong>1.000.000 TL</strong> iken, ücret gelirlerinde <strong>1.500.000 TL</strong> olarak uygulanır. Bu durum, ücretlilerin daha geç üst vergi dilimine girmesini sağlar.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="border rounded-3 p-3 h-100 bg-light">
-                                        <h4 class="h6 fw-bold mb-2">Ücret gelir vergisinde kümülatif matrah neden gerekir?</h4>
-                                        <p class="small text-muted mb-0">Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır.</p>
+                                        <h4 class="h6 fw-bold text-dark mb-2">Brüt maaş ile net gelir vergisi matrahı nasıl hesaplanır?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">Brüt maaştan; <strong>%14 SGK işçi payı</strong> ve <strong>%1 İşsizlik sigortası işçi payı</strong> (toplam %15) düşüldükten sonra kalan tutar "Gelir Vergisi Matrahı"dır. Varsa şahıs sigorta primleri, engellilik indirimi ve sendika aidatları gibi yasal indirimler de matrahtan düşülür.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Kira geliri ile ücret geliri aynı beyannamede toplanır mı?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;"><strong>Evet, toplanır.</strong> Hem ücret hem de kira geliri elde eden bir mükellef, her iki gelir için de yasal beyan sınırlarını aşmışsa, her iki geliri tek bir yıllık beyannamede birleştirir. Kira matrahı ile ücret matrahı birleştirilerek kümülatif vergi tarifesine tabi tutulur.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Huzur hakkı, prim ve ikramiyeler kümülatif vergi matrahına dahil edilir mi?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;"><strong>Evet, dahil edilir.</strong> Yönetim kurulu üyelerine ödenen huzur hakkı, personele ödenen primler, ikramiyeler, fazla mesai ücretleri ve harcırahların vergiye tabi kısımları da ücret niteliğinde olup, kümülatif vergi matrahına eklenerek vergilendirilir.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Efektif vergi oranı nedir ve nasıl hesaplanır?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">Efektif vergi oranı, ödediğiniz net vergi tutarının toplam brüt gelirinize (matrahınıza) olan yüzde oranıdır. Artan oranlı vergi sisteminde vergi diliminiz %27 veya %35 olsa dahi, efektif oranınız tüm matrahın ortalaması alındığı ve istisnalar düşüldüğü için daha düşük çıkacaktır.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 bg-light">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Yıllık beyanname üzerinden hangi yasal indirimlerden yararlanılabilir?</h4>
+                                        <p class="small text-muted mb-0" style="line-height: 1.6;">GVK Madde 89 kapsamında; beyan edilen gelirin %10'unu aşmayan faturalı eğitim ve sağlık harcamaları, %15'ini aşmayan şahıs/hayat sigortası primleri, kamu yararına çalışan derneklere yapılan %5 limitli bağışlar ile okul/yurt/sağlık tesisi yapımı bağışlarının tamamı indirilebilir.</p>
                                     </div>
                                 </div>
                             </div>
@@ -797,58 +851,82 @@ document.addEventListener("DOMContentLoaded", () => {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Gelir vergisi hesaplama aracı ne işe yarar?",
+      "name": "Kümülatif vergi matrahı ücret hesaplamalarında neden kritiktir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "İlgili yılın gelir vergisi dilimlerine göre ücret veya ücret dışı gelir için hesaplanan vergi tutarını gösterir."
+        "text": "Ücretlilerde gelir vergisi kümülatif matraha göre artan oranlı hesaplanır. Yıl içinde elde ettiğiniz safi vergi matrahı her ay üst üste toplanarak kümülatif matrahı oluşturur. Matrah arttıkça girilen vergi dilimi yükselir ve net maaşınız azalır."
       }
     },
     {
       "@type": "Question",
-      "name": "Kümülatif vergi matrahı nedir?",
+      "name": "Yıl ortasında iş değiştiren bir çalışanın kümülatif vergi matrahı sıfırlanır mı?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Kümülatif vergi matrahı, yıl başından ilgili aya kadar oluşan gelir vergisi matrahlarının toplamıdır. Ücret gelirlerinde hangi vergi dilimine girildiğini belirler."
+        "text": "Evet, yeni bir işverenin yanında işe başlayan çalışanın kümülatif vergi matrahı sıfırdan başlatılır. Ancak, eski işyerinden alınan matrah ile yeni işyerindeki matrahın yıl sonunda birleştirilip birleştirilmeyeceği ücret toplam sınırlarına bağlıdır."
       }
     },
     {
       "@type": "Question",
-      "name": "Asgari ücret istisnası ne zaman uygulanır?",
+      "name": "Birden fazla işverenden ücret alanlar için beyanname sınırı nedir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Asgari ücret gelir vergisi istisnası ücret gelirlerinde uygulanır. Ücret dışı gelirlerde bu seçenek otomatik olarak kapatılır."
+        "text": "GVK Md. 86/1-b uyarınca, en yüksek ücret aldığınız birinci işveren dışındaki diğer işverenlerden aldığınız ücretlerin kümülatif toplamı 2026 yılı için 190.000 TL'yi veya tüm işverenlerden aldığınız ücretlerin brüt kümülatif toplamı 5.300.000 TL'yi aşarsa yıllık beyanname vermeniz zorunludur."
       }
     },
     {
       "@type": "Question",
-      "name": "2026 gelir vergisi nasıl hesaplanır?",
+      "name": "Asgari ücret gelir vergisi istisnası birden fazla işyerinde kullanılabilir mi?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Matrah, 2026 gelir vergisi tarifesindeki dilimlere dağıtılır. Her dilim için ilgili oran uygulanır ve toplam gelir vergisi bulunur."
+        "text": "Hayır, asgari ücret istisnası yalnızca tek bir işverende (en yüksek ücret alınan yerde) uygulanabilir. Birden fazla yerde çalışanlar istisnayı yalnızca bir işyerinde kullanabilirler."
       }
     },
     {
       "@type": "Question",
-      "name": "2026 gelir vergisi dilimleri nelerdir?",
+      "name": "Ücret gelirleri ile ücret dışı gelirlerin vergi tarifelerindeki fark nedir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "2026 tarifesinde ilk dilim 190.000 TL'ye kadar %15'tir. Ücret gelirlerinde üçüncü ve dördüncü dilim sınırları ücret dışı gelirlere göre daha yüksektir."
+        "text": "Her iki gelir türü de GVK 103 vergi dilimlerine tabi olsa da dilimlerin üst sınırları farklıdır. 2026 tarifesinde; üçüncü dilim sınırı ücret dışı gelirlerde 1.000.000 TL iken, ücret gelirlerinde 1.500.000 TL olarak uygulanır."
       }
     },
     {
       "@type": "Question",
-      "name": "Ücret gelir vergisinde kümülatif matrah neden gerekir?",
+      "name": "Brüt maaş ile net gelir vergisi matrahı nasıl hesaplanır?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ücret gelirlerinde yıl içindeki önceki ay matrahları vergi dilimini etkiler. Bu nedenle ilgili ay için kümülatif matrah dikkate alınır."
+        "text": "Brüt maaştan; %14 SGK işçi payı ve %1 İşsizlik sigortası işçi payı düşüldükten sonra kalan tutar Gelir Vergisi Matrahıdır. Varsa şahıs sigorta primleri, engellilik indirimi ve sendika aidatları gibi yasal indirimler de matrahtan düşülür."
       }
     },
     {
       "@type": "Question",
-      "name": "Maaş ve ücret dışı gelir hesabı aynı mı?",
+      "name": "Kira geliri ile ücret geliri aynı beyannamede toplanır mı?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Gelir vergisi tarifesi aynı yapıya sahip olsa da ücret gelirlerinde asgari ücret istisnası ve aylık kümülatif matrah etkisi ayrıca değerlendirilir."
+        "text": "Evet, hem ücret hem de kira geliri elde eden bir mükellef, her iki gelir için de yasal beyan sınırlarını aşmışsa, her iki geliri tek bir yıllık beyannamede birleştirir ve kümülatif vergi tarifesine tabi tutulur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Huzur hakkı, prim ve ikramiyeler kümülatif vergi matrahına dahil edilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Evet, huzur hakkı, primler, ikramiyeler, fazla mesai ücretleri ve harcırahların vergiye tabi kısımları da ücret niteliğinde olup, kümülatif vergi matrahına eklenerek vergilendirilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Efektif vergi oranı nedir ve nasıl hesaplanır?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Efektif vergi oranı, ödediğiniz net vergi tutarının toplam brüt gelirinize olan yüzde oranıdır. Diliminiz %35 olsa dahi, efektif oranınız tüm matrahın ortalaması alındığı için daha düşük çıkacaktır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Yıllık beyanname üzerinden hangi yasal indirimlerden yararlanılabilir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GVK Madde 89 kapsamında; beyan edilen gelirin %10'unu aşmayan faturalı eğitim ve sağlık harcamaları, %15'ini aşmayan şahıs/hayat sigortası primleri, kamu yararına çalışan derneklere yapılan %5 limitli bağışlar ile okul/yurt yapımı bağışlarının tamamı indirilebilir."
       }
     }
   ]

@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Mali Bülten & Sirküler - YMM Vergi Sirküleri ve Güncel Mevzuat Duyuruları | İSFA YMM
+{% endblock %}
+
+{% block description %}
+Güncel vergi, SGK ve dış ticaret sirküleri, Yeminli Mali Müşavir mevzuat analizleri ve mali duyurular bülten arşivi.
+{% endblock %}
+
+{% block content %}
+<section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #8b0000, #b22222);">
+    <div class="container" data-aos="fade-up">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">
+            <i class="bi bi-broadcast me-1"></i> Mali Yayınlarımız
+        </span>
+        <h1 class="fw-bold mb-3 display-4">Mali Bülten & Sirküler Arşivi</h1>
+        <p class="lead text-white-50 max-width-600 mx-auto" style="font-size: 1.15rem;">
+            Vergi mevzuatındaki son değişiklikler, yeni tebliğler ve Resmi Gazete duyurularının uzman sirküler analizleri.
+        </p>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <!-- Arama ve Filtre Kartı -->
+        <div class="card border-0 shadow-sm p-4 mb-5 rounded-4" style="margin-top: -2rem; z-index: 10; position: relative;">
+            <form action="{{ url_for('main.sirkuler_list') }}" method="GET" class="row g-3 align-items-center">
+                <!-- Search Input -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0 ps-0 py-2" placeholder="Sirküler adı veya konuda ara..." value="{{ query or '' }}">
+                    </div>
+                </div>
+                
+                <!-- Category Buttons -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('main.sirkuler_list', q=query) }}" class="btn btn-sm {% if not selected_category %}btn-danger{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-2 fw-semibold">
+                            Hepsi
+                        </a>
+                        {% for cat in categories %}
+                        <a href="{{ url_for('main.sirkuler_list', kategori=cat, q=query) }}" class="btn btn-sm {% if selected_category == cat %}btn-danger{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-2 fw-semibold">
+                            {{ cat }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="col-lg-2 col-md-12 text-lg-end">
+                    <button type="submit" class="btn btn-dark w-100 py-2 fw-semibold rounded-pill">Filtrele</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sirküler Listesi -->
+        {% if items %}
+        <div class="row g-4">
+            {% for item in items %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 50 }}">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all hover-card-lift">
+                    <!-- Üst Şerit -->
+                    <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <span class="badge px-3 py-2 rounded-pill fw-bold" style="font-size: 0.85rem; background-color: #ffd8d8; color: #8b0000 !important;">
+                            <i class="bi bi-file-earmark-text me-1"></i> No: {{ item.sirkuler_no }}
+                        </span>
+                        <span class="text-muted small fw-semibold"><i class="bi bi-calendar-event me-1"></i> {{ item.date }}</span>
+                    </div>
+                    
+                    <div class="card-body px-4 pb-4 pt-2 d-flex flex-column">
+                        <div class="mb-2">
+                            <span class="badge px-2.5 py-1.5 rounded fw-bold" style="font-size: 0.8rem; background-color: #343a40; color: #ffffff;">
+                                {{ item.category }}
+                            </span>
+                        </div>
+                        <h4 class="card-title fw-bold text-dark mb-3" style="font-size: 1.2rem; line-height: 1.4;">
+                            {{ item.title }}
+                        </h4>
+                        <p class="card-text text-muted mb-4 flex-grow-1" style="font-size: 0.95rem; line-height: 1.6;">
+                            {{ item.subject }}
+                        </p>
+                        <div class="mt-auto">
+                            <a href="{{ url_for('main.sirkuler_detail', slug=item.slug) }}" class="btn btn-outline-danger w-100 py-2 fw-bold rounded-pill transition-colors">
+                                Detaylı Analizi Oku <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Boş Durum Fallback -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-journal-x text-muted" style="font-size: 5rem;"></i>
+            </div>
+            <h3 class="fw-bold text-dark">Sonuç Bulunamadı</h3>
+            <p class="text-muted max-width-500 mx-auto">
+                Aradığınız kriterlere uygun herhangi bir mali bülten veya sirküler bulunamadı. Lütfen filtrelerinizi sıfırlayıp tekrar deneyin.
+            </p>
+            <a href="{{ url_for('main.sirkuler_list') }}" class="btn btn-danger px-4 py-2 mt-3 rounded-pill fw-bold">
+                Tüm Bültenleri Göster
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.hover-card-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-card-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+}
+.max-width-600 {
+    max-width: 600px;
+}
+.max-width-500 {
+    max-width: 500px;
+}
+</style>
+{% endblock %}

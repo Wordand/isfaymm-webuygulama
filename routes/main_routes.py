@@ -472,7 +472,24 @@ def indirim(): return render_template("pages/indirim.html")
 def kv_istisna_indirimler(): return render_template("pages/kv_istisna_indirim.html")
 
 @bp.route("/mevzuat/gv-istisna-indirimler")
-def gv_istisna_indirimler(): return render_template("pages/gv_istisna_indirim.html")
+def gv_istisna_indirimler():
+    return redirect(url_for("main.gv_istisnalar"), code=301)
+
+@bp.route("/mevzuat/gv-istisnalar")
+def gv_istisnalar():
+    return render_template("pages/gv_istisna_indirim.html", active_tab="istisnalar")
+
+@bp.route("/mevzuat/gv-indirimler")
+def gv_indirimler():
+    return render_template("pages/gv_istisna_indirim.html", active_tab="indirimler")
+
+@bp.route("/mevzuat/gv-muafliklar")
+def gv_muafliklar():
+    return render_template("pages/gv_istisna_indirim.html", active_tab="muafliklar")
+
+@bp.route("/mevzuat/gv-beyan-ve-tarife")
+def gv_beyan_tarife():
+    return render_template("pages/gv_istisna_indirim.html", active_tab="beyan-tarife")
 
 
 
@@ -505,3 +522,191 @@ def kv_suggestions():
     expert_questions = ["İştirak Kazançları İstisnası?", "Örtülü Sermaye Şartları?", "Kurumlar Vergisi Oranı 2026", "Zarar Mahsubu"]
     import random
     return jsonify({"suggestions": random.sample(expert_questions, 4)})
+
+
+# ── Sirküler & Mali Bülten Servisi ──
+TURKISH_MONTHS = {
+    1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
+    7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık"
+}
+
+def format_to_turkish_date(date_str):
+    try:
+        parts = date_str.split("-")
+        if len(parts) == 3:
+            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
+            month_name = TURKISH_MONTHS.get(month, "")
+            return f"{day} {month_name} {year}"
+    except Exception:
+        pass
+    return date_str
+
+def parse_markdown_sirkuler(filename):
+    """Parses sirkuler markdown files with front-matter metadata"""
+    filepath = os.path.join(current_app.root_path, "sirkuler", filename)
+    if not os.path.exists(filepath):
+        return None
+        
+    with open(filepath, "r", encoding="utf-8") as f:
+        raw_text = f.read()
+        
+    parts = raw_text.split("---", 2)
+    meta = {
+        "slug": filename.replace(".md", ""),
+        "title": "Başlıksız Sirküler",
+        "date": "2026-01-01",
+        "raw_date": "2026-01-01",
+        "category": "Mevzuat",
+        "sirkuler_no": "2026/00",
+        "subject": ""
+    }
+    content_raw = raw_text
+    
+    if len(parts) >= 3:
+        front_matter = parts[1]
+        content_raw = parts[2]
+        for line in front_matter.strip().split("\n"):
+            if ":" in line:
+                key, val = line.split(":", 1)
+                meta[key.strip().lower()] = val.strip()
+                
+    # Format date
+    meta["raw_date"] = meta["date"]
+    meta["date"] = format_to_turkish_date(meta["date"])
+    
+    # Convert simple markdown content to HTML
+    meta["content_html"] = markdown_to_html(content_raw.strip())
+    return meta
+
+def markdown_to_html(md_text):
+    """Converts a subset of markdown features (headers, lists, bold, alerts) to HTML"""
+    html = []
+    in_list = False
+    in_quote = False
+    
+    for line in md_text.split("\n"):
+        line_strip = line.strip()
+        
+        # Lists
+        if line_strip.startswith("- ") or line_strip.startswith("* "):
+            if not in_list:
+                html.append('<ul class="list-unstyled ps-3">')
+                in_list = True
+            item_text = line_strip[2:]
+            item_text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', item_text)
+            html.append(f'  <li class="mb-2"><i class="bi bi-patch-check text-danger me-2"></i>{item_text}</li>')
+            continue
+        else:
+            if in_list:
+                html.append("</ul>")
+                in_list = False
+                
+        # Quotes and Custom Alerts
+        if line.startswith("> "):
+            quote_line = line[2:].strip()
+            if quote_line.startswith("[!IMPORTANT]"):
+                in_quote = True
+                html.append('<div class="alert alert-danger d-flex align-items-start gap-3 my-3">')
+                html.append('  <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>')
+                html.append('  <div>')
+                continue
+            elif quote_line.startswith("[!WARNING]"):
+                in_quote = True
+                html.append('<div class="alert alert-warning d-flex align-items-start gap-3 my-3">')
+                html.append('  <i class="bi bi-exclamation-octagon-fill fs-4 text-warning"></i>')
+                html.append('  <div>')
+                continue
+            elif quote_line.startswith("[!TIP]"):
+                in_quote = True
+                html.append('<div class="alert alert-success d-flex align-items-start gap-3 my-3">')
+                html.append('  <i class="bi bi-lightbulb-fill fs-4 text-success"></i>')
+                html.append('  <div>')
+                continue
+            
+            if in_quote:
+                quote_line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', quote_line)
+                html.append(f'    <p class="mb-0">{quote_line}</p>')
+            else:
+                html.append(f'<blockquote class="blockquote border-start border-3 ps-3 text-secondary">{quote_line}</blockquote>')
+            continue
+        else:
+            if in_quote:
+                html.append('  </div>')
+                html.append('</div>')
+                in_quote = False
+                
+        # Empty Line
+        if not line_strip:
+            html.append("<br>")
+            continue
+            
+        # Headers
+        if line_strip.startswith("### "):
+            header_text = line_strip[4:]
+            html.append(f'<h4 class="mt-4 mb-3 text-dark fw-bold">{header_text}</h4>')
+        elif line_strip.startswith("## "):
+            header_text = line_strip[3:]
+            html.append(f'<h3 class="mt-4 mb-3 text-dark fw-bold border-bottom pb-2">{header_text}</h3>')
+        elif line_strip.startswith("# "):
+            header_text = line_strip[2:]
+            html.append(f'<h2 class="mt-4 mb-3 text-dark fw-bold">{header_text}</h2>')
+        else:
+            p_text = line_strip
+            p_text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', p_text)
+            p_text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', p_text)
+            html.append(f'<p class="text-dark" style="font-size: 1.1rem; line-height: 1.75;">{p_text}</p>')
+            
+    if in_list:
+        html.append("</ul>")
+    if in_quote:
+        html.append('  </div>')
+        html.append('</div>')
+        
+    return "\n".join(html)
+
+def get_all_sirkuler():
+    """Reads all markdown files inside sirkuler/ and returns their metadata sorted by date desc"""
+    dir_path = os.path.join(current_app.root_path, "sirkuler")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path, exist_ok=True)
+        return []
+        
+    items = []
+    for fn in os.listdir(dir_path):
+        if fn.endswith(".md"):
+            meta = parse_markdown_sirkuler(fn)
+            if meta:
+                items.append(meta)
+                
+    # Sort by raw_date desc, then by sirkuler_no desc
+    items.sort(key=lambda x: (x.get("raw_date", ""), x.get("sirkuler_no", "")), reverse=True)
+    return items
+
+@bp.route("/mali-bulten")
+def sirkuler_list():
+    items = get_all_sirkuler()
+    category_filter = request.args.get("kategori", "").strip()
+    query = request.args.get("q", "").strip().lower()
+    
+    # Apply category filter
+    if category_filter:
+        items = [i for i in items if i.get("category", "").lower() == category_filter.lower()]
+        
+    # Apply search query
+    if query:
+        items = [i for i in items if query in i.get("title", "").lower() or query in i.get("subject", "").lower()]
+        
+    # Categories list for the template buttons
+    categories = ["Vergi", "SGK", "Dış Ticaret"]
+    return render_template("pages/sirkuler_list.html", items=items, categories=categories, selected_category=category_filter, query=query)
+
+@bp.route("/mali-bulten/<slug>")
+def sirkuler_detail(slug):
+    filename = f"{slug}.md"
+    meta = parse_markdown_sirkuler(filename)
+    if not meta:
+        abort(404)
+        
+    # Get recent sirkulers for sidebar (excluding current one)
+    recent = [i for i in get_all_sirkuler() if i.get("slug") != slug][:4]
+    return render_template("pages/sirkuler_detail.html", item=meta, recent=recent)

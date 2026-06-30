@@ -40,6 +40,9 @@
                     <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#team">Ekibimiz</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link nav-link-animated" href="{{ url_for('main.sirkuler_list') }}">Mali Bülten</a>
+                </li>
+                <li class="nav-item">
                     {% if not is_logged_in %}
                     <a class="nav-link nav-link-animated" href="{{ url_for('main.home') }}#contact">İletişim</a>
                     {% else %}

@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+
+{% block title %}
+{{ item.title }} - No: {{ item.sirkuler_no }} | İSFA YMM
+{% endblock %}
+
+{% block description %}
+{{ item.subject }}
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Şeridi -->
+<nav class="bg-white border-bottom py-3">
+    <div class="container">
+        <ol class="breadcrumb mb-0 small fw-semibold text-muted">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted">Anasayfa</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.sirkuler_list') }}" class="text-decoration-none text-muted">Mali Bülten</a></li>
+            <li class="breadcrumb-item active text-danger" aria-current="page">No: {{ item.sirkuler_no }}</li>
+        </ol>
+    </div>
+</nav>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            
+            <!-- Sol Sütun: Sirküler Detayı -->
+            <div class="col-lg-8">
+                <article class="card border-0 shadow-sm p-4 p-md-5 rounded-4 overflow-hidden">
+                    
+                    <!-- Kategori ve Üst Bilgi -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 border-bottom pb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger px-3 py-2 rounded-pill fw-bold" style="font-size: 0.85rem;">
+                                Sirküler {{ item.sirkuler_no }}
+                            </span>
+                            <span class="badge px-2.5 py-1.5 rounded fw-bold" style="font-size: 0.8rem; background-color: #343a40; color: #ffffff;">
+                                {{ item.category }}
+                            </span>
+                        </div>
+                        <div class="text-muted small fw-semibold">
+                            <i class="bi bi-calendar-event me-1"></i> Yayınlanma: {{ item.date }}
+                        </div>
+                    </div>
+
+                    <!-- Başlık -->
+                    <h1 class="fw-extrabold text-dark mb-4 display-6" style="line-height: 1.35; font-weight: 800;">
+                        {{ item.title }}
+                    </h1>
+
+                    <!-- Kısa Özet / Alt Başlık -->
+                    <div class="p-3 bg-light border-start border-danger border-3 rounded-end-3 mb-4">
+                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1.05rem; line-height: 1.6;">
+                            {{ item.subject }}
+                        </p>
+                    </div>
+
+                    <!-- Asıl İçerik (HTML olarak render edilir) -->
+                    <div class="sirkuler-body mt-4">
+                        {{ item.content_html | safe }}
+                    </div>
+
+                    <!-- Paylaşım Bölümü -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-5 pt-4 border-top">
+                        <span class="fw-bold text-dark"><i class="bi bi-share me-1"></i> Bu Bülteni Paylaşın:</span>
+                        <div class="d-flex gap-2">
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url | urlencode }}" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold">
+                                <i class="bi bi-linkedin text-primary me-1"></i> LinkedIn
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url={{ request.url | urlencode }}&text={{ item.title | urlencode }}" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold">
+                                <i class="bi bi-twitter-x text-dark me-1"></i> Twitter (X)
+                            </a>
+                        </div>
+                    </div>
+
+                </article>
+                
+                <!-- Yasal Uyarı Disclaimer -->
+                <div class="alert alert-secondary border-0 shadow-sm p-4 mt-4 rounded-4" style="background-color: #f8f9fa;">
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-exclamation text-danger me-2"></i>Yasal Sorumluluk Sınırı</h6>
+                    <p class="small text-muted mb-0" style="line-height: 1.6;">
+                        Mali Bülten ve Sirküler sayfalarımızda yer alan tüm teknik bilgi, yorum ve açıklamalar genel bilgilendirme amacıyla hazırlanmıştır. Kanun ve tebliğlerin uygulaması mükelleflerin özel durumlarına göre değişiklik gösterebilir. Kesin karar vermeden önce işlemlerinizin güvenliği için uzman bir <strong>Yeminli Mali Müşavir (YMM)</strong> veya mali danışmana başvurmanız tavsiye olunur.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sağ Sütun: Yan Panel (Sidebar) -->
+            <div class="col-lg-4">
+                
+                <!-- Danışmanlık CTA Kartı -->
+                <div class="card border-0 shadow-sm p-4 text-center rounded-4 mb-4 text-white" style="background: linear-gradient(135deg, #8b0000, #b22222);">
+                    <div class="mb-3">
+                        <i class="bi bi-chat-quote-fill" style="font-size: 3rem; color: rgba(255,255,255,0.75);"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Müşavirlik Desteği Alın</h4>
+                    <p class="small text-white-50 mb-4" style="line-height: 1.6;">
+                        İstisna, muafiyet ve vergi avantajı şartlarını sizin yerinize en güvenli şekilde biz yönetelim. Kanuni sınırların dışında kalmayın.
+                    </p>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-warning w-100 py-2.5 fw-bold rounded-pill shadow-sm">
+                        YMM Danışmanlık Talebi
+                    </a>
+                </div>
+
+                <!-- Hızlı Hesaplama Araçları -->
+                <div class="card border-0 shadow-sm p-4 rounded-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-cpu-fill text-danger me-2"></i> Pratik Araçlar
+                    </h5>
+                    <div class="d-flex flex-column gap-2.5">
+                        <a href="{{ url_for('calculators.gelir_vergisi') }}" class="btn btn-light text-start py-2.5 border-0 hover-btn-danger d-flex align-items-center gap-2 rounded-3">
+                            <i class="bi bi-person-badge text-danger"></i> Gelir Vergisi Hesaplama
+                        </a>
+                        <a href="{{ url_for('main.mevzuat') }}" class="btn btn-light text-start py-2.5 border-0 hover-btn-danger d-flex align-items-center gap-2 rounded-3">
+                            <i class="bi bi-journal-text text-danger"></i> Tüm Mevzuat Portalı
+                        </a>
+                        <a href="{{ url_for('main.kv_istisna_indirimler') }}" class="btn btn-light text-start py-2.5 border-0 hover-btn-danger d-flex align-items-center gap-2 rounded-3">
+                            <i class="bi bi-buildings text-danger"></i> Kurumlar Vergisi İstisnaları
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Diğer Son Sirkülerler -->
+                {% if recent %}
+                <div class="card border-0 shadow-sm p-4 rounded-4">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-journal-text text-danger me-2"></i> Diğer Bültenler
+                    </h5>
+                    <div class="d-flex flex-column gap-3.5">
+                        {% for r in recent %}
+                        <div class="border-bottom pb-3 last-border-none">
+                            <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                 <span class="badge px-2 py-1 rounded fw-bold" style="font-size: 0.75rem; background-color: #ffd8d8; color: #8b0000 !important;">No: {{ r.sirkuler_no }}</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ r.date }}</span>
+                            </div>
+                            <a href="{{ url_for('main.sirkuler_detail', slug=r.slug) }}" class="text-decoration-none text-dark fw-bold hover-text-danger d-block mb-1.5" style="font-size: 0.95rem; line-height: 1.45;">
+                                {{ r.title }}
+                            </a>
+                            <p class="text-muted mb-0 small text-truncate-2">
+                                {{ r.subject }}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<style>
+.sirkuler-body p {
+    font-size: 1.125rem;
+    line-height: 1.85;
+    color: #212529;
+    margin-bottom: 1.5rem;
+}
+.sirkuler-body ul, .sirkuler-body ol {
+    margin-bottom: 1.5rem;
+}
+.hover-btn-danger:hover {
+    background-color: #fff5f5 !important;
+    color: #8b0000 !important;
+}
+.hover-text-danger:hover {
+    color: #b22222 !important;
+}
+.last-border-none:last-child {
+    border-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+}
+</style>
+{% endblock %}
