@@ -8,209 +8,251 @@
 
 {% block content %}
 <style>
-:root { --calc-blue: #4e54c8; --calc-grad: linear-gradient(135deg,#4e54c8,#8f94fb); }
-.calc-card { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.3); border-radius:24px; padding:2rem; box-shadow:0 15px 35px rgba(0,0,0,0.08); }
-.section-title { font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:2px solid #f1f5f9; }
-.section-title i { color:var(--calc-blue); }
 .amt-input { font-family:'Roboto Mono',monospace; text-align:right; font-weight:600; }
 .result-card { border-radius:16px; padding:1.5rem; text-align:center; }
 .result-card h6 { font-size:.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:.5rem; }
 .result-card .val { font-size:1.6rem; font-weight:800; font-family:'Roboto Mono',monospace; }
-.detail-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid #f1f5f9; font-size:.9rem; }
+.detail-row { display:flex; justify-content:space-between; padding:.65rem 0; border-bottom:1px solid #f1f5f9; font-size:.95rem; }
 .detail-row:last-child { border:none; }
 .detail-val { font-weight:700; font-family:'Roboto Mono',monospace; }
-.badge-7846 { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:.65rem; padding:2px 8px; border-radius:20px; font-weight:700; vertical-align:middle; }
+.badge-7846 { background-color: #ffd8d8; color: #8b0000 !important; font-size:.7rem; padding:3px 8px; border-radius:20px; font-weight:700; vertical-align:middle; }
 </style>
 
 <div class="container py-4">
-    <header class="text-center mb-4">
-        <nav aria-label="breadcrumb" class="small mb-2">
-            <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}">Hesaplama Araçları</a></li>
-                <li class="breadcrumb-item active" aria-current="page">İthalatta KDV</li>
-            </ol>
-        </nav>
-        <h1 style="font-weight:800;font-size:2rem;background:var(--calc-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
-            İthalatta KDV İndirimi Hesaplama
-        </h1>
-        <p class="text-muted">7846 sayılı CB Kararı & KDV Genel Uygulama Tebliği (III/C-2.6)</p>
-    </header>
-
     <div class="row justify-content-center">
-        <div class="col-xl-10">
-            <div class="calc-card">
-                <form id="ithalatForm" autocomplete="off">
-
-                    <!-- BÖLÜM 1: Temel Bilgiler -->
-                    <div class="section-title"><i class="bi bi-box-seam me-2"></i>Beyanname Temel Bilgileri</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Mal Bedeli (CIF) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control amt-input" id="malBedeli" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                            <div class="form-text">Mal + Sigorta + Navlun</div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Yurt Dışı Gider <span class="badge-7846">7846</span></label>
-                            <input type="text" class="form-control amt-input" id="yurtDisi" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                            <div class="form-text">Gözetim farkı (tevsik edilemeyen)</div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">GV Matrahı</label>
-                            <input type="text" class="form-control amt-input bg-light" id="gvMatrahi" readonly>
-                            <div class="form-text">Otomatik: Mal Bedeli + Yurt Dışı</div>
-                        </div>
-                    </div>
-
-                    <!-- BÖLÜM 2: Gümrük Vergileri -->
-                    <div class="section-title"><i class="bi bi-bank me-2"></i>Gümrük Vergileri</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Gümrük Vergisi (GV)</label>
-                            <input type="text" class="form-control amt-input" id="gv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">İlave GV</label>
-                            <input type="text" class="form-control amt-input" id="igv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Damga Vergisi (DV)</label>
-                            <input type="text" class="form-control amt-input" id="dv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">KDV Oranı (%)</label>
-                            <input type="number" class="form-control amt-input" id="kdvOran" value="20" step="1">
-                        </div>
-                    </div>
-
-                    <!-- BÖLÜM 3: 7846 Kapsamı Vergiler -->
-                    <div class="section-title"><i class="bi bi-shield-exclamation me-2"></i>7846 Sayılı Karar Kapsamı Vergiler <span class="badge-7846">İNDİRİLEMEZ</span></div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Dampinge Karşı Vergi</label>
-                            <input type="text" class="form-control amt-input border-danger" id="dkv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Telafi Edici Vergi</label>
-                            <input type="text" class="form-control amt-input border-danger" id="tev" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Korunma Önlemi GV</label>
-                            <input type="text" class="form-control amt-input border-danger" id="korunmaGV" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Ek Mali Mükellefiyet</label>
-                            <input type="text" class="form-control amt-input border-danger" id="ekMali" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                    </div>
-
-                    <!-- BÖLÜM 4: Diğer Giderler -->
-                    <div class="section-title"><i class="bi bi-receipt me-2"></i>Diğer Giderler (İndirilebilir)</div>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">Dep. Gid.</label>
-                            <input type="text" class="form-control amt-input" id="depGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">Tahm-Tahl</label>
-                            <input type="text" class="form-control amt-input" id="tahmTahl" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">Banka Mas.</label>
-                            <input type="text" class="form-control amt-input" id="bankaMas" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">Liman Gid.</label>
-                            <input type="text" class="form-control amt-input" id="limanGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">Diğer</label>
-                            <input type="text" class="form-control amt-input" id="diger" placeholder="0,00" oninput="formatTR(this);autoCalc()">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold">KDV Matrahı</label>
-                            <input type="text" class="form-control amt-input bg-light" id="kdvMatrahi" readonly>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn w-100 btn-lg fw-bold text-white" style="background:var(--calc-grad);border:none;border-radius:14px;padding:.9rem" onclick="hesapla()">
-                        <i class="bi bi-calculator me-2"></i>Hesapla
-                    </button>
-                </form>
-
-                <!-- SONUÇLAR -->
-                <div id="sonucAlani" style="display:none" class="mt-4">
-                    <hr>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <div class="result-card bg-light border">
-                                <h6 class="text-muted">Toplam KDV</h6>
-                                <div class="val text-dark" id="resToplam">0,00 ₺</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="result-card" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">
-                                <h6 class="text-success">✅ İndirilecek KDV</h6>
-                                <div class="val text-success" id="resIndirilecek">0,00 ₺</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="result-card" style="background:linear-gradient(135deg,#fee2e2,#fecaca)">
-                                <h6 class="text-danger">❌ İndirilemeyecek KDV</h6>
-                                <div class="val text-danger" id="resIndirilemez">0,00 ₺</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Detay Accordion -->
-                    <div class="accordion" id="accDetay">
-                        <div class="accordion-item border-0">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#detay1">
-                                    <i class="bi bi-list-ul me-2"></i>İndirilemez KDV Detayı (7846 Kapsamı)
-                                </button>
-                            </h2>
-                            <div id="detay1" class="accordion-collapse collapse" data-bs-parent="#accDetay">
-                                <div class="accordion-body" id="detayBody"></div>
-                            </div>
-                        </div>
-                        <div class="accordion-item border-0">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#detay2">
-                                    <i class="bi bi-check-circle me-2"></i>İndirilecek KDV Detayı
-                                </button>
-                            </h2>
-                            <div id="detay2" class="accordion-collapse collapse" data-bs-parent="#accDetay">
-                                <div class="accordion-body" id="detayIndirilecek"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- YMM Uyarısı -->
-                    <div id="ymmUyari" class="alert mt-3 d-none"></div>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <div class="alert alert-light border small text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    <strong>Yasal Dayanak:</strong> 7846 sayılı Cumhurbaşkanı Kararı, KDV Genel Uygulama Tebliği III/C-2.6. Gözetim, korunma önlemleri ve haksız rekabet uygulamaları nedeniyle ödenen KDV'nin indirimi kısıtlanmıştır.
-                </div>
-            </div>
-            <section class="mt-4" aria-labelledby="ithalat-kdv-rehber">
-                <h2 id="ithalat-kdv-rehber" class="h4 fw-bold text-dark mb-3">İthalatta KDV Hesabı Nasıl Yapılır?</h2>
-                <p class="text-muted">
-                    İthalatta KDV matrahı; mal bedeli, yurt dışı giderler, gümrük vergileri ve ithalatla ilgili diğer giderlerin toplamından oluşur. 7846 sayılı Karar kapsamındaki bazı vergilere isabet eden KDV ise indirim konusu yapılamayabilir.
+        <div class="col-lg-10">
+            <!-- Header -->
+            <header class="mb-4">
+                <nav aria-label="breadcrumb" class="small mb-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}" class="text-decoration-none text-muted">Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('calculators.index') }}" class="text-decoration-none text-muted">Hesaplama Araçları</a></li>
+                        <li class="breadcrumb-item active text-danger" aria-current="page">İthalatta KDV</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-bold text-dark mb-2">İthalatta KDV İndirimi Hesaplama</h1>
+                <p class="lead text-muted mb-3">
+                    7846 sayılı Cumhurbaşkanı Kararı ve KDV Genel Uygulama Tebliği (III/C-2.6) kapsamında indirilecek ve indirilemeyecek KDV tutarını hesaplayın.
                 </p>
-                <div class="row g-3">
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">Toplam KDV</h3><p class="small text-muted mb-0">KDV matrahı üzerinden hesaplanan toplam ithalat KDV tutarıdır.</p></div></div>
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">İndirilecek KDV</h3><p class="small text-muted mb-0">Genel esaslara göre indirim konusu yapılabilecek KDV tutarıdır.</p></div></div>
-                    <div class="col-md-4"><div class="border rounded-3 p-3 h-100 bg-white"><h3 class="h6 fw-bold">İndirilemeyecek KDV</h3><p class="small text-muted mb-0">Gözetim ve koruma önlemleri gibi kalemlere isabet eden kısıtlı KDV tutarıdır.</p></div></div>
+                <div class="d-flex flex-wrap gap-2" aria-label="Hesaplama kapsamı">
+                    <span class="badge rounded-pill text-bg-danger px-3 py-2">7846 Kararı</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">İndirilemeyecek KDV</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Gözetim Farkı</span>
+                    <span class="badge rounded-pill bg-white border px-3 py-2" style="color: #1f2937 !important;">Dampinge Karşı Vergi</span>
+                </div>
+            </header>
+
+            <!-- Ana Hesaplama Kartı -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-dark text-white p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-truck me-2 text-danger"></i>Gümrük Beyanname Verileri</h4>
+                        <span class="badge bg-danger">7846 UYUMLU</span>
+                    </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form id="ithalatForm" autocomplete="off">
+
+                        <!-- BÖLÜM 1: Temel Bilgiler -->
+                        <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
+                            <i class="bi bi-box-seam me-1 text-danger"></i> 1. Beyanname Temel Bilgileri
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Mal Bedeli (CIF) <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="malBedeli" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                                <div class="form-text text-muted small">Mal Bedeli + Sigorta + Navlun</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Yurt Dışı Gider <span class="badge-7846 ms-1">7846</span></label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="yurtDisi" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                                <div class="form-text text-muted small">Gözetim farkı (Tevsik edilemeyen)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Hesaplanan GV Matrahı</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light-subtle rounded-3 p-3 fw-bold text-dark" id="gvMatrahi" readonly>
+                                <div class="form-text text-muted small">Otomatik: Mal Bedeli + Gözetim Farkı</div>
+                            </div>
+                        </div>
+
+                        <!-- BÖLÜM 2: Gümrük Vergileri -->
+                        <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
+                            <i class="bi bi-bank me-1 text-danger"></i> 2. Gümrük Vergileri
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Gümrük Vergisi (GV)</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="gv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">İlave Gümrük Vergisi (İGV)</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="igv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Damga Vergisi (DV)</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="dv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">KDV Oranı (%)</label>
+                                <input type="number" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="kdvOran" value="20" step="1">
+                            </div>
+                        </div>
+
+                        <!-- BÖLÜM 3: 7846 Kapsamı Vergiler -->
+                        <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
+                            <i class="bi bi-shield-exclamation me-1 text-danger"></i> 3. 7846 Sayılı Karar Kapsamı (İndirilemeyecek) Vergiler
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Dampinge Karşı Vergi</label>
+                                <input type="text" class="form-control amt-input border border-danger-subtle bg-light rounded-3 p-3" id="dkv" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Telafi Edici Vergi</label>
+                                <input type="text" class="form-control amt-input border border-danger-subtle bg-light rounded-3 p-3" id="tev" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Korunma Önlemi GV</label>
+                                <input type="text" class="form-control amt-input border border-danger-subtle bg-light rounded-3 p-3" id="korunmaGV" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Ek Mali Mükellefiyet</label>
+                                <input type="text" class="form-control amt-input border border-danger-subtle bg-light rounded-3 p-3" id="ekMali" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                        </div>
+
+                        <!-- BÖLÜM 4: Diğer Giderler -->
+                        <div class="fw-bold text-uppercase text-secondary small mb-3 border-bottom pb-2">
+                            <i class="bi bi-receipt me-1 text-danger"></i> 4. Diğer İthalat Giderleri (KDV Matrahına Dahil)
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-2.4 col-sm-6 mb-3">
+                                <label class="form-label small fw-bold">Depolama Gideri</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="depGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-2.4 col-sm-6 mb-3">
+                                <label class="form-label small fw-bold">Tahmil-Tahliye</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="tahmTahl" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-2.4 col-sm-6 mb-3">
+                                <label class="form-label small fw-bold">Banka Masrafı</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="bankaMas" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-2.4 col-sm-6 mb-3">
+                                <label class="form-label small fw-bold">Liman Giderleri</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="limanGid" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                            <div class="col-md-2.4 col-sm-6 mb-3">
+                                <label class="form-label small fw-bold">Diğer Giderler</label>
+                                <input type="text" class="form-control amt-input border-0 bg-light rounded-3 p-3" id="diger" placeholder="0,00" oninput="formatTR(this);autoCalc()">
+                            </div>
+                        </div>
+
+                        <!-- Toplam KDV Matrahı Göstergesi -->
+                        <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark"><i class="bi bi-calculator-fill me-1 text-danger"></i> Toplam KDV Matrahı (Öngörülen):</span>
+                            <input type="text" class="form-control amt-input border-0 bg-transparent fw-bold text-dark fs-5 w-auto" id="kdvMatrahi" style="max-width: 200px;" readonly value="0,00">
+                        </div>
+
+                        <button type="button" class="btn btn-danger w-100 btn-lg fw-bold rounded-pill py-3 shadow" onclick="hesapla()">
+                            <i class="bi bi-calculator me-2"></i>Hesapla
+                        </button>
+                    </form>
+
+                    <!-- SONUÇ ALANI -->
+                    <div id="sonucAlani" style="display:none" class="mt-5 pt-4 border-top">
+                        <h4 class="fw-bold text-dark mb-4 text-center">Hesaplama Sonuçları</h4>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <div class="result-card bg-secondary-subtle border-0 shadow-sm p-4">
+                                    <h6 class="text-secondary fw-bold"><i class="bi bi-plus-circle me-1"></i> Toplam KDV</h6>
+                                    <div class="val text-dark fs-3 mt-2" id="resToplam">0,00 ₺</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="result-card bg-success-subtle border-0 shadow-sm p-4">
+                                    <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> İndirilecek KDV</h6>
+                                    <div class="val text-success fs-3 mt-2" id="resIndirilecek">0,00 ₺</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="result-card bg-danger-subtle border-0 shadow-sm p-4">
+                                    <h6 class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i> İndirilemeyecek KDV</h6>
+                                    <div class="val text-danger fs-3 mt-2" id="resIndirilemez">0,00 ₺</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detay Accordion -->
+                        <div class="accordion border rounded-4 overflow-hidden mb-4" id="accDetay">
+                            <div class="accordion-item border-0 border-bottom">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#detay1">
+                                        <i class="bi bi-x-octagon-fill text-danger me-2"></i> 7846 Kapsamı İndirilemeyecek KDV Detayı
+                                    </button>
+                                </h2>
+                                <div id="detay1" class="accordion-collapse collapse" data-bs-parent="#accDetay">
+                                    <div class="accordion-body bg-light" id="detayBody"></div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#detay2">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i> İndirilebilir KDV Detayı
+                                    </button>
+                                </h2>
+                                <div id="detay2" class="accordion-collapse collapse" data-bs-parent="#accDetay">
+                                    <div class="accordion-body bg-light" id="detayIndirilecek"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- YMM Rapor Uyarısı -->
+                        <div id="ymmUyari" class="alert mt-3 d-none border-0 rounded-3 shadow-sm p-3.5"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yasal Bilgilendirme ve Açıklamalar -->
+            <div class="alert alert-secondary border-0 shadow-sm p-4 rounded-4 mb-5" style="background-color: #f8f9fa;">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-exclamation text-danger me-2"></i>Yasal Sorumluluk Sınırı</h5>
+                <p class="small text-muted mb-0" style="line-height: 1.6;">
+                    Bu hesaplama aracı genel bilgilendirme amacıyla hazırlanmıştır. İthalat işlemlerinizdeki KDV indirimi kısıtlamaları (gözetim belgesi, korunma önlemi, damping vb. vergiler) her beyanname bazında kendi özel gümrük tarife istatistik pozisyonu (GTİP) ve menşe koduna göre değişkenlik gösterebilir. Kesin beyanname işlemleri ve vergi yükü planlamalarınız için gümrük müşaviriniz veya **Yeminli Mali Müşavir (YMM)** kadromuzla iletişime geçmeniz tavsiye olunur.
+                </p>
+            </div>
+
+            <section class="mb-5">
+                <h2 class="fw-bold text-dark mb-4 text-center">İthalatta KDV İndirim Kısıtlaması Nedir?</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-tag-fill text-danger me-2"></i>Gözetim Farkı Kısıtı</h4>
+                            <p class="small text-muted mb-0" style="line-height: 1.6;">
+                                Gözetim uygulaması kapsamında tevsik edilemeyen (gerçekleşmeyen) gözetim matrah farkı üzerinden gümrükte ödenen KDV'nin KDV beyannamesinde indirim konusu yapılması kanunen kısıtlanmıştır.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-x-diamond-fill text-danger me-2"></i>Damping ve Korunma</h4>
+                            <p class="small text-muted mb-0" style="line-height: 1.6;">
+                                Haksız rekabetin önlenmesi çerçevesinde uygulanan dampinge karşı vergi, korunma önlemi gümrük vergileri ve ek mali yükümlülükler kapsamında ödenen KDV tutarları indirilemez.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm p-4 rounded-4">
+                            <h4 class="h5 fw-bold text-dark mb-3"><i class="bi bi-file-earmark-medical-fill text-danger me-2"></i>YMM Rapor Sınırı</h4>
+                            <p class="small text-muted mb-0" style="line-height: 1.6;">
+                                İthalat beyannamelerinde KDV indirimlerinin tevsiki için, takvim yılının altışar aylık dönemleri itibarıyla ithalat tutarı yasal haddi aştığında Özel Amaçlı YMM Tevsik Raporu aranır.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
     </div>
-    <div class="mt-3">{% include "partials/tax_disclaimer.html" %}</div>
 </div>
 {% endblock %}
 
@@ -268,7 +310,7 @@ function hesapla() {
     const kdvOran = (parseFloat(document.getElementById('kdvOran').value) || 20) / 100;
 
     if (mal <= 0) {
-        Swal.fire({icon:'warning', title:'Uyarı', text:'Mal Bedeli (CIF) giriniz.'});
+        Swal.fire({icon:'warning', title:'Uyarı', text:'Lütfen Gümrük Beyannamesindeki Mal Bedeli (CIF) tutarını giriniz.'});
         return;
     }
 
@@ -309,20 +351,20 @@ function hesapla() {
     // Detay: İndirilemez
     let d = '';
     if (yd > 0) {
-        d += `<div class="detail-row"><span>Yurt Dışı Gider (Gözetim Farkı)</span><span class="detail-val text-danger">${fmtTR(yd)} ₺</span></div>`;
+        d += `<div class="detail-row"><span>Gözetim Farkı (Yurt Dışı Gider)</span><span class="detail-val text-danger">${fmtTR(yd)} ₺</span></div>`;
         d += `<div class="detail-row"><span>↳ Gözetim Farkına İsabet Eden GV (%${(gvRate*100).toFixed(2)})</span><span class="detail-val text-danger">${fmtTR(gozetimGV)} ₺</span></div>`;
         d += `<div class="detail-row"><span>↳ Gözetim Farkına İsabet Eden İlave GV (%${(igvRate*100).toFixed(2)})</span><span class="detail-val text-danger">${fmtTR(gozetimIGV)} ₺</span></div>`;
-        d += `<div class="detail-row" style="background:#fef2f2"><span><strong>Gözetim Kaynaklı İndirilemez Matrah</strong></span><span class="detail-val text-danger">${fmtTR(gozetimMatrah)} ₺</span></div>`;
+        d += `<div class="detail-row" style="background:#fff5f5"><span><strong>Gözetim Farkından Kaynaklanan İndirilemez Matrah</strong></span><span class="detail-val text-danger">${fmtTR(gozetimMatrah)} ₺</span></div>`;
     }
     if (dkvTutar > 0) d += `<div class="detail-row"><span>Dampinge Karşı Vergi</span><span class="detail-val text-danger">${fmtTR(dkvTutar)} ₺</span></div>`;
     if (tevTutar > 0) d += `<div class="detail-row"><span>Telafi Edici Vergi</span><span class="detail-val text-danger">${fmtTR(tevTutar)} ₺</span></div>`;
     if (korunma > 0) d += `<div class="detail-row"><span>Korunma Önlemi GV</span><span class="detail-val text-danger">${fmtTR(korunma)} ₺</span></div>`;
     if (ekMali > 0) d += `<div class="detail-row"><span>Ek Mali Mükellefiyet</span><span class="detail-val text-danger">${fmtTR(ekMali)} ₺</span></div>`;
-    d += `<div class="detail-row" style="background:#fee2e2;border-radius:8px;padding:.8rem"><span><strong>Toplam İndirilemez KDV Matrahı</strong></span><span class="detail-val text-danger">${fmtTR(indirilemezMatrah)} ₺</span></div>`;
-    d += `<div class="detail-row" style="background:#fee2e2;border-radius:8px;padding:.8rem;margin-top:4px"><span><strong>İndirilemeyecek KDV (%${(kdvOran*100).toFixed(0)})</strong></span><span class="detail-val text-danger fs-5">${fmtTR(indirilemezKDV)} ₺</span></div>`;
+    d += `<div class="detail-row fw-bold mt-2" style="background:#fee2e2;border-radius:8px;padding:.8rem"><span>Toplam İndirilemez KDV Matrahı</span><span class="detail-val text-danger">${fmtTR(indirilemezMatrah)} ₺</span></div>`;
+    d += `<div class="detail-row fw-bold" style="background:#fecaca;border-radius:8px;padding:.8rem;margin-top:4px"><span>İndirilemeyecek KDV (%${(kdvOran*100).toFixed(0)})</span><span class="detail-val text-danger fs-5">${fmtTR(indirilemezKDV)} ₺</span></div>`;
 
     if (indirilemezMatrah === 0) {
-        d = '<div class="text-center text-muted py-3"><i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i>Bu beyannamede 7846 sayılı Karar kapsamında indirilemeyecek KDV bulunmamaktadır.</div>';
+        d = '<div class="text-center text-muted py-3"><i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>Bu beyannamede 7846 sayılı Karar kapsamında indirilemeyecek KDV bulunmamaktadır.</div>';
     }
     document.getElementById('detayBody').innerHTML = d;
 
@@ -331,17 +373,17 @@ function hesapla() {
     const cifIGV = igvTutar - gozetimIGV;
     const indirilecekMatrah = kdvMatrahiToplam - indirilemezMatrah;
     let d2 = '';
-    d2 += `<div class="detail-row"><span>CIF Bedeli</span><span class="detail-val">${fmtTR(mal)} ₺</span></div>`;
-    d2 += `<div class="detail-row"><span>CIF'e İsabet Eden GV</span><span class="detail-val">${fmtTR(cifGV)} ₺</span></div>`;
+    d2 += `<div class="detail-row"><span>CIF Mal Bedeli</span><span class="detail-val">${fmtTR(mal)} ₺</span></div>`;
+    d2 += `<div class="detail-row"><span>CIF'e İsabet Eden Gümrük Vergisi (GV)</span><span class="detail-val">${fmtTR(cifGV)} ₺</span></div>`;
     d2 += `<div class="detail-row"><span>CIF'e İsabet Eden İlave GV</span><span class="detail-val">${fmtTR(cifIGV)} ₺</span></div>`;
     if (dvTutar > 0) d2 += `<div class="detail-row"><span>Damga Vergisi</span><span class="detail-val">${fmtTR(dvTutar)} ₺</span></div>`;
     if (depGid > 0) d2 += `<div class="detail-row"><span>Depolama Gideri</span><span class="detail-val">${fmtTR(depGid)} ₺</span></div>`;
     if (tahmTahl > 0) d2 += `<div class="detail-row"><span>Tahmil-Tahliye</span><span class="detail-val">${fmtTR(tahmTahl)} ₺</span></div>`;
     if (bankaMas > 0) d2 += `<div class="detail-row"><span>Banka Masrafı</span><span class="detail-val">${fmtTR(bankaMas)} ₺</span></div>`;
-    if (limanGid > 0) d2 += `<div class="detail-row"><span>Liman Gideri</span><span class="detail-val">${fmtTR(limanGid)} ₺</span></div>`;
-    if (diger > 0) d2 += `<div class="detail-row"><span>Diğer</span><span class="detail-val">${fmtTR(diger)} ₺</span></div>`;
-    d2 += `<div class="detail-row" style="background:#dcfce7;border-radius:8px;padding:.8rem"><span><strong>İndirilecek KDV Matrahı</strong></span><span class="detail-val text-success">${fmtTR(indirilecekMatrah)} ₺</span></div>`;
-    d2 += `<div class="detail-row" style="background:#dcfce7;border-radius:8px;padding:.8rem;margin-top:4px"><span><strong>İndirilecek KDV (%${(kdvOran*100).toFixed(0)})</strong></span><span class="detail-val text-success fs-5">${fmtTR(indirilecekKDV)} ₺</span></div>`;
+    if (limanGid > 0) d2 += `<div class="detail-row"><span>Liman Giderleri</span><span class="detail-val">${fmtTR(limanGid)} ₺</span></div>`;
+    if (diger > 0) d2 += `<div class="detail-row"><span>Diğer İthalat Giderleri</span><span class="detail-val">${fmtTR(diger)} ₺</span></div>`;
+    d2 += `<div class="detail-row fw-bold mt-2" style="background:#e8f5e9;border-radius:8px;padding:.8rem"><span>İndirilecek KDV Matrahı</span><span class="detail-val text-success">${fmtTR(indirilecekMatrah)} ₺</span></div>`;
+    d2 += `<div class="detail-row fw-bold" style="background:#c8e6c9;border-radius:8px;padding:.8rem;margin-top:4px"><span>İndirilecek KDV (%${(kdvOran*100).toFixed(0)})</span><span class="detail-val text-success fs-5">${fmtTR(indirilecekKDV)} ₺</span></div>`;
     document.getElementById('detayIndirilecek').innerHTML = d2;
 
     // YMM Uyarısı (altışar aylık dönemler itibarıyla)

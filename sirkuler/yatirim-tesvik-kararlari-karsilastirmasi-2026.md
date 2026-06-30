@@ -114,7 +114,7 @@ Eski sistemde yatırım tamamlandıktan sonra yatırıma katkı tutarı tamamen 
 
 ### 4. Kullanılmayan Yatırıma Katkı Tutarının Devretmemesi
 
-Uygulamada en fazla tartışma yaratan düzenleme, [Kurumlar Vergisi Genel Tebliği (Seri No: 24)](/static/pdf/mevzuat/KURUMLAR%20VERG%C4%B0S%C4%B0%20TEBL%C4%B0%C4%9E%C4%B0%20-%2010.05.2026.pdf#page=211) kapsamında yapılan açıklamalardır. Tebliğ uyarınca, **ilgili hesap döneminde indirimli kurumlar vergisinden yararlanma imkânı (kazanç/matrah) bulunmasına rağmen kullanılmayan yatırıma katkı tutarı sonraki hesap dönemlerine devredilemez.**
+Uygulamada en fazla tartışma oluşturan düzenleme, [Kurumlar Vergisi Genel Tebliği](/static/pdf/mevzuat/KURUMLAR%20VERG%C4%B0S%C4%B0%20TEBL%C4%B0%C4%9E%C4%B0%20-%2010.05.2026.pdf#page=211) kapsamında yapılan açıklamalardır. Tebliğ uyarınca, **ilgili hesap döneminde indirimli kurumlar vergisinden yararlanma imkânı (kazanç/matrah) bulunmasına rağmen kullanılmayan yatırıma katkı tutarı sonraki hesap dönemlerine devredilemez.**
 
 Mükellefin beyannamede indirimli kurumlar vergisi uygulayabileceği yeterli matrahı bulunmasına rağmen, sehven veya başka bir nedenle bu hakkını kullanmaması durumunda, o döneme isabet eden teşvik hakkı sonraki yıllara taşınamayacak ve tamamen kaybedilecektir. Bu durum, yıllık vergi planlamasının ve beyanname kontrollerinin önemini katbekat artırmaktadır. Tebliğin bu konusuna dair detaylı mevzuat metnine [Kurumlar Vergisi Genel Tebliği Bölüm IV-32-32.2](/mevzuat/kv-tebligi/IV-32-32.2) sayfamızdan doğrudan ulaşabilirsiniz.
 
