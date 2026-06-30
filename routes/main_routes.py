@@ -578,23 +578,117 @@ def parse_markdown_sirkuler(filename):
     meta["content_html"] = markdown_to_html(content_raw.strip())
     return meta
 
+def parse_markdown_table(table_lines):
+    if len(table_lines) < 1:
+        return ""
+    
+    def clean_cells(line):
+        parts = line.strip().split("|")
+        if len(parts) > 1 and parts[0] == "":
+            parts = parts[1:]
+        if len(parts) > 0 and parts[-1] == "":
+            parts = parts[:-1]
+        return [c.strip() for c in parts]
+
+    headers = clean_cells(table_lines[0])
+    
+    alignments = []
+    has_separator = False
+    data_start_idx = 1
+    if len(table_lines) > 1 and table_lines[1].replace("-", "").replace(":", "").replace("|", "").strip() == "":
+        has_separator = True
+        sep_cells = clean_cells(table_lines[1])
+        for sc in sep_cells:
+            if sc.startswith(":") and sc.endswith(":"):
+                alignments.append("center")
+            elif sc.endswith(":"):
+                alignments.append("right")
+            else:
+                alignments.append("left")
+        data_start_idx = 2
+    else:
+        alignments = ["left"] * len(headers)
+        
+    html = []
+    html.append('<div class="table-responsive my-4">')
+    html.append('  <table class="table table-striped table-bordered align-middle">')
+    html.append('    <thead class="table-dark">')
+    html.append('      <tr>')
+    for i, h in enumerate(headers):
+        align = alignments[i] if i < len(alignments) else "left"
+        h_formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', h)
+        html.append(f'        <th class="text-{align}">{h_formatted}</th>')
+    html.append('      </tr>')
+    html.append('    </thead>')
+    html.append('    <tbody>')
+    
+    for line in table_lines[data_start_idx:]:
+        cells = clean_cells(line)
+        html.append('      <tr>')
+        for i in range(len(headers)):
+            cell_val = cells[i] if i < len(cells) else ""
+            align = alignments[i] if i < len(alignments) else "left"
+            cell_val = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', cell_val)
+            cell_val = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', cell_val)
+            html.append(f'        <td class="text-{align}">{cell_val}</td>')
+        html.append('      </tr>')
+        
+    html.append('    </tbody>')
+    html.append('  </table>')
+    html.append('</div>')
+    return "\n".join(html)
+
 def markdown_to_html(md_text):
-    """Converts a subset of markdown features (headers, lists, bold, alerts) to HTML"""
+    """Converts a subset of markdown features (headers, lists, bold, alerts, tables) to HTML"""
+    lines = md_text.split("\n")
     html = []
     in_list = False
     in_quote = False
     
-    for line in md_text.split("\n"):
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
         line_strip = line.strip()
         
+        # Horizontal Rule
+        if line_strip == "---":
+            if in_list:
+                html.append("</ul>")
+                in_list = False
+            if in_quote:
+                html.append("  </div></div>")
+                in_quote = False
+            html.append('<hr class="my-4">')
+            idx += 1
+            continue
+
+        # Tables
+        if line_strip.startswith("|"):
+            if in_list:
+                html.append("</ul>")
+                in_list = False
+            if in_quote:
+                html.append("  </div></div>")
+                in_quote = False
+                
+            table_lines = []
+            while idx < len(lines) and lines[idx].strip().startswith("|"):
+                table_lines.append(lines[idx])
+                idx += 1
+            
+            html.append(parse_markdown_table(table_lines))
+            continue
+            
         # Lists
         if line_strip.startswith("- ") or line_strip.startswith("* "):
             if not in_list:
-                html.append('<ul class="list-unstyled ps-3">')
+                html.append('<ul class="list-unstyled ps-3 my-3">')
                 in_list = True
             item_text = line_strip[2:]
             item_text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', item_text)
+            item_text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', item_text)
             html.append(f'  <li class="mb-2"><i class="bi bi-patch-check text-danger me-2"></i>{item_text}</li>')
+            idx += 1
             continue
         else:
             if in_list:
@@ -607,27 +701,41 @@ def markdown_to_html(md_text):
             if quote_line.startswith("[!IMPORTANT]"):
                 in_quote = True
                 html.append('<div class="alert alert-danger d-flex align-items-start gap-3 my-3">')
-                html.append('  <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>')
+                html.append('  <i class="bi bi-exclamation-triangle-fill fs-4 text-danger mt-1"></i>')
                 html.append('  <div>')
+                idx += 1
                 continue
             elif quote_line.startswith("[!WARNING]"):
                 in_quote = True
                 html.append('<div class="alert alert-warning d-flex align-items-start gap-3 my-3">')
-                html.append('  <i class="bi bi-exclamation-octagon-fill fs-4 text-warning"></i>')
+                html.append('  <i class="bi bi-exclamation-octagon-fill fs-4 text-warning mt-1"></i>')
                 html.append('  <div>')
+                idx += 1
                 continue
             elif quote_line.startswith("[!TIP]"):
                 in_quote = True
                 html.append('<div class="alert alert-success d-flex align-items-start gap-3 my-3">')
-                html.append('  <i class="bi bi-lightbulb-fill fs-4 text-success"></i>')
+                html.append('  <i class="bi bi-lightbulb-fill fs-4 text-success mt-1"></i>')
                 html.append('  <div>')
+                idx += 1
+                continue
+            elif quote_line.startswith("[!NOTE]"):
+                in_quote = True
+                html.append('<div class="alert alert-info d-flex align-items-start gap-3 my-3">')
+                html.append('  <i class="bi bi-info-circle-fill fs-4 text-info mt-1"></i>')
+                html.append('  <div>')
+                idx += 1
                 continue
             
             if in_quote:
                 quote_line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', quote_line)
+                quote_line = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', quote_line)
                 html.append(f'    <p class="mb-0">{quote_line}</p>')
             else:
-                html.append(f'<blockquote class="blockquote border-start border-3 ps-3 text-secondary">{quote_line}</blockquote>')
+                quote_line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', quote_line)
+                quote_line = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', quote_line)
+                html.append(f'<blockquote class="blockquote border-start border-3 ps-3 text-secondary my-3">{quote_line}</blockquote>')
+            idx += 1
             continue
         else:
             if in_quote:
@@ -638,6 +746,7 @@ def markdown_to_html(md_text):
         # Empty Line
         if not line_strip:
             html.append("<br>")
+            idx += 1
             continue
             
         # Headers
@@ -656,6 +765,8 @@ def markdown_to_html(md_text):
             p_text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', p_text)
             html.append(f'<p class="text-dark" style="font-size: 1.1rem; line-height: 1.75;">{p_text}</p>')
             
+        idx += 1
+        
     if in_list:
         html.append("</ul>")
     if in_quote:
