@@ -8,10 +8,97 @@
 {% block og_desc %}2026 gelir vergisi dilimlerine göre ücret, maaş, kümülatif matrah ve ücret dışı gelir vergisini hesaplayın.{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<style>
+@media (max-width: 767.98px) {
+    .gv-page {
+        padding: 1rem 0.75rem 2rem !important;
+    }
+    .gv-intro {
+        margin-bottom: 1rem !important;
+    }
+    .gv-intro nav {
+        margin-bottom: 0.5rem !important;
+        font-size: 0.76rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .gv-intro .breadcrumb-item.active {
+        display: none;
+    }
+    .gv-intro h1 {
+        font-size: 1.65rem;
+        line-height: 1.15;
+        margin-bottom: 0.45rem !important;
+    }
+    .gv-intro .lead {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        margin-bottom: 0.7rem !important;
+    }
+    .gv-intro [aria-label="Gelir vergisi hesaplama kapsamı"] {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        padding-bottom: 0.2rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .gv-intro [aria-label="Gelir vergisi hesaplama kapsamı"]::-webkit-scrollbar {
+        display: none;
+    }
+    .gv-intro .badge {
+        flex: 0 0 auto;
+        padding: 0.42rem 0.65rem !important;
+        font-size: 0.7rem;
+    }
+    .gv-calculator-card {
+        border-radius: 8px !important;
+        box-shadow: 0 5px 16px rgba(15, 23, 42, 0.1) !important;
+    }
+    .gv-calculator-card > .card-header {
+        padding: 0.8rem 1rem !important;
+    }
+    .gv-calculator-card > .card-header h4 {
+        font-size: 1rem;
+    }
+    .gv-calculator-card > .card-header .badge {
+        display: none;
+    }
+    .gv-calculator-card > .card-body {
+        padding: 1rem !important;
+    }
+    .gv-calculator-card form .row {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.85rem;
+        margin-bottom: 0.9rem !important;
+    }
+    .gv-calculator-card .form-label {
+        font-size: 0.82rem;
+        margin-bottom: 0.35rem;
+    }
+    .gv-calculator-card .form-control,
+    .gv-calculator-card .form-select,
+    .gv-calculator-card .input-group-text {
+        padding: 0.7rem 0.75rem !important;
+        font-size: 0.88rem;
+    }
+    .gv-calculator-card .form-check,
+    .gv-calculator-card .alert {
+        margin-bottom: 0.9rem !important;
+    }
+    .gv-calculator-card button[type="submit"] {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.9rem;
+    }
+}
+</style>
+<div class="container py-4 gv-page">
     <div class="row justify-content-center">
         <div class="col-lg-9">
-            <header class="mb-4">
+            <header class="mb-4 gv-intro">
                 <nav aria-label="breadcrumb" class="small mb-2">
                     <ol class="breadcrumb mb-0">
                         <li class="breadcrumb-item"><a href="{{ url_for('main.home') }}">Ana Sayfa</a></li>
@@ -31,7 +118,7 @@
                 </div>
             </header>
 
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden gv-calculator-card">
                 <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #dc2626, #991b1b);">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0 fw-bold"><i class="bi bi-bank me-2"></i>Gelir Vergisi Hesaplama</h4>

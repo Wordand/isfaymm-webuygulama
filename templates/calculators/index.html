@@ -6,7 +6,7 @@
 {% block og_desc %}İSFA YMM Vergi ve Finans Hesaplama Araçları Merkesi{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 calculator-index">
     <!-- Header Section -->
     <div class="text-center mb-5" data-aos="fade-down">
         <h1 class="display-4 fw-bold text-dark">
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Dashboard Grid -->
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center calculator-grid">
 
         <!-- Gelir Vergisi -->
         <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
@@ -271,6 +271,95 @@
 
     </div>
 </div>
+
+<style>
+@media (max-width: 767.98px) {
+    .calculator-index {
+        padding: 1.25rem 0.75rem 2rem !important;
+    }
+    .calculator-index > .text-center {
+        text-align: left !important;
+        margin-bottom: 1.25rem !important;
+        padding: 0 0.2rem;
+    }
+    .calculator-index > .text-center h1 {
+        font-size: 1.8rem;
+        line-height: 1.15;
+        margin-bottom: 0.45rem;
+    }
+    .calculator-index > .text-center .lead {
+        font-size: 0.9rem;
+        line-height: 1.45;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+    .calculator-grid {
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0.65rem;
+        margin: 0;
+    }
+    .calculator-grid > [class*="col-"] {
+        padding: 0;
+    }
+    .calculator-grid .card {
+        border: 1px solid rgba(148, 163, 184, 0.22) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06) !important;
+    }
+    .calculator-grid .card-body {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        align-items: center;
+        column-gap: 0.75rem;
+        row-gap: 0.2rem;
+        padding: 0.8rem !important;
+        text-align: left !important;
+    }
+    .calculator-grid .icon-box {
+        grid-column: 1;
+        grid-row: 1 / 3;
+        width: 44px !important;
+        height: 44px !important;
+        margin: 0 !important;
+        border-radius: 7px !important;
+    }
+    .calculator-grid .icon-box i {
+        font-size: 1.15rem !important;
+    }
+    .calculator-grid h4 {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        font-size: 0.96rem;
+        line-height: 1.25;
+        margin: 0 !important;
+    }
+    .calculator-grid p {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: start;
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        font-size: 0.75rem !important;
+        line-height: 1.35;
+        margin: 0 !important;
+    }
+    .calculator-grid .btn {
+        grid-column: 3;
+        grid-row: 1 / 3;
+        min-width: 66px;
+        max-width: 82px;
+        padding: 0.45rem 0.6rem !important;
+        border-radius: 6px !important;
+        font-size: 0.68rem;
+        line-height: 1.2;
+        white-space: normal;
+    }
+}
+</style>
 {% endblock %}
 
 <script type="application/ld+json">
