@@ -343,8 +343,9 @@
         padding: 4px 4px 7px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        touch-action: pan-x;
+        touch-action: pan-y;
         scroll-snap-type: x proximity;
+        overscroll-behavior-inline: contain;
     }
     .ikv-tabbar::-webkit-scrollbar {
         display: none;
@@ -547,6 +548,39 @@ function ikvLog(...args) {
   if (IKV_DEBUG) console.log(...args);
 }
 document.addEventListener("DOMContentLoaded", function () {
+  const tabbar = document.querySelector('.ikv-tabbar');
+  if (tabbar) {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let startScrollLeft = 0;
+    let dragged = false;
+
+    tabbar.addEventListener('touchstart', (event) => {
+      const touch = event.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      startScrollLeft = tabbar.scrollLeft;
+      dragged = false;
+    }, { passive: true });
+
+    tabbar.addEventListener('touchmove', (event) => {
+      const touch = event.touches[0];
+      const deltaX = touchStartX - touch.clientX;
+      const deltaY = touchStartY - touch.clientY;
+      if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
+      dragged = Math.abs(deltaX) > 6;
+      tabbar.scrollLeft = startScrollLeft + deltaX;
+      event.preventDefault();
+    }, { passive: false });
+
+    tabbar.addEventListener('click', (event) => {
+      if (!dragged) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setTimeout(() => { dragged = false; }, 0);
+    }, true);
+  }
+
   const isMobileWidth = window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
   const storageKey = "ikv_mobile_desktop_hint_seen";
   if (!isMobileWidth || localStorage.getItem(storageKey) === "1") return;
