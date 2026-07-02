@@ -394,7 +394,12 @@ def sitemap_xml():
     return response
 
 @bp.route("/favicon.ico")
-def favicon(): return send_from_directory(os.path.join(current_app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+def favicon():
+    return send_from_directory(
+        os.path.join(current_app.root_path, "static", "images"),
+        "icon.ico",
+        mimetype="image/vnd.microsoft.icon",
+    )
 
 @bp.route("/ceza")
 def ceza(): return render_template("pages/ceza.html")
