@@ -291,6 +291,72 @@
 .ikv-tab[data-public-tab="mevzuat"] { order: 6; }
 .ikv-tab[data-public-tab="ozelgeler"] { order: 7; }
 
+@media (max-width: 768px) {
+    .ikv-header {
+        padding: 1.25rem 0.85rem 0;
+    }
+    .ikv-header h1 {
+        font-size: 1.85rem !important;
+        line-height: 1.15;
+    }
+    .ikv-header p {
+        font-size: 0.92rem !important;
+        line-height: 1.55;
+    }
+    .ikv-header > .d-flex:first-child {
+        gap: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    .ikv-new-badge {
+        max-width: 100%;
+        padding: 0.45rem 0.75rem;
+    }
+    .ikv-new-text {
+        white-space: normal;
+        line-height: 1.35;
+    }
+    .ikv-banner {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        min-width: 0;
+        padding: 0.75rem;
+    }
+    .ikv-banner .flex-grow-1 {
+        min-width: 0;
+        flex-basis: calc(100% - 48px);
+    }
+    .ikv-banner > a {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 0.35rem;
+        text-align: center;
+        white-space: normal;
+    }
+    .ikv-tabbar {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 4px;
+        padding: 4px 4px 7px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        touch-action: pan-x;
+        scroll-snap-type: x proximity;
+    }
+    .ikv-tabbar::-webkit-scrollbar {
+        display: none;
+    }
+    .ikv-tab {
+        flex: 0 0 auto;
+        min-width: max-content;
+        padding: 0.65rem 0.85rem;
+        scroll-snap-align: start;
+    }
+}
+
 /* Yeni Teşvik Badge */
 .ikv-new-badge {
     display: inline-flex;

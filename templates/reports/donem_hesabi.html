@@ -136,6 +136,9 @@
 
             <input type="radio" class="btn-check" name="pool_genel_oran" id="pool_oran_20" autocomplete="off" value="20">
             <label class="btn btn-outline-dark" for="pool_oran_20">%20 (İhracat)</label>
+
+            <input type="radio" class="btn-check" name="pool_genel_oran" id="pool_oran_12_5" autocomplete="off" value="12.5">
+            <label class="btn btn-outline-dark" for="pool_oran_12_5" onclick="poolShow125Notice()">%12,5</label>
           </div>
           <div class="text-muted small mt-2">Bu oran “kalan matrah” ve “indirimli oran hesabı” için baz alınır.</div>
         </div>
@@ -507,6 +510,21 @@
   function _getGenelOran() {
     const el = document.querySelector('input[name="pool_genel_oran"]:checked');
     return el ? Number(el.value) : 25;
+  }
+
+  function poolShow125Notice() {
+    const options = {
+      icon: 'info',
+      title: 'Yürürlük Tarihi',
+      text: '%12,5 oranı 01.01.2027 tarihinden itibaren yürürlükte olacaktır.',
+      confirmButtonText: 'Tamam',
+      confirmButtonColor: '#0d6efd'
+    };
+    if (window.Swal) {
+      Swal.fire(options);
+    } else {
+      window.alert(options.text);
+    }
   }
 
   function poolShowTevsiInfo(type) {
