@@ -1,227 +1,136 @@
 {% extends "layout.html" %}
 
-{% block title %}
-2026 Güncel Vergi Mevzuatı Portalı - KDV, KV ve Rehberler | İSFA YMM
-{% endblock %}
-
-{% block description %}
-2026 yılı güncel vergi mevzuatı portalı: KDV ve Kurumlar Vergisi tebliğleri, vergi borcu tecil, varlık barışı, vergi cezaları ve indirimli kurumlar vergisi rehberleri.
-{% endblock %}
+{% block title %}2026 Güncel Vergi Mevzuatı ve Uygulama Rehberleri | İSFA YMM{% endblock %}
+{% block description %}2026 güncel vergi mevzuatı: KDV ve Kurumlar Vergisi tebliğleri, vergi borcu tecil, varlık barışı, istisna ve indirim rehberlerine sade erişim.{% endblock %}
+{% block canonical_url %}https://www.isfaymm.com/mevzuat{% endblock %}
 
 {% block content %}
+<main class="legislation-page">
+    <header class="legislation-hero">
+        <div class="container">
+            <div class="legislation-eyebrow">İSFA YMM Mevzuat Merkezi</div>
+            <h1>Vergi Mevzuatı ve Uygulama Rehberleri</h1>
+            <p>Güncel düzenlemelere, temel vergi tebliğlerine ve uygulama rehberlerine konu başlıklarıyla ulaşın.</p>
+        </div>
+    </header>
 
-<section class="py-5 text-center text-white" style="background: linear-gradient(135deg, #004aad, #007bff);">
-    <div class="container" data-aos="fade-up">
-        <h1 class="fw-bold mb-3">2026 Güncel Mevzuat Portalı</h1>
-        <p class="lead text-white-50">
-            Vergi borcu tecil, varlık barışı, KDV, kurumlar vergisi ve uygulama rehberlerine tek yerden ulaşın.
-        </p>
+    <div class="container legislation-content">
+        <section class="legislation-section legislation-current">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Güncel</span>
+                    <h2>Yeni düzenlemeler</h2>
+                </div>
+                <p>Başvuru süresi veya güncel uygulaması bulunan başlıklar.</p>
+            </div>
+            <div class="legislation-grid featured-grid">
+                <a class="legislation-link" href="{{ url_for('main.mevzuat_degisiklikleri') }}">
+                    <span class="legislation-icon icon-red"><i class="bi bi-megaphone"></i></span>
+                    <span class="legislation-copy"><strong>Mevzuat Değişiklikleri</strong><small>Yeni düzenlemeler ve uygulama notları</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+                <a class="legislation-link" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">
+                    <span class="legislation-icon icon-blue"><i class="bi bi-calendar2-check"></i></span>
+                    <span class="legislation-copy"><strong>2026 Vergi Borcu Tecil</strong><small>%29 oran, 72 aya kadar taksit ve teminat</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+                <a class="legislation-link" href="{{ url_for('main.varlik_barisi_2026') }}">
+                    <span class="legislation-icon icon-green"><i class="bi bi-cash-coin"></i></span>
+                    <span class="legislation-copy"><strong>2026 Varlık Barışı</strong><small>Bildirim, süre, oran ve temel şartlar</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+            </div>
+        </section>
+
+        <section class="legislation-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Temel kaynaklar</span>
+                    <h2>Vergi türüne göre mevzuat</h2>
+                </div>
+                <p>Tebliğ metinleri ve konu bazlı uygulama açıklamaları.</p>
+            </div>
+            <div class="legislation-grid">
+                <a class="legislation-link" href="{{ url_for('main.kdv_tebligi') }}">
+                    <span class="legislation-icon icon-amber"><i class="bi bi-file-earmark-ruled"></i></span>
+                    <span class="legislation-copy"><strong>Katma Değer Vergisi</strong><small>KDV Genel Uygulama Tebliği</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+                <a class="legislation-link" href="{{ url_for('main.kv_tebligi') }}">
+                    <span class="legislation-icon icon-indigo"><i class="bi bi-book-half"></i></span>
+                    <span class="legislation-copy"><strong>Kurumlar Vergisi Tebliği</strong><small>Hiyerarşik ve açıklamalı mevzuat</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+                <a class="legislation-link" href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}">
+                    <span class="legislation-icon icon-blue"><i class="bi bi-building"></i></span>
+                    <span class="legislation-copy"><strong>İndirimli Kurumlar Mevzuatı</strong><small>KVK 32/A ve yatırım teşvik uygulaması</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+            </div>
+        </section>
+
+        <section class="legislation-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Pratik rehberler</span>
+                    <h2>İstisna, indirim ve muafiyetler</h2>
+                </div>
+                <p>Mükellef ve kazanç türüne göre uygulanabilecek başlıklar.</p>
+            </div>
+            <div class="legislation-grid compact-grid">
+                <a class="legislation-link" href="{{ url_for('main.kv_istisna_indirimler') }}">
+                    <span class="legislation-icon icon-green"><i class="bi bi-shield-check"></i></span>
+                    <span class="legislation-copy"><strong>KV İstisna ve İndirimler</strong><small>Kurum kazancında uygulanacak hükümler</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+                <a class="legislation-link" href="{{ url_for('main.gv_istisnalar') }}">
+                    <span class="legislation-icon icon-red"><i class="bi bi-person-check"></i></span>
+                    <span class="legislation-copy"><strong>GV İstisna ve Muafiyetler</strong><small>Şahıs, kira, girişimci ve esnaf uygulamaları</small></span>
+                    <i class="bi bi-chevron-right legislation-arrow"></i>
+                </a>
+            </div>
+        </section>
     </div>
-</section>
-
-<section class="py-5">
-    <div class="container">
-        <div class="mb-4">
-            <h2 class="h4 fw-bold text-dark mb-1">Güncel Gelişmeler</h2>
-            <p class="text-muted mb-0">Yeni düzenlemeler, başvuru süreleri ve güncel oranlara ilişkin hızlı rehberler.</p>
-        </div>
-
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.mevzuat_degisiklikleri') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-megaphone text-danger fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">Mevzuat Değişiklikleri</h4>
-                            <p class="text-muted mb-0">Güncel yasal düzenlemeler, değişiklik özetleri ve uygulama notları.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.tecil_taksitlendirme_2026') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-calendar2-check text-info fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">2026 Vergi Borcu Tecil</h4>
-                            <p class="text-muted mb-0">31.08.2026 son başvuru, %29 tecil oranı, 36/48/72 ay taksit ve teminat rehberi.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.varlik_barisi_2026') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-cash-coin text-success fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">2026 Varlık Barışı</h4>
-                            <p class="text-muted mb-0">Yurt dışı ve yurt içi varlık bildirimi, vergi oranları ve 31.07.2027 son tarih rehberi.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.ceza') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-exclamation-triangle text-warning fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">Güncel Vergi Cezaları</h4>
-                            <p class="text-muted mb-0">2026 yılı VUK ceza hükümleri, usulsüzlük cezaları ve güncel tutarlar.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <div class="mt-5 mb-4">
-            <h2 class="h4 fw-bold text-dark mb-1">Uygulama Rehberleri &amp; Portallar</h2>
-            <p class="text-muted mb-0">KDV, kurumlar vergisi ve uygulama rehberlerine tek yerden ulaşın.</p>
-        </div>
-
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kdv_tebligi') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-file-earmark-ruled text-warning fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">Katma Değer Vergisi</h4>
-                            <p class="text-muted mb-0">KDV Genel Uygulama Tebliği, iade ve tevkifat uygulamaları.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('indirimlikurumlar_seo.mevzuat_rehberi') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-building text-primary fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">İndirimli Kurumlar Mevzuatı</h4>
-                            <p class="text-muted mb-0">KVK 32/A, yatırım dönemi, işletme dönemi ve katkı sınırları rehberi.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kv_tebligi') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-book-half text-primary fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">Kurumlar Vergisi Tebliği</h4>
-                            <p class="text-muted mb-0">Kurumlar vergisi mevzuatı, hiyerarşik ve açıklamalı olarak.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.kv_istisna_indirimler') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-shield-check text-success fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">KV İstisna &amp; İndirimler</h4>
-                            <p class="text-muted mb-0">Kazanç ve zarar durumuna göre uygulanacak tüm istisna ve indirimler.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ url_for('main.gv_istisnalar') }}" class="text-decoration-none">
-                    <div class="card shadow-sm border-0 h-100 hover-card">
-                        <div class="card-body text-center p-5">
-                            <i class="bi bi-person-check text-danger fs-1"></i>
-                            <h4 class="fw-bold mt-3 text-dark">GV İstisna &amp; Muafiyetler</h4>
-                            <p class="text-muted mb-0">Şahıs işletmeleri, kira, genç girişimci ve esnaf muafiyeti yasal hakları.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  "name": "Vergi Mevzuatı Portalı",
-  "description": "Vergi borcu tecil, varlık barışı, KDV, kurumlar vergisi ve indirimli kurumlar vergisi rehberleri.",
-  "url": "https://www.isfaymm.com/mevzuat",
-  "hasPart": {
-    "@type": "ItemList",
-    "name": "Mevzuat Kategorileri",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Mevzuat Değişiklikleri",
-        "url": "https://www.isfaymm.com/mevzuat-degisiklikleri"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "2026 Vergi Borcu Tecil ve Taksitlendirme",
-        "url": "https://www.isfaymm.com/mevzuat/vergi-borcu-tecil-taksitlendirme-2026"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": "2026 Varlık Barışı",
-        "url": "https://www.isfaymm.com/mevzuat/varlik-barisi-2026"
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
-        "name": "Güncel Vergi Cezaları",
-        "url": "https://www.isfaymm.com/ceza"
-      },
-      {
-        "@type": "ListItem",
-        "position": 5,
-        "name": "Katma Değer Vergisi",
-        "url": "https://www.isfaymm.com/mevzuat/kdv-tebligi"
-      },
-      {
-        "@type": "ListItem",
-        "position": 6,
-        "name": "İndirimli Kurumlar Mevzuatı",
-        "url": "https://www.isfaymm.com/hesaplama-araclari/indirimli-kurumlar-vergisi/mevzuat"
-      },
-      {
-        "@type": "ListItem",
-        "position": 7,
-        "name": "Kurumlar Vergisi Genel Tebliği",
-        "url": "https://www.isfaymm.com/mevzuat/kv-tebligi"
-      },
-      {
-        "@type": "ListItem",
-        "position": 8,
-        "name": "Kurumlar Vergisi İstisna ve İndirimleri",
-        "url": "https://www.isfaymm.com/mevzuat/kv-istisna-indirimler"
-      },
-      {
-        "@type": "ListItem",
-        "position": 9,
-        "name": "Gelir Vergisi İstisna ve Muafiyetleri",
-        "url": "https://www.isfaymm.com/mevzuat/gv-istisna-indirimler"
-      }
-    ]
-  }
-}
-</script>
+</main>
 
 <style>
-    .hover-card:hover {
-        transform: translateY(-4px);
-        transition: 0.2s;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
-    }
+.legislation-page { background: #f7f9fc; color: #172033; min-height: 100vh; padding-bottom: 3.5rem; }
+.legislation-hero { background: #172744; color: #fff; padding: 2.6rem 0 2.3rem; border-bottom: 4px solid #2563eb; }
+.legislation-eyebrow { color: #93c5fd; text-transform: uppercase; font-size: .75rem; font-weight: 800; letter-spacing: .06em; margin-bottom: .55rem; }
+.legislation-hero h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 .65rem; }
+.legislation-hero p { color: #d3deef; max-width: 760px; margin: 0; font-size: 1rem; }
+.legislation-content { max-width: 1100px; }
+.legislation-section { padding-top: 2.2rem; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; margin-bottom: .9rem; }
+.section-heading h2 { font-size: 1.25rem; font-weight: 800; margin: .15rem 0 0; }
+.section-heading p { color: #64748b; margin: 0; font-size: .88rem; }
+.section-kicker { color: #2563eb; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+.legislation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.featured-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.legislation-link { display: grid; grid-template-columns: 44px minmax(0, 1fr) 20px; align-items: center; gap: .8rem; min-height: 78px; padding: .85rem 1rem; background: #fff; border: 1px solid #dce4ef; border-radius: 8px; text-decoration: none; color: #172033; box-shadow: 0 3px 12px rgba(15, 23, 42, .04); transition: border-color .15s, box-shadow .15s; }
+.legislation-link:hover { color: #172033; border-color: #93b4e8; box-shadow: 0 6px 18px rgba(15, 23, 42, .08); }
+.legislation-icon { width: 44px; height: 44px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; }
+.icon-red { background: #fee2e2; color: #b91c1c; }.icon-blue { background: #dbeafe; color: #1d4ed8; }.icon-green { background: #dcfce7; color: #15803d; }.icon-amber { background: #fef3c7; color: #b45309; }.icon-indigo { background: #e0e7ff; color: #4338ca; }
+.legislation-copy { min-width: 0; }.legislation-copy strong { display: block; font-size: .94rem; line-height: 1.3; }.legislation-copy small { display: block; color: #64748b; margin-top: .2rem; line-height: 1.35; }
+.legislation-arrow { color: #94a3b8; }
+@media (max-width: 767.98px) {
+    .legislation-page { padding-bottom: 2rem; }
+    .legislation-hero { padding: 1.35rem 0 1.2rem; }
+    .legislation-hero h1 { font-size: 1.65rem; line-height: 1.18; margin-bottom: .45rem; }
+    .legislation-hero p { font-size: .85rem; line-height: 1.45; }
+    .legislation-content { padding-left: .75rem; padding-right: .75rem; }
+    .legislation-section { padding-top: 1.35rem; }
+    .section-heading { display: block; margin-bottom: .7rem; }
+    .section-heading h2 { font-size: 1.05rem; }
+    .section-heading p { font-size: .76rem; margin-top: .25rem; }
+    .legislation-grid, .featured-grid { grid-template-columns: 1fr; gap: .55rem; }
+    .legislation-link { grid-template-columns: 40px minmax(0, 1fr) 16px; min-height: 66px; padding: .68rem .75rem; gap: .65rem; }
+    .legislation-icon { width: 40px; height: 40px; font-size: 1rem; }
+    .legislation-copy strong { font-size: .86rem; }.legislation-copy small { font-size: .72rem; }
+}
 </style>
 
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Vergi Mevzuatı ve Uygulama Rehberleri","url":"https://www.isfaymm.com/mevzuat","description":"KDV, kurumlar vergisi, tecil, varlık barışı, istisna ve indirimlere ilişkin güncel mevzuat rehberleri."}
+</script>
 {% endblock %}

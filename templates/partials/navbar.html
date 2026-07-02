@@ -63,6 +63,25 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-modern dropdown-menu-end" aria-labelledby="dijitalDropdown">
                         <div class="dropdown-section">
+                            <a class="dropdown-item-modern" href="{{ url_for('main.ceza') }}">
+                                <div class="dmi-icon bg-orange"><i class="bi bi-exclamation-triangle"></i></div>
+                                <div>
+                                    <div class="dmi-label">Vergi Cezaları 2026</div>
+                                    <div class="dmi-desc">2026 VUK ceza tutarları</div>
+                                </div>
+                            </a>
+                            <a class="dropdown-item-modern" href="{{ url_for('calculators.tdhp') }}">
+                                <div class="dmi-icon bg-green"><i class="bi bi-book"></i></div>
+                                <div>
+                                    <div class="dmi-label">Tek Düzen Hesap Planı</div>
+                                    <div class="dmi-desc">Hesap kodları rehberi</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider-modern"></div>
+
+                        <div class="dropdown-section">
                             <div class="dropdown-section-title">
                                 <i class="bi bi-calculator text-primary"></i> Hesaplama Araçları
                             </div>
@@ -223,13 +242,6 @@
                                     </div>
                                 </a>
 
-                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.ceza') }}">
-                                    <div class="dimc-icon"><i class="bi bi-exclamation-triangle"></i></div>
-                                    <div class="dimc-body">
-                                        <div class="dimc-title">Güncel Vergi Cezaları</div>
-                                        <div class="dimc-desc">2026 yılı VUK ceza hükümleri ve oranları</div>
-                                    </div>
-                                </a>
                             </div>
 
                             <!-- Sağ Sütun: Uygulama Rehberleri & Portallar (Beyaz Panel) -->
@@ -380,27 +392,12 @@
                                     </div>
                                 </div>
 
-                                <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.kv_istisna_indirimler') }}">
-                                    <div class="dimc-icon"><i class="bi bi-shield-check"></i></div>
-                                    <div class="dimc-body">
-                                        <div class="dimc-title">KV İstisna &amp; İndirimler</div>
-                                        <div class="dimc-desc">Kazanç ve zarar durumuna göre tam liste</div>
-                                    </div>
-                                </a>
-
                                 <div class="mevzuat-megamenu-footer-row">
                                     <a class="dropdown-item-mevzuat-card mevzuat-footer-card py-2 px-3 flex-grow-1" href="{{ url_for('main.mevzuat') }}">
                                         <div class="dimc-icon dimc-icon-portal"><i class="bi bi-balance-scale"></i></div>
                                         <div class="dimc-body">
                                             <div class="dimc-title">Mevzuat Portalı</div>
                                             <div class="dimc-desc">Tüm mevzuat arşivi</div>
-                                        </div>
-                                    </a>
-                                    <a class="dropdown-item-mevzuat-card mevzuat-footer-card py-2 px-3 flex-grow-1" href="{{ url_for('calculators.tdhp') }}">
-                                        <div class="dimc-icon dimc-icon-tdhp"><i class="bi bi-book"></i></div>
-                                        <div class="dimc-body">
-                                            <div class="dimc-title">Tek Düzen Hesap Planı</div>
-                                            <div class="dimc-desc">Hesap kodları rehberi</div>
                                         </div>
                                     </a>
                                 </div>
@@ -1016,6 +1013,78 @@
         background: #f8f9fa;
         border: 1px solid #eee;
         border-radius: 12px;
+    }
+
+    #mainNavbar .navbar-collapse {
+        top: 70px;
+        padding: .65rem .75rem .8rem !important;
+        max-height: calc(100vh - 82px);
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .16);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    #mainNavbar .navbar-nav {
+        gap: 0 !important;
+        margin: 0 !important;
+    }
+
+    #mainNavbar.navbar-transparent .navbar-collapse .nav-link,
+    #mainNavbar.navbar-transparent .navbar-collapse .nav-link-animated,
+    #mainNavbar .navbar-collapse .nav-link,
+    #mainNavbar .navbar-collapse .nav-link-animated {
+        color: #273449 !important;
+    }
+
+    #mainNavbar .navbar-collapse .nav-link-animated {
+        padding: .55rem .65rem !important;
+        font-size: .88rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    #mainNavbar.navbar-transparent .navbar-collapse .nav-pill-btn,
+    #mainNavbar .navbar-collapse .nav-pill-btn {
+        width: 100%;
+        margin: .25rem 0 0;
+        padding: .55rem .7rem !important;
+        color: #273449 !important;
+        background: #f8fafc !important;
+        border: 1px solid #dbe3ee !important;
+        box-shadow: none !important;
+    }
+
+    #mainNavbar.navbar-transparent .navbar-collapse .nav-pill-btn i,
+    #mainNavbar .navbar-collapse .nav-pill-btn i {
+        color: currentColor !important;
+    }
+
+    #mainNavbar .dropdown-menu-modern,
+    #mainNavbar .dropdown-menu-mevzuat {
+        position: static !important;
+        width: 100%;
+        min-width: 0;
+        max-height: 58vh;
+        margin: .35rem 0 .5rem !important;
+        padding: .45rem;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: none;
+        animation: none;
+    }
+
+    #mainNavbar .dropdown-item-modern,
+    #mainNavbar .dropdown-item-mevzuat-card {
+        min-height: 48px;
+        padding: .45rem .55rem;
+    }
+
+    #mainNavbar .dropdown-section-title {
+        padding: .45rem .4rem .3rem;
+        font-size: .68rem;
     }
 }
 </style>

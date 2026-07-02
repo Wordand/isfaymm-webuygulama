@@ -1,0 +1,564 @@
+/* Shared compact mobile treatment for legislation and tax-reference pages. */
+@media (max-width: 767.98px) {
+    .mevzuat-changes-hero {
+        padding: 1.25rem 0 1.1rem !important;
+        text-align: left !important;
+    }
+
+    .mevzuat-changes-hero h1 {
+        font-size: 1.55rem !important;
+        line-height: 1.18;
+        margin-bottom: .4rem !important;
+    }
+
+    .mevzuat-changes-hero p {
+        margin: 0;
+        font-size: .82rem !important;
+        line-height: 1.4;
+    }
+
+    .mevzuat-changes-content {
+        padding: .75rem 0 1.5rem !important;
+    }
+
+    .mevzuat-changes-content .timeline-card {
+        margin-bottom: .7rem !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, .06) !important;
+    }
+
+    .mevzuat-changes-content .timeline-card .card-body {
+        padding: .8rem !important;
+    }
+
+    .mevzuat-changes-content .date-badge {
+        width: auto !important;
+        min-width: 82px;
+        display: inline-flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: .3rem;
+        padding: .35rem .55rem !important;
+        margin-bottom: .55rem !important;
+    }
+
+    .mevzuat-changes-content .date-badge span {
+        display: inline !important;
+        font-size: .68rem !important;
+    }
+
+    .mevzuat-changes-content .date-badge .h3 {
+        font-size: .95rem !important;
+    }
+
+    .mevzuat-changes-content h2 {
+        font-size: 1rem !important;
+        line-height: 1.3;
+        margin-bottom: .65rem !important;
+    }
+
+    .mevzuat-changes-content h5 {
+        font-size: .86rem !important;
+    }
+
+    .mevzuat-changes-content .bg-light,
+    .mevzuat-changes-content .rounded-4 {
+        padding: .7rem !important;
+        border-radius: 7px !important;
+    }
+
+    .mevzuat-changes-content p,
+    .mevzuat-changes-content li {
+        font-size: .74rem !important;
+        line-height: 1.42;
+    }
+
+    .legal-guide-hero {
+        padding: 1.15rem 0 !important;
+    }
+
+    .legal-guide-hero > .container {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .legal-guide-hero nav {
+        margin-bottom: .65rem !important;
+        font-size: .68rem !important;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .legal-guide-hero .row {
+        --bs-gutter-y: .65rem;
+    }
+
+    .legal-guide-hero h1 {
+        font-size: 1.45rem !important;
+        line-height: 1.2;
+        margin: .45rem 0 !important;
+    }
+
+    .legal-guide-hero .lead {
+        font-size: .78rem !important;
+        line-height: 1.42;
+    }
+
+    .legal-guide-hero .tecil-pill,
+    .legal-guide-hero .vb-pill {
+        padding: .32rem .5rem !important;
+        font-size: .66rem !important;
+    }
+
+    .legal-guide-hero .tecil-card,
+    .legal-guide-hero .vb-card {
+        padding: .65rem !important;
+        border-radius: 7px !important;
+        font-size: .72rem;
+    }
+
+    .legal-guide-hero .tecil-card .py-2,
+    .legal-guide-hero .vb-card .py-2 {
+        padding-top: .3rem !important;
+        padding-bottom: .3rem !important;
+    }
+
+    .legal-guide-content {
+        padding: .8rem .7rem 1.5rem !important;
+    }
+
+    .legal-guide-content > section,
+    .legal-guide-content .tecil-section,
+    .legal-guide-content .vb-section {
+        margin-bottom: 1rem !important;
+    }
+
+    .legal-guide-content > .row:first-child {
+        --bs-gutter-x: .45rem;
+        --bs-gutter-y: .45rem;
+    }
+
+    .legal-guide-content > .row:first-child > [class*="col-"] {
+        width: 50%;
+    }
+
+    .legal-guide-content .tecil-fact,
+    .legal-guide-content .vb-fact {
+        min-height: 86px;
+        padding: .6rem !important;
+        border-radius: 7px !important;
+    }
+
+    .legal-guide-content .tecil-fact strong,
+    .legal-guide-content .vb-fact strong {
+        font-size: .88rem;
+    }
+
+    .legal-guide-content h2,
+    .legal-guide-content .h3 {
+        font-size: 1.05rem !important;
+        margin-bottom: .5rem !important;
+    }
+
+    .legal-guide-content h3,
+    .legal-guide-content .h4,
+    .legal-guide-content .h5 {
+        font-size: .9rem !important;
+    }
+
+    .legal-guide-content p,
+    .legal-guide-content li,
+    .legal-guide-content small {
+        font-size: .74rem !important;
+        line-height: 1.42;
+    }
+
+    .legal-guide-content .tecil-card,
+    .legal-guide-content .vb-card,
+    .legal-guide-content .tecil-warning,
+    .legal-guide-content .vb-warning,
+    .legal-guide-content .vb-note,
+    .legal-guide-content .tecil-cta {
+        padding: .7rem !important;
+        border-radius: 7px !important;
+    }
+
+    .legal-guide-content .table-responsive {
+        border-radius: 7px !important;
+    }
+
+    .legal-guide-content table {
+        min-width: 620px;
+        font-size: .68rem;
+    }
+
+    .legal-guide-content th,
+    .legal-guide-content td {
+        padding: .42rem .5rem !important;
+    }
+
+    .teblig-mobile-page {
+        padding: .55rem .5rem 1.25rem !important;
+    }
+
+    .teblig-mobile-page > .row {
+        --bs-gutter-x: 0;
+        --bs-gutter-y: .6rem;
+    }
+
+    .teblig-mobile-page .navigation-wrapper {
+        position: static !important;
+    }
+
+    .teblig-mobile-page .navigation-wrapper > .glass-card {
+        max-height: 235px !important;
+        border-radius: 7px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, .07) !important;
+    }
+
+    .teblig-mobile-page .gradient-header {
+        padding: .55rem .7rem !important;
+    }
+
+    .teblig-mobile-page .gradient-header .mb-2 {
+        margin-bottom: .1rem !important;
+    }
+
+    .teblig-mobile-page .gradient-header h5 {
+        font-size: .88rem;
+    }
+
+    .teblig-mobile-page .gradient-header p {
+        font-size: .62rem !important;
+    }
+
+    .teblig-mobile-page .navigation-wrapper .p-3 {
+        padding: .5rem !important;
+    }
+
+    .teblig-mobile-page #mevzuatSearch {
+        min-height: 38px;
+        font-size: .76rem;
+        border-radius: 7px !important;
+    }
+
+    .teblig-mobile-page #mevzuatNav {
+        max-height: 145px;
+        padding: .35rem !important;
+    }
+
+    .teblig-mobile-page .nav-header-item {
+        padding: .35rem .45rem !important;
+    }
+
+    .teblig-mobile-page .nav-header-item span {
+        font-size: .7rem !important;
+    }
+
+    .teblig-toolbar {
+        display: block !important;
+        margin-bottom: .6rem !important;
+        padding: .55rem !important;
+        border-radius: 7px !important;
+    }
+
+    .teblig-toolbar .breadcrumb {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 0 !important;
+        font-size: .68rem;
+        scrollbar-width: none;
+    }
+
+    .teblig-actions {
+        margin-top: .45rem;
+    }
+
+    .teblig-actions .input-group {
+        width: 100% !important;
+    }
+
+    .teblig-actions > .btn,
+    .teblig-actions > .vr {
+        display: none;
+    }
+
+    .teblig-mobile-page #contentWrapper {
+        min-height: 0 !important;
+        border-radius: 7px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, .07) !important;
+    }
+
+    .teblig-mobile-page #mainContent {
+        padding: .7rem !important;
+    }
+
+    .teblig-mobile-page .welcome-screen {
+        padding: 0 !important;
+        margin-bottom: .65rem !important;
+    }
+
+    .teblig-mobile-page .welcome-screen .icon-circle {
+        display: none !important;
+    }
+
+    .teblig-mobile-page .welcome-screen h1 {
+        font-size: 1.2rem !important;
+        letter-spacing: 0 !important;
+    }
+
+    .teblig-mobile-page .kdv-static-intro,
+    .teblig-mobile-page .kv-static-intro {
+        margin-top: .7rem !important;
+    }
+
+    .teblig-mobile-page .kdv-intro-panel,
+    .teblig-mobile-page .kdv-topic-panel,
+    .teblig-mobile-page .kv-intro-panel,
+    .teblig-mobile-page .kv-topic-panel,
+    .teblig-mobile-page .ai-search-card {
+        padding: .7rem !important;
+        border-radius: 7px !important;
+    }
+
+    .teblig-mobile-page .kdv-intro-panel h2,
+    .teblig-mobile-page .kv-intro-panel h2,
+    .teblig-mobile-page .kdv-topic-panel h3,
+    .teblig-mobile-page .kv-topic-panel h3,
+    .teblig-mobile-page .ai-search-card h3 {
+        font-size: .92rem !important;
+    }
+
+    .teblig-mobile-page p,
+    .teblig-mobile-page li,
+    .teblig-mobile-page .small {
+        font-size: .72rem !important;
+        line-height: 1.4;
+    }
+
+    .teblig-mobile-page .ai-search-card .mb-4 {
+        margin-bottom: .6rem !important;
+    }
+
+    .teblig-mobile-page .ai-input-group {
+        min-height: 42px;
+        margin-bottom: .6rem !important;
+    }
+
+    .teblig-mobile-page .ai-input-group input {
+        min-width: 0;
+        font-size: .76rem !important;
+    }
+
+    .teblig-mobile-page .ai-btn-primary {
+        padding: .45rem .65rem !important;
+        font-size: .72rem;
+    }
+
+    .teblig-mobile-page .suggestions {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+    }
+
+    .teblig-mobile-page .suggestion-pill {
+        flex: 0 0 auto;
+        font-size: .66rem;
+    }
+
+    .teblig-mobile-page #mainSearchSection > .d-flex {
+        margin-top: 1rem !important;
+        margin-bottom: .55rem !important;
+    }
+
+    .teblig-mobile-page .classic-search-bar {
+        border-radius: 7px !important;
+    }
+
+    .teblig-mobile-page .classic-search-bar .input-group-text {
+        padding-left: .65rem !important;
+    }
+
+    .teblig-mobile-page .classic-search-bar input {
+        min-width: 0;
+        padding: .5rem !important;
+        font-size: .74rem !important;
+    }
+
+    .teblig-mobile-page .classic-search-bar button {
+        margin: .25rem !important;
+        padding: .42rem .55rem !important;
+        border-radius: 6px !important;
+        font-size: .68rem;
+        white-space: nowrap;
+    }
+
+    .teblig-mobile-page article h1,
+    .teblig-mobile-page article h2,
+    .teblig-mobile-page #article-container h1,
+    .teblig-mobile-page #article-container h2 {
+        font-size: 1.05rem !important;
+    }
+
+    .teblig-mobile-page .table-responsive table {
+        min-width: 620px;
+        font-size: .66rem !important;
+    }
+
+    .tax-reference-hero {
+        padding: 1.25rem 0 1.1rem !important;
+        text-align: left !important;
+    }
+
+    .tax-reference-hero .badge {
+        padding: .35rem .55rem !important;
+        margin-bottom: .5rem !important;
+        font-size: .62rem !important;
+    }
+
+    .tax-reference-hero h1 {
+        font-size: 1.45rem !important;
+        line-height: 1.2;
+        margin-bottom: .4rem !important;
+    }
+
+    .tax-reference-hero .lead {
+        max-width: none !important;
+        margin-bottom: .55rem !important;
+        font-size: .78rem !important;
+        line-height: 1.42;
+    }
+
+    .tax-reference-hero .btn {
+        padding: .45rem .7rem !important;
+        margin-top: 0 !important;
+        font-size: .72rem;
+    }
+
+    .tax-reference-tabs {
+        position: static !important;
+    }
+
+    .tax-reference-tabs .container > .d-flex {
+        justify-content: flex-start !important;
+        flex-wrap: nowrap !important;
+        gap: .35rem !important;
+        padding: .5rem 0 !important;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tax-reference-tabs .container > .d-flex::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tax-reference-tabs .kvi-tab-btn {
+        flex: 0 0 auto;
+        min-height: 38px;
+        padding: .42rem .62rem !important;
+        font-size: .7rem !important;
+        white-space: nowrap;
+    }
+
+    .tax-reference-content {
+        min-height: 0 !important;
+        padding: .65rem 0 1.5rem !important;
+    }
+
+    .tax-reference-content > .container {
+        padding-left: .65rem;
+        padding-right: .65rem;
+    }
+
+    .tax-reference-content .row {
+        --bs-gutter-x: .55rem;
+        --bs-gutter-y: .55rem;
+    }
+
+    .tax-reference-content section {
+        padding-top: .65rem !important;
+        padding-bottom: .65rem !important;
+        margin-bottom: .65rem !important;
+        border-radius: 7px !important;
+    }
+
+    .tax-reference-content .kvi-persona-card {
+        padding: .55rem !important;
+        border-radius: 7px !important;
+    }
+
+    .tax-reference-content .kvi-persona-icon {
+        width: 34px !important;
+        height: 34px !important;
+        margin-bottom: .35rem !important;
+        font-size: .9rem !important;
+    }
+
+    .tax-reference-content .kvi-persona-card h6 {
+        font-size: .72rem;
+    }
+
+    .tax-reference-content .kvi-persona-card p {
+        font-size: .65rem !important;
+        line-height: 1.3;
+    }
+
+    .tax-reference-content .card {
+        border-radius: 7px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, .06) !important;
+    }
+
+    .tax-reference-content .card-header,
+    .tax-reference-content .card-body {
+        padding: .7rem !important;
+    }
+
+    .tax-reference-content .card-body[style*="min-height"] {
+        min-height: 0 !important;
+    }
+
+    .tax-reference-content h2,
+    .tax-reference-content h3,
+    .tax-reference-content h4,
+    .tax-reference-content h5 {
+        font-size: .92rem !important;
+    }
+
+    .tax-reference-content p,
+    .tax-reference-content li,
+    .tax-reference-content label,
+    .tax-reference-content .small {
+        font-size: .72rem !important;
+        line-height: 1.4;
+    }
+
+    .tax-reference-content .kvi-group-header {
+        padding: .5rem .6rem !important;
+        font-size: .72rem !important;
+    }
+
+    .tax-reference-content .kvi-row {
+        padding: .55rem .65rem !important;
+    }
+
+    .tax-reference-content .kvi-row-name {
+        font-size: .76rem !important;
+    }
+
+    .tax-reference-content .kvi-badge {
+        padding: .25rem .4rem !important;
+        font-size: .61rem !important;
+    }
+
+    .tax-reference-content .input-group,
+    .tax-reference-content .form-control,
+    .tax-reference-content .form-select {
+        min-height: 40px;
+        font-size: .76rem;
+    }
+
+    .tax-reference-content .table-responsive table {
+        min-width: 620px;
+        font-size: .66rem;
+    }
+}

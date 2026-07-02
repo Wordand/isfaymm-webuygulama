@@ -165,8 +165,24 @@
 
 @media (max-width: 620px) {
     .incentive-wrap { padding: 0 14px; }
-    .tool-panel, .result-panel, .info-band, .compare-section { padding: 17px; }
+    .incentive-hero { padding: 22px 0 18px; }
+    .incentive-hero h1 { font-size: 1.7rem; line-height: 1.18; margin-bottom: 7px; }
+    .incentive-hero p { font-size: .86rem; line-height: 1.45; }
+    .incentive-hero .eyebrow { margin-bottom: 7px; font-size: .7rem; }
+    .privacy-note { width: 100%; margin-top: 12px; font-size: .74rem; padding: 7px 9px; }
+    .incentive-grid { gap: 12px; margin-top: 14px; }
+    .tool-panel, .result-panel, .info-band, .compare-section { padding: 14px; }
+    .panel-heading { margin-bottom: 14px; }
+    .panel-heading h2, .result-panel h2 { font-size: 1.05rem; }
+    .field-grid { gap: 12px; }
     .field-grid { grid-template-columns: 1fr; }
+    .field input, .field select { min-height: 42px; padding: 8px 10px; }
+    .result-main { margin: 10px 0 12px; padding: 12px; }
+    .result-main strong { font-size: 1.35rem; }
+    .result-row { padding: 8px 0; font-size: .82rem; }
+    .content-tabs { margin: 18px 0 9px; gap: 6px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .content-tabs::-webkit-scrollbar { display: none; }
+    .content-tabs button { flex: 0 0 auto; padding: 7px 10px; font-size: .76rem; }
     .compare-table, .compare-table tbody, .compare-table tr, .compare-table td { display: block; width: 100%; }
     .compare-table thead { display: none; }
     .compare-table tr { border-bottom: 1px solid var(--line); padding: 8px 0; }

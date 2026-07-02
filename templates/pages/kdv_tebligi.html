@@ -71,7 +71,7 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
 }
 </script>
 {% endif %}
-<div class="container-fluid py-5" style="background: #f8faff;">
+<div class="container-fluid py-5 teblig-mobile-page" style="background: #f8faff;">
     <!-- External Libraries -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -118,7 +118,7 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
         <div class="col-lg-9">
             <!-- Breadcrumb & Kontrol Paneli -->
             <div
-                class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0">
+                class="glass-card mb-4 p-3 d-flex justify-content-between align-items-center rounded-4 shadow-sm border-0 teblig-toolbar">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0 px-2" id="breadcrumbNav">
                         <li class="breadcrumb-item"><a href="{{ url_for('main.mevzuat') }}"
@@ -128,7 +128,7 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
                             Tebliği</li>
                     </ol>
                 </nav>
-                <div class="d-flex gap-2 align-items-center">
+                <div class="d-flex gap-2 align-items-center teblig-actions">
                     <!-- Global Header Search -->
                     <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs"
                         style="width: 250px;">
@@ -255,7 +255,7 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
                                 <div class="input-group input-group-lg classic-search-bar shadow-sm">
                                     <span class="input-group-text border-0 ps-4 bg-transparent"><i class="bi bi-list-columns-reverse text-primary"></i></span>
                                     <input type="text" class="form-control border-0 px-3 fs-6 bg-transparent" id="mainSearchInput"
-                                        placeholder="Madde numarası veya aramak istediğiniz kelime...">
+                                        placeholder="Örn. II-B-4-4.3 veya anahtar kelime...">
                                     <button class="btn btn-primary px-5 rounded-pill m-2 py-2 fw-bold shadow-sm" type="button" id="mainSearchBtn">Maddeyi Getir</button>
                                 </div>
                             </div>
@@ -1089,8 +1089,11 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
         const mainSearchBtn = document.getElementById('mainSearchBtn');
 
         if (mainSearch) {
-            mainSearch.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleMainSearch(e.target.value);
+            mainSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleMainSearch(e.target.value);
+                }
             });
         }
 
@@ -1154,10 +1157,47 @@ KDV Genel Uygulama Tebliği 2026 güncel metni; tevkifat, iade, özel matrah ve 
         }, 350);
     }
 
+    function normalizeArticleReference(value) {
+        return (value || '')
+            .toLocaleLowerCase('tr-TR')
+            .replace(/[^a-z0-9çğıöşü]/g, '');
+    }
+
+    function findDirectArticleMatch(term) {
+        const normalizedTerm = normalizeArticleReference(term);
+        if (!normalizedTerm || !window.flatData) return null;
+
+        return window.flatData.find(entry => {
+            const item = entry.obj || {};
+            const uid = item.uid || entry.id || item.id || '';
+            return normalizeArticleReference(uid) === normalizedTerm;
+        }) || null;
+    }
+
+    function openDirectArticle(match) {
+        const item = match.obj || {};
+        const uid = item.uid || match.id || item.id;
+        const linkUid = uid.replace(/\//g, '-');
+
+        history.pushState(null, '', '/mevzuat/kdv-tebligi/' + linkUid);
+        loadContent(uid);
+
+        const mainSearch = document.getElementById('mainSearchInput');
+        if (mainSearch) mainSearch.value = uid.replace(/\//g, '-');
+    }
+
     function handleMainSearch(term) {
         // Main search looks deep into content
         term = term ? term.trim() : "";
         if (term.length === 0) return;
+
+        // II-B-4-4.3, II/B/4/4.3 ve II.B.4.4.3 gibi madde kodlarını
+        // aynı kabul ederek tam eşleşmede içerik taramasını atla.
+        const directMatch = findDirectArticleMatch(term);
+        if (directMatch) {
+            openDirectArticle(directMatch);
+            return;
+        }
 
         // Show loading
         const contentArea = document.getElementById('mainContent');

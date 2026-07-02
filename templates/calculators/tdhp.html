@@ -6,7 +6,7 @@
 {% block og_desc %}Güncel Tek Düzen Hesap Planı (TDHP) arama motoru, hesap kodları, işleyiş açıklamaları ve örnek muhasebe kayıtları.{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 900px;">
+<div class="container py-4 calculator-mobile tdhp-mobile" style="max-width: 900px;">
     
     <!-- 🔍 Pratik Arama Alanı (Estetik & Sticky) -->
     <div class="sticky-top py-3 mb-4" style="z-index: 1000; top: 70px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.03); margin-left: -15px; margin-right: -15px; padding-left: 15px; padding-right: 15px;">
@@ -320,6 +320,110 @@
     /* Clickable row refined */
     .leaf-item { cursor: pointer; transition: all 0.2s ease; border-left: 3px solid transparent; }
     .leaf-item:hover { background-color: #f8fafc; border-left-color: var(--bs-primary); padding-left: 1.2rem !important; }
+
+    @media (max-width: 767.98px) {
+        .tdhp-mobile {
+            padding: .55rem .65rem 1.25rem !important;
+        }
+
+        .tdhp-mobile > .sticky-top {
+            position: static !important;
+            margin: 0 -.15rem .75rem !important;
+            padding: .55rem .15rem .7rem !important;
+            background: #fff !important;
+            backdrop-filter: none !important;
+        }
+
+        .tdhp-mobile h2 {
+            font-size: 1.22rem !important;
+            line-height: 1.2;
+        }
+
+        .tdhp-mobile .text-center.mb-3 {
+            margin-bottom: .55rem !important;
+        }
+
+        .tdhp-mobile #tdhpSearch {
+            min-height: 44px;
+            padding-top: .55rem !important;
+            padding-bottom: .55rem !important;
+            padding-left: 2.75rem !important;
+            border: 1px solid #dbe3ee !important;
+            border-radius: 7px !important;
+            box-shadow: none !important;
+            font-size: .9rem !important;
+        }
+
+        .tdhp-mobile .group-search .ps-4 {
+            padding-left: .9rem !important;
+        }
+
+        .tdhp-mobile #filterButtons {
+            justify-content: flex-start !important;
+            gap: .35rem !important;
+            margin-top: .55rem !important;
+            overflow-x: auto;
+            padding-bottom: .15rem;
+            flex-wrap: nowrap;
+            scrollbar-width: none;
+        }
+
+        .tdhp-mobile #filterButtons::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tdhp-mobile #filterButtons .btn {
+            flex: 0 0 auto;
+            padding: .38rem .65rem !important;
+            font-size: .72rem;
+            box-shadow: none !important;
+        }
+
+        .tdhp-mobile #accountsContainer .row {
+            --bs-gutter-y: .65rem;
+            margin-top: 0 !important;
+        }
+
+        .tdhp-mobile .card {
+            border-radius: 7px !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .07) !important;
+        }
+
+        .tdhp-mobile .card-header {
+            padding: .65rem .75rem !important;
+        }
+
+        .tdhp-mobile .card-header .fs-5 {
+            font-size: .9rem !important;
+        }
+
+        .tdhp-mobile .accordion-button {
+            min-height: 42px;
+            padding: .55rem .7rem !important;
+            font-size: .78rem !important;
+        }
+
+        .tdhp-mobile .leaf-item {
+            min-height: 38px;
+            padding: .42rem .6rem !important;
+        }
+
+        .tdhp-mobile .leaf-item:hover {
+            padding-left: .6rem !important;
+        }
+
+        .tdhp-mobile .badge-code,
+        .tdhp-mobile [class*="badge-code-"] {
+            min-width: 45px;
+            font-size: .72rem;
+            margin-right: .55rem !important;
+        }
+
+        .tdhp-mobile .search-text {
+            font-size: .76rem !important;
+            line-height: 1.3 !important;
+        }
+    }
 </style>
 
 <script>
