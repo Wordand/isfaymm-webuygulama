@@ -1,16 +1,18 @@
 {% extends "layout.html" %}
 
 {% block title %}
-KDV Tevkifat Rehberi 2026 | Tevkifatlı Fatura, Matrah ve Düzeltme | İSFA YMM
+Tevkifat Nedir? KDV Tevkifat Oranları ve Kodları 2026 | İSFA YMM
 {% endblock %}
 
 {% block description %}
-KDV tevkifat rehberi 2026: tevkifatlı fatura, tevkifattan matrah bulma, düzeltme işlemleri, güncel tevkifat oranları, belirlenmiş alıcılar ve iade süreçleri.
+Tevkifat nedir, kimler KDV tevkifatı yapar? 2026 KDV tevkifat sınırı, güncel oranlar, işlem kodları, belirlenmiş alıcılar ve fatura örnekleri.
 {% endblock %}
 
 {% block og_desc %}
-KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, matrah bulma, düzeltme işlemleri ve güncel mevzuat rehberi.
+Tevkifatın ne olduğunu, kimlerin uyguladığını, 2026 sınırını, güncel KDV tevkifat oranlarını, kodlarını ve örneklerini inceleyin.
 {% endblock %}
+
+{% block canonical_url %}https://www.isfaymm.com/mevzuat/kdv-tevkifat{% endblock %}
 
 {% block content %}
 <!-- ⭐ SEO STRUCTURED DATA (JSON-LD) -->
@@ -20,8 +22,8 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
   "@graph": [
     {
       "@type": "Article",
-      "headline": "2026 Güncel KDV Tevkifat Rehberi ve Hesaplama Aracı",
-      "description": "KDV Genel Uygulama Tebliği kapsamında Tam ve Kısmi Tevkifat uygulamaları, güncel tevkifat oranları tablosu, belirlenmiş alıcılar ve tevkifat iade prosedürleri.",
+      "headline": "Tevkifat Nedir? KDV Tevkifat Oranları ve Kodları 2026",
+      "description": "Tevkifatın tanımı, kimlerin KDV tevkifatı yapacağı, 2026 tevkifat sınırı, güncel oranlar, işlem kodları, belirlenmiş alıcılar ve örnek uygulamalar.",
       "author": {
         "@type": "Organization",
         "name": "İSFA Yeminli Mali Müşavirlik",
@@ -84,20 +86,23 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
                     <i class="bi bi-star-fill animate-bounce"></i> KDV Genel Uygulama Tebliği | 2026 Güncel Rehber
                 </div>
                 <h1 class="display-4 fw-black mb-3 lh-tight text-white">
-                    KDV'de Tam ve Kısmi <span class="text-warning-gradient">Tevkifat Uygulaması</span>
+                    Tevkifat Nedir? <span class="text-warning-gradient">KDV Tevkifat Oranları ve Kodları 2026</span>
                 </h1>
                 <p class="lead text-light mb-4 fw-normal" style="max-width: 700px;">
-                    Vergi sorumlusu sıfatıyla KDV tevkifatı yapacak alıcılar, güncel kısmi tevkifat oranları tablosu, interaktif fatura hesaplama motoru ve özellikli iade işlemleri.
+                    Tevkifat, hesaplanan verginin tamamının veya bir kısmının alıcı tarafından kesilerek vergi dairesine beyan edilmesidir. Kimlerin tevkifat yapacağını, güncel sınırı, oranları, kodları ve örnekleri inceleyin.
                 </p>
                 <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
-                    <a href="#hesaplamaMotoru" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale">
-                        <i class="bi bi-calculator-fill me-2"></i> Tevkifat Hesapla
+                    <a href="#kismiTevkifat" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 shadow-sm hover-scale">
+                        <i class="bi bi-person-check-fill me-2"></i> Kim Öder?
                     </a>
-                    <a href="#oranlarTablosu" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-4 hover-scale">
-                        <i class="bi bi-table me-2"></i> Tevkifat Oranları
+                    <a href="#ortakHususlar" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-check2-circle me-2"></i> Sınır
                     </a>
-                    <a href="#belirlenmisAlicilar" class="btn btn-outline-info btn-lg rounded-pill fw-bold px-4 hover-scale">
-                        <i class="bi bi-person-badge-fill me-2"></i> Belirlenmiş Alıcılar
+                    <a href="#oranlarTablosu" class="btn btn-outline-info btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-table me-2"></i> Oranlar ve Kodlar
+                    </a>
+                    <a href="#tamTevkifat" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-4 hover-scale">
+                        <i class="bi bi-receipt me-2"></i> Örnek
                     </a>
                 </div>
             </div>
@@ -149,14 +154,14 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
                         <i class="bi bi-list-nested me-2"></i> İçindekiler
                     </div>
                     <div class="list-group list-group-flush small fw-semibold" id="tocNav">
-                        <a href="#tevkifatNedir" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 1. Tevkifatın Niteliği & Beyan</a>
-                        <a href="#hesaplamaMotoru" class="list-group-item list-group-item-action py-3 bg-warning-soft text-dark fw-bold"><i class="bi bi-calculator-fill me-2 text-warning"></i> 2. Tevkifat Hesaplama Aracı</a>
-                        <a href="#tamTevkifat" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 3. Tam Tevkifat Uygulaması</a>
-                        <a href="#kismiTevkifat" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 4. Kısmi Tevkifat & Alıcılar</a>
-                        <a href="#oranlarTablosu" class="list-group-item list-group-item-action py-3"><i class="bi bi-table me-2 text-primary"></i> 5. Kısmi Tevkifat Oranları Tablosu</a>
-                        <a href="#ortakHususlar" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 6. Ortak Hususlar & Sınır</a>
-                        <a href="#duzeltmeIslemleri" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 7. Düzeltme & İade İşlemleri</a>
-                        <a href="#faqSection" class="list-group-item list-group-item-action py-3"><i class="bi bi-question-circle-fill me-2 text-primary"></i> 8. Sıkça Sorulan Sorular</a>
+                        <a href="#tevkifatNedir" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 1. Tevkifat Nedir?</a>
+                        <a href="#tamTevkifat" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 2. Tam Tevkifat ve Örnek</a>
+                        <a href="#kismiTevkifat" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 3. Kimler Tevkifat Yapar?</a>
+                        <a href="#oranlarTablosu" class="list-group-item list-group-item-action py-3"><i class="bi bi-table me-2 text-primary"></i> 4. Tevkifat Oranları ve Kodları</a>
+                        <a href="#ortakHususlar" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 5. Tevkifat Sınırı</a>
+                        <a href="#duzeltmeIslemleri" class="list-group-item list-group-item-action py-3"><i class="bi bi-chevron-right me-2 text-primary"></i> 6. Düzeltme ve İade İşlemleri</a>
+                        <a href="#faqSection" class="list-group-item list-group-item-action py-3"><i class="bi bi-question-circle-fill me-2 text-primary"></i> 7. Sıkça Sorulan Sorular</a>
+                        <a href="#hesaplamaMotoru" class="list-group-item list-group-item-action py-3 bg-warning-soft text-dark fw-bold"><i class="bi bi-calculator-fill me-2 text-warning"></i> Hesaplama Aracı</a>
                     </div>
                 </div>
 
@@ -175,14 +180,14 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
             <section id="tevkifatNedir" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-info-lg"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">1. KDV Tevkifatının Niteliği ve İşleyişi</h2>
+                    <h2 class="fw-bold mb-0 text-dark">1. Tevkifat Nedir?</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
                     <p class="lead text-dark fw-normal">
-                        3065 sayılı KDV Kanununun (9/1) inci maddesine göre, mükellefin Türkiye içinde ikametgâhının, işyerinin, kanuni merkezi ve iş merkezinin bulunmaması hallerinde ve gerekli görülen diğer hallerde Maliye Bakanlığı, vergi alacağının emniyet altına alınması amacıyla vergiye tabi işlemlere taraf olanları verginin ödenmesinden sorumlu tutma yetkisine sahiptir.
+                        Tevkifat, hesaplanan verginin tamamının veya belirli bir kısmının ödeme sırasında alıcı tarafından kesilerek vergi dairesine beyan edilip ödenmesidir. KDV tevkifatında satıcıya ödenecek KDV ile alıcının sorumlu sıfatıyla beyan edeceği KDV ayrılır.
                     </p>
                     <p class="text-muted">
-                        KDV tevkifatı ihtiyari bir uygulama olmayıp, Maliye Bakanlığınca tevkifat uygulaması kapsamına alınan işlemlerde alıcılar tarafından tevkifat yapılması zorunludur. KDV tevkifatı uygulaması, teslim veya hizmet bedeli üzerinden hesaplanan verginin, teslim veya hizmeti yapanlar tarafından değil, bu işlemlere muhatap olanlar tarafından kısmen veya tamamen vergi sorumlusu sıfatıyla beyan edilip ödenmesidir.
+                        3065 sayılı KDV Kanununun 9/1 inci maddesi, vergi alacağının güvence altına alınması amacıyla işleme taraf olanların verginin ödenmesinden sorumlu tutulmasına imkân verir. Kapsama alınan işlemlerde tevkifat isteğe bağlı değil, zorunludur.
                     </p>
 
                     <div class="row g-4 my-3">
@@ -214,37 +219,11 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
                 </div>
             </section>
 
-            <!-- ⭐ 2️⃣ İNTERAKTİF TEVKİFAT HESAPLAMA MOTORU YÖNLENDİRMESİ -->
-            <section id="hesaplamaMotoru" class="mb-5 searchable-section">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
-                    <div class="card-header p-4 bg-warning bg-opacity-25 border-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="feature-icon bg-warning text-dark fs-4 shadow-sm"><i class="bi bi-calculator-fill"></i></div>
-                            <div>
-                                <h3 class="fw-bold mb-0 text-dark">KDV Tevkifat Hesaplama & İade Analiz Motoru</h3>
-                                <p class="small text-muted mb-0">Tam ve Kısmi tevkifat faturası oluşturun, otomatik oranları ve iade şartlarını inceleyin.</p>
-                            </div>
-                        </div>
-                        <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-xs">2026 Yapay Zeka Destekli</span>
-                    </div>
-                    <div class="card-body p-4 p-lg-5 text-center bg-light bg-opacity-50">
-                        <i class="bi bi-display text-warning mb-3 d-inline-block" style="font-size: 3.5rem;"></i>
-                        <h4 class="fw-bold text-dark mb-3">Gelişmiş Tevkifat Hesaplama Motoru Yayında!</h4>
-                        <p class="text-muted mb-4 mx-auto" style="max-width: 650px;">
-                            İşlem türünü seçtiğinizde tevkifat oranını otomatik dolduran, <b>Mahsuben İade</b> ve <b>Nakden İade</b> limitlerini anında hesaplayan yeni nesil aracımızı hemen deneyin.
-                        </p>
-                        <a href="{{ url_for('calculators.kdv_tevkifat') }}" class="btn btn-warning btn-lg rounded-pill fw-bold px-5 py-3 shadow hover-scale text-dark">
-                            <i class="bi bi-calculator me-2"></i> Hesaplama Aracına Git
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3️⃣ TAM TEVKİFAT UYGULAMASI (Yenilenmiş Modern Grid Kart Tasarımı) -->
+            <!-- TAM TEVKİFAT UYGULAMASI -->
             <section id="tamTevkifat" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-shield-lock-fill"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">3. Tam Tevkifat Uygulaması (%100 Kesinti)</h2>
+                    <h2 class="fw-bold mb-0 text-dark">2. Tam Tevkifat Uygulaması ve Örnek</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
                     <p class="lead text-dark fw-normal mb-4">
@@ -323,7 +302,7 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
             <section id="kismiTevkifat" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-warning text-dark fs-4 shadow-sm"><i class="bi bi-pie-chart-fill"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">4. Kısmi Tevkifat Uygulaması ve Tevkifat Yapacak Alıcılar</h2>
+                    <h2 class="fw-bold mb-0 text-dark">3. Kimler Kısmi Tevkifat Yapar?</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
                     <p class="lead text-dark fw-normal mb-4">
@@ -379,7 +358,7 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
                     <div class="d-flex align-items-center gap-3">
                         <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-table"></i></div>
                         <div>
-                            <h2 class="fw-bold mb-0 text-dark">5. Kısmi Tevkifat Oranları ve Kapsamı Tablosu</h2>
+                            <h2 class="fw-bold mb-0 text-dark">4. KDV Tevkifat Oranları ve Kodları 2026</h2>
                             <p class="small text-muted mb-0">Tabloda arama yaparak ilgili hizmet veya teslimin güncel oranına anında ulaşın.</p>
                         </div>
                     </div>
@@ -576,7 +555,7 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
             <section id="ortakHususlar" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-primary text-white fs-4 shadow-sm"><i class="bi bi-gear-fill"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">6. Tevkifat Uygulamasında Ortak Hususlar ve Alt Sınır</h2>
+                    <h2 class="fw-bold mb-0 text-dark">5. KDV Tevkifat Sınırı ve Ortak Kurallar</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
                     <h5 class="fw-bold text-dark mb-3">Tevkifat Uygulamasında Sınır (VUK Fatura Düzenleme Limiti)</h5>
@@ -601,7 +580,7 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
             <section id="duzeltmeIslemleri" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-warning text-dark fs-4 shadow-sm"><i class="bi bi-arrow-clockwise"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">7. Düzeltme, Matrah Değişiklikleri ve KDV İade İşlemleri</h2>
+                    <h2 class="fw-bold mb-0 text-dark">6. Düzeltme, Matrah Değişiklikleri ve KDV İade İşlemleri</h2>
                 </div>
                 <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
                     
@@ -645,7 +624,7 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
             <section id="faqSection" class="mb-5 searchable-section">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="feature-icon bg-success text-white fs-4 shadow-sm"><i class="bi bi-question-lg"></i></div>
-                    <h2 class="fw-bold mb-0 text-dark">8. Sıkça Sorulan Sorular (FAQ)</h2>
+                    <h2 class="fw-bold mb-0 text-dark">7. Sıkça Sorulan Sorular</h2>
                 </div>
                 <div class="accordion shadow-sm rounded-4 overflow-hidden bg-white" id="accordionFaq">
                     <div class="accordion-item border-0 border-bottom">
@@ -695,6 +674,29 @@ KDV tevkifat oranları, belirlenmiş alıcılar, tevkifatlı fatura hesaplama, m
                                 Fatura düzenleme sınırını aşmayan işlemlerde tevkifat yapılmaması esastır. Fazla veya yersiz tevkifat yapılması durumunda, alıcı ve satıcının beyanlarının düzeltilmesi suretiyle işlemin tevkifat uygulanmadan önceki hale döndürülmesi ve fazla ödenen verginin alıcıya iade edilmesi gerekir.
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HESAPLAMA ARACI YÖNLENDİRMESİ -->
+            <section id="hesaplamaMotoru" class="mb-5 searchable-section">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                    <div class="card-header p-4 bg-warning bg-opacity-25 border-0">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="feature-icon bg-warning text-dark fs-4 shadow-sm"><i class="bi bi-calculator-fill"></i></div>
+                            <div>
+                                <h3 class="fw-bold mb-0 text-dark">KDV Tevkifatını Hesaplayın</h3>
+                                <p class="small text-muted mb-0">Matrah, KDV, tevkifat ve tahsil edilecek tutarı ayrı hesaplama ekranında bulun.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-lg-5 text-center bg-light bg-opacity-50">
+                        <p class="text-muted mb-4 mx-auto" style="max-width: 650px;">
+                            İşlem türünü ve oranı seçerek tevkif edilen KDV'yi, satıcıya ödenecek tutarı ve fatura toplamını hesaplayın.
+                        </p>
+                        <a href="{{ url_for('calculators.kdv_tevkifat') }}" class="btn btn-warning btn-lg rounded-pill fw-bold px-5 py-3 shadow hover-scale text-dark">
+                            <i class="bi bi-calculator me-2"></i> KDV Tevkifat Hesaplama Aracı
+                        </a>
                     </div>
                 </div>
             </section>

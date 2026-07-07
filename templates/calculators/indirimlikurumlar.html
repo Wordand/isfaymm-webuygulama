@@ -129,28 +129,6 @@
     margin-top: 4px;
 }
 
-/* Visitor / Mükellef Banner */
-.ikv-banner {
-    border-radius: 10px;
-    padding: 0.65rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-}
-.ikv-banner.visitor {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-.ikv-banner.mukellef-ok {
-    background: rgba(52,211,153,0.08);
-    border: 1px solid rgba(52,211,153,0.18);
-}
-.ikv-banner.mukellef-warn {
-    background: rgba(251,191,36,0.08);
-    border: 1px solid rgba(251,191,36,0.2);
-}
-
 .ikv-seo-guide {
     margin-top: 2rem;
     padding: 1.25rem;
@@ -292,45 +270,52 @@
 .ikv-tab[data-public-tab="ozelgeler"] { order: 7; }
 
 @media (max-width: 768px) {
+    .ikv-shell {
+        padding: 0.5rem !important;
+    }
+    .ikv-main-card {
+        border-radius: 12px !important;
+    }
     .ikv-header {
-        padding: 1.25rem 0.85rem 0;
+        padding: 0.85rem 0.75rem 0;
     }
     .ikv-header h1 {
-        font-size: 1.85rem !important;
-        line-height: 1.15;
+        font-size: 1.32rem !important;
+        line-height: 1.18;
+        margin-bottom: 0.3rem !important;
+        letter-spacing: 0 !important;
     }
     .ikv-header p {
-        font-size: 0.92rem !important;
-        line-height: 1.55;
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        font-size: 0.76rem !important;
+        line-height: 1.4;
     }
     .ikv-header > .d-flex:first-child {
-        gap: 1rem !important;
-        margin-bottom: 1rem !important;
+        display: block !important;
+        margin-bottom: 0.65rem !important;
+    }
+    .ikv-header > .d-flex:first-child > div:first-child {
+        min-width: 0;
+    }
+    .ikv-header > .d-flex:first-child > div:last-child {
+        margin-top: 0.55rem;
+    }
+    .ikv-badge {
+        font-size: 0.62rem;
+        padding: 0.24rem 0.55rem;
+        letter-spacing: 0.05em;
     }
     .ikv-new-badge {
         max-width: 100%;
-        padding: 0.45rem 0.75rem;
+        padding: 0.3rem 0.6rem;
     }
     .ikv-new-text {
         white-space: normal;
-        line-height: 1.35;
-    }
-    .ikv-banner {
-        align-items: flex-start;
-        flex-wrap: wrap;
-        min-width: 0;
-        padding: 0.75rem;
-    }
-    .ikv-banner .flex-grow-1 {
-        min-width: 0;
-        flex-basis: calc(100% - 48px);
-    }
-    .ikv-banner > a {
-        width: 100%;
-        max-width: 100%;
-        margin-top: 0.35rem;
-        text-align: center;
-        white-space: normal;
+        line-height: 1.25;
+        font-size: 0.7rem;
     }
     .ikv-tabbar {
         display: flex;
@@ -339,8 +324,9 @@
         max-width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
-        gap: 4px;
-        padding: 4px 4px 7px;
+        gap: 2px;
+        margin-top: 0.55rem;
+        padding: 3px 3px 5px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         touch-action: pan-y;
@@ -353,8 +339,64 @@
     .ikv-tab {
         flex: 0 0 auto;
         min-width: max-content;
-        padding: 0.65rem 0.85rem;
+        padding: 0.48rem 0.62rem;
+        font-size: 0.7rem;
         scroll-snap-align: start;
+    }
+    .ikv-tab i {
+        margin-right: 3px;
+    }
+    .ikv-content-body {
+        padding: 0.55rem !important;
+    }
+    .ikv-content-body > .mt-4 {
+        margin-top: 0 !important;
+    }
+    .ikv-content-body .container-fluid.py-3 {
+        padding: 0.4rem 0 !important;
+    }
+    .ikv-content-body h2 {
+        font-size: 1.25rem;
+    }
+    .ikv-content-body .mb-4 {
+        margin-bottom: 0.8rem !important;
+    }
+    .ikv-content-body .p-3 {
+        padding: 0.75rem !important;
+    }
+    .ikv-content-body .form-label {
+        margin-bottom: 0.3rem;
+        font-size: 0.82rem;
+    }
+    .ikv-content-body .form-control,
+    .ikv-content-body .form-select {
+        min-height: 40px;
+        font-size: 0.88rem;
+    }
+    .ikv-content-body .ikv-status-badge {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.72rem;
+    }
+    .ikv-content-body .ikv-start-calc-btn {
+        width: 100%;
+        padding: 0.72rem 1rem !important;
+        font-size: 0.82rem;
+    }
+    .ikv-seo-entry,
+    .ikv-seo-guide {
+        margin-top: 1rem;
+        padding: 0.8rem;
+    }
+    .ikv-seo-entry h2,
+    .ikv-seo-guide h2 {
+        font-size: 1rem;
+    }
+    .ikv-seo-entry p,
+    .ikv-seo-guide .lead-copy,
+    .ikv-seo-item p,
+    .ikv-faq-item p {
+        font-size: 0.8rem;
+        line-height: 1.45;
     }
 }
 
@@ -398,7 +440,6 @@
 .ikv-header h1 { font-size: 1.25rem !important; margin-bottom: 0px !important; }
 .ikv-header p { display: none; }
 .ikv-badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; border: none !important; }
-.ikv-banner { flex-direction: column; text-align: center; gap: 0.25rem; padding: 0.5rem; margin-top: 0.5rem; }
 .ikv-tabbar { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; margin-top: 0.5rem; padding-bottom: 0px; margin-bottom: 0; background: transparent; }
 .ikv-tab { font-size: 0.75rem; padding: 0.4rem; white-space: nowrap; flex: 0 0 auto; color: rgba(255,255,255,0.6); }
 .ikv-tab.active { background: #fff; color: #1e2a47; border-radius: 8px 8px 0 0; }
@@ -618,8 +659,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<div class="{% if sekme == 'ayrintili' %}container-fluid px-md-5{% else %}container{% endif %} py-4">
-  <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+<div class="{% if sekme == 'ayrintili' %}container-fluid px-md-5{% else %}container{% endif %} py-4 ikv-shell">
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden ikv-main-card">
 
     <!-- Premium Header -->
     <div class="ikv-header">
@@ -669,90 +710,10 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       </div>
 
-      <!-- Mükellef / Ziyaretçi Durumu -->
+      <!-- Örnek turu uyarısı -->
       {% if sekme != 'ornekler' and sekme != 'mevzuat' and sekme != 'ozelgeler' %}
       <div id="banner-preset-tour-warning" class="d-none bg-warning text-dark fw-bold px-3 py-2 rounded shadow-sm align-items-center mb-3 gap-2" style="position:relative; z-index:1; font-size: 0.88rem; border: 1px solid #d97706;">
         <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>TEBLİĞDE YER ALAN ÖRNEK TURUNDASINIZ. (KAYIT YAPILAMAZ)
-      </div>
-
-      <div id="ikv-status-banners" style="position:relative; z-index:1;">
-      {% if session.get('aktif_mukellef_unvan') %}
-      <div class="ikv-banner mukellef-ok">
-        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-             style="width:32px; height:32px; background:rgba(34,197,94,0.3);">
-          <i class="bi bi-building-check text-success"></i>
-        </div>
-        <div class="flex-grow-1">
-          <div class="d-flex align-items-center flex-wrap gap-2">
-            <span class="text-white fw-semibold" style="font-size:0.95rem;">{{ session.get('aktif_mukellef_unvan') }}</span>
-            <span style="color:rgba(255,255,255,0.55); font-size:0.88rem;"> · {{ session.get('aktif_mukellef_vkn') }}</span>
-          </div>
-          <div class="mt-1 d-flex align-items-center flex-wrap gap-3" style="font-size:0.82rem; color:rgba(255,255,255,0.7);">
-            {% set active_doc = namespace(no='', karar='') %}
-            {% if current_belge %}
-              {% set active_doc.no = current_belge.belge_no %}
-              {% set active_doc.karar = current_belge.karar %}
-            {% else %}
-              {% for d in docs %}
-                {% if session.get('active_tesvik_id')|string == d.id|string %}
-                  {% set active_doc.no = d.belge_no %}
-                  {% set active_doc.karar = d.karar %}
-                {% endif %}
-              {% endfor %}
-            {% endif %}
-
-            {% if active_doc.no %}
-              <div id="banner-belge-wrap">
-                <i class="bi bi-file-earmark-text me-1 text-info"></i>
-                Belge: <span class="text-white fw-medium">{{ active_doc.no }}</span>
-                <span class="badge bg-secondary ms-1" style="font-size:0.75rem; padding: 0.15rem 0.4rem;">{{ active_doc.karar }}</span>
-              </div>
-            {% else %}
-              <div id="banner-belge-wrap">
-                <i class="bi bi-file-earmark-x me-1 text-muted"></i>
-                <span class="text-muted">Seçili Belge Yok</span>
-              </div>
-            {% endif %}
-
-            {% if session.get('active_donem_text') %}
-              <div id="banner-donem-wrap">
-                <i class="bi bi-calendar3 me-1 text-warning"></i>
-                Dönem: <span class="text-white fw-medium">{{ session.get('active_donem_text') }}</span>
-              </div>
-            {% else %}
-              <div id="banner-donem-wrap">
-                <i class="bi bi-calendar-x me-1 text-muted"></i>
-                <span class="text-muted">Seçili Dönem Yok</span>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-        {% if session.get('logged_in') %}
-        <a href="{{ url_for('mukellef.index') }}"
-           class="flex-shrink-0 text-decoration-none px-3 py-1 rounded-pill fw-semibold"
-           style="background:rgba(255,255,255,0.15); color:white; font-size:0.85rem; border:1px solid rgba(255,255,255,0.2);">
-          <i class="bi bi-arrow-left-right me-1"></i>Değiştir
-        </a>
-        {% endif %}
-      </div>
-
-      {% elif session.get('logged_in') %}
-      <div class="ikv-banner mukellef-warn">
-        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-             style="width:32px; height:32px; background:rgba(251,191,36,0.25);">
-          <i class="bi bi-exclamation-triangle text-warning"></i>
-        </div>
-        <div class="flex-grow-1">
-          <span class="text-white fw-semibold" style="font-size:0.85rem;">Mükellef seçilmedi</span>
-          <span style="color:rgba(255,255,255,0.5); font-size:0.78rem;"> — hesaplamalar kaydedilmeyecek</span>
-        </div>
-        <a href="{{ url_for('mukellef.index') }}"
-           class="flex-shrink-0 text-decoration-none px-3 py-1 rounded-pill fw-semibold"
-           style="background:rgba(251,191,36,0.8); color:#1c1917; font-size:0.78rem;">
-          <i class="bi bi-person-check me-1"></i>Mükellef Seç
-        </a>
-      </div>
-      {% endif %}
       </div>
       {% endif %}
 
@@ -783,7 +744,7 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 
     <!-- Content Body -->
-    <div class="card-body p-4">
+    <div class="card-body p-4 ikv-content-body">
 
 <div class="mt-4">
   {% if sekme == 'tesvik' %}
@@ -6250,7 +6211,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }, 200);
 
-      // Ziyaretçi modunda sayfa yenilenince sonuçlar (özellikle Aşama 7) boş kalmasın diye tekrar hesaplat
+      // Sayfa yenilenince sonuçlar boş kalmasın diye hesaplamayı yeniden oluştur.
       if (!isViewMode) {
         setTimeout(() => {
           try {
@@ -7057,14 +7018,12 @@ document.addEventListener("DOMContentLoaded", function () {
     currentTourPreset = presetKey;
     currentTourStepIndex = 0;
 
-    // Show warning badge and hide normal status banners
+    // Show the example-tour warning.
     const warningEl = document.getElementById("banner-preset-tour-warning");
     if (warningEl) {
       warningEl.classList.remove("d-none");
       warningEl.classList.add("d-flex");
     }
-    const statusBannersEl = document.getElementById("ikv-status-banners");
-    if (statusBannersEl) statusBannersEl.classList.add("d-none");
 
     // Set widget title
     const titleEl = document.getElementById("tour-preset-name");
@@ -7153,14 +7112,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const panel = document.getElementById("ikv-tour-panel");
     if (panel) panel.classList.remove("active");
 
-    // Hide warning badge and restore normal status banners
+    // Hide the example-tour warning.
     const warningEl = document.getElementById("banner-preset-tour-warning");
     if (warningEl) {
       warningEl.classList.add("d-none");
       warningEl.classList.remove("d-flex");
     }
-    const statusBannersEl = document.getElementById("ikv-status-banners");
-    if (statusBannersEl) statusBannersEl.classList.remove("d-none");
 
     // Clear highlights
     document.querySelectorAll(".tour-highlight-active").forEach(el => {
