@@ -5,6 +5,16 @@ import numpy as np
 
 ALL_KATEGORILER = ["likidite","yapi","varlik","karlilik","borsa"]
 
+LOWER_IS_BETTER_RATIOS = {
+    "Stok Bağımlılık Oranı",
+    "Yabancı Kaynak Oranı",
+    "Borç/Özsermaye Oranı",
+    "Kısa Vadeli Yabancı Kaynak Oranı",
+    "Uzun Vadeli Yabancı Kaynak Oranı",
+    "Yabancı Kaynaklar Vade Yapısı Oranı",
+    "Fiyat Kazanç (F/K) Oranı",
+}
+
 
 ORAN_DEFINITIONS = {
     # --- 1. Likidite Oranları ---
@@ -84,17 +94,17 @@ ORAN_DEFINITIONS = {
         "meaning": (
             "Kısa vadeli borçların ne kadarının stok satışı ile karşılanabileceğini gösterir."
         ),
-        "thresholds": {"safe": 0.0, "adequate": 0.5}, # The user's provided thresholds were {"optimal": [0, 0.8], "warning": [0.8, 1.0], "risk": [1.0, 999]} but the advice keys are "safe", "adequate", "risky". Keeping existing keys and adjusting values.
+        "thresholds": {"safe": 0.5, "adequate": 1.0},
         "advice": {
             "safe": (
                 "Stok bağımlılık oranınız 0’a yakın; borçlarınız stok dışı varlıklarla karşılanıyor. Bu, stok yönetiminde "
                 "verimliliğinizin yüksek olduğunu gösterir."
             ),
             "adequate": (
-                "Stok bağımlılık oranınız 0,5’in altında. Stok döngüsünü hızlandırarak bu oranı daha da düşürebilirsiniz."
+                "Stok bağımlılık oranınız 0,5–1 aralığında. Stok döngüsünü hızlandırarak bu oranı düşürebilirsiniz."
             ),
             "risky": (
-                "Stok bağımlılık oranınız 0,5’in üzerinde; borç ödeme gücünüz stoklara bağlı. Alacak ve stok yönetimini "
+                "Stok bağımlılık oranınız 1’in üzerinde; borç ödeme gücünüz stoklara bağlı. Alacak ve stok yönetimini "
                 "iyileştirerek riski azaltın."
             ),
         }
@@ -492,6 +502,70 @@ ORAN_DEFINITIONS = {
 }
 
 
+def ratio_direction(name: str) -> str:
+    """Oran yükseldikçe riskin azaldığını veya arttığını belirtir."""
+    return "lower" if name in LOWER_IS_BETTER_RATIOS else "higher"
+
+
+def classify_ratio_level(name: str, value, thresholds: Dict[str, Any]) -> str | None:
+    """Eşikleri oranın yönüne göre güçlü, yeterli veya riskli olarak sınıflandırır."""
+    if value is None or not thresholds:
+        return None
+
+    safe = thresholds.get("safe")
+    adequate = thresholds.get("adequate")
+    if safe is None and adequate is None:
+        return None
+
+    if ratio_direction(name) == "lower":
+        if safe is not None and value <= safe:
+            return "safe"
+        if adequate is not None and value <= adequate:
+            return "adequate"
+        return "risky"
+
+    if safe is not None and value >= safe:
+        return "safe"
+    if adequate is not None and value >= adequate:
+        return "adequate"
+    return "risky"
+
+
+def _trend_summary(values: List[float]) -> tuple[str, str, str]:
+    """Trend etiketi, hareket yönü ve finansal etki tonunu üretir."""
+    if len(values) < 2:
+        return "Tek dönem", "flat", "neutral"
+
+    first, last = values[0], values[-1]
+    scale = max(abs(first), abs(mean(values)), 1e-9)
+    relative_change = (last - first) / scale
+    noise_limit = scale * 0.02
+    movements = []
+    for previous, current in zip(values, values[1:]):
+        difference = current - previous
+        if abs(difference) <= noise_limit:
+            continue
+        movements.append(1 if difference > 0 else -1)
+
+    is_volatile = len(set(movements)) > 1
+    if is_volatile:
+        if abs(relative_change) <= 0.05:
+            return "Dalgalı seyir", "volatile", "neutral"
+        if relative_change > 0:
+            return "Dalgalı artış", "volatile", "neutral"
+        return "Dalgalı düşüş", "volatile", "neutral"
+
+    if relative_change > 0.05:
+        return "Güçlü artış", "up", "positive"
+    if relative_change > 0:
+        return "Ilımlı artış", "up", "positive"
+    if relative_change < -0.05:
+        return "Önemli düşüş", "down", "negative"
+    if relative_change < 0:
+        return "Ilımlı düşüş", "down", "negative"
+    return "Yatay seyir", "flat", "neutral"
+
+
 # ✅ EKLE: safe_float fonksiyonu
 def safe_float(val):
     """Her türlü pandas Series/DataFrame değerini tek float'a dönüştürür."""
@@ -843,18 +917,11 @@ def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
         det["meaning"]    = definition.get("meaning")
         thresholds         = definition.get("thresholds", {})
         det["thresholds"] = thresholds
+        det["direction"]  = ratio_direction(adi)
         advice_map         = definition.get("advice", {})
         value              = det.get("deger")
-        level = None
-        if value is not None and thresholds:
-            safe     = thresholds.get("safe")
-            adequate = thresholds.get("adequate")
-            if safe is not None and value >= safe:
-                level = "safe"
-            elif adequate is not None and value >= adequate:
-                level = "adequate"
-            else:
-                level = "risky"
+        level = classify_ratio_level(adi, value, thresholds)
+        det["level"] = level
         det["advice"] = advice_map.get(level)
 
     return oranlar
@@ -862,7 +929,7 @@ def hesapla_finansal_oranlar(aktif_df, pasif_df, gelir_df, kategori="likidite"):
 from typing import Dict, Any, List
 from statistics import mean
 
-def analiz_olustur(reports: Dict[int, Dict[str, Any]]) -> Dict[str, Any]:
+def analiz_olustur(reports: Dict[Any, Dict[str, Any]]) -> Dict[str, Any]:
     """
     Derinlemesine analiz:
       - Her oran için yıllık trend, eşik değerlerle kıyas, sapma ve detaylı yorum.
@@ -884,13 +951,25 @@ def analiz_olustur(reports: Dict[int, Dict[str, Any]]) -> Dict[str, Any]:
       "genel_oneriler": [...]
     }
     """
-    yıllar: List[int] = sorted(reports.keys())
+    yıllar: List[Any] = list(reports.keys())
     oran_analizleri: Dict[str, Dict[str, Any]] = {}
 
-    # tüm oran adlarını bir kümede topla
-    tüm_oran_adları = set()
+    # Oranları tanım sırasında göster: likidite, finansal yapı,
+    # varlık kullanımı ve kârlılık.
+    bulunan_oran_adları = set()
     for r in reports.values():
-        tüm_oran_adları.update(r.keys())
+        bulunan_oran_adları.update(r.keys())
+
+    tüm_oran_adları = [
+        oran for oran in ORAN_DEFINITIONS
+        if oran in bulunan_oran_adları
+    ]
+    tüm_oran_adları.extend(
+        sorted(
+            oran for oran in bulunan_oran_adları
+            if isinstance(oran, str) and oran not in ORAN_DEFINITIONS
+        )
+    )
 
     for oran in tüm_oran_adları:
         # --- Yeni koruma bloğu ---
@@ -903,52 +982,46 @@ def analiz_olustur(reports: Dict[int, Dict[str, Any]]) -> Dict[str, Any]:
 
         # dönemsel değerleri çıkar
         zaman_serisi = [(y, reports[y][oran].get("deger")) for y in yıllar if oran in reports[y]]
-        değerler = [v for (_, v) in zaman_serisi if v is not None]
+        geçerli_seri = [(y, v) for (y, v) in zaman_serisi if v is not None]
+        değerler = [v for (_, v) in geçerli_seri]
 
         if not değerler:
             continue
 
         # temel istatistikler
-        ilk, son = değerler[0], değerler[-1]
+        ilk_yıl, ilk = geçerli_seri[0]
+        son_yıl, son = geçerli_seri[-1]
         ort = round(mean(değerler), 2)
 
-        # trend analizi
-        if son > ilk * 1.05:
-            trend = "Güçlü artış"
-        elif son > ilk:
-            trend = "Ilımlı artış"
-        elif son < ilk * 0.95:
-            trend = "Önemli düşüş"
-        elif son < ilk:
-            trend = "Ilımlı düşüş"
-        else:
-            trend = "Yatay seyir"
+        trend, trend_direction, trend_tone = _trend_summary(değerler)
+        direction = ratio_direction(oran)
+        if trend_tone != "neutral" and direction == "lower":
+            trend_tone = "negative" if trend_tone == "positive" else "positive"
 
         # eşiğe göre yorum
-        th = reports[yıllar[-1]][oran].get("thresholds", {})
-        safe_th, adeq_th = th.get("safe"), th.get("adequate")
+        son_oran = reports.get(son_yıl, {}).get(oran, {})
+        th = son_oran.get("thresholds", {})
         son_deger = son
-        if safe_th is not None and son_deger >= safe_th:
-            seviye = "Güvende"
-        elif adeq_th is not None and son_deger >= adeq_th:
-            seviye = "Yeterli"
-        else:
-            seviye = "Riskli"
+        level = classify_ratio_level(oran, son_deger, th)
+        seviye = {
+            "safe": "Güçlü",
+            "adequate": "Yeterli",
+            "risky": "Riskli",
+        }.get(level, "Değerlendirilemedi")
 
         # kapsamlı yorum
-        sonuc = (f"{yıllar[0]}–{yıllar[-1]} arasında {trend.lower()}; "
+        sonuc = (f"{ilk_yıl}–{son_yıl} arasında {trend.lower()}; "
                  f"ortalama {ort}, son değer {son_deger}. "
                  f"Mevcut seviye: {seviye.lower()}.")
-
         # öneri - tanımlı tavsiye + trend/eşik bazlı ek öneri
-        temel_oneri = reports[yıllar[-1]][oran].get("advice", "")
+        temel_oneri = son_oran.get("advice", "")
         ek_oneri = []
         if seviye == "Riskli":
             ek_oneri.append("Bu oranda iyileştirme için nakit akış ve borç yönetimini gözden geçirin.")
-        if trend.startswith("Önemli düşüş"):
+        if trend_tone == "negative" and trend_direction == "down":
             ek_oneri.append("Düşüşü durdurmak adına kısa vadede maliyet optimizasyonu yapın.")
-        if trend.startswith("Güçlü artış") and oran.lower().find("borç") >= 0:
-            ek_oneri.append("Borçlanmayı azaltarak sürdürülebilir büyümeyi destekleyin.")
+        if trend_tone == "negative" and trend_direction == "up":
+            ek_oneri.append("Risk artırıcı yükselişin nedenlerini inceleyerek finansman ve işletme sermayesi yapısını gözden geçirin.")
 
         # birleştir
         tüm_oneriler = [te for te in (temel_oneri, *ek_oneri) if te]
@@ -957,14 +1030,18 @@ def analiz_olustur(reports: Dict[int, Dict[str, Any]]) -> Dict[str, Any]:
             "trend":      trend,
             "son_deger":  son_deger,
             "ortalama":   ort,
+            "seviye":     level,
+            "trend_tone": trend_tone,
+            "trend_direction": trend_direction,
             "sonucu":     sonuc,
             "oneri":      tüm_oneriler
         }
 
     # Genel sonuç üretimi
+    riskli_sayisi = sum(1 for item in oran_analizleri.values() if item.get("seviye") == "risky")
     genel_sonuc = (
-        f"Finansal oranlarınız genel olarak {'olumlu' if any(v['trend'].startswith('Güçlü artış') for v in oran_analizleri.values()) else 'istikrarlı veya iyileşme potansiyeli taşıyan'} "
-        f"bir tablo çiziyor. Bazı oranlarda riskli seviyeler mevcut; özellikle nakit likiditenize ve borç yapınıza dikkat etmenizi öneririz."
+        f"Finansal oranlarda {riskli_sayisi} gösterge riskli seviyededir. "
+        "Sonuçlar sektör, şirket yapısı ve dönem uzunluğuyla birlikte değerlendirilmelidir."
     )
 
     # Genel öneriler
@@ -977,5 +1054,6 @@ def analiz_olustur(reports: Dict[int, Dict[str, Any]]) -> Dict[str, Any]:
     return {
         "oran_analizleri":  oran_analizleri,
         "genel_sonuc":      genel_sonuc,
-        "genel_oneriler":   genel_oneriler
+        "genel_oneriler":   genel_oneriler,
+        "gecici_donem_var": any("GEÇİCİ" in str(period).upper() for period in yıllar),
     }

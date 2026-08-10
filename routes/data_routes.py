@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from werkzeug.utils import secure_filename
 from services.db import get_conn
-from services.utils import allowed_file, to_float_turkish
+from services.utils import allowed_file
 from services.pdf_service import (
     parse_bilanco_from_pdf,
     parse_gelir_from_pdf,
@@ -9,11 +9,16 @@ from services.pdf_service import (
 )
 
 from services.xml_service import parse_xml_file
-from services.excel_service import parse_mizan_excel
+from services.excel_service import (
+    build_mizan_report_comparison,
+    detect_mizan_metadata_from_text,
+    parse_mizan_file,
+)
 from extensions import fernet
 from auth import role_required
 import os
 import json
+import re
 import psycopg2.extras
 import tempfile
 import shutil
@@ -22,6 +27,67 @@ from zoneinfo import ZoneInfo
 from decimal import Decimal
 
 bp = Blueprint("data", __name__)
+
+
+def _format_upload_timestamp(value):
+    if not value:
+        return "-", ""
+
+    if hasattr(value, "strftime"):
+        return value.strftime("%d.%m.%Y"), value.strftime("%H:%M:%S")
+
+    text = str(value).strip()
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        return parsed.strftime("%d.%m.%Y"), parsed.strftime("%H:%M:%S")
+    except ValueError:
+        match = re.match(
+            r"^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}:\d{2}(?::\d{2})?))?",
+            text,
+        )
+        if match:
+            return f"{match.group(3)}.{match.group(2)}.{match.group(1)}", match.group(4) or ""
+        return text, ""
+
+
+def _prepare_document_row(row):
+    document = dict(row)
+    date_text, time_text = _format_upload_timestamp(document.get("yuklenme_tarihi"))
+    document["yuklenme_tarihi_tarih"] = date_text
+    document["yuklenme_tarihi_saat"] = time_text
+    return document
+
+
+def is_gecici_vergi_pdf(text):
+    import re
+
+    return bool(re.search(r"GE.ICI\s+VERG.\s+BEYANNAMES.", str(text or ""), re.I))
+
+
+def _decrypt_report_data(value):
+    if isinstance(value, memoryview):
+        value = value.tobytes()
+    if isinstance(value, str):
+        return json.loads(value)
+    try:
+        return json.loads(fernet.decrypt(value).decode("utf-8"))
+    except Exception:
+        return json.loads(value.decode("utf-8"))
+
+
+def _build_mizan_report_comparison(vkn, donem, parsed):
+    with get_conn() as conn:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(
+            "SELECT b.tur, b.veriler FROM beyanname b "
+            "JOIN mukellef m ON b.mukellef_id=m.id "
+            "WHERE m.user_id=%s AND m.vergi_kimlik_no=%s AND b.donem=%s "
+            "AND b.tur IN ('bilanco', 'gelir')",
+            (session["user_id"], vkn, donem),
+        )
+        reports = {row["tur"]: _decrypt_report_data(row["veriler"]) for row in cursor.fetchall()}
+
+    return build_mizan_report_comparison(reports, parsed)
 
 def kaydet_beyanname(data, tur):
     with get_conn() as conn:
@@ -62,17 +128,15 @@ def kaydet_beyanname(data, tur):
 
 def process_parsed_parts(full_data, doc_type):
     import copy
+    import math
     import re
-    
-    # Yıl tespiti
-    yil = 2023
-    try:
-        m = re.search(r"(\d{4})", str(full_data.get("donem", "")))
-        if m: yil = int(m.group(1))
-    except: pass
-    
-    results = []
-    
+
+    period_text = str(full_data.get("donem", "")).strip()
+    period_match = re.search(r"\b(20\d{2})\b", period_text)
+    if not period_match:
+        raise ValueError("Beyannamenin hesap dönemi belirlenemedi.")
+    yil = int(period_match.group(1))
+
     if doc_type == 'bilanco':
         cols = {'prev': 'Önceki Dönem', 'curr': 'Cari Dönem', 'inf': 'Cari Dönem (Enflasyonlu)'}
         target_val_key = 'Cari Dönem'
@@ -84,65 +148,63 @@ def process_parsed_parts(full_data, doc_type):
         sections = ['tablo']
         title_base = "GELİR TABLOSU"
 
-    def create_part(source_col, target_year, type_suffix="", include_prev=False):
-        new_d = copy.deepcopy(full_data)
-        new_d['donem'] = str(target_year)
-        
-        has_any_data = False
-        
-        # Keys mapping for previous and inflation columns
-        prev_key = cols['prev'] 
-        inf_key = cols.get('inf', None)  # Inflation column name
+    def clean_value(value):
+        if value is None:
+            return None
+        if isinstance(value, float) and math.isnan(value):
+            return None
+        if isinstance(value, Decimal) and value.is_nan():
+            return None
+        return value
 
-        for sec in sections:
-            new_rows = []
-            if sec in new_d:
-                for row in new_d[sec]:
-                    val = row.get(source_col)
-                    prev_val = row.get(prev_key)
-                    inf_val = row.get(inf_key) if inf_key else None
+    new_data = copy.deepcopy(full_data)
+    normalized_period = re.sub(r"\s+", " ", period_text).strip()
+    new_data['donem'] = (
+        normalized_period
+        if re.search(r"GEÇİCİ|GECICI", normalized_period, re.I)
+        else str(yil)
+    )
+    new_data['kaynak_donem'] = period_text
+    has_current_data = False
+    has_inflation_data = False
 
-                    if val is not None or (include_prev and (prev_val is not None or inf_val is not None)):
-                        base_keys = ['Kod', 'Açıklama', 'kod', 'aciklama', 'grup']
-                        new_row = {k: v for k, v in row.items() if k in base_keys}
-                        
-                        # Set target value (Current Period or Inflation Adjusted)
-                        if val is not None:
-                            new_row[target_val_key] = val
-                            has_any_data = True
-                        
-                        # If including previous period data (only for main current year record)
-                        if include_prev and prev_val is not None:
-                            new_row[prev_key] = prev_val
-                        
-                        # If including inflation data (only for main current year record)
-                        if include_prev and inf_val is not None and inf_key:
-                            new_row[inf_key] = inf_val
-                        
-                        new_rows.append(new_row)
-            new_d[sec] = new_rows
-            
-        new_d['veriler'] = {s: new_d.get(s, []) for s in sections}
-        # has_inflation should be True if we have inflation column data
-        new_d['has_inflation'] = (type_suffix == '_enf') or (include_prev and full_data.get('has_inflation', False))
-        
-        final_tur = doc_type + type_suffix
-        return new_d, has_any_data, final_tur
+    for section in sections:
+        new_rows = []
+        for row in full_data.get(section, []):
+            current_value = clean_value(row.get(cols['curr']))
+            previous_value = clean_value(row.get(cols['prev']))
+            inflation_value = clean_value(row.get(cols['inf']))
 
-    # 1. Önceki Dönem
-    d1, ok1, t1 = create_part(cols['prev'], yil - 1)
-    if ok1: results.append((d1, t1, f"{yil-1} {title_base}"))
-    
-    # 2. Cari Dönem
-    d2, ok2, t2 = create_part(cols['curr'], yil, include_prev=True)
-    if ok2: results.append((d2, t2, f"{yil} {title_base}"))
-    
-    # 3. Enflasyonlu
-    if full_data.get('has_inflation') and doc_type == 'bilanco':
-        d3, ok3, t3 = create_part(cols['inf'], yil, '_enf')
-        if ok3: results.append((d3, t3, f"{yil} ENFLASYONLU {title_base}"))
-        
-    return results
+            if current_value is None and previous_value is None and inflation_value is None:
+                continue
+
+            base_keys = ['Kod', 'Açıklama', 'kod', 'aciklama', 'grup']
+            new_row = {key: value for key, value in row.items() if key in base_keys}
+
+            if current_value is not None:
+                new_row[target_val_key] = current_value
+                has_current_data = True
+            if previous_value is not None:
+                new_row[cols['prev']] = previous_value
+            if doc_type == 'bilanco' and inflation_value is not None:
+                new_row[cols['inf']] = inflation_value
+                has_inflation_data = True
+
+            new_rows.append(new_row)
+
+        new_data[section] = new_rows
+
+    new_data['veriler'] = {section: new_data.get(section, []) for section in sections}
+    new_data['has_inflation'] = bool(
+        doc_type == 'bilanco'
+        and full_data.get('has_inflation')
+        and has_inflation_data
+    )
+
+    if not has_current_data:
+        raise ValueError(f"{yil} cari dönem {title_base.lower()} verisi bulunamadı.")
+
+    return [(new_data, doc_type, f"{yil} {title_base}")]
 
 @bp.route("/yukle-coklu", methods=["POST"])
 @role_required(allow_roles=("admin",))
@@ -201,7 +263,50 @@ def yukle_coklu():
                          sonuclar.append({"filename": filename, "type": "error", "message": f"(XML): {str(e)}"})
                          continue
 
-                # 2. PDF Kontrolü (Öncelik Kurumlar/Bilanço/Gelir'de)
+                # 2. PDF mizan: mükellef ve dönem onayından sonra geçici önizlemeye alınır.
+                elif is_pdf and re.search(r"\bM[İI]ZAN\b", full_text, re.I):
+                    metadata = detect_mizan_metadata_from_text(full_text)
+                    sonuclar.append({
+                        "filename": file.filename,
+                        "type": "mizan_input_required",
+                        "text": "PDF mizan için mükellef ve dönem bilgisi gerekli.",
+                        "suggested_period": metadata.get("detected_period", ""),
+                        "suggested_title": metadata.get("detected_title", ""),
+                    })
+                    continue
+
+                # 3. Geçici vergi PDF'i: yalnızca cari dönem gelir tablosu içerir.
+                elif is_pdf and is_gecici_vergi_pdf(full_text):
+                     tur = "gelir"
+                     try:
+                         res_g = parse_gelir_from_pdf(temp_path, full_text)
+                         if not res_g.get("tablo"):
+                             raise ValueError("Gelir tablosu satırları bulunamadı.")
+
+                         parsed_parts = process_parsed_parts(res_g, "gelir")
+                     except Exception:
+                         current_app.logger.exception(
+                             "Geçici vergi PDF gelir tablosu ayrıştırılamadı: file=%s",
+                             filename,
+                         )
+                         sonuclar.append({
+                             "filename": filename,
+                             "type": "error",
+                             "message": "Geçici vergi gelir tablosu doğrulanamadı; dosya kaydedilmedi.",
+                         })
+                     else:
+                         for p_data, p_tur, p_title in parsed_parts:
+                             if kaydet_beyanname(p_data, p_tur):
+                                 sonuclar.append({
+                                     "filename": filename,
+                                     "type": "success",
+                                     "title": "Geçici Vergi Gelir Tablosu Yüklendi",
+                                     "text": f"{p_data.get('unvan')} - {p_data.get('donem')} başarıyla yüklendi.",
+                                     "tur": p_tur,
+                                     "donem": p_data.get("donem")
+                                 })
+
+                # 4. PDF Kontrolü (Öncelik Kurumlar/Bilanço/Gelir'de)
                 # Regex ile sağlam kontrol: encoding hatalarını (. ile) tolere et
                 elif is_pdf and (re.search(r"KURUMLAR\s*VERG", full_text, re.I) or \
                                  re.search(r"BILAN.O", full_text, re.I) or \
@@ -209,47 +314,42 @@ def yukle_coklu():
                      
                      tur = "bilanco/gelir"
                      
-                     # Bilanço Parsingleme ve Parçalama
                      try:
                          res_b = parse_bilanco_from_pdf(temp_path, full_text)
-                         # Eğer bilanco içeriği varsa (aktif veya pasif doluysa)
-                         if res_b.get("aktif") or res_b.get("pasif"):
-                             parts_b = process_parsed_parts(res_b, "bilanco")
-                             if not parts_b:
-                                 # Parça çıkmadı ama belki sadece gelir tablosu vardır, devam et
-                                 pass
-                             for p_data, p_tur, p_title in parts_b:
-                                 if kaydet_beyanname(p_data, p_tur):
-                                     sonuclar.append({
-                                         "filename": filename,
-                                         "type": "success",
-                                         "title": "Bilanço Yüklendi",
-                                         "text": f"{p_data.get('unvan')} - {p_title} başarıyla yüklendi.",
-                                         "tur": p_tur,
-                                         "donem": p_data.get("donem")
-                                     })
-                     except Exception as e:
-                         pass # Bilanço hatası, devam et
-                         
-                     # Gelir Tablosu Parsingleme ve Parçalama
-                     try:
                          res_g = parse_gelir_from_pdf(temp_path, full_text)
-                         if res_g.get("tablo"):
-                             parts_g = process_parsed_parts(res_g, "gelir")
-                             for p_data, p_tur, p_title in parts_g:
-                                 if kaydet_beyanname(p_data, p_tur):
-                                     sonuclar.append({
-                                         "filename": filename,
-                                         "type": "success",
-                                         "title": "Gelir Tablosu Yüklendi",
-                                         "text": f"{p_data.get('unvan')} - {p_title} başarıyla yüklendi.",
-                                         "tur": p_tur,
-                                         "donem": p_data.get("donem")
-                                     })
-                     except Exception as e:
-                         pass
 
-                # 3. KDV Kontrolü (Sadece yukarıdakiler değilse)
+                         if not (res_b.get("aktif") or res_b.get("pasif")):
+                             raise ValueError("Bilanço satırları bulunamadı.")
+                         if not res_g.get("tablo"):
+                             raise ValueError("Gelir tablosu satırları bulunamadı.")
+
+                         parsed_parts = (
+                             process_parsed_parts(res_b, "bilanco")
+                             + process_parsed_parts(res_g, "gelir")
+                         )
+                     except Exception:
+                         current_app.logger.exception(
+                             "Kurumlar vergisi PDF tabloları ayrıştırılamadı: file=%s",
+                             filename,
+                         )
+                         sonuclar.append({
+                             "filename": filename,
+                             "type": "error",
+                             "message": "Bilanço ve gelir tablosu birlikte doğrulanamadı; dosya kaydedilmedi.",
+                         })
+                     else:
+                         for p_data, p_tur, p_title in parsed_parts:
+                             if kaydet_beyanname(p_data, p_tur):
+                                 sonuclar.append({
+                                     "filename": filename,
+                                     "type": "success",
+                                     "title": "Bilanço Yüklendi" if p_tur == "bilanco" else "Gelir Tablosu Yüklendi",
+                                     "text": f"{p_data.get('unvan')} - {p_title} başarıyla yüklendi.",
+                                     "tur": p_tur,
+                                     "donem": p_data.get("donem")
+                                 })
+
+                # 5. KDV Kontrolü (Sadece yukarıdakiler değilse)
                 elif is_pdf and (re.search(r"KATMA\s*DE.ER\s*VERG", full_text, re.I) or "KDV" in full_text.upper()):
                      res = parse_kdv_from_pdf(temp_path, full_text)
                      if not res.get("hata"):
@@ -269,10 +369,10 @@ def yukle_coklu():
                          else:
                             sonuclar.append({"filename": filename, "type": "error", "message": "Veritabanına kaydedilirken hata oluştu."})
 
-                # 4. Mizan (Excel) kontrolü
+                # 6. Mizan (Excel) kontrolü
                 elif not parsed_data and file.filename.lower().endswith((".xlsx", ".xls")):
                     sonuclar.append({
-                        "filename": filename,
+                        "filename": file.filename,
                         "type": "mizan_input_required",
                         "text": "Excel mizan dosyası için mükellef ve dönem bilgisi gerekli."
                     })
@@ -300,6 +400,7 @@ def kaydet_mizan_meta():
     vkn = request.form.get("vkn")
     unvan = request.form.get("unvan")
     donem = request.form.get("donem")
+    action = request.form.get("action", "preview")
     file = request.files.get("mizan_file")
     
     if not vkn or not donem or not file:
@@ -307,6 +408,12 @@ def kaydet_mizan_meta():
         
     if not allowed_file(file.filename):
         return jsonify({"status": "error", "message": "Desteklenmeyen dosya formatı."}), 400
+
+    if action not in {"preview", "save"}:
+        return jsonify({"status": "error", "message": "Geçersiz mizan işlemi."}), 400
+
+    if not re.fullmatch(r"20\d{2}(?:\s*-\s*[1-4]\.\s*GEÇİCİ)?", donem.strip(), re.I):
+        return jsonify({"status": "error", "message": "Dönem 2026 veya 2026 - 1. GEÇİCİ biçiminde olmalıdır."}), 400
 
     if not unvan:
         try:
@@ -321,19 +428,49 @@ def kaydet_mizan_meta():
         except Exception as e:
             return jsonify({"status": "error", "message": f"Mükellef aranırken hata oluştu: {str(e)}"}), 500
 
-    temp_path = os.path.join(tempfile.gettempdir(), secure_filename(file.filename))
+    safe_suffix = os.path.splitext(secure_filename(file.filename))[1].lower()
+    temp_handle, temp_path = tempfile.mkstemp(prefix="mizan_", suffix=safe_suffix)
+    os.close(temp_handle)
     file.save(temp_path)
     
     try:
-        parsed = parse_mizan_excel(temp_path)
-        if isinstance(parsed, dict) and parsed.get("status") == "error":
-            return jsonify({"status": "error", "message": parsed.get("message")}), 400
-        else:
-            parsed.update({"vergi_kimlik_no": vkn, "unvan": unvan, "donem": donem})
-            if kaydet_beyanname(parsed, "mizan"):
-                return jsonify({"status": "success", "message": "Mizan başarıyla kaydedildi."})
-            else:
-                return jsonify({"status": "error", "message": "Veritabanına kaydedilirken hata oluştu."}), 500
+        parsed = parse_mizan_file(temp_path)
+        parsed.update({"vergi_kimlik_no": vkn, "unvan": unvan, "donem": donem.strip()})
+
+        detected_period = str(parsed.get("detected_period") or "").strip()
+        if detected_period and detected_period != donem.strip():
+            parsed.setdefault("validation", []).insert(0, {
+                "code": "period_mismatch",
+                "title": "Dönem kontrolü",
+                "status": "warning",
+                "detail": f"Dosyada {detected_period}, kullanıcı seçiminde {donem.strip()} dönemi yer alıyor.",
+                "difference": 0,
+            })
+            parsed["summary"]["warning_count"] = parsed["summary"].get("warning_count", 0) + 1
+
+        comparison = _build_mizan_report_comparison(vkn, donem.strip(), parsed)
+        parsed["comparison"] = comparison
+
+        if action == "preview":
+            preview = {
+                "summary": parsed.get("summary", {}),
+                "validation": parsed.get("validation", []),
+                "tax_checks": parsed.get("tax_checks", []),
+                "comparison": comparison,
+                "detected_period": parsed.get("detected_period", ""),
+                "detected_title": parsed.get("detected_title", ""),
+                "source_format": parsed.get("source_format", ""),
+            }
+            return jsonify({
+                "status": "preview",
+                "message": "Geçici analiz tamamlandı. Dosya ve sonuçlar kaydedilmedi.",
+                "preview": preview,
+            })
+
+        parsed.pop("preview", None)
+        if kaydet_beyanname(parsed, "mizan"):
+            return jsonify({"status": "success", "message": "Mizan ve oluşturulan mali tablolar başarıyla kaydedildi."})
+        return jsonify({"status": "error", "message": "Veritabanına kaydedilirken hata oluştu."}), 500
     except Exception as e:
         return jsonify({"status": "error", "message": f"Mizan işlenirken hata oluştu: {str(e)}"}), 500
     finally:
@@ -386,7 +523,7 @@ def veri_giris():
                 
                 query += " ORDER BY b.yuklenme_tarihi DESC"
                 c.execute(query, params)
-                yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+                yuklenen_tum_belgeler = [_prepare_document_row(r) for r in c.fetchall()]
             else:
                 # Mükellef seçilmemişse son 50 belgeyi göster
                 c.execute("""
@@ -396,7 +533,7 @@ def veri_giris():
                     WHERE m.user_id=%s 
                     ORDER BY b.yuklenme_tarihi DESC LIMIT 50
                 """, (uid,))
-                yuklenen_tum_belgeler = [dict(r) for r in c.fetchall()]
+                yuklenen_tum_belgeler = [_prepare_document_row(r) for r in c.fetchall()]
 
         return render_template("data/veri_giris.html", 
                                mukellefler=mukellefler, 
@@ -486,7 +623,8 @@ def yeniden_yukle():
             row = c.fetchone()
             conn.commit()
             
-            tarih = row["yuklenme_tarihi"].strftime("%Y-%m-%d %H:%M:%S") if row else "-"
+            tarih_parts = _format_upload_timestamp(row["yuklenme_tarihi"]) if row else ("-", "")
+            tarih = " ".join(part for part in tarih_parts if part)
             
         return jsonify({"status": "success", "message": f"Yeniden yüklendi. ({tarih})"})
     except Exception as e:

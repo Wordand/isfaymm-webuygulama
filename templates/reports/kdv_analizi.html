@@ -1,0 +1,258 @@
+{% extends "layout.html" %}
+
+{% block title %}KDV Analizi | İSFA YMM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/kdv_analizi.css') }}?v=2">
+{% endblock %}
+
+{% block content %}
+<main class="kdv-analysis-page">
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        <header class="kdv-page-header">
+            <div class="kdv-title-icon" aria-hidden="true"><i class="bi bi-receipt"></i></div>
+            <div>
+                <span class="kdv-eyebrow">Beyanname raporlama</span>
+                <h1>KDV Analizi</h1>
+                <p>Aylık KDV beyannamelerini dönemler itibarıyla karşılaştırın ve Excel özeti alın.</p>
+            </div>
+        </header>
+
+        <section class="kdv-filter-panel" aria-labelledby="mukellef-baslik">
+            <div class="kdv-section-heading">
+                <div>
+                    <span class="step-number">1</span>
+                    <div>
+                        <h2 id="mukellef-baslik">Mükellef seçimi</h2>
+                        <p>Analiz edilecek mükellefi belirleyin.</p>
+                    </div>
+                </div>
+            </div>
+            <form method="get" action="{{ url_for('reports.kdv_analizi') }}">
+                <label for="kdvVknSelect" class="form-label">Mükellef</label>
+                <select id="kdvVknSelect" name="vkn" class="form-select" onchange="this.form.submit()">
+                    <option value="">Mükellef seçin...</option>
+                    {% for mukellef in mukellefler %}
+                    <option value="{{ mukellef.vkn }}" {% if secili_vkn == mukellef.vkn %}selected{% endif %}>
+                        {{ mukellef.unvan }} ({{ mukellef.vkn }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </section>
+
+        {% if secili_vkn %}
+        <section class="kdv-period-panel" aria-labelledby="donem-baslik">
+            <div class="kdv-section-heading period-heading">
+                <div>
+                    <span class="step-number">2</span>
+                    <div>
+                        <h2 id="donem-baslik">Dönem seçimi</h2>
+                        <p>{{ secili_unvan }}</p>
+                    </div>
+                </div>
+                {% if donemler or kdv_findings %}
+                <div class="period-heading-actions">
+                    {% if donemler %}
+                    <div class="period-summary" aria-label="Yüklenen KDV dönemi sayısı">
+                        <strong>{{ donemler|length }}</strong>
+                        <span>yüklü dönem</span>
+                    </div>
+                    {% endif %}
+                    {% if kdv_findings %}
+                    <button type="button" class="btn-kdv-controls" id="kdvControlsToggle"
+                            aria-expanded="false" aria-controls="kdvControlFindings">
+                        <i class="bi bi-shield-check"></i>
+                        <span>KDV Kontrol Bulguları</span>
+                        <strong>{{ kdv_findings|length }}</strong>
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if donemler %}
+            <form id="kdvReportForm" method="get">
+                <input type="hidden" name="vkn" value="{{ secili_vkn }}">
+                <input type="hidden" name="unvan" value="{{ secili_unvan }}">
+                <input type="hidden" name="kdv_periods" id="kdvPeriodsInput">
+                <input type="hidden" name="donemler" id="kdvExcelPeriodsInput">
+
+                <div class="period-toolbar">
+                    <span id="selectedPeriodCount" class="selected-count" aria-live="polite"></span>
+                    <div class="period-tools">
+                        <button type="button" class="period-tool" data-period-action="latest">
+                            <i class="bi bi-calendar-check"></i><span>Son 12 dönem</span>
+                        </button>
+                        <button type="button" class="period-tool" data-period-action="all">
+                            <i class="bi bi-check2-square"></i><span>Tümünü seç</span>
+                        </button>
+                        <button type="button" class="period-tool" data-period-action="clear">
+                            <i class="bi bi-x-circle"></i><span>Temizle</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="period-groups">
+                    {% set ns = namespace(index=0) %}
+                    {% for yil, yil_donemleri in donem_gruplari.items() %}
+                    <fieldset class="period-year-group">
+                        <legend>{{ yil }}</legend>
+                        <div class="period-grid">
+                            {% for donem in yil_donemleri %}
+                            <label class="period-option">
+                                <input type="checkbox" class="kdv-period-checkbox" value="{{ donem }}" {% if ns.index < 12 %}checked{% endif %}>
+                                <span><i class="bi bi-calendar3"></i>{{ donem }}</span>
+                            </label>
+                            {% set ns.index = ns.index + 1 %}
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                    {% endfor %}
+                </div>
+
+                <div class="kdv-actions">
+                    <div>
+                        <strong>Analiz hazır</strong>
+                        <span>Seçtiğiniz dönemler karşılaştırmalı raporda gösterilir.</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="button" class="btn-kdv-secondary" data-report-type="excel" title="Excel özeti indir">
+                            <i class="bi bi-file-earmark-spreadsheet"></i><span>Excel Özeti</span>
+                        </button>
+                        <button type="button" class="btn-kdv-primary" data-report-type="report">
+                            <i class="bi bi-bar-chart-line"></i><span>Analizi Aç</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% else %}
+            <div class="kdv-empty-state">
+                <i class="bi bi-inbox"></i>
+                <div>
+                    <strong>KDV beyannamesi bulunamadı</strong>
+                    <p>Bu mükellef için aylık KDV beyannamesi yüklendiğinde dönemler burada görünür.</p>
+                </div>
+                <a href="{{ url_for('data.veri_giris', vkn=secili_vkn) }}" class="btn-kdv-primary">
+                    <i class="bi bi-cloud-upload"></i><span>Veri Girişine Git</span>
+                </a>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if kdv_findings %}
+        <section class="kdv-control-panel" id="kdvControlFindings" hidden>
+            <div class="kdv-control-panel-head">
+                <h2>KDV Kontrol Bulguları</h2>
+                <div class="kdv-control-counts" aria-label="KDV bulgu özeti">
+                    {% if kdv_finding_counts.warning %}<span class="warning">İncelenmeli <strong>{{ kdv_finding_counts.warning }}</strong></span>{% endif %}
+                    {% if kdv_finding_counts.info %}<span class="info">Bilgi <strong>{{ kdv_finding_counts.info }}</strong></span>{% endif %}
+                    {% if kdv_finding_counts.success %}<span class="success">Uyumlu <strong>{{ kdv_finding_counts.success }}</strong></span>{% endif %}
+                </div>
+            </div>
+            <div class="kdv-control-list">
+                {% for item in kdv_findings %}
+                <article class="kdv-control-row {{ item.get('status', 'info') }}">
+                    <span class="kdv-control-status" aria-hidden="true">
+                        <i class="bi {% if item.get('status') == 'warning' %}bi-exclamation-triangle-fill{% elif item.get('status') == 'success' %}bi-check-circle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+                    </span>
+                    <div class="kdv-control-content">
+                        <div class="kdv-control-labels">
+                            <span>{% if item.get('status') == 'warning' %}İncelenmeli{% elif item.get('status') == 'success' %}Uyumlu{% else %}Bilgi{% endif %}</span>
+                            <small>{{ item.get('category') }}</small>
+                            {% if item.get('period') %}<small><i class="bi bi-calendar3"></i>{{ item.get('period') }}</small>{% endif %}
+                        </div>
+                        <h3>{{ item.get('title') }}</h3>
+                        <p>{{ item.get('detail') }}</p>
+                        {% if item.get('breakdown') %}
+                        <div class="kdv-control-breakdown">
+                            {% for difference in item.get('breakdown') %}
+                            <div><strong>{{ difference.get('period') }}</strong><span>{{ difference.get('label') }}</span><b>{{ difference.get('amount')|tlformat }} TL</b></div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if item.get('action') and item.get('status') != 'success' %}
+                        <div class="kdv-control-action"><i class="bi bi-arrow-right-circle"></i><span>{{ item.get('action') }}</span></div>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const controlsToggle = document.getElementById('kdvControlsToggle');
+    const controlsPanel = document.getElementById('kdvControlFindings');
+    if (controlsToggle && controlsPanel) {
+        controlsToggle.addEventListener('click', function () {
+            const willOpen = controlsToggle.getAttribute('aria-expanded') !== 'true';
+            controlsToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            controlsToggle.classList.toggle('active', willOpen);
+            controlsPanel.hidden = !willOpen;
+            if (willOpen) controlsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    const form = document.getElementById('kdvReportForm');
+    if (!form) return;
+
+    const checkboxes = Array.from(document.querySelectorAll('.kdv-period-checkbox'));
+    const countLabel = document.getElementById('selectedPeriodCount');
+    const reportInput = document.getElementById('kdvPeriodsInput');
+    const excelInput = document.getElementById('kdvExcelPeriodsInput');
+
+    function selectedPeriods() {
+        return checkboxes.filter(function (item) { return item.checked; }).map(function (item) { return item.value; });
+    }
+
+    function refreshSelection() {
+        const count = selectedPeriods().length;
+        countLabel.textContent = count + ' dönem seçili';
+    }
+
+    document.querySelectorAll('[data-period-action]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const action = button.dataset.periodAction;
+            checkboxes.forEach(function (item, index) {
+                item.checked = action === 'all' || (action === 'latest' && index < 12);
+                if (action === 'clear') item.checked = false;
+            });
+            refreshSelection();
+        });
+    });
+
+    checkboxes.forEach(function (item) { item.addEventListener('change', refreshSelection); });
+
+    document.querySelectorAll('[data-report-type]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const periods = selectedPeriods();
+            if (!periods.length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dönem seçimi gerekli',
+                    text: 'Analiz için en az bir KDV dönemi seçin.',
+                    confirmButtonColor: '#2563eb'
+                });
+                return;
+            }
+
+            reportInput.value = periods.join(',');
+            excelInput.value = periods.join(',');
+            form.action = button.dataset.reportType === 'excel'
+                ? "{{ url_for('reports.rapor_kdv_excel') }}"
+                : "{{ url_for('reports.rapor_kdv') }}";
+            form.submit();
+        });
+    });
+
+    refreshSelection();
+});
+</script>
+{% endblock %}

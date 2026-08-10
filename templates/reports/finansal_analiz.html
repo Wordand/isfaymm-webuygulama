@@ -158,6 +158,25 @@
         align-items: center;
     }
 
+    .source-usage {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        margin: -1rem 0 1.25rem;
+        padding: .65rem .8rem;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: #fff;
+        scrollbar-width: thin;
+    }
+    .source-usage-title { flex: 0 0 auto; color: #64748b; font-size: .72rem; font-weight: 800; }
+    .source-period { display: flex; align-items: center; gap: .35rem; flex: 0 0 auto; padding-left: .7rem; border-left: 1px solid var(--border-color); }
+    .source-period strong { margin-right: .2rem; font-size: .75rem; }
+    .source-chip { padding: .22rem .4rem; border-radius: 4px; font-size: .66rem; font-weight: 800; }
+    .source-chip.declaration { background: #ecfdf5; color: #047857; }
+    .source-chip.trial { background: #eff6ff; color: #1d4ed8; }
+
     .gauge-container {
         width: 100%;
         height: 10px;
@@ -244,6 +263,17 @@
             
             <div class="vr opacity-25"></div>
 
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-database-check text-muted"></i>
+                <select name="source_mode" class="form-select border-0 bg-light fw-bold" onchange="this.form.submit()" aria-label="Finansal analiz veri kaynağı">
+                    <option value="auto" {% if source_mode=='auto' %}selected{% endif %}>Otomatik (Beyanname öncelikli)</option>
+                    <option value="beyanname" {% if source_mode=='beyanname' %}selected{% endif %}>Yalnız beyanname</option>
+                    <option value="mizan" {% if source_mode=='mizan' %}selected{% endif %}>Yalnız mizan</option>
+                </select>
+            </div>
+
+            <div class="vr opacity-25"></div>
+
             <!-- Yıl Seçimi (Modern Dropdown) -->
             <div class="dropdown">
                 <button class="btn btn-white bg-white border border-secondary fw-bold dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
@@ -296,8 +326,34 @@
                     <i class="bi bi-stars me-1 text-purple"></i>AI Tahmini
                 </label>
             </div>
+
+            {% if secili_vkn and secili_yillar %}
+            <button type="submit"
+                    class="btn btn-dark rounded-pill px-3 fw-bold"
+                    formaction="{{ url_for('reports.finansal_oran_raporu') }}"
+                    formmethod="get">
+                <i class="bi bi-file-earmark-pdf me-2"></i>PDF Rapor
+            </button>
+            {% endif %}
         </form>
     </div>
+
+    {% if source_details %}
+    <div class="source-usage" aria-label="Analizde kullanılan veri kaynakları">
+        <span class="source-usage-title"><i class="bi bi-database-check me-1"></i>Kullanılan kaynak</span>
+        {% for period, sources in source_details.items() %}
+        <div class="source-period">
+            <strong>{{ period }}</strong>
+            {% if sources.get('bilanco') %}
+            <span class="source-chip {% if sources.get('bilanco') == 'beyanname' %}declaration{% else %}trial{% endif %}">Bilanço: {% if sources.get('bilanco') == 'beyanname' %}Beyanname{% else %}Mizan{% endif %}</span>
+            {% endif %}
+            {% if sources.get('gelir') %}
+            <span class="source-chip {% if sources.get('gelir') == 'beyanname' %}declaration{% else %}trial{% endif %}">Gelir: {% if sources.get('gelir') == 'beyanname' %}Beyanname{% else %}Mizan{% endif %}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     
     <!-- Uyarılar / Analiz Notları -->
     {% if uyarilar and uyarilar|length > 0 %}
@@ -336,7 +392,16 @@
                 <div class="ratio-list-body" id="ratioList">
                     {% for key, val_dict in trend_data.items() %}
                         <div class="ratio-item px-4 border-bottom" onclick="selectRatio('{{ key|escape }}', this)">
-                            <div class="ratio-name flex-grow-1 text-truncate pe-2" style="font-size: 0.85rem;">{{ key }}</div>
+                            {% set ratio_definition = oran_tanimlari.get(key) %}
+                            <div class="ratio-name flex-grow-1 text-truncate pe-2" style="font-size: 0.85rem;">
+                                {{ key }}
+                                {% if ratio_definition and ratio_definition.formula %}
+                                <i class="bi bi-info-circle ms-1 text-muted opacity-50"
+                                   data-bs-toggle="tooltip"
+                                   title="{{ ratio_definition.formula }}"
+                                   aria-label="{{ key }} hesaplama formülü"></i>
+                                {% endif %}
+                            </div>
                             <div class="d-flex gap-2 align-items-center">
                                 {% for dp in display_periods %}
                                     {% set val = val_dict.get(dp) %}
@@ -432,6 +497,8 @@
             </div>
         </div>
     </div>
+    {% endif %}
+
     {% set extra_disclaimer = True %}
     {% include 'partials/tax_disclaimer.html' %}
 
@@ -478,7 +545,7 @@
         document.getElementById('dAdvice').innerText = getEffectiveAdvice(lastVal, meta) || "Hesaplanamadı.";
         
         // Risk Analizi
-        updateRiskIndicator(lastVal, meta.thresholds);
+        updateRiskIndicator(lastVal, meta.thresholds, meta.direction);
 
         // Grafik Çizimi
         drawChart(labels, chartData, key);
@@ -502,16 +569,20 @@
         let projectionDataset = null;
 
         if (showProjection && chartData.length >= 2) {
+             const lastActualValue = chartData[chartData.length - 1];
              // Basit Lineer Regresyon ile Tahmin
-             const nextVal = calculateProjection(chartData);
+             const nextVal = (lastActualValue !== null && lastActualValue !== undefined)
+                 ? calculateProjection(chartData)
+                 : null;
              if (nextVal !== null) {
                  // Tahmin verisi: Mevcut verilerin sonuncusu ile başlar, tahmin edilen ile biter
                  const lastVal = chartData[chartData.length - 1];
-                 const nextYear = parseInt(chartLabels[chartLabels.length - 1]) + 1;
+                 const lastYearMatch = String(chartLabels[chartLabels.length - 1]).match(/20\d{2}/);
+                 const nextYear = lastYearMatch ? parseInt(lastYearMatch[0], 10) + 1 : "Sonraki Dönem";
                  
                  // Ana grafiği etkilememesi için ayrı dataset
                  projectionDataset = {
-                     label: 'AI Tahmini (2026)',
+                     label: `AI Tahmini (${nextYear})`,
                      data: Array(chartData.length - 1).fill(null).concat([lastVal, nextVal]),
                      borderColor: '#8b5cf6', // Mor renk
                      borderDash: [5, 5],
@@ -626,7 +697,7 @@
          }
     });
 
-    function updateRiskIndicator(val, thresholds) {
+    function updateRiskIndicator(val, thresholds, direction = 'higher') {
         const bar = document.getElementById('riskBar');
         const label = document.getElementById('riskLabel');
         const desc = document.getElementById('riskDesc');
@@ -645,8 +716,13 @@
 
         let status = 'risk';
         if (thresholds) {
-            if (thresholds.safe !== undefined && val >= thresholds.safe) status = 'safe';
-            else if (thresholds.adequate !== undefined && val >= thresholds.adequate) status = 'adequate';
+            if (direction === 'lower') {
+                if (thresholds.safe !== undefined && val <= thresholds.safe) status = 'safe';
+                else if (thresholds.adequate !== undefined && val <= thresholds.adequate) status = 'adequate';
+            } else {
+                if (thresholds.safe !== undefined && val >= thresholds.safe) status = 'safe';
+                else if (thresholds.adequate !== undefined && val >= thresholds.adequate) status = 'adequate';
+            }
         }
 
         if (status === 'safe') {
@@ -679,14 +755,23 @@
         
         // Eşiklere göre doğru tavsiyeyi seç
         const th = meta.thresholds || {};
-        if (th.safe !== undefined && val >= th.safe) return meta.advice.safe;
-        if (th.adequate !== undefined && val >= th.adequate) return meta.advice.adequate;
+        if (meta.direction === 'lower') {
+            if (th.safe !== undefined && val <= th.safe) return meta.advice.safe;
+            if (th.adequate !== undefined && val <= th.adequate) return meta.advice.adequate;
+        } else {
+            if (th.safe !== undefined && val >= th.safe) return meta.advice.safe;
+            if (th.adequate !== undefined && val >= th.adequate) return meta.advice.adequate;
+        }
         return meta.advice.risky;
     }
 
     function formatNum(n) {
         return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(n);
     }
+
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
+        new bootstrap.Tooltip(element);
+    });
     {% endif %}
 </script>
 {% endblock %}

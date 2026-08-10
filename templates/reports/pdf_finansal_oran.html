@@ -1,217 +1,780 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ unvan }} - Finansal Oran Raporu</title>
-  <style>
-    /* === GENEL === */
-    body {
-      font-family: "DejaVu Sans", Arial, sans-serif;
-      font-size: 12px;
-      color: #1a1a1a;
-      background: #fff;
-      margin: 25px;
-      line-height: 1.5;
-    }
+    <meta charset="UTF-8">
+    <title>{{ unvan }} - Finansal Analiz Raporu</title>
+    <style>
+        @page { size: A4 portrait; margin: 0; }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        html, body {
+            width: 210mm;
+            margin: 0;
+            padding: 0;
+            color: #0b2142;
+            background: #ffffff;
+            font-family: "DejaVu Sans", Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.45;
+        }
+        .sheet {
+            position: relative;
+            width: 210mm;
+            height: 297mm;
+            min-height: 297mm;
+            overflow: hidden;
+            page-break-after: always;
+            background: #ffffff;
+        }
+        .sheet.last { page-break-after: avoid; }
 
-    h1, h2, h3 {
-      margin: 0;
-      color: #0d47a1;
-    }
+        /* Cover */
+        .cover {
+            color: #ffffff;
+            background: #071f43;
+        }
+        .cover-side {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 53mm;
+            background: #12559c;
+        }
+        .cover-side::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1.4mm;
+            height: 100%;
+            background: #d99a17;
+        }
+        .cover-brand {
+            position: absolute;
+            top: 20mm;
+            left: 24mm;
+            color: #d99a17;
+            font-size: 11pt;
+            font-weight: 800;
+            letter-spacing: .9pt;
+        }
+        .cover-rule {
+            position: absolute;
+            top: 57mm;
+            left: 24mm;
+            width: 2.2mm;
+            height: 40mm;
+            background: #d99a17;
+        }
+        .cover-title {
+            position: absolute;
+            top: 61mm;
+            left: 32mm;
+            width: 120mm;
+            margin: 0;
+            color: #ffffff;
+            font-size: 30pt;
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: .25pt;
+            text-transform: uppercase;
+        }
+        .cover-subtitle {
+            position: absolute;
+            top: 126mm;
+            left: 32mm;
+            width: 108mm;
+            color: #d9e5f2;
+            font-size: 11.5pt;
+            line-height: 1.55;
+        }
+        .cover-company {
+            position: absolute;
+            top: 170mm;
+            left: 32mm;
+            width: 112mm;
+            padding-top: 6mm;
+            border-top: .45mm solid #d99a17;
+            font-size: 14pt;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+        .cover-meta {
+            position: absolute;
+            top: 216mm;
+            left: 32mm;
+            width: 112mm;
+            color: #d9e5f2;
+            font-size: 8.5pt;
+        }
+        .cover-meta-row { margin-bottom: 3mm; }
+        .cover-meta-label {
+            display: inline-block;
+            width: 33mm;
+            color: #8fb7df;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .cover-periods { display: inline; }
+        .cover-periods span::after { content: "  /  "; color: #d99a17; }
+        .cover-periods span:last-child::after { content: ""; }
+        .cover-confidential {
+            position: absolute;
+            left: 24mm;
+            bottom: 17mm;
+            color: #8fb7df;
+            font-size: 6.8pt;
+            text-transform: uppercase;
+            letter-spacing: .4pt;
+        }
+        .side-mark {
+            position: absolute;
+            right: 11mm;
+            bottom: 25mm;
+            color: rgba(255,255,255,.18);
+            font-size: 48pt;
+            font-weight: 800;
+            line-height: .78;
+            text-align: right;
+        }
 
-    /* === ÜST BANNER === */
-    .header {
-      text-align: center;
-      border-bottom: 3px solid #1565c0;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-    }
-    .header h1 { font-size: 22px; font-weight: bold; }
-    .header h2 { font-size: 15px; color: #1565c0; margin-top: 5px; }
-    .year { color: #555; margin-top: 5px; font-style: italic; }
+        /* Interior page frame */
+        .interior { padding: 31mm 17mm 17mm; }
+        .top-band {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 18mm;
+            color: #ffffff;
+            background: #071f43;
+        }
+        .top-band::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: -1.1mm;
+            left: 0;
+            height: 1.1mm;
+            background: #d99a17;
+        }
+        .header-brand {
+            position: absolute;
+            top: 6mm;
+            left: 17mm;
+            font-size: 9pt;
+            font-weight: 800;
+            letter-spacing: .25pt;
+        }
+        .header-brand span { color: #d99a17; }
+        .header-section {
+            position: absolute;
+            top: 6mm;
+            right: 17mm;
+            color: #d9e5f2;
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .35pt;
+        }
+        .page-footer {
+            position: absolute;
+            right: 17mm;
+            bottom: 8mm;
+            left: 17mm;
+            padding-top: 2.5mm;
+            color: #66748a;
+            border-top: .25mm solid #dbe2ea;
+            font-size: 6.8pt;
+        }
+        .page-number { float: right; color: #0b2142; font-weight: 800; }
+        .section-no {
+            margin-bottom: 2mm;
+            color: #d99a17;
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .55pt;
+        }
+        .page-title {
+            margin: 0;
+            color: #071f43;
+            font-size: 23pt;
+            font-weight: 800;
+            line-height: 1.16;
+        }
+        .page-lead {
+            max-width: 156mm;
+            margin: 3mm 0 8mm;
+            color: #5d6c82;
+            font-size: 9.2pt;
+        }
 
-    /* === FİRMA BİLGİLERİ === */
-    .meta {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px 20px;
-      background: #f7f9fc;
-      border: 1px solid #cfd8dc;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 25px;
-    }
-    .meta strong { color: #0d47a1; }
+        /* Shared UI */
+        .status {
+            display: inline-block;
+            min-width: 19mm;
+            padding: 1.1mm 2mm;
+            color: #ffffff;
+            text-align: center;
+            font-size: 6.4pt;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .status-safe { background: #168865; }
+        .status-adequate { background: #d49a24; }
+        .status-risky { background: #d94b43; }
+        .status-none { background: #7d8998; }
+        .tone-safe { color: #168865; }
+        .tone-adequate { color: #c78708; }
+        .tone-risky { color: #d43c36; }
+        .muted { color: #6f7d90; }
 
-    /* === ORAN KARTI === */
-    .card {
-      border: 1px solid #cfd8dc;
-      border-left: 5px solid #1976d2;
-      background: #fafafa;
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin-bottom: 15px;
-      page-break-inside: avoid;
-    }
+        /* Contents */
+        .contents-list { margin-top: 14mm; }
+        .contents-row {
+            width: 100%;
+            margin-bottom: 2.5mm;
+            border-collapse: collapse;
+        }
+        .contents-row td { height: 16mm; vertical-align: middle; }
+        .contents-index {
+            width: 15mm;
+            color: #d99a17;
+            font-size: 13pt;
+            font-weight: 800;
+        }
+        .contents-name {
+            color: #0b2142;
+            font-size: 11pt;
+            font-weight: 700;
+        }
+        .contents-dots { border-bottom: .3mm dotted #bdc7d3; }
+        .contents-page {
+            width: 12mm;
+            color: #12559c;
+            font-size: 11pt;
+            font-weight: 800;
+            text-align: right;
+        }
+        .contents-note {
+            margin-top: 14mm;
+            padding: 6mm;
+            color: #42536d;
+            background: #f3f7fb;
+            border-left: 1.7mm solid #12559c;
+            font-size: 8.5pt;
+        }
 
-    .card-title {
-      font-size: 14px;
-      font-weight: bold;
-      color: #0d47a1;
-      margin-bottom: 8px;
-    }
+        /* Executive summary */
+        .metric-grid {
+            width: calc(100% + 6mm);
+            margin: 4mm 0 8mm -3mm;
+            border-collapse: separate;
+            border-spacing: 3mm 0;
+            table-layout: fixed;
+        }
+        .metric-card {
+            position: relative;
+            height: 42mm;
+            padding: 5mm 4.5mm 6mm;
+            vertical-align: top;
+            background: #ffffff;
+            border: .35mm solid #cbd8e6;
+            border-radius: 2.5mm;
+        }
+        .metric-card::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 2.2mm;
+            background: #12559c;
+        }
+        .metric-card.safe::after { background: #168865; }
+        .metric-card.adequate::after { background: #d49a24; }
+        .metric-card.risky::after { background: #d94b43; }
+        .metric-label {
+            min-height: 12mm;
+            color: #52627a;
+            font-size: 7.3pt;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            color: #071f43;
+            font-size: 21pt;
+            font-weight: 800;
+            line-height: 1.05;
+        }
+        .metric-period { margin-top: 2mm; color: #7c8999; font-size: 6.6pt; }
+        .summary-row {
+            width: calc(100% + 6mm);
+            margin-left: -3mm;
+            border-collapse: separate;
+            border-spacing: 3mm 0;
+            table-layout: fixed;
+        }
+        .summary-card {
+            height: 61mm;
+            padding: 6mm;
+            vertical-align: top;
+            background: #f5f8fb;
+            border-top: 1.3mm solid #12559c;
+        }
+        .summary-card.green { border-top-color: #168865; }
+        .summary-card.gold { border-top-color: #d99a17; }
+        .summary-card-title {
+            margin-bottom: 4mm;
+            color: #0b2142;
+            font-size: 10pt;
+            font-weight: 800;
+        }
+        .summary-big {
+            margin-bottom: 3mm;
+            font-size: 22pt;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .summary-card p { margin: 0; color: #55657c; font-size: 8pt; line-height: 1.55; }
+        .manager-note {
+            margin-top: 8mm;
+            padding: 6mm 7mm;
+            color: #ffffff;
+            background: #071f43;
+            border-bottom: 2mm solid #d99a17;
+        }
+        .manager-note strong {
+            display: block;
+            margin-bottom: 2mm;
+            color: #d99a17;
+            font-size: 7pt;
+            text-transform: uppercase;
+        }
 
-    .card-values {
-      margin-bottom: 6px;
-    }
-    .card-values span {
-      display: inline-block;
-      margin-right: 8px;
-      background: #e3f2fd;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
+        /* Charts and tables */
+        .overview-table, .ratio-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .overview-table th, .ratio-table th {
+            padding: 3mm 2.5mm;
+            color: #ffffff;
+            background: #0b315f;
+            font-size: 6.7pt;
+            text-align: right;
+            text-transform: uppercase;
+        }
+        .overview-table th:first-child, .ratio-table th:first-child { text-align: left; }
+        .overview-table td, .ratio-table td {
+            padding: 3mm 2.5mm;
+            border-bottom: .25mm solid #dce3eb;
+            color: #31435e;
+            font-size: 7.7pt;
+            text-align: right;
+        }
+        .overview-table tr:nth-child(even) td, .ratio-table tr:nth-child(even) td { background: #f5f8fb; }
+        .overview-table td:first-child, .ratio-table td:first-child {
+            color: #0b2142;
+            font-weight: 700;
+            text-align: left;
+        }
+        .ratio-table td.status-cell { text-align: center; }
+        .charts-row {
+            width: 100%;
+            margin: 8mm 0 0;
+            border-collapse: separate;
+            border-spacing: 3mm 0;
+            table-layout: fixed;
+        }
+        .charts-row td { width: 50%; vertical-align: top; }
+        .chart-card {
+            width: 100%;
+            height: 68mm;
+            padding: 5mm;
+            vertical-align: top;
+            background: #ffffff;
+            border: .35mm solid #cbd8e6;
+            border-radius: 2mm;
+        }
+        .chart-title {
+            color: #0b2142;
+            font-size: 9pt;
+            font-weight: 800;
+        }
+        .chart-subtitle { margin: 1mm 0 3mm; color: #7b8798; font-size: 6.5pt; }
+        .chart-canvas {
+            width: 100%;
+            height: 38mm;
+            padding: 2mm;
+            background: #f7f9fc;
+        }
+        .chart-svg { display: block; width: 100%; height: 100%; }
+        .chart-grid { stroke: #d9e2ec; stroke-width: .7; }
+        .chart-line {
+            fill: none;
+            stroke: #125fb5;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .chart-point { fill: #ffffff; stroke: #125fb5; stroke-width: 2; }
+        .chart-labels {
+            width: 100%;
+            margin-top: 2mm;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .chart-labels td { color: #6e7c8f; font-size: 5.8pt; text-align: center; }
+        .chart-values { margin-top: 1.5mm; color: #12559c; font-size: 6.6pt; font-weight: 700; text-align: center; }
+        .section-insight {
+            margin-top: 7mm;
+            padding: 5mm 6mm;
+            color: #40516a;
+            background: #f5f8fb;
+            border-left: 1.6mm solid #168865;
+            font-size: 8pt;
+        }
 
-    .card-section {
-      margin-top: 8px;
-      font-size: 11.5px;
-    }
-    .card-section strong {
-      color: #ff6f00;
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .card-section ul {
-      margin: 0;
-      padding-left: 15px;
-    }
-
-    /* === GENEL ANALİZ === */
-    .analysis {
-      margin-top: 25px;
-      background: #f1f8e9;
-      border-left: 5px solid #43a047;
-      padding: 14px 16px;
-      border-radius: 6px;
-    }
-
-    .analysis h3 {
-      color: #2e7d32;
-      border-bottom: 2px solid #81c784;
-      display: inline-block;
-      margin-bottom: 6px;
-    }
-
-    /* === ÖNERİLER === */
-    .analysis ol {
-      margin-top: 8px;
-      padding-left: 18px;
-    }
-
-    /* === RENK KODLU DEĞERLER === */
-    .good { color: #2e7d32; font-weight: bold; }
-    .warn { color: #f57f17; font-weight: bold; }
-    .bad  { color: #c62828; font-weight: bold; }
-
-    /* === FOOTER === */
-    .footer {
-      text-align: center;
-      font-size: 10px;
-      color: #777;
-      border-top: 1px solid #ccc;
-      margin-top: 30px;
-      padding-top: 6px;
-    }
-
-    /* === SAYFA KIRILMALARI === */
-    @page {
-      size: A4;
-      margin: 15mm 12mm;
-    }
-    .page-break {
-      page-break-before: always;
-    }
-  </style>
+        /* Findings and conclusion */
+        .finding-card {
+            width: 100%;
+            margin-bottom: 4mm;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .finding-number {
+            width: 17mm;
+            color: #ffffff;
+            background: #d94b43;
+            font-size: 18pt;
+            font-weight: 800;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .finding-number.gold { background: #d49a24; }
+        .finding-number.teal { background: #168865; }
+        .finding-body {
+            height: 29mm;
+            padding: 4mm 5mm;
+            vertical-align: middle;
+            background: #f5f8fb;
+            border: .3mm solid #d8e1eb;
+            border-left: 0;
+        }
+        .finding-title { color: #0b2142; font-size: 9.5pt; font-weight: 800; }
+        .finding-text { margin-top: 1.3mm; color: #5d6c82; font-size: 7.4pt; }
+        .finding-value { color: #d43c36; font-weight: 800; }
+        .more-findings { color: #6b788b; font-size: 7.5pt; text-align: right; }
+        .conclusion-panel {
+            margin-top: 9mm;
+            padding: 12mm 10mm;
+            color: #ffffff;
+            background: #071f43;
+            border-bottom: 2mm solid #d99a17;
+        }
+        .conclusion-panel h2 { margin: 0 0 5mm; color: #d99a17; font-size: 13pt; }
+        .conclusion-panel p { margin: 0; color: #edf4fb; font-size: 10pt; line-height: 1.7; }
+        .recommendation {
+            width: 100%;
+            margin-top: 5mm;
+            border-collapse: collapse;
+        }
+        .recommendation-index {
+            width: 13mm;
+            color: #d99a17;
+            font-size: 16pt;
+            font-weight: 800;
+            vertical-align: top;
+        }
+        .recommendation-text {
+            padding: 1mm 0 4mm;
+            color: #40516a;
+            border-bottom: .3mm solid #dbe2ea;
+            font-size: 8.4pt;
+        }
+        .data-note {
+            margin-top: 7mm;
+            padding: 4mm 5mm;
+            color: #657287;
+            background: #f5f8fb;
+            font-size: 7pt;
+        }
+    </style>
 </head>
-
 <body>
+{% macro status_text(level) -%}
+    {%- if level == 'safe' -%}Güçlü
+    {%- elif level == 'adequate' -%}İzlenmeli
+    {%- elif level == 'risky' -%}Riskli
+    {%- else -%}Veri yok
+    {%- endif -%}
+{%- endmacro %}
 
-  <div class="header">
-    <h1>{{ unvan }}</h1>
-    <h2>Finansal Oran Raporu</h2>
-    <div class="year">{{ donemler|join(" • ") }}</div>
-  </div>
+{% macro value_text(value) -%}
+    {%- if value is not none -%}{{ ("%.2f"|format(value)).replace(".", ",") }}{%- else -%}–{%- endif -%}
+{%- endmacro %}
 
-  <div class="meta">
-    <div><strong>Vergi Kimlik No:</strong> {{ vkn }}</div>
-    <div><strong>Tarih:</strong> {{ now().strftime("%d.%m.%Y") }}</div>
-    <div><strong>Adres:</strong> {{ adres or "-" }}</div>
-    <div><strong>Telefon:</strong> {{ telefon or "-" }}</div>
-    <div><strong>E-posta:</strong> {{ email or "-" }}</div>
-  </div>
-
-  {% for oran_adi in reports[donemler[0]].keys() %}
-  {% set info = reports[donemler[0]][oran_adi] %}
-  {% set trend = analiz.oran_analizleri.get(oran_adi) %}
-  <div class="card">
-    <div class="card-title">{{ oran_adi }}</div>
-    <div class="card-values">
-      {% for d in donemler %}
-        {% set v = reports[d][oran_adi].deger %}
-        <span>
-          <strong>{{ d }}:</strong>
-          {% if v is not none %}
-            {% set cls = "good" if v >= 1.5 else ("warn" if v >= 1 else "bad") %}
-            <span class="{{ cls }}">{{ "%.2f"|format(v) }}</span>
-          {% else %}
-            –
-          {% endif %}
-        </span>
-      {% endfor %}
+{% macro page_frame(section_name, page_number) -%}
+    <div class="top-band">
+        <div class="header-brand">İSFA <span>YMM</span> &nbsp;|&nbsp; FİNANSAL ANALİZ RAPORU</div>
+        <div class="header-section">{{ section_name }}</div>
     </div>
-
-    <div class="card-section">
-      <strong>Açıklama</strong>
-      <div>{{ info.meaning or "–" }}</div>
+    <div class="page-footer">
+        {{ periods|join(' · ') }}
+        <span class="page-number">{{ page_number }}</span>
     </div>
+{%- endmacro %}
 
-    <div class="card-section">
-      <strong>Öneri</strong>
-      <div>
-        {% if info.advice is iterable and info.advice is not string %}
-          <ul>
-            {% for o in info.advice %}<li>{{ o }}</li>{% endfor %}
-          </ul>
+{% macro trend_chart(item) -%}
+    <div class="chart-card">
+        <div class="chart-title">{{ item.name }}</div>
+        <div class="chart-subtitle">Dönemsel değişim</div>
+        <div class="chart-canvas">
+            {% if item.sparkline_points %}
+            <svg class="chart-svg" viewBox="0 0 120 34" preserveAspectRatio="none">
+                <line class="chart-grid" x1="4" y1="5" x2="116" y2="5"></line>
+                <line class="chart-grid" x1="4" y1="17" x2="116" y2="17"></line>
+                <line class="chart-grid" x1="4" y1="29" x2="116" y2="29"></line>
+                <polyline class="chart-line" points="{{ item.sparkline_points }}"></polyline>
+                {% for marker in item.sparkline_markers %}
+                <circle class="chart-point" cx="{{ marker.x }}" cy="{{ marker.y }}" r="2.4"></circle>
+                {% endfor %}
+            </svg>
+            {% endif %}
+        </div>
+        <table class="chart-labels"><tr>
+            {% for period_value in item["values"] %}<td>{{ period_value.period }}</td>{% endfor %}
+        </tr></table>
+        <div class="chart-values">
+            {% for period_value in item["values"] %}{{ value_text(period_value.value) }}{% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}
+        </div>
+    </div>
+{%- endmacro %}
+
+{% set total_status = status_counts.safe + status_counts.adequate + status_counts.risky %}
+
+<!-- 01 Cover -->
+<section class="sheet cover">
+    <div class="cover-side"></div>
+    <div class="cover-brand">İSFA YMM</div>
+    <div class="cover-rule"></div>
+    <h1 class="cover-title">Kurumsal<br>Finansal Analiz<br>Raporu</h1>
+    <div class="cover-subtitle">Finansal yapı, likidite, faaliyet etkinliği ve kârlılık göstergelerinin dönemsel değerlendirmesi</div>
+    <div class="cover-company">{{ unvan }}</div>
+    <div class="cover-meta">
+        <div class="cover-meta-row"><span class="cover-meta-label">Rapor tarihi</span>{{ generated_date_label }}</div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Vergi kimlik no</span>{{ vkn }}</div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Dönemler</span><span class="cover-periods">{% for period in periods %}<span>{{ period }}</span>{% endfor %}</span></div>
+    </div>
+    <div class="cover-confidential">Yönetim kullanımı için hazırlanmıştır</div>
+    <div class="side-mark">İS<br>FA</div>
+</section>
+
+<!-- 02 Contents -->
+<section class="sheet interior">
+    {{ page_frame('İçindekiler', '02') }}
+    <div class="section-no">Rapor yapısı</div>
+    <h1 class="page-title">İçindekiler</h1>
+    <div class="contents-list">
+        {% set contents = [
+            ('01', 'Yönetici Özeti', '03'),
+            ('02', 'Finansal Gelişim ve Dönemsel Görünüm', '04'),
+            ('03', 'Likidite Analizi', '05'),
+            ('04', 'Mali Yapı Analizi', '06'),
+            ('05', 'Varlık Kullanımı', '07'),
+            ('06', 'Kârlılık Analizi', '08'),
+            ('07', 'Kritik Bulgular', '09'),
+            ('08', 'Genel Sonuç ve Öneriler', '10')
+        ] %}
+        {% for index, name, page in contents %}
+        <table class="contents-row"><tr>
+            <td class="contents-index">{{ index }}</td>
+            <td class="contents-name">{{ name }}</td>
+            <td class="contents-dots"></td>
+            <td class="contents-page">{{ page }}</td>
+        </tr></table>
+        {% endfor %}
+    </div>
+    <div class="contents-note">
+        Rapor, seçilen dönemlere ait mali tablolardan otomatik olarak hesaplanan {{ total_indicators }} finansal göstergeyi kapsar. Oranlar son dönem değeri, dönemsel yön ve tanımlı eşikler birlikte dikkate alınarak sınıflandırılmıştır.
+    </div>
+</section>
+
+<!-- 03 Executive summary -->
+<section class="sheet interior">
+    {{ page_frame('Yönetici Özeti', '03') }}
+    <div class="section-no">01 / Yönetici özeti</div>
+    <h1 class="page-title">Finansal görünüm</h1>
+    <p class="page-lead">Son dönem değerleri ve dönemsel eğilimler, karar almayı kolaylaştıracak temel göstergeler halinde özetlenmiştir.</p>
+
+    <table class="metric-grid"><tr>
+        {% for item in executive_metrics %}
+        <td class="metric-card {{ item.level or 'none' }}">
+            <div class="metric-label">{{ item.name }}</div>
+            <div class="metric-value tone-{{ item.level or 'none' }}">{{ value_text(item.latest_value) }}</div>
+            <div class="metric-period">{{ item.latest_period }} · {{ status_text(item.level) }}</div>
+        </td>
+        {% endfor %}
+    </tr></table>
+
+    <table class="summary-row"><tr>
+        <td class="summary-card green">
+            <div class="summary-card-title">Güçlü göstergeler</div>
+            <div class="summary-big tone-safe">{{ status_counts.safe }}</div>
+            <p>Tanımlı eşiklere göre finansal dayanıklılığı destekleyen göstergeler.</p>
+        </td>
+        <td class="summary-card gold">
+            <div class="summary-card-title">İzlenecek göstergeler</div>
+            <div class="summary-big tone-adequate">{{ status_counts.adequate }}</div>
+            <p>Mevcut seviyesi kabul edilebilir olmakla birlikte düzenli takibi gereken göstergeler.</p>
+        </td>
+        <td class="summary-card" style="border-top-color:#d94b43;">
+            <div class="summary-card-title">Riskli göstergeler</div>
+            <div class="summary-big tone-risky">{{ status_counts.risky }}</div>
+            <p>Son değeri tanımlı risk eşiğinde bulunan ve yönetim değerlendirmesi gerektiren göstergeler.</p>
+        </td>
+    </tr></table>
+
+    <div class="manager-note">
+        <strong>Yönetici değerlendirmesi</strong>
+        {{ analysis.genel_sonuc or 'Finansal göstergeler dönemsel gelişim ve güncel seviye birlikte dikkate alınarak değerlendirilmiştir.' }}
+    </div>
+</section>
+
+<!-- 04 Periodic overview -->
+<section class="sheet interior">
+    {{ page_frame('Finansal Gelişim', '04') }}
+    <div class="section-no">02 / Dönemsel görünüm</div>
+    <h1 class="page-title">Finansal gelişim</h1>
+    <p class="page-lead">Seçilmiş göstergelerin dönemler itibarıyla seyri ve son dönem risk görünümü.</p>
+
+    <table class="overview-table">
+        <thead><tr>
+            <th style="width:47mm;">Gösterge</th>
+            {% for period in periods %}<th>{{ period }}</th>{% endfor %}
+            <th style="width:24mm; text-align:center;">Durum</th>
+        </tr></thead>
+        <tbody>
+            {% for item in executive_metrics %}
+            <tr>
+                <td>{{ item.name }}</td>
+                {% for period_value in item["values"] %}<td>{{ value_text(period_value.value) }}</td>{% endfor %}
+                <td style="text-align:center;"><span class="status status-{{ item.level or 'none' }}">{{ status_text(item.level) }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="charts-row"><tr>
+        {% for item in overview_items %}<td>{{ trend_chart(item) }}</td>{% endfor %}
+    </tr></table>
+
+    <div class="section-insight">
+        <strong>Okuma notu:</strong> Eğilim grafikleri dönemler arasındaki yönü gösterir. Geçici vergi dönemleri bulunuyorsa kârlılık oranları, dönem uzunluğu ve mevsimsellik etkisi dikkate alınarak yorumlanmalıdır.
+    </div>
+</section>
+
+<!-- 05-08 Ratio sections -->
+{% for section in sections %}
+<section class="sheet interior">
+    {{ page_frame(section.name, '%02d'|format(section.page)) }}
+    <div class="section-no">{{ section.number }} / Oran analizi</div>
+    <h1 class="page-title">{{ section.name }}</h1>
+    <p class="page-lead">Dönemsel değerler, son dönem sınıflandırması ve öne çıkan hareketler.</p>
+
+    <table class="ratio-table">
+        <thead><tr>
+            <th style="width:48mm;">Gösterge</th>
+            {% for period in periods %}<th>{{ period }}</th>{% endfor %}
+            <th style="width:23mm; text-align:center;">Durum</th>
+        </tr></thead>
+        <tbody>
+            {% for item in section["items"] %}
+            <tr>
+                <td>{{ item.name }}</td>
+                {% for period_value in item["values"] %}<td>{{ value_text(period_value.value) }}</td>{% endfor %}
+                <td class="status-cell"><span class="status status-{{ item.level or 'none' }}">{{ status_text(item.level) }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="charts-row"><tr>
+        {% for item in section["items"][:2] %}<td>{{ trend_chart(item) }}</td>{% endfor %}
+    </tr></table>
+
+    {% set focus = section["items"]|selectattr('level', 'equalto', 'risky')|list %}
+    <div class="section-insight" style="border-left-color:{% if focus %}#d94b43{% else %}#168865{% endif %};">
+        {% if focus %}
+        <strong>Öncelikli değerlendirme:</strong> {{ focus[0].trend }}{% if focus[0].advice %} {{ focus[0].advice }}{% endif %}
         {% else %}
-          {{ info.advice or "–" }}
+        <strong>Genel değerlendirme:</strong> Bu grupta son dönem itibarıyla riskli sınıfta gösterge bulunmamaktadır. Dönemsel hareketlerin izlenmesi önerilir.
         {% endif %}
-      </div>
+    </div>
+</section>
+{% endfor %}
+
+<!-- 09 Critical findings -->
+<section class="sheet interior">
+    {{ page_frame('Kritik Bulgular', '09') }}
+    <div class="section-no">07 / Kritik bulgular</div>
+    <h1 class="page-title">Öncelikli değerlendirme alanları</h1>
+    <p class="page-lead">Son dönem değeri riskli sınıfta bulunan başlıca göstergeler yönetim önceliğine göre tek ekranda sunulmuştur.</p>
+
+    {% if risk_items %}
+        {% for item in risk_items[:5] %}
+        <table class="finding-card"><tr>
+            <td class="finding-number {% if loop.index == 4 %}gold{% elif loop.index == 5 %}teal{% endif %}">{{ '%02d'|format(loop.index) }}</td>
+            <td class="finding-body">
+                <div class="finding-title">{{ item.name }} <span class="finding-value">{{ value_text(item.latest_value) }}</span></div>
+                <div class="finding-text">{{ item.trend }}{% if item.advice %} {{ item.advice }}{% endif %}</div>
+            </td>
+        </tr></table>
+        {% endfor %}
+        {% if risk_items|length > 5 %}<div class="more-findings">Ayrıntılı bölüm tablolarında {{ risk_items|length - 5 }} ilave riskli gösterge yer almaktadır.</div>{% endif %}
+    {% else %}
+        <div class="manager-note"><strong>Sonuç</strong>Son mevcut değerler itibarıyla riskli sınıfta gösterge bulunmamıştır.</div>
+    {% endif %}
+</section>
+
+<!-- 10 Conclusion -->
+<section class="sheet interior last">
+    {{ page_frame('Genel Sonuç', '10') }}
+    <div class="section-no">08 / Genel sonuç</div>
+    <h1 class="page-title">Sonuç ve öneriler</h1>
+
+    <div class="conclusion-panel">
+        <h2>Yönetim değerlendirmesi</h2>
+        <p>{{ analysis.genel_sonuc or 'Finansal oranlar, seçilen dönemler itibarıyla birlikte değerlendirilmiş ve karar süreçlerine temel oluşturacak göstergeler özetlenmiştir.' }}</p>
     </div>
 
-    {% if donemler|length > 1 and trend %}
-      <div class="card-section">
-        <strong>Trend Yorumu</strong>
-        <div>{{ trend.sonucu }}</div>
-      </div>
+    {% if analysis.genel_oneriler %}
+        {% for suggestion in analysis.genel_oneriler[:3] %}
+        <table class="recommendation"><tr>
+            <td class="recommendation-index">{{ '%02d'|format(loop.index) }}</td>
+            <td class="recommendation-text">{{ suggestion }}</td>
+        </tr></table>
+        {% endfor %}
+    {% else %}
+        {% for item in risk_items[:3] %}
+        <table class="recommendation"><tr>
+            <td class="recommendation-index">{{ '%02d'|format(loop.index) }}</td>
+            <td class="recommendation-text">{{ item.advice or item.trend }}</td>
+        </tr></table>
+        {% endfor %}
     {% endif %}
-  </div>
-  {% endfor %}
 
-  <div class="analysis">
-    <h3>Genel Sonuç</h3>
-    <p>{{ analiz.genel_sonuc }}</p>
-
-    <h3>Genel Öneriler</h3>
-    <ol>
-      {% for o in analiz.genel_oneriler %}<li>{{ o }}</li>{% endfor %}
-    </ol>
-  </div>
-
-  <div class="footer">
-    Rapor oluşturulma tarihi: {{ now().strftime("%d/%m/%Y %H:%M") }}
-  </div>
-
+    <div class="data-note">
+        <strong>Rapor kapsamı:</strong> Bu çalışma yüklenen mali tablolardan otomatik olarak oluşturulan bir ön değerlendirmedir. Bağımsız denetim, YMM tasdik görüşü, kredi derecelendirmesi veya yatırım tavsiyesi niteliğinde değildir.
+        {% if warnings %}<br><strong>Veri notu:</strong> {{ warnings|join(' ') }}{% endif %}
+    </div>
+</section>
 </body>
 </html>

@@ -170,6 +170,17 @@ def extract_mukellef_bilgileri(text: str):
             elif m_yil:
                 donem = m_yil.group(1)
 
+    # Geçici vergi beyannamelerinde yıl ve dönem numarası aynı başlıkta yer alır.
+    # Yıllık beyannameyle aynı DB dönemine yazılmaması için açık bir dönem etiketi üret.
+    if "GECICI VERGI BEYANNAMESI" in text_norm:
+        gecici_yil = re.search(r"\bYILI\s*(20\d{2})\b", text_norm)
+        gecici_donem = re.search(
+            r"GECICI VERGI DONEMI.*?\bDONEM\s*([1-4])\s*\.\s*DONEM\b",
+            text_norm,
+        )
+        if gecici_yil and gecici_donem:
+            donem = f"{gecici_yil.group(1)} - {gecici_donem.group(1)}. GEÇİCİ"
+
     return {
         "unvan": unvan,
         "donem": donem,
@@ -177,9 +188,9 @@ def extract_mukellef_bilgileri(text: str):
         "tur": tur
     }
 
-def find_account_code(block_name, description, parent_group=None):
+def find_account_code(block_name, description, parent_group=None, sub_group=None):
     original_description = description.strip()
-    kod_match = re.match(r"^\s*(\d{1,3})\s*[.\-]?\s*(.*)", original_description)
+    kod_match = re.match(r"^\s*(\d{3})\s*[.\-]?\s*(.*)", original_description)
 
     if kod_match:
         return kod_match.group(1)
@@ -190,53 +201,182 @@ def find_account_code(block_name, description, parent_group=None):
     description_clean = re.sub(r"^\s*[\.\s]+", "", original_description)
     description_clean = re.sub(r"[^\w\s]", "", description_clean.lower().strip())
 
-    best_match = ""
-    best_score = 0
     ana_blok = BILANCO_HESAPLARI.get(block_name.upper(), {})
+    candidates = []
 
     for grup, alt_gruplar in ana_blok.items():
-        if parent_group and parent_group.strip().lower() != grup.strip().lower():
+        if parent_group and parent_group != grup:
             continue
 
         for alt_grup, kod_dict in alt_gruplar.items():
+            if sub_group and sub_group != alt_grup:
+                continue
             for kod, tanim in kod_dict.items():
                 tanim_clean = tanim.lower().strip()
                 tanim_clean_simple = re.sub(r"^\d+\.\s*", "", tanim_clean)
                 tanim_clean_simple = re.sub(r"[^\w\s]", "", tanim_clean_simple)
+                candidates.append((kod, tanim_clean_simple))
 
-                if description_clean == tanim_clean_simple or description_clean in tanim_clean_simple:
+                if description_clean == tanim_clean_simple:
                     return kod
 
-                if abs(len(tanim_clean_simple) - len(description_clean)) > 30:
-                    continue
+    best_match = ""
+    best_score = 0
+    for kod, tanim_clean_simple in candidates:
+        if description_clean in tanim_clean_simple:
+            return kod
 
-                score = difflib.SequenceMatcher(None, description_clean, tanim_clean_simple).ratio()
-                if score > best_score and score > 0.65:
-                    best_match = kod
-                    best_score = score
+        if abs(len(tanim_clean_simple) - len(description_clean)) > 30:
+            continue
+
+        score = difflib.SequenceMatcher(None, description_clean, tanim_clean_simple).ratio()
+        if score > best_score and score > 0.65:
+            best_match = kod
+            best_score = score
+
     return best_match
 
-def parse_numeric_columns(line_stripped):
-    numeric_values = re.findall(r"\d[\d\.\,]*", line_stripped)
-    numeric_values = [v for v in numeric_values if v.strip()]
+
+TABLE_NUMBER_RE = re.compile(r"(?<!\w)(?:\(\s*)?[-+]?\d[\d\.,]*(?:\s*\))?-?")
+
+
+def _clean_table_description(description):
+    description = re.sub(r"^\s*[.•]\s*", "", str(description or "").strip())
+    description = re.sub(r"^\d{1,2}\s*\.\s*", "", description)
+    description = re.sub(r"\s{2,}", " ", description)
+    return description.strip(" .-•").strip()
+
+
+def _split_numeric_columns(line_stripped, expected_columns=None):
+    matches = list(TABLE_NUMBER_RE.finditer(line_stripped))
+    if not matches:
+        return line_stripped.strip(), None, None, None
+
+    if expected_columns in (1, 2, 3) and len(matches) >= expected_columns:
+        selected = matches[-expected_columns:]
+    elif len(matches) >= 3:
+        selected = matches[-3:]
+    elif len(matches) == 2:
+        selected = matches[-2:]
+    else:
+        selected = matches[-1:]
+
+    raw_description = line_stripped[:selected[0].start()].strip()
+    numeric_values = [to_float_turkish(match.group(0)) for match in selected]
 
     onceki = cari = cari_enflasyon = None
-    if len(numeric_values) >= 3:
-        onceki = to_float_turkish(numeric_values[-3])
-        cari = to_float_turkish(numeric_values[-2])
-        cari_enflasyon = to_float_turkish(numeric_values[-1])
-    elif len(numeric_values) == 2:
-        onceki = to_float_turkish(numeric_values[0])
-        cari = to_float_turkish(numeric_values[1])
-    elif len(numeric_values) == 1:
-        cari = to_float_turkish(numeric_values[0])
+    if expected_columns == 3 and len(numeric_values) == 3:
+        onceki, cari, cari_enflasyon = numeric_values
+    elif len(numeric_values) >= 2:
+        onceki, cari = numeric_values[-2:]
+    elif numeric_values:
+        cari = numeric_values[-1]
 
-    desc_clean = re.sub(r"\d[\d\.\,]*", "", line_stripped)
-    desc_clean = re.sub(r"\s{2,}", " ", desc_clean) 
-    desc_clean = re.sub(r"[\.]+(?=\s|$)", ".", desc_clean) 
-    description = desc_clean.strip(" .-•").strip()
+    return raw_description, onceki, cari, cari_enflasyon
 
-    return description, onceki, cari, cari_enflasyon
+
+def parse_numeric_columns(line_stripped, expected_columns=None):
+    raw_description, onceki, cari, cari_enflasyon = _split_numeric_columns(
+        line_stripped,
+        expected_columns,
+    )
+    return (
+        _clean_table_description(raw_description),
+        onceki,
+        cari,
+        cari_enflasyon,
+    )
+
+
+def _mapping_key_by_marker(mapping, marker):
+    marker = str(marker or "").upper().strip(". ")
+    for key in mapping:
+        key_marker = str(key).strip().split(".", 1)[0].upper()
+        if key_marker == marker:
+            return key
+    return None
+
+
+def _canonical_account_description(
+    block_name,
+    code,
+    parent_group=None,
+    sub_group=None,
+):
+    """Hesap kodunun tam Tek Düzen adını bilanço sözlüğünden getirir."""
+    code = str(code or "").strip()
+    if not code:
+        return None
+
+    account_groups = BILANCO_HESAPLARI.get(str(block_name).upper(), {})
+    parent_items = account_groups.items()
+    if parent_group in account_groups:
+        parent_items = [(parent_group, account_groups[parent_group])]
+
+    for _, sub_groups in parent_items:
+        sub_items = sub_groups.items()
+        if sub_group in sub_groups:
+            sub_items = [(sub_group, sub_groups[sub_group])]
+
+        for _, accounts in sub_items:
+            if code in accounts:
+                return re.sub(r"^\s*\d+\.\s*", "", accounts[code]).strip()
+
+    # Eski kayıtlarda grup bağlamı bulunmayabilir; kodlar bilanço genelinde
+    # benzersiz olduğu için son çare olarak bütün blokta ara.
+    for sub_groups in account_groups.values():
+        for accounts in sub_groups.values():
+            if code in accounts:
+                return re.sub(r"^\s*\d+\.\s*", "", accounts[code]).strip()
+    return None
+
+
+def canonicalize_bilanco_rows(rows, block_name):
+    """Kesilmiş PDF etiketlerini kod ve grup sırasına göre tam adlara çevirir."""
+    account_groups = BILANCO_HESAPLARI.get(str(block_name).upper(), {})
+    current_parent_group = None
+    current_sub_group = None
+    normalized_rows = []
+
+    for source_row in rows or []:
+        row = dict(source_row)
+        description = str(row.get("Açıklama") or "").strip()
+        code = str(row.get("Kod") or "").strip()
+
+        parent_match = re.match(r"^\s*([IVXLCDM]+)\.\s*", description, re.I)
+        sub_match = re.match(r"^\s*([A-ZÇĞİÖŞÜ])\.\s*", description, re.I)
+
+        parent_key = (
+            _mapping_key_by_marker(account_groups, parent_match.group(1))
+            if parent_match
+            else None
+        )
+        if parent_key:
+            current_parent_group = parent_key
+            current_sub_group = None
+            row["Açıklama"] = parent_key
+        elif sub_match and current_parent_group:
+            sub_key = _mapping_key_by_marker(
+                account_groups.get(current_parent_group, {}),
+                sub_match.group(1),
+            )
+            if sub_key:
+                current_sub_group = sub_key
+                row["Açıklama"] = sub_key
+
+        if code:
+            canonical_description = _canonical_account_description(
+                block_name,
+                code,
+                parent_group=current_parent_group,
+                sub_group=current_sub_group,
+            )
+            if canonical_description:
+                row["Açıklama"] = canonical_description
+
+        normalized_rows.append(row)
+
+    return normalized_rows
 
 def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True):
     header_pattern = (
@@ -263,6 +403,10 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
 
     lines = block_content.split("\n")
     data = []
+    expected_columns = 3 if has_inflation_column_from_header else 2
+    account_groups = BILANCO_HESAPLARI.get(block_name.upper(), {})
+    current_parent_group = None
+    current_sub_group = None
 
     filter_patterns = [
         r"(?i)^TEK DÜZEN.*",
@@ -283,34 +427,70 @@ def parse_table_block(text: str, block_name: str = "AKTİF", debug: bool = True)
         if any(re.search(pat, line_stripped) for pat in filter_patterns):
             continue
 
-        all_numeric_strings = re.findall(r"\d[\d\.\,]*", line_stripped)
-        if not all_numeric_strings:
+        all_numeric_strings = TABLE_NUMBER_RE.findall(line_stripped)
+        if len(all_numeric_strings) < expected_columns:
             continue
 
-        numeric_values_float = [to_float_turkish(s) for s in all_numeric_strings]
-        if not any(val is not None for val in numeric_values_float):
-            continue             
+        raw_description, onceki_val, cari_val, inflation_val = _split_numeric_columns(
+            line_stripped,
+            expected_columns,
+        )
+        description = _clean_table_description(raw_description)
 
-        if len(numeric_values_float) >= 3:
-            onceki_val, cari_val, inflation_val = numeric_values_float[-3:]
-            has_inflation_column_from_header = True
-        elif len(numeric_values_float) == 2:
-            onceki_val, cari_val = numeric_values_float[-2:]
-            inflation_val = None
-        else:
-            cari_val = numeric_values_float[-1] if numeric_values_float else None
-            onceki_val = inflation_val = None             
+        parent_match = re.match(r"^\s*[.•]?\s*([IVXLCDM]+)\.\s*", raw_description, re.I)
+        sub_match = re.match(r"^\s*[.•]?\s*([A-ZÇĞİÖŞÜ])\.\s*", raw_description, re.I)
+        parent_key = (
+            _mapping_key_by_marker(account_groups, parent_match.group(1))
+            if parent_match
+            else None
+        )
+        if parent_key:
+            current_parent_group = parent_key
+            current_sub_group = None
+        elif sub_match and current_parent_group:
+            current_sub_group = _mapping_key_by_marker(
+                account_groups.get(current_parent_group, {}),
+                sub_match.group(1),
+            )
+
+        kod = find_account_code(
+            block_name,
+            description,
+            parent_group=current_parent_group,
+            sub_group=current_sub_group,
+        )
+
+        if parent_key:
+            description = parent_key
+        elif sub_match and current_sub_group:
+            description = current_sub_group
+
+        canonical_description = _canonical_account_description(
+            block_name,
+            kod,
+            parent_group=current_parent_group,
+            sub_group=current_sub_group,
+        )
+        if canonical_description:
+            description = canonical_description
+
+        if "(-)" in raw_description or kod in NEGATIVE_BILANCO_CODES:
+            if onceki_val is not None:
+                onceki_val = -abs(onceki_val)
+            if cari_val is not None:
+                cari_val = -abs(cari_val)
+            if inflation_val is not None:
+                inflation_val = -abs(inflation_val)
         
-        description, onceki_val, cari_val, inflation_val = parse_numeric_columns(line_stripped)        
-        kod = find_account_code(block_name, description)
-        
-        data.append([
+        parsed_row = [
             kod,
             description,
             onceki_val,
             cari_val,
-            inflation_val if has_inflation_column_from_header else None
-        ])
+        ]
+        if has_inflation_column_from_header:
+            parsed_row.append(inflation_val)
+        data.append(parsed_row)
 
     columns = ["Kod", "Açıklama", "Önceki Dönem", "Cari Dönem"]
     if has_inflation_column_from_header:
@@ -350,8 +530,16 @@ def parse_bilanco_from_pdf(pdf_path: str, text_content=None) -> dict:
             full_text = "\n".join([page.extract_text() or "" for page in pdf.pages])
 
     if "PASİF" in full_text and "AKTİF" in full_text:
-        aktif_text, rest_text = re.split(r"PASİF\s*(?:\n|$)", full_text, 1)
-        pasif_text = re.split(r"(?i)(PASİF\s*TOPLAMI|GELİR\s*TABLOSU)", rest_text, 1)[0]
+        aktif_text, rest_text = re.split(
+            r"PASİF\s*(?:\n|$)",
+            full_text,
+            maxsplit=1,
+        )
+        pasif_text = re.split(
+            r"(?i)(PASİF\s*TOPLAMI|GELİR\s*TABLOSU)",
+            rest_text,
+            maxsplit=1,
+        )[0]
     else:
         split_match = re.split(r"AKTİF\s*TOPLAMI[^\n]*\n", full_text, 1)
         if len(split_match) > 1:
@@ -360,7 +548,10 @@ def parse_bilanco_from_pdf(pdf_path: str, text_content=None) -> dict:
             aktif_text = full_text
             pasif_text = ""
 
-    if "PASİF" not in pasif_text.upper() and "III." in pasif_text:
+    # Çok sayfalı beyannamelerde PASİF başlığı sonraki sayfalarda tekrarlanır.
+    # İlk başlık split sırasında kaldırıldığı için metni her zaman ilk satırdan
+    # başlat; aksi halde parser ikinci sayfadaki PASİF başlığından devam eder.
+    if not re.match(r"^\s*PASİF\b", pasif_text, re.IGNORECASE) and "III." in pasif_text:
         pasif_text = "PASİF\n" + pasif_text
 
     muk = extract_mukellef_bilgileri(full_text)
@@ -412,17 +603,23 @@ def find_gelir_kodu(aciklama_raw: str) -> str:
         return ""
 
     temiz = re.sub(r"[^\w\s]", "", original.lower())
-    best_code, best_score = "", 0.0
+    candidates = []
     for grup, kod_tanim in GELIR_TABLOSU_HESAPLARI.items():
         for kod, tanim in kod_tanim.items():
             tanim_clean = re.sub(r"[^\w\s]", "", tanim.lower())
-            if temiz == tanim_clean or temiz in tanim_clean:
+            candidates.append((kod, tanim_clean))
+            if temiz == tanim_clean:
                 return kod
-            if abs(len(temiz) - len(tanim_clean)) > 20:
-                continue
-            score = difflib.SequenceMatcher(None, temiz, tanim_clean).ratio()
-            if score > best_score and score > 0.75:
-                best_code, best_score = kod, score
+
+    best_code, best_score = "", 0.0
+    for kod, tanim_clean in candidates:
+        if temiz in tanim_clean:
+            return kod
+        if abs(len(temiz) - len(tanim_clean)) > 20:
+            continue
+        score = difflib.SequenceMatcher(None, temiz, tanim_clean).ratio()
+        if score > best_score and score > 0.75:
+            best_code, best_score = kod, score
     return best_code
 
 def koddan_grup_bul(kod: str) -> str:
@@ -430,6 +627,44 @@ def koddan_grup_bul(kod: str) -> str:
         if kod in alt:
             return grup
     return "Diğer"
+
+
+def _canonical_gelir_account_description(code):
+    code = str(code or "").strip()
+    for accounts in GELIR_TABLOSU_HESAPLARI.values():
+        if code in accounts:
+            return accounts[code]
+    return None
+
+
+def canonicalize_gelir_rows(rows):
+    """Gelir satırlarını şablonun kullandığı ortak alana dönüştürür."""
+    normalized_rows = []
+    for source_row in rows or []:
+        row = dict(source_row)
+        code = str(row.get("kod") or row.get("Kod") or "").strip()
+        description = str(row.get("aciklama") or row.get("Açıklama") or "").strip()
+
+        row["kod"] = code
+        row["aciklama"] = description
+        if "cari_donem" not in row and "Cari Dönem" in row:
+            row["cari_donem"] = row.get("Cari Dönem")
+        if "onceki_donem" not in row and "Önceki Dönem" in row:
+            row["onceki_donem"] = row.get("Önceki Dönem")
+        if "cari_donem_enflasyonlu" not in row and "Cari Dönem (Enflasyonlu)" in row:
+            row["cari_donem_enflasyonlu"] = row.get("Cari Dönem (Enflasyonlu)")
+
+        canonical_account = _canonical_gelir_account_description(code)
+        if canonical_account:
+            row["aciklama"] = canonical_account
+        elif re.match(r"^\s*K\.\s*Dönem\s+Karı", description, re.I):
+            row["aciklama"] = (
+                "K. Dönem Karı, Vergi ve Diğer Yasal Yükümlülük "
+                "Karşılıkları (-)"
+            )
+
+        normalized_rows.append(row)
+    return normalized_rows
 
 def parse_gelir_from_pdf(pdf_path: str, text_content=None) -> dict:
     if text_content:
@@ -447,6 +682,7 @@ def parse_gelir_from_pdf(pdf_path: str, text_content=None) -> dict:
     collecting = False
     tablo = []
     has_inflation = False
+    gelir_column_count = 2
 
     # Ba\u015Fl\u0131ktan enflasyon kolonunu kontrol et
     # Baştan regex tanımları
@@ -467,6 +703,10 @@ def parse_gelir_from_pdf(pdf_path: str, text_content=None) -> dict:
             hdr_context = " ".join(lines[i:i+6]).lower()
             if "enflasyon" in hdr_context:
                 has_inflation = True
+                gelir_column_count = 3
+            elif not re.search(r"Önceki\s*Dönem", hdr_context, re.I):
+                # Geçici vergi beyannamesi eki yalnızca cari dönem sütunu içerir.
+                gelir_column_count = 1
             continue
 
         if not collecting: continue
@@ -488,7 +728,8 @@ def parse_gelir_from_pdf(pdf_path: str, text_content=None) -> dict:
         if not nums and "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" not in line:
             continue
             
-        desc, onceki, cari, cari_enf = parse_numeric_columns(line)
+        expected_columns = gelir_column_count
+        desc, onceki, cari, cari_enf = parse_numeric_columns(line, expected_columns)
         if onceki is None and cari is None and "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" not in line:
             continue
 
@@ -511,6 +752,8 @@ def parse_gelir_from_pdf(pdf_path: str, text_content=None) -> dict:
         
         if "D\u00F6nem Net Kar\u0131 veya Zarar\u0131" in line:
             break
+
+    tablo = canonicalize_gelir_rows(tablo)
 
     return {
         "tur": "gelir",
@@ -594,6 +837,7 @@ def parse_kdv_from_pdf(pdf_path, text_content=None):
         from collections import OrderedDict
         sections = OrderedDict([
             ("MATRAH DETAYI", []),
+            ("DİĞER İŞLEMLER", []),
             ("İNDİRİMLER DETAYI", []),
             ("İSTİSNALAR VE İADE", [])
         ])
@@ -605,6 +849,8 @@ def parse_kdv_from_pdf(pdf_path, text_content=None):
             # Robust Header detection (Supports both New and Old styles)
             if "MATRAH DETAYI" in u_line or "TEVKIFAT UYGULANMAYAN" in u_line or "KISMI TEVKIFAT UYGULANAN" in u_line: 
                 cur_sec = "MATRAH DETAYI"
+            elif "DIGER ISLEMLER" in u_line:
+                cur_sec = "DİĞER İŞLEMLER"
             elif any(x in u_line for x in ["INDIRIMLER DETAYI", "INDIRILECEK KDV", "ORANLARA GORE DAGILIMI", "INDIRIM TURU"]): 
                 cur_sec = "İNDİRİMLER DETAYI"
             elif any(x in u_line for x in ["ISTISNALAR", "IADE HAKKI", "TAM ISTISNA"]):
@@ -613,7 +859,7 @@ def parse_kdv_from_pdf(pdf_path, text_content=None):
             if not cur_sec: continue
 
             # Section Specific Parsing
-            if cur_sec == "MATRAH DETAYI":
+            if cur_sec in {"MATRAH DETAYI", "DİĞER İŞLEMLER"}:
                 # 1100, 616 etc.
                 m1 = re.search(r"^(\d{4})\s*[-–]\s*(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})", line)
                 if m1:
@@ -669,6 +915,21 @@ def parse_kdv_from_pdf(pdf_path, text_content=None):
                     sections[cur_sec].append({"alan": f"1100 Tevkifat Uygulanmayan İşlem (%{oran}) - Matrah", "deger": mtr})
                     sections[cur_sec].append({"alan": f"1100 Tevkifat Uygulanmayan İşlem (%{oran}) - Vergi", "deger": vrg})
                     continue
+
+                if cur_sec == "DİĞER İŞLEMLER":
+                    m_other = re.search(
+                        r"^(.*?)\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})(?:\s+.*)?$",
+                        line,
+                    )
+                    if m_other:
+                        desc, mtr, vrg = m_other.groups()
+                        previous_line = all_lines[i - 1] if i > 0 else ""
+                        if "GERCEKLESMEYEN ISLEMLER" in _stripped_canon(desc) and "ALINAN MALLARIN IADESI" in _stripped_canon(previous_line):
+                            desc = f"{previous_line} {desc}"
+                        desc = re.sub(r"\s+", " ", desc).strip(" ,-–")
+                        sections[cur_sec].append({"alan": f"504 {desc} - Matrah", "deger": mtr})
+                        sections[cur_sec].append({"alan": f"504 {desc} - Vergi", "deger": vrg})
+                        continue
 
             elif cur_sec == "İNDİRİMLER DETAYI":
                 # Oran Dağılımı: 20 10.828.454,75 2.165.690,95

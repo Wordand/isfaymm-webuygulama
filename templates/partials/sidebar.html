@@ -30,6 +30,18 @@
             <i class="bi bi-graph-up-arrow sidebar-icon"></i> Finansal Analiz ve Raporlama
         </a>
 
+        {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('reports.kdv_analizi') }}"
+                class="sidebar-link {% if request.path.startswith('/kdv-analizi') or request.path.startswith('/rapor-kdv') %}active{% endif %}">
+                <i class="bi bi-receipt sidebar-icon"></i> KDV Analizi
+            </a>
+
+            <a href="{{ url_for('reports.vergi_kontrolleri') }}"
+                class="sidebar-link {% if request.path.startswith('/vergi-kontrolleri') or request.path.startswith('/tablo-mizan/kontroller') %}active{% endif %}">
+                <i class="bi bi-shield-check sidebar-icon"></i> Vergi Kontrolleri
+            </a>
+        {% endif %}
+
         <div class="sidebar-divider my-3 opacity-25"></div>
     </nav>
 </div>

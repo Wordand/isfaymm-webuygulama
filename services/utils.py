@@ -33,7 +33,10 @@ def tlformat(value):
     if value is None or isinstance(value, Undefined):
         return "-"
     try:
-        return '{:,.2f}'.format(value).replace(",", "X").replace(".", ",").replace("X", ".")
+        numeric_value = float(value)
+        if abs(numeric_value) < 0.005:
+            numeric_value = 0.0
+        return '{:,.2f}'.format(numeric_value).replace(",", "X").replace(".", ",").replace("X", ".")
     except (ValueError, TypeError):
         return str(value)
 

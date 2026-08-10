@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+
+{% block title %}Mizan Vergi Kontrolleri{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mizan_kontroller.css') }}?v=2">
+{% endblock %}
+
+{% block content %}
+{% set warning_count = tax_checks|selectattr('status', 'equalto', 'warning')|list|length %}
+{% set info_count = tax_checks|selectattr('status', 'equalto', 'info')|list|length %}
+{% set success_count = tax_checks|selectattr('status', 'equalto', 'success')|list|length %}
+<main class="container mizan-audit-page py-4">
+    <nav class="audit-breadcrumb" aria-label="Sayfa yolu">
+        <a href="{{ url_for('data.veri_giris', vkn=vkn, donem=donem) }}">Dosya ve Veri Yönetimi</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Mizan Kontrolleri</span>
+    </nav>
+
+    <header class="audit-hero">
+        <div>
+            <div class="audit-eyebrow"><i class="bi bi-shield-check"></i> Otomatik ön kontrol</div>
+            <h1>Mizan Vergi Kontrolleri</h1>
+            <p>{{ unvan }} <span>·</span> {{ donem }}</p>
+        </div>
+        <div class="audit-result {% if summary.get('warning_count', 0) %}needs-review{% else %}is-clear{% endif %}">
+            <i class="bi {% if summary.get('warning_count', 0) %}bi-exclamation-triangle{% else %}bi-check-circle{% endif %}"></i>
+            <div>
+                <span>Genel durum</span>
+                <strong>{% if summary.get('warning_count', 0) %}{{ summary.get('warning_count', 0) }} konu incelenmeli{% else %}Temel kontroller uygun{% endif %}</strong>
+            </div>
+        </div>
+    </header>
+
+    <section class="audit-metrics" aria-label="Mizan özeti">
+        <article>
+            <span>Ana hesap</span>
+            <strong>{{ summary.get('main_account_count', 0) }}</strong>
+        </article>
+        <article>
+            <span>Aktif / Pasif farkı</span>
+            <strong>{{ (summary.get('active_total', 0) - summary.get('passive_total', 0))|abs|tlformat }} TL</strong>
+        </article>
+        <article>
+            <span>Net satışlar</span>
+            <strong>{{ summary.get('net_sales', 0)|tlformat }} TL</strong>
+        </article>
+        <article>
+            <span>Dönem sonucu</span>
+            <strong>{{ summary.get('period_profit', 0)|tlformat }} TL</strong>
+        </article>
+    </section>
+
+    <div class="audit-jumpbar" aria-label="Sayfa bölümleri">
+        <a href="#dogrulama"><i class="bi bi-check2-square"></i> Doğrulama</a>
+        <a href="#vergi-kontrolleri"><i class="bi bi-search"></i> Vergi kontrolleri</a>
+        <a href="#karsilastirma"><i class="bi bi-arrow-left-right"></i> Beyanname karşılaştırması</a>
+    </div>
+
+    <section id="dogrulama" class="audit-section">
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">Veri bütünlüğü</span>
+                <h2>Doğrulama sonuçları</h2>
+            </div>
+            <span class="section-count">{{ validation|length }} kontrol</span>
+        </div>
+        <div class="validation-list">
+            {% for item in validation %}
+            <article class="validation-row {{ item.get('status', 'info') }}">
+                <i class="bi {% if item.get('status') == 'success' %}bi-check-circle-fill{% elif item.get('status') == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+                <div>
+                    <strong>{{ item.get('title') }}</strong>
+                    <p>{{ item.get('detail') }}</p>
+                </div>
+            </article>
+            {% else %}
+            <p class="empty-note">Doğrulama sonucu bulunamadı.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="vergi-kontrolleri" class="audit-section">
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">Risk taraması</span>
+                <h2>Vergi ve dönem sonu kontrolleri</h2>
+            </div>
+            <div class="status-summary" aria-label="Kontrol durumları">
+                {% if warning_count %}<span class="warning"><i class="bi bi-exclamation-circle-fill"></i> {{ warning_count }} inceleme</span>{% endif %}
+                {% if info_count %}<span class="info"><i class="bi bi-info-circle-fill"></i> {{ info_count }} bilgi</span>{% endif %}
+                {% if success_count %}<span class="success"><i class="bi bi-check-circle-fill"></i> {{ success_count }} uygun</span>{% endif %}
+            </div>
+        </div>
+
+        {% for category, items in tax_checks|groupby('category') %}
+        <div class="control-group">
+            <h3>{{ category }} <span>{{ items|length }}</span></h3>
+            <div class="control-grid">
+                {% for item in items %}
+                <article class="control-card {{ item.get('status', 'info') }}">
+                    <div class="control-card-head">
+                        <span class="status-icon"><i class="bi {% if item.get('status') == 'success' %}bi-check-lg{% elif item.get('status') == 'warning' %}bi-exclamation-lg{% else %}bi-info-lg{% endif %}"></i></span>
+                        <div>
+                            <h4>{{ item.get('title') }}</h4>
+                            <span class="status-label">{% if item.get('status') == 'success' %}Uygun{% elif item.get('status') == 'warning' %}İnceleme gerekli{% else %}Kontrol notu{% endif %}</span>
+                        </div>
+                        {% if item.get('amount') %}<strong class="control-amount">{{ item.get('amount')|tlformat }} TL</strong>{% endif %}
+                    </div>
+                    <p class="control-detail">{{ item.get('detail') }}</p>
+                    {% if item.get('accounts') %}
+                    <div class="account-list"><span>Hesap</span> {{ item.get('accounts')|join(', ') }}</div>
+                    {% endif %}
+                    {% if item.get('action') %}
+                    <div class="control-action"><i class="bi bi-arrow-right-circle"></i><span>{{ item.get('action') }}</span></div>
+                    {% endif %}
+                    {% if item.get('basis') %}
+                    <div class="control-basis"><i class="bi bi-book"></i> {{ item.get('basis') }}</div>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <p class="empty-note">Vergi kontrolü gerektiren bir bulgu oluşmadı.</p>
+        {% endfor %}
+    </section>
+
+    <section id="karsilastirma" class="audit-section comparison-section">
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">Kaynak mutabakatı</span>
+                <h2>Beyanname - mizan karşılaştırması</h2>
+            </div>
+            {% if official_types %}
+            <div class="source-pills">
+                {% if 'bilanco' in official_types %}<span>Bilanço yüklü</span>{% endif %}
+                {% if 'gelir' in official_types %}<span>Gelir tablosu yüklü</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if comparison %}
+        <div class="comparison-table-wrap">
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>Kalem</th><th>Beyanname</th><th>Mizan</th><th>Fark</th><th>Durum</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in comparison %}
+                    <tr>
+                        <td data-label="Kalem">{{ item.get('title') }}</td>
+                        <td data-label="Beyanname">{{ item.get('official', 0)|tlformat }} TL</td>
+                        <td data-label="Mizan">{{ item.get('mizan', 0)|tlformat }} TL</td>
+                        <td data-label="Fark">{{ item.get('difference', 0)|tlformat }} TL</td>
+                        <td data-label="Durum"><span class="comparison-status {{ item.get('status') }}">{% if item.get('status') == 'warning' %}Fark var{% else %}Uyumlu{% endif %}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="comparison-empty">
+            <i class="bi bi-file-earmark-arrow-up"></i>
+            <div>
+                <strong>Bu dönem için karşılaştırılabilir beyanname tablosu bulunmuyor.</strong>
+                <p>Aynı döneme ait geçici vergi beyannamesi yüklendiğinde net satışlar ve dönem sonucu burada otomatik karşılaştırılır.</p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <aside class="audit-disclaimer">
+        <i class="bi bi-shield-exclamation"></i>
+        <p>Bu ekran mizan hesap kodu, bakiye ve açıklamalarından otomatik ön kontrol üretir. Belge içeriği, sözleşme, cari hesap hareketi ve mevzuattaki özel şartlar ayrıca değerlendirilmelidir; sonuçlar kesin vergi incelemesi veya mesleki görüş yerine geçmez.</p>
+    </aside>
+</main>
+{% endblock %}

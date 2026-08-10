@@ -710,6 +710,21 @@
     // Init button styles correctly on load
     updateButtonStyles(document.querySelector('#filterButtons button'));
 
+    const initialQuery = new URLSearchParams(window.location.search).get('q');
+    if (initialQuery) {
+        const firstDigit = initialQuery.trim().charAt(0);
+        const categoryOrder = { bilanco: 0, gelir: 1, diger: 2 };
+        const targetCategory = ['7', '8', '9'].includes(firstDigit) ? 'diger' : (firstDigit === '6' ? 'gelir' : 'bilanco');
+        const targetButton = document.querySelectorAll('#filterButtons button')[categoryOrder[targetCategory]];
+
+        currentCategory = targetCategory;
+        updateButtonStyles(targetButton);
+        updateCategoryVisibility();
+        searchInput.value = initialQuery.trim();
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
 </script>
 
 <script type="application/ld+json">

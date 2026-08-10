@@ -13,6 +13,7 @@
         --accent-blue: #3b82f6; 
         --accent-purple: #8b5cf6;
         --accent-teal: #14b8a6;
+        --accent-gold: #c88a0a;
         --border-color: #e2e8f0;
         --radius-xl: 24px;
         --radius-lg: 16px;
@@ -94,6 +95,7 @@
 
     .module-card.trend:hover { box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.2); }
     .module-card.xray:hover { box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.2); }
+    .module-card.pdf:hover { box-shadow: 0 20px 40px -10px rgba(200, 138, 10, 0.22); }
 
     .module-icon {
         width: 80px;
@@ -114,6 +116,7 @@
 
     .module-bg-blue { background: var(--gradient-blue); color: var(--accent-blue); }
     .module-bg-purple { background: var(--gradient-purple); color: var(--accent-purple); }
+    .module-bg-gold { background: #fff7e6; color: var(--accent-gold); }
 
     .btn-action {
         width: 100%;
@@ -132,6 +135,8 @@
 
     .btn-xray { background-color: var(--accent-purple); color: white; }
     .btn-xray:hover { background-color: #7c3aed; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
+    .btn-pdf { background-color: #0b315f; color: white; }
+    .btn-pdf:hover { background-color: #071f43; color: white; box-shadow: 0 8px 20px rgba(7, 31, 67, 0.25); }
 
     /* Form Elements */
     .custom-select {
@@ -169,12 +174,6 @@
         border-color: var(--accent-teal);
         background-color: #f0fdfa;
         color: #0d9488;
-    }
-    
-    .kdv-section {
-        margin-top: 4rem;
-        padding-top: 3rem;
-        border-top: 1px dashed var(--border-color);
     }
     
 </style>
@@ -253,12 +252,12 @@
             </div>
         </div>
 
-        <!-- Alt Kısım: İki Ana Seçenek (Trend vs Röntgen) -->
+        <!-- Alt Kısım: Analiz ve rapor seçenekleri -->
         {% if secili_vkn %}
         <div class="row g-4 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
             
             <!-- Seçenek 1: Trend Analizi -->
-            <div class="col-md-6">
+            <div class="col-lg-4">
                 <div class="module-card trend" onclick='submitTo("{{ url_for("reports.raporlama_grafik") }}")'>
                     <div class="module-icon module-bg-blue">
                         <i class="bi bi-graph-up"></i>
@@ -275,7 +274,7 @@
             </div>
 
             <!-- Seçenek 2: Finansal Röntgen -->
-            <div class="col-md-6">
+            <div class="col-lg-4">
                 <div class="module-card xray" onclick='submitTo("{{ url_for("reports.finansal_analiz") }}")'>
                     <div class="module-icon module-bg-purple">
                         <i class="bi bi-activity"></i>
@@ -290,23 +289,22 @@
                 </div>
             </div>
 
-        </div>
-        
-        <!-- KDV Alanı (Opsiyonel) -->
-        <div class="kdv-section text-center animate__animated animate__fadeIn" style="animation-delay: 0.2s;">
-            <p class="text-muted fw-bold mb-3 small text-uppercase">Alternatif Raporlar</p>
-            <div class="d-inline-flex gap-3">
-                <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary" 
-                        onclick='submitKDV("{{ url_for("reports.rapor_kdv") }}")'>
-                    <i class="bi bi-table me-2 text-warning"></i>KDV Analiz Raporu
-                </button>
-                <button type="button" class="btn btn-light border shadow-sm rounded-pill px-4 py-2 text-secondary"
-                        onclick='submitKDV("{{ url_for("reports.rapor_kdv_excel") }}")'>
-                    <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>KDV Özeti (Excel)
-                </button>
+            <!-- Seçenek 3: PDF Finansal Rapor -->
+            <div class="col-lg-4">
+                <div class="module-card pdf" onclick='submitTo("{{ url_for("reports.finansal_oran_raporu") }}")'>
+                    <div class="module-icon module-bg-gold">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <h3 class="module-title">PDF Finansal Rapor</h3>
+                    <p class="module-desc">
+                        Seçilen dönemleri yönetici özeti, risk görünümü ve oran analizleriyle kurumsal PDF rapora dönüştürün.
+                    </p>
+                    <button type="button" class="btn btn-action btn-pdf">
+                        PDF Raporu İndir <i class="bi bi-download ms-2"></i>
+                    </button>
+                </div>
             </div>
-            <!-- KDV sayfası için input (kdv_periods olarak gidiyor genellikle) -->
-            <input type="hidden" name="kdv_periods" id="kdvPeriodsInput">
+
         </div>
 
         {% endif %}
@@ -349,18 +347,6 @@
         
         // Finansal Röntgen 'yillar' (list) bekler, checkboxlar zaten 'yillar' adıyla submit edilir, bu OK.
 
-        form.action = url;
-        form.submit();
-    }
-    
-    function submitKDV(url) {
-        const years = validateSelection();
-        if(!years) return;
-        
-        // KDV rotası 'kdv_periods' bekler
-        document.getElementById('kdvPeriodsInput').value = years.join(',');
-        
-        const form = document.getElementById('mainAnalysisForm');
         form.action = url;
         form.submit();
     }

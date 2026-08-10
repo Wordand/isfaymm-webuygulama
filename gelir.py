@@ -12,7 +12,7 @@ GELIR_TABLOSU_HESAPLARI = {
     "C. NET SATIŞLAR": {},
     "D. SATIŞLARIN MALİYETİ (-)": {
         "620": "Satılan Mamuller Maliyeti (-)",
-        "621": "Satılan Ticari Mal Maliyeti (-)",
+        "621": "Satılan Ticari Mallar Maliyeti (-)",
         "622": "Satılan Hizmet Maliyeti (-)",
         "623": "Diğer Satışların Maliyeti (-)",
     },
@@ -44,7 +44,7 @@ GELIR_TABLOSU_HESAPLARI = {
         "658": "Enflasyon Düzeltmesi Zararları (-)",
         "659": "Diğer Olağan Gider ve Zararlar (-)",
     },
-    "G. FİNANSMAN GİDERLERİ (-)": {
+    "H. FİNANSMAN GİDERLERİ (-)": {
         "660": "Kısa Vadeli Borçlanma Giderleri (-)",
         "661": "Uzun Vadeli Borçlanma Giderleri (-)",
     },
@@ -53,12 +53,12 @@ GELIR_TABLOSU_HESAPLARI = {
         "671": "Önceki Dönem Gelir ve Karları",
         "679": "Diğer Olağandışı Gelir ve Karlar",
     },
-    "J. OLAĞANDIŞI GİDER VE ZARARLAR": {
+    "J. OLAĞANDIŞI GİDER VE ZARARLAR (-)": {
         "680": "Çalışmayan Kısım Gider ve Zararları (-)",
         "681": "Önceki Dönem Gider ve Zararları (-)",
         "689": "Diğer Olağandışı Gider ve Zararlar (-)",
     },
     "DÖNEM KARI VEYA ZARARI": {},
-    "K. DÖNEM KARI, VERGİ VE DİĞER YASAL YÜKÜMLÜLÜK KARŞILIĞI": {},
+    "K. DÖNEM KARI, VERGİ VE DİĞER YASAL YÜKÜMLÜLÜK KARŞILIKLARI (-)": {},
     "DÖNEM NET KARI VEYA ZARARI": {},
 }

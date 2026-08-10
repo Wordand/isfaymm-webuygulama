@@ -1,0 +1,369 @@
+{% extends "layout.html" %}
+
+{% block title %}Vergi Kontrolleri{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vergi_kontrolleri.css') }}?v=5">
+{% endblock %}
+
+{% block content %}
+<main class="container tax-control-page py-4">
+    <nav class="tax-breadcrumb" aria-label="Sayfa yolu">
+        <a href="{{ url_for('main.home') }}">Ana Sayfa</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Vergi Kontrolleri</span>
+    </nav>
+
+    <header class="tax-control-hero">
+        <div class="tax-control-title">
+            <span class="tax-hero-icon"><i class="bi bi-shield-check"></i></span>
+            <div>
+                <h1>Vergi Kontrolleri</h1>
+            </div>
+        </div>
+        {% if mukellefler %}
+        <form method="get" class="taxpayer-picker">
+            <input type="hidden" name="view" id="taxControlView" value="">
+            <label for="vkn">Mükellef</label>
+            <div class="picker-row">
+                <select id="vkn" name="vkn" onchange="this.form.submit()">
+                    {% for item in mukellefler %}
+                    <option value="{{ item.vergi_kimlik_no }}" {% if item.vergi_kimlik_no|string == selected_vkn|string %}selected{% endif %}>
+                        {{ item.unvan }} · {{ item.vergi_kimlik_no }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" title="Mükellefi getir" aria-label="Mükellefi getir"><i class="bi bi-arrow-right"></i></button>
+            </div>
+        </form>
+        {% endif %}
+    </header>
+
+    <nav class="tax-tabbar" role="tablist" aria-label="Vergi kontrol görünümleri">
+        <button type="button" class="tax-tab active" id="tab-bulgular" role="tab" aria-selected="true" aria-controls="bulgular" data-tab="bulgular">
+            <span class="tax-tab-icon"><i class="bi bi-clipboard2-pulse"></i></span>
+            <span class="tax-tab-copy"><strong>Mükellef Bulguları</strong><small>Mizan ve beyanname kontrolleri</small></span>
+            <span class="tax-tab-count">{{ findings|length if selected_mukellef else 0 }}</span>
+        </button>
+        <button type="button" class="tax-tab" id="tab-risk-rehberi" role="tab" aria-selected="false" aria-controls="risk-rehberi" data-tab="risk-rehberi">
+            <span class="tax-tab-icon"><i class="bi bi-journal-check"></i></span>
+            <span class="tax-tab-copy"><strong>Risk Rehberi</strong></span>
+            <span class="tax-tab-count">{{ risk_guide|length }}</span>
+        </button>
+    </nav>
+
+    <div class="tax-tab-panels">
+    <section id="bulgular" class="tax-tab-panel active" role="tabpanel" aria-labelledby="tab-bulgular">
+
+    {% if selected_mukellef %}
+    <section class="data-coverage" aria-label="Yüklenen veri dönemleri">
+        <div class="coverage-grid">
+            {% for item in coverage %}
+            <button type="button"
+                    class="coverage-item {% if item.count %}available{% else %}missing{% endif %}"
+                    data-coverage-key="{{ item.key }}"
+                    aria-expanded="false"
+                    aria-controls="coverage-periods-{{ item.key }}"
+                    {% if not item.count %}disabled{% endif %}>
+                <span class="coverage-icon"><i class="bi {{ item.icon }}"></i></span>
+                <div class="coverage-content">
+                    <span class="coverage-label">{{ item.label }}</span>
+                    <strong class="coverage-value">
+                        {% if item.count %}{{ item.count }} <small>dönem</small>{% else %}<small>Yüklü değil</small>{% endif %}
+                    </strong>
+                </div>
+                <span class="coverage-state" title="{% if item.count %}Dönemleri göster{% else %}Veri bulunmuyor{% endif %}">
+                    <i class="bi {% if item.count %}bi-chevron-down{% else %}bi-dash-circle{% endif %}"></i>
+                </span>
+            </button>
+            {% endfor %}
+        </div>
+        <div class="coverage-period-panels">
+            {% for item in coverage if item.count %}
+            <div class="coverage-period-panel" id="coverage-periods-{{ item.key }}" data-coverage-panel="{{ item.key }}" hidden>
+                <div class="coverage-period-heading">
+                    <span><i class="bi {{ item.icon }}"></i>{{ item.label }} dönemleri</span>
+                    <strong>{{ item.count }} dönem</strong>
+                </div>
+                <div class="coverage-period-list">
+                    {% for period in item.periods|reverse %}
+                    <span class="coverage-period-chip"><i class="bi bi-calendar3"></i>{{ period }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="findings-section">
+        <div class="section-heading">
+            <div>
+                <h2>Kontrol bulguları</h2>
+            </div>
+            <div class="finding-counts" aria-label="Bulgu özeti">
+                <button type="button" class="finding-filter active" data-status="all">Tümü <strong>{{ findings|length }}</strong></button>
+                <button type="button" class="finding-filter warning" data-status="warning">İncelenmeli <strong>{{ finding_counts.warning }}</strong></button>
+                <button type="button" class="finding-filter info" data-status="info">Bilgi <strong>{{ finding_counts.info }}</strong></button>
+                <button type="button" class="finding-filter success" data-status="success">Uyumlu <strong>{{ finding_counts.success }}</strong></button>
+            </div>
+        </div>
+
+        {% if findings %}
+        <div class="finding-list" id="findingList">
+            {% for item in findings %}
+            <article class="finding-row {{ item.get('status', 'info') }}" data-status="{{ item.get('status', 'info') }}">
+                <span class="finding-status-icon">
+                    <i class="bi {% if item.get('status') == 'warning' %}bi-exclamation-triangle-fill{% elif item.get('status') == 'success' %}bi-check-circle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+                </span>
+                <div class="finding-main">
+                    <div class="finding-head">
+                        <div>
+                            <div class="finding-labels">
+                                <span class="finding-state">{% if item.get('status') == 'warning' %}İncelenmeli{% elif item.get('status') == 'success' %}Uyumlu{% else %}Bilgi{% endif %}</span>
+                                <span class="finding-category">{{ item.get('category') }}</span>
+                            </div>
+                            <h3>{{ item.get('title') }}</h3>
+                        </div>
+                        {% if item.get('amount') %}
+                        <div class="finding-amount-block">
+                            <span>{{ item.get('amount_label', 'Kontrole konu tutar') }}</span>
+                            <strong class="finding-amount">{{ item.get('amount')|tlformat }} TL</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="finding-detection">
+                        <strong>Tespit</strong>
+                        <p>{{ item.get('detail') }}</p>
+                    </div>
+
+                    {% if item.get('breakdown') %}
+                    <div class="finding-breakdown" aria-label="Fark ayrıntıları">
+                        <div class="finding-breakdown-head">
+                            <span>Dönem</span>
+                            <span>Farkın türü</span>
+                            <span>Fark tutarı</span>
+                        </div>
+                        {% for difference in item.get('breakdown') %}
+                        <div class="finding-breakdown-row">
+                            <strong>{{ difference.get('period') }}</strong>
+                            <span>{{ difference.get('label') }}</span>
+                            <strong class="difference-amount">{{ difference.get('amount')|tlformat }} TL</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="finding-meta">
+                        <span><i class="bi bi-database"></i> {{ item.get('source', 'Yüklenen veri') }}</span>
+                        {% if item.get('period') %}<span><i class="bi bi-calendar3"></i> {{ item.get('period') }}</span>{% endif %}
+                        <span class="classification">{{ item.get('classification', 'Kontrol notu') }}</span>
+                        {% if item.get('accounts') %}<span><i class="bi bi-list-ol"></i> Hesap {{ item.get('accounts')|join(', ') }}</span>{% endif %}
+                    </div>
+                    {% if item.get('action') %}<div class="finding-action"><i class="bi bi-arrow-right-circle-fill"></i><div><strong>Ne yapılmalı?</strong><span>{{ item.get('action') }}</span></div></div>{% endif %}
+                    {% if item.get('basis') %}<div class="finding-basis"><i class="bi bi-book"></i><div><strong>Dayanak</strong><span>{{ item.get('basis') }}</span></div></div>{% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        <p class="filter-empty" id="findingFilterEmpty" hidden>Bu durumda bulgu bulunmuyor.</p>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-file-earmark-arrow-up"></i>
+            <div>
+                <strong>Bu mükellef için kontrol üretilebilecek veri bulunmuyor.</strong>
+                <p>Mizan veya mali tablolar yüklendiğinde sonuçlar burada oluşur.</p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    {% else %}
+    <div class="empty-state no-taxpayer">
+        <i class="bi bi-person-plus"></i>
+        <div><strong>Henüz seçilebilecek mükellef bulunmuyor.</strong><p>Mizan veya beyanname yüklendiğinde mükellef bulguları burada gösterilir.</p></div>
+    </div>
+    {% endif %}
+    </section>
+
+    <section id="risk-rehberi" class="tax-tab-panel" role="tabpanel" aria-labelledby="tab-risk-rehberi" hidden>
+    <section class="risk-guide-section">
+        <div class="section-heading guide-heading">
+            <div>
+                <h2>Vergi Riskleri Rehberi</h2>
+            </div>
+            <span class="guide-version">Güncelleme {{ risk_guide_version }}</span>
+        </div>
+
+        <div class="guide-toolbar">
+            <label class="guide-search" for="riskGuideSearch">
+                <i class="bi bi-search"></i>
+                <input id="riskGuideSearch" type="search" placeholder="Hesap kodu veya risk ara" autocomplete="off">
+            </label>
+            <select id="riskGuideCategory" aria-label="Risk kategorisi">
+                <option value="all">Tüm kategoriler</option>
+                {% for category, items in risk_guide|groupby('category') %}<option value="{{ category|lower }}">{{ category }}</option>{% endfor %}
+            </select>
+        </div>
+
+        <nav class="guide-resources" aria-label="Vergi kontrol yardımcı kaynakları">
+            <a href="{{ url_for('calculators.tdhp') }}">
+                <i class="bi bi-journal-text"></i>
+                <span><strong>Tekdüzen Hesap Planı</strong><small>Hesap kodu ve açıklama ara</small></span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            <a href="{{ url_for('main.ceza') }}">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span><strong>Vergi Cezaları 2026</strong><small>Olası yaptırımları ayrıca incele</small></span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </nav>
+
+        <div class="guide-groups" id="riskGuideList">
+            {% for category, items in risk_guide|groupby('category') %}
+            <section class="guide-group" data-category="{{ category|lower }}">
+                <h3>{{ category }} <span>{{ items|length }}</span></h3>
+                <div class="guide-list">
+                    {% for item in items %}
+                    <details class="guide-item" data-search="{{ (item.title ~ ' ' ~ item.accounts ~ ' ' ~ item.description ~ ' ' ~ item.basis)|lower }}">
+                        <summary>
+                            <span class="guide-code">{{ item.accounts }}</span>
+                            <span class="guide-summary-text"><strong>{{ item.title }}</strong><small>{{ item.level }}</small></span>
+                            <i class="bi bi-chevron-down"></i>
+                        </summary>
+                        <div class="guide-detail">
+                            <p>{{ item.description }}</p>
+                            <div class="guide-action"><strong>Kontrol adımı</strong><span>{{ item.action }}</span></div>
+                            {% if item.tdhp_query %}
+                            <div class="guide-links">
+                                <a href="{{ url_for('calculators.tdhp', q=item.tdhp_query) }}"><i class="bi bi-search"></i> {{ item.tdhp_query }} hesabını planda aç</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </details>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+        <p class="filter-empty" id="guideFilterEmpty" hidden>Aramanızla eşleşen risk başlığı bulunamadı.</p>
+    </section>
+    </section>
+    </div>
+
+    <aside class="tax-control-disclaimer">
+        <i class="bi bi-shield-exclamation"></i>
+        <p>Otomatik sonuçlar ön değerlendirmedir. “Risk sinyali” vergi hatası veya ihlal tespiti değildir; hesap hareketi, belge, sözleşme, faaliyet türü ve güncel mevzuatla birlikte değerlendirilmelidir.</p>
+    </aside>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = Array.from(document.querySelectorAll('.tax-tab'));
+    const panels = Array.from(document.querySelectorAll('.tax-tab-panel'));
+
+    function activateTab(tabName, updateUrl) {
+        const selectedTab = tabs.find(function (tab) { return tab.dataset.tab === tabName; }) || tabs[0];
+        tabs.forEach(function (tab) {
+            const active = tab === selectedTab;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            tab.setAttribute('tabindex', active ? '0' : '-1');
+        });
+        panels.forEach(function (panel) {
+            const active = panel.id === selectedTab.dataset.tab;
+            panel.hidden = !active;
+            panel.classList.toggle('active', active);
+        });
+        const viewInput = document.getElementById('taxControlView');
+        if (viewInput) viewInput.value = selectedTab.dataset.tab;
+        if (updateUrl) {
+            history.replaceState(null, '', window.location.pathname + window.location.search + '#' + selectedTab.dataset.tab);
+        }
+    }
+
+    tabs.forEach(function (tab, index) {
+        tab.addEventListener('click', function () { activateTab(tab.dataset.tab, true); });
+        tab.addEventListener('keydown', function (event) {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            const direction = event.key === 'ArrowRight' ? 1 : -1;
+            const nextTab = tabs[(index + direction + tabs.length) % tabs.length];
+            activateTab(nextTab.dataset.tab, true);
+            nextTab.focus();
+        });
+    });
+
+    const initialTab = window.location.hash.replace('#', '') || new URLSearchParams(window.location.search).get('view');
+    activateTab(['bulgular', 'risk-rehberi'].includes(initialTab) ? initialTab : 'bulgular', false);
+
+    const coverageButtons = Array.from(document.querySelectorAll('.coverage-item[data-coverage-key]'));
+    const coveragePanels = Array.from(document.querySelectorAll('[data-coverage-panel]'));
+
+    coverageButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const key = button.dataset.coverageKey;
+            const willOpen = button.getAttribute('aria-expanded') !== 'true';
+
+            coverageButtons.forEach(function (item) {
+                item.classList.remove('active');
+                item.setAttribute('aria-expanded', 'false');
+            });
+            coveragePanels.forEach(function (panel) { panel.hidden = true; });
+
+            if (willOpen) {
+                const target = document.querySelector('[data-coverage-panel="' + key + '"]');
+                button.classList.add('active');
+                button.setAttribute('aria-expanded', 'true');
+                if (target) target.hidden = false;
+            }
+        });
+    });
+
+    const findingButtons = Array.from(document.querySelectorAll('.finding-filter'));
+    const findingRows = Array.from(document.querySelectorAll('.finding-row'));
+    const findingEmpty = document.getElementById('findingFilterEmpty');
+
+    findingButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const status = button.dataset.status;
+            findingButtons.forEach(function (item) { item.classList.toggle('active', item === button); });
+            let visible = 0;
+            findingRows.forEach(function (row) {
+                const show = status === 'all' || row.dataset.status === status;
+                row.hidden = !show;
+                if (show) visible += 1;
+            });
+            if (findingEmpty) findingEmpty.hidden = visible !== 0;
+        });
+    });
+
+    const search = document.getElementById('riskGuideSearch');
+    const category = document.getElementById('riskGuideCategory');
+    const groups = Array.from(document.querySelectorAll('.guide-group'));
+    const guideEmpty = document.getElementById('guideFilterEmpty');
+
+    function filterGuide() {
+        const query = (search.value || '').trim().toLocaleLowerCase('tr-TR');
+        const selected = category.value;
+        let totalVisible = 0;
+        groups.forEach(function (group) {
+            const categoryMatch = selected === 'all' || group.dataset.category === selected;
+            let groupVisible = 0;
+            group.querySelectorAll('.guide-item').forEach(function (item) {
+                const matches = categoryMatch && (!query || item.dataset.search.toLocaleLowerCase('tr-TR').includes(query));
+                item.hidden = !matches;
+                if (matches) groupVisible += 1;
+            });
+            group.hidden = groupVisible === 0;
+            totalVisible += groupVisible;
+        });
+        guideEmpty.hidden = totalVisible !== 0;
+    }
+
+    if (search && category) {
+        search.addEventListener('input', filterGuide);
+        category.addEventListener('change', filterGuide);
+    }
+});
+</script>
+{% endblock %}

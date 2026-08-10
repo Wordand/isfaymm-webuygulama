@@ -196,10 +196,10 @@
                             <tr class="total-row">
                                 <td></td>
                                 <td>AKTİF TOPLAMI</td>
-                                <td class="text-end active-side text-primary">{{ toplamlar.AKTİF.get(secilen_donem, 0) | tlformat }}</td>
+                                <td class="text-end active-side text-primary">{{ toplamlar.get("AKTİF", {}).get(secilen_donem, 0) | tlformat }}</td>
                                 <td style="padding-left: 1.5rem;"></td>
                                 <td>PASİF TOPLAMI</td>
-                                <td class="text-end text-success">{{ toplamlar.PASİF.get(secilen_donem, 0) | tlformat }}</td>
+                                <td class="text-end text-success">{{ toplamlar.get("PASİF", {}).get(secilen_donem, 0) | tlformat }}</td>
                             </tr>
                         </tbody>
                     </table>

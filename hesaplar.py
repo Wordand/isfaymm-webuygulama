@@ -125,7 +125,7 @@ BILANCO_HESAPLARI = {
                 "278": "4. Birikmiş Tükenme Payları (-)",
                 "279": "5. Verilen Avanslar",
             },
-            "G. Gelecek Aylara Ait Giderler ve Gelir Tahakkukları": {
+            "G. Gelecek Yıllara Ait Giderler ve Gelir Tahakkukları": {
                 "280": "1. Gelecek Yıllara Ait Giderler",
                 "281": "2. Gelir Tahakkukları",
             },
@@ -181,12 +181,12 @@ BILANCO_HESAPLARI = {
             "F. Ödenecek Vergi ve Diğer Yükümlülükler": {
                 "360": "1. Ödenecek Vergi ve Fonlar",
                 "361": "2. Ödenecek Sosyal Güvenlik Kesintileri",
-                "368": "3. Vadesi Geçmiş Ertelenmiş veya Taksitlendirilmiş Vergi ve Diğer Yükümlülükler",
+                "368": "3. Vadesi Geçmiş, Ertelenmiş veya Taksitlendirilmiş Vergi ve Diğer Yükümlülükler",
                 "369": "4. Ödenecek Diğer Yükümlülükler",
             },
             "G. Borç ve Gider Karşılıkları": {
                 "370": "1. Dönem Karı Vergi ve Diğer Yasal Yükümlülük Karşılıkları",
-                "371": "2. Dönem Karının Peşin Ödenen Vergi ve Yükümlülükleri (-)",
+                "371": "2. Dönem Karının Peşin Ödenen Vergi ve Diğer Yükümlülükleri (-)",
                 "372": "3. Kıdem Tazminatı Karşılığı",
                 "373": "4. Maliyet Giderleri Karşılığı",
                 "379": "5. Diğer Borç ve Gider Karşılıkları",
@@ -240,13 +240,13 @@ BILANCO_HESAPLARI = {
                 "480": "1. Gelecek Yıllara Ait Gelirler",
                 "481": "2. Gider Tahakkukları",
             },
-            "G. Diğer Uzun Vadeli YAbancı Kaynaklar": {
+            "G. Diğer Uzun Vadeli Yabancı Kaynaklar": {
                 "492": "1. Gelecek Yıllara Ertelenen veya Terkin Edilen KDV",
                 "493": "2. Tesise Katılma Payları",
                 "499": "3. Diğer Çeşitli Uzun Vadeli Yabancı Kaynaklar Toplamı",
             },
         },
-        "V. Özkaynaklar": {
+        "V. Öz Kaynaklar": {
             "A. Ödenmiş Sermaye": {
                 "500": "1. Sermaye",
                 "501": "2. Ödenmemiş Sermaye (-)",
@@ -272,7 +272,7 @@ BILANCO_HESAPLARI = {
             "D. Geçmiş Yıl Karları": {
                 "570": "1. Geçmiş Yıl Karları",
             },
-            "E. Geçmiş Yıllar Zararları": {
+            "E. Geçmiş Yıllar Zararları (-)": {
                 "580": "1. Geçmiş Yıllar Zararları (-)",
             },
             "F. Dönem Net Karı (zararı)": {
