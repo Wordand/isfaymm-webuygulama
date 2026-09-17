@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi | 72 Ay, %29 Tecil Oranı | İSFA YMM{% endblock %}
-{% block description %}6183 sayılı Kanun md.48 ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında 2026 vergi borcu tecil ve taksitlendirme şartları: son başvuru, taksit sayısı, teminat ve kapsam dışı borçlar.{% endblock %}
+{% block title %}2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi | Mevcut Başvurular | İSFA YMM{% endblock %}
+{% block description %}Seri:B Sıra No:20 kapsamında başvuru süresi 31.08.2026'da sona erdi. Mevcut başvurular için tecil oranı, taksit koşulları, teminat ve ödeme planı rehberi.{% endblock %}
 {% block keywords %}vergi borcu tecil 2026, vergi borcu taksitlendirme 2026, 6183 48 tecil, 72 ay taksitlendirme, tecil oranı 2026, tahsilat genel tebliği seri b sıra no 20, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/mevzuat/vergi-borcu-tecil-taksitlendirme-2026{% endblock %}
 {% block og_title %}2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi{% endblock %}
-{% block og_desc %}31 Ağustos 2026'ya kadar başvuru, yıllık %29 tecil oranı, 36/48/72 ay ve KDV-BSMV için 12 taksit koşulları.{% endblock %}
+{% block og_desc %}Başvuru süresi 31.08.2026'da sona eren özel tecil düzenlemesinin kapsamı ve mevcut başvuruların ödeme koşulları.{% endblock %}
 
 {% block content %}
 <style>
@@ -99,16 +99,19 @@
     </nav>
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
-        <span class="tecil-pill mb-3"><i class="bi bi-calendar-check"></i> Son başvuru: 31.08.2026</span>
+        <span class="tecil-pill mb-3"><i class="bi bi-calendar-x" aria-hidden="true"></i> Başvuru süresi sona erdi</span>
         <h1 class="display-6 fw-bold mb-3">2026 Vergi Borcu Tecil ve Taksitlendirme Rehberi</h1>
         <p class="lead mb-0 text-white text-opacity-90">
-          6183 sayılı Kanunun 48 inci maddesi ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında,
-          vergi dairesine olan borçlar için daha düşük tecil oranıyla taksitlendirme imkanı getirildi.
+          Seri:B Sıra No:20 kapsamında süresinde yapılan başvuruların taksit ve ödeme koşulları.
         </p>
+        <div class="tecil-warning p-3 mt-3 text-dark">
+          <strong>Özel düzenlemenin son başvuru tarihi 31.08.2026 idi.</strong>
+          <div class="small mt-1">Bu başvuru süresi sona ermiştir. Buradaki %29 oran ve 72 taksit koşulları, yeni başvurular için genel ve otomatik bir hak değildir.</div>
+        </div>
       </div>
       <div class="col-lg-4">
         <div class="tecil-card p-4 text-dark">
-          <div class="small text-muted fw-bold text-uppercase mb-2">Kısa özet</div>
+          <div class="small text-muted fw-bold mb-2">Seri:B Sıra No:20 kapsamındaki koşullar</div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>Oran</span><strong>Yıllık %29</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>Azami süre</span><strong>72 taksit</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>İlk taksit</span><strong>Eylül 2026</strong></div>
@@ -121,7 +124,7 @@
 
 <main class="container py-5 legal-guide-content">
   <section class="row g-3 mb-5" aria-label="Önemli bilgiler">
-    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Başvuru tarihi</span><strong>31.08.2026</strong><small>Bu tarih dahil.</small></div></div>
+    <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Son başvuru tarihi</span><strong>31.08.2026</strong><small>Başvuru süresi sona erdi.</small></div></div>
     <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Kapsam tarihi</span><strong>05.06.2026</strong><small>Bu tarih dahil vadesi gelmiş borçlar.</small></div></div>
     <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Tecil oranı</span><strong>%29</strong><small>Yıllık oran.</small></div></div>
     <div class="col-md-3"><div class="tecil-fact h-100"><span class="small text-muted">Taksit</span><strong>12-72</strong><small>Borç türü ve duruma göre.</small></div></div>
@@ -136,7 +139,7 @@
           vadesi geldiği halde Tebliğin yayım tarihine kadar ödenmemiş amme alacakları kapsama girer.
         </p>
         <ul class="tecil-check">
-          <li>Başvuru 31 Ağustos 2026 tarihine kadar yapılmalıdır.</li>
+          <li>Başvurunun 31 Ağustos 2026 tarihi dahil süresinde yapılmış olması gerekir.</li>
           <li>Birden fazla vergi dairesine borç varsa her vergi dairesi için ayrı başvuru gerekir.</li>
           <li>Borçlunun ilgili vergi dairesindeki tüm borçları için tecil talep etmesi gerekir.</li>
         </ul>
@@ -148,7 +151,7 @@
             Özel tüketim vergisi ile 2026 yılına ait gelir veya kurumlar vergisine mahsup edilecek geçici vergi,
             bunlara bağlı vergi ziyaı cezası, gecikme faizi, gecikme zammı ve ilgili damga vergileri bu özel düzenleme kapsamında değildir.
           </p>
-          <p class="small text-muted mb-0">Bu ayrım, başvuru öncesinde borç listesinin doğru okunması için kritik.</p>
+          <p class="small text-muted mb-0">Bu ayrım, mevcut başvurunun borç kapsamı değerlendirilirken dikkate alınmalıdır.</p>
         </div>
       </div>
     </div>
@@ -243,7 +246,7 @@
       </div>
       <div class="col-lg-6">
         <div class="tecil-card p-4 h-100">
-          <h2 class="h4 mb-3">Başvuru nereden yapılır?</h2>
+          <h2 class="h4 mb-3">Başvurular hangi kanallardan alındı?</h2>
           <ul class="tecil-check mb-0">
             <li>Gelir İdaresi Başkanlığı internet adresi</li>
             <li>Dijital Vergi Dairesi</li>
@@ -295,7 +298,7 @@
           <p class="text-muted mb-0">
             Tebliğin yayımı tarihinde şartlarına uygun devam eden tecillerde, yayım tarihinden sonraki
             taksitler için yıllık %29 oranı uygulanır. Daha uzun süre imkanından yararlanmak isteyenlerin
-            31 Ağustos 2026'ya kadar ayrıca başvurması gerekir.
+            31 Ağustos 2026'ya kadar ayrıca başvurmuş olması gerekir.
           </p>
         </div>
       </div>
@@ -304,7 +307,7 @@
           <h2 class="h4 mb-3">Devam eden başvuru veya yapılandırma varsa?</h2>
           <p class="text-muted mb-0">
             Tebliğ yayımı tarihinde değerlendirme aşamasında olan tecil talepleri için bu özel imkandan
-            yararlanılmak isteniyorsa yine 31 Ağustos 2026'ya kadar başvuru gerekir. Özel kanunlarla
+            yararlanmak için yine 31 Ağustos 2026'ya kadar başvuru yapılmış olması gerekir. Özel kanunlarla
             yapılandırılmış ve ihlal edilmemiş dosyaların ödenmemiş taksitleri ise bu Tebliğ kapsamında
             yeniden tecil edilmez.
           </p>
@@ -316,10 +319,9 @@
   <section class="tecil-cta p-4 p-lg-5">
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
-        <h2 class="h3 fw-bold mb-2">Tecil oranı ve taksit planını hesaplayın</h2>
+        <h2 class="h3 fw-bold mb-2">Mevcut başvurunuzun ödeme planını hesaplayın</h2>
         <p class="mb-0 text-white text-opacity-75">
-          Tecil başvurusunda toplam borç tutarı, vade ve başvuru tarihine kadar işleyen fer'i alacaklarla birlikte değerlendirilir.
-          Tecil oranı aracıyla tahmini taksit tutarını, tecil yükünü ve toplam ödeme planını hızlıca görebilirsiniz.
+          Süresinde yapılan başvurunuzdaki toplam borç, başvuru tarihi ve tecil kararındaki koşullara göre tahmini taksit ve toplam ödeme planı.
         </p>
       </div>
       <div class="col-lg-4 text-lg-end">
@@ -345,7 +347,7 @@
       "name": "2026 vergi borcu tecil başvurusu için son tarih nedir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında başvuru için son tarih 31 Ağustos 2026'dır."
+        "text": "Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında son başvuru tarihi 31 Ağustos 2026 idi. Bu özel düzenlemenin başvuru süresi sona ermiştir. Rehber, süresinde yapılan mevcut başvuruların ödeme koşullarını açıklar."
       }
     },
     {
@@ -361,7 +363,7 @@
       "name": "Vergi borcu en fazla kaç taksit yapılır?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Borç türü, hukuki statü ve çok zor durum haline göre 12, 36, 48 veya 72 taksit uygulanabilir. KDV ve BSMV borçlarında üst sınır 12 taksittir."
+        "text": "Seri:B Sıra No:20 kapsamında süresinde yapılan başvurularda borç türü, hukuki statü ve çok zor durum haline göre 12, 36, 48 veya 72 taksit uygulanabilir. KDV ve BSMV borçlarında üst sınır 12 taksittir. Mevcut tecil kararı esas alınmalıdır; bu koşullar yeni başvurular için otomatik bir hak değildir."
       }
     },
     {

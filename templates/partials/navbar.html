@@ -229,8 +229,8 @@
                                 <a class="dropdown-item-mevzuat-card" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">
                                     <div class="dimc-icon"><i class="bi bi-calendar2-check"></i></div>
                                     <div class="dimc-body">
-                                        <div class="dimc-title">2026 Vergi Borcu Tecil <span class="badge-new">YENİ</span></div>
-                                        <div class="dimc-desc">Başvuru şartları ve taksitlendirme detayları</div>
+                                        <div class="dimc-title">2026 Vergi Borcu Tecil</div>
+                                        <div class="dimc-desc">Mevcut başvuruların taksit ve ödeme koşulları</div>
                                     </div>
                                 </a>
 
@@ -606,6 +606,17 @@
     box-shadow: 0 20px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08);
     animation: dropFade 0.2s ease;
     background: white;
+}
+
+/* Uzun Dijital Çözümler listesi ekran dışına taşarsa sayfa yerine panel kayar. */
+@media (min-width: 992px) {
+    .dropdown-menu-modern {
+        max-height: calc(100vh - 92px);
+        max-height: calc(100dvh - 92px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+    }
 }
 
 /* ═══════════════════════════════════════
@@ -1076,6 +1087,31 @@
         animation: none;
     }
 
+    #mainNavbar .dropdown-menu.show {
+        display: block;
+    }
+
+    #mainNavbar .dropdown-submenu-modern:not(.mobile-submenu-open) > .submenu-modern-content {
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    #mainNavbar .dropdown-submenu-modern.mobile-submenu-open > .submenu-modern-content {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+
+    #mainNavbar .dropdown-submenu-modern > .dropdown-item-mevzuat-card > .bi-chevron-left {
+        transition: transform .2s ease;
+    }
+
+    #mainNavbar .dropdown-submenu-modern.mobile-submenu-open > .dropdown-item-mevzuat-card > .bi-chevron-left {
+        transform: rotate(-90deg);
+    }
+
     #mainNavbar .dropdown-item-modern,
     #mainNavbar .dropdown-item-mevzuat-card {
         min-height: 48px;
@@ -1088,3 +1124,121 @@
     }
 }
 </style>
+
+<script>
+(function () {
+    const MOBILE_BREAKPOINT = 992;
+
+    function initNavbarDropdowns() {
+        const navbar = document.getElementById('mainNavbar');
+        if (!navbar || navbar.dataset.mobileDropdownsReady === 'true') return;
+
+        navbar.dataset.mobileDropdownsReady = 'true';
+        const topLevelTriggers = [
+            document.getElementById('dijitalDropdown'),
+            document.getElementById('mevzuatDropdown')
+        ].filter(Boolean);
+        const navbarCollapse = document.getElementById('navbarResponsive');
+        const isMobile = () => window.innerWidth < MOBILE_BREAKPOINT;
+
+        function syncBootstrapToggleMode() {
+            topLevelTriggers.forEach((trigger) => {
+                if (isMobile()) {
+                    trigger.removeAttribute('data-bs-toggle');
+                } else {
+                    trigger.setAttribute('data-bs-toggle', 'dropdown');
+                }
+            });
+        }
+
+        syncBootstrapToggleMode();
+
+        function closeNestedMenus(scope) {
+            (scope || navbar).querySelectorAll('.dropdown-submenu-modern.mobile-submenu-open').forEach((submenu) => {
+                submenu.classList.remove('mobile-submenu-open');
+                const submenuTrigger = submenu.querySelector(':scope > .dropdown-item-mevzuat-card');
+                if (submenuTrigger) submenuTrigger.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        function closeTopLevelMenus(exceptTrigger) {
+            topLevelTriggers.forEach((trigger) => {
+                if (trigger === exceptTrigger) return;
+                const menu = trigger.nextElementSibling;
+                trigger.classList.remove('show');
+                trigger.setAttribute('aria-expanded', 'false');
+                if (menu) {
+                    menu.classList.remove('show');
+                    closeNestedMenus(menu);
+                }
+            });
+        }
+
+        topLevelTriggers.forEach((trigger) => {
+            trigger.addEventListener('click', function (event) {
+                if (!isMobile()) return;
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                const menu = trigger.nextElementSibling;
+                if (!menu) return;
+
+                const willOpen = !menu.classList.contains('show');
+                closeTopLevelMenus(trigger);
+                trigger.classList.toggle('show', willOpen);
+                trigger.setAttribute('aria-expanded', String(willOpen));
+                menu.classList.toggle('show', willOpen);
+
+                if (!willOpen) closeNestedMenus(menu);
+            }, true);
+        });
+
+        navbar.querySelectorAll('.dropdown-submenu-modern > .dropdown-item-mevzuat-card').forEach((trigger) => {
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.addEventListener('click', function (event) {
+                if (!isMobile()) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const submenu = trigger.parentElement;
+                const willOpen = !submenu.classList.contains('mobile-submenu-open');
+                submenu.parentElement.querySelectorAll('.dropdown-submenu-modern.mobile-submenu-open').forEach((openSubmenu) => {
+                    if (openSubmenu !== submenu) {
+                        openSubmenu.classList.remove('mobile-submenu-open');
+                        const openTrigger = openSubmenu.querySelector(':scope > .dropdown-item-mevzuat-card');
+                        if (openTrigger) openTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                submenu.classList.toggle('mobile-submenu-open', willOpen);
+                trigger.setAttribute('aria-expanded', String(willOpen));
+            });
+        });
+
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('hide.bs.collapse', function () {
+                closeTopLevelMenus();
+                closeNestedMenus();
+            });
+        }
+
+        let mobileState = isMobile();
+        window.addEventListener('resize', function () {
+            const nextMobileState = isMobile();
+            if (nextMobileState !== mobileState) {
+                closeTopLevelMenus();
+                closeNestedMenus();
+                mobileState = nextMobileState;
+                syncBootstrapToggleMode();
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNavbarDropdowns);
+    } else {
+        initNavbarDropdowns();
+    }
+})();
+</script>

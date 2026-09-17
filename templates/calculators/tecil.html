@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}Tecil Hesaplama 2026 | 7582 Sayılı Kanun Uyumlu 72 Ay Taksit | İSFA YMM{% endblock %}
-{% block description %}2026 tecil hesaplama aracı ile 7582 sayılı Kanun ve Seri:B Sıra No:20 Tebliğ kapsamında yıllık %29 tecil oranı, 72 aya kadar taksit ve teminat tutarını hesaplayın.{% endblock %}
+{% block title %}Tecil Faizi Hesaplama 2026 | Mevcut Başvuruların Ödeme Planı | İSFA YMM{% endblock %}
+{% block description %}Seri:B Sıra No:20 kapsamında başvuru süresi 31.08.2026'da sona erdi. Süresinde yapılan başvurular için tahmini tecil faizi, taksit planı ve teminat hesaplayın.{% endblock %}
 {% block keywords %}tecil hesaplama, vergi borcu taksitlendirme hesaplama, 2026 tecil oranı, 7582 sayılı kanun tecil, seri b sıra no 20 tecil, 6183 48 tecil hesaplama, 72 ay vergi borcu taksitlendirme, İSFA YMM{% endblock %}
 {% block canonical_url %}https://www.isfaymm.com/hesaplama-araclari/tecil{% endblock %}
 {% block og_title %}Tecil Hesaplama 2026 | İSFA YMM{% endblock %}
-{% block og_desc %}Vergi borcu tecil ve taksitlendirme için tahmini taksit, tecil oranı ve toplam ödeme planı hesaplayın.{% endblock %}
+{% block og_desc %}Başvuru süresi 31.08.2026'da sona eren Seri:B Sıra No:20 kapsamındaki mevcut başvurular için tahmini tecil faizi ve ödeme planı.{% endblock %}
 
 {% block content %}
 <style>
@@ -59,14 +59,19 @@
     </nav>
     <div class="row align-items-center g-4">
       <div class="col-lg-8">
-        <span class="tecil-hero-badge mb-3">7582 Sayılı Kanun ve 2026 Tebliğ uyumlu</span>
+        <span class="tecil-hero-badge mb-3"><i class="bi bi-calendar-x me-2" aria-hidden="true"></i> Başvuru süresi sona erdi</span>
         <h1 class="display-6 fw-bold mb-3">Tecil Hesaplama 2026</h1>
         <p class="lead mb-0 text-white-75">
-          Vergi borcu tecil ve taksitlendirme başvurusu için yıllık %29 tecil oranı, 72 aya kadar taksit, teminat durumu ve tahmini ödeme planını görün.
+          Süresinde yapılan tecil başvuruları için tahmini faiz, taksit ve toplam ödeme planı.
         </p>
+        <div class="tecil-note p-3 mt-3">
+          <strong>Seri:B Sıra No:20 kapsamında son başvuru tarihi: 31.08.2026.</strong>
+          <div class="small mt-1">Bu özel düzenlemenin başvuru süresi sona ermiştir. %29 oran ve 72 taksit, yeni başvurular için genel ve otomatik bir hak değildir.</div>
+        </div>
       </div>
       <div class="col-lg-4">
         <div class="tecil-calc-card p-4 text-dark">
+          <div class="small text-muted fw-bold mb-2">Seri:B Sıra No:20 kapsamındaki koşullar</div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>Oran</span><strong>Yıllık %29</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>İlk taksit</span><strong>Eylül 2026</strong></div>
           <div class="d-flex justify-content-between border-bottom py-2"><span>Azami süre</span><strong>72 taksit</strong></div>
@@ -93,7 +98,8 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label for="basvuruTarihi" class="form-label fw-bold">Başvuru tarihi</label>
-              <input type="date" id="basvuruTarihi" class="form-control" required>
+              <input type="date" id="basvuruTarihi" class="form-control" max="2026-08-31" aria-describedby="basvuruTarihiNotu" required>
+              <div id="basvuruTarihiNotu" class="form-text">Mevcut başvurunuzun tarihi; en geç 31.08.2026.</div>
             </div>
             <div class="col-md-6">
               <label for="ilkTaksitAyi" class="form-label fw-bold">İlk taksit ayı</label>
@@ -117,6 +123,7 @@
             <div class="col-md-6">
               <label for="Orani" class="form-label fw-bold">Yıllık tecil oranı (%)</label>
               <input type="number" id="Orani" class="form-control" value="29" min="0" step="0.01" required>
+              <div class="form-text">Mevcut tecil kararınızda uygulanan oranı esas alın.</div>
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
@@ -199,7 +206,7 @@
         <div class="tecil-calc-card p-4 h-100">
           <h2 class="h4 fw-bold mb-3">Hangi durumda kaç taksit?</h2>
           <p class="text-muted mb-0">
-            KDV ve BSMV borçları için genel olarak 12 taksit; likidite oranına göre 36, 48 veya 72 taksit; bazı kamu bağlantılı borçlularda ise 72 taksit uygulanabilir.
+            Seri:B Sıra No:20 kapsamında süresinde yapılan başvurularda KDV ve BSMV için üst sınır 12 taksit; diğer borçlarda likidite oranı ve borçlunun durumuna göre 36, 48 veya 72 taksittir. Mevcut tecil kararınızdaki süre esas alınmalıdır.
           </p>
         </div>
       </div>
@@ -207,7 +214,7 @@
         <div class="tecil-calc-card p-4 h-100">
           <h2 class="h4 fw-bold mb-3">Detaylı şartları okuyun</h2>
           <p class="text-muted">
-            Kapsama giren borçlar, kapsam dışı kalan vergiler, başvuru şekli ve teminat sınırı için rehber sayfasını inceleyebilirsiniz.
+            Başvuru süresi sona eren özel düzenlemenin kapsamı, taksit koşulları ve teminat sınırı.
           </p>
           <a class="btn btn-outline-primary rounded-pill fw-bold" href="{{ url_for('main.tecil_taksitlendirme_2026') }}">2026 Tecil Rehberine Git</a>
         </div>
@@ -228,7 +235,7 @@
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Web",
   "url": "https://www.isfaymm.com/hesaplama-araclari/tecil",
-  "description": "7582 sayılı Kanun ve Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında yıllık %29 tecil oranı, 72 aya kadar taksit planı ve teminat tutarını hesaplayan ücretsiz vergi borcu tecil hesaplama aracı.",
+  "description": "Başvuru süresi 31.08.2026'da sona eren Tahsilat Genel Tebliği Seri:B Sıra No:20 kapsamında süresinde yapılan başvurular için tahmini tecil faizi, taksit planı ve teminat tutarını hesaplayan ücretsiz araç.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -242,7 +249,7 @@
   "featureList": [
     "Tecil hesaplama",
     "Vergi borcu taksitlendirme planı",
-    "72 aya kadar taksit hesabı",
+    "Mevcut tecil başvuruları için taksit hesabı",
     "Teminat tutarı hesaplama"
   ]
 }
@@ -263,9 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const planBody = document.getElementById("planBody");
   const liquidityInputs = document.querySelectorAll(".liquidity-input");
   const liquidityResult = document.getElementById("likiditeSonuc");
-
-  const today = new Date().toISOString().slice(0, 10);
-  basvuruInput.value = today;
 
   function parseMoney(value) {
     return Number(String(value || "").replace(/\./g, "").replace(",", ".")) || 0;
