@@ -272,7 +272,7 @@
     async function fetchKdvPersonnel() {
         const container = document.getElementById('personnelList');
         try {
-            const response = await fetch('/api/kdv/users');
+            const response = await kdvFetch('/api/kdv/users');
             if (!response.ok) throw new Error('Network response was not ok');
 
             const users = await response.json();
@@ -348,11 +348,11 @@
 
         try {
             // Fetch all mukellefs
-            const res1 = await fetch('/api/kdv/all-mukellefs');
+            const res1 = await kdvFetch('/api/kdv/all-mukellefs');
             const allMukellefs = await res1.json();
 
             // Fetch user assignments
-            const res2 = await fetch(`/api/kdv/user-assignments/${userId}`);
+            const res2 = await kdvFetch(`/api/kdv/user-assignments/${userId}`);
             const assigned = await res2.json();
             const assignedIds = assigned.map(a => a.id);
 
@@ -408,7 +408,7 @@
         btn.innerText = '...';
 
         try {
-            const res = await fetch(url, {
+            const res = await kdvFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId, mukellef_id: mukellefId })
@@ -440,7 +440,7 @@
             return;
         }
         try {
-            const res = await fetch('/api/kdv/update-pin', {
+            const res = await kdvFetch('/api/kdv/update-pin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pin })
@@ -465,7 +465,7 @@
         if (!container) return; // Not admin
 
         try {
-            const res = await fetch('/api/kdv/logs');
+            const res = await kdvFetch('/api/kdv/logs');
             const logs = await res.json();
 
             if (logs.length === 0) {
@@ -507,7 +507,7 @@
         });
 
         if (result.isConfirmed) {
-            await fetch('/api/kdv/logs/delete', { method: 'POST' });
+            await kdvFetch('/api/kdv/logs/delete', { method: 'POST' });
             fetchLogs();
             Swal.fire('Silindi', 'Loglar temizlendi.', 'success');
         }

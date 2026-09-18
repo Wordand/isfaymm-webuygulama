@@ -103,7 +103,7 @@
         const apiUrl = userId ? `/api/kdv/files?user_id=${userId}&active=all` : '/api/kdv/files?active=all';
 
         try {
-            const response = await fetch(apiUrl);
+            const response = await kdvFetch(apiUrl);
             const files = await response.json();
             
             // Sadece tamamlananları filtrele & Verileri sıralama için hazırla
@@ -301,7 +301,7 @@
 
         if (date && date !== currentDate) {
             try {
-                const res = await fetch('/api/kdv/update-status', {
+                const res = await kdvFetch('/api/kdv/update-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ file_id: fileId, date: date, status: 'İade Tamamlandı' })

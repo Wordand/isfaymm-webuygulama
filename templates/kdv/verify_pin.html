@@ -14,6 +14,7 @@
         </div>
 
         <form action="{{ url_for('kdv.verify_pin') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="mb-4">
                 <input type="password" name="pin" class="form-control form-control-lg text-center fw-bold fs-2 rounded-3" 
                        placeholder="••••" maxlength="6" autofocus required

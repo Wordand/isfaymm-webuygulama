@@ -50,7 +50,7 @@ def admin_users():
         flash("Kullanıcı listesi yüklenirken bir hata oluştu.", "danger")
         return redirect(url_for("main.home"))
 
-@bp.route("/approve/<int:user_id>")
+@bp.route("/approve/<int:user_id>", methods=["POST"])
 @login_required
 def approve_user(user_id):
     if session.get("username", "").lower() != "admin":
@@ -64,7 +64,7 @@ def approve_user(user_id):
     flash("Kullanıcı başarıyla onaylandı ✅", "success")
     return redirect(url_for("admin.admin_users"))
 
-@bp.route("/reject/<int:user_id>")
+@bp.route("/reject/<int:user_id>", methods=["POST"])
 @login_required
 def reject_user(user_id):
     if session.get("username", "").lower() != "admin":
@@ -75,6 +75,9 @@ def reject_user(user_id):
         c = conn.cursor()
         c.execute("SELECT username FROM users WHERE id = %s", (user_id,))
         row = c.fetchone()
+        if not row:
+            flash("Kullanıcı bulunamadı.", "warning")
+            return redirect(url_for("admin.admin_users"))
         # row can be dict or tuple
         username = row["username"] if isinstance(row, dict) else row[0]
         
@@ -108,7 +111,7 @@ def update_username(user_id):
     flash("Kullanıcı adı başarıyla güncellendi ✅", "success")
     return redirect(url_for('admin.admin_users'))
 
-@bp.route('/suspend/<int:user_id>')
+@bp.route('/suspend/<int:user_id>', methods=['POST'])
 @login_required
 def suspend_user(user_id):
     if session.get("username", "").lower() != "admin":

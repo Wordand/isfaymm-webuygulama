@@ -1,10 +1,48 @@
-from flask import Blueprint, render_template, request, jsonify, session, current_app, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, session, current_app, flash, redirect, url_for, send_file
 from services.db import get_conn
+from services.kdv_document_service import document_path, save_document
 from auth import login_required, kdv_access_required, api_kdv_access_required, role_required
 import psycopg2.extras
 from datetime import datetime
 
 bp = Blueprint("kdv", __name__)
+
+
+def _positive_record_id(value):
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        return None
+    try:
+        number = int(value)
+    except ValueError:
+        return None
+    return number if 0 < number <= 9223372036854775807 else None
+
+
+def _kdv_record_access_error(cursor, record_type, record_id):
+    queries = {
+        "file": "SELECT mukellef_id FROM kdv_files WHERE id = %s",
+        "note": """
+            SELECT f.mukellef_id FROM kdv_notes n
+            JOIN kdv_files f ON f.id = n.file_id WHERE n.id = %s
+        """,
+        "history": """
+            SELECT f.mukellef_id FROM kdv_history h
+            JOIN kdv_files f ON f.id = h.file_id WHERE h.id = %s
+        """,
+    }
+    cursor.execute(queries[record_type], (record_id,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify(status="error", message="Kayıt bulunamadı."), 404
+    if session.get("role") == "uzman":
+        cursor.execute("""
+            SELECT 1 FROM kdv_user_assignments
+            WHERE user_id = %s AND mukellef_id = %s
+        """, (session.get("user_id"), row["mukellef_id"]))
+        if not cursor.fetchone():
+            return jsonify(status="error", message="Yetkisiz işlem."), 403
+    return None
+
 
 STATUS_STAGES = {
     'Listeler': [
@@ -802,7 +840,12 @@ def get_file(file_id):
             WHERE file_id = %s
             ORDER BY id DESC
         """, (file_id,))
-        file["documents"] = [dict(r) for r in c.fetchall()]
+        file["documents"] = []
+        for row in c.fetchall():
+            document = dict(row)
+            document.pop("file_path", None)
+            document["download_url"] = url_for("kdv.download_document", doc_id=document["id"])
+            file["documents"].append(document)
 
         # 📝 Notlar (Hızlı Bilgi)
         c.execute("""
@@ -1087,20 +1130,20 @@ def update_status():
 
 @bp.route("/api/kdv/history/delete/<int:item_id>", methods=["DELETE"])
 @api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def delete_history_item(item_id):
     """Süreç akışından bir kaydı siler."""
     with get_conn() as conn:
-        c = conn.cursor()
-        c.execute("DELETE FROM kdv_history WHERE id = %s", (item_id,))
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        error = _kdv_record_access_error(c, "history", item_id)
+        if error:
+            return error
+        c.execute("DELETE FROM kdv_history WHERE id = %s RETURNING id", (item_id,))
+        deleted = c.fetchone()
         conn.commit()
-        if c.rowcount > 0:
+        if deleted:
             return jsonify({"status": "success", "message": "Kayıt silindi."})
         return jsonify({"status": "error", "message": "Kayıt bulunamadı."}), 404
-
-    return jsonify({
-        "status": "success",
-        "message": "Dosya durumu güncellendi."
-    })
 
 
 @bp.route("/api/kdv/update-file-amounts", methods=["POST"])
@@ -1598,6 +1641,7 @@ def delete_kdv_mukellef():
 
 @bp.route("/api/kdv/upload-doc", methods=["POST"])
 @api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def upload_document():
     if 'file' not in request.files:
         return jsonify({"status": "error", "message": "Dosya seçilmedi"}), 400
@@ -1658,6 +1702,8 @@ def upload_document():
             "message": "Hata: Dosya boyutu 3MB'dan büyük olamaz."
         }), 400
 
+    saved_path = None
+    committed = False
     try:
         filename = secure_filename(file.filename)
         if not filename:
@@ -1665,16 +1711,7 @@ def upload_document():
             
         unique_filename = f"{uuid.uuid4().hex}_{filename}"
         
-        static_folder = os.path.join(current_app.root_path, 'static')
-        upload_folder = os.path.join(static_folder, 'uploads', 'kdv_docs')
-        
-        if not os.path.exists(upload_folder):
-            os.makedirs(upload_folder)
-        
-        file_path = os.path.join(upload_folder, unique_filename)
-        file.save(file_path)
-        
-        relative_path = f"uploads/kdv_docs/{unique_filename}"
+        saved_path = save_document(file, unique_filename)
         
         with get_conn() as conn:
             c = conn.cursor()
@@ -1689,7 +1726,7 @@ def upload_document():
                 doc_type,
                 filename,
                 datetime.now().strftime("%d.%m.%Y %H:%M"),
-                relative_path
+                unique_filename
             )
 
             if not USE_SQLITE:
@@ -1711,6 +1748,7 @@ def upload_document():
             f_info = f"{f_row['unvan']} {f_row['period']} dönemi" if f_row else "Bilinmeyen dosya"
 
             conn.commit()
+            committed = True
             
             kdv_log_action(
                 session.get("username", "Admin"),
@@ -1725,18 +1763,60 @@ def upload_document():
                 "id": new_id,
                 "name": filename,
                 "date": datetime.now().strftime("%d.%m.%Y %H:%M"),
-                "file_path": relative_path,
+                "download_url": url_for("kdv.download_document", doc_id=new_id),
                 "type": doc_type
             }
         })
         
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
+    except Exception:
+        if saved_path is not None and not committed:
+            try:
+                saved_path.unlink(missing_ok=True)
+            except OSError:
+                current_app.logger.exception("An incomplete KDV upload could not be removed.")
+        current_app.logger.exception("KDV document upload failed.")
         return jsonify({
             "status": "error",
-            "message": f"Yükleme hatası: {str(e)}"
+            "message": "Belge yüklenirken bir hata oluştu."
         }), 500
+
+
+@bp.route("/api/kdv/document/<int:doc_id>/download")
+@api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
+def download_document(doc_id):
+    with get_conn() as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT d.file_path, d.name, f.mukellef_id
+            FROM kdv_documents d
+            JOIN kdv_files f ON d.file_id = f.id
+            WHERE d.id = %s
+        """, (doc_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+        if session.get("role") == "uzman":
+            c.execute("""
+                SELECT 1 FROM kdv_user_assignments
+                WHERE user_id = %s AND mukellef_id = %s
+            """, (session["user_id"], row["mukellef_id"]))
+            if not c.fetchone():
+                return jsonify({"status": "error", "message": "Bu belgeyi indirme yetkiniz yok."}), 403
+
+    try:
+        path = document_path(row.get("file_path"))
+        if not path.is_file():
+            return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+        return send_file(
+            path, as_attachment=True, download_name=row.get("name") or path.name,
+            conditional=False, etag=False, max_age=0,
+        )
+    except ValueError:
+        return jsonify({"status": "error", "message": "Belge bulunamadı."}), 404
+    except OSError:
+        current_app.logger.exception("KDV document download failed for document %s", doc_id)
+        return jsonify({"status": "error", "message": "Belge indirilemedi."}), 500
 
 
 @bp.route("/api/kdv/document/delete/<int:doc_id>", methods=["DELETE"])
@@ -1772,13 +1852,11 @@ def delete_document(doc_id):
                 return jsonify({"status": "error", "message": "Bu belgeyi silme yetkiniz yok."}), 403
 
         if row.get("file_path"):
-            import os
             try:
-                full_path = os.path.join(current_app.root_path, "static", row["file_path"])
-                if os.path.exists(full_path):
-                    os.remove(full_path)
-            except Exception as e:
-                ("   ")
+                document_path(row["file_path"]).unlink(missing_ok=True)
+            except (OSError, ValueError):
+                current_app.logger.exception("KDV document deletion failed for document %s", doc_id)
+                return jsonify({"status": "error", "message": "Belge silinemedi."}), 500
 
         # Log için dosya/mükellef bilgisi al
         c.execute("""
@@ -1806,18 +1884,24 @@ def delete_document(doc_id):
 # --- KDV NOTES (Hızlı Bilgi) ---
 @bp.route("/api/kdv/note/add", methods=["POST"])
 @api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def add_note():
-    data = request.json
-    file_id = data.get("file_id")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(status="error", message="Geçersiz bilgi."), 400
+    file_id = _positive_record_id(data.get("file_id"))
     text = data.get("text")
     
-    if not file_id or not text:
+    if not file_id or not isinstance(text, str) or not text.strip():
         return jsonify({"status": "error", "message": "Eksik bilgi"}), 400
         
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
     
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        error = _kdv_record_access_error(c, "file", file_id)
+        if error:
+            return error
         c.execute("""
             INSERT INTO kdv_notes (file_id, note_text, created_at)
             VALUES (%s, %s, %s)
@@ -1828,18 +1912,24 @@ def add_note():
 
 @bp.route("/api/kdv/note/update", methods=["POST"])
 @api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def update_note():
-    data = request.json
-    note_id = data.get("id")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(status="error", message="Geçersiz bilgi."), 400
+    note_id = _positive_record_id(data.get("id"))
     text = data.get("text")
     
-    if not note_id or not text:
+    if not note_id or not isinstance(text, str) or not text.strip():
         return jsonify({"status": "error", "message": "Eksik bilgi"}), 400
         
     now = datetime.now().strftime("%d.%m.%Y %H:%M")
     
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        error = _kdv_record_access_error(c, "note", note_id)
+        if error:
+            return error
         c.execute("""
             UPDATE kdv_notes
             SET note_text = %s, updated_at = %s
@@ -1851,9 +1941,13 @@ def update_note():
 
 @bp.route("/api/kdv/note/delete/<int:note_id>", methods=["DELETE"])
 @api_kdv_access_required
+@role_required(allow_roles=("admin", "ymm", "yonetici", "uzman"))
 def delete_note(note_id):
     with get_conn() as conn:
-        c = conn.cursor()
+        c = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        error = _kdv_record_access_error(c, "note", note_id)
+        if error:
+            return error
         c.execute("DELETE FROM kdv_notes WHERE id = %s", (note_id,))
         conn.commit()
         

@@ -978,7 +978,7 @@
     }
 
     function loadSummary() {
-        fetch('/api/kdv/mukellef-summary/' + MUKELLEF_ID)
+        kdvFetch('/api/kdv/mukellef-summary/' + MUKELLEF_ID)
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.status !== 'success') {
@@ -1094,7 +1094,7 @@
             guarantee_date: document.getElementById('editGuaranteeDate').value
         };
 
-        fetch('/api/kdv/update-file-amounts', {
+        kdvFetch('/api/kdv/update-file-amounts', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
@@ -1195,7 +1195,7 @@
             no_refund: noRefund
         };
 
-        fetch('/api/kdv/add-file', {
+        kdvFetch('/api/kdv/add-file', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
@@ -1244,7 +1244,7 @@
             cancelButtonText: 'İptal'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`/api/kdv/delete-file/${id}`, { method: 'DELETE' })
+                kdvFetch(`/api/kdv/delete-file/${id}`, { method: 'DELETE' })
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success') {

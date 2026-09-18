@@ -284,7 +284,7 @@
             if (userId) apiUrl += `&user_id=${userId}`;
             if (mukellefId) apiUrl += `&mukellef_id=${mukellefId}`;
             
-            const response = await fetch(apiUrl);
+            const response = await kdvFetch(apiUrl);
             let rawFiles = await response.json();
             
             // Sıralama için dönem verisini normalize et
@@ -432,7 +432,7 @@
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch('/api/kdv/toggle-active', {
+                const response = await kdvFetch('/api/kdv/toggle-active', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id, is_active: newStatus })
@@ -460,7 +460,7 @@
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch('/api/kdv/delete', {
+                const response = await kdvFetch('/api/kdv/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
@@ -490,7 +490,7 @@
         };
 
         try {
-            const response = await fetch('/api/kdv/update-file-amounts', {
+            const response = await kdvFetch('/api/kdv/update-file-amounts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

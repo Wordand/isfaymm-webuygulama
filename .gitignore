@@ -16,6 +16,7 @@ venv/
 
 # SQLite veya geçici veritabanı dosyaları
 instance/
+static/uploads/kdv_docs/
 *.db
 *.sqlite3
 

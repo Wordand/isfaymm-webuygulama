@@ -516,7 +516,7 @@
                 cancelButtonText: 'Vazgeç'
             }).then(function(res) {
                 if (res.isConfirmed) {
-                    fetch('/api/kdv/delete-mukellef', {
+                    kdvFetch('/api/kdv/delete-mukellef', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({ id: mid })
@@ -545,7 +545,7 @@
 
         const url = id ? '/api/kdv/update-mukellef' : '/api/kdv/add-mukellef';
         try {
-            const res = await fetch(url, {
+            const res = await kdvFetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
@@ -593,7 +593,7 @@
     // Offices
     (async function() {
         try {
-            const res = await fetch('/api/kdv/tax-offices');
+            const res = await kdvFetch('/api/kdv/tax-offices');
             const data = await res.json();
             const dl = document.getElementById('taxOffList');
             if(dl) dl.innerHTML = data.map(o => `<option value="${o}">`).join('');

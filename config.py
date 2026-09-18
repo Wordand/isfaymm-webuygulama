@@ -8,6 +8,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 FERNET_KEY = os.getenv("FERNET_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 SECRET_LOGIN_PATH = os.getenv("SECRET_LOGIN_PATH", "login").strip("/")
+KDV_DOCUMENT_STORAGE_PATH = os.getenv("KDV_DOCUMENT_STORAGE_PATH")
 
 # İzin verilen dosya uzantıları
 ALLOWED_EXTENSIONS = {"pdf", "docx", "xlsx", "xls", "xml"}

@@ -108,22 +108,29 @@
                             <td>
                                 <div class="d-flex justify-content-center align-items-center">
                                     {% if u.username != 'admin' %}
-                                        <a href="{{ url_for('admin.suspend_user', user_id=u.id) }}" class="btn-action-link">
-                                            {{ 'Askıdan Çıkar' if u.is_suspended else 'Askıya Al' }}
-                                        </a>
+                                        <form method="POST" action="{{ url_for('admin.suspend_user', user_id=u.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn-action-link">{{ 'Askıdan Çıkar' if u.is_suspended else 'Askıya Al' }}</button>
+                                        </form>
                                         <span class="action-divider">|</span>
                                         <button class="btn-action-link" data-bs-toggle="modal" data-bs-target="#editUserModal{{ u.id }}">Düzenle</button>
                                         <span class="action-divider">|</span>
                                         <a href="{{ url_for('admin.admin_reset_password', user_id=u.id) }}" class="btn-action-link text-warning">Şifre Sıfırla</a>
                                         <span class="action-divider">|</span>
-                                        <a href="{{ url_for('admin.reject_user', user_id=u.id) }}" class="btn-action-link btn-delete-link" onclick="return confirm('Kullanıcıyı silmek istediğinize emin misiniz?')">Sil</a>
+                                        <form method="POST" action="{{ url_for('admin.reject_user', user_id=u.id) }}" class="d-inline" onsubmit="return confirm('Kullanıcıyı silmek istediğinize emin misiniz?')">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn-action-link btn-delete-link">Sil</button>
+                                        </form>
                                     {% else %}
                                         <span class="text-muted small">Sistem Admink</span>
                                     {% endif %}
                                     
                                     {% if not u.is_approved %}
                                         <span class="action-divider">|</span>
-                                        <a href="{{ url_for('admin.approve_user', user_id=u.id) }}" class="btn-action-link text-success fw-bold">Onayla</a>
+                                        <form method="POST" action="{{ url_for('admin.approve_user', user_id=u.id) }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn-action-link text-success fw-bold">Onayla</button>
+                                        </form>
                                     {% endif %}
                                 </div>
                             </td>
@@ -134,6 +141,7 @@
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content rounded-4 border-0 shadow">
                                     <form method="POST" action="{{ url_for('admin.update_username', user_id=u.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <div class="modal-header border-0 pb-0">
                                             <h5 class="fw-bold">Kullanıcı Düzenle</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

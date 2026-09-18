@@ -39,6 +39,8 @@ from services.db import (
     migrate_kdv_notes_table, migrate_beyanname_table, get_conn
 )
 from services.utils import safe_date, currency_filter, tlformat
+from services.kdv_document_service import init_kdv_document_storage
+from services.request_security import init_request_security
 
 # Blueprints
 from routes.main_routes import bp as main_bp
@@ -124,6 +126,9 @@ if not app.debug:
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax'
     )
+
+init_request_security(app)
+init_kdv_document_storage(app)
 
 # --- Context Processors & Filters ---
 @app.context_processor

@@ -293,6 +293,7 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='kdv-logic.js') }}"></script>
+<script src="{{ url_for('static', filename='js/kdv-notes.js') }}"></script>
 <script>
     const FILE_ID = Number("{{ file_id }}");
     const CURRENT_USER = "{{ session.get('username')|title }}";
@@ -314,7 +315,7 @@
     async function initDetailPage() {
         try {
             console.log("KDV Detay sayfası başlatılıyor...");
-            const response = await fetch(`/api/kdv/file/${FILE_ID}`);
+            const response = await kdvFetch(`/api/kdv/file/${FILE_ID}`);
             const file = await response.json();
             
             if (file.status === 'error') {
@@ -396,13 +397,13 @@
             <div class="timeline-item position-relative" style="padding-bottom: 25px; border-left: 2px solid #eef2f7; padding-left: 20px; margin-left: 5px;">
                 <div style="position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--bs-${colorClass}); border: 2px solid white; box-shadow: 0 0 0 2px #eef2f7;"></div>
                 <div class="d-flex justify-content-between align-items-start">
-                    <h3 class="h6 fw-bold mb-0 text-dark" style="font-size: 0.9rem;">${itemText}</h3>
+                    <h3 class="h6 fw-bold mb-0 text-dark" style="font-size: 0.9rem;">${escapeDetailText(itemText)}</h3>
                     <button onclick="deleteHistoryItem(${h.id})" class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none opacity-50 hover-opacity-100" style="font-size: 0.75rem;">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
-                <span class="d-block text-muted small mt-1 mb-2" style="font-size: 0.7rem;">${h.date}</span>
-                ${h.description ? `<p class="small text-muted mb-0 bg-light p-2 rounded-3 border-start border-3 border-${colorClass}">${h.description}</p>` : ''}
+                <span class="d-block text-muted small mt-1 mb-2" style="font-size: 0.7rem;">${escapeDetailText(h.date)}</span>
+                ${h.description ? `<p class="small text-muted mb-0 bg-light p-2 rounded-3 border-start border-3 border-${colorClass}">${escapeDetailText(h.description)}</p>` : ''}
             </div>`;
         };
         
@@ -425,7 +426,7 @@
 
         if (result.isConfirmed) {
             try {
-                const res = await fetch(`/api/kdv/history/delete/${id}`, { method: 'DELETE' });
+                const res = await kdvFetch(`/api/kdv/history/delete/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.status === 'success') {
                     initDetailPage();
@@ -461,12 +462,12 @@
                     <div class="d-flex align-items-center gap-2 overflow-hidden">
                         <i class="fa-regular fa-file-lines text-secondary"></i>
                         <div class="text-truncate">
-                            <span class="d-block text-dark fw-bold small text-truncate" style="max-width: 150px;" title="${doc.name}">${doc.name}</span>
-                            <span class="d-block text-muted" style="font-size: 0.65rem;">${doc.date}</span>
+                            <span class="d-block text-dark fw-bold small text-truncate" style="max-width: 150px;" title="${escapeDetailText(doc.name)}">${escapeDetailText(doc.name)}</span>
+                            <span class="d-block text-muted" style="font-size: 0.65rem;">${escapeDetailText(doc.date)}</span>
                         </div>
                     </div>
                     <div class="d-flex gap-1">
-                        <a href="/static/${doc.file_path}" download="${doc.name}" class="btn btn-sm btn-icon btn-white border text-primary" title="İndir">
+                        <a href="/api/kdv/document/${doc.id}/download" class="btn btn-sm btn-icon btn-white border text-primary" title="İndir">
                             <i class="fa-solid fa-download"></i>
                         </a>
                         <button onclick="deleteDocument(${doc.id})" class="btn btn-sm btn-icon btn-white border text-danger" title="Sil">
@@ -494,7 +495,7 @@
             Swal.fire({title: 'Yükleniyor...', didOpen: () => Swal.showLoading()});
 
             try {
-                const res = await fetch('/api/kdv/upload-doc', { method: 'POST', body: formData });
+                const res = await kdvFetch('/api/kdv/upload-doc', { method: 'POST', body: formData });
                 const result = await res.json();
                 if (result.status === 'success') {
                     Swal.fire({ icon: 'success', title: 'Başarılı', timer: 1500, showConfirmButton: false });
@@ -521,7 +522,7 @@
 
         if (result.isConfirmed) {
             try {
-                const res = await fetch(`/api/kdv/document/delete/${docId}`, { method: 'DELETE' });
+                const res = await kdvFetch(`/api/kdv/document/delete/${docId}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.status === 'success') {
                     Swal.fire('Silindi', 'Belge silindi.', 'success');
@@ -529,33 +530,6 @@
                 }
             } catch (err) { Swal.fire('Hata', 'Silme işlemi başarısız.', 'error'); }
         }
-    }
-
-    function renderNotes(notes) {
-        const container = document.getElementById('quickNotesList');
-        if (!container) return;
-
-        if (!notes || notes.length === 0) {
-            container.innerHTML = '<div class="text-muted small text-center py-2">Bilgi bulunmuyor. <br>"+" butonuyla ekleyebilirsiniz.</div>';
-            return;
-        }
-
-        container.innerHTML = notes.map(note => `
-            <div class="quick-note-item p-3 mb-2 rounded-3 bg-light transition-all group-hover">
-                <div class="note-content small text-dark mb-1" style="line-height: 1.4; white-space: pre-wrap;">${note.note_text}</div>
-                <div class="note-meta d-flex gap-2 text-muted" style="font-size: 0.65rem;">
-                    <span><i class="fa-regular fa-clock me-1"></i>${note.created_at}</span>
-                    ${note.updated_at ? `<span class="text-primary fw-bold" title="Son Güncelleme: ${note.updated_at}"><i class="fa-solid fa-pen-nib me-1"></i>Güncellendi</span>` : ''}
-                </div>
-                <div class="note-actions position-absolute top-0 end-0 p-2 group-hover-visible transition-all">
-                    <button onclick="editQuickNote(${note.id}, \`${note.note_text.replace(/`/g, '\\`').replace(/'/g, "\\'").replace(/"/g, '\\"')}\`)" class="btn btn-sm btn-link text-primary p-0 h-auto border-0 shadow-none">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button onclick="deleteQuickNote(${note.id})" class="btn btn-sm btn-link text-danger p-0 h-auto border-0 ms-1 shadow-none">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>`).join('');
     }
 
     async function addQuickNote() {
@@ -571,7 +545,7 @@
 
         if (text && text.trim()) {
             try {
-                const res = await fetch('/api/kdv/note/add', {
+                const res = await kdvFetch('/api/kdv/note/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ file_id: FILE_ID, text: text.trim() })
@@ -598,7 +572,7 @@
 
         if (text !== undefined && text.trim() && text.trim() !== currentText) {
             try {
-                const res = await fetch('/api/kdv/note/update', {
+                const res = await kdvFetch('/api/kdv/note/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: noteId, text: text.trim() })
@@ -625,7 +599,7 @@
 
         if (result.isConfirmed) {
             try {
-                const res = await fetch(`/api/kdv/note/delete/${noteId}`, { method: 'DELETE' });
+                const res = await kdvFetch(`/api/kdv/note/delete/${noteId}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.status === 'success') {
                     initDetailPage();
@@ -715,7 +689,7 @@
         else data.status = selectedStatus;
 
         try {
-            const res = await fetch('/api/kdv/update-status', {
+            const res = await kdvFetch('/api/kdv/update-status', {
                 method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
             });
             const result = await res.json();
@@ -770,7 +744,7 @@
 
         if (date) {
             try {
-                const res = await fetch('/api/kdv/update-file-amounts', {
+                const res = await kdvFetch('/api/kdv/update-file-amounts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ file_id: FILE_ID, guarantee_date: date })
@@ -804,7 +778,7 @@
 
         if (date && date !== currentDate) {
             try {
-                const res = await fetch('/api/kdv/update-file-amounts', {
+                const res = await kdvFetch('/api/kdv/update-file-amounts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ file_id: FILE_ID, date: date })
